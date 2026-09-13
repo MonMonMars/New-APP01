@@ -9,12 +9,16 @@ type ProfileDetailSheetProps = {
   profile: Profile | null;
   visible: boolean;
   onClose: () => void;
+  onReport?: (profileId: string) => void;
+  onBlock?: (profileId: string) => void;
 };
 
 export function ProfileDetailSheet({
   profile,
   visible,
   onClose,
+  onReport,
+  onBlock,
 }: ProfileDetailSheetProps) {
   const insets = useSafeAreaInsets();
 
@@ -76,6 +80,24 @@ export function ProfileDetailSheet({
               ))}
             </View>
           </View>
+
+          {(onReport || onBlock) && (
+            <View style={styles.safetySection}>
+              <Text style={styles.sectionTitle}>Safety</Text>
+              {onReport && (
+                <Pressable style={styles.safetyRow} onPress={() => onReport(profile.id)}>
+                  <Ionicons name="flag-outline" size={20} color={colors.rewind} />
+                  <Text style={styles.safetyLabel}>Report {profile.name}</Text>
+                </Pressable>
+              )}
+              {onBlock && (
+                <Pressable style={styles.safetyRow} onPress={() => onBlock(profile.id)}>
+                  <Ionicons name="hand-left-outline" size={20} color={colors.nope} />
+                  <Text style={styles.safetyLabel}>Block {profile.name}</Text>
+                </Pressable>
+              )}
+            </View>
+          )}
         </ScrollView>
       </View>
     </Modal>
@@ -172,6 +194,24 @@ const styles = StyleSheet.create({
   tagText: {
     color: colors.text,
     fontSize: 14,
+    fontWeight: '600',
+  },
+  safetySection: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.lg,
+  },
+  safetyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#2A2A2E',
+  },
+  safetyLabel: {
+    color: colors.text,
+    fontSize: 15,
     fontWeight: '600',
   },
 });

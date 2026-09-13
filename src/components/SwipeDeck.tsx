@@ -34,6 +34,8 @@ type SwipeDeckProps = {
   profiles: Profile[];
   onSwipe: (profile: Profile, direction: 'left' | 'right') => void;
   onEmpty: () => void;
+  canLike?: boolean;
+  onLikeBlocked?: () => void;
 };
 
 type ActiveEffect = {
@@ -89,7 +91,7 @@ function zoneProximity(
 }
 
 export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
-  function SwipeDeck({ profiles, onSwipe, onEmpty }, ref) {
+  function SwipeDeck({ profiles, onSwipe, onEmpty, canLike = true, onLikeBlocked }, ref) {
     const { playSound } = useSwipeSounds();
     const containerRef = useRef<View>(null);
     const [activeIndex, setActiveIndex] = useState(0);
@@ -177,6 +179,14 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
 
     const dropToTarget = useCallback(
       (direction: 'left' | 'right') => {
+        if (direction === 'right' && !canLike) {
+          resetPosition();
+          if (onLikeBlocked) {
+            onLikeBlocked();
+          }
+          return;
+        }
+
         triggerFeedback(direction);
 
         const zone = direction === 'left' ? trashZone.value : heartZone.value;
@@ -200,11 +210,14 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
       },
       [
         advanceCard,
+        canLike,
         cardScale,
         deckHeight,
         deckWidth,
         heartZone,
         heartActive,
+        onLikeBlocked,
+        resetPosition,
         trashActive,
         translateX,
         translateY,

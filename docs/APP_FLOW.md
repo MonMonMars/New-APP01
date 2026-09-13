@@ -1,6 +1,23 @@
 # Spark — App Flow & UI Structure Map
 
-Research synthesis from **Tinder**, **Bumble**, and **Hinge** (2024–2025 patterns). Spark implements the shared industry workflow with our drag-to-target discovery mechanic.
+Research synthesis from **Tinder**, **Bumble**, **Hinge**, **Badoo**, and **Coffee Meets Bagel** (2024–2026 patterns). Spark implements the shared industry workflow with our drag-to-target discovery mechanic.
+
+## Competitor pattern matrix
+
+| Pattern | Tinder | Bumble | Hinge | Badoo / CMB | Spark copies |
+|---------|--------|--------|-------|-------------|--------------|
+| **Post-like (no mutual)** | Silent; keep swiping | Silent; keep swiping | Comment sent; keep browsing | Bagel queue / pass | **Waiting for match** modal + “Find more people” (Tinder/Bumble silent flow) |
+| **Match celebration** | Full-screen “It’s a Match!” + dual avatars | Full-screen + Opening Move prompt | Subtle toast; comment-first | Match screen | **Full-screen gradient celebration** with Send Message / Keep Swiping (Tinder) |
+| **Likes inbox** | Gold blur grid + count badge | Beeline blur + Premium CTA | Roses / likes tab | Encounters blur | **Blurred grid + count badge + Spark+ CTA** (Tinder Gold / Bumble Beeline) |
+| **Daily like limit** | ~100/12h; paywall at cap | Daily cap; Premium unlimited | 8 free likes/day | Limited free actions | **10/day free + banner + LikeLimitModal → Spark+** |
+| **Empty deck** | “Out of people” + widen search | Same + Snooze | “You’re all caught up” | Expand radius | **“No more people nearby” + Widen filters + Discovery settings** |
+| **Matches list** | New matches row + inbox | New matches + 24h expiry ring | “Your turn” badge | Chat list | **New matches row + Your turn + Expires in Xh** (Bumble urgency) |
+| **Chat openers** | GIFs, suggested messages | Opening Moves, icebreakers | Prompt replies | Quick replies | **Icebreaker chips on empty thread** (Bumble/Hinge) |
+| **Profile detail** | Photo carousel, bio | Badges, modes | **Prompt cards** interleaved with photos | Interests | **Hinge-style prompt cards** in profile sheet |
+| **Safety** | Report/block in chat & profile | Safety Center hub | Report/block | Safety tips | **Safety Center + report/block in chat menu & profile sheet** |
+| **Tab badges** | Likes count, unread messages | Beeline count, chat badge | Likes + matches | Notifications | **Dynamic Likes count + Matches unread/your-turn badge** |
+| **Premium upsell** | Blurred like tap, like limit, Boost | Beeline tap, Spotlight | Rose limit, Hinge+ | Credits | **Likes tap, like limit modal, Spark+ from Profile** |
+| **Discovery gesture** | Swipe left/right (patented) | Swipe | Tap like on prompts | Swipe / tap | **Drag card → trash / heart** (legal differentiator) |
 
 ## Industry-standard user journey
 
@@ -8,22 +25,30 @@ Research synthesis from **Tinder**, **Bumble**, and **Hinge** (2024–2025 patte
 ┌─────────────┐    ┌──────────────┐    ┌─────────────┐    ┌──────────────┐
 │  Onboarding │ -> │ Profile setup│ -> │  Discovery  │ -> │ Match modal  │
 │  + rules    │    │ + location   │    │  (cards)    │    │ (mutual like)│
-└─────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
+└─────────────┘    └──────────────┘    └─────────────┘    └──────────────┘
                                               │                    │
                                               v                    v
                                        ┌──────────────┐    ┌──────────────┐
                                        │ Pass (trash) │    │ Chat thread  │
                                        └──────────────┘    └──────────────┘
+                                              │
+                                              v (one-sided like)
+                                       ┌──────────────┐
+                                       │ Waiting modal│
+                                       │ Find more    │
+                                       └──────────────┘
 ```
 
 | Phase | Tinder | Bumble | Hinge | Spark |
 |-------|--------|--------|-------|-------|
 | Onboarding | House rules early, location last | Guidelines at end, modes (Date/BFF) | Prompt-heavy profile first | Welcome → rules → location → profile |
 | Discovery | Swipe cards, photo-first | Swipe + Opening Moves | Like specific prompts | **Drag card → trash / heart** |
-| Likes inbox | Gold blur grid | Beeline blur | Roses / likes tab | Blurred grid + upgrade CTA |
-| Matches | New matches row + inbox | Expiring matches ring | "Your turn" badge | New matches + messages + your turn |
-| Chat | GIFs, safety | Icebreakers, voice/video | Focused thread | Icebreaker chips, bubbles |
-| Profile | Edit, settings, premium | Verification, modes | Prompts editor | Stats, interests, settings |
+| Post-like | Keep swiping | Keep swiping | Keep browsing | **Waiting modal → Find more people** |
+| Likes inbox | Gold blur grid | Beeline blur | Roses / likes tab | Blurred grid + badge + Spark+ CTA |
+| Matches | New matches row + inbox | Expiring matches ring | "Your turn" badge | New matches + messages + your turn + expiry |
+| Chat | GIFs, safety | Icebreakers, voice/video | Focused thread | Icebreaker chips, report/block menu |
+| Profile | Edit, settings, premium | Verification, modes | Prompts editor | Stats, interests, Safety & Spark+ links |
+| Paywall | Like limit, blur tap | Beeline tap | Rose limit | Like limit modal, Likes tap, Spark+ screen |
 
 ## Screen map (Spark)
 
@@ -37,29 +62,37 @@ Root Stack
 └── Main (Bottom Tabs)
     ├── Discover
     │   ├── Card deck (drag → trash / heart)
-    │   ├── Profile detail sheet (scroll: prompts, interests)
-    │   └── Match modal
+    │   ├── Like limit banner + modal
+    │   ├── Empty deck (widen filters)
+    │   ├── Waiting for match modal
+    │   ├── Profile detail sheet (prompts, report/block)
+    │   └── Full-screen match celebration
     ├── Likes
-    │   ├── Upgrade banner
-    │   └── Blurred like grid
+    │   ├── Count badge banner
+    │   ├── Blurred like grid → Spark+
+    │   └── Tab badge (incoming count)
     ├── Matches
-    │   ├── New matches (horizontal)
-    │   └── Message list (your turn, unread)
+    │   ├── New matches (horizontal, expiry)
+    │   ├── Message list (your turn, unread, expires)
+    │   └── Tab badge (new + unread + your turn)
     ├── Profile
     │   ├── Edit profile
     │   ├── Stats
-    │   └── Settings rows
-    └── Chat (stack push)
-        ├── Header (avatar, video)
-        ├── Icebreakers (empty state)
-        └── Composer
+    │   └── Settings → Safety, Spark+
+    ├── Chat (stack push)
+    │   ├── Header (avatar, expiry, safety menu)
+    │   ├── Icebreakers (empty state)
+    │   └── Composer
+    ├── SparkPlus (modal)
+    └── Safety (stack push)
 ```
 
 ## Navigation pattern
 
 - **Bottom tabs** (4): Discover, Likes, Matches, Profile — matches Tinder/Bumble thumb-zone convention.
-- **Stack overlay**: Chat pushes on top of tabs.
-- **Modals**: Match celebration, full profile detail.
+- **Stack overlay**: Chat, Safety push on top of tabs; Spark+ presents as modal.
+- **Modals**: Waiting for match, like limit, profile detail sheet.
+- **Full-screen**: Match celebration (Tinder-style, not a small sheet).
 
 ## Discovery UX (Spark differentiator)
 
@@ -71,19 +104,31 @@ Unlike Tinder swipe-left/right:
 4. **Drag** toward **heart** (bottom-right) = like, or **tap** the heart button.
 5. Drop outside zones → card springs back.
 6. **Discovery settings** filter by distance and age range.
-7. **Match modal** → opens chat thread directly.
+7. **One-sided like** → waiting modal; **mutual like** → full-screen celebration → chat.
 
 This avoids direct replication of Tinder's patented swipe gesture while keeping familiar dating-app mental model.
 
+## Monetization touchpoints (copied patterns)
+
+| Trigger | Source app | Spark screen |
+|---------|-----------|--------------|
+| Tap blurred like | Tinder Gold | Likes grid → Spark+ |
+| Daily like cap | Tinder / Hinge | LikeLimitModal → Spark+ |
+| Likes tab badge | Tinder “99+” | Tab badge + banner count |
+| See who liked you CTA | Bumble Beeline | Likes banner button |
+
 ## Data flow (prototype)
 
-- `AppContext` holds: discover queue, likes, passes, matches, conversations.
-- Mutual match IDs: `1`, `3`, `5` (demo).
-- Seed conversations with Ava and Mia.
-- Incoming likes: blurred profiles `7`–`10`.
+- `AppContext` holds: discover queue, likes, passes, pending likes, matches, conversations, daily like count, blocked IDs.
+- Mutual match demo ID: `3` (Mia) — instant match celebration.
+- Other likes → waiting modal.
+- Seed conversations with Ava and Mia (Mia has “Your turn” + expiry).
+- Incoming likes: blurred profiles `7`–`10` (Likes tab badge = 4).
 
 ## References
 
+- [Best Dating App Designs 2026](https://gummble.com/blog/best-dating-app-designs-2026) — prompt cards, celebration, blur paywall
+- [Tinder Gold blur-to-reveal strategy](https://startupspells.com/p/tinder-gold-conversion-strategy-blur-to-reveal-paywall-ux)
+- [Match-to-message UX patterns](https://medium.com/@post.uz/match-to-message-ux-designing-dating-chat-in-figma-8a8e7c6a8d9a)
 - [Tinder vs Bumble UI comparison](https://medium.com/design-bootcamp/decoding-ui-ux-quick-comparison-of-tinder-and-bumble-9a3cb2b76f28)
 - [Dating app UI/UX tips (Purrweb)](https://www.purrweb.com/blog/tips-to-create-a-successful-dating-app-ui-and-ux/)
-- [Tinder browsing flow (Page Flows)](https://pageflows.com/post/ios/general-browsing/tinder/)

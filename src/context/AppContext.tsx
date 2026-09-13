@@ -15,6 +15,7 @@ import {
   DiscoveryPreferences,
 } from '../types/preferences';
 import { Profile, UserProfile } from '../types/profile';
+import { FREE_DAILY_LIKE_LIMIT } from '../types/subscription';
 
 function filterDiscoverProfiles(
   profiles: Profile[],
@@ -38,15 +39,23 @@ type AppContextValue = {
   passedIds: Set<string>;
   likedIds: Set<string>;
   pendingLikeIds: Set<string>;
+  blockedIds: Set<string>;
   matches: Match[];
   conversations: Conversation[];
   incomingLikes: Profile[];
+  dailyLikesUsed: number;
+  remainingLikes: number;
+  canLike: boolean;
+  likesTabBadge: number;
+  matchesTabBadge: number;
   completeOnboarding: (user: UserProfile) => void;
   updatePreferences: (preferences: DiscoveryPreferences) => void;
   passProfile: (profile: Profile) => void;
   likeProfile: (profile: Profile) => Match | null;
   sendMessage: (conversationId: string, text: string) => void;
   getConversationIdForProfile: (profileId: string) => string | null;
+  blockProfile: (profileId: string) => void;
+  reportProfile: (profileId: string) => void;
   isSparkPlus: boolean;
   activateSparkPlus: () => void;
 };
@@ -68,21 +77,46 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [passedIds, setPassedIds] = useState<Set<string>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [pendingLikeIds, setPendingLikeIds] = useState<Set<string>>(new Set());
+  const [blockedIds, setBlockedIds] = useState<Set<string>>(new Set());
   const [matches, setMatches] = useState<Match[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>(seedConversations);
+  const [dailyLikesUsed, setDailyLikesUsed] = useState(0);
   const [isSparkPlus, setIsSparkPlus] = useState(false);
 
   const excludedIds = useMemo(() => {
     const ids = new Set<string>();
     passedIds.forEach((id) => ids.add(id));
     likedIds.forEach((id) => ids.add(id));
+    blockedIds.forEach((id) => ids.add(id));
     return ids;
-  }, [likedIds, passedIds]);
+  }, [blockedIds, likedIds, passedIds]);
 
   const discoverQueue = useMemo(
     () => filterDiscoverProfiles(mockProfiles, preferences, excludedIds),
     [excludedIds, preferences],
   );
+
+  const remainingLikes = isSparkPlus
+    ? Infinity
+    : Math.max(0, FREE_DAILY_LIKE_LIMIT - dailyLikesUsed);
+  const canLike = isSparkPlus || dailyLikesUsed < FREE_DAILY_LIKE_LIMIT;
+
+  const likesTabBadge = isSparkPlus ? 0 : incomingLikeProfiles.length;
+
+  const matchesTabBadge = useMemo(() => {
+    const newMatchCount = matches.filter(
+      (match) =>
+        !conversations.some(
+          (conversation) =>
+            conversation.match.id === match.id && conversation.messages.length > 0,
+        ),
+    ).length;
+    const unreadCount = conversations.filter((conversation) => conversation.unread).length;
+    const yourTurnCount = conversations.filter(
+      (conversation) => conversation.yourTurn && !conversation.unread,
+    ).length;
+    return newMatchCount + unreadCount + yourTurnCount;
+  }, [conversations, matches]);
 
   const completeOnboarding = useCallback((nextUser: UserProfile) => {
     setUser(nextUser);
@@ -97,9 +131,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPassedIds((prev) => new Set(prev).add(profile.id));
   }, []);
 
+  const blockProfile = useCallback((profileId: string) => {
+    setBlockedIds((prev) => new Set(prev).add(profileId));
+    setMatches((prev) => prev.filter((match) => match.profile.id !== profileId));
+    setConversations((prev) =>
+      prev.filter((conversation) => conversation.match.profile.id !== profileId),
+    );
+  }, []);
+
+  const reportProfile = useCallback(
+    (profileId: string) => {
+      blockProfile(profileId);
+    },
+    [blockProfile],
+  );
+
   const likeProfile = useCallback(
     (profile: Profile): Match | null => {
+      if (!canLike) {
+        return null;
+      }
+
       setLikedIds((prev) => new Set(prev).add(profile.id));
+      if (!isSparkPlus) {
+        setDailyLikesUsed((count) => count + 1);
+      }
 
       if (!MUTUAL_MATCH_IDS.has(profile.id)) {
         setPendingLikeIds((prev) => new Set(prev).add(profile.id));
@@ -120,14 +176,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       };
 
       setMatches((prev) => {
-        if (prev.some((m) => m.profile.id === profile.id)) {
+        if (prev.some((item) => item.profile.id === profile.id)) {
           return prev;
         }
         return [match, ...prev];
       });
 
       setConversations((prev) => {
-        if (prev.some((c) => c.match.profile.id === profile.id)) {
+        if (prev.some((item) => item.match.profile.id === profile.id)) {
           return prev;
         }
         const conversation: Conversation = {
@@ -142,7 +198,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       return match;
     },
-    [],
+    [canLike, isSparkPlus],
   );
 
   const sendMessage = useCallback((conversationId: string, text: string) => {
@@ -198,15 +254,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
       passedIds,
       likedIds,
       pendingLikeIds,
+      blockedIds,
       matches,
       conversations,
       incomingLikes: incomingLikeProfiles,
+      dailyLikesUsed,
+      remainingLikes,
+      canLike,
+      likesTabBadge,
+      matchesTabBadge,
       completeOnboarding,
       updatePreferences,
       passProfile,
       likeProfile,
       sendMessage,
       getConversationIdForProfile,
+      blockProfile,
+      reportProfile,
       isSparkPlus,
       activateSparkPlus,
     }),
@@ -218,14 +282,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
       passedIds,
       likedIds,
       pendingLikeIds,
+      blockedIds,
       matches,
       conversations,
+      dailyLikesUsed,
+      remainingLikes,
+      canLike,
+      likesTabBadge,
+      matchesTabBadge,
       completeOnboarding,
       updatePreferences,
       passProfile,
       likeProfile,
       sendMessage,
       getConversationIdForProfile,
+      blockProfile,
+      reportProfile,
       isSparkPlus,
       activateSparkPlus,
     ],

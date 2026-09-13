@@ -38,6 +38,7 @@ export const seedConversations: Conversation[] = [
       id: 'match-2',
       profile: mia,
       matchedAt: new Date(Date.now() - 43200000).toISOString(),
+      expiresAt: new Date(Date.now() + 3600000 * 18).toISOString(),
     },
     messages: [
       {

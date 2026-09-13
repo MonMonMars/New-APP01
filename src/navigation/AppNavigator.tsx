@@ -9,6 +9,8 @@ import { DiscoverScreen } from '../screens/DiscoverScreen';
 import { LikesScreen } from '../screens/LikesScreen';
 import { MatchesScreen } from '../screens/MatchesScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { SafetyScreen } from '../screens/SafetyScreen';
+import { SparkPlusScreen } from '../screens/SparkPlusScreen';
 import { OnboardingFlow } from '../screens/onboarding/OnboardingFlow';
 import { colors } from '../theme';
 import { MainTabParamList, RootStackParamList } from '../types/navigation';
@@ -29,6 +31,8 @@ function MatchesTabScreen() {
 }
 
 function MainTabs() {
+  const { likesTabBadge, matchesTabBadge } = useApp();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -53,8 +57,20 @@ function MainTabs() {
       })}
     >
       <Tab.Screen name="Discover" component={DiscoverScreen} />
-      <Tab.Screen name="Likes" component={LikesScreen} options={{ tabBarBadge: 4 }} />
-      <Tab.Screen name="Matches" component={MatchesTabScreen} />
+      <Tab.Screen
+        name="Likes"
+        component={LikesScreen}
+        options={{
+          tabBarBadge: likesTabBadge > 0 ? likesTabBadge : undefined,
+        }}
+      />
+      <Tab.Screen
+        name="Matches"
+        component={MatchesTabScreen}
+        options={{
+          tabBarBadge: matchesTabBadge > 0 ? matchesTabBadge : undefined,
+        }}
+      />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
@@ -72,6 +88,14 @@ function ChatScreenWrapper({
   );
 }
 
+function SparkPlusWrapper({ navigation }: NativeStackScreenProps<RootStackParamList, 'SparkPlus'>) {
+  return <SparkPlusScreen onClose={() => navigation.goBack()} />;
+}
+
+function SafetyWrapper({ navigation }: NativeStackScreenProps<RootStackParamList, 'Safety'>) {
+  return <SafetyScreen onClose={() => navigation.goBack()} />;
+}
+
 function RootNavigator() {
   const { hasOnboarded } = useApp();
 
@@ -85,7 +109,21 @@ function RootNavigator() {
       ) : (
         <>
           <Stack.Screen name="Main" component={MainTabs} />
-          <Stack.Screen name="Chat" component={ChatScreenWrapper} />
+          <Stack.Screen
+            name="Chat"
+            component={ChatScreenWrapper}
+            options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="SparkPlus"
+            component={SparkPlusWrapper}
+            options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+          />
+          <Stack.Screen
+            name="Safety"
+            component={SafetyWrapper}
+            options={{ animation: 'slide_from_right' }}
+          />
         </>
       )}
     </Stack.Navigator>

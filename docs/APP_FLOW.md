@@ -66,9 +66,12 @@ Root Stack
 Unlike Tinder swipe-left/right:
 
 1. User sees **one card** from the deck.
-2. **Drag** toward **trash** (bottom-left) = pass.
-3. **Drag** toward **heart** (bottom-right) = like.
-4. Drop outside zones → card springs back.
+2. **Tap** left/right on the photo to browse multiple images (Tinder-style dots).
+3. **Drag** toward **trash** (bottom-left) = pass, or **tap** the trash button.
+4. **Drag** toward **heart** (bottom-right) = like, or **tap** the heart button.
+5. Drop outside zones → card springs back.
+6. **Discovery settings** filter by distance and age range.
+7. **Match modal** → opens chat thread directly.
 
 This avoids direct replication of Tinder's patented swipe gesture while keeping familiar dating-app mental model.
 

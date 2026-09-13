@@ -9,6 +9,7 @@ type SafetyActionSheetProps = {
   onClose: () => void;
   onReport: () => void;
   onBlock: () => void;
+  onOpenSafetyCenter?: () => void;
 };
 
 export function SafetyActionSheet({
@@ -17,6 +18,7 @@ export function SafetyActionSheet({
   onClose,
   onReport,
   onBlock,
+  onOpenSafetyCenter,
 }: SafetyActionSheetProps) {
   return (
     <Modal visible={visible} animationType="slide" transparent>
@@ -25,6 +27,22 @@ export function SafetyActionSheet({
           <View style={styles.handle} />
           <Text style={styles.title}>Safety options</Text>
           <Text style={styles.subtitle}>Choose an action for {profileName}.</Text>
+
+          {onOpenSafetyCenter && (
+            <Pressable
+              style={styles.actionRow}
+              onPress={() => {
+                onClose();
+                onOpenSafetyCenter();
+              }}
+            >
+              <Ionicons name="shield-checkmark-outline" size={22} color={colors.gradientEnd} />
+              <View style={styles.actionText}>
+                <Text style={styles.actionLabel}>Safety Center</Text>
+                <Text style={styles.actionHint}>Tips, resources, and support links.</Text>
+              </View>
+            </Pressable>
+          )}
 
           <Pressable style={styles.actionRow} onPress={onReport}>
             <Ionicons name="flag-outline" size={22} color={colors.rewind} />

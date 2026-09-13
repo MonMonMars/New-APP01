@@ -10,7 +10,8 @@ A dating app prototype inspired by **Tinder**, **Bumble**, and **Hinge** — bui
 - Welcome + sign-in
 - House rules
 - Location permission
-- Quick profile setup
+- Relationship intent
+- Quick profile setup (persisted locally)
 
 ### Discovery (Spark differentiator)
 - One profile card at a time
@@ -25,7 +26,7 @@ A dating app prototype inspired by **Tinder**, **Bumble**, and **Hinge** — bui
 | **Likes** | Tinder Gold / Bumble Beeline blur grid |
 | **Matches** | Bumble expiring ring + Hinge "Your turn" |
 | **Chat** | Icebreaker prompts (Bumble-style) |
-| **Profile** | Standard settings + edit |
+| **Profile** | Edit profile, discovery prefs, Safety & Spark+ links |
 
 ### Chat
 - Icebreaker prompts (Bumble-style)
@@ -60,7 +61,8 @@ src/
   components/      # Swipe deck, drop targets, modals
   data/            # Mock profiles & conversations
 docs/
-  APP_FLOW.md      # UI map + competitor research
+  APP_FLOW.md              # UI map + competitor research
+  SPARK_APP_DOCUMENT.md    # Full product & technical reference
 ```
 
 ## Legal note

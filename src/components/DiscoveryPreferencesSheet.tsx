@@ -2,7 +2,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { DiscoveryPreferences } from '../types/preferences';
+import {
+  DiscoveryPreferences,
+  SHOW_ME_LABELS,
+  ShowMePreference,
+} from '../types/preferences';
 import { colors, radii, spacing } from '../theme';
 
 type DiscoveryPreferencesSheetProps = {
@@ -21,6 +25,8 @@ type StepperRowProps = {
   step: number;
   onChange: (value: number) => void;
 };
+
+const showMeOptions: ShowMePreference[] = ['women', 'men', 'everyone'];
 
 function StepperRow({
   label,
@@ -71,6 +77,24 @@ export function DiscoveryPreferencesSheet({
           <Pressable onPress={onClose} style={styles.doneButton}>
             <Text style={styles.doneText}>Done</Text>
           </Pressable>
+        </View>
+
+        <Text style={styles.sectionTitle}>Show me</Text>
+        <View style={styles.chipRow}>
+          {showMeOptions.map((option) => {
+            const selected = preferences.showMe === option;
+            return (
+              <Pressable
+                key={option}
+                style={[styles.chip, selected && styles.chipSelected]}
+                onPress={() => onChange({ ...preferences, showMe: option })}
+              >
+                <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
+                  {SHOW_ME_LABELS[option]}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
 
         <Text style={styles.sectionTitle}>Distance</Text>
@@ -145,6 +169,30 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     marginTop: spacing.lg,
     marginBottom: spacing.md,
+  },
+  chipRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  chip: {
+    backgroundColor: colors.surface,
+    borderRadius: radii.button,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  chipSelected: {
+    borderColor: colors.gradientEnd,
+  },
+  chipText: {
+    color: colors.textMuted,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  chipTextSelected: {
+    color: colors.text,
   },
   row: {
     flexDirection: 'row',

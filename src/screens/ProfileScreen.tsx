@@ -1,29 +1,47 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesSheet';
+import { EditProfileSheet } from '../components/EditProfileSheet';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { useApp } from '../context/AppContext';
+import { RelationshipIntent } from '../types/profile';
 import { colors, radii, spacing } from '../theme';
 
-const settingsRows = [
-  { icon: 'options-outline' as const, label: 'Discovery preferences', route: null },
-  { icon: 'shield-checkmark-outline' as const, label: 'Safety & privacy', route: 'Safety' as const },
-  { icon: 'notifications-outline' as const, label: 'Notifications', route: null },
-  { icon: 'diamond-outline' as const, label: 'Spark+ subscription', route: 'SparkPlus' as const },
+const intentLabels: Record<RelationshipIntent, string> = {
+  long_term: 'Long-term partner',
+  short_term: 'Something casual',
+  new_friends: 'New friends',
+  not_sure: 'Still figuring it out',
+};
+
+type SettingsRoute = 'Safety' | 'SparkPlus' | 'DiscoveryPreferences' | null;
+
+const settingsRows: { icon: keyof typeof Ionicons.glyphMap; label: string; route: SettingsRoute }[] = [
+  { icon: 'options-outline', label: 'Discovery preferences', route: 'DiscoveryPreferences' },
+  { icon: 'shield-checkmark-outline', label: 'Safety & privacy', route: 'Safety' },
+  { icon: 'notifications-outline', label: 'Notifications', route: null },
+  { icon: 'diamond-outline', label: 'Spark+ subscription', route: 'SparkPlus' },
 ];
 
 export function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const { user, likedIds, matches } = useApp();
+  const { user, likedIds, matches, preferences, updatePreferences, updateUser, isSparkPlus } = useApp();
+  const [showEdit, setShowEdit] = useState(false);
+  const [showPreferences, setShowPreferences] = useState(false);
 
-  const handleRowPress = (route: 'Safety' | 'SparkPlus' | null) => {
-    if (!route) {
+  const handleRowPress = (route: SettingsRoute) => {
+    if (route === 'DiscoveryPreferences') {
+      setShowPreferences(true);
       return;
     }
-    navigation.getParent()?.navigate(route);
+    if (route === 'Safety' || route === 'SparkPlus') {
+      navigation.getParent()?.navigate(route);
+    }
   };
 
   return (
@@ -35,12 +53,22 @@ export function ProfileScreen() {
           <Image source={{ uri: user.photos[0] }} style={styles.avatar} />
           <View style={styles.heroText}>
             <Text style={styles.name}>{user.name}, {user.age}</Text>
+            {user.intent && (
+              <Text style={styles.intent}>{intentLabels[user.intent]}</Text>
+            )}
             <Text style={styles.bio}>{user.bio}</Text>
-            <Pressable style={styles.editButton}>
+            <Pressable style={styles.editButton} onPress={() => setShowEdit(true)}>
               <Text style={styles.editButtonText}>Edit profile</Text>
             </Pressable>
           </View>
         </View>
+
+        {isSparkPlus && (
+          <View style={styles.sparkPlusBadge}>
+            <Ionicons name="diamond" size={16} color={colors.gradientEnd} />
+            <Text style={styles.sparkPlusText}>Spark+ member</Text>
+          </View>
+        )}
 
         <View style={styles.statsRow}>
           <View style={styles.stat}>
@@ -82,6 +110,20 @@ export function ProfileScreen() {
           ))}
         </View>
       </ScrollView>
+
+      <EditProfileSheet
+        visible={showEdit}
+        user={user}
+        onClose={() => setShowEdit(false)}
+        onSave={updateUser}
+      />
+
+      <DiscoveryPreferencesSheet
+        visible={showPreferences}
+        preferences={preferences}
+        onClose={() => setShowPreferences(false)}
+        onChange={updatePreferences}
+      />
     </View>
   );
 }
@@ -116,6 +158,12 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '800',
   },
+  intent: {
+    color: colors.gradientEnd,
+    fontSize: 13,
+    fontWeight: '600',
+    marginTop: 2,
+  },
   bio: {
     color: colors.textMuted,
     fontSize: 14,
@@ -135,6 +183,22 @@ const styles = StyleSheet.create({
     color: colors.gradientEnd,
     fontWeight: '700',
     fontSize: 14,
+  },
+  sparkPlusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    alignSelf: 'center',
+    marginTop: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: radii.button,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  sparkPlusText: {
+    color: colors.gradientEnd,
+    fontSize: 13,
+    fontWeight: '700',
   },
   statsRow: {
     flexDirection: 'row',

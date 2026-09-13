@@ -7,11 +7,15 @@ export type Match = {
   expiresAt?: string;
 };
 
+export type MessageStatus = 'sent' | 'delivered' | 'read';
+
 export type Message = {
   id: string;
   text: string;
   sentAt: string;
   isMine: boolean;
+  imageUrl?: string;
+  status?: MessageStatus;
 };
 
 export type Conversation = {
@@ -22,4 +26,5 @@ export type Conversation = {
   lastMessageAt?: string;
   yourTurn: boolean;
   unread: boolean;
+  isTyping?: boolean;
 };

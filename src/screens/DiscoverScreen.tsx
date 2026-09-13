@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useCallback, useRef, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DailyBatchIndicator } from '../components/DailyBatchIndicator';
+import { DiscoverFilterChips } from '../components/DiscoverFilterChips';
 import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesSheet';
 import { LikeLimitModal } from '../components/LikeLimitModal';
 import { MatchModal } from '../components/MatchModal';
@@ -16,19 +17,24 @@ import { SparkNoteSheet } from '../components/SparkNoteSheet';
 import { SwipeDeck, SwipeDeckHandle } from '../components/SwipeDeck';
 import { WaitingForMatchModal } from '../components/WaitingForMatchModal';
 import { useApp } from '../context/AppContext';
-import { colors, spacing } from '../theme';
+import { useTheme } from '../context/ThemeContext';
+import { DiscoverFilter } from '../types/preferences';
 import { Profile } from '../types/profile';
+import { spacing } from '../theme';
 
 export function DiscoverScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const { colors } = useTheme();
   const deckRef = useRef<SwipeDeckHandle>(null);
+  const rewindAnim = useRef(new Animated.Value(0)).current;
   const {
     discoverQueue,
     likedIds,
     passedIds,
     preferences,
     updatePreferences,
+    toggleDiscoverFilter,
     passProfile,
     likeProfile,
     getConversationIdForProfile,
@@ -38,6 +44,8 @@ export function DiscoverScreen() {
     isSparkPlus,
     isBoosted,
     canRewind,
+    rewindKey,
+    isPaused,
     user,
     blockProfile,
     reportProfile,
@@ -57,6 +65,15 @@ export function DiscoverScreen() {
   const [sparkNoteProfile, setSparkNoteProfile] = useState<Profile | null>(null);
   const [reportProfileId, setReportProfileId] = useState<string | null>(null);
   const [reportProfileName, setReportProfileName] = useState('');
+
+  const activeFilters = preferences.discoverFilters ?? [];
+
+  const handleFilterToggle = useCallback(
+    (filter: DiscoverFilter) => {
+      toggleDiscoverFilter(filter);
+    },
+    [toggleDiscoverFilter],
+  );
 
   const processLike = useCallback(
     (profile: Profile, sparkNote?: string) => {
@@ -90,6 +107,14 @@ export function DiscoverScreen() {
     },
     [passProfile, processLike],
   );
+
+  const handleRewind = useCallback(() => {
+    Animated.sequence([
+      Animated.timing(rewindAnim, { toValue: 1, duration: 200, useNativeDriver: true }),
+      Animated.timing(rewindAnim, { toValue: 0, duration: 300, useNativeDriver: true }),
+    ]).start();
+    rewindLastPass();
+  }, [rewindAnim, rewindLastPass]);
 
   const handleFindMorePeople = useCallback(() => {
     setShowWaiting(false);
@@ -182,13 +207,25 @@ export function DiscoverScreen() {
     setSparkNoteProfile(null);
   }, [processLike, sparkNoteProfile]);
 
+  const rewindScale = rewindAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [1, 1.08, 1],
+  });
+
   return (
-    <View style={[styles.screen, { paddingTop: insets.top }]}>
+    <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <ScreenHeader
         showLogo
         rightIcon="options-outline"
         onRightPress={() => setShowPreferences(true)}
       />
+
+      {isPaused && (
+        <View style={[styles.pausedBanner, { backgroundColor: colors.surface }]}>
+          <Ionicons name="pause-circle" size={16} color={colors.rewind} />
+          <Text style={[styles.pausedText, { color: colors.rewind }]}>Account paused — you&apos;re hidden from the deck</Text>
+        </View>
+      )}
 
       {isBoosted && (
         <View style={styles.boostBanner}>
@@ -197,6 +234,17 @@ export function DiscoverScreen() {
         </View>
       )}
 
+      {preferences.travelMode && preferences.passportCity && (
+        <View style={[styles.passportBanner, { backgroundColor: colors.surface }]}>
+          <Ionicons name="airplane" size={14} color={colors.superLike} />
+          <Text style={[styles.passportText, { color: colors.superLike }]}>
+            Passport: {preferences.passportCity}
+          </Text>
+        </View>
+      )}
+
+      <DiscoverFilterChips activeFilters={activeFilters} onToggle={handleFilterToggle} />
+
       <DailyBatchIndicator
         remaining={discoverQueue.length}
         total={discoverQueue.length + likedIds.size + passedIds.size}
@@ -204,14 +252,18 @@ export function DiscoverScreen() {
 
       {!isSparkPlus && (
         <Pressable
-          style={[styles.limitBanner, !canLike && styles.limitBannerExhausted]}
+          style={[
+            styles.limitBanner,
+            { backgroundColor: colors.surface },
+            !canLike && { borderWidth: 1, borderColor: colors.gradientEnd },
+          ]}
           onPress={() => {
             if (!canLike) {
               setShowLikeLimit(true);
             }
           }}
         >
-          <Text style={styles.limitBannerText}>
+          <Text style={[styles.limitBannerText, { color: colors.gradientEnd }]}>
             {remainingLikes === 0
               ? 'Out of likes today — tap to upgrade'
               : `${remainingLikes} of 10 likes left today`}
@@ -219,23 +271,32 @@ export function DiscoverScreen() {
         </Pressable>
       )}
 
-      <View style={styles.deckArea}>
-        {discoverQueue.length === 0 ? (
+      <Animated.View style={[styles.deckArea, { transform: [{ scale: rewindScale }] }]}>
+        {isPaused ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyEmoji}>⏸️</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>Account paused</Text>
+            <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
+              Unpause in Profile settings to start discovering again.
+            </Text>
+          </View>
+        ) : discoverQueue.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyEmoji}>🌍</Text>
-            <Text style={styles.emptyTitle}>No more people nearby</Text>
-            <Text style={styles.emptySubtitle}>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>No more people nearby</Text>
+            <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
               You&apos;ve seen everyone in your area. Widen filters or check back later.
             </Text>
-            <Pressable style={styles.primaryButton} onPress={handleWidenFilters}>
-              <Text style={styles.primaryButtonText}>Widen filters</Text>
+            <Pressable style={[styles.primaryButton, { backgroundColor: colors.gradientEnd }]} onPress={handleWidenFilters}>
+              <Text style={[styles.primaryButtonText, { color: colors.text }]}>Widen filters</Text>
             </Pressable>
             <Pressable style={styles.secondaryButton} onPress={() => setShowPreferences(true)}>
-              <Text style={styles.secondaryButtonText}>Discovery settings</Text>
+              <Text style={[styles.secondaryButtonText, { color: colors.textMuted }]}>Discovery settings</Text>
             </Pressable>
           </View>
         ) : (
           <SwipeDeck
+            key={`deck-${rewindKey}`}
             ref={deckRef}
             profiles={discoverQueue}
             onSwipe={handleSwipe}
@@ -244,22 +305,22 @@ export function DiscoverScreen() {
             onLikeBlocked={() => setShowLikeLimit(true)}
           />
         )}
-      </View>
+      </Animated.View>
 
-      {currentProfile && (
+      {currentProfile && !isPaused && (
         <View style={styles.actionRow}>
           {canRewind && (
-            <Pressable style={styles.rewindButton} onPress={rewindLastPass}>
+            <Pressable style={[styles.rewindButton, { backgroundColor: colors.surface }]} onPress={handleRewind}>
               <Ionicons name="refresh" size={18} color={colors.gradientEnd} />
-              <Text style={styles.rewindText}>Rewind</Text>
+              <Text style={[styles.rewindText, { color: colors.gradientEnd }]}>Rewind</Text>
             </Pressable>
           )}
-          <Pressable style={styles.sparkNoteButton} onPress={openSparkNote}>
+          <Pressable style={[styles.sparkNoteButton, { backgroundColor: colors.surface }]} onPress={openSparkNote}>
             <Ionicons name="chatbubble-ellipses-outline" size={18} color={colors.gradientEnd} />
-            <Text style={styles.sparkNoteText}>Spark Note</Text>
+            <Text style={[styles.sparkNoteText, { color: colors.gradientEnd }]}>Spark Note</Text>
           </Pressable>
-          <Pressable style={styles.infoPill} onPress={() => setDetailProfile(currentProfile)}>
-            <Text style={styles.infoPillText}>View profile</Text>
+          <Pressable style={[styles.infoPill, { backgroundColor: colors.surface }]} onPress={() => setDetailProfile(currentProfile)}>
+            <Text style={[styles.infoPillText, { color: colors.textMuted }]}>View profile</Text>
           </Pressable>
         </View>
       )}
@@ -337,7 +398,20 @@ export function DiscoverScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.background,
+  },
+  pausedBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.sm,
+    borderRadius: 999,
+    paddingVertical: spacing.sm,
+  },
+  pausedText: {
+    fontSize: 13,
+    fontWeight: '700',
   },
   boostBanner: {
     flexDirection: 'row',
@@ -355,20 +429,28 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
   },
+  passportBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.sm,
+    borderRadius: 999,
+    paddingVertical: spacing.sm,
+  },
+  passportText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
   limitBanner: {
     marginHorizontal: spacing.lg,
     marginBottom: spacing.sm,
-    backgroundColor: colors.surface,
     borderRadius: 999,
     paddingVertical: spacing.sm,
     alignItems: 'center',
   },
-  limitBannerExhausted: {
-    borderWidth: 1,
-    borderColor: colors.gradientEnd,
-  },
   limitBannerText: {
-    color: colors.gradientEnd,
     fontSize: 13,
     fontWeight: '700',
   },
@@ -389,12 +471,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   emptyTitle: {
-    color: colors.text,
     fontSize: 24,
     fontWeight: '800',
   },
   emptySubtitle: {
-    color: colors.textMuted,
     fontSize: 15,
     textAlign: 'center',
     lineHeight: 22,
@@ -402,13 +482,11 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     marginTop: spacing.sm,
-    backgroundColor: colors.gradientEnd,
     borderRadius: 999,
     paddingHorizontal: spacing.xl,
     paddingVertical: spacing.sm + 4,
   },
   primaryButtonText: {
-    color: colors.text,
     fontWeight: '800',
     fontSize: 15,
   },
@@ -416,7 +494,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   secondaryButtonText: {
-    color: colors.textMuted,
     fontWeight: '600',
     fontSize: 14,
   },
@@ -432,13 +509,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: colors.surface,
     borderRadius: 999,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
   rewindText: {
-    color: colors.gradientEnd,
     fontSize: 13,
     fontWeight: '700',
   },
@@ -446,24 +521,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: colors.surface,
     borderRadius: 999,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
   sparkNoteText: {
-    color: colors.gradientEnd,
     fontSize: 13,
     fontWeight: '700',
   },
   infoPill: {
-    backgroundColor: colors.surface,
     borderRadius: 999,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
   infoPillText: {
-    color: colors.textMuted,
     fontSize: 13,
     fontWeight: '600',
   },

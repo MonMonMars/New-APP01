@@ -5,9 +5,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '../components/ScreenHeader';
 import { useApp } from '../context/AppContext';
-import { colors, radii, spacing } from '../theme';
+import { useTheme } from '../context/ThemeContext';
+import { useLiveExpiry } from '../hooks/useLiveExpiry';
 import { Conversation } from '../types/match';
-import { formatExpiresIn } from '../utils/matchTiming';
+import { radii, spacing } from '../theme';
 
 type MatchesScreenProps = {
   onOpenChat: (conversationId: string) => void;
@@ -20,33 +21,59 @@ function ConversationRow({
   conversation: Conversation;
   onPress: () => void;
 }) {
+  const { colors } = useTheme();
   const { match, lastMessage, yourTurn, unread } = conversation;
   const profile = match.profile;
-  const expiryLabel = formatExpiresIn(match.expiresAt);
+  const expiryLabel = useLiveExpiry(match.expiresAt);
+
+  const turnLabel = yourTurn ? 'Your turn' : lastMessage ? 'Waiting for reply' : null;
 
   return (
     <Pressable style={styles.row} onPress={onPress}>
       <View style={styles.avatarWrap}>
         <Image source={{ uri: profile.photos[0] }} style={styles.avatar} />
-        {match.expiresAt && <View style={styles.expiryRing} />}
+        {match.expiresAt && <View style={[styles.expiryRing, { borderColor: colors.rewind }]} />}
       </View>
       <View style={styles.rowBody}>
         <View style={styles.rowTop}>
-          <Text style={styles.rowName}>{profile.name}</Text>
-          {yourTurn && (
-            <View style={styles.yourTurnBadge}>
-              <Text style={styles.yourTurnText}>Your turn</Text>
+          <Text style={[styles.rowName, { color: colors.text }]}>{profile.name}</Text>
+          {turnLabel && (
+            <View style={[styles.turnBadge, { backgroundColor: yourTurn ? colors.gradientEnd : colors.surface }]}>
+              <Text style={[styles.turnText, { color: colors.text }]}>{turnLabel}</Text>
             </View>
           )}
         </View>
-        <Text style={[styles.preview, unread && styles.previewUnread]} numberOfLines={1}>
+        <Text style={[styles.preview, { color: unread ? colors.text : colors.textMuted }, unread && styles.previewUnread]} numberOfLines={1}>
           {lastMessage ?? 'Say something nice!'}
         </Text>
         {expiryLabel && (
-          <Text style={styles.expiryText}>{expiryLabel}</Text>
+          <Text style={[styles.expiryText, { color: colors.rewind }]}>{expiryLabel}</Text>
         )}
       </View>
-      {unread && <View style={styles.unreadDot} />}
+      {unread && <View style={[styles.unreadDot, { backgroundColor: colors.gradientEnd }]} />}
+    </Pressable>
+  );
+}
+
+function NewMatchItem({
+  match,
+  onPress,
+}: {
+  match: { id: string; profile: { id: string; name: string; photos: string[] }; expiresAt?: string };
+  onPress: () => void;
+}) {
+  const { colors } = useTheme();
+  const expiryLabel = useLiveExpiry(match.expiresAt);
+
+  return (
+    <Pressable style={styles.newMatch} onPress={onPress}>
+      <View style={[styles.newMatchRing, { borderColor: colors.gradientEnd }]}>
+        <Image source={{ uri: match.profile.photos[0] }} style={styles.newMatchPhoto} />
+      </View>
+      <Text style={[styles.newMatchName, { color: colors.text }]}>{match.profile.name}</Text>
+      {expiryLabel && (
+        <Text style={[styles.newMatchExpiry, { color: colors.rewind }]}>{expiryLabel}</Text>
+      )}
     </Pressable>
   );
 }
@@ -54,6 +81,7 @@ function ConversationRow({
 export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const { colors } = useTheme();
   const { conversations, matches } = useApp();
 
   const newMatches = matches.filter(
@@ -61,7 +89,7 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
   );
 
   return (
-    <View style={[styles.screen, { paddingTop: insets.top }]}>
+    <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <ScreenHeader
         title="Messages"
         rightIcon="shield-checkmark-outline"
@@ -71,33 +99,27 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
       <ScrollView contentContainerStyle={styles.content}>
         {newMatches.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>New matches</Text>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>New matches</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.matchRow}>
               {newMatches.map((match) => (
-                <Pressable
+                <NewMatchItem
                   key={match.id}
-                  style={styles.newMatch}
+                  match={match}
                   onPress={() => onOpenChat(`conv-${match.profile.id}`)}
-                >
-                  <View style={styles.newMatchRing}>
-                    <Image source={{ uri: match.profile.photos[0] }} style={styles.newMatchPhoto} />
-                  </View>
-                  <Text style={styles.newMatchName}>{match.profile.name}</Text>
-                  {formatExpiresIn(match.expiresAt) && (
-                    <Text style={styles.newMatchExpiry}>{formatExpiresIn(match.expiresAt)}</Text>
-                  )}
-                </Pressable>
+                />
               ))}
             </ScrollView>
           </View>
         )}
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Messages</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Messages</Text>
           {conversations.length === 0 ? (
             <View style={styles.empty}>
               <Ionicons name="chatbubbles-outline" size={40} color={colors.textMuted} />
-              <Text style={styles.emptyText}>Matches appear here when you both like each other.</Text>
+              <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+                Matches appear here when you both like each other.
+              </Text>
             </View>
           ) : (
             conversations.map((conversation) => (
@@ -117,7 +139,6 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   content: {
     paddingBottom: spacing.xl,
@@ -126,7 +147,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   sectionTitle: {
-    color: colors.textMuted,
     fontSize: 13,
     fontWeight: '700',
     textTransform: 'uppercase',
@@ -146,7 +166,6 @@ const styles = StyleSheet.create({
     padding: 3,
     borderRadius: 40,
     borderWidth: 2,
-    borderColor: colors.gradientEnd,
   },
   newMatchPhoto: {
     width: 68,
@@ -154,13 +173,11 @@ const styles = StyleSheet.create({
     borderRadius: 34,
   },
   newMatchName: {
-    color: colors.text,
     fontSize: 12,
     marginTop: spacing.xs,
     fontWeight: '600',
   },
   newMatchExpiry: {
-    color: colors.rewind,
     fontSize: 10,
     fontWeight: '700',
     marginTop: 2,
@@ -188,7 +205,6 @@ const styles = StyleSheet.create({
     bottom: -2,
     borderRadius: 30,
     borderWidth: 2,
-    borderColor: colors.rewind,
   },
   rowBody: {
     flex: 1,
@@ -199,32 +215,26 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   rowName: {
-    color: colors.text,
     fontSize: 17,
     fontWeight: '700',
   },
-  yourTurnBadge: {
-    backgroundColor: colors.gradientEnd,
+  turnBadge: {
     borderRadius: radii.button,
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
   },
-  yourTurnText: {
-    color: colors.text,
-    fontSize: 11,
+  turnText: {
+    fontSize: 10,
     fontWeight: '700',
   },
   preview: {
-    color: colors.textMuted,
     fontSize: 14,
     marginTop: 2,
   },
   previewUnread: {
-    color: colors.text,
     fontWeight: '600',
   },
   expiryText: {
-    color: colors.rewind,
     fontSize: 12,
     fontWeight: '600',
     marginTop: 2,
@@ -233,7 +243,6 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: colors.gradientEnd,
   },
   empty: {
     alignItems: 'center',
@@ -241,7 +250,6 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   emptyText: {
-    color: colors.textMuted,
     textAlign: 'center',
     lineHeight: 22,
   },

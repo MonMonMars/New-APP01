@@ -13,6 +13,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { VideoProfileOverlay } from './VideoProfileOverlay';
 import { colors, radii, spacing } from '../theme';
 import { Profile } from '../types/profile';
 
@@ -59,8 +60,8 @@ export function ProfileCard({
   const cardStyle = useAnimatedStyle(() => {
     if (!translateX || !translateY || !isTop) {
       const offset = index - activeIndex;
-      const stackScale = 1 - offset * 0.04;
-      const stackTranslateY = offset * 10;
+      const stackScale = 1 - offset * 0.03;
+      const stackTranslateY = offset * 8;
       return {
         transform: [{ scale: stackScale }, { translateY: stackTranslateY }],
         opacity: offset > 2 ? 0 : 1,
@@ -143,6 +144,8 @@ export function ProfileCard({
           <Text style={styles.crushBadgeText}>Crush</Text>
         </View>
       )}
+
+      {profile.hasVideo && isTop && <VideoProfileOverlay visible />}
 
       {isTop && photoCount > 1 && (
         <>

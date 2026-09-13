@@ -6,23 +6,26 @@ import { type ReactNode } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { useApp } from '../context/AppContext';
+import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { ChatScreen } from '../screens/ChatScreen';
+import { ConsumablesShopScreen } from '../screens/ConsumablesShopScreen';
 import { DiscoverScreen } from '../screens/DiscoverScreen';
 import { LikesScreen } from '../screens/LikesScreen';
 import { MatchesScreen } from '../screens/MatchesScreen';
+import { NotificationPreferencesScreen } from '../screens/NotificationPreferencesScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { SafetyScreen } from '../screens/SafetyScreen';
 import { SparkPlusScreen } from '../screens/SparkPlusScreen';
 import { OnboardingFlow } from '../screens/onboarding/OnboardingFlow';
-import { colors } from '../theme';
 import { MainTabParamList, RootStackParamList } from '../types/navigation';
 
 function HydrationGate({ children }: { children: ReactNode }) {
   const { isHydrated } = useApp();
+  const { colors } = useTheme();
 
   if (!isHydrated) {
     return (
-      <View style={styles.loading}>
+      <View style={[styles.loading, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.gradientEnd} />
       </View>
     );
@@ -48,6 +51,7 @@ function MatchesTabScreen() {
 
 function MainTabs() {
   const { likesTabBadge, matchesTabBadge } = useApp();
+  const { colors } = useTheme();
 
   return (
     <Tab.Navigator
@@ -55,7 +59,7 @@ function MainTabs() {
         headerShown: false,
         tabBarStyle: {
           backgroundColor: colors.background,
-          borderTopColor: '#2A2A2E',
+          borderTopColor: colors.border,
           paddingTop: 6,
           height: 72,
         },
@@ -112,13 +116,29 @@ function SafetyWrapper({ navigation }: NativeStackScreenProps<RootStackParamList
   return <SafetyScreen onClose={() => navigation.goBack()} />;
 }
 
+function NotificationPreferencesWrapper({
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, 'NotificationPreferences'>) {
+  return <NotificationPreferencesScreen onClose={() => navigation.goBack()} />;
+}
+
+function ConsumablesShopWrapper({
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, 'ConsumablesShop'>) {
+  return <ConsumablesShopScreen onClose={() => navigation.goBack()} />;
+}
+
 function RootNavigator() {
   const { hasOnboarded } = useApp();
+  const { colors } = useTheme();
 
   return (
     <Stack.Navigator
       key={hasOnboarded ? 'main' : 'onboarding'}
-      screenOptions={{ headerShown: false }}
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: colors.background },
+      }}
     >
       {!hasOnboarded ? (
         <Stack.Screen name="Onboarding" component={OnboardingFlow} />
@@ -140,20 +160,38 @@ function RootNavigator() {
             component={SafetyWrapper}
             options={{ animation: 'slide_from_right' }}
           />
+          <Stack.Screen
+            name="NotificationPreferences"
+            component={NotificationPreferencesWrapper}
+            options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="ConsumablesShop"
+            component={ConsumablesShopWrapper}
+            options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+          />
         </>
       )}
     </Stack.Navigator>
   );
 }
 
-export function AppNavigator() {
+function ThemedNavigator() {
+  const { themeMode } = useApp();
+
   return (
-    <NavigationContainer>
-      <HydrationGate>
-        <RootNavigator />
-      </HydrationGate>
-    </NavigationContainer>
+    <ThemeProvider mode={themeMode}>
+      <NavigationContainer>
+        <HydrationGate>
+          <RootNavigator />
+        </HydrationGate>
+      </NavigationContainer>
+    </ThemeProvider>
   );
+}
+
+export function AppNavigator() {
+  return <ThemedNavigator />;
 }
 
 const styles = StyleSheet.create({
@@ -161,6 +199,5 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.background,
   },
 });

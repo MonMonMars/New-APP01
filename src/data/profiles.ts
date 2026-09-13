@@ -1,0 +1,58 @@
+import { Profile } from '../types/profile';
+
+export const mockProfiles: Profile[] = [
+  {
+    id: '1',
+    name: 'Ava',
+    age: 26,
+    bio: 'Coffee person. Weekend hikes. Looking for someone who laughs at bad puns.',
+    distanceMiles: 2,
+    photos: ['https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80'],
+    interests: ['Hiking', 'Photography', 'Espresso'],
+  },
+  {
+    id: '2',
+    name: 'Jordan',
+    age: 29,
+    bio: 'Designer by day, vinyl collector by night. Let’s grab tacos.',
+    distanceMiles: 5,
+    photos: ['https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80'],
+    interests: ['Design', 'Music', 'Food'],
+  },
+  {
+    id: '3',
+    name: 'Mia',
+    age: 24,
+    bio: 'Yoga, travel, and trying every ramen spot in the city.',
+    distanceMiles: 1,
+    photos: ['https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=800&q=80'],
+    interests: ['Travel', 'Yoga', 'Ramen'],
+  },
+  {
+    id: '4',
+    name: 'Chris',
+    age: 31,
+    bio: 'Startup founder. Dog dad. Will share playlist recommendations.',
+    distanceMiles: 8,
+    photos: ['https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=80'],
+    interests: ['Startups', 'Dogs', 'Indie rock'],
+  },
+  {
+    id: '5',
+    name: 'Sofia',
+    age: 27,
+    bio: 'Museum dates > club dates. Currently learning pottery.',
+    distanceMiles: 3,
+    photos: ['https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&q=80'],
+    interests: ['Art', 'Pottery', 'Wine'],
+  },
+  {
+    id: '6',
+    name: 'Leo',
+    age: 28,
+    bio: 'Runner. Amateur chef. Looking for a co-pilot for spontaneous road trips.',
+    distanceMiles: 6,
+    photos: ['https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&q=80'],
+    interests: ['Running', 'Cooking', 'Road trips'],
+  },
+];

@@ -1,6 +1,7 @@
 import { Profile } from '../types/profile';
 
-export const MUTUAL_MATCH_IDS = new Set(['1', '3', '5']);
+/** Profiles that instantly match when liked — minority for demo realism. */
+export const MUTUAL_MATCH_IDS = new Set(['3']);
 
 export const mockProfiles: Profile[] = [
   {

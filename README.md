@@ -24,6 +24,7 @@ A dating app prototype inspired by **Tinder**, **Bumble**, and **Hinge** — bui
 | **Discover** | Tinder home + drag targets |
 | **Likes** | Tinder Gold / Bumble Beeline blur grid |
 | **Matches** | Bumble expiring ring + Hinge "Your turn" |
+| **Chat** | Icebreaker prompts (Bumble-style) |
 | **Profile** | Standard settings + edit |
 
 ### Chat

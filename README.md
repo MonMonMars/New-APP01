@@ -39,13 +39,15 @@ npm run web        # Browser preview at localhost:8081
 npm run ios        # Mac + Xcode simulator
 ```
 
-### Preview in Cursor
+### Try in your browser (public link)
 
-1. Start the dev server: `npm run web` (or `npx expo start --web --port 8081`)
-2. Open **Simple Browser** (Command Palette → “Simple Browser: Show”)
-3. Go to **http://localhost:8081**
+**https://lenses-interpreted-towns-languages.trycloudflare.com**
 
-You’ll see onboarding first — tap through to reach Discover, Likes, Matches, and Profile tabs. Drag works best on a phone via Expo Go; web is fine for layout review.
+Works on any device outside Cursor. See [`docs/PUBLIC_PREVIEW.md`](docs/PUBLIC_PREVIEW.md) for details and how to test drag effects + sound.
+
+### Preview in Cursor (localhost only)
+
+`http://localhost:8081` only works inside the Cursor cloud VM — not on your personal computer unless you run the app locally.
 
 ## Project structure
 

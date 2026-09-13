@@ -15,6 +15,8 @@ type ProfileCardProps = {
   index: number;
   activeIndex: number;
   translateX?: SharedValue<number>;
+  translateY?: SharedValue<number>;
+  scale?: SharedValue<number>;
 };
 
 export function ProfileCard({
@@ -22,63 +24,38 @@ export function ProfileCard({
   index,
   activeIndex,
   translateX,
+  translateY,
+  scale,
 }: ProfileCardProps) {
   const isTop = index === activeIndex;
 
   const cardStyle = useAnimatedStyle(() => {
-    if (!translateX || !isTop) {
+    if (!translateX || !translateY || !isTop) {
       const offset = index - activeIndex;
-      const scale = 1 - offset * 0.04;
-      const translateY = offset * 10;
+      const stackScale = 1 - offset * 0.04;
+      const stackTranslateY = offset * 10;
       return {
-        transform: [{ scale }, { translateY }],
+        transform: [{ scale: stackScale }, { translateY: stackTranslateY }],
         opacity: offset > 2 ? 0 : 1,
       };
     }
 
+    const dragScale = scale?.value ?? 1;
     const rotate = interpolate(
       translateX.value,
-      [-220, 0, 220],
-      [-12, 0, 12],
+      [-120, 0, 120],
+      [-6, 0, 6],
       Extrapolation.CLAMP,
     );
 
     return {
       transform: [
         { translateX: translateX.value },
+        { translateY: translateY.value },
         { rotate: `${rotate}deg` },
+        { scale: dragScale },
       ],
     };
-  });
-
-  const likeStampStyle = useAnimatedStyle(() => {
-    if (!translateX || !isTop) {
-      return { opacity: 0 };
-    }
-
-    const opacity = interpolate(
-      translateX.value,
-      [40, 120],
-      [0, 1],
-      Extrapolation.CLAMP,
-    );
-
-    return { opacity };
-  });
-
-  const nopeStampStyle = useAnimatedStyle(() => {
-    if (!translateX || !isTop) {
-      return { opacity: 0 };
-    }
-
-    const opacity = interpolate(
-      translateX.value,
-      [-120, -40],
-      [1, 0],
-      Extrapolation.CLAMP,
-    );
-
-    return { opacity };
   });
 
   return (
@@ -88,14 +65,6 @@ export function ProfileCard({
         colors={['transparent', 'rgba(0,0,0,0.85)']}
         style={styles.gradient}
       />
-
-      <Animated.View style={[styles.stamp, styles.likeStamp, likeStampStyle]}>
-        <Text style={styles.stampText}>LIKE</Text>
-      </Animated.View>
-
-      <Animated.View style={[styles.stamp, styles.nopeStamp, nopeStampStyle]}>
-        <Text style={styles.stampText}>NOPE</Text>
-      </Animated.View>
 
       <View style={styles.info}>
         <Text style={styles.name}>
@@ -177,29 +146,5 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 12,
     fontWeight: '600',
-  },
-  stamp: {
-    position: 'absolute',
-    top: 48,
-    borderWidth: 4,
-    borderRadius: 8,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
-  likeStamp: {
-    left: spacing.lg,
-    borderColor: colors.like,
-    transform: [{ rotate: '-18deg' }],
-  },
-  nopeStamp: {
-    right: spacing.lg,
-    borderColor: colors.nope,
-    transform: [{ rotate: '18deg' }],
-  },
-  stampText: {
-    color: colors.text,
-    fontSize: 28,
-    fontWeight: '800',
-    letterSpacing: 2,
   },
 });

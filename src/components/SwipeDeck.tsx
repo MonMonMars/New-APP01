@@ -1,25 +1,23 @@
 import * as Haptics from 'expo-haptics';
 import { forwardRef, useCallback, useImperativeHandle, useMemo, useState } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
-  useAnimatedStyle,
   useSharedValue,
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
 
 import { Profile } from '../types/profile';
+import { DropTargets, ZoneLayout } from './DropTargets';
 import { ProfileCard } from './ProfileCard';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.28;
-const SWIPE_OUT_DISTANCE = SCREEN_WIDTH * 1.25;
+const ZONE_HIT_PADDING = 36;
 
 export type SwipeDeckHandle = {
-  swipeLeft: () => void;
-  swipeRight: () => void;
+  reject: () => void;
+  like: () => void;
 };
 
 type SwipeDeckProps = {
@@ -28,11 +26,60 @@ type SwipeDeckProps = {
   onEmpty: () => void;
 };
 
+function isPointInZone(
+  x: number,
+  y: number,
+  zone: ZoneLayout,
+  padding: number,
+): boolean {
+  'worklet';
+  return (
+    x >= zone.x - padding &&
+    x <= zone.x + zone.width + padding &&
+    y >= zone.y - padding &&
+    y <= zone.y + zone.height + padding
+  );
+}
+
+function zoneProximity(
+  x: number,
+  y: number,
+  zone: ZoneLayout,
+  padding: number,
+): number {
+  'worklet';
+  const centerX = zone.x + zone.width / 2;
+  const centerY = zone.y + zone.height / 2;
+  const maxDistance = zone.width / 2 + padding;
+  const distance = Math.hypot(x - centerX, y - centerY);
+  if (distance >= maxDistance) {
+    return 0;
+  }
+  return 1 - distance / maxDistance;
+}
+
 export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
   function SwipeDeck({ profiles, onSwipe, onEmpty }, ref) {
     const [activeIndex, setActiveIndex] = useState(0);
     const translateX = useSharedValue(0);
     const translateY = useSharedValue(0);
+    const cardScale = useSharedValue(1);
+    const deckWidth = useSharedValue(0);
+    const deckHeight = useSharedValue(0);
+    const trashZone = useSharedValue<ZoneLayout>({
+      x: 0,
+      y: 0,
+      width: 68,
+      height: 68,
+    });
+    const heartZone = useSharedValue<ZoneLayout>({
+      x: 0,
+      y: 0,
+      width: 68,
+      height: 68,
+    });
+    const trashActive = useSharedValue(0);
+    const heartActive = useSharedValue(0);
 
     const visibleProfiles = useMemo(
       () => profiles.slice(activeIndex, activeIndex + 3),
@@ -67,67 +114,124 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
     const resetPosition = useCallback(() => {
       translateX.value = withSpring(0, { damping: 18, stiffness: 220 });
       translateY.value = withSpring(0, { damping: 18, stiffness: 220 });
-    }, [translateX, translateY]);
+      cardScale.value = withSpring(1, { damping: 18, stiffness: 220 });
+      trashActive.value = withTiming(0, { duration: 120 });
+      heartActive.value = withTiming(0, { duration: 120 });
+    }, [cardScale, heartActive, trashActive, translateX, translateY]);
 
-    const swipeOut = useCallback(
+    const dropToTarget = useCallback(
       (direction: 'left' | 'right') => {
-        const toValue =
-          direction === 'right' ? SWIPE_OUT_DISTANCE : -SWIPE_OUT_DISTANCE;
-        translateX.value = withTiming(toValue, { duration: 220 }, (finished) => {
+        const zone = direction === 'left' ? trashZone.value : heartZone.value;
+        const targetCenterX = zone.x + zone.width / 2;
+        const targetCenterY = zone.y + zone.height / 2;
+        const toX = targetCenterX - deckWidth.value / 2;
+        const toY = targetCenterY - deckHeight.value / 2;
+
+        translateX.value = withTiming(toX, { duration: 220 });
+        translateY.value = withTiming(toY, { duration: 220 });
+        cardScale.value = withTiming(0.15, { duration: 220 }, (finished) => {
           if (finished) {
             translateX.value = 0;
             translateY.value = 0;
+            cardScale.value = 1;
+            trashActive.value = 0;
+            heartActive.value = 0;
             runOnJS(advanceCard)(direction);
           }
         });
       },
-      [advanceCard, translateX, translateY],
+      [advanceCard, cardScale, deckHeight, deckWidth, heartZone, trashActive, heartActive, translateX, translateY, trashZone],
     );
 
     useImperativeHandle(
       ref,
       () => ({
-        swipeLeft: () => swipeOut('left'),
-        swipeRight: () => swipeOut('right'),
+        reject: () => dropToTarget('left'),
+        like: () => dropToTarget('right'),
       }),
-      [swipeOut],
+      [dropToTarget],
+    );
+
+    const handleDeckLayout = useCallback((event: LayoutChangeEvent) => {
+      deckWidth.value = event.nativeEvent.layout.width;
+      deckHeight.value = event.nativeEvent.layout.height;
+    }, [deckHeight, deckWidth]);
+
+    const handleTrashLayout = useCallback(
+      (layout: ZoneLayout) => {
+        trashZone.value = layout;
+      },
+      [trashZone],
+    );
+
+    const handleHeartLayout = useCallback(
+      (layout: ZoneLayout) => {
+        heartZone.value = layout;
+      },
+      [heartZone],
     );
 
     const panGesture = Gesture.Pan()
       .onUpdate((event) => {
         translateX.value = event.translationX;
-        translateY.value = event.translationY * 0.15;
+        translateY.value = event.translationY;
+
+        const cardCenterX = deckWidth.value / 2 + event.translationX;
+        const cardCenterY = deckHeight.value / 2 + event.translationY;
+
+        const trashProximity = zoneProximity(
+          cardCenterX,
+          cardCenterY,
+          trashZone.value,
+          ZONE_HIT_PADDING,
+        );
+        const heartProximity = zoneProximity(
+          cardCenterX,
+          cardCenterY,
+          heartZone.value,
+          ZONE_HIT_PADDING,
+        );
+
+        trashActive.value = trashProximity;
+        heartActive.value = heartProximity;
       })
       .onEnd((event) => {
-        const shouldSwipeRight =
-          event.translationX > SWIPE_THRESHOLD || event.velocityX > 900;
-        const shouldSwipeLeft =
-          event.translationX < -SWIPE_THRESHOLD || event.velocityX < -900;
+        const cardCenterX = deckWidth.value / 2 + event.translationX;
+        const cardCenterY = deckHeight.value / 2 + event.translationY;
 
-        if (shouldSwipeRight) {
-          runOnJS(swipeOut)('right');
+        const overTrash = isPointInZone(
+          cardCenterX,
+          cardCenterY,
+          trashZone.value,
+          ZONE_HIT_PADDING,
+        );
+        const overHeart = isPointInZone(
+          cardCenterX,
+          cardCenterY,
+          heartZone.value,
+          ZONE_HIT_PADDING,
+        );
+
+        if (overTrash) {
+          runOnJS(dropToTarget)('left');
           return;
         }
 
-        if (shouldSwipeLeft) {
-          runOnJS(swipeOut)('left');
+        if (overHeart) {
+          runOnJS(dropToTarget)('right');
           return;
         }
 
         runOnJS(resetPosition)();
       });
 
-    const deckStyle = useAnimatedStyle(() => ({
-      transform: [{ translateY: translateY.value }],
-    }));
-
     if (activeIndex >= profiles.length) {
       return null;
     }
 
     return (
-      <View style={styles.container}>
-        <Animated.View style={[styles.deck, deckStyle]}>
+      <View style={styles.container} onLayout={handleDeckLayout}>
+        <View style={styles.deck}>
           {visibleProfiles
             .slice()
             .reverse()
@@ -145,6 +249,8 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
                         index={index}
                         activeIndex={activeIndex}
                         translateX={translateX}
+                        translateY={translateY}
+                        scale={cardScale}
                       />
                     </Animated.View>
                   </GestureDetector>
@@ -161,7 +267,14 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
                 </View>
               );
             })}
-        </Animated.View>
+        </View>
+
+        <DropTargets
+          trashActive={trashActive}
+          heartActive={heartActive}
+          onTrashLayout={handleTrashLayout}
+          onHeartLayout={handleHeartLayout}
+        />
       </View>
     );
   },

@@ -1,11 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ActionBar } from '../components/ActionBar';
 import { MatchModal } from '../components/MatchModal';
-import { SwipeDeck, SwipeDeckHandle } from '../components/SwipeDeck';
+import { SwipeDeck } from '../components/SwipeDeck';
 import { TabBar } from '../components/TabBar';
 import { mockProfiles } from '../data/profiles';
 import { colors, spacing } from '../theme';
@@ -13,7 +12,6 @@ import { Profile } from '../types/profile';
 
 export function DiscoverScreen() {
   const insets = useSafeAreaInsets();
-  const deckRef = useRef<SwipeDeckHandle>(null);
   const [isEmpty, setIsEmpty] = useState(false);
   const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
   const [showMatch, setShowMatch] = useState(false);
@@ -57,23 +55,12 @@ export function DiscoverScreen() {
           </View>
         ) : (
           <SwipeDeck
-            ref={deckRef}
             profiles={mockProfiles}
             onSwipe={handleSwipe}
             onEmpty={handleEmpty}
           />
         )}
       </View>
-
-      {!isEmpty && (
-        <ActionBar
-          onNope={() => deckRef.current?.swipeLeft()}
-          onLike={() => deckRef.current?.swipeRight()}
-          onSuperLike={() => deckRef.current?.swipeRight()}
-          onRewind={() => undefined}
-          onBoost={() => undefined}
-        />
-      )}
 
       <TabBar activeTab="discover" onTabPress={() => undefined} />
 

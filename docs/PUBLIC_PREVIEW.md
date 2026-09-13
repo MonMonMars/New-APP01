@@ -4,25 +4,30 @@ Try the app in **any browser** (phone, laptop, tablet) using these links.
 
 ## Live preview (Cloudflare)
 
-**https://news-boxed-finish-log.trycloudflare.com**
+**https://penalty-cincinnati-shades-rocky.trycloudflare.com**
 
 > This link works outside Cursor. It forwards to the dev server running in the cloud workspace.  
 > Tunnels are **temporary** — if the link stops working, ask to regenerate it.
 
-### How to test new features
+### How to test new v0.3 features
 
-1. **Onboarding** — tap "Continue with Apple" → complete rules, location, intent, profile.
-2. **Photo upload** — on profile step, tap "Add photos" to pick from library (web: file picker).
-3. **Discover** — drag card to white trash (pass) or red heart (like).
-4. **Spark Note** — tap "Spark Note" below deck → send a message with your like.
-5. **Match demo** — like **Mia** → full-screen celebration → open chat.
-6. **Spark+** — Likes tab → tap blurred card → subscribe → names revealed.
-7. **Boost** — Profile tab → tap "Boost" → golden banner on Discover.
-8. **Unmatch** — open Mia chat → ⋮ menu → Unmatch → confirm.
-9. **Report** — profile detail or chat → Report → pick reason → confirmation.
-10. **Persistence** — refresh browser — onboarding state, matches, and likes survive.
-11. **Rewind** — subscribe Spark+ → pass someone → tap "Rewind" on Discover.
-12. **Notifications** — Profile → Notifications → enable (native only; stub on web).
+1. **Onboarding** — tap "Continue with Apple" → rules → location → intent → **gender & orientation** → profile.
+2. **Discovery filters** — tap chips: Active today, New here, Has bio, Verified.
+3. **Passport mode** — Discover settings (⚙️) → enable Travel mode → pick a city.
+4. **Video profile** — tap play icon overlay on Ava/Mia/Leo cards → "coming soon" alert.
+5. **Rewind** — subscribe Spark+ → pass someone → tap "Rewind" (animated).
+6. **Chat polish** — open Mia chat → send message → see read receipts (✓✓) → typing indicator → auto-reply.
+7. **Image messages** — chat composer → 📷 icon → pick a photo.
+8. **Spark+ comparison** — Likes tab → Spark+ → Free vs Plus table + Restore purchases.
+9. **Consumables shop** — Profile → Shop — Boosts & Notes → buy packs.
+10. **Prompts editor** — Profile → Edit profile → Add prompts (up to 3 Hinge-style).
+11. **Social connect** — Edit profile → Instagram / Spotify stub rows.
+12. **Age verification** — Edit profile → Verify your age → 18+ badge on profile.
+13. **Pause account** — Profile → Pause account toggle → hidden from deck.
+14. **Delete account** — Profile → Delete account → confirm → resets to onboarding.
+15. **Notification prefs** — Profile → Notifications → toggle matches/messages/likes.
+16. **Dark/light mode** — Profile → Appearance → tap to cycle.
+17. **Supabase** — works when `EXPO_PUBLIC_SUPABASE_URL` + `EXPO_PUBLIC_SUPABASE_ANON_KEY` are set; otherwise AsyncStorage only.
 
 ### Sound & effects
 
@@ -36,12 +41,16 @@ Try the app in **any browser** (phone, laptop, tablet) using these links.
 ```bash
 git clone https://github.com/MonMonMars/New-APP01.git
 cd New-APP01
-git checkout cursor/complete-all-features-7b60
+git checkout cursor/finish-spark-app-7b60
 npm install
 npm run web
 ```
 
 Open http://localhost:8081
+
+## Backend setup
+
+See [`BACKEND_SETUP.md`](./BACKEND_SETUP.md) for Supabase configuration.
 
 ## Phone (best experience)
 

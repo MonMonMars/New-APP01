@@ -1,5 +1,7 @@
 # Spark — App Flow & UI Structure Map
 
+> **Full reference:** See [`SPARK_APP_DOCUMENT.md`](./SPARK_APP_DOCUMENT.md) for the complete product & technical app document (journeys, monetization, architecture, roadmap).
+
 Research synthesis from **Tinder**, **Bumble**, **Hinge**, **Badoo**, and **Coffee Meets Bagel** (2024–2026 patterns). Spark implements the shared industry workflow with our drag-to-target discovery mechanic.
 
 ## Competitor pattern matrix

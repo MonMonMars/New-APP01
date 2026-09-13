@@ -1,16 +1,26 @@
 # Spark — Dating App (iOS-first)
 
-A Tinder-style swipe dating app prototype built with **Expo + React Native + TypeScript**.
+A dating app prototype built with **Expo + React Native + TypeScript**.
 
 > **Not legal advice.** See [Legal notes](#legal-notes-tinder-swipe-ui) before shipping to the App Store.
 
 ## Features
 
-- Swipeable profile card stack (drag left/right or use action buttons)
-- LIKE / NOPE stamps while swiping
-- Bottom action bar (nope, super-like, like)
+- Profile card deck with subtle stack depth (one card visible at a time)
+- **Drag-to-target** interaction — drag the photo card to corner drop zones:
+  - **Trash** (bottom-left) to pass / reject
+  - **Heart** (bottom-right) to like
+- Drop zones highlight and scale when the card is nearby
 - Match modal on mutual-like simulation
-- iOS-first layout with dark UI
+- iOS-first layout with dark Spark branding
+
+## Interaction
+
+1. A single profile card is shown from the deck.
+2. **Drag** the card with your finger — it follows freely.
+3. Drop it on the **trash** target (lower-left) to pass, or the **heart** target (lower-right) to like.
+4. If released outside both zones, the card springs back to center.
+5. On like, a random match may trigger the match modal.
 
 ## Run on iPhone (easiest)
 
@@ -41,7 +51,7 @@ Requires macOS with Xcode and the iOS Simulator installed.
 
 ```
 src/
-  components/   # Swipe deck, cards, actions, match modal
+  components/   # Drag deck, cards, drop targets, match modal
   data/         # Mock profiles
   screens/      # Discover screen
   theme.ts      # Colors and spacing
@@ -63,7 +73,7 @@ src/
 - **App Store launch** — copying Tinder’s exact UI, interaction flow, and branding increases infringement risk. Match has sued competitors (e.g. Bumble) over overlapping patterns.
 - **Safer path** — use your own name, colors, icons, and distinctive flows; consider a patent attorney for a freedom-to-operate review before monetizing.
 
-Many dating apps use card swiping, but **how close** you get to Tinder’s patented workflow and visual design matters.
+This app uses **drag-to-target** (trash / heart corners) rather than horizontal swipe-left/right, which is a more distinctive interaction pattern.
 
 ## Next steps
 

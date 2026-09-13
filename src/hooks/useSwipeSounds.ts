@@ -28,21 +28,21 @@ export function useSwipeSounds() {
 
   const playSound = useCallback(async (kind: SwipeSoundKind) => {
     try {
-      const existing = soundsRef.current[kind];
-      if (existing) {
-        await existing.replayAsync();
-        return;
+      let sound = soundsRef.current[kind];
+      if (!sound) {
+        const created = await Audio.Sound.createAsync(soundSources[kind], {
+          volume: kind === 'like' ? 0.9 : 0.75,
+        });
+        sound = created.sound;
+        soundsRef.current[kind] = sound;
       }
 
-      const { sound } = await Audio.Sound.createAsync(soundSources[kind], {
-        shouldPlay: true,
-        volume: kind === 'like' ? 0.9 : 0.75,
-      });
-      soundsRef.current[kind] = sound;
+      await sound.setPositionAsync(0);
+      await sound.playAsync();
     } catch {
-      // Sound is optional feedback; ignore playback failures on web/autoplay blocks.
+      // Sound is optional; browser may block until first user gesture.
     }
   }, []);
 
   return { playSound };
-}
+};

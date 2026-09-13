@@ -23,36 +23,39 @@ export type SwipeEffectOrigin = {
 type SwipeBurstEffectProps = {
   kind: SwipeEffectKind | null;
   origin: SwipeEffectOrigin | null;
+  effectKey: number;
   onComplete: () => void;
 };
 
-const PARTICLE_COUNT = 16;
+const PARTICLE_COUNT = 20;
 
 type ParticleProps = {
   index: number;
   kind: SwipeEffectKind;
   origin: SwipeEffectOrigin;
+  effectKey: number;
 };
 
-function Particle({ index, kind, origin }: ParticleProps) {
+function Particle({ index, kind, origin, effectKey }: ParticleProps) {
   const progress = useSharedValue(0);
   const angle = (index / PARTICLE_COUNT) * Math.PI * 2 + (kind === 'like' ? 0.2 : -0.1);
-  const distance = 48 + (index % 5) * 18;
+  const distance = 60 + (index % 6) * 22;
   const isLike = kind === 'like';
 
   useEffect(() => {
+    progress.value = 0;
     progress.value = withDelay(
-      index * 18,
-      withTiming(1, { duration: 520, easing: Easing.out(Easing.cubic) }),
+      index * 12,
+      withTiming(1, { duration: 650, easing: Easing.out(Easing.cubic) }),
     );
-  }, [index, progress]);
+  }, [effectKey, index, progress]);
 
   const style = useAnimatedStyle(() => {
     const travel = progress.value * distance;
-    const x = origin.x + Math.cos(angle) * travel - 10;
-    const y = origin.y + Math.sin(angle) * travel - 10;
-    const scale = 0.5 + progress.value * (isLike ? 1.1 : 0.7);
-    const opacity = 1 - progress.value;
+    const x = origin.x + Math.cos(angle) * travel - 12;
+    const y = origin.y + Math.sin(angle) * travel - 12;
+    const scale = 0.6 + progress.value * (isLike ? 1.4 : 1);
+    const opacity = Math.max(0, 1 - progress.value * 0.95);
 
     return {
       opacity,
@@ -60,7 +63,7 @@ function Particle({ index, kind, origin }: ParticleProps) {
         { translateX: x },
         { translateY: y },
         { scale },
-        { rotate: `${progress.value * (isLike ? 35 : -25)}deg` },
+        { rotate: `${progress.value * (isLike ? 45 : -30)}deg` },
       ],
     };
   });
@@ -69,7 +72,7 @@ function Particle({ index, kind, origin }: ParticleProps) {
     <Animated.View style={[styles.particle, style]}>
       <Ionicons
         name={isLike ? 'heart' : 'close'}
-        size={isLike ? 18 : 16}
+        size={isLike ? 22 : 20}
         color={isLike ? colors.like : colors.nope}
       />
     </Animated.View>
@@ -79,36 +82,12 @@ function Particle({ index, kind, origin }: ParticleProps) {
 export function SwipeBurstEffect({
   kind,
   origin,
+  effectKey,
   onComplete,
 }: SwipeBurstEffectProps) {
   const flashOpacity = useSharedValue(0);
   const ringScale = useSharedValue(0.4);
   const ringOpacity = useSharedValue(0);
-
-  useEffect(() => {
-    if (!kind || !origin) {
-      return;
-    }
-
-    const flashColor = kind === 'like' ? 0.35 : 0.28;
-    flashOpacity.value = withSequence(
-      withTiming(flashColor, { duration: 80 }),
-      withTiming(0, { duration: 320 }),
-    );
-
-    ringScale.value = 0.4;
-    ringOpacity.value = 0.85;
-    ringScale.value = withTiming(2.4, { duration: 420, easing: Easing.out(Easing.cubic) });
-    ringOpacity.value = withTiming(0, { duration: 420 }, (finished) => {
-      if (finished) {
-        runOnJS(onComplete)();
-      }
-    });
-  }, [flashOpacity, kind, onComplete, origin, ringOpacity, ringScale]);
-
-  if (!kind || !origin) {
-    return null;
-  }
 
   const flashStyle = useAnimatedStyle(() => ({
     opacity: flashOpacity.value,
@@ -118,11 +97,36 @@ export function SwipeBurstEffect({
   const ringStyle = useAnimatedStyle(() => ({
     opacity: ringOpacity.value,
     transform: [
-      { translateX: origin.x - 34 },
-      { translateY: origin.y - 34 },
+      { translateX: (origin?.x ?? 0) - 40 },
+      { translateY: (origin?.y ?? 0) - 40 },
       { scale: ringScale.value },
     ],
   }));
+
+  useEffect(() => {
+    if (!kind || !origin) {
+      return;
+    }
+
+    const flashPeak = kind === 'like' ? 0.55 : 0.45;
+    flashOpacity.value = withSequence(
+      withTiming(flashPeak, { duration: 100 }),
+      withTiming(0, { duration: 450 }),
+    );
+
+    ringScale.value = 0.35;
+    ringOpacity.value = 1;
+    ringScale.value = withTiming(3, { duration: 500, easing: Easing.out(Easing.cubic) });
+    ringOpacity.value = withTiming(0, { duration: 500 }, (finished) => {
+      if (finished) {
+        runOnJS(onComplete)();
+      }
+    });
+  }, [effectKey, flashOpacity, kind, onComplete, origin, ringOpacity, ringScale]);
+
+  if (!kind || !origin) {
+    return null;
+  }
 
   return (
     <View style={styles.overlay} pointerEvents="none">
@@ -135,7 +139,13 @@ export function SwipeBurstEffect({
         ]}
       />
       {Array.from({ length: PARTICLE_COUNT }).map((_, index) => (
-        <Particle key={`${kind}-${index}`} index={index} kind={kind} origin={origin} />
+        <Particle
+          key={`${effectKey}-${index}`}
+          index={index}
+          kind={kind}
+          origin={origin}
+          effectKey={effectKey}
+        />
       ))}
     </View>
   );
@@ -144,24 +154,25 @@ export function SwipeBurstEffect({
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFill,
-    zIndex: 30,
+    zIndex: 100,
+    elevation: 100,
   },
   flash: {
     ...StyleSheet.absoluteFill,
   },
   ring: {
     position: 'absolute',
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    borderWidth: 3,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 4,
   },
   particle: {
     position: 'absolute',
     left: 0,
     top: 0,
-    width: 20,
-    height: 20,
+    width: 24,
+    height: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },

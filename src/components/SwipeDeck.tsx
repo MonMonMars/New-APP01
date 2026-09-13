@@ -70,6 +70,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
     const { playSound } = useSwipeSounds();
     const [activeIndex, setActiveIndex] = useState(0);
     const [activeEffect, setActiveEffect] = useState<ActiveEffect | null>(null);
+    const [effectKey, setEffectKey] = useState(0);
     const translateX = useSharedValue(0);
     const translateY = useSharedValue(0);
     const cardScale = useSharedValue(1);
@@ -104,6 +105,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
         const zone = direction === 'left' ? trashZone.value : heartZone.value;
         const kind: SwipeEffectKind = direction === 'left' ? 'pass' : 'like';
 
+        setEffectKey((key) => key + 1);
         setActiveEffect({
           kind,
           origin: {
@@ -327,6 +329,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
         <SwipeBurstEffect
           kind={activeEffect?.kind ?? null}
           origin={activeEffect?.origin ?? null}
+          effectKey={effectKey}
           onComplete={() => setActiveEffect(null)}
         />
       </View>

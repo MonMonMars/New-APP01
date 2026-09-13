@@ -1,13 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useTheme } from '../context/ThemeContext';
 import {
   DiscoveryPreferences,
+  PASSPORT_CITIES,
   SHOW_ME_LABELS,
   ShowMePreference,
 } from '../types/preferences';
-import { colors, radii, spacing } from '../theme';
+import { radii, spacing } from '../theme';
 
 type DiscoveryPreferencesSheetProps = {
   visible: boolean;
@@ -37,20 +39,22 @@ function StepperRow({
   step,
   onChange,
 }: StepperRowProps) {
+  const { colors } = useTheme();
+
   return (
-    <View style={styles.row}>
-      <Text style={styles.rowLabel}>{label}</Text>
+    <View style={[styles.row, { backgroundColor: colors.surface }]}>
+      <Text style={[styles.rowLabel, { color: colors.text }]}>{label}</Text>
       <View style={styles.stepper}>
         <Pressable
-          style={styles.stepButton}
+          style={[styles.stepButton, { backgroundColor: colors.border }]}
           onPress={() => onChange(Math.max(min, value - step))}
           disabled={value <= min}
         >
           <Ionicons name="remove" size={20} color={colors.text} />
         </Pressable>
-        <Text style={styles.stepValue}>{value}{suffix}</Text>
+        <Text style={[styles.stepValue, { color: colors.text }]}>{value}{suffix}</Text>
         <Pressable
-          style={styles.stepButton}
+          style={[styles.stepButton, { backgroundColor: colors.border }]}
           onPress={() => onChange(Math.min(max, value + step))}
           disabled={value >= max}
         >
@@ -68,69 +72,120 @@ export function DiscoveryPreferencesSheet({
   onChange,
 }: DiscoveryPreferencesSheetProps) {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
-      <View style={[styles.container, { paddingTop: insets.top + spacing.md }]}>
+      <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top + spacing.md }]}>
         <View style={styles.header}>
-          <Text style={styles.title}>Discovery settings</Text>
+          <Text style={[styles.title, { color: colors.text }]}>Discovery settings</Text>
           <Pressable onPress={onClose} style={styles.doneButton}>
-            <Text style={styles.doneText}>Done</Text>
+            <Text style={[styles.doneText, { color: colors.gradientEnd }]}>Done</Text>
           </Pressable>
         </View>
 
-        <Text style={styles.sectionTitle}>Show me</Text>
-        <View style={styles.chipRow}>
-          {showMeOptions.map((option) => {
-            const selected = preferences.showMe === option;
-            return (
-              <Pressable
-                key={option}
-                style={[styles.chip, selected && styles.chipSelected]}
-                onPress={() => onChange({ ...preferences, showMe: option })}
-              >
-                <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
-                  {SHOW_ME_LABELS[option]}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Show me</Text>
+          <View style={styles.chipRow}>
+            {showMeOptions.map((option) => {
+              const selected = preferences.showMe === option;
+              return (
+                <Pressable
+                  key={option}
+                  style={[
+                    styles.chip,
+                    { backgroundColor: colors.surface },
+                    selected && { borderColor: colors.gradientEnd },
+                  ]}
+                  onPress={() => onChange({ ...preferences, showMe: option })}
+                >
+                  <Text style={[styles.chipText, { color: selected ? colors.text : colors.textMuted }]}>
+                    {SHOW_ME_LABELS[option]}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
 
-        <Text style={styles.sectionTitle}>Distance</Text>
-        <StepperRow
-          label="Maximum distance"
-          value={preferences.maxDistanceMiles}
-          suffix=" mi"
-          min={1}
-          max={100}
-          step={5}
-          onChange={(maxDistanceMiles) =>
-            onChange({ ...preferences, maxDistanceMiles })
-          }
-        />
+          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Passport / Travel mode</Text>
+          <View style={[styles.passportRow, { backgroundColor: colors.surface }]}>
+            <Ionicons name="airplane" size={20} color={colors.superLike} />
+            <Text style={[styles.passportLabel, { color: colors.text }]}>Change location</Text>
+            <Switch
+              value={preferences.travelMode ?? false}
+              onValueChange={(travelMode) =>
+                onChange({
+                  ...preferences,
+                  travelMode,
+                  passportCity: travelMode ? (preferences.passportCity ?? PASSPORT_CITIES[0]) : undefined,
+                })
+              }
+              trackColor={{ false: colors.border, true: colors.gradientEnd }}
+              thumbColor={colors.text}
+            />
+          </View>
 
-        <Text style={styles.sectionTitle}>Age range</Text>
-        <StepperRow
-          label="Minimum age"
-          value={preferences.minAge}
-          min={18}
-          max={preferences.maxAge - 1}
-          step={1}
-          onChange={(minAge) => onChange({ ...preferences, minAge })}
-        />
-        <StepperRow
-          label="Maximum age"
-          value={preferences.maxAge}
-          min={preferences.minAge + 1}
-          max={60}
-          step={1}
-          onChange={(maxAge) => onChange({ ...preferences, maxAge })}
-        />
+          {preferences.travelMode && (
+            <View style={styles.cityGrid}>
+              {PASSPORT_CITIES.map((city) => {
+                const selected = preferences.passportCity === city;
+                return (
+                  <Pressable
+                    key={city}
+                    style={[
+                      styles.cityChip,
+                      { backgroundColor: colors.surface },
+                      selected && { borderColor: colors.gradientEnd },
+                    ]}
+                    onPress={() => onChange({ ...preferences, passportCity: city })}
+                  >
+                    <Text style={[styles.cityText, { color: selected ? colors.text : colors.textMuted }]}>
+                      {city}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          )}
 
-        <Text style={styles.hint}>
-          Profiles outside these settings are hidden from your deck.
-        </Text>
+          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Distance</Text>
+          <StepperRow
+            label="Maximum distance"
+            value={preferences.maxDistanceMiles}
+            suffix=" mi"
+            min={1}
+            max={100}
+            step={5}
+            onChange={(maxDistanceMiles) =>
+              onChange({ ...preferences, maxDistanceMiles })
+            }
+          />
+
+          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Age range</Text>
+          <StepperRow
+            label="Minimum age"
+            value={preferences.minAge}
+            min={18}
+            max={preferences.maxAge - 1}
+            step={1}
+            onChange={(minAge) => onChange({ ...preferences, minAge })}
+          />
+          <StepperRow
+            label="Maximum age"
+            value={preferences.maxAge}
+            min={preferences.minAge + 1}
+            max={60}
+            step={1}
+            onChange={(maxAge) => onChange({ ...preferences, maxAge })}
+          />
+
+          <Text style={[styles.hint, { color: colors.textMuted }]}>
+            Profiles outside these settings are hidden from your deck.
+            {preferences.travelMode && preferences.passportCity
+              ? ` Showing people near ${preferences.passportCity}.`
+              : ''}
+          </Text>
+        </ScrollView>
       </View>
     </Modal>
   );
@@ -139,7 +194,6 @@ export function DiscoveryPreferencesSheet({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
     paddingHorizontal: spacing.lg,
   },
   header: {
@@ -149,7 +203,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   title: {
-    color: colors.text,
     fontSize: 24,
     fontWeight: '800',
   },
@@ -157,12 +210,10 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
   },
   doneText: {
-    color: colors.gradientEnd,
     fontSize: 16,
     fontWeight: '700',
   },
   sectionTitle: {
-    color: colors.textMuted,
     fontSize: 13,
     fontWeight: '700',
     textTransform: 'uppercase',
@@ -176,35 +227,55 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   chip: {
-    backgroundColor: colors.surface,
     borderRadius: radii.button,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderWidth: 2,
     borderColor: 'transparent',
   },
-  chipSelected: {
-    borderColor: colors.gradientEnd,
-  },
   chipText: {
-    color: colors.textMuted,
     fontSize: 14,
     fontWeight: '600',
   },
-  chipTextSelected: {
-    color: colors.text,
+  passportRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    borderRadius: radii.card,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  passportLabel: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  cityGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  cityChip: {
+    borderRadius: radii.button,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  cityText: {
+    fontSize: 13,
+    fontWeight: '600',
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.surface,
     borderRadius: radii.card,
     padding: spacing.md,
     marginBottom: spacing.sm,
   },
   rowLabel: {
-    color: colors.text,
     fontSize: 15,
     flex: 1,
   },
@@ -217,21 +288,19 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#2A2A2E',
     alignItems: 'center',
     justifyContent: 'center',
   },
   stepValue: {
-    color: colors.text,
     fontSize: 16,
     fontWeight: '700',
     minWidth: 56,
     textAlign: 'center',
   },
   hint: {
-    color: colors.textMuted,
     fontSize: 14,
     lineHeight: 20,
     marginTop: spacing.lg,
+    marginBottom: spacing.xl,
   },
 });

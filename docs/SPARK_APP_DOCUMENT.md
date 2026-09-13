@@ -487,7 +487,7 @@ Public preview: see `docs/PUBLIC_PREVIEW.md`.
 - [x] Push notifications stub (permission prompt + local notification on match)
 - [x] Photo upload + camera roll (expo-image-picker — onboarding + profile edit)
 - [x] Spark Note (pre-match message with like)
-- [ ] Backend (Supabase / Firebase)
+- [x] Backend (Supabase — client + schema + graceful AsyncStorage fallback)
 - [x] Full AsyncStorage persistence (matches, chats, likes, passes, spark+, boost, photos)
 - [x] Unmatch flow (chat + safety menu with confirm dialog)
 - [x] Report flow (reason picker → confirmation)
@@ -495,14 +495,30 @@ Public preview: see `docs/PUBLIC_PREVIEW.md`.
 - [x] Boost consumable (30-min timer UI on Profile tab)
 - [x] Spark+ full wiring (unlimited likes, reveal likes, rewind, spark notes, boost)
 
+### v0.3 — Production polish (current)
+
+- [x] Supabase integration (`src/services/supabase.ts`, `docs/supabase-schema.sql`, `docs/BACKEND_SETUP.md`)
+- [x] Chat: typing indicator, read receipts, image messages, live expiry countdown
+- [x] Chat: "Your turn" / "Waiting for reply" states
+- [x] Discovery: filter chips (Active today, New here, Has bio, Verified)
+- [x] Discovery: rewind animation, Passport / Travel mode city picker
+- [x] Discovery: video profile placeholder overlay, smoother card stack
+- [x] Profile: Hinge prompts editor (up to 3), Instagram/Spotify connect stubs
+- [x] Onboarding: gender & orientation selectors, age verification stub
+- [x] Monetization: Spark+ Free vs Plus comparison table, restore purchases stub
+- [x] Monetization: consumables shop (Boost packs, Spark Notes packs)
+- [x] Settings: delete account, pause account, notification preferences screen
+- [x] Settings: dark / light mode toggle
+- [x] EAS build config stub (`eas.json`)
+
 ### Later (v1.0)
 
 - [ ] Android build & parity
-- [ ] Photo verification
+- [ ] Photo verification (real ID check)
 - [ ] City-by-city launch tooling
 - [ ] Real Apple Sign-In backend + push notification server
 - [ ] A/B ranking experiments
-- [ ] Read receipts (Spark+ tier)
+- [ ] Real-time chat via Supabase subscriptions
 - [ ] Events / IRL modes
 - [ ] AI profile coaching
 

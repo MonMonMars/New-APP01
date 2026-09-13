@@ -1,12 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { PhotoCarousel } from './PhotoCarousel';
+import { useTheme } from '../context/ThemeContext';
 import { UserProfile } from '../types/profile';
 import { pickProfilePhoto } from '../utils/photoPicker';
-import { colors, radii, spacing } from '../theme';
+import { PhotoCarousel } from './PhotoCarousel';
+import { PromptsEditor } from './PromptsEditor';
+import { SocialConnectRows } from './SocialConnectRows';
+import { radii, spacing } from '../theme';
 
 type EditProfileSheetProps = {
   visible: boolean;
@@ -17,10 +20,15 @@ type EditProfileSheetProps = {
 
 export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfileSheetProps) {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
   const [name, setName] = useState(user.name);
   const [bio, setBio] = useState(user.bio);
   const [age, setAge] = useState(String(user.age));
   const [photos, setPhotos] = useState<string[]>(user.photos);
+  const [prompts, setPrompts] = useState(user.prompts ?? []);
+  const [instagramConnected, setInstagramConnected] = useState(user.instagramConnected ?? false);
+  const [spotifyConnected, setSpotifyConnected] = useState(user.spotifyConnected ?? false);
+  const [ageVerified, setAgeVerified] = useState(user.ageVerified ?? false);
 
   useEffect(() => {
     if (visible) {
@@ -28,6 +36,10 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       setBio(user.bio);
       setAge(String(user.age));
       setPhotos(user.photos);
+      setPrompts(user.prompts ?? []);
+      setInstagramConnected(user.instagramConnected ?? false);
+      setSpotifyConnected(user.spotifyConnected ?? false);
+      setAgeVerified(user.ageVerified ?? false);
     }
   }, [visible, user]);
 
@@ -36,6 +48,17 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
     if (uri) {
       setPhotos((prev) => [...prev, uri]);
     }
+  };
+
+  const handleVerifyAge = () => {
+    Alert.alert(
+      'Age verification',
+      'In production, this would use ID verification (e.g. Yoti, Onfido). For the demo, we will mark your profile as 18+ verified.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Verify (demo)', onPress: () => setAgeVerified(true) },
+      ],
+    );
   };
 
   const handleSave = () => {
@@ -50,63 +73,86 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       bio: bio.trim() || user.bio,
       age: nextAge,
       photos: photos.length > 0 ? photos : user.photos,
+      prompts,
+      instagramConnected,
+      spotifyConnected,
+      ageVerified,
     });
     onClose();
   };
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
-      <View style={[styles.container, { paddingTop: insets.top + spacing.md }]}>
+      <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top + spacing.md }]}>
         <View style={styles.header}>
           <Pressable onPress={onClose}>
-            <Text style={styles.cancel}>Cancel</Text>
+            <Text style={[styles.cancel, { color: colors.textMuted }]}>Cancel</Text>
           </Pressable>
-          <Text style={styles.title}>Edit profile</Text>
+          <Text style={[styles.title, { color: colors.text }]}>Edit profile</Text>
           <Pressable onPress={handleSave}>
-            <Text style={styles.save}>Save</Text>
+            <Text style={[styles.save, { color: colors.gradientEnd }]}>Save</Text>
           </Pressable>
         </View>
 
-        <PhotoCarousel
-          photos={photos}
-          onAddPhoto={handleAddPhoto}
-          editable
-          height={240}
-        />
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <PhotoCarousel
+            photos={photos}
+            onAddPhoto={handleAddPhoto}
+            editable
+            height={240}
+          />
 
-        <Pressable style={styles.addPhotoRow} onPress={handleAddPhoto}>
-          <Ionicons name="images-outline" size={20} color={colors.gradientEnd} />
-          <Text style={styles.addPhotoText}>Add photo from library</Text>
-        </Pressable>
+          <Pressable style={styles.addPhotoRow} onPress={handleAddPhoto}>
+            <Ionicons name="images-outline" size={20} color={colors.gradientEnd} />
+            <Text style={[styles.addPhotoText, { color: colors.gradientEnd }]}>Add photo from library</Text>
+          </Pressable>
 
-        <Text style={styles.label}>Name</Text>
-        <TextInput
-          value={name}
-          onChangeText={setName}
-          style={styles.input}
-          placeholder="Your first name"
-          placeholderTextColor={colors.textMuted}
-        />
+          <Pressable style={[styles.verifyRow, { backgroundColor: colors.surface }]} onPress={handleVerifyAge}>
+            <Ionicons name="shield-checkmark" size={20} color={ageVerified ? colors.like : colors.textMuted} />
+            <Text style={[styles.verifyText, { color: colors.text }]}>
+              {ageVerified ? 'Age verified (18+)' : 'Verify your age'}
+            </Text>
+            {ageVerified && <Ionicons name="checkmark-circle" size={18} color={colors.like} />}
+          </Pressable>
 
-        <Text style={styles.label}>Age</Text>
-        <TextInput
-          value={age}
-          onChangeText={setAge}
-          style={styles.input}
-          keyboardType="number-pad"
-          placeholder="18+"
-          placeholderTextColor={colors.textMuted}
-        />
+          <Text style={[styles.label, { color: colors.textMuted }]}>Name</Text>
+          <TextInput
+            value={name}
+            onChangeText={setName}
+            style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]}
+            placeholder="Your first name"
+            placeholderTextColor={colors.textMuted}
+          />
 
-        <Text style={styles.label}>Bio</Text>
-        <TextInput
-          value={bio}
-          onChangeText={setBio}
-          style={[styles.input, styles.inputMultiline]}
-          placeholder="Tell people what you're about"
-          placeholderTextColor={colors.textMuted}
-          multiline
-        />
+          <Text style={[styles.label, { color: colors.textMuted }]}>Age</Text>
+          <TextInput
+            value={age}
+            onChangeText={setAge}
+            style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]}
+            keyboardType="number-pad"
+            placeholder="18+"
+            placeholderTextColor={colors.textMuted}
+          />
+
+          <Text style={[styles.label, { color: colors.textMuted }]}>Bio</Text>
+          <TextInput
+            value={bio}
+            onChangeText={setBio}
+            style={[styles.input, styles.inputMultiline, { backgroundColor: colors.surface, color: colors.text }]}
+            placeholder="Tell people what you're about"
+            placeholderTextColor={colors.textMuted}
+            multiline
+          />
+
+          <PromptsEditor prompts={prompts} onChange={setPrompts} />
+
+          <SocialConnectRows
+            instagramConnected={instagramConnected}
+            spotifyConnected={spotifyConnected}
+            onToggleInstagram={() => setInstagramConnected((v) => !v)}
+            onToggleSpotify={() => setSpotifyConnected((v) => !v)}
+          />
+        </ScrollView>
       </View>
     </Modal>
   );
@@ -115,7 +161,6 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
     paddingHorizontal: spacing.lg,
   },
   header: {
@@ -125,16 +170,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   title: {
-    color: colors.text,
     fontSize: 17,
     fontWeight: '800',
   },
   cancel: {
-    color: colors.textMuted,
     fontSize: 16,
   },
   save: {
-    color: colors.gradientEnd,
     fontSize: 16,
     fontWeight: '700',
   },
@@ -143,15 +185,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
     marginTop: spacing.md,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
   addPhotoText: {
-    color: colors.gradientEnd,
     fontSize: 14,
     fontWeight: '600',
   },
+  verifyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderRadius: radii.card,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  verifyText: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '600',
+  },
   label: {
-    color: colors.textMuted,
     fontSize: 13,
     fontWeight: '700',
     textTransform: 'uppercase',
@@ -159,10 +212,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   input: {
-    backgroundColor: colors.surface,
     borderRadius: radii.card,
     padding: spacing.md,
-    color: colors.text,
     fontSize: 16,
     marginBottom: spacing.md,
   },

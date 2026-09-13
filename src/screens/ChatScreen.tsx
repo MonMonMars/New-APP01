@@ -15,17 +15,21 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { MessageStatusIcon } from '../components/MessageStatusIcon';
 import { ReportReasonSheet, type ReportReason } from '../components/ReportReasonSheet';
 import { SafetyActionSheet } from '../components/SafetyActionSheet';
+import { TypingIndicator } from '../components/TypingIndicator';
 import { useApp } from '../context/AppContext';
-import { colors, radii, spacing } from '../theme';
+import { useTheme } from '../context/ThemeContext';
+import { useLiveExpiry } from '../hooks/useLiveExpiry';
 import { Message } from '../types/match';
-import { formatExpiresIn } from '../utils/matchTiming';
+import { pickProfilePhoto } from '../utils/photoPicker';
+import { radii, spacing } from '../theme';
 
 const icebreakers = [
-  'What’s your go-to weekend plan?',
+  "What's your go-to weekend plan?",
   'Two truths and a lie?',
-  'Best meal you’ve had lately?',
+  "Best meal you've had lately?",
 ];
 
 type ChatScreenProps = {
@@ -36,6 +40,7 @@ type ChatScreenProps = {
 export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const { colors } = useTheme();
   const { conversations, sendMessage, blockProfile, reportProfile, unmatchProfile } = useApp();
   const [draft, setDraft] = useState('');
   const [showSafety, setShowSafety] = useState(false);
@@ -46,23 +51,36 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
     [conversations, conversationId],
   );
 
+  const expiryLabel = useLiveExpiry(conversation?.match.expiresAt);
+
   if (!conversation) {
     return (
-      <View style={styles.missing}>
-        <Text style={styles.missingText}>Conversation not found.</Text>
+      <View style={[styles.missing, { backgroundColor: colors.background }]}>
+        <Text style={[styles.missingText, { color: colors.text }]}>Conversation not found.</Text>
         <Pressable onPress={onBack}>
-          <Text style={styles.backLink}>Go back</Text>
+          <Text style={[styles.backLink, { color: colors.gradientEnd }]}>Go back</Text>
         </Pressable>
       </View>
     );
   }
 
   const profile = conversation.match.profile;
-  const expiryLabel = formatExpiresIn(conversation.match.expiresAt);
+  const turnLabel = conversation.yourTurn
+    ? 'Your turn'
+    : conversation.messages.length > 0
+      ? 'Waiting for reply'
+      : null;
 
-  const handleSend = (text: string) => {
-    sendMessage(conversationId, text);
+  const handleSend = (text: string, imageUrl?: string) => {
+    sendMessage(conversationId, text, imageUrl);
     setDraft('');
+  };
+
+  const handlePickImage = async () => {
+    const uri = await pickProfilePhoto();
+    if (uri) {
+      handleSend('', uri);
+    }
   };
 
   const handleBlock = () => {
@@ -106,28 +124,43 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
 
   const renderMessage = ({ item }: { item: Message }) => (
     <View style={[styles.bubbleRow, item.isMine ? styles.bubbleRowMine : styles.bubbleRowTheirs]}>
-      <View style={[styles.bubble, item.isMine ? styles.bubbleMine : styles.bubbleTheirs]}>
-        <Text style={[styles.bubbleText, item.isMine && styles.bubbleTextMine]}>{item.text}</Text>
+      <View style={[styles.bubble, item.isMine ? { backgroundColor: colors.gradientEnd } : { backgroundColor: colors.surface }]}>
+        {item.imageUrl && (
+          <Image source={{ uri: item.imageUrl }} style={styles.messageImage} resizeMode="cover" />
+        )}
+        {item.text && item.text !== '📷 Photo' && (
+          <Text style={[styles.bubbleText, { color: colors.text }]}>{item.text}</Text>
+        )}
+        {item.isMine && (
+          <View style={styles.statusRow}>
+            <MessageStatusIcon status={item.status} size={13} />
+          </View>
+        )}
       </View>
     </View>
   );
 
   return (
     <KeyboardAvoidingView
-      style={[styles.screen, { paddingTop: insets.top }]}
+      style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={styles.header}>
+      <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <Pressable onPress={onBack} style={styles.backButton}>
           <Ionicons name="chevron-back" size={28} color={colors.text} />
         </Pressable>
         <Image source={{ uri: profile.photos[0] }} style={styles.headerAvatar} />
         <View style={styles.headerText}>
-          <Text style={styles.headerName}>{profile.name}</Text>
-          <Text style={styles.headerMeta}>
+          <Text style={[styles.headerName, { color: colors.text }]}>{profile.name}</Text>
+          <Text style={[styles.headerMeta, { color: colors.textMuted }]}>
             {expiryLabel ?? 'Matched recently'}
           </Text>
         </View>
+        {turnLabel && (
+          <View style={[styles.turnBadge, { backgroundColor: conversation.yourTurn ? colors.gradientEnd : colors.surface }]}>
+            <Text style={[styles.turnText, { color: colors.text }]}>{turnLabel}</Text>
+          </View>
+        )}
         <Pressable style={styles.headerAction} onPress={() => setShowSafety(true)}>
           <Ionicons name="ellipsis-vertical" size={22} color={colors.text} />
         </Pressable>
@@ -136,15 +169,19 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
       {conversation.messages.length === 0 ? (
         <View style={styles.emptyThread}>
           <Text style={styles.emptyEmoji}>👋</Text>
-          <Text style={styles.emptyTitle}>Say hi to {profile.name}</Text>
-          <Text style={styles.emptySubtitle}>
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>Say hi to {profile.name}</Text>
+          <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
             Matches expire in 24 hours — send the first message to keep the spark alive.
           </Text>
           <View style={styles.icebreakers}>
-            <Text style={styles.icebreakerTitle}>Break the ice</Text>
+            <Text style={[styles.icebreakerTitle, { color: colors.textMuted }]}>Break the ice</Text>
             {icebreakers.map((prompt) => (
-              <Pressable key={prompt} style={styles.icebreakerChip} onPress={() => handleSend(prompt)}>
-                <Text style={styles.icebreakerText}>{prompt}</Text>
+              <Pressable
+                key={prompt}
+                style={[styles.icebreakerChip, { backgroundColor: colors.surface }]}
+                onPress={() => handleSend(prompt)}
+              >
+                <Text style={[styles.icebreakerText, { color: colors.text }]}>{prompt}</Text>
               </Pressable>
             ))}
           </View>
@@ -155,12 +192,14 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
           keyExtractor={(item) => item.id}
           renderItem={renderMessage}
           contentContainerStyle={styles.messages}
-          inverted={false}
+          ListFooterComponent={
+            conversation.isTyping ? <TypingIndicator name={profile.name} /> : null
+          }
         />
       )}
 
-      <View style={[styles.composer, { paddingBottom: insets.bottom + spacing.sm }]}>
-        <Pressable style={styles.gifButton}>
+      <View style={[styles.composer, { borderTopColor: colors.border, paddingBottom: insets.bottom + spacing.sm }]}>
+        <Pressable style={styles.gifButton} onPress={handlePickImage}>
           <Ionicons name="images-outline" size={22} color={colors.textMuted} />
         </Pressable>
         <TextInput
@@ -168,11 +207,11 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
           onChangeText={setDraft}
           placeholder="Type a message..."
           placeholderTextColor={colors.textMuted}
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]}
           onSubmitEditing={() => handleSend(draft)}
         />
         <Pressable
-          style={[styles.sendButton, !draft.trim() && styles.sendButtonDisabled]}
+          style={[styles.sendButton, { backgroundColor: colors.gradientEnd }, !draft.trim() && styles.sendButtonDisabled]}
           onPress={() => handleSend(draft)}
           disabled={!draft.trim()}
         >
@@ -204,28 +243,22 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   missing: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.background,
   },
   missingText: {
-    color: colors.text,
     marginBottom: spacing.md,
   },
-  backLink: {
-    color: colors.gradientEnd,
-  },
+  backLink: {},
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#2A2A2E',
     gap: spacing.sm,
   },
   backButton: {
@@ -240,13 +273,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerName: {
-    color: colors.text,
     fontSize: 17,
     fontWeight: '700',
   },
   headerMeta: {
-    color: colors.textMuted,
     fontSize: 12,
+  },
+  turnBadge: {
+    borderRadius: radii.button,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+  },
+  turnText: {
+    fontSize: 10,
+    fontWeight: '700',
   },
   headerAction: {
     padding: spacing.sm,
@@ -262,13 +302,11 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   emptyTitle: {
-    color: colors.text,
     fontSize: 22,
     fontWeight: '800',
     textAlign: 'center',
   },
   emptySubtitle: {
-    color: colors.textMuted,
     fontSize: 14,
     lineHeight: 21,
     textAlign: 'center',
@@ -279,7 +317,6 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   icebreakerTitle: {
-    color: colors.textMuted,
     fontSize: 13,
     fontWeight: '700',
     textTransform: 'uppercase',
@@ -288,13 +325,11 @@ const styles = StyleSheet.create({
   },
   icebreakerChip: {
     alignSelf: 'flex-start',
-    backgroundColor: colors.surface,
     borderRadius: radii.button,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
   icebreakerText: {
-    color: colors.text,
     fontSize: 14,
   },
   messages: {
@@ -316,20 +351,22 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 2,
+    overflow: 'hidden',
   },
-  bubbleMine: {
-    backgroundColor: colors.gradientEnd,
-  },
-  bubbleTheirs: {
-    backgroundColor: colors.surface,
+  messageImage: {
+    width: 200,
+    height: 150,
+    borderRadius: 12,
+    marginBottom: spacing.xs,
   },
   bubbleText: {
-    color: colors.text,
     fontSize: 15,
     lineHeight: 21,
   },
-  bubbleTextMine: {
-    color: colors.text,
+  statusRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 2,
   },
   composer: {
     flexDirection: 'row',
@@ -338,25 +375,21 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     gap: spacing.sm,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#2A2A2E',
   },
   gifButton: {
     padding: spacing.sm,
   },
   input: {
     flex: 1,
-    backgroundColor: colors.surface,
     borderRadius: radii.button,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 2,
-    color: colors.text,
     fontSize: 15,
   },
   sendButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.gradientEnd,
     alignItems: 'center',
     justifyContent: 'center',
   },

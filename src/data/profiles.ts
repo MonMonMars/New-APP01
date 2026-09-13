@@ -21,6 +21,8 @@ export const mockProfiles: Profile[] = [
     ],
     interests: ['Hiking', 'Photography', 'Espresso'],
     mostCompatible: true,
+    hasVideo: true,
+    activeToday: true,
     prompts: [
       { question: 'My simple pleasures', answer: 'Morning coffee and a long walk.' },
       { question: 'I go crazy for', answer: 'Live music and good typography.' },
@@ -35,6 +37,7 @@ export const mockProfiles: Profile[] = [
     distanceMiles: 5,
     job: 'UX Lead',
     verified: true,
+    activeToday: true,
     photos: [
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80',
       'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=80',
@@ -59,6 +62,8 @@ export const mockProfiles: Profile[] = [
     ],
     interests: ['Travel', 'Yoga', 'Ramen'],
     spotlight: true,
+    hasVideo: true,
+    activeToday: true,
     prompts: [
       { question: 'The way to win me over is', answer: 'Recommend a hidden gem restaurant.' },
     ],
@@ -73,6 +78,7 @@ export const mockProfiles: Profile[] = [
     job: 'Founder',
     photos: ['https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=80'],
     interests: ['Startups', 'Dogs', 'Indie rock'],
+    isNew: true,
   },
   {
     id: '5',
@@ -83,6 +89,7 @@ export const mockProfiles: Profile[] = [
     distanceMiles: 3,
     job: 'Curator',
     verified: true,
+    activeToday: true,
     photos: [
       'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&q=80',
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80',
@@ -102,6 +109,8 @@ export const mockProfiles: Profile[] = [
     job: 'Engineer',
     photos: ['https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&q=80'],
     interests: ['Running', 'Cooking', 'Road trips'],
+    isNew: true,
+    hasVideo: true,
   },
 ];
 

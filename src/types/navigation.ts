@@ -8,6 +8,8 @@ export type RootStackParamList = {
   ProfileDetail: { profileId: string };
   SparkPlus: undefined;
   Safety: undefined;
+  NotificationPreferences: undefined;
+  ConsumablesShop: undefined;
 };
 
 export type MainTabParamList = {

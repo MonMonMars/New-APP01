@@ -1,16 +1,18 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { SparkPlusComparisonTable } from '../components/SparkPlusComparisonTable';
 import { useApp } from '../context/AppContext';
+import { useTheme } from '../context/ThemeContext';
 import {
   SPARK_PLUS_FEATURES,
   SPARK_PLUS_PRICING,
   SparkPlusPlan,
 } from '../types/subscription';
-import { colors, radii, spacing } from '../theme';
+import { radii, spacing } from '../theme';
 
 type SparkPlusScreenProps = {
   onClose: () => void;
@@ -18,16 +20,30 @@ type SparkPlusScreenProps = {
 
 export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
   const insets = useSafeAreaInsets();
-  const { activateSparkPlus } = useApp();
+  const { colors } = useTheme();
+  const { activateSparkPlus, restorePurchases } = useApp();
   const [selectedPlan, setSelectedPlan] = useState<SparkPlusPlan>('annual');
+  const [restoring, setRestoring] = useState(false);
 
   const handleSubscribe = () => {
     activateSparkPlus();
     onClose();
   };
 
+  const handleRestore = async () => {
+    setRestoring(true);
+    const restored = await restorePurchases();
+    setRestoring(false);
+    if (restored) {
+      Alert.alert('Purchases restored', 'Your Spark+ subscription has been restored.');
+      onClose();
+    } else {
+      Alert.alert('No purchases found', 'We could not find any previous Spark+ subscriptions.');
+    }
+  };
+
   return (
-    <View style={[styles.screen, { paddingTop: insets.top }]}>
+    <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <LinearGradient colors={[colors.gradientStart, colors.gradientEnd]} style={styles.hero}>
         <Pressable style={styles.close} onPress={onClose}>
           <Ionicons name="close" size={28} color={colors.text} />
@@ -40,9 +56,11 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
       </LinearGradient>
 
       <ScrollView contentContainerStyle={styles.content}>
+        <SparkPlusComparisonTable />
+
         {SPARK_PLUS_FEATURES.map((feature) => (
           <View key={feature.title} style={styles.featureRow}>
-            <View style={styles.featureIcon}>
+            <View style={[styles.featureIcon, { backgroundColor: colors.surface }]}>
               <Ionicons
                 name={feature.icon as keyof typeof Ionicons.glyphMap}
                 size={22}
@@ -50,44 +68,57 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
               />
             </View>
             <View style={styles.featureText}>
-              <Text style={styles.featureTitle}>{feature.title}</Text>
-              <Text style={styles.featureDescription}>{feature.description}</Text>
+              <Text style={[styles.featureTitle, { color: colors.text }]}>{feature.title}</Text>
+              <Text style={[styles.featureDescription, { color: colors.textMuted }]}>{feature.description}</Text>
             </View>
           </View>
         ))}
 
-        <Text style={styles.planTitle}>Choose your plan</Text>
+        <Text style={[styles.planTitle, { color: colors.text }]}>Choose your plan</Text>
         {(Object.keys(SPARK_PLUS_PRICING) as SparkPlusPlan[]).map((plan) => {
           const pricing = SPARK_PLUS_PRICING[plan];
           const isSelected = selectedPlan === plan;
           return (
             <Pressable
               key={plan}
-              style={[styles.planCard, isSelected && styles.planCardSelected]}
+              style={[
+                styles.planCard,
+                { backgroundColor: colors.surface },
+                isSelected && { borderColor: colors.gradientEnd },
+              ]}
               onPress={() => setSelectedPlan(plan)}
             >
               <View>
-                <Text style={styles.planLabel}>{pricing.label}</Text>
+                <Text style={[styles.planLabel, { color: colors.text }]}>{pricing.label}</Text>
                 {plan === 'annual' && (
-                  <Text style={styles.planBadge}>Best value</Text>
+                  <Text style={[styles.planBadge, { color: colors.gradientEnd }]}>Best value</Text>
                 )}
               </View>
               <View style={styles.planPriceCol}>
-                <Text style={styles.planPrice}>{pricing.price}</Text>
+                <Text style={[styles.planPrice, { color: colors.text }]}>{pricing.price}</Text>
                 {pricing.perMonth !== '—' && (
-                  <Text style={styles.planPerMonth}>{pricing.perMonth}</Text>
+                  <Text style={[styles.planPerMonth, { color: colors.textMuted }]}>{pricing.perMonth}</Text>
                 )}
               </View>
             </Pressable>
           );
         })}
 
-        <Pressable style={styles.subscribeButton} onPress={handleSubscribe}>
-          <Text style={styles.subscribeText}>
+        <Pressable style={[styles.subscribeButton, { backgroundColor: colors.gradientEnd }]} onPress={handleSubscribe}>
+          <Text style={[styles.subscribeText, { color: colors.text }]}>
             Continue — {SPARK_PLUS_PRICING[selectedPlan].price}
           </Text>
         </Pressable>
-        <Text style={styles.legal}>
+
+        <Pressable style={styles.restoreButton} onPress={handleRestore} disabled={restoring}>
+          {restoring ? (
+            <ActivityIndicator color={colors.textMuted} />
+          ) : (
+            <Text style={[styles.restoreText, { color: colors.textMuted }]}>Restore purchases</Text>
+          )}
+        </Pressable>
+
+        <Text style={[styles.legal, { color: colors.textMuted }]}>
           Recurring billing. Cancel anytime in App Store settings. This is a prototype — no real charge.
         </Text>
       </ScrollView>
@@ -98,7 +129,6 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   hero: {
     padding: spacing.xl,
@@ -113,13 +143,13 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
   },
   heroTitle: {
-    color: colors.text,
+    color: '#FFFFFF',
     fontSize: 32,
     fontWeight: '800',
     marginTop: spacing.sm,
   },
   heroSubtitle: {
-    color: colors.text,
+    color: '#FFFFFF',
     fontSize: 16,
     textAlign: 'center',
     marginTop: spacing.sm,
@@ -138,7 +168,6 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -146,18 +175,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   featureTitle: {
-    color: colors.text,
     fontSize: 16,
     fontWeight: '700',
   },
   featureDescription: {
-    color: colors.textMuted,
     fontSize: 13,
     lineHeight: 18,
     marginTop: 2,
   },
   planTitle: {
-    color: colors.text,
     fontSize: 18,
     fontWeight: '800',
     marginTop: spacing.lg,
@@ -167,23 +193,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: colors.surface,
     borderRadius: radii.card,
     padding: spacing.md,
     marginBottom: spacing.sm,
     borderWidth: 2,
     borderColor: 'transparent',
   },
-  planCardSelected: {
-    borderColor: colors.gradientEnd,
-  },
   planLabel: {
-    color: colors.text,
     fontSize: 16,
     fontWeight: '700',
   },
   planBadge: {
-    color: colors.gradientEnd,
     fontSize: 12,
     fontWeight: '700',
     marginTop: 2,
@@ -192,28 +212,32 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   planPrice: {
-    color: colors.text,
     fontSize: 18,
     fontWeight: '800',
   },
   planPerMonth: {
-    color: colors.textMuted,
     fontSize: 12,
   },
   subscribeButton: {
-    backgroundColor: colors.gradientEnd,
     borderRadius: radii.button,
     paddingVertical: spacing.md,
     alignItems: 'center',
     marginTop: spacing.lg,
   },
   subscribeText: {
-    color: colors.text,
     fontSize: 16,
     fontWeight: '700',
   },
+  restoreButton: {
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+    marginTop: spacing.sm,
+  },
+  restoreText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
   legal: {
-    color: colors.textMuted,
     fontSize: 11,
     textAlign: 'center',
     marginTop: spacing.md,

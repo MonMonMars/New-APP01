@@ -13,12 +13,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PhotoCarousel } from '../../components/PhotoCarousel';
 import { useApp } from '../../context/AppContext';
-import { RelationshipIntent } from '../../types/profile';
+import {
+  GENDER_LABELS,
+  ORIENTATION_LABELS,
+  Orientation,
+  ProfileGender,
+  RelationshipIntent,
+} from '../../types/profile';
 import { signInWithApple } from '../../utils/appleAuth';
 import { pickProfilePhoto } from '../../utils/photoPicker';
 import { colors, radii, spacing } from '../../theme';
 
-type Step = 'welcome' | 'rules' | 'location' | 'intent' | 'profile';
+type Step = 'welcome' | 'rules' | 'location' | 'intent' | 'identity' | 'profile';
 
 const rules = [
   'Be yourself. Use recent photos.',
@@ -42,8 +48,13 @@ export function OnboardingFlow() {
   const [bio, setBio] = useState(user.bio);
   const [age, setAge] = useState(String(user.age));
   const [intent, setIntent] = useState<RelationshipIntent>('not_sure');
+  const [gender, setGender] = useState<ProfileGender>('woman');
+  const [orientation, setOrientation] = useState<Orientation>('straight');
   const [photos, setPhotos] = useState<string[]>(user.photos);
   const [authLoading, setAuthLoading] = useState(false);
+
+  const genderOptions: ProfileGender[] = ['woman', 'man', 'nonbinary'];
+  const orientationOptions: Orientation[] = ['straight', 'gay', 'lesbian', 'bisexual', 'pansexual', 'queer', 'asexual', 'other'];
 
   const handleAppleSignIn = async () => {
     setAuthLoading(true);
@@ -80,7 +91,10 @@ export function OnboardingFlow() {
       bio: bio.trim() || user.bio,
       age: nextAge,
       intent,
+      gender,
+      orientation,
       photos: photos.length > 0 ? photos : user.photos,
+      ageVerified: nextAge >= 18,
     });
   };
 
@@ -171,6 +185,55 @@ export function OnboardingFlow() {
               </Pressable>
             );
           })}
+          <Pressable style={styles.primaryButton} onPress={() => setStep('identity')}>
+            <Text style={styles.primaryButtonText}>Continue</Text>
+          </Pressable>
+        </View>
+      )}
+
+      {step === 'identity' && (
+        <View style={styles.step}>
+          <Text style={styles.title}>About you</Text>
+          <Text style={styles.subtitle}>
+            Help us show you the right people. You can change this anytime.
+          </Text>
+
+          <Text style={styles.label}>I am a</Text>
+          <View style={styles.chipRow}>
+            {genderOptions.map((option) => {
+              const selected = gender === option;
+              return (
+                <Pressable
+                  key={option}
+                  style={[styles.chip, selected && styles.chipSelected]}
+                  onPress={() => setGender(option)}
+                >
+                  <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
+                    {GENDER_LABELS[option]}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <Text style={styles.label}>My orientation</Text>
+          <View style={styles.chipRow}>
+            {orientationOptions.map((option) => {
+              const selected = orientation === option;
+              return (
+                <Pressable
+                  key={option}
+                  style={[styles.chip, selected && styles.chipSelected]}
+                  onPress={() => setOrientation(option)}
+                >
+                  <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
+                    {ORIENTATION_LABELS[option]}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
           <Pressable style={styles.primaryButton} onPress={() => setStep('profile')}>
             <Text style={styles.primaryButtonText}>Continue</Text>
           </Pressable>
@@ -336,6 +399,31 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: 13,
     marginTop: 2,
+  },
+  chipRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+  },
+  chip: {
+    backgroundColor: colors.surface,
+    borderRadius: radii.button,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  chipSelected: {
+    borderColor: colors.gradientEnd,
+  },
+  chipText: {
+    color: colors.textMuted,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  chipTextSelected: {
+    color: colors.text,
   },
   addPhotoButton: {
     flexDirection: 'row',

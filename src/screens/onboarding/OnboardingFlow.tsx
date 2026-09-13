@@ -1,6 +1,8 @@
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import {
+  ActivityIndicator,
   Pressable,
   StyleSheet,
   Text,
@@ -9,8 +11,11 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { PhotoCarousel } from '../../components/PhotoCarousel';
 import { useApp } from '../../context/AppContext';
 import { RelationshipIntent } from '../../types/profile';
+import { signInWithApple } from '../../utils/appleAuth';
+import { pickProfilePhoto } from '../../utils/photoPicker';
 import { colors, radii, spacing } from '../../theme';
 
 type Step = 'welcome' | 'rules' | 'location' | 'intent' | 'profile';
@@ -31,12 +36,37 @@ const intentOptions: { value: RelationshipIntent; label: string; hint: string }[
 
 export function OnboardingFlow() {
   const insets = useSafeAreaInsets();
-  const { completeOnboarding, user } = useApp();
+  const { completeOnboarding, signInWithAppleStub, user } = useApp();
   const [step, setStep] = useState<Step>('welcome');
   const [name, setName] = useState(user.name);
   const [bio, setBio] = useState(user.bio);
   const [age, setAge] = useState(String(user.age));
   const [intent, setIntent] = useState<RelationshipIntent>('not_sure');
+  const [photos, setPhotos] = useState<string[]>(user.photos);
+  const [authLoading, setAuthLoading] = useState(false);
+
+  const handleAppleSignIn = async () => {
+    setAuthLoading(true);
+    try {
+      const result = await signInWithApple();
+      if (result.success) {
+        await signInWithAppleStub();
+        if (result.displayName) {
+          setName(result.displayName);
+        }
+        setStep('rules');
+      }
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleAddPhoto = async () => {
+    const uri = await pickProfilePhoto();
+    if (uri) {
+      setPhotos((prev) => [...prev, uri]);
+    }
+  };
 
   const finish = () => {
     const parsedAge = Number.parseInt(age, 10);
@@ -50,6 +80,7 @@ export function OnboardingFlow() {
       bio: bio.trim() || user.bio,
       age: nextAge,
       intent,
+      photos: photos.length > 0 ? photos : user.photos,
     });
   };
 
@@ -64,10 +95,21 @@ export function OnboardingFlow() {
           <Text style={styles.subtitle}>
             Match. Chat. Date. It starts with a drag.
           </Text>
-          <Pressable style={styles.appleButton} onPress={() => setStep('rules')}>
-            <Text style={styles.appleButtonText}>Continue with Apple</Text>
+          <Pressable
+            style={styles.appleButton}
+            onPress={handleAppleSignIn}
+            disabled={authLoading}
+          >
+            {authLoading ? (
+              <ActivityIndicator color={colors.textDark} />
+            ) : (
+              <>
+                <Ionicons name="logo-apple" size={20} color={colors.textDark} />
+                <Text style={styles.appleButtonText}>Continue with Apple</Text>
+              </>
+            )}
           </Pressable>
-          <Pressable onPress={() => setStep('rules')}>
+          <Pressable onPress={() => { signInWithAppleStub(); setStep('rules'); }}>
             <Text style={styles.link}>Use phone number instead</Text>
           </Pressable>
         </View>
@@ -139,6 +181,19 @@ export function OnboardingFlow() {
         <View style={styles.step}>
           <Text style={styles.title}>Create your profile</Text>
           <Text style={styles.subtitle}>Photo-first, like the apps you know.</Text>
+
+          <PhotoCarousel
+            photos={photos}
+            onAddPhoto={handleAddPhoto}
+            editable
+            height={200}
+          />
+
+          <Pressable style={styles.addPhotoButton} onPress={handleAddPhoto}>
+            <Ionicons name="camera-outline" size={18} color={colors.gradientEnd} />
+            <Text style={styles.addPhotoText}>Add photos</Text>
+          </Pressable>
+
           <Text style={styles.label}>Name</Text>
           <TextInput
             value={name}
@@ -209,10 +264,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   appleButton: {
+    flexDirection: 'row',
     backgroundColor: colors.text,
     borderRadius: radii.button,
     paddingVertical: spacing.md,
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
     marginBottom: spacing.md,
   },
   appleButtonText: {
@@ -279,6 +337,18 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 2,
   },
+  addPhotoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginTop: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  addPhotoText: {
+    color: colors.gradientEnd,
+    fontSize: 14,
+    fontWeight: '600',
+  },
   label: {
     color: colors.textMuted,
     fontSize: 13,
@@ -296,7 +366,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   inputMultiline: {
-    minHeight: 96,
+    minHeight: 72,
     textAlignVertical: 'top',
   },
   primaryButton: {

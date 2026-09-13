@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ReportReasonSheet, type ReportReason } from '../components/ReportReasonSheet';
 import { SafetyActionSheet } from '../components/SafetyActionSheet';
 import { useApp } from '../context/AppContext';
 import { colors, radii, spacing } from '../theme';
@@ -35,9 +36,10 @@ type ChatScreenProps = {
 export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const { conversations, sendMessage, blockProfile, reportProfile } = useApp();
+  const { conversations, sendMessage, blockProfile, reportProfile, unmatchProfile } = useApp();
   const [draft, setDraft] = useState('');
   const [showSafety, setShowSafety] = useState(false);
+  const [showReport, setShowReport] = useState(false);
 
   const conversation = useMemo(
     () => conversations.find((c) => c.id === conversationId),
@@ -70,11 +72,36 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
     onBack();
   };
 
-  const handleReport = () => {
+  const handleReportOpen = () => {
     setShowSafety(false);
-    reportProfile(profile.id);
-    Alert.alert('Report submitted', 'Thanks for helping keep Spark safe.');
+    setShowReport(true);
+  };
+
+  const handleReportSubmit = (reason: ReportReason) => {
+    setShowReport(false);
+    reportProfile(profile.id, reason);
+    Alert.alert('Report submitted', `Thanks for reporting. Reason: ${reason}`);
     onBack();
+  };
+
+  const handleUnmatch = () => {
+    setShowSafety(false);
+    Alert.alert(
+      'Unmatch?',
+      `Remove ${profile.name} from your matches? This can't be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Unmatch',
+          style: 'destructive',
+          onPress: () => {
+            unmatchProfile(profile.id);
+            Alert.alert('Unmatched', `You and ${profile.name} are no longer matched.`);
+            onBack();
+          },
+        },
+      ],
+    );
   };
 
   const renderMessage = ({ item }: { item: Message }) => (
@@ -156,10 +183,19 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
       <SafetyActionSheet
         visible={showSafety}
         profileName={profile.name}
+        showUnmatch
         onClose={() => setShowSafety(false)}
-        onReport={handleReport}
+        onReport={handleReportOpen}
         onBlock={handleBlock}
+        onUnmatch={handleUnmatch}
         onOpenSafetyCenter={() => navigation.getParent()?.navigate('Safety')}
+      />
+
+      <ReportReasonSheet
+        visible={showReport}
+        profileName={profile.name}
+        onClose={() => setShowReport(false)}
+        onSubmit={handleReportSubmit}
       />
     </KeyboardAvoidingView>
   );

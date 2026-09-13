@@ -413,7 +413,7 @@ Industry: subscriptions ~69% of category revenue (2025 benchmarks).
 | Navigation | React Navigation 7 (native stack + bottom tabs) |
 | Gestures / animation | react-native-gesture-handler, react-native-reanimated |
 | Media | expo-av (sound), expo-haptics, expo-linear-gradient |
-| State | React Context (`AppContext`) — no persistence yet |
+| State | React Context (`AppContext`) + AsyncStorage persistence |
 
 ### 10.2 Project layout
 
@@ -448,7 +448,7 @@ Public preview: see `docs/PUBLIC_PREVIEW.md`.
 
 ### 10.4 Architecture notes
 
-- **No backend yet** — all data in memory; refresh resets state
+- **No backend yet** — all data persisted locally via AsyncStorage; survives app restart
 - **Navigation key** on `hasOnboarded` remounts stack when onboarding completes
 - **Discover queue** computed via `useMemo` from profiles − passed − liked − blocked, filtered by preferences
 - **Match creation** synchronous in `likeProfile`; checks `MUTUAL_MATCH_IDS` set
@@ -478,23 +478,29 @@ Public preview: see `docs/PUBLIC_PREVIEW.md`.
 - [x] **Safety Center** reachable from Profile, Matches shield, and chat menu
 - [x] Waiting-for-match + full-screen match celebration
 - [x] Web preview tunnel for stakeholder demos
+- [x] Loading/hydration gate on app boot from AsyncStorage
+- [x] Empty states (Discover, Likes, Matches, Chat)
 
 ### Next (v0.2)
 
-- [ ] Apple Sign-In + real auth
-- [ ] Push notifications (new match, message, your turn)
-- [ ] Photo upload + camera roll (expo-image-picker)
-- [ ] Spark Note (pre-match message)
+- [x] Apple Sign-In stub (expo-apple-authentication on iOS; demo stub on web)
+- [x] Push notifications stub (permission prompt + local notification on match)
+- [x] Photo upload + camera roll (expo-image-picker — onboarding + profile edit)
+- [x] Spark Note (pre-match message with like)
 - [ ] Backend (Supabase / Firebase)
-- [ ] Persist matches, likes, preferences
-- [ ] Unmatch flow
+- [x] Full AsyncStorage persistence (matches, chats, likes, passes, spark+, boost, photos)
+- [x] Unmatch flow (chat + safety menu with confirm dialog)
+- [x] Report flow (reason picker → confirmation)
+- [x] Block user (removes from deck/matches/chat)
+- [x] Boost consumable (30-min timer UI on Profile tab)
+- [x] Spark+ full wiring (unlimited likes, reveal likes, rewind, spark notes, boost)
 
 ### Later (v1.0)
 
 - [ ] Android build & parity
 - [ ] Photo verification
 - [ ] City-by-city launch tooling
-- [ ] Boost consumable
+- [ ] Real Apple Sign-In backend + push notification server
 - [ ] A/B ranking experiments
 - [ ] Read receipts (Spark+ tier)
 - [ ] Events / IRL modes

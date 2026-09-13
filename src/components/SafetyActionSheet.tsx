@@ -6,18 +6,22 @@ import { colors, radii, spacing } from '../theme';
 type SafetyActionSheetProps = {
   visible: boolean;
   profileName: string;
+  showUnmatch?: boolean;
   onClose: () => void;
   onReport: () => void;
   onBlock: () => void;
+  onUnmatch?: () => void;
   onOpenSafetyCenter?: () => void;
 };
 
 export function SafetyActionSheet({
   visible,
   profileName,
+  showUnmatch = false,
   onClose,
   onReport,
   onBlock,
+  onUnmatch,
   onOpenSafetyCenter,
 }: SafetyActionSheetProps) {
   return (
@@ -40,6 +44,18 @@ export function SafetyActionSheet({
               <View style={styles.actionText}>
                 <Text style={styles.actionLabel}>Safety Center</Text>
                 <Text style={styles.actionHint}>Tips, resources, and support links.</Text>
+              </View>
+            </Pressable>
+          )}
+
+          {showUnmatch && onUnmatch && (
+            <Pressable style={styles.actionRow} onPress={onUnmatch}>
+              <Ionicons name="heart-dislike-outline" size={22} color={colors.textMuted} />
+              <View style={styles.actionText}>
+                <Text style={styles.actionLabel}>Unmatch</Text>
+                <Text style={styles.actionHint}>
+                  Remove this match and conversation. You can still block or report.
+                </Text>
               </View>
             </Pressable>
           )}

@@ -1,5 +1,13 @@
 import * as Haptics from 'expo-haptics';
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -48,6 +56,21 @@ function isPointInZone(
   );
 }
 
+function isOverZone(
+  x: number,
+  y: number,
+  cardCenterX: number,
+  cardCenterY: number,
+  zone: ZoneLayout,
+  padding: number,
+): boolean {
+  'worklet';
+  return (
+    isPointInZone(x, y, zone, padding) ||
+    isPointInZone(cardCenterX, cardCenterY, zone, padding)
+  );
+}
+
 function zoneProximity(
   x: number,
   y: number,
@@ -68,6 +91,7 @@ function zoneProximity(
 export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
   function SwipeDeck({ profiles, onSwipe, onEmpty }, ref) {
     const { playSound } = useSwipeSounds();
+    const containerRef = useRef<View>(null);
     const [activeIndex, setActiveIndex] = useState(0);
     const [activeEffect, setActiveEffect] = useState<ActiveEffect | null>(null);
     const [effectKey, setEffectKey] = useState(0);
@@ -226,18 +250,26 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
 
         const cardCenterX = deckWidth.value / 2 + event.translationX;
         const cardCenterY = deckHeight.value / 2 + event.translationY;
+        const pointerX = event.x;
+        const pointerY = event.y;
 
-        const trashProximity = zoneProximity(
-          cardCenterX,
-          cardCenterY,
-          trashZone.value,
-          ZONE_HIT_PADDING,
+        const trashProximity = Math.max(
+          zoneProximity(pointerX, pointerY, trashZone.value, ZONE_HIT_PADDING),
+          zoneProximity(
+            cardCenterX,
+            cardCenterY,
+            trashZone.value,
+            ZONE_HIT_PADDING,
+          ),
         );
-        const heartProximity = zoneProximity(
-          cardCenterX,
-          cardCenterY,
-          heartZone.value,
-          ZONE_HIT_PADDING,
+        const heartProximity = Math.max(
+          zoneProximity(pointerX, pointerY, heartZone.value, ZONE_HIT_PADDING),
+          zoneProximity(
+            cardCenterX,
+            cardCenterY,
+            heartZone.value,
+            ZONE_HIT_PADDING,
+          ),
         );
 
         trashActive.value = trashProximity;
@@ -246,14 +278,20 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
       .onEnd((event) => {
         const cardCenterX = deckWidth.value / 2 + event.translationX;
         const cardCenterY = deckHeight.value / 2 + event.translationY;
+        const pointerX = event.x;
+        const pointerY = event.y;
 
-        const overTrash = isPointInZone(
+        const overTrash = isOverZone(
+          pointerX,
+          pointerY,
           cardCenterX,
           cardCenterY,
           trashZone.value,
           ZONE_HIT_PADDING,
         );
-        const overHeart = isPointInZone(
+        const overHeart = isOverZone(
+          pointerX,
+          pointerY,
           cardCenterX,
           cardCenterY,
           heartZone.value,
@@ -278,7 +316,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
     }
 
     return (
-      <View style={styles.container} onLayout={handleDeckLayout}>
+      <View ref={containerRef} style={styles.container} onLayout={handleDeckLayout}>
         <View style={styles.deck}>
           {visibleProfiles
             .slice()
@@ -318,6 +356,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
         </View>
 
         <DropTargets
+          containerRef={containerRef}
           trashActive={trashActive}
           heartActive={heartActive}
           onTrashLayout={handleTrashLayout}

@@ -1,28 +1,31 @@
 # Spark — Public Web Preview
 
-Try the app in **any browser** (phone, laptop, tablet) using these links.
+Try the app in **any browser** (phone, laptop, tablet) using the link below.
 
 ## Live preview (Cloudflare)
 
-**https://lenses-interpreted-towns-languages.trycloudflare.com**
+**https://getting-summaries-tucson-extremely.trycloudflare.com**
 
-> This link works outside Cursor. It forwards to the dev server running in the cloud workspace.  
-> Tunnels are **temporary** — if the link stops working, ask to regenerate it.
+> **Generated:** 13 September 2026  
+> **Agents should update this URL and share it when completing work.**
 
-### How to test special effects
+This link works outside Cursor. It forwards to the dev server running in the cloud workspace.  
+Tunnels are **temporary** — they stop when the workspace shuts down or the tunnel process exits. If the link stops working, ask to regenerate it.
 
-1. Complete onboarding (tap through welcome → rules → location → profile).
-2. On **Discover**, drag a profile card to:
-   - **Trash** (bottom-left) → red flash + particle burst + whoosh sound
-   - **Heart** (bottom-right) → green flash + hearts burst + chime sound
-3. Or **tap** the trash/heart buttons directly.
-4. **Sound:** click anywhere on the page first (browser autoplay rule), then like/pass again.
+### Quick test paths
 
-### Alternate link (LocalTunnel)
+1. **Onboarding** — Tap through Welcome → House Rules → Location → Intent → Profile setup.
+2. **Discover** — Drag a card to **Trash** (pass) or **Heart** (like), or tap the bottom buttons.
+3. **Match with Mia** — On Discover, like **Mia** (3rd profile) → instant mutual match → celebration modal → Send Message or Keep Swiping.
+4. **Likes tab** — Blurred grid of who liked you (Spark+ upsell).
+5. **Matches / Chat** — Open Mia chat, use an icebreaker, send a message.
+6. **Profile** — Edit profile, discovery prefs, Safety Center, Spark+.
 
-**https://five-lizards-hang.loca.lt**
+### Special effects
 
-First visit may show a “Click to Continue” page — tap through it.
+- **Trash** → red flash + particle burst + whoosh sound
+- **Heart** → green flash + hearts burst + chime sound
+- **Sound:** click anywhere on the page first (browser autoplay rule), then like/pass again.
 
 ---
 

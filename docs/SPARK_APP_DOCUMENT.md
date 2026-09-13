@@ -444,7 +444,7 @@ npm run web        # Browser at localhost:8081
 npm run ios        # Xcode simulator (Mac)
 ```
 
-Public preview: see `docs/PUBLIC_PREVIEW.md`.
+**Live demo link:** [`docs/PUBLIC_PREVIEW.md`](./PUBLIC_PREVIEW.md) — agents update this URL when completing work.
 
 ### 10.4 Architecture notes
 

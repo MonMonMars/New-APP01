@@ -2,7 +2,8 @@
 
 A dating app prototype inspired by **Tinder**, **Bumble**, and **Hinge** — built with Expo + React Native + TypeScript.
 
-> See [`docs/APP_FLOW.md`](docs/APP_FLOW.md) for the full UI structure map and competitor workflow research.
+> See [`docs/APP_FLOW.md`](docs/APP_FLOW.md) for the full UI structure map and competitor workflow research.  
+> **Live demo link:** [`docs/PUBLIC_PREVIEW.md`](docs/PUBLIC_PREVIEW.md)
 
 ## Features
 

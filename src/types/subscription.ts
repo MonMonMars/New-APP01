@@ -46,3 +46,5 @@ export const SPARK_PLUS_PRICING: Record<SparkPlusPlan, { label: string; price: s
 };
 
 export const FREE_DAILY_LIKE_LIMIT = 10;
+export const FREE_DAILY_SPARK_NOTES = 1;
+export const BOOST_DURATION_MS = 30 * 60 * 1000;

@@ -1,9 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import { Alert, Image, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { PhotoCarousel } from './PhotoCarousel';
 import { UserProfile } from '../types/profile';
+import { pickProfilePhoto } from '../utils/photoPicker';
 import { colors, radii, spacing } from '../theme';
 
 type EditProfileSheetProps = {
@@ -18,21 +20,22 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
   const [name, setName] = useState(user.name);
   const [bio, setBio] = useState(user.bio);
   const [age, setAge] = useState(String(user.age));
+  const [photos, setPhotos] = useState<string[]>(user.photos);
 
   useEffect(() => {
     if (visible) {
       setName(user.name);
       setBio(user.bio);
       setAge(String(user.age));
+      setPhotos(user.photos);
     }
   }, [visible, user]);
 
-  const handleAddPhoto = () => {
-    Alert.alert(
-      'Add a photo',
-      'Photo upload is coming soon. For now, your profile uses the default Spark photo.',
-      [{ text: 'Got it' }],
-    );
+  const handleAddPhoto = async () => {
+    const uri = await pickProfilePhoto();
+    if (uri) {
+      setPhotos((prev) => [...prev, uri]);
+    }
   };
 
   const handleSave = () => {
@@ -46,6 +49,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       name: name.trim() || user.name,
       bio: bio.trim() || user.bio,
       age: nextAge,
+      photos: photos.length > 0 ? photos : user.photos,
     });
     onClose();
   };
@@ -63,15 +67,16 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
           </Pressable>
         </View>
 
-        <Pressable style={styles.photoRow} onPress={handleAddPhoto}>
-          <Image source={{ uri: user.photos[0] }} style={styles.photo} />
-          <View style={styles.photoText}>
-            <Text style={styles.photoTitle}>Profile photo</Text>
-            <Text style={styles.photoHint}>Tap to add from camera roll</Text>
-          </View>
-          <View style={styles.addBadge}>
-            <Ionicons name="camera" size={18} color={colors.text} />
-          </View>
+        <PhotoCarousel
+          photos={photos}
+          onAddPhoto={handleAddPhoto}
+          editable
+          height={240}
+        />
+
+        <Pressable style={styles.addPhotoRow} onPress={handleAddPhoto}>
+          <Ionicons name="images-outline" size={20} color={colors.gradientEnd} />
+          <Text style={styles.addPhotoText}>Add photo from library</Text>
         </Pressable>
 
         <Text style={styles.label}>Name</Text>
@@ -117,7 +122,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: spacing.xl,
+    marginBottom: spacing.lg,
   },
   title: {
     color: colors.text,
@@ -133,40 +138,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
-  photoRow: {
+  addPhotoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: spacing.md,
+    gap: spacing.sm,
+    marginTop: spacing.md,
     marginBottom: spacing.lg,
   },
-  photo: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-  },
-  photoText: {
-    flex: 1,
-  },
-  photoTitle: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  photoHint: {
-    color: colors.textMuted,
-    fontSize: 13,
-    marginTop: 2,
-  },
-  addBadge: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.gradientEnd,
-    alignItems: 'center',
-    justifyContent: 'center',
+  addPhotoText: {
+    color: colors.gradientEnd,
+    fontSize: 14,
+    fontWeight: '600',
   },
   label: {
     color: colors.textMuted,

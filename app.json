@@ -27,6 +27,15 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Spark to access your photos for your profile."
+        }
+      ],
+      "expo-notifications"
+    ]
   }
 }

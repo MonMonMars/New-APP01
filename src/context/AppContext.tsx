@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -17,8 +18,15 @@ import {
   ShowMePreference,
 } from '../types/preferences';
 import { Profile, UserProfile } from '../types/profile';
-import { FREE_DAILY_LIKE_LIMIT } from '../types/subscription';
-import { loadPersistedState, savePersistedState } from '../utils/persistence';
+import { FREE_DAILY_LIKE_LIMIT, FREE_DAILY_SPARK_NOTES } from '../types/subscription';
+import { BOOST_DURATION_MS } from '../types/subscription';
+import { requestNotificationPermission, scheduleMatchNotification } from '../utils/notifications';
+import {
+  createDefaultPersistedState,
+  loadPersistedState,
+  PersistedAppState,
+  savePersistedState,
+} from '../utils/persistence';
 
 function matchesGenderFilter(profile: Profile, showMe: ShowMePreference): boolean {
   switch (showMe) {
@@ -50,9 +58,22 @@ function filterDiscoverProfiles(
   );
 }
 
+function arrayToSet(values: string[]): Set<string> {
+  return new Set(values);
+}
+
+function setToArray(set: Set<string>): string[] {
+  return Array.from(set);
+}
+
+function todayKey(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 type AppContextValue = {
   hasOnboarded: boolean;
   isHydrated: boolean;
+  isAuthenticated: boolean;
   user: UserProfile;
   preferences: DiscoveryPreferences;
   discoverQueue: Profile[];
@@ -63,38 +84,47 @@ type AppContextValue = {
   matches: Match[];
   conversations: Conversation[];
   incomingLikes: Profile[];
+  sparkNotes: Record<string, string>;
   dailyLikesUsed: number;
   remainingLikes: number;
+  remainingSparkNotes: number;
   canLike: boolean;
+  canSendSparkNote: boolean;
   likesTabBadge: number;
   matchesTabBadge: number;
+  isSparkPlus: boolean;
+  isBoosted: boolean;
+  boostActiveUntil: string | null;
+  notificationsEnabled: boolean;
+  canRewind: boolean;
   completeOnboarding: (user: UserProfile) => void;
+  signInWithAppleStub: () => Promise<void>;
   updateUser: (user: UserProfile) => void;
   updatePreferences: (preferences: DiscoveryPreferences) => void;
   passProfile: (profile: Profile) => void;
-  likeProfile: (profile: Profile) => Match | null;
+  likeProfile: (profile: Profile, sparkNote?: string) => Match | null;
   sendMessage: (conversationId: string, text: string) => void;
   getConversationIdForProfile: (profileId: string) => string | null;
   blockProfile: (profileId: string) => void;
-  reportProfile: (profileId: string) => void;
-  isSparkPlus: boolean;
+  reportProfile: (profileId: string, reason?: string) => void;
+  unmatchProfile: (profileId: string) => void;
   activateSparkPlus: () => void;
+  activateBoost: () => void;
+  rewindLastPass: () => void;
+  enableNotifications: () => Promise<boolean>;
+  dismissNotificationPrompt: () => void;
+  showNotificationPrompt: boolean;
 };
 
-const defaultUser: UserProfile = {
-  name: 'Mon',
-  age: 28,
-  bio: 'Designer exploring the city.',
-  photos: ['https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&q=80'],
-  interests: ['Design', 'Coffee', 'Travel'],
-};
+const defaultPersisted = createDefaultPersistedState();
 
 const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [hasOnboarded, setHasOnboarded] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
-  const [user, setUser] = useState<UserProfile>(defaultUser);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<UserProfile>(defaultPersisted.user);
   const [preferences, setPreferences] = useState<DiscoveryPreferences>(defaultPreferences);
   const [passedIds, setPassedIds] = useState<Set<string>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
@@ -102,20 +132,51 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [blockedIds, setBlockedIds] = useState<Set<string>>(new Set());
   const [matches, setMatches] = useState<Match[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>(seedConversations);
+  const [sparkNotes, setSparkNotes] = useState<Record<string, string>>({});
   const [dailyLikesUsed, setDailyLikesUsed] = useState(0);
   const [isSparkPlus, setIsSparkPlus] = useState(false);
+  const [boostActiveUntil, setBoostActiveUntil] = useState<string | null>(null);
+  const [sparkNotesUsedToday, setSparkNotesUsedToday] = useState(0);
+  const [lastSparkNoteDate, setLastSparkNoteDate] = useState<string | null>(null);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [lastPassedProfileId, setLastPassedProfileId] = useState<string | null>(null);
+  const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
+  const [notificationPromptDismissed, setNotificationPromptDismissed] = useState(false);
+
+  const hydratedRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
 
     loadPersistedState().then((saved) => {
-      if (cancelled || !saved) {
-        setIsHydrated(true);
+      if (cancelled) {
         return;
       }
-      setUser(saved.user);
-      setPreferences(saved.preferences);
-      setHasOnboarded(saved.hasOnboarded);
+
+      if (saved) {
+        setUser(saved.user);
+        setPreferences(saved.preferences);
+        setHasOnboarded(saved.hasOnboarded);
+        setIsAuthenticated(saved.isAuthenticated);
+        setPassedIds(arrayToSet(saved.passedIds));
+        setLikedIds(arrayToSet(saved.likedIds));
+        setPendingLikeIds(arrayToSet(saved.pendingLikeIds));
+        setBlockedIds(arrayToSet(saved.blockedIds));
+        setMatches(saved.matches);
+        setConversations(
+          saved.conversations.length > 0 ? saved.conversations : seedConversations,
+        );
+        setSparkNotes(saved.sparkNotes);
+        setDailyLikesUsed(saved.dailyLikesUsed);
+        setIsSparkPlus(saved.isSparkPlus);
+        setBoostActiveUntil(saved.boostActiveUntil);
+        setSparkNotesUsedToday(saved.sparkNotesUsedToday);
+        setLastSparkNoteDate(saved.lastSparkNoteDate);
+        setNotificationsEnabled(saved.notificationsEnabled);
+        setLastPassedProfileId(saved.lastPassedProfileId);
+      }
+
+      hydratedRef.current = true;
       setIsHydrated(true);
     });
 
@@ -124,19 +185,55 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const persistState = useCallback(
-    (nextUser: UserProfile, nextPreferences: DiscoveryPreferences, onboarded: boolean) => {
-      if (!onboarded) {
-        return;
-      }
-      void savePersistedState({
-        hasOnboarded: true,
-        user: nextUser,
-        preferences: nextPreferences,
-      });
-    },
-    [],
-  );
+  const buildPersistedState = useCallback((): PersistedAppState => {
+    return {
+      version: 2,
+      hasOnboarded,
+      isAuthenticated,
+      user,
+      preferences,
+      passedIds: setToArray(passedIds),
+      likedIds: setToArray(likedIds),
+      pendingLikeIds: setToArray(pendingLikeIds),
+      blockedIds: setToArray(blockedIds),
+      matches,
+      conversations,
+      dailyLikesUsed,
+      isSparkPlus,
+      sparkNotes,
+      boostActiveUntil,
+      sparkNotesUsedToday,
+      lastSparkNoteDate,
+      notificationsEnabled,
+      lastPassedProfileId,
+    };
+  }, [
+    hasOnboarded,
+    isAuthenticated,
+    user,
+    preferences,
+    passedIds,
+    likedIds,
+    pendingLikeIds,
+    blockedIds,
+    matches,
+    conversations,
+    dailyLikesUsed,
+    isSparkPlus,
+    sparkNotes,
+    boostActiveUntil,
+    sparkNotesUsedToday,
+    lastSparkNoteDate,
+    notificationsEnabled,
+    lastPassedProfileId,
+  ]);
+
+  useEffect(() => {
+    if (!hydratedRef.current || !hasOnboarded) {
+      return;
+    }
+    void savePersistedState(buildPersistedState());
+  }, [buildPersistedState, hasOnboarded]);
 
   const excludedIds = useMemo(() => {
     const ids = new Set<string>();
@@ -146,15 +243,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return ids;
   }, [blockedIds, likedIds, passedIds]);
 
-  const discoverQueue = useMemo(
-    () => filterDiscoverProfiles(mockProfiles, preferences, excludedIds),
-    [excludedIds, preferences],
-  );
+  const discoverQueue = useMemo(() => {
+    const queue = filterDiscoverProfiles(mockProfiles, preferences, excludedIds);
+    const now = Date.now();
+    const boosted = boostActiveUntil && new Date(boostActiveUntil).getTime() > now;
+    if (boosted) {
+      return [...queue];
+    }
+    return queue;
+  }, [boostActiveUntil, excludedIds, preferences]);
+
+  const isBoosted = useMemo(() => {
+    if (!boostActiveUntil) {
+      return false;
+    }
+    return new Date(boostActiveUntil).getTime() > Date.now();
+  }, [boostActiveUntil]);
 
   const remainingLikes = isSparkPlus
     ? Infinity
     : Math.max(0, FREE_DAILY_LIKE_LIMIT - dailyLikesUsed);
   const canLike = isSparkPlus || dailyLikesUsed < FREE_DAILY_LIKE_LIMIT;
+
+  const sparkNotesUsedForToday = useMemo(() => {
+    if (lastSparkNoteDate !== todayKey()) {
+      return 0;
+    }
+    return sparkNotesUsedToday;
+  }, [lastSparkNoteDate, sparkNotesUsedToday]);
+
+  const dailyNoteLimit = isSparkPlus ? Infinity : FREE_DAILY_SPARK_NOTES;
+  const remainingSparkNotes = isSparkPlus
+    ? Infinity
+    : Math.max(0, dailyNoteLimit - sparkNotesUsedForToday);
+  const canSendSparkNote = isSparkPlus || sparkNotesUsedForToday < FREE_DAILY_SPARK_NOTES;
 
   const likesTabBadge = isSparkPlus ? 0 : incomingLikeProfiles.length;
 
@@ -173,38 +295,44 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return newMatchCount + unreadCount + yourTurnCount;
   }, [conversations, matches]);
 
-  const completeOnboarding = useCallback(
-    (nextUser: UserProfile) => {
-      setUser(nextUser);
-      setHasOnboarded(true);
-      persistState(nextUser, preferences, true);
-    },
-    [persistState, preferences],
-  );
+  const canRewind = isSparkPlus && lastPassedProfileId !== null;
 
-  const updateUser = useCallback(
-    (nextUser: UserProfile) => {
-      setUser(nextUser);
-      if (hasOnboarded) {
-        persistState(nextUser, preferences, true);
-      }
-    },
-    [hasOnboarded, persistState, preferences],
-  );
+  const signInWithAppleStub = useCallback(async () => {
+    setIsAuthenticated(true);
+  }, []);
 
-  const updatePreferences = useCallback(
-    (next: DiscoveryPreferences) => {
-      setPreferences(next);
-      if (hasOnboarded) {
-        persistState(user, next, true);
-      }
-    },
-    [hasOnboarded, persistState, user],
-  );
+  const completeOnboarding = useCallback((nextUser: UserProfile) => {
+    setUser(nextUser);
+    setHasOnboarded(true);
+    if (!notificationPromptDismissed && !notificationsEnabled) {
+      setShowNotificationPrompt(true);
+    }
+  }, [notificationPromptDismissed, notificationsEnabled]);
+
+  const updateUser = useCallback((nextUser: UserProfile) => {
+    setUser(nextUser);
+  }, []);
+
+  const updatePreferences = useCallback((next: DiscoveryPreferences) => {
+    setPreferences(next);
+  }, []);
 
   const passProfile = useCallback((profile: Profile) => {
     setPassedIds((prev) => new Set(prev).add(profile.id));
+    setLastPassedProfileId(profile.id);
   }, []);
+
+  const rewindLastPass = useCallback(() => {
+    if (!isSparkPlus || !lastPassedProfileId) {
+      return;
+    }
+    setPassedIds((prev) => {
+      const next = new Set(prev);
+      next.delete(lastPassedProfileId);
+      return next;
+    });
+    setLastPassedProfileId(null);
+  }, [isSparkPlus, lastPassedProfileId]);
 
   const blockProfile = useCallback((profileId: string) => {
     setBlockedIds((prev) => new Set(prev).add(profileId));
@@ -212,17 +340,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setConversations((prev) =>
       prev.filter((conversation) => conversation.match.profile.id !== profileId),
     );
+    setPendingLikeIds((prev) => {
+      const next = new Set(prev);
+      next.delete(profileId);
+      return next;
+    });
+  }, []);
+
+  const unmatchProfile = useCallback((profileId: string) => {
+    setMatches((prev) => prev.filter((match) => match.profile.id !== profileId));
+    setConversations((prev) =>
+      prev.filter((conversation) => conversation.match.profile.id !== profileId),
+    );
+    setLikedIds((prev) => {
+      const next = new Set(prev);
+      next.delete(profileId);
+      return next;
+    });
+    setPendingLikeIds((prev) => {
+      const next = new Set(prev);
+      next.delete(profileId);
+      return next;
+    });
+    setPassedIds((prev) => new Set(prev).add(profileId));
   }, []);
 
   const reportProfile = useCallback(
-    (profileId: string) => {
+    (profileId: string, _reason?: string) => {
       blockProfile(profileId);
     },
     [blockProfile],
   );
 
   const likeProfile = useCallback(
-    (profile: Profile): Match | null => {
+    (profile: Profile, sparkNote?: string): Match | null => {
       if (!canLike) {
         return null;
       }
@@ -230,6 +381,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setLikedIds((prev) => new Set(prev).add(profile.id));
       if (!isSparkPlus) {
         setDailyLikesUsed((count) => count + 1);
+      }
+
+      if (sparkNote) {
+        setSparkNotes((prev) => ({ ...prev, [profile.id]: sparkNote }));
+        const today = todayKey();
+        if (lastSparkNoteDate !== today) {
+          setLastSparkNoteDate(today);
+          setSparkNotesUsedToday(1);
+        } else {
+          setSparkNotesUsedToday((count) => count + 1);
+        }
       }
 
       if (!MUTUAL_MATCH_IDS.has(profile.id)) {
@@ -271,9 +433,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return [conversation, ...prev];
       });
 
+      if (notificationsEnabled) {
+        void scheduleMatchNotification(profile.name);
+      } else if (!notificationPromptDismissed) {
+        setShowNotificationPrompt(true);
+      }
+
       return match;
     },
-    [canLike, isSparkPlus],
+    [canLike, isSparkPlus, lastSparkNoteDate, notificationsEnabled, notificationPromptDismissed],
   );
 
   const sendMessage = useCallback((conversationId: string, text: string) => {
@@ -310,6 +478,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIsSparkPlus(true);
   }, []);
 
+  const activateBoost = useCallback(() => {
+    const until = new Date(Date.now() + BOOST_DURATION_MS).toISOString();
+    setBoostActiveUntil(until);
+  }, []);
+
+  const enableNotifications = useCallback(async () => {
+    const granted = await requestNotificationPermission();
+    setNotificationsEnabled(granted);
+    setShowNotificationPrompt(false);
+    setNotificationPromptDismissed(true);
+    return granted;
+  }, []);
+
+  const dismissNotificationPrompt = useCallback(() => {
+    setShowNotificationPrompt(false);
+    setNotificationPromptDismissed(true);
+  }, []);
+
   const getConversationIdForProfile = useCallback(
     (profileId: string) => {
       const conversation = conversations.find(
@@ -324,6 +510,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     () => ({
       hasOnboarded,
       isHydrated,
+      isAuthenticated,
       user,
       preferences,
       discoverQueue,
@@ -334,12 +521,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
       matches,
       conversations,
       incomingLikes: incomingLikeProfiles,
+      sparkNotes,
       dailyLikesUsed,
       remainingLikes,
+      remainingSparkNotes,
       canLike,
+      canSendSparkNote,
       likesTabBadge,
       matchesTabBadge,
+      isSparkPlus,
+      isBoosted,
+      boostActiveUntil,
+      notificationsEnabled,
+      canRewind,
       completeOnboarding,
+      signInWithAppleStub,
       updateUser,
       updatePreferences,
       passProfile,
@@ -348,12 +544,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
       getConversationIdForProfile,
       blockProfile,
       reportProfile,
-      isSparkPlus,
+      unmatchProfile,
       activateSparkPlus,
+      activateBoost,
+      rewindLastPass,
+      enableNotifications,
+      dismissNotificationPrompt,
+      showNotificationPrompt,
     }),
     [
       hasOnboarded,
       isHydrated,
+      isAuthenticated,
       user,
       preferences,
       discoverQueue,
@@ -363,12 +565,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
       blockedIds,
       matches,
       conversations,
+      sparkNotes,
       dailyLikesUsed,
       remainingLikes,
+      remainingSparkNotes,
       canLike,
+      canSendSparkNote,
       likesTabBadge,
       matchesTabBadge,
+      isSparkPlus,
+      isBoosted,
+      boostActiveUntil,
+      notificationsEnabled,
+      canRewind,
       completeOnboarding,
+      signInWithAppleStub,
       updateUser,
       updatePreferences,
       passProfile,
@@ -377,8 +588,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       getConversationIdForProfile,
       blockProfile,
       reportProfile,
-      isSparkPlus,
+      unmatchProfile,
       activateSparkPlus,
+      activateBoost,
+      rewindLastPass,
+      enableNotifications,
+      dismissNotificationPrompt,
+      showNotificationPrompt,
     ],
   );
 

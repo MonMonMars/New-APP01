@@ -43,7 +43,15 @@ export function LikesScreen() {
       </View>
 
       <View style={styles.grid}>
-        {incomingLikes.map((profile) => (
+        {incomingLikes.length === 0 ? (
+          <View style={styles.empty}>
+            <Text style={styles.emptyEmoji}>💫</Text>
+            <Text style={styles.emptyTitle}>No likes yet</Text>
+            <Text style={styles.emptySubtitle}>
+              Keep discovering — when someone likes you, they&apos;ll show up here.
+            </Text>
+          </View>
+        ) : incomingLikes.map((profile) => (
           <Pressable
             key={profile.id}
             style={styles.card}
@@ -162,5 +170,27 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: spacing.xs,
     fontWeight: '600',
+  },
+  empty: {
+    flex: 1,
+    alignItems: 'center',
+    padding: spacing.xl,
+    width: '100%',
+  },
+  emptyEmoji: {
+    fontSize: 40,
+    marginBottom: spacing.sm,
+  },
+  emptyTitle: {
+    color: colors.text,
+    fontSize: 20,
+    fontWeight: '800',
+  },
+  emptySubtitle: {
+    color: colors.textMuted,
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginTop: spacing.sm,
   },
 });

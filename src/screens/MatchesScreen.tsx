@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -6,6 +7,7 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { useApp } from '../context/AppContext';
 import { colors, radii, spacing } from '../theme';
 import { Conversation } from '../types/match';
+import { formatExpiresIn } from '../utils/matchTiming';
 
 type MatchesScreenProps = {
   onOpenChat: (conversationId: string) => void;
@@ -20,6 +22,7 @@ function ConversationRow({
 }) {
   const { match, lastMessage, yourTurn, unread } = conversation;
   const profile = match.profile;
+  const expiryLabel = formatExpiresIn(match.expiresAt);
 
   return (
     <Pressable style={styles.row} onPress={onPress}>
@@ -39,6 +42,9 @@ function ConversationRow({
         <Text style={[styles.preview, unread && styles.previewUnread]} numberOfLines={1}>
           {lastMessage ?? 'Say something nice!'}
         </Text>
+        {expiryLabel && (
+          <Text style={styles.expiryText}>{expiryLabel}</Text>
+        )}
       </View>
       {unread && <View style={styles.unreadDot} />}
     </Pressable>
@@ -47,6 +53,7 @@ function ConversationRow({
 
 export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
   const { conversations, matches } = useApp();
 
   const newMatches = matches.filter(
@@ -55,7 +62,11 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
-      <ScreenHeader title="Messages" rightIcon="shield-checkmark-outline" />
+      <ScreenHeader
+        title="Messages"
+        rightIcon="shield-checkmark-outline"
+        onRightPress={() => navigation.getParent()?.navigate('Safety')}
+      />
 
       <ScrollView contentContainerStyle={styles.content}>
         {newMatches.length > 0 && (
@@ -68,8 +79,13 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
                   style={styles.newMatch}
                   onPress={() => onOpenChat(`conv-${match.profile.id}`)}
                 >
-                  <Image source={{ uri: match.profile.photos[0] }} style={styles.newMatchPhoto} />
+                  <View style={styles.newMatchRing}>
+                    <Image source={{ uri: match.profile.photos[0] }} style={styles.newMatchPhoto} />
+                  </View>
                   <Text style={styles.newMatchName}>{match.profile.name}</Text>
+                  {formatExpiresIn(match.expiresAt) && (
+                    <Text style={styles.newMatchExpiry}>{formatExpiresIn(match.expiresAt)}</Text>
+                  )}
                 </Pressable>
               ))}
             </ScrollView>
@@ -124,20 +140,30 @@ const styles = StyleSheet.create({
   newMatch: {
     alignItems: 'center',
     marginRight: spacing.md,
-    width: 84,
+    width: 88,
   },
-  newMatchPhoto: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+  newMatchRing: {
+    padding: 3,
+    borderRadius: 40,
     borderWidth: 2,
     borderColor: colors.gradientEnd,
+  },
+  newMatchPhoto: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
   },
   newMatchName: {
     color: colors.text,
     fontSize: 12,
     marginTop: spacing.xs,
     fontWeight: '600',
+  },
+  newMatchExpiry: {
+    color: colors.rewind,
+    fontSize: 10,
+    fontWeight: '700',
+    marginTop: 2,
   },
   row: {
     flexDirection: 'row',
@@ -196,6 +222,12 @@ const styles = StyleSheet.create({
   previewUnread: {
     color: colors.text,
     fontWeight: '600',
+  },
+  expiryText: {
+    color: colors.rewind,
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 2,
   },
   unreadDot: {
     width: 10,

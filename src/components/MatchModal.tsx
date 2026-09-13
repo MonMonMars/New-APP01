@@ -1,5 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, radii, spacing } from '../theme';
 import { Profile } from '../types/profile';
@@ -7,6 +8,7 @@ import { Profile } from '../types/profile';
 type MatchModalProps = {
   visible: boolean;
   profile: Profile | null;
+  userPhoto: string;
   onClose: () => void;
   onMessage: () => void;
 };
@@ -14,35 +16,37 @@ type MatchModalProps = {
 export function MatchModal({
   visible,
   profile,
+  userPhoto,
   onClose,
   onMessage,
 }: MatchModalProps) {
+  const insets = useSafeAreaInsets();
+
   if (!profile) {
     return null;
   }
 
   return (
-    <Modal visible={visible} animationType="fade" transparent>
-      <View style={styles.overlay}>
-        <LinearGradient
-          colors={[colors.gradientStart, colors.gradientEnd]}
-          style={styles.sheet}
-        >
-          <Text style={styles.title}>It's a Match!</Text>
-          <Text style={styles.subtitle}>
-            You and {profile.name} liked each other.
-          </Text>
+    <Modal visible={visible} animationType="fade">
+      <LinearGradient
+        colors={[colors.gradientStart, colors.gradientEnd, '#C9184A']}
+        style={[styles.screen, { paddingTop: insets.top + spacing.xl }]}
+      >
+        <Text style={styles.kicker}>It&apos;s a</Text>
+        <Text style={styles.title}>Match!</Text>
+        <Text style={styles.subtitle}>
+          You and {profile.name} liked each other. Say hi before the spark fades.
+        </Text>
 
-          <View style={styles.avatars}>
-            <Image
-              source={{ uri: profile.photos[0] }}
-              style={styles.avatar}
-            />
-            <View style={styles.heartBadge}>
-              <Text style={styles.heart}>♥</Text>
-            </View>
+        <View style={styles.avatarRow}>
+          <Image source={{ uri: userPhoto }} style={[styles.avatar, styles.avatarLeft]} />
+          <View style={styles.heartBadge}>
+            <Text style={styles.heart}>♥</Text>
           </View>
+          <Image source={{ uri: profile.photos[0] }} style={[styles.avatar, styles.avatarRight]} />
+        </View>
 
+        <View style={[styles.actions, { paddingBottom: insets.bottom + spacing.lg }]}>
           <Pressable style={styles.primaryButton} onPress={onMessage}>
             <Text style={styles.primaryButtonText}>Send a Message</Text>
           </Pressable>
@@ -50,39 +54,46 @@ export function MatchModal({
           <Pressable style={styles.secondaryButton} onPress={onClose}>
             <Text style={styles.secondaryButtonText}>Keep Swiping</Text>
           </Pressable>
-        </LinearGradient>
-      </View>
+        </View>
+      </LinearGradient>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
+  screen: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.75)',
-    justifyContent: 'center',
-    padding: spacing.lg,
-  },
-  sheet: {
-    borderRadius: radii.card,
-    padding: spacing.xl,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.lg,
+  },
+  kicker: {
+    color: colors.text,
+    fontSize: 28,
+    fontWeight: '600',
+    fontStyle: 'italic',
+    opacity: 0.9,
   },
   title: {
     color: colors.text,
-    fontSize: 34,
-    fontWeight: '800',
+    fontSize: 52,
+    fontWeight: '900',
     fontStyle: 'italic',
+    marginTop: -4,
   },
   subtitle: {
     color: colors.text,
     fontSize: 16,
-    marginTop: spacing.sm,
+    marginTop: spacing.md,
     textAlign: 'center',
+    lineHeight: 24,
+    opacity: 0.95,
+    maxWidth: 300,
   },
-  avatars: {
-    marginVertical: spacing.xl,
+  avatarRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    marginVertical: spacing.xl,
   },
   avatar: {
     width: 120,
@@ -91,19 +102,30 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderColor: colors.text,
   },
+  avatarLeft: {
+    marginRight: -20,
+    zIndex: 1,
+  },
+  avatarRight: {
+    marginLeft: -20,
+    zIndex: 1,
+  },
   heartBadge: {
-    position: 'absolute',
-    bottom: -8,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: colors.text,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 2,
   },
   heart: {
     color: colors.gradientEnd,
-    fontSize: 20,
+    fontSize: 24,
+  },
+  actions: {
+    width: '100%',
+    marginTop: 'auto',
   },
   primaryButton: {
     width: '100%',
@@ -114,16 +136,17 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     color: colors.gradientEnd,
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 17,
+    fontWeight: '800',
   },
   secondaryButton: {
     marginTop: spacing.md,
     paddingVertical: spacing.sm,
+    alignItems: 'center',
   },
   secondaryButtonText: {
     color: colors.text,
-    fontSize: 15,
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: '700',
   },
 });

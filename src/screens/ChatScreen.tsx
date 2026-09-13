@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
 import {
+  Alert,
   FlatList,
   Image,
   KeyboardAvoidingView,
@@ -13,9 +14,11 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { SafetyActionSheet } from '../components/SafetyActionSheet';
 import { useApp } from '../context/AppContext';
 import { colors, radii, spacing } from '../theme';
 import { Message } from '../types/match';
+import { formatExpiresIn } from '../utils/matchTiming';
 
 const icebreakers = [
   'What’s your go-to weekend plan?',
@@ -30,8 +33,9 @@ type ChatScreenProps = {
 
 export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const insets = useSafeAreaInsets();
-  const { conversations, sendMessage } = useApp();
+  const { conversations, sendMessage, blockProfile, reportProfile } = useApp();
   const [draft, setDraft] = useState('');
+  const [showSafety, setShowSafety] = useState(false);
 
   const conversation = useMemo(
     () => conversations.find((c) => c.id === conversationId),
@@ -50,10 +54,25 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   }
 
   const profile = conversation.match.profile;
+  const expiryLabel = formatExpiresIn(conversation.match.expiresAt);
 
   const handleSend = (text: string) => {
     sendMessage(conversationId, text);
     setDraft('');
+  };
+
+  const handleBlock = () => {
+    setShowSafety(false);
+    blockProfile(profile.id);
+    Alert.alert('Blocked', `${profile.name} has been blocked.`);
+    onBack();
+  };
+
+  const handleReport = () => {
+    setShowSafety(false);
+    reportProfile(profile.id);
+    Alert.alert('Report submitted', 'Thanks for helping keep Spark safe.');
+    onBack();
   };
 
   const renderMessage = ({ item }: { item: Message }) => (
@@ -76,10 +95,12 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         <Image source={{ uri: profile.photos[0] }} style={styles.headerAvatar} />
         <View style={styles.headerText}>
           <Text style={styles.headerName}>{profile.name}</Text>
-          <Text style={styles.headerMeta}>Matched recently</Text>
+          <Text style={styles.headerMeta}>
+            {expiryLabel ?? 'Matched recently'}
+          </Text>
         </View>
-        <Pressable style={styles.headerAction}>
-          <Ionicons name="videocam-outline" size={22} color={colors.text} />
+        <Pressable style={styles.headerAction} onPress={() => setShowSafety(true)}>
+          <Ionicons name="ellipsis-vertical" size={22} color={colors.text} />
         </Pressable>
       </View>
 
@@ -122,6 +143,14 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
           <Ionicons name="send" size={18} color={colors.text} />
         </Pressable>
       </View>
+
+      <SafetyActionSheet
+        visible={showSafety}
+        profileName={profile.name}
+        onClose={() => setShowSafety(false)}
+        onReport={handleReport}
+        onBlock={handleBlock}
+      />
     </KeyboardAvoidingView>
   );
 }

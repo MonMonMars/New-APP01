@@ -1,14 +1,15 @@
 import { useNavigation } from '@react-navigation/native';
 import { useCallback, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesSheet';
+import { LikeLimitModal } from '../components/LikeLimitModal';
 import { MatchModal } from '../components/MatchModal';
-import { WaitingForMatchModal } from '../components/WaitingForMatchModal';
 import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { SwipeDeck, SwipeDeckHandle } from '../components/SwipeDeck';
+import { WaitingForMatchModal } from '../components/WaitingForMatchModal';
 import { useApp } from '../context/AppContext';
 import { colors, spacing } from '../theme';
 import { Profile } from '../types/profile';
@@ -24,6 +25,11 @@ export function DiscoverScreen() {
     passProfile,
     likeProfile,
     getConversationIdForProfile,
+    canLike,
+    remainingLikes,
+    user,
+    blockProfile,
+    reportProfile,
   } = useApp();
 
   const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
@@ -32,11 +38,17 @@ export function DiscoverScreen() {
   const [showWaiting, setShowWaiting] = useState(false);
   const [detailProfile, setDetailProfile] = useState<Profile | null>(null);
   const [showPreferences, setShowPreferences] = useState(false);
+  const [showLikeLimit, setShowLikeLimit] = useState(false);
 
   const handleSwipe = useCallback(
     (profile: Profile, direction: 'left' | 'right') => {
       if (direction === 'left') {
         passProfile(profile);
+        return;
+      }
+
+      if (!canLike) {
+        setShowLikeLimit(true);
         return;
       }
 
@@ -50,7 +62,7 @@ export function DiscoverScreen() {
       setWaitingProfile(profile);
       setShowWaiting(true);
     },
-    [likeProfile, passProfile],
+    [canLike, likeProfile, passProfile],
   );
 
   const handleFindMorePeople = useCallback(() => {
@@ -73,6 +85,32 @@ export function DiscoverScreen() {
     navigation.getParent()?.navigate('Chat', { conversationId });
   }, [getConversationIdForProfile, matchProfile, navigation]);
 
+  const handleWidenFilters = useCallback(() => {
+    updatePreferences({
+      ...preferences,
+      maxDistanceMiles: Math.min(preferences.maxDistanceMiles + 10, 100),
+      maxAge: Math.min(preferences.maxAge + 5, 55),
+    });
+  }, [preferences, updatePreferences]);
+
+  const handleBlockDetail = useCallback(
+    (profileId: string) => {
+      blockProfile(profileId);
+      setDetailProfile(null);
+      Alert.alert('Blocked', 'You will no longer see this profile.');
+    },
+    [blockProfile],
+  );
+
+  const handleReportDetail = useCallback(
+    (profileId: string) => {
+      reportProfile(profileId);
+      setDetailProfile(null);
+      Alert.alert('Report submitted', 'Thanks for helping keep Spark safe.');
+    },
+    [reportProfile],
+  );
+
   const currentProfile = discoverQueue[0] ?? null;
 
   return (
@@ -83,18 +121,27 @@ export function DiscoverScreen() {
         onRightPress={() => setShowPreferences(true)}
       />
 
+      {!canLike && (
+        <Pressable style={styles.limitBanner} onPress={() => setShowLikeLimit(true)}>
+          <Text style={styles.limitBannerText}>
+            {remainingLikes === 0 ? 'Out of likes today' : `${remainingLikes} likes left today`}
+          </Text>
+        </Pressable>
+      )}
+
       <View style={styles.deckArea}>
         {discoverQueue.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyTitle}>No more profiles nearby</Text>
+            <Text style={styles.emptyEmoji}>🌍</Text>
+            <Text style={styles.emptyTitle}>No more people nearby</Text>
             <Text style={styles.emptySubtitle}>
-              Try widening your distance or age range in discovery settings.
+              You&apos;ve seen everyone in your area. Widen filters or check back later.
             </Text>
-            <Pressable
-              style={styles.settingsButton}
-              onPress={() => setShowPreferences(true)}
-            >
-              <Text style={styles.settingsButtonText}>Discovery settings</Text>
+            <Pressable style={styles.primaryButton} onPress={handleWidenFilters}>
+              <Text style={styles.primaryButtonText}>Widen filters</Text>
+            </Pressable>
+            <Pressable style={styles.secondaryButton} onPress={() => setShowPreferences(true)}>
+              <Text style={styles.secondaryButtonText}>Discovery settings</Text>
             </Pressable>
           </View>
         ) : (
@@ -103,6 +150,8 @@ export function DiscoverScreen() {
             profiles={discoverQueue}
             onSwipe={handleSwipe}
             onEmpty={() => undefined}
+            canLike={canLike}
+            onLikeBlocked={() => setShowLikeLimit(true)}
           />
         )}
       </View>
@@ -116,6 +165,7 @@ export function DiscoverScreen() {
       <MatchModal
         visible={showMatch}
         profile={matchProfile}
+        userPhoto={user.photos[0]}
         onClose={handleCloseMatch}
         onMessage={handleOpenChat}
       />
@@ -126,10 +176,21 @@ export function DiscoverScreen() {
         onFindMorePeople={handleFindMorePeople}
       />
 
+      <LikeLimitModal
+        visible={showLikeLimit}
+        onClose={() => setShowLikeLimit(false)}
+        onUpgrade={() => {
+          setShowLikeLimit(false);
+          navigation.getParent()?.navigate('SparkPlus');
+        }}
+      />
+
       <ProfileDetailSheet
         profile={detailProfile}
         visible={detailProfile !== null}
         onClose={() => setDetailProfile(null)}
+        onBlock={handleBlockDetail}
+        onReport={handleReportDetail}
       />
 
       <DiscoveryPreferencesSheet
@@ -147,6 +208,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  limitBanner: {
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.sm,
+    backgroundColor: colors.surface,
+    borderRadius: 999,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+  },
+  limitBannerText: {
+    color: colors.gradientEnd,
+    fontSize: 13,
+    fontWeight: '700',
+  },
   deckArea: {
     flex: 1,
     marginHorizontal: spacing.md,
@@ -159,27 +233,41 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
     gap: spacing.sm,
   },
+  emptyEmoji: {
+    fontSize: 48,
+    marginBottom: spacing.sm,
+  },
   emptyTitle: {
     color: colors.text,
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: 24,
+    fontWeight: '800',
   },
   emptySubtitle: {
     color: colors.textMuted,
     fontSize: 15,
     textAlign: 'center',
     lineHeight: 22,
+    marginBottom: spacing.md,
   },
-  settingsButton: {
-    marginTop: spacing.md,
-    backgroundColor: colors.surface,
+  primaryButton: {
+    marginTop: spacing.sm,
+    backgroundColor: colors.gradientEnd,
     borderRadius: 999,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.sm + 4,
   },
-  settingsButtonText: {
-    color: colors.gradientEnd,
-    fontWeight: '700',
+  primaryButtonText: {
+    color: colors.text,
+    fontWeight: '800',
+    fontSize: 15,
+  },
+  secondaryButton: {
+    paddingVertical: spacing.sm,
+  },
+  secondaryButtonText: {
+    color: colors.textMuted,
+    fontWeight: '600',
+    fontSize: 14,
   },
   infoPill: {
     alignSelf: 'center',

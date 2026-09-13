@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -7,15 +8,23 @@ import { useApp } from '../context/AppContext';
 import { colors, radii, spacing } from '../theme';
 
 const settingsRows = [
-  { icon: 'options-outline' as const, label: 'Discovery preferences' },
-  { icon: 'shield-checkmark-outline' as const, label: 'Safety & privacy' },
-  { icon: 'notifications-outline' as const, label: 'Notifications' },
-  { icon: 'diamond-outline' as const, label: 'Spark+ subscription' },
+  { icon: 'options-outline' as const, label: 'Discovery preferences', route: null },
+  { icon: 'shield-checkmark-outline' as const, label: 'Safety & privacy', route: 'Safety' as const },
+  { icon: 'notifications-outline' as const, label: 'Notifications', route: null },
+  { icon: 'diamond-outline' as const, label: 'Spark+ subscription', route: 'SparkPlus' as const },
 ];
 
 export function ProfileScreen() {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
   const { user, likedIds, matches } = useApp();
+
+  const handleRowPress = (route: 'Safety' | 'SparkPlus' | null) => {
+    if (!route) {
+      return;
+    }
+    navigation.getParent()?.navigate(route);
+  };
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
@@ -61,7 +70,11 @@ export function ProfileScreen() {
 
         <View style={styles.section}>
           {settingsRows.map((row) => (
-            <Pressable key={row.label} style={styles.settingsRow}>
+            <Pressable
+              key={row.label}
+              style={styles.settingsRow}
+              onPress={() => handleRowPress(row.route)}
+            >
               <Ionicons name={row.icon} size={20} color={colors.textMuted} />
               <Text style={styles.settingsLabel}>{row.label}</Text>
               <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />

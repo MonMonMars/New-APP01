@@ -2,6 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
+import { type ReactNode } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { useApp } from '../context/AppContext';
 import { ChatScreen } from '../screens/ChatScreen';
@@ -14,6 +16,20 @@ import { SparkPlusScreen } from '../screens/SparkPlusScreen';
 import { OnboardingFlow } from '../screens/onboarding/OnboardingFlow';
 import { colors } from '../theme';
 import { MainTabParamList, RootStackParamList } from '../types/navigation';
+
+function HydrationGate({ children }: { children: ReactNode }) {
+  const { isHydrated } = useApp();
+
+  if (!isHydrated) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color={colors.gradientEnd} />
+      </View>
+    );
+  }
+
+  return <>{children}</>;
+}
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -133,7 +149,18 @@ function RootNavigator() {
 export function AppNavigator() {
   return (
     <NavigationContainer>
-      <RootNavigator />
+      <HydrationGate>
+        <RootNavigator />
+      </HydrationGate>
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  loading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.background,
+  },
+});

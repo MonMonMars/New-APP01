@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useMemo, useState } from 'react';
 import {
   Alert,
@@ -33,6 +34,7 @@ type ChatScreenProps = {
 
 export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
   const { conversations, sendMessage, blockProfile, reportProfile } = useApp();
   const [draft, setDraft] = useState('');
   const [showSafety, setShowSafety] = useState(false);
@@ -104,24 +106,31 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         </Pressable>
       </View>
 
-      {conversation.messages.length === 0 && (
-        <View style={styles.icebreakers}>
-          <Text style={styles.icebreakerTitle}>Break the ice</Text>
-          {icebreakers.map((prompt) => (
-            <Pressable key={prompt} style={styles.icebreakerChip} onPress={() => handleSend(prompt)}>
-              <Text style={styles.icebreakerText}>{prompt}</Text>
-            </Pressable>
-          ))}
+      {conversation.messages.length === 0 ? (
+        <View style={styles.emptyThread}>
+          <Text style={styles.emptyEmoji}>👋</Text>
+          <Text style={styles.emptyTitle}>Say hi to {profile.name}</Text>
+          <Text style={styles.emptySubtitle}>
+            Matches expire in 24 hours — send the first message to keep the spark alive.
+          </Text>
+          <View style={styles.icebreakers}>
+            <Text style={styles.icebreakerTitle}>Break the ice</Text>
+            {icebreakers.map((prompt) => (
+              <Pressable key={prompt} style={styles.icebreakerChip} onPress={() => handleSend(prompt)}>
+                <Text style={styles.icebreakerText}>{prompt}</Text>
+              </Pressable>
+            ))}
+          </View>
         </View>
+      ) : (
+        <FlatList
+          data={conversation.messages}
+          keyExtractor={(item) => item.id}
+          renderItem={renderMessage}
+          contentContainerStyle={styles.messages}
+          inverted={false}
+        />
       )}
-
-      <FlatList
-        data={conversation.messages}
-        keyExtractor={(item) => item.id}
-        renderItem={renderMessage}
-        contentContainerStyle={styles.messages}
-        inverted={false}
-      />
 
       <View style={[styles.composer, { paddingBottom: insets.bottom + spacing.sm }]}>
         <Pressable style={styles.gifButton}>
@@ -150,6 +159,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         onClose={() => setShowSafety(false)}
         onReport={handleReport}
         onBlock={handleBlock}
+        onOpenSafetyCenter={() => navigation.getParent()?.navigate('Safety')}
       />
     </KeyboardAvoidingView>
   );
@@ -205,8 +215,31 @@ const styles = StyleSheet.create({
   headerAction: {
     padding: spacing.sm,
   },
-  icebreakers: {
+  emptyThread: {
+    flex: 1,
     padding: spacing.lg,
+    justifyContent: 'center',
+  },
+  emptyEmoji: {
+    fontSize: 40,
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+  },
+  emptyTitle: {
+    color: colors.text,
+    fontSize: 22,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    color: colors.textMuted,
+    fontSize: 14,
+    lineHeight: 21,
+    textAlign: 'center',
+    marginTop: spacing.sm,
+    marginBottom: spacing.lg,
+  },
+  icebreakers: {
     gap: spacing.sm,
   },
   icebreakerTitle: {

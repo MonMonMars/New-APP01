@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesSheet';
 import { LikeLimitModal } from '../components/LikeLimitModal';
 import { MatchModal } from '../components/MatchModal';
+import { MatchToast } from '../components/MatchToast';
 import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { SwipeDeck, SwipeDeckHandle } from '../components/SwipeDeck';
@@ -27,6 +28,7 @@ export function DiscoverScreen() {
     getConversationIdForProfile,
     canLike,
     remainingLikes,
+    isSparkPlus,
     user,
     blockProfile,
     reportProfile,
@@ -39,6 +41,8 @@ export function DiscoverScreen() {
   const [detailProfile, setDetailProfile] = useState<Profile | null>(null);
   const [showPreferences, setShowPreferences] = useState(false);
   const [showLikeLimit, setShowLikeLimit] = useState(false);
+  const [toastProfileName, setToastProfileName] = useState<string | null>(null);
+  const [showMatchToast, setShowMatchToast] = useState(false);
 
   const handleSwipe = useCallback(
     (profile: Profile, direction: 'left' | 'right') => {
@@ -56,6 +60,8 @@ export function DiscoverScreen() {
       if (match) {
         setMatchProfile(profile);
         setShowMatch(true);
+        setToastProfileName(profile.name);
+        setShowMatchToast(true);
         return;
       }
 
@@ -111,6 +117,11 @@ export function DiscoverScreen() {
     [reportProfile],
   );
 
+  const dismissMatchToast = useCallback(() => {
+    setShowMatchToast(false);
+    setToastProfileName(null);
+  }, []);
+
   const currentProfile = discoverQueue[0] ?? null;
 
   return (
@@ -121,10 +132,19 @@ export function DiscoverScreen() {
         onRightPress={() => setShowPreferences(true)}
       />
 
-      {!canLike && (
-        <Pressable style={styles.limitBanner} onPress={() => setShowLikeLimit(true)}>
+      {!isSparkPlus && (
+        <Pressable
+          style={[styles.limitBanner, !canLike && styles.limitBannerExhausted]}
+          onPress={() => {
+            if (!canLike) {
+              setShowLikeLimit(true);
+            }
+          }}
+        >
           <Text style={styles.limitBannerText}>
-            {remainingLikes === 0 ? 'Out of likes today' : `${remainingLikes} likes left today`}
+            {remainingLikes === 0
+              ? 'Out of likes today — tap to upgrade'
+              : `${remainingLikes} of 10 likes left today`}
           </Text>
         </Pressable>
       )}
@@ -161,6 +181,12 @@ export function DiscoverScreen() {
           <Text style={styles.infoPillText}>View full profile</Text>
         </Pressable>
       )}
+
+      <MatchToast
+        visible={showMatchToast}
+        profileName={toastProfileName}
+        onDismiss={dismissMatchToast}
+      />
 
       <MatchModal
         visible={showMatch}
@@ -215,6 +241,10 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingVertical: spacing.sm,
     alignItems: 'center',
+  },
+  limitBannerExhausted: {
+    borderWidth: 1,
+    borderColor: colors.gradientEnd,
   },
   limitBannerText: {
     color: colors.gradientEnd,

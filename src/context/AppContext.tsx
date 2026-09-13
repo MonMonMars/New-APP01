@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -13,9 +14,26 @@ import { Conversation, Match } from '../types/match';
 import {
   defaultPreferences,
   DiscoveryPreferences,
+  ShowMePreference,
 } from '../types/preferences';
 import { Profile, UserProfile } from '../types/profile';
 import { FREE_DAILY_LIKE_LIMIT } from '../types/subscription';
+import { loadPersistedState, savePersistedState } from '../utils/persistence';
+
+function matchesGenderFilter(profile: Profile, showMe: ShowMePreference): boolean {
+  switch (showMe) {
+    case 'everyone':
+      return true;
+    case 'women':
+      return profile.gender === 'woman';
+    case 'men':
+      return profile.gender === 'man';
+    default: {
+      const _exhaustive: never = showMe;
+      return _exhaustive;
+    }
+  }
+}
 
 function filterDiscoverProfiles(
   profiles: Profile[],
@@ -27,12 +45,14 @@ function filterDiscoverProfiles(
       !excludedIds.has(profile.id) &&
       profile.distanceMiles <= preferences.maxDistanceMiles &&
       profile.age >= preferences.minAge &&
-      profile.age <= preferences.maxAge,
+      profile.age <= preferences.maxAge &&
+      matchesGenderFilter(profile, preferences.showMe),
   );
 }
 
 type AppContextValue = {
   hasOnboarded: boolean;
+  isHydrated: boolean;
   user: UserProfile;
   preferences: DiscoveryPreferences;
   discoverQueue: Profile[];
@@ -49,6 +69,7 @@ type AppContextValue = {
   likesTabBadge: number;
   matchesTabBadge: number;
   completeOnboarding: (user: UserProfile) => void;
+  updateUser: (user: UserProfile) => void;
   updatePreferences: (preferences: DiscoveryPreferences) => void;
   passProfile: (profile: Profile) => void;
   likeProfile: (profile: Profile) => Match | null;
@@ -72,6 +93,7 @@ const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [hasOnboarded, setHasOnboarded] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [user, setUser] = useState<UserProfile>(defaultUser);
   const [preferences, setPreferences] = useState<DiscoveryPreferences>(defaultPreferences);
   const [passedIds, setPassedIds] = useState<Set<string>>(new Set());
@@ -82,6 +104,39 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [conversations, setConversations] = useState<Conversation[]>(seedConversations);
   const [dailyLikesUsed, setDailyLikesUsed] = useState(0);
   const [isSparkPlus, setIsSparkPlus] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    loadPersistedState().then((saved) => {
+      if (cancelled || !saved) {
+        setIsHydrated(true);
+        return;
+      }
+      setUser(saved.user);
+      setPreferences(saved.preferences);
+      setHasOnboarded(saved.hasOnboarded);
+      setIsHydrated(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const persistState = useCallback(
+    (nextUser: UserProfile, nextPreferences: DiscoveryPreferences, onboarded: boolean) => {
+      if (!onboarded) {
+        return;
+      }
+      void savePersistedState({
+        hasOnboarded: true,
+        user: nextUser,
+        preferences: nextPreferences,
+      });
+    },
+    [],
+  );
 
   const excludedIds = useMemo(() => {
     const ids = new Set<string>();
@@ -118,14 +173,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return newMatchCount + unreadCount + yourTurnCount;
   }, [conversations, matches]);
 
-  const completeOnboarding = useCallback((nextUser: UserProfile) => {
-    setUser(nextUser);
-    setHasOnboarded(true);
-  }, []);
+  const completeOnboarding = useCallback(
+    (nextUser: UserProfile) => {
+      setUser(nextUser);
+      setHasOnboarded(true);
+      persistState(nextUser, preferences, true);
+    },
+    [persistState, preferences],
+  );
 
-  const updatePreferences = useCallback((next: DiscoveryPreferences) => {
-    setPreferences(next);
-  }, []);
+  const updateUser = useCallback(
+    (nextUser: UserProfile) => {
+      setUser(nextUser);
+      if (hasOnboarded) {
+        persistState(nextUser, preferences, true);
+      }
+    },
+    [hasOnboarded, persistState, preferences],
+  );
+
+  const updatePreferences = useCallback(
+    (next: DiscoveryPreferences) => {
+      setPreferences(next);
+      if (hasOnboarded) {
+        persistState(user, next, true);
+      }
+    },
+    [hasOnboarded, persistState, user],
+  );
 
   const passProfile = useCallback((profile: Profile) => {
     setPassedIds((prev) => new Set(prev).add(profile.id));
@@ -248,6 +323,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AppContextValue>(
     () => ({
       hasOnboarded,
+      isHydrated,
       user,
       preferences,
       discoverQueue,
@@ -264,6 +340,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       likesTabBadge,
       matchesTabBadge,
       completeOnboarding,
+      updateUser,
       updatePreferences,
       passProfile,
       likeProfile,
@@ -276,6 +353,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }),
     [
       hasOnboarded,
+      isHydrated,
       user,
       preferences,
       discoverQueue,
@@ -291,6 +369,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       likesTabBadge,
       matchesTabBadge,
       completeOnboarding,
+      updateUser,
       updatePreferences,
       passProfile,
       likeProfile,

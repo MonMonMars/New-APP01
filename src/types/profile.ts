@@ -3,12 +3,15 @@ export type ProfilePrompt = {
   answer: string;
 };
 
+export type ProfileGender = 'woman' | 'man' | 'nonbinary';
+
 export type Profile = {
   id: string;
   name: string;
   age: number;
   bio: string;
   distanceMiles: number;
+  gender: ProfileGender;
   photos: string[];
   interests: string[];
   job?: string;

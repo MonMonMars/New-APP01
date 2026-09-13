@@ -32,7 +32,7 @@ export function LikesScreen() {
         </Text>
         <Text style={styles.bannerSubtitle}>
           {isSparkPlus
-            ? 'You can see everyone who liked you with Spark+.'
+            ? 'Spark+ unlocked — see who liked you below.'
             : 'Upgrade to Spark+ to see who they are and match instantly.'}
         </Text>
         {!isSparkPlus && (
@@ -44,12 +44,24 @@ export function LikesScreen() {
 
       <View style={styles.grid}>
         {incomingLikes.map((profile) => (
-          <Pressable key={profile.id} style={styles.card} onPress={openPaywall}>
-            <Image source={{ uri: profile.photos[0] }} style={styles.photo} blurRadius={18} />
-            <View style={styles.cardOverlay}>
-              <Text style={styles.cardName}>???</Text>
-              {!isSparkPlus && (
+          <Pressable
+            key={profile.id}
+            style={styles.card}
+            onPress={isSparkPlus ? undefined : openPaywall}
+          >
+            <Image
+              source={{ uri: profile.photos[0] }}
+              style={styles.photo}
+              blurRadius={isSparkPlus ? 0 : 18}
+            />
+            <View style={[styles.cardOverlay, isSparkPlus && styles.cardOverlayRevealed]}>
+              <Text style={styles.cardName}>
+                {isSparkPlus ? `${profile.name}, ${profile.age}` : '???'}
+              </Text>
+              {!isSparkPlus ? (
                 <Text style={styles.cardHint}>Tap to reveal</Text>
+              ) : (
+                <Text style={styles.cardHint}>{profile.distanceMiles} mi away</Text>
               )}
             </View>
           </Pressable>
@@ -135,9 +147,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  cardOverlayRevealed: {
+    backgroundColor: 'rgba(0,0,0,0.25)',
+    justifyContent: 'flex-end',
+    padding: spacing.sm,
+  },
   cardName: {
     color: colors.text,
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: '800',
   },
   cardHint: {

@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
+import { LayoutChangeEvent, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   SharedValue,
   useAnimatedStyle,
@@ -19,6 +19,8 @@ type DropTargetsProps = {
   heartActive: SharedValue<number>;
   onTrashLayout: (layout: ZoneLayout) => void;
   onHeartLayout: (layout: ZoneLayout) => void;
+  onTrashPress?: () => void;
+  onHeartPress?: () => void;
 };
 
 const TARGET_SIZE = 68;
@@ -28,9 +30,16 @@ type TargetButtonProps = {
   color: string;
   active: SharedValue<number>;
   onLayout: (event: LayoutChangeEvent) => void;
+  onPress?: () => void;
 };
 
-function TargetButton({ icon, color, active, onLayout }: TargetButtonProps) {
+function TargetButton({
+  icon,
+  color,
+  active,
+  onLayout,
+  onPress,
+}: TargetButtonProps) {
   const animatedStyle = useAnimatedStyle(() => {
     const intensity = active.value;
     return {
@@ -46,11 +55,13 @@ function TargetButton({ icon, color, active, onLayout }: TargetButtonProps) {
   }));
 
   return (
-    <Animated.View style={[styles.target, animatedStyle]} onLayout={onLayout}>
-      <Animated.View style={iconStyle}>
-        <Ionicons name={icon} size={32} color={color} />
+    <Pressable onPress={onPress} hitSlop={12}>
+      <Animated.View style={[styles.target, animatedStyle]} onLayout={onLayout}>
+        <Animated.View style={iconStyle}>
+          <Ionicons name={icon} size={32} color={color} />
+        </Animated.View>
       </Animated.View>
-    </Animated.View>
+    </Pressable>
   );
 }
 
@@ -59,6 +70,8 @@ export function DropTargets({
   heartActive,
   onTrashLayout,
   onHeartLayout,
+  onTrashPress,
+  onHeartPress,
 }: DropTargetsProps) {
   const handleTrashLayout = (event: LayoutChangeEvent) => {
     onTrashLayout(event.nativeEvent.layout);
@@ -69,18 +82,20 @@ export function DropTargets({
   };
 
   return (
-    <View style={styles.row} pointerEvents="none">
+    <View style={styles.row} pointerEvents="box-none">
       <TargetButton
         icon="trash-outline"
         color={colors.nope}
         active={trashActive}
         onLayout={handleTrashLayout}
+        onPress={onTrashPress}
       />
       <TargetButton
         icon="heart"
         color={colors.like}
         active={heartActive}
         onLayout={handleHeartLayout}
+        onPress={onHeartPress}
       />
     </View>
   );

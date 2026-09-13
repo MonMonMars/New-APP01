@@ -1,21 +1,34 @@
-import { useCallback, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { useCallback, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesSheet';
 import { MatchModal } from '../components/MatchModal';
 import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
 import { ScreenHeader } from '../components/ScreenHeader';
-import { SwipeDeck } from '../components/SwipeDeck';
+import { SwipeDeck, SwipeDeckHandle } from '../components/SwipeDeck';
 import { useApp } from '../context/AppContext';
 import { colors, spacing } from '../theme';
 import { Profile } from '../types/profile';
 
 export function DiscoverScreen() {
   const insets = useSafeAreaInsets();
-  const { discoverQueue, passProfile, likeProfile } = useApp();
+  const navigation = useNavigation();
+  const deckRef = useRef<SwipeDeckHandle>(null);
+  const {
+    discoverQueue,
+    preferences,
+    updatePreferences,
+    passProfile,
+    likeProfile,
+    getConversationIdForProfile,
+  } = useApp();
+
   const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
   const [showMatch, setShowMatch] = useState(false);
   const [detailProfile, setDetailProfile] = useState<Profile | null>(null);
+  const [showPreferences, setShowPreferences] = useState(false);
 
   const handleSwipe = useCallback(
     (profile: Profile, direction: 'left' | 'right') => {
@@ -38,6 +51,16 @@ export function DiscoverScreen() {
     setMatchProfile(null);
   }, []);
 
+  const handleOpenChat = useCallback(() => {
+    if (!matchProfile) {
+      return;
+    }
+    const conversationId = getConversationIdForProfile(matchProfile.id);
+    setShowMatch(false);
+    setMatchProfile(null);
+    navigation.getParent()?.navigate('Chat', { conversationId });
+  }, [getConversationIdForProfile, matchProfile, navigation]);
+
   const currentProfile = discoverQueue[0] ?? null;
 
   return (
@@ -45,7 +68,7 @@ export function DiscoverScreen() {
       <ScreenHeader
         showLogo
         rightIcon="options-outline"
-        onRightPress={() => currentProfile && setDetailProfile(currentProfile)}
+        onRightPress={() => setShowPreferences(true)}
       />
 
       <View style={styles.deckArea}>
@@ -53,11 +76,18 @@ export function DiscoverScreen() {
           <View style={styles.emptyState}>
             <Text style={styles.emptyTitle}>No more profiles nearby</Text>
             <Text style={styles.emptySubtitle}>
-              Check back later or expand your distance settings.
+              Try widening your distance or age range in discovery settings.
             </Text>
+            <Pressable
+              style={styles.settingsButton}
+              onPress={() => setShowPreferences(true)}
+            >
+              <Text style={styles.settingsButtonText}>Discovery settings</Text>
+            </Pressable>
           </View>
         ) : (
           <SwipeDeck
+            ref={deckRef}
             profiles={discoverQueue}
             onSwipe={handleSwipe}
             onEmpty={() => undefined}
@@ -75,13 +105,20 @@ export function DiscoverScreen() {
         visible={showMatch}
         profile={matchProfile}
         onClose={handleCloseMatch}
-        onMessage={handleCloseMatch}
+        onMessage={handleOpenChat}
       />
 
       <ProfileDetailSheet
         profile={detailProfile}
         visible={detailProfile !== null}
         onClose={() => setDetailProfile(null)}
+      />
+
+      <DiscoveryPreferencesSheet
+        visible={showPreferences}
+        preferences={preferences}
+        onClose={() => setShowPreferences(false)}
+        onChange={updatePreferences}
       />
     </View>
   );
@@ -114,6 +151,17 @@ const styles = StyleSheet.create({
     fontSize: 15,
     textAlign: 'center',
     lineHeight: 22,
+  },
+  settingsButton: {
+    marginTop: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: 999,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm + 2,
+  },
+  settingsButtonText: {
+    color: colors.gradientEnd,
+    fontWeight: '700',
   },
   infoPill: {
     alignSelf: 'center',

@@ -20,6 +20,7 @@ export const mockProfiles: Profile[] = [
       'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=800&q=80',
     ],
     interests: ['Hiking', 'Photography', 'Espresso'],
+    mostCompatible: true,
     prompts: [
       { question: 'My simple pleasures', answer: 'Morning coffee and a long walk.' },
       { question: 'I go crazy for', answer: 'Live music and good typography.' },
@@ -57,6 +58,7 @@ export const mockProfiles: Profile[] = [
       'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80',
     ],
     interests: ['Travel', 'Yoga', 'Ramen'],
+    spotlight: true,
     prompts: [
       { question: 'The way to win me over is', answer: 'Recommend a hidden gem restaurant.' },
     ],

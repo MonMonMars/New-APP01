@@ -13,6 +13,21 @@ type MatchModalProps = {
   onMessage: () => void;
 };
 
+const OPENING_MOVES = [
+  'What\'s your go-to weekend plan?',
+  'Best hidden gem in the city?',
+  'Coffee or cocktails first date?',
+];
+
+function pickOpeningMove(profile: Profile): string {
+  if (profile.prompts && profile.prompts.length > 0) {
+    const prompt = profile.prompts[0];
+    return `Try: "${prompt.answer}"`;
+  }
+  const index = parseInt(profile.id, 10) % OPENING_MOVES.length;
+  return OPENING_MOVES[index];
+}
+
 export function MatchModal({
   visible,
   profile,
@@ -25,6 +40,8 @@ export function MatchModal({
   if (!profile) {
     return null;
   }
+
+  const openingMove = pickOpeningMove(profile);
 
   return (
     <Modal visible={visible} animationType="fade">
@@ -46,13 +63,18 @@ export function MatchModal({
           <Image source={{ uri: profile.photos[0] }} style={[styles.avatar, styles.avatarRight]} />
         </View>
 
+        <View style={styles.openingMoveCard}>
+          <Text style={styles.openingMoveLabel}>Opening Move</Text>
+          <Text style={styles.openingMoveText}>{openingMove}</Text>
+        </View>
+
         <View style={[styles.actions, { paddingBottom: insets.bottom + spacing.lg }]}>
           <Pressable style={styles.primaryButton} onPress={onMessage}>
-            <Text style={styles.primaryButtonText}>Send a Message</Text>
+            <Text style={styles.primaryButtonText}>Start talking</Text>
           </Pressable>
 
           <Pressable style={styles.secondaryButton} onPress={onClose}>
-            <Text style={styles.secondaryButtonText}>Keep Swiping</Text>
+            <Text style={styles.secondaryButtonText}>Keep looking</Text>
           </Pressable>
         </View>
       </LinearGradient>
@@ -123,6 +145,30 @@ const styles = StyleSheet.create({
     color: colors.gradientEnd,
     fontSize: 24,
   },
+  openingMoveCard: {
+    width: '100%',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: radii.card,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.25)',
+  },
+  openingMoveLabel: {
+    color: colors.text,
+    fontSize: 11,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    opacity: 0.85,
+    marginBottom: spacing.xs,
+  },
+  openingMoveText: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: '600',
+    lineHeight: 22,
+  },
   actions: {
     width: '100%',
     marginTop: 'auto',
@@ -141,8 +187,13 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     marginTop: spacing.md,
-    paddingVertical: spacing.sm,
+    width: '100%',
+    borderRadius: radii.button,
+    paddingVertical: spacing.md,
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.6)',
+    backgroundColor: 'transparent',
   },
   secondaryButtonText: {
     color: colors.text,

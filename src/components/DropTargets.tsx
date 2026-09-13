@@ -19,28 +19,37 @@ type DropTargetsProps = {
   containerRef: RefObject<View | null>;
   trashActive: SharedValue<number>;
   heartActive: SharedValue<number>;
+  roseActive?: SharedValue<number>;
   onTrashLayout: (layout: ZoneLayout) => void;
   onHeartLayout: (layout: ZoneLayout) => void;
   onTrashPress?: () => void;
   onHeartPress?: () => void;
+  onRosePress?: () => void;
 };
 
 const TARGET_SIZE = 68;
+const ROSE_SIZE = 52;
 
 type TargetButtonProps = {
   icon: keyof typeof Ionicons.glyphMap;
-  color: string;
+  iconColor: string;
+  backgroundColor: string;
+  borderColor: string;
   active: SharedValue<number>;
   targetRef: RefObject<View | null>;
+  size?: number;
   onLayout: (event: LayoutChangeEvent) => void;
   onPress?: () => void;
 };
 
 function TargetButton({
   icon,
-  color,
+  iconColor,
+  backgroundColor,
+  borderColor,
   active,
   targetRef,
+  size = TARGET_SIZE,
   onLayout,
   onPress,
 }: TargetButtonProps) {
@@ -48,26 +57,26 @@ function TargetButton({
     const intensity = active.value;
     return {
       transform: [{ scale: 1 + intensity * 0.22 }],
-      borderColor: color,
-      backgroundColor: `rgba(26, 26, 28, ${0.85 + intensity * 0.15})`,
-      shadowOpacity: 0.25 + intensity * 0.45,
+      borderColor,
+      backgroundColor,
+      shadowOpacity: 0.2 + intensity * 0.5,
     };
   });
 
   const iconStyle = useAnimatedStyle(() => ({
-    opacity: 0.7 + active.value * 0.3,
-    transform: [{ scale: 1 + active.value * 0.15 }],
+    opacity: 0.85 + active.value * 0.15,
+    transform: [{ scale: 1 + active.value * 0.18 }],
   }));
 
   return (
     <Pressable onPress={onPress} hitSlop={16}>
       <Animated.View
         ref={targetRef}
-        style={[styles.target, animatedStyle]}
+        style={[styles.target, { width: size, height: size, borderRadius: size / 2 }, animatedStyle]}
         onLayout={onLayout}
       >
         <Animated.View style={iconStyle}>
-          <Ionicons name={icon} size={34} color={color} />
+          <Ionicons name={icon} size={size === ROSE_SIZE ? 26 : 34} color={iconColor} />
         </Animated.View>
       </Animated.View>
     </Pressable>
@@ -78,13 +87,17 @@ export function DropTargets({
   containerRef,
   trashActive,
   heartActive,
+  roseActive,
   onTrashLayout,
   onHeartLayout,
   onTrashPress,
   onHeartPress,
+  onRosePress,
 }: DropTargetsProps) {
   const trashRef = useRef<View>(null);
   const heartRef = useRef<View>(null);
+  const roseRef = useRef<View>(null);
+  const roseActiveValue = roseActive ?? trashActive;
 
   const measureZone = useCallback(
     (targetRef: RefObject<View | null>, callback: (layout: ZoneLayout) => void) => {
@@ -122,15 +135,34 @@ export function DropTargets({
     <View style={styles.row} pointerEvents="box-none" onLayout={reportZones}>
       <TargetButton
         icon="trash-outline"
-        color={colors.nope}
+        iconColor={colors.textDark}
+        backgroundColor={colors.card}
+        borderColor="rgba(0,0,0,0.08)"
         active={trashActive}
         targetRef={trashRef}
         onLayout={reportTrashZone}
         onPress={onTrashPress}
       />
+
+      {onRosePress && (
+        <TargetButton
+          icon="rose"
+          iconColor={colors.superLike}
+          backgroundColor={colors.surface}
+          borderColor={colors.superLike}
+          active={roseActiveValue}
+          targetRef={roseRef}
+          size={ROSE_SIZE}
+          onLayout={() => undefined}
+          onPress={onRosePress}
+        />
+      )}
+
       <TargetButton
         icon="heart"
-        color={colors.like}
+        iconColor={colors.card}
+        backgroundColor={colors.heartRed}
+        borderColor={colors.heartRed}
         active={heartActive}
         targetRef={heartRef}
         onLayout={reportHeartZone}
@@ -148,12 +180,10 @@ const styles = StyleSheet.create({
     right: spacing.lg,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     zIndex: 20,
   },
   target: {
-    width: TARGET_SIZE,
-    height: TARGET_SIZE,
-    borderRadius: TARGET_SIZE / 2,
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',

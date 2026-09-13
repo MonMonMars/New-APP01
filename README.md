@@ -61,7 +61,10 @@ src/
   components/      # Swipe deck, drop targets, modals
   data/            # Mock profiles & conversations
 docs/
-  APP_FLOW.md      # UI map + competitor research
+  SPARK_APP_DOCUMENT.md  # Full product & technical reference
+  APP_FLOW.md            # UI map + competitor research
+  PRODUCT_STRATEGY.md    # GTM, monetization, metrics
+  PUBLIC_PREVIEW.md      # Browser demo links
 ```
 
 ## Legal note

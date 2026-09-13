@@ -2,7 +2,8 @@
 
 A dating app prototype inspired by **Tinder**, **Bumble**, and **Hinge** — built with Expo + React Native + TypeScript.
 
-> See [`docs/APP_FLOW.md`](docs/APP_FLOW.md) for the full UI structure map and competitor workflow research.
+> **Full app document:** [`docs/SPARK_APP_DOCUMENT.md`](docs/SPARK_APP_DOCUMENT.md) — product, flows, screens, monetization, and architecture.  
+> See also [`docs/APP_FLOW.md`](docs/APP_FLOW.md) for the UI structure map and competitor workflow research.
 
 ## Features
 

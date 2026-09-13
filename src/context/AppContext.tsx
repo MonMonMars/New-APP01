@@ -10,11 +10,30 @@ import {
 import { seedConversations } from '../data/conversations';
 import { incomingLikeProfiles, mockProfiles, MUTUAL_MATCH_IDS } from '../data/profiles';
 import { Conversation, Match } from '../types/match';
+import {
+  defaultPreferences,
+  DiscoveryPreferences,
+} from '../types/preferences';
 import { Profile, UserProfile } from '../types/profile';
+
+function filterDiscoverProfiles(
+  profiles: Profile[],
+  preferences: DiscoveryPreferences,
+  excludedIds: Set<string>,
+): Profile[] {
+  return profiles.filter(
+    (profile) =>
+      !excludedIds.has(profile.id) &&
+      profile.distanceMiles <= preferences.maxDistanceMiles &&
+      profile.age >= preferences.minAge &&
+      profile.age <= preferences.maxAge,
+  );
+}
 
 type AppContextValue = {
   hasOnboarded: boolean;
   user: UserProfile;
+  preferences: DiscoveryPreferences;
   discoverQueue: Profile[];
   passedIds: Set<string>;
   likedIds: Set<string>;
@@ -22,9 +41,11 @@ type AppContextValue = {
   conversations: Conversation[];
   incomingLikes: Profile[];
   completeOnboarding: (user: UserProfile) => void;
+  updatePreferences: (preferences: DiscoveryPreferences) => void;
   passProfile: (profile: Profile) => void;
   likeProfile: (profile: Profile) => Match | null;
   sendMessage: (conversationId: string, text: string) => void;
+  getConversationIdForProfile: (profileId: string) => string | null;
 };
 
 const defaultUser: UserProfile = {
@@ -40,26 +61,40 @@ const AppContext = createContext<AppContextValue | null>(null);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [hasOnboarded, setHasOnboarded] = useState(false);
   const [user, setUser] = useState<UserProfile>(defaultUser);
-  const [discoverQueue, setDiscoverQueue] = useState<Profile[]>(mockProfiles);
+  const [preferences, setPreferences] = useState<DiscoveryPreferences>(defaultPreferences);
   const [passedIds, setPassedIds] = useState<Set<string>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [matches, setMatches] = useState<Match[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>(seedConversations);
+
+  const excludedIds = useMemo(() => {
+    const ids = new Set<string>();
+    passedIds.forEach((id) => ids.add(id));
+    likedIds.forEach((id) => ids.add(id));
+    return ids;
+  }, [likedIds, passedIds]);
+
+  const discoverQueue = useMemo(
+    () => filterDiscoverProfiles(mockProfiles, preferences, excludedIds),
+    [excludedIds, preferences],
+  );
 
   const completeOnboarding = useCallback((nextUser: UserProfile) => {
     setUser(nextUser);
     setHasOnboarded(true);
   }, []);
 
+  const updatePreferences = useCallback((next: DiscoveryPreferences) => {
+    setPreferences(next);
+  }, []);
+
   const passProfile = useCallback((profile: Profile) => {
     setPassedIds((prev) => new Set(prev).add(profile.id));
-    setDiscoverQueue((prev) => prev.filter((p) => p.id !== profile.id));
   }, []);
 
   const likeProfile = useCallback(
     (profile: Profile): Match | null => {
       setLikedIds((prev) => new Set(prev).add(profile.id));
-      setDiscoverQueue((prev) => prev.filter((p) => p.id !== profile.id));
 
       if (!MUTUAL_MATCH_IDS.has(profile.id)) {
         return null;
@@ -128,10 +163,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
+  const getConversationIdForProfile = useCallback(
+    (profileId: string) => {
+      const conversation = conversations.find(
+        (item) => item.match.profile.id === profileId,
+      );
+      return conversation?.id ?? `conv-${profileId}`;
+    },
+    [conversations],
+  );
+
   const value = useMemo<AppContextValue>(
     () => ({
       hasOnboarded,
       user,
+      preferences,
       discoverQueue,
       passedIds,
       likedIds,
@@ -139,22 +185,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
       conversations,
       incomingLikes: incomingLikeProfiles,
       completeOnboarding,
+      updatePreferences,
       passProfile,
       likeProfile,
       sendMessage,
+      getConversationIdForProfile,
     }),
     [
       hasOnboarded,
       user,
+      preferences,
       discoverQueue,
       passedIds,
       likedIds,
       matches,
       conversations,
       completeOnboarding,
+      updatePreferences,
       passProfile,
       likeProfile,
       sendMessage,
+      getConversationIdForProfile,
     ],
   );
 

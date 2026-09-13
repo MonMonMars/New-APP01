@@ -12,7 +12,11 @@ export const mockProfiles: Profile[] = [
     job: 'Product Designer',
     school: 'RISD',
     verified: true,
-    photos: ['https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80'],
+    photos: [
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80',
+      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&q=80',
+      'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=800&q=80',
+    ],
     interests: ['Hiking', 'Photography', 'Espresso'],
     prompts: [
       { question: 'My simple pleasures', answer: 'Morning coffee and a long walk.' },
@@ -27,7 +31,10 @@ export const mockProfiles: Profile[] = [
     distanceMiles: 5,
     job: 'UX Lead',
     verified: true,
-    photos: ['https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80'],
+    photos: [
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80',
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=80',
+    ],
     interests: ['Design', 'Music', 'Food'],
     prompts: [
       { question: 'Together we could', answer: 'Hunt for the best taco spot in town.' },
@@ -40,7 +47,11 @@ export const mockProfiles: Profile[] = [
     bio: 'Yoga, travel, and trying every ramen spot in the city.',
     distanceMiles: 1,
     job: 'Marketing',
-    photos: ['https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=800&q=80'],
+    photos: [
+      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=800&q=80',
+      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&q=80',
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80',
+    ],
     interests: ['Travel', 'Yoga', 'Ramen'],
     prompts: [
       { question: 'The way to win me over is', answer: 'Recommend a hidden gem restaurant.' },
@@ -64,7 +75,10 @@ export const mockProfiles: Profile[] = [
     distanceMiles: 3,
     job: 'Curator',
     verified: true,
-    photos: ['https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&q=80'],
+    photos: [
+      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&q=80',
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80',
+    ],
     interests: ['Art', 'Pottery', 'Wine'],
     prompts: [
       { question: 'Typical Sunday', answer: 'Gallery hop then wine on the terrace.' },

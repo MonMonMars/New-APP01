@@ -32,7 +32,13 @@ export function ProfileDetailSheet({
         </View>
 
         <ScrollView contentContainerStyle={styles.content}>
-          <Image source={{ uri: profile.photos[0] }} style={styles.hero} />
+          {profile.photos.map((photo, photoIndex) => (
+            <Image
+              key={`${profile.id}-photo-${photoIndex}`}
+              source={{ uri: photo }}
+              style={styles.hero}
+            />
+          ))}
 
           <View style={styles.section}>
             <View style={styles.nameRow}>

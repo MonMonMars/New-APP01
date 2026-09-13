@@ -1,5 +1,5 @@
 import * as Haptics from 'expo-haptics';
-import { forwardRef, useCallback, useImperativeHandle, useMemo, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -80,6 +80,10 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
     });
     const trashActive = useSharedValue(0);
     const heartActive = useSharedValue(0);
+
+    useEffect(() => {
+      setActiveIndex(0);
+    }, [profiles]);
 
     const visibleProfiles = useMemo(
       () => profiles.slice(activeIndex, activeIndex + 3),
@@ -172,6 +176,8 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
     );
 
     const panGesture = Gesture.Pan()
+      .activeOffsetX([-12, 12])
+      .activeOffsetY([-12, 12])
       .onUpdate((event) => {
         translateX.value = event.translationX;
         translateY.value = event.translationY;
@@ -274,6 +280,8 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           heartActive={heartActive}
           onTrashLayout={handleTrashLayout}
           onHeartLayout={handleHeartLayout}
+          onTrashPress={() => dropToTarget('left')}
+          onHeartPress={() => dropToTarget('right')}
         />
       </View>
     );

@@ -17,10 +17,17 @@ export type Profile = {
   prompts?: ProfilePrompt[];
 };
 
+export type RelationshipIntent =
+  | 'long_term'
+  | 'short_term'
+  | 'new_friends'
+  | 'not_sure';
+
 export type UserProfile = {
   name: string;
   age: number;
   bio: string;
   photos: string[];
   interests: string[];
+  intent?: RelationshipIntent;
 };

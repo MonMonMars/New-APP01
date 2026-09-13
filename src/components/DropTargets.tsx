@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LayoutChangeEvent, Pressable, StyleSheet, View } from 'react-native';
+import { useRef } from 'react';
 import Animated, {
   SharedValue,
   useAnimatedStyle,
@@ -43,22 +44,23 @@ function TargetButton({
   const animatedStyle = useAnimatedStyle(() => {
     const intensity = active.value;
     return {
-      transform: [{ scale: 1 + intensity * 0.18 }],
+      transform: [{ scale: 1 + intensity * 0.22 }],
       borderColor: color,
       backgroundColor: `rgba(26, 26, 28, ${0.85 + intensity * 0.15})`,
-      shadowOpacity: 0.25 + intensity * 0.35,
+      shadowOpacity: 0.25 + intensity * 0.45,
     };
   });
 
   const iconStyle = useAnimatedStyle(() => ({
     opacity: 0.7 + active.value * 0.3,
+    transform: [{ scale: 1 + active.value * 0.15 }],
   }));
 
   return (
-    <Pressable onPress={onPress} hitSlop={12}>
+    <Pressable onPress={onPress} hitSlop={16}>
       <Animated.View style={[styles.target, animatedStyle]} onLayout={onLayout}>
         <Animated.View style={iconStyle}>
-          <Ionicons name={icon} size={32} color={color} />
+          <Ionicons name={icon} size={34} color={color} />
         </Animated.View>
       </Animated.View>
     </Pressable>
@@ -73,28 +75,42 @@ export function DropTargets({
   onTrashPress,
   onHeartPress,
 }: DropTargetsProps) {
-  const handleTrashLayout = (event: LayoutChangeEvent) => {
-    onTrashLayout(event.nativeEvent.layout);
-  };
+  const rowLayoutRef = useRef({ x: 0, y: 0 });
 
-  const handleHeartLayout = (event: LayoutChangeEvent) => {
-    onHeartLayout(event.nativeEvent.layout);
+  const toContainerLayout = (
+    event: LayoutChangeEvent,
+    callback: (layout: ZoneLayout) => void,
+  ) => {
+    const child = event.nativeEvent.layout;
+    const row = rowLayoutRef.current;
+    callback({
+      x: row.x + child.x,
+      y: row.y + child.y,
+      width: child.width,
+      height: child.height,
+    });
   };
 
   return (
-    <View style={styles.row} pointerEvents="box-none">
+    <View
+      style={styles.row}
+      pointerEvents="box-none"
+      onLayout={(event) => {
+        rowLayoutRef.current = event.nativeEvent.layout;
+      }}
+    >
       <TargetButton
         icon="trash-outline"
         color={colors.nope}
         active={trashActive}
-        onLayout={handleTrashLayout}
+        onLayout={(event) => toContainerLayout(event, onTrashLayout)}
         onPress={onTrashPress}
       />
       <TargetButton
         icon="heart"
         color={colors.like}
         active={heartActive}
-        onLayout={handleHeartLayout}
+        onLayout={(event) => toContainerLayout(event, onHeartLayout)}
         onPress={onHeartPress}
       />
     </View>

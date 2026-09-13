@@ -46,6 +46,8 @@ type AppContextValue = {
   likeProfile: (profile: Profile) => Match | null;
   sendMessage: (conversationId: string, text: string) => void;
   getConversationIdForProfile: (profileId: string) => string | null;
+  isSparkPlus: boolean;
+  activateSparkPlus: () => void;
 };
 
 const defaultUser: UserProfile = {
@@ -66,6 +68,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [matches, setMatches] = useState<Match[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>(seedConversations);
+  const [isSparkPlus, setIsSparkPlus] = useState(false);
 
   const excludedIds = useMemo(() => {
     const ids = new Set<string>();
@@ -163,6 +166,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
+  const activateSparkPlus = useCallback(() => {
+    setIsSparkPlus(true);
+  }, []);
+
   const getConversationIdForProfile = useCallback(
     (profileId: string) => {
       const conversation = conversations.find(
@@ -190,6 +197,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       likeProfile,
       sendMessage,
       getConversationIdForProfile,
+      isSparkPlus,
+      activateSparkPlus,
     }),
     [
       hasOnboarded,
@@ -206,6 +215,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       likeProfile,
       sendMessage,
       getConversationIdForProfile,
+      isSparkPlus,
+      activateSparkPlus,
     ],
   );
 

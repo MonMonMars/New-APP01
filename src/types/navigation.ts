@@ -6,6 +6,8 @@ export type RootStackParamList = {
   Main: undefined;
   Chat: { conversationId: string };
   ProfileDetail: { profileId: string };
+  SparkPlus: undefined;
+  Safety: undefined;
 };
 
 export type MainTabParamList = {

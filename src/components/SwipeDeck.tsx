@@ -9,9 +9,11 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { useSwipeSounds } from '../hooks/useSwipeSounds';
 import { Profile } from '../types/profile';
 import { DropTargets, ZoneLayout } from './DropTargets';
 import { ProfileCard } from './ProfileCard';
+import { SwipeBurstEffect, SwipeEffectKind, SwipeEffectOrigin } from './SwipeBurstEffect';
 
 const ZONE_HIT_PADDING = 36;
 
@@ -24,6 +26,11 @@ type SwipeDeckProps = {
   profiles: Profile[];
   onSwipe: (profile: Profile, direction: 'left' | 'right') => void;
   onEmpty: () => void;
+};
+
+type ActiveEffect = {
+  kind: SwipeEffectKind;
+  origin: SwipeEffectOrigin;
 };
 
 function isPointInZone(
@@ -60,7 +67,9 @@ function zoneProximity(
 
 export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
   function SwipeDeck({ profiles, onSwipe, onEmpty }, ref) {
+    const { playSound } = useSwipeSounds();
     const [activeIndex, setActiveIndex] = useState(0);
+    const [activeEffect, setActiveEffect] = useState<ActiveEffect | null>(null);
     const translateX = useSharedValue(0);
     const translateY = useSharedValue(0);
     const cardScale = useSharedValue(1);
@@ -90,18 +99,35 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
       [profiles, activeIndex],
     );
 
+    const triggerFeedback = useCallback(
+      (direction: 'left' | 'right') => {
+        const zone = direction === 'left' ? trashZone.value : heartZone.value;
+        const kind: SwipeEffectKind = direction === 'left' ? 'pass' : 'like';
+
+        setActiveEffect({
+          kind,
+          origin: {
+            x: zone.x + zone.width / 2,
+            y: zone.y + zone.height / 2,
+          },
+        });
+
+        void playSound(kind);
+        void Haptics.notificationAsync(
+          direction === 'right'
+            ? Haptics.NotificationFeedbackType.Success
+            : Haptics.NotificationFeedbackType.Warning,
+        );
+      },
+      [heartZone, playSound, trashZone],
+    );
+
     const advanceCard = useCallback(
       (direction: 'left' | 'right') => {
         const current = profiles[activeIndex];
         if (!current) {
           return;
         }
-
-        void Haptics.impactAsync(
-          direction === 'right'
-            ? Haptics.ImpactFeedbackStyle.Medium
-            : Haptics.ImpactFeedbackStyle.Light,
-        );
 
         onSwipe(current, direction);
 
@@ -125,6 +151,8 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
 
     const dropToTarget = useCallback(
       (direction: 'left' | 'right') => {
+        triggerFeedback(direction);
+
         const zone = direction === 'left' ? trashZone.value : heartZone.value;
         const targetCenterX = zone.x + zone.width / 2;
         const targetCenterY = zone.y + zone.height / 2;
@@ -144,7 +172,19 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           }
         });
       },
-      [advanceCard, cardScale, deckHeight, deckWidth, heartZone, trashActive, heartActive, translateX, translateY, trashZone],
+      [
+        advanceCard,
+        cardScale,
+        deckHeight,
+        deckWidth,
+        heartZone,
+        heartActive,
+        trashActive,
+        translateX,
+        translateY,
+        trashZone,
+        triggerFeedback,
+      ],
     );
 
     useImperativeHandle(
@@ -282,6 +322,12 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           onHeartLayout={handleHeartLayout}
           onTrashPress={() => dropToTarget('left')}
           onHeartPress={() => dropToTarget('right')}
+        />
+
+        <SwipeBurstEffect
+          kind={activeEffect?.kind ?? null}
+          origin={activeEffect?.origin ?? null}
+          onComplete={() => setActiveEffect(null)}
         />
       </View>
     );

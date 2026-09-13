@@ -28,6 +28,7 @@ const ZONE_HIT_PADDING = 36;
 export type SwipeDeckHandle = {
   reject: () => void;
   like: () => void;
+  superLike: () => void;
 };
 
 type SwipeDeckProps = {
@@ -100,6 +101,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
     const translateX = useSharedValue(0);
     const translateY = useSharedValue(0);
     const cardScale = useSharedValue(1);
+    const passDim = useSharedValue(0);
     const deckWidth = useSharedValue(0);
     const deckHeight = useSharedValue(0);
     const trashZone = useSharedValue<ZoneLayout>({
@@ -116,6 +118,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
     });
     const trashActive = useSharedValue(0);
     const heartActive = useSharedValue(0);
+    const roseActive = useSharedValue(0);
 
     useEffect(() => {
       setActiveIndex(0);
@@ -127,9 +130,9 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
     );
 
     const triggerFeedback = useCallback(
-      (direction: 'left' | 'right') => {
-        const zone = direction === 'left' ? trashZone.value : heartZone.value;
-        const kind: SwipeEffectKind = direction === 'left' ? 'pass' : 'like';
+      (kind: SwipeEffectKind) => {
+        const zone =
+          kind === 'pass' ? trashZone.value : heartZone.value;
 
         setEffectKey((key) => key + 1);
         setActiveEffect({
@@ -140,11 +143,11 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           },
         });
 
-        void playSound(kind);
+        void playSound(kind === 'pass' ? 'pass' : 'like');
         void Haptics.notificationAsync(
-          direction === 'right'
-            ? Haptics.NotificationFeedbackType.Success
-            : Haptics.NotificationFeedbackType.Warning,
+          kind === 'pass'
+            ? Haptics.NotificationFeedbackType.Warning
+            : Haptics.NotificationFeedbackType.Success,
         );
       },
       [heartZone, playSound, trashZone],
@@ -173,12 +176,14 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
       translateX.value = withSpring(0, { damping: 18, stiffness: 220 });
       translateY.value = withSpring(0, { damping: 18, stiffness: 220 });
       cardScale.value = withSpring(1, { damping: 18, stiffness: 220 });
+      passDim.value = withTiming(0, { duration: 120 });
       trashActive.value = withTiming(0, { duration: 120 });
       heartActive.value = withTiming(0, { duration: 120 });
-    }, [cardScale, heartActive, trashActive, translateX, translateY]);
+      roseActive.value = withTiming(0, { duration: 120 });
+    }, [cardScale, heartActive, passDim, roseActive, trashActive, translateX, translateY]);
 
     const dropToTarget = useCallback(
-      (direction: 'left' | 'right') => {
+      (direction: 'left' | 'right', superLike = false) => {
         if (direction === 'right' && !canLike) {
           resetPosition();
           if (onLikeBlocked) {
@@ -187,7 +192,9 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           return;
         }
 
-        triggerFeedback(direction);
+        const effectKind: SwipeEffectKind =
+          direction === 'left' ? 'pass' : superLike ? 'super' : 'like';
+        triggerFeedback(effectKind);
 
         const zone = direction === 'left' ? trashZone.value : heartZone.value;
         const targetCenterX = zone.x + zone.width / 2;
@@ -195,15 +202,21 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
         const toX = targetCenterX - deckWidth.value / 2;
         const toY = targetCenterY - deckHeight.value / 2;
 
+        if (direction === 'left') {
+          passDim.value = withTiming(1, { duration: 180 });
+        }
+
         translateX.value = withTiming(toX, { duration: 220 });
         translateY.value = withTiming(toY, { duration: 220 });
-        cardScale.value = withTiming(0.15, { duration: 220 }, (finished) => {
+        cardScale.value = withTiming(direction === 'left' ? 0.1 : 0.15, { duration: 220 }, (finished) => {
           if (finished) {
             translateX.value = 0;
             translateY.value = 0;
             cardScale.value = 1;
+            passDim.value = 0;
             trashActive.value = 0;
             heartActive.value = 0;
+            roseActive.value = 0;
             runOnJS(advanceCard)(direction);
           }
         });
@@ -214,14 +227,16 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
         cardScale,
         deckHeight,
         deckWidth,
-        heartZone,
         heartActive,
         onLikeBlocked,
+        passDim,
         resetPosition,
+        roseActive,
         trashActive,
         translateX,
         translateY,
         trashZone,
+        heartZone,
         triggerFeedback,
       ],
     );
@@ -231,6 +246,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
       () => ({
         reject: () => dropToTarget('left'),
         like: () => dropToTarget('right'),
+        superLike: () => dropToTarget('right', true),
       }),
       [dropToTarget],
     );
@@ -287,6 +303,12 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
 
         trashActive.value = trashProximity;
         heartActive.value = heartProximity;
+
+        if (trashProximity > 0.3) {
+          passDim.value = trashProximity * 0.7;
+        } else {
+          passDim.value = 0;
+        }
       })
       .onEnd((event) => {
         const cardCenterX = deckWidth.value / 2 + event.translationX;
@@ -350,6 +372,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
                         translateX={translateX}
                         translateY={translateY}
                         scale={cardScale}
+                        passDim={passDim}
                       />
                     </Animated.View>
                   </GestureDetector>
@@ -372,10 +395,12 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           containerRef={containerRef}
           trashActive={trashActive}
           heartActive={heartActive}
+          roseActive={roseActive}
           onTrashLayout={handleTrashLayout}
           onHeartLayout={handleHeartLayout}
           onTrashPress={() => dropToTarget('left')}
           onHeartPress={() => dropToTarget('right')}
+          onRosePress={() => dropToTarget('right', true)}
         />
 
         <SwipeBurstEffect

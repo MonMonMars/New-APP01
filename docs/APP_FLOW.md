@@ -18,6 +18,13 @@ Research synthesis from **Tinder**, **Bumble**, **Hinge**, **Badoo**, and **Coff
 | **Tab badges** | Likes count, unread messages | Beeline count, chat badge | Likes + matches | Notifications | **Dynamic Likes count + Matches unread/your-turn badge** |
 | **Premium upsell** | Blurred like tap, like limit, Boost | Beeline tap, Spotlight | Rose limit, Hinge+ | Credits | **Likes tap, like limit modal, Spark+ from Profile** |
 | **Discovery gesture** | Swipe left/right (patented) | Swipe | Tap like on prompts | Swipe / tap | **Drag card → trash / heart** (legal differentiator) |
+| **Daily curated batch** | Top Picks / Chemistry | — | Most Compatible daily | Bagels at noon | **"Today's picks · X of Y left"** batch indicator (CMB) |
+| **Super-like / Rose** | Super Like (swipe up) | SuperSwipe | Rose (1 free/week) | Crush highlight | **Spark Rose** center button + blue burst effect (Hinge/Tinder) |
+| **Compatibility signal** | Smart Photos / Top Picks | — | Most Compatible badge | Match % | **"Most Compatible"** badge on daily pick (Hinge) |
+| **Spotlight / Crush** | Boost visibility | Spotlight | Standouts | Crush moment | **"Crush"** badge + pulsing ring on spotlight profile (Badoo) |
+| **Match screen CTAs** | Send Message + Keep Swiping | Opening Move + chat | Comment-first toast | Quick reply | **"Start talking"** (primary) + **"Keep looking"** (outline) + Opening Move card (Bumble) |
+| **Pass / like effects** | Stamp overlays | Color flashes | Subtle animations | Quick fade | **Big red heart burst** (like) + **dark vignette fade** (pass) |
+| **Action buttons** | Red X / green heart | Same palette | Rose + heart | Pass / like buttons | **White trash** + **red heart** drop targets |
 
 ## Industry-standard user journey
 

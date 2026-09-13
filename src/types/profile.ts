@@ -18,6 +18,10 @@ export type Profile = {
   school?: string;
   verified?: boolean;
   prompts?: ProfilePrompt[];
+  /** Hinge-style "Most Compatible" daily pick */
+  mostCompatible?: boolean;
+  /** Badoo-style Crush / spotlight profile */
+  spotlight?: boolean;
 };
 
 export type RelationshipIntent =

@@ -3,6 +3,7 @@ import { useCallback, useRef, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { DailyBatchIndicator } from '../components/DailyBatchIndicator';
 import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesSheet';
 import { LikeLimitModal } from '../components/LikeLimitModal';
 import { MatchModal } from '../components/MatchModal';
@@ -21,6 +22,8 @@ export function DiscoverScreen() {
   const deckRef = useRef<SwipeDeckHandle>(null);
   const {
     discoverQueue,
+    likedIds,
+    passedIds,
     preferences,
     updatePreferences,
     passProfile,
@@ -130,6 +133,11 @@ export function DiscoverScreen() {
         showLogo
         rightIcon="options-outline"
         onRightPress={() => setShowPreferences(true)}
+      />
+
+      <DailyBatchIndicator
+        remaining={discoverQueue.length}
+        total={discoverQueue.length + likedIds.size + passedIds.size}
       />
 
       {!isSparkPlus && (

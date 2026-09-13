@@ -3,10 +3,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
+  Easing,
   Extrapolation,
   SharedValue,
   interpolate,
   useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
 } from 'react-native-reanimated';
 
 import { colors, radii, spacing } from '../theme';
@@ -19,6 +23,7 @@ type ProfileCardProps = {
   translateX?: SharedValue<number>;
   translateY?: SharedValue<number>;
   scale?: SharedValue<number>;
+  passDim?: SharedValue<number>;
   onPhotoTap?: (side: 'left' | 'right') => void;
 };
 
@@ -29,11 +34,23 @@ export function ProfileCard({
   translateX,
   translateY,
   scale,
+  passDim,
   onPhotoTap,
 }: ProfileCardProps) {
   const isTop = index === activeIndex;
   const [photoIndex, setPhotoIndex] = useState(0);
   const photoCount = profile.photos.length;
+  const spotlightPulse = useSharedValue(0);
+
+  useEffect(() => {
+    if (profile.spotlight && isTop) {
+      spotlightPulse.value = withRepeat(
+        withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.ease) }),
+        -1,
+        true,
+      );
+    }
+  }, [isTop, profile.id, profile.spotlight, spotlightPulse]);
 
   useEffect(() => {
     setPhotoIndex(0);
@@ -68,6 +85,21 @@ export function ProfileCard({
     };
   });
 
+  const passDimStyle = useAnimatedStyle(() => ({
+    opacity: passDim?.value ?? 0,
+  }));
+
+  const spotlightStyle = useAnimatedStyle(() => {
+    if (!profile.spotlight || !isTop) {
+      return { opacity: 0 };
+    }
+    const pulse = 0.4 + spotlightPulse.value * 0.6;
+    return {
+      opacity: pulse,
+      borderColor: colors.heartPink,
+    };
+  });
+
   const goToPhoto = (side: 'left' | 'right') => {
     if (photoCount <= 1) {
       return;
@@ -83,6 +115,9 @@ export function ProfileCard({
 
   return (
     <Animated.View style={[styles.card, cardStyle]}>
+      {profile.spotlight && isTop && (
+        <Animated.View style={[styles.spotlightRing, spotlightStyle]} pointerEvents="none" />
+      )}
       <Image
         source={{ uri: profile.photos[photoIndex] }}
         style={styles.photo}
@@ -93,6 +128,21 @@ export function ProfileCard({
         locations={[0, 0.35, 1]}
         style={styles.gradient}
       />
+      {isTop && passDim && (
+        <Animated.View style={[styles.passDimOverlay, passDimStyle]} pointerEvents="none" />
+      )}
+
+      {profile.mostCompatible && isTop && (
+        <View style={styles.compatibleBadge}>
+          <Text style={styles.compatibleBadgeText}>Most Compatible</Text>
+        </View>
+      )}
+
+      {profile.spotlight && isTop && (
+        <View style={styles.crushBadge}>
+          <Text style={styles.crushBadgeText}>Crush</Text>
+        </View>
+      )}
 
       {isTop && photoCount > 1 && (
         <>
@@ -146,6 +196,51 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 8 },
     elevation: 8,
+  },
+  spotlightRing: {
+    ...StyleSheet.absoluteFill,
+    borderRadius: radii.card,
+    borderWidth: 3,
+    zIndex: 5,
+  },
+  passDimOverlay: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    zIndex: 4,
+  },
+  compatibleBadge: {
+    position: 'absolute',
+    top: spacing.md + 28,
+    left: spacing.md,
+    backgroundColor: colors.boost,
+    borderRadius: radii.button,
+    paddingHorizontal: spacing.sm + 4,
+    paddingVertical: spacing.xs + 2,
+    zIndex: 6,
+  },
+  compatibleBadgeText: {
+    color: colors.text,
+    fontSize: 11,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  crushBadge: {
+    position: 'absolute',
+    top: spacing.md + 12,
+    right: spacing.md,
+    backgroundColor: colors.heartRed,
+    borderRadius: radii.button,
+    paddingHorizontal: spacing.sm + 4,
+    paddingVertical: spacing.xs + 2,
+    zIndex: 6,
+  },
+  crushBadgeText: {
+    color: colors.text,
+    fontSize: 11,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   photo: {
     width: '100%',

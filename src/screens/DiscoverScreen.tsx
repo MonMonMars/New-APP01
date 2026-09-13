@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesSheet';
 import { MatchModal } from '../components/MatchModal';
+import { WaitingForMatchModal } from '../components/WaitingForMatchModal';
 import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { SwipeDeck, SwipeDeckHandle } from '../components/SwipeDeck';
@@ -27,6 +28,8 @@ export function DiscoverScreen() {
 
   const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
   const [showMatch, setShowMatch] = useState(false);
+  const [waitingProfile, setWaitingProfile] = useState<Profile | null>(null);
+  const [showWaiting, setShowWaiting] = useState(false);
   const [detailProfile, setDetailProfile] = useState<Profile | null>(null);
   const [showPreferences, setShowPreferences] = useState(false);
 
@@ -41,10 +44,19 @@ export function DiscoverScreen() {
       if (match) {
         setMatchProfile(profile);
         setShowMatch(true);
+        return;
       }
+
+      setWaitingProfile(profile);
+      setShowWaiting(true);
     },
     [likeProfile, passProfile],
   );
+
+  const handleFindMorePeople = useCallback(() => {
+    setShowWaiting(false);
+    setWaitingProfile(null);
+  }, []);
 
   const handleCloseMatch = useCallback(() => {
     setShowMatch(false);
@@ -106,6 +118,12 @@ export function DiscoverScreen() {
         profile={matchProfile}
         onClose={handleCloseMatch}
         onMessage={handleOpenChat}
+      />
+
+      <WaitingForMatchModal
+        visible={showWaiting}
+        profile={waitingProfile}
+        onFindMorePeople={handleFindMorePeople}
       />
 
       <ProfileDetailSheet

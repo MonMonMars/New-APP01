@@ -37,6 +37,7 @@ type AppContextValue = {
   discoverQueue: Profile[];
   passedIds: Set<string>;
   likedIds: Set<string>;
+  pendingLikeIds: Set<string>;
   matches: Match[];
   conversations: Conversation[];
   incomingLikes: Profile[];
@@ -66,6 +67,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [preferences, setPreferences] = useState<DiscoveryPreferences>(defaultPreferences);
   const [passedIds, setPassedIds] = useState<Set<string>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
+  const [pendingLikeIds, setPendingLikeIds] = useState<Set<string>>(new Set());
   const [matches, setMatches] = useState<Match[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>(seedConversations);
   const [isSparkPlus, setIsSparkPlus] = useState(false);
@@ -100,8 +102,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setLikedIds((prev) => new Set(prev).add(profile.id));
 
       if (!MUTUAL_MATCH_IDS.has(profile.id)) {
+        setPendingLikeIds((prev) => new Set(prev).add(profile.id));
         return null;
       }
+
+      setPendingLikeIds((prev) => {
+        const next = new Set(prev);
+        next.delete(profile.id);
+        return next;
+      });
 
       const match: Match = {
         id: `match-${profile.id}`,
@@ -188,6 +197,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       discoverQueue,
       passedIds,
       likedIds,
+      pendingLikeIds,
       matches,
       conversations,
       incomingLikes: incomingLikeProfiles,
@@ -207,6 +217,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       discoverQueue,
       passedIds,
       likedIds,
+      pendingLikeIds,
       matches,
       conversations,
       completeOnboarding,

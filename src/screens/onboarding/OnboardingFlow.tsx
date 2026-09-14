@@ -77,7 +77,7 @@ export function OnboardingFlow() {
     try {
       const result = await signInWithApple();
       if (result.success) {
-        await signInWithAppleStub();
+        await signInWithAppleStub(result.identityToken, result.displayName);
         if (result.displayName) {
           setName(result.displayName);
         }

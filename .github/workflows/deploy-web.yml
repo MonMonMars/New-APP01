@@ -2,7 +2,7 @@ name: Deploy Web to GitHub Pages
 
 on:
   push:
-    branches: [main, cursor/red-star-superlike-7b60]
+    branches: [main, cursor/red-star-superlike-7b60, cursor/cloud-complete-7b60]
   workflow_dispatch:
 
 permissions:

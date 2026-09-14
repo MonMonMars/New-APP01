@@ -24,7 +24,7 @@ _Last verified: Sep 14, 2026 — includes disguise mode (default), AI ad generat
 ## What to try
 
 ### Disguise mode (Pulse) — default
-- News articles open real external links (Reuters, BBC, Verge, NYT)
+- News articles use free sources (BBC News, BBC Good Food, The Verge) and open in-app
 - Sponsored ads open real client landing pages
 - Social avatars show news/ad text over faces
 - **Profile → AI disguise ad image** — generate your own disguised ad from your photo

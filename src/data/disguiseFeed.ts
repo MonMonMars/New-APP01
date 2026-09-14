@@ -63,17 +63,16 @@ const newsItems: NewsPost[] = [
   {
     id: 'news-1',
     type: 'news',
-    source: 'Reuters',
-    headline: 'Big Tech may be breaking the bank for AI, but investors love it',
+    source: 'BBC News',
+    headline: 'Tech giants are spending big on AI in a bid to dominate the boom',
     summary:
-      'Microsoft, Meta, Amazon and Alphabet reported strong cloud and ad revenue as AI spending climbs — and markets are largely buying the story.',
+      'Meta, Alphabet and Microsoft are ramping up AI spending on data centres and chips — even as investors question how long the returns will take.',
     articleBody:
-      'Microsoft, Meta, Amazon and Alphabet all reported quarterly earnings this week, and the headline is the same across the board: AI spending is enormous, but revenue is keeping pace.\n\nCloud divisions posted double-digit growth as enterprises rush to deploy generative tools. Advertising businesses held steady despite macro uncertainty. Investors sent shares higher in after-hours trading, betting that the capex cycle will pay off over the next two years.\n\nAnalysts note that the gap between AI investment and proven returns is widening — yet few are willing to bet against the hyperscalers while demand for compute remains insatiable.',
+      'The titans of the technology sector are ramping up their spending on artificial intelligence, as they rush to reap the benefits of an AI boom that has pushed stocks to record highs.\n\nEarnings reports from Meta, Alphabet and Microsoft reaffirmed the colossal amounts of money these firms are spending on everything from data centres to chips, even as questions swirl about returns on the investments.\n\nMeta said its capital expenditures for 2025 will be between $70bn and $72bn, up from an earlier estimate. Alphabet raised its forecast to $91bn to $93bn. Microsoft reported quarterly capital expenditures of $34.9bn, up from $24bn in the previous quarter.\n\nExuberance among investors about massive AI spending has helped all three tech firms outperform the broader S&P 500 index — but analysts continue to watch whether revenue growth can keep pace with the capex surge.',
     imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c9aeeda0bf6?w=800&q=80',
     timeAgo: '12m ago',
     category: 'Business',
-    articleUrl:
-      'https://www.reuters.com/business/retail-consumer/big-tech-may-be-breaking-bank-ai-investors-love-it-2025-07-31/',
+    articleUrl: 'https://www.bbc.co.uk/news/articles/c5yp2y8rdpro',
     reporters: [
       {
         id: 'rep-1a',
@@ -165,22 +164,22 @@ const newsItems: NewsPost[] = [
   {
     id: 'news-4',
     type: 'news',
-    source: 'NYT Cooking',
-    headline: 'Pasta with chorizo, chickpeas and kale',
+    source: 'BBC Good Food',
+    headline: 'Speedy chorizo with chickpeas',
     summary:
-      'A 30-minute pantry dinner: dried chorizo, canned chickpeas and kale tossed with short pasta and shaved Manchego.',
+      'A 10-minute pantry supper: chorizo, chickpeas, tomatoes and cabbage bubble together for a quick bowl with crusty bread.',
     articleBody:
-      'This weeknight pasta leans on pantry staples: dried chorizo, canned chickpeas, and sturdy kale that wilts into the sauce without turning mushy.\n\nBrown the chorizo first to render its fat, then sauté garlic and kale until just tender. Add chickpeas and a splash of pasta water to emulsify a glossy coating. Toss with short pasta — orecchiette or rigatoni work well — and finish with shaved Manchego and lemon zest.\n\nFrom start to finish, expect about 30 minutes and one skillet plus a pot.',
+      'This speedy supper from BBC Good Food is ready in about 10 minutes and leans on pantry staples you likely already have.\n\nPut a medium pan on the heat and tip in chopped tomatoes followed by a canful of water. While the tomatoes heat, chop the chorizo into chunky pieces and shred the cabbage.\n\nPile the chorizo and cabbage into the pan with chilli flakes and drained chickpeas, then crumble in a stock cube. Stir well, cover and leave to bubble over a high heat for 6 minutes until the cabbage is just tender.\n\nLadle into bowls and eat with crusty or garlic bread. For an Indian-inspired twist, swap the chorizo for chicken and add a teaspoon of curry paste.',
     imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80',
     timeAgo: '5h ago',
     category: 'Lifestyle',
-    articleUrl: 'https://cooking.nytimes.com/recipes/1020999-pasta-with-chorizo-chickpeas-and-kale',
+    articleUrl: 'https://www.bbcgoodfood.com/recipes/speedy-chorizo-chickpeas',
     reporters: [
       {
         id: 'rep-4a',
         name: 'Luca M.',
         avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80',
-        quote: 'Chorizo fat makes the whole sauce',
+        quote: 'Ten minutes and dinner is done',
         photos: [
           'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&q=80',
           'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80',
@@ -283,10 +282,9 @@ export const disguiseAlerts: DisguiseAlert[] = [
   {
     id: 'a4',
     icon: 'newspaper-outline',
-    text: 'Reuters: Big Tech AI spending story trending',
+    text: 'BBC News: Tech giants AI spending story trending',
     time: '6h ago',
-    articleUrl:
-      'https://www.reuters.com/business/retail-consumer/big-tech-may-be-breaking-bank-ai-investors-love-it-2025-07-31/',
+    articleUrl: 'https://www.bbc.co.uk/news/articles/c5yp2y8rdpro',
   },
   {
     id: 'a5',

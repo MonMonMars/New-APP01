@@ -9,6 +9,7 @@ import { useApp } from '../context/AppContext';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { ChatScreen } from '../screens/ChatScreen';
 import { ConsumablesShopScreen } from '../screens/ConsumablesShopScreen';
+import { DiscoverHubScreen } from '../screens/DiscoverHubScreen';
 import { DiscoverScreen } from '../screens/DiscoverScreen';
 import { ExploreScreen } from '../screens/ExploreScreen';
 import { MapDiscoverScreen } from '../screens/MapDiscoverScreen';
@@ -143,6 +144,12 @@ function ExploreWrapper({
   return <ExploreScreen onClose={() => navigation.goBack()} />;
 }
 
+function DiscoverHubWrapper({
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, 'DiscoverHub'>) {
+  return <DiscoverHubScreen onClose={() => navigation.goBack()} />;
+}
+
 function MainShell() {
   const { disguiseMode } = useApp();
   if (disguiseMode) {
@@ -201,6 +208,11 @@ function RootNavigator() {
           <Stack.Screen
             name="Explore"
             component={ExploreWrapper}
+            options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="DiscoverHub"
+            component={DiscoverHubWrapper}
             options={{ animation: 'slide_from_right' }}
           />
         </>

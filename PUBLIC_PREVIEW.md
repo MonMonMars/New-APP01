@@ -2,9 +2,9 @@
 
 ## Demo link (open now)
 
-**https://investigated-ballot-stage-uses.trycloudflare.com**
+**https://save-privacy-accomplished-tomorrow.trycloudflare.com**
 
-_Last updated: Sep 14, 2026 — likes match-back, chat/map polish, onboarding explainer_
+_Last updated: Sep 14, 2026 — clean discover home, emergency logo, unified disguise cards_
 
 > Tunnel links expire when the cloud workspace stops. If this 404s, ask for a fresh link.
 
@@ -16,8 +16,8 @@ _Last updated: Sep 14, 2026 — likes match-back, chat/map polish, onboarding ex
 2. Tap **Skip sign-in (demo mode)** if prompted
 3. Complete onboarding (or accept defaults)
 4. You land in **Pulse** disguise mode (news & social feed) — the default
-5. Tap the **Pulse logo** (top left) to open **Spark** safe mode
-6. Tap the **Spark logo** or **eye-off** button to return to Pulse
+5. In Spark, tap the **Emergency** logo (top left, semi-transparent) → instant Pulse disguise
+6. To return: **hold the Pulse logo and drag right** to unlock Spark
 
 ---
 
@@ -32,7 +32,9 @@ _Last updated: Sep 14, 2026 — likes match-back, chat/map polish, onboarding ex
 - Header search → Trending · bell → Activity
 
 ### Spark safe mode
-- **Discover** — drag to heart/trash/star zones
+- **Discover** — clean home: emergency logo + card deck + three bottom targets only
+- **Profile → Discover tools** — map, explore, filters, standouts, held profiles, etc.
+- Drag cards to heart/trash/star zones
 - **Video** badge on profiles → preview sheet
 - **Likes** (Spark+) → tap card → Like/Pass → instant match-back
 - **Chat** → tap header for profile · vibe game in composer

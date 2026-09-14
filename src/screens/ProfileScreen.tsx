@@ -31,12 +31,14 @@ const intentLabels: Record<RelationshipIntent, string> = {
 type SettingsRoute =
   | 'Safety'
   | 'SparkPlus'
+  | 'DiscoverHub'
   | 'DiscoveryPreferences'
   | 'NotificationPreferences'
   | 'ConsumablesShop'
   | null;
 
 const settingsRows: { icon: keyof typeof Ionicons.glyphMap; label: string; route: SettingsRoute }[] = [
+  { icon: 'flame-outline', label: 'Discover tools', route: 'DiscoverHub' },
   { icon: 'options-outline', label: 'Discovery preferences', route: 'DiscoveryPreferences' },
   { icon: 'shield-checkmark-outline', label: 'Safety & privacy', route: 'Safety' },
   { icon: 'notifications-outline', label: 'Notifications', route: 'NotificationPreferences' },

@@ -19,19 +19,20 @@ type DropTargetsProps = {
   containerRef: RefObject<View | null>;
   trashActive: SharedValue<number>;
   heartActive: SharedValue<number>;
-  roseActive?: SharedValue<number>;
+  starActive?: SharedValue<number>;
   compact?: boolean;
   onTrashLayout: (layout: ZoneLayout) => void;
   onHeartLayout: (layout: ZoneLayout) => void;
+  onStarLayout?: (layout: ZoneLayout) => void;
   onTrashPress?: () => void;
   onHeartPress?: () => void;
-  onRosePress?: () => void;
+  onStarPress?: () => void;
 };
 
 const TARGET_SIZE = 68;
 const TARGET_SIZE_COMPACT = 52;
-const ROSE_SIZE = 58;
-const ROSE_SIZE_COMPACT = 44;
+const STAR_SIZE = 58;
+const STAR_SIZE_COMPACT = 44;
 
 type TargetButtonProps = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -79,7 +80,7 @@ function TargetButton({
         onLayout={onLayout}
       >
         <Animated.View style={iconStyle}>
-          <Ionicons name={icon} size={size === ROSE_SIZE ? 26 : 34} color={iconColor} />
+          <Ionicons name={icon} size={size === STAR_SIZE || size === STAR_SIZE_COMPACT ? 28 : 34} color={iconColor} />
         </Animated.View>
       </Animated.View>
     </Pressable>
@@ -90,20 +91,21 @@ export function DropTargets({
   containerRef,
   trashActive,
   heartActive,
-  roseActive,
+  starActive,
   compact = false,
   onTrashLayout,
   onHeartLayout,
+  onStarLayout,
   onTrashPress,
   onHeartPress,
-  onRosePress,
+  onStarPress,
 }: DropTargetsProps) {
   const trashRef = useRef<View>(null);
   const heartRef = useRef<View>(null);
-  const roseRef = useRef<View>(null);
-  const roseActiveValue = roseActive ?? trashActive;
+  const starRef = useRef<View>(null);
+  const starActiveValue = starActive ?? trashActive;
   const targetSize = compact ? TARGET_SIZE_COMPACT : TARGET_SIZE;
-  const roseSize = compact ? ROSE_SIZE_COMPACT : ROSE_SIZE;
+  const starSize = compact ? STAR_SIZE_COMPACT : STAR_SIZE;
 
   const measureZone = useCallback(
     (targetRef: RefObject<View | null>, callback: (layout: ZoneLayout) => void) => {
@@ -132,10 +134,17 @@ export function DropTargets({
     measureZone(heartRef, onHeartLayout);
   }, [measureZone, onHeartLayout]);
 
+  const reportStarZone = useCallback(() => {
+    if (onStarLayout) {
+      measureZone(starRef, onStarLayout);
+    }
+  }, [measureZone, onStarLayout]);
+
   const reportZones = useCallback(() => {
     reportTrashZone();
     reportHeartZone();
-  }, [reportHeartZone, reportTrashZone]);
+    reportStarZone();
+  }, [reportHeartZone, reportStarZone, reportTrashZone]);
 
   return (
     <View style={[styles.row, compact && styles.rowCompact]} pointerEvents="box-none" onLayout={reportZones}>
@@ -151,19 +160,19 @@ export function DropTargets({
         onPress={onTrashPress}
       />
 
-      {onRosePress && (
-        <View style={styles.roseWrap}>
-          <View style={[styles.roseGlow, { width: roseSize + 20, height: roseSize + 20, borderRadius: (roseSize + 20) / 2 }]} />
+      {onStarPress && (
+        <View style={styles.starWrap}>
+          <View style={[styles.starGlow, { width: starSize + 20, height: starSize + 20, borderRadius: (starSize + 20) / 2 }]} />
           <TargetButton
-            icon="rose"
-            iconColor={colors.superLike}
-            backgroundColor={colors.surface}
-            borderColor={colors.superLike}
-            active={roseActiveValue}
-            targetRef={roseRef}
-            size={roseSize}
-            onLayout={() => undefined}
-            onPress={onRosePress}
+            icon="star"
+            iconColor={colors.card}
+            backgroundColor={colors.heartRed}
+            borderColor={colors.heartRed}
+            active={starActiveValue}
+            targetRef={starRef}
+            size={starSize}
+            onLayout={reportStarZone}
+            onPress={onStarPress}
           />
         </View>
       )}
@@ -208,14 +217,14 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 6,
   },
-  roseWrap: {
+  starWrap: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  roseGlow: {
+  starGlow: {
     position: 'absolute',
-    backgroundColor: 'rgba(30,195,255,0.2)',
+    backgroundColor: 'rgba(233,64,87,0.25)',
     borderWidth: 2,
-    borderColor: 'rgba(255,215,0,0.35)',
+    borderColor: 'rgba(255,107,138,0.5)',
   },
 });

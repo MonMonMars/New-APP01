@@ -123,9 +123,15 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
       width: 68,
       height: 68,
     });
+    const starZone = useSharedValue<ZoneLayout>({
+      x: 0,
+      y: 0,
+      width: 58,
+      height: 58,
+    });
     const trashActive = useSharedValue(0);
     const heartActive = useSharedValue(0);
-    const roseActive = useSharedValue(0);
+    const starActive = useSharedValue(0);
 
     useEffect(() => {
       setActiveIndex(0);
@@ -186,8 +192,8 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
       passDim.value = withTiming(0, { duration: 120 });
       trashActive.value = withTiming(0, { duration: 120 });
       heartActive.value = withTiming(0, { duration: 120 });
-      roseActive.value = withTiming(0, { duration: 120 });
-    }, [cardScale, heartActive, passDim, roseActive, trashActive, translateX, translateY]);
+      starActive.value = withTiming(0, { duration: 120 });
+    }, [cardScale, heartActive, passDim, starActive, trashActive, translateX, translateY]);
 
     const advanceAfterSuperLike = useCallback(() => {
       translateX.value = 0;
@@ -196,7 +202,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
       passDim.value = 0;
       trashActive.value = 0;
       heartActive.value = 0;
-      roseActive.value = 0;
+      starActive.value = 0;
 
       const nextIndex = activeIndex + 1;
       setActiveIndex(nextIndex);
@@ -210,7 +216,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
       onEmpty,
       passDim,
       profiles.length,
-      roseActive,
+      starActive,
       trashActive,
       translateX,
       translateY,
@@ -241,7 +247,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
         }
 
         if (superLike) {
-          roseActive.value = withTiming(1, { duration: 120 });
+          starActive.value = withTiming(1, { duration: 120 });
           void playSound('super');
           void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
@@ -249,11 +255,15 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           setSuperCelebrationKey((key) => key + 1);
           setShowSuperCelebration(true);
 
-          const toX = 0;
-          const toY = 0;
-          translateX.value = withTiming(toX, { duration: 260 });
-          translateY.value = withTiming(toY, { duration: 260 });
-          cardScale.value = withTiming(0.05, { duration: 260 });
+          const zone = starZone.value;
+          const targetCenterX = zone.x + zone.width / 2;
+          const targetCenterY = zone.y + zone.height / 2;
+          const toX = targetCenterX - deckWidth.value / 2;
+          const toY = targetCenterY - deckHeight.value / 2;
+
+          translateX.value = withTiming(toX, { duration: 280 });
+          translateY.value = withTiming(toY, { duration: 280 });
+          cardScale.value = withTiming(0.08, { duration: 280 });
           return;
         }
 
@@ -280,7 +290,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
             passDim.value = 0;
             trashActive.value = 0;
             heartActive.value = 0;
-            roseActive.value = 0;
+            starActive.value = 0;
             runOnJS(advanceCard)(direction);
           }
         });
@@ -298,7 +308,8 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
         playSound,
         profiles,
         resetPosition,
-        roseActive,
+        starActive,
+        starZone,
         trashActive,
         translateX,
         translateY,
@@ -338,6 +349,13 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
       [heartZone],
     );
 
+    const handleStarLayout = useCallback(
+      (layout: ZoneLayout) => {
+        starZone.value = layout;
+      },
+      [starZone],
+    );
+
     const panGesture = Gesture.Pan()
       .activeOffsetX([-12, 12])
       .activeOffsetY([-12, 12])
@@ -368,9 +386,19 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
             ZONE_HIT_PADDING,
           ),
         );
+        const starProximity = Math.max(
+          zoneProximity(pointerX, pointerY, starZone.value, ZONE_HIT_PADDING),
+          zoneProximity(
+            cardCenterX,
+            cardCenterY,
+            starZone.value,
+            ZONE_HIT_PADDING,
+          ),
+        );
 
         trashActive.value = trashProximity;
         heartActive.value = heartProximity;
+        starActive.value = starProximity;
 
         if (trashProximity > 0.3) {
           passDim.value = trashProximity * 0.7;
@@ -400,9 +428,22 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           heartZone.value,
           ZONE_HIT_PADDING,
         );
+        const overStar = isOverZone(
+          pointerX,
+          pointerY,
+          cardCenterX,
+          cardCenterY,
+          starZone.value,
+          ZONE_HIT_PADDING,
+        );
 
         if (overTrash) {
           runOnJS(dropToTarget)('left');
+          return;
+        }
+
+        if (overStar) {
+          runOnJS(dropToTarget)('right', true);
           return;
         }
 
@@ -465,13 +506,14 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           containerRef={containerRef}
           trashActive={trashActive}
           heartActive={heartActive}
-          roseActive={roseActive}
+          starActive={starActive}
           compact={compact}
           onTrashLayout={handleTrashLayout}
           onHeartLayout={handleHeartLayout}
+          onStarLayout={handleStarLayout}
           onTrashPress={() => dropToTarget('left')}
           onHeartPress={() => dropToTarget('right')}
-          onRosePress={() => dropToTarget('right', true)}
+          onStarPress={() => dropToTarget('right', true)}
         />
 
         <SwipeBurstEffect

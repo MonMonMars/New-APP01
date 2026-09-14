@@ -253,16 +253,28 @@ export function DiscoverScreen() {
     deckRef.current?.advanceAfterSuperLike();
   }, []);
 
-  const handleSuperLikeChat = useCallback(() => {
+  const handleSuperLikeTalkLater = useCallback(() => {
+    dismissSuperLikeResult();
+  }, [dismissSuperLikeResult]);
+
+  const handleSuperLikeChatNow = useCallback(() => {
     if (!superLikeProfileState) {
       return;
     }
-    const conversationId = getConversationIdForProfile(superLikeProfileState.id);
+    const profile = superLikeProfileState;
     setShowSuperLikeResult(false);
     setSuperLikeProfileState(null);
     deckRef.current?.advanceAfterSuperLike();
-    navigation.getParent()?.navigate('Chat', { conversationId });
-  }, [getConversationIdForProfile, navigation, superLikeProfileState]);
+
+    if (superLikeIsMatch) {
+      const conversationId = getConversationIdForProfile(profile.id);
+      navigation.getParent()?.navigate('Chat', { conversationId });
+      return;
+    }
+
+    setWaitingProfile(profile);
+    setShowWaiting(true);
+  }, [dismissSuperLikeResult, getConversationIdForProfile, navigation, superLikeIsMatch, superLikeProfileState]);
 
   const rewindScale = rewindAnim.interpolate({
     inputRange: [0, 0.5, 1],
@@ -462,8 +474,8 @@ export function DiscoverScreen() {
         profile={superLikeProfileState}
         isMatch={superLikeIsMatch}
         userPhoto={user.photos[0]}
-        onContinue={dismissSuperLikeResult}
-        onChat={superLikeIsMatch ? handleSuperLikeChat : undefined}
+        onTalkLater={handleSuperLikeTalkLater}
+        onChatNow={handleSuperLikeChatNow}
       />
 
       <WaitingForMatchModal

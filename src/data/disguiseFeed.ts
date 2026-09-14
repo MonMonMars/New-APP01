@@ -34,7 +34,9 @@ export type SocialPost = {
   author: string;
   handle: string;
   avatarUrl: string;
-  avatarMask: SocialAvatarMask;
+  avatarMask?: SocialAvatarMask;
+  /** When false, avatarUrl is already a baked disguise image. */
+  maskAvatar?: boolean;
   body: string;
   imageUrl?: string;
   imageMask?: SocialAvatarMask;

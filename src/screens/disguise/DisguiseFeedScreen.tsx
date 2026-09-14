@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -5,8 +6,10 @@ import { AdBannerCard } from '../../components/disguise/AdBannerCard';
 import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
 import { NewsPostCard } from '../../components/disguise/NewsPostCard';
 import { SocialPostCard } from '../../components/disguise/SocialPostCard';
+import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
-import { disguiseFeedItems, FeedItem } from '../../data/disguiseFeed';
+import { FeedItem } from '../../data/disguiseFeed';
+import { buildDisguiseFeed } from '../../utils/buildDisguiseFeed';
 import { spacing } from '../../theme';
 
 function renderFeedItem({ item }: { item: FeedItem }) {
@@ -27,12 +30,17 @@ function renderFeedItem({ item }: { item: FeedItem }) {
 export function DisguiseFeedScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { user, disguiseAdCreative } = useApp();
+  const feedItems = useMemo(
+    () => buildDisguiseFeed(user, disguiseAdCreative),
+    [user, disguiseAdCreative],
+  );
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader />
       <FlatList
-        data={disguiseFeedItems}
+        data={feedItems}
         keyExtractor={(item) => item.id}
         renderItem={renderFeedItem}
         contentContainerStyle={styles.list}

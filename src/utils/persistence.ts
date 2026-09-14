@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Conversation, Match } from '../types/match';
 import { defaultPreferences, DiscoveryPreferences } from '../types/preferences';
 import { UserProfile } from '../types/profile';
+import { DisguiseAdCreative } from '../types/disguise';
 import {
   defaultNotificationPreferences,
   NotificationPreferences,
@@ -10,7 +11,7 @@ import {
 } from '../types/settings';
 
 const STORAGE_KEY = '@spark/app_state';
-const STORAGE_VERSION = 6;
+const STORAGE_VERSION = 7;
 
 export type PersistedAppState = {
   version: number;
@@ -40,6 +41,7 @@ export type PersistedAppState = {
   isPaused: boolean;
   themeMode: ThemeMode;
   disguiseMode: boolean;
+  disguiseAdCreative: DisguiseAdCreative | null;
 };
 
 export function createDefaultPersistedState(): PersistedAppState {
@@ -81,6 +83,7 @@ export function createDefaultPersistedState(): PersistedAppState {
     isPaused: false,
     themeMode: 'dark',
     disguiseMode: false,
+    disguiseAdCreative: null,
   };
 }
 
@@ -117,6 +120,7 @@ export async function loadPersistedState(): Promise<PersistedAppState | null> {
       bonusSparkNotes: parsed.bonusSparkNotes ?? 0,
       isPaused: parsed.isPaused ?? false,
       disguiseMode: parsed.disguiseMode ?? false,
+      disguiseAdCreative: parsed.disguiseAdCreative ?? null,
       heldIds: parsed.heldIds ?? [],
       userId: parsed.userId ?? null,
     };

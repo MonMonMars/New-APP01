@@ -15,6 +15,7 @@ import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { RelationshipIntent } from '../types/profile';
 import { ThemeMode } from '../types/settings';
+import { DisguiseAdGeneratorSheet } from '../components/disguise/DisguiseAdGeneratorSheet';
 import { DISGUISE_APP_NAME } from '../data/disguiseFeed';
 import { computeProfileCompletion } from '../utils/profileCompletion';
 import { radii, spacing } from '../theme';
@@ -69,10 +70,12 @@ export function ProfileScreen() {
     isSupabaseEnabled,
     disguiseMode,
     setDisguiseMode,
+    disguiseAdCreative,
   } = useApp();
   const [showEdit, setShowEdit] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
   const [showNotifPrompt, setShowNotifPrompt] = useState(false);
+  const [showDisguiseGenerator, setShowDisguiseGenerator] = useState(false);
 
   const handleRowPress = (route: SettingsRoute) => {
     if (route === 'DiscoveryPreferences') {
@@ -221,6 +224,22 @@ export function ProfileScreen() {
           />
         </View>
 
+        <Pressable
+          style={[styles.disguiseAdRow, { borderBottomColor: colors.border }]}
+          onPress={() => setShowDisguiseGenerator(true)}
+        >
+          <Ionicons name="sparkles-outline" size={22} color={colors.textMuted} />
+          <View style={styles.toggleText}>
+            <Text style={[styles.toggleLabel, { color: colors.text }]}>AI disguise ad image</Text>
+            <Text style={[styles.toggleDesc, { color: colors.textMuted }]}>
+              {disguiseAdCreative
+                ? `Ready — ${disguiseAdCreative.overlayText}`
+                : 'Generate a sponsored post from your photo'}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+        </Pressable>
+
         {notificationsEnabled && (
           <View style={styles.notifBadge}>
             <Ionicons name="notifications" size={14} color={colors.gradientEnd} />
@@ -317,6 +336,11 @@ export function ProfileScreen() {
           setShowNotifPrompt(false);
           dismissNotificationPrompt();
         }}
+      />
+
+      <DisguiseAdGeneratorSheet
+        visible={showDisguiseGenerator}
+        onClose={() => setShowDisguiseGenerator(false)}
       />
     </View>
   );
@@ -422,6 +446,14 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     marginHorizontal: spacing.lg,
     marginTop: spacing.md,
+    paddingVertical: spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  disguiseAdRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    marginHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },

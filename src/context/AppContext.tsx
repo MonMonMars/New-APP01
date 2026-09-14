@@ -26,6 +26,7 @@ import {
   buildSeedSwipeState,
 } from '../data/seedState';
 import { uploadPhotosToCloud } from '../services/cloudStorage';
+import { generateDisguiseAdImage } from '../services/disguiseImageGeneration';
 import { registerCloudPushToken } from '../services/pushCloud';
 import type { ConversationRealtimeUpdate } from '../services/realtimeChat';
 import {
@@ -45,6 +46,7 @@ import {
   DiscoveryPreferences,
   ShowMePreference,
 } from '../types/preferences';
+import { DisguiseAdCreative, DisguiseOverlayVariant } from '../types/disguise';
 import { Profile, UserProfile } from '../types/profile';
 import {
   defaultNotificationPreferences,
@@ -169,6 +171,8 @@ type AppContextValue = {
   isPaused: boolean;
   themeMode: ThemeMode;
   disguiseMode: boolean;
+  disguiseAdCreative: DisguiseAdCreative | null;
+  isGeneratingDisguiseAd: boolean;
   canRewind: boolean;
   rewindKey: number;
   isSupabaseEnabled: boolean;
@@ -204,6 +208,11 @@ type AppContextValue = {
   updateNotificationPreferences: (prefs: NotificationPreferences) => void;
   setThemeMode: (mode: ThemeMode) => void;
   setDisguiseMode: (enabled: boolean) => void;
+  generateDisguiseAd: (
+    overlayText: string,
+    variant: DisguiseOverlayVariant,
+  ) => Promise<{ ok: boolean; message?: string }>;
+  clearDisguiseAd: () => void;
   setPaused: (paused: boolean) => void;
   deleteAccount: () => Promise<void>;
   dismissNotificationPrompt: () => void;
@@ -246,6 +255,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [isPaused, setIsPaused] = useState(false);
   const [themeMode, setThemeModeState] = useState<ThemeMode>('dark');
   const [disguiseMode, setDisguiseModeState] = useState(false);
+  const [disguiseAdCreative, setDisguiseAdCreative] = useState<DisguiseAdCreative | null>(null);
+  const [isGeneratingDisguiseAd, setIsGeneratingDisguiseAd] = useState(false);
   const [rewindKey, setRewindKey] = useState(0);
   const [discoverUnlockedCount, setDiscoverUnlockedCount] = useState(DISCOVER_BATCH_SIZE);
   const [priorityProfileId, setPriorityProfileId] = useState<string | null>(null);
@@ -303,6 +314,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setIsPaused(saved.isPaused);
         setThemeModeState(saved.themeMode);
         setDisguiseModeState(saved.disguiseMode ?? false);
+        setDisguiseAdCreative(saved.disguiseAdCreative ?? null);
 
         if (isSupabaseConfigured()) {
           const session = await getSupabaseSession();
@@ -386,6 +398,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       isPaused,
       themeMode,
       disguiseMode,
+      disguiseAdCreative,
     };
   }, [
     hasOnboarded,
@@ -414,6 +427,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     isPaused,
     themeMode,
     disguiseMode,
+    disguiseAdCreative,
   ]);
 
   const scheduleSync = useCallback(() => {
@@ -1095,6 +1109,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setDisguiseModeState(enabled);
   }, []);
 
+  const generateDisguiseAd = useCallback(
+    async (overlayText: string, variant: DisguiseOverlayVariant) => {
+      const sourcePhotoUrl = user.photos[0];
+      if (!sourcePhotoUrl) {
+        return { ok: false, message: 'Add a profile photo first.' };
+      }
+
+      setIsGeneratingDisguiseAd(true);
+      try {
+        const creative = await generateDisguiseAdImage({
+          sourcePhotoUrl,
+          overlayText,
+          variant,
+        });
+        setDisguiseAdCreative(creative);
+        return { ok: true };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Generation failed.';
+        return { ok: false, message };
+      } finally {
+        setIsGeneratingDisguiseAd(false);
+      }
+    },
+    [user.photos],
+  );
+
+  const clearDisguiseAd = useCallback(() => {
+    setDisguiseAdCreative(null);
+  }, []);
+
   const setPaused = useCallback((paused: boolean) => {
     setIsPaused(paused);
   }, []);
@@ -1121,6 +1165,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIsSparkPlus(false);
     setBoostActiveUntil(null);
     setIsPaused(false);
+    setDisguiseModeState(false);
+    setDisguiseAdCreative(null);
     setLastPassedProfileId(null);
     setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
     setPriorityProfileId(null);
@@ -1182,6 +1228,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       isPaused,
       themeMode,
       disguiseMode,
+      disguiseAdCreative,
+      isGeneratingDisguiseAd,
       canRewind,
       rewindKey,
       isSupabaseEnabled: isSupabaseConfigured(),
@@ -1214,6 +1262,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateNotificationPreferences,
       setThemeMode,
       setDisguiseMode,
+      generateDisguiseAd,
+      clearDisguiseAd,
       setPaused,
       deleteAccount,
       dismissNotificationPrompt,
@@ -1258,6 +1308,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       isPaused,
       themeMode,
       disguiseMode,
+      disguiseAdCreative,
+      isGeneratingDisguiseAd,
       canRewind,
       rewindKey,
       completeOnboarding,
@@ -1289,6 +1341,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateNotificationPreferences,
       setThemeMode,
       setDisguiseMode,
+      generateDisguiseAd,
+      clearDisguiseAd,
       setPaused,
       deleteAccount,
       dismissNotificationPrompt,

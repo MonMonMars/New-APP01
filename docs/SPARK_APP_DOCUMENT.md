@@ -63,6 +63,12 @@ Research synthesized from Tinder, Bumble, Hinge, Badoo, and Coffee Meets Bagel (
 | Tab badges | Likes count, unread | Beeline count, chat badge | Likes + matches | ✅ | **Dynamic Likes + Matches badges** |
 | Premium upsell | Blur tap, like limit, Boost | Beeline tap, Spotlight | Rose limit, Hinge+ | ✅ | Likes tap, like limit modal, Spark+ screen |
 | **Discovery gesture** | **Swipe left/right (patented)** | Swipe | Tap like on prompts | ❌ Avoid | **Drag card → trash / heart** |
+| Top Picks / Standouts | Top Picks | For You (4/day) | Standouts (Roses) | Bagels at noon | ✅ **Standouts row** on Discover |
+| Recently active | Active status | Online now | Active today | Online badge | ✅ **Recently active strip** |
+| Super Like effects | Super Like animation | SuperSwipe | Rose | Crush | ✅ **SuperLikeCelebration** + result modal |
+| Super Likes sent | Gold Super Likes tab | — | Roses sent | — | ✅ **Super Likes sent** in Likes tab |
+| Super Matches | — | — | — | — | ✅ **Super Matches** row in Matches |
+| Explore stacks | Explore / Passport | Modes | — | Encounters filters | ✅ **Explore screen** (Serious / New / Nearby) |
 
 ### 2.2 Positioning summary
 
@@ -526,47 +532,54 @@ Public preview: see `docs/PUBLIC_PREVIEW.md`.
 
 ## 12. Appendix — demo data
 
-### 12.1 Mock discover profiles
+### 12.1 Profile counts & QA buckets
 
-Six profiles in `mockProfiles` (ids `1`–`6`): Ava, Jordan, Mia, Chris, Sofia, Leo. Each has photos, bio, interests; several include Hinge-style prompts and verified badges.
+See `src/data/profiles.ts` header for the authoritative ID map.
 
-### 12.2 Mutual match demo
+| Bucket | Count | IDs |
+|--------|-------|-----|
+| Discover pool | **52** | `1`–`6`, `11`–`56` (excludes incoming-only `7`–`10`) |
+| Incoming likes | **6** | `7`–`10`, `37`, `38` |
+| Pre-matched | **4** | `1`, `5`, `15`, `27` |
+| Pending likes (user sent) | **5** | `6`, `14`, `20`, `22`, `31` |
+| Instant heart match | **4** | `3`, `18`, `41`, `45` |
+| Instant super-match (Rose) | **3** | `11`, `29`, `34` |
+| Standouts (Top Picks) | **5** | `15`, `30`, `36`, `48`, `52` |
 
-```typescript
-export const MUTUAL_MATCH_IDS = new Set(['3']); // Mia
-```
+Fresh installs seed pre-matches, pending likes, and conversations via `src/data/seedState.ts`.
 
-Liking **Mia** triggers instant mutual match → celebration modal → new conversation `conv-3`.
+### 12.2 Super-like demo
 
-All other likes → **Waiting for match** modal (one-sided).
+Tap the center **Spark Rose** button:
 
-### 12.3 Incoming likes (Likes tab)
+1. **SuperLikeCelebration** — blue/gold flash, giant rose, 56 particles, screen shake (~1.8s).
+2. **SuperLikeResultModal** — “Super Like sent!” or “Super Match!” with Continue / Chat now.
 
-Four profiles in `incomingLikeProfiles` (ids `7`–`10`): Emma, Noah, Zoe, Sam. Displayed blurred with “???” names; tab badge = **4**.
+Test super-match on **Priya (`11`)**, **Riley (`29`)**, or **Aaliyah (`34`)**.
 
-### 12.4 Seed conversations
+### 12.3 Seed conversations
 
 | Conversation | Match | State |
 |--------------|-------|-------|
-| `conv-1` | Ava | Active thread; your turn = false |
-| `conv-2` | Mia | Unread + **Your turn**; expiry ~18h |
+| `conv-1` | Ava (`1`) | Active thread with messages |
+| `conv-5` | Sofia (`5`) | New match, empty thread |
+| `conv-15` | Amara (`15`) | Unread + **Your turn** |
+| — | Isabella (`27`) | New match row only (no messages yet) |
 
-New matches from Discover appear in horizontal “New matches” row until first message.
-
-### 12.5 Default user
+### 12.4 Default user
 
 Prototype user: **Mon**, 28, designer bio, default Unsplash photo.
 
-### 12.6 Testing checklist
+### 12.5 Testing checklist
 
-1. Complete onboarding.
-2. On Discover, like **Mia** → match celebration → open chat.
-3. Like **Ava** or others → waiting modal.
-4. Exhaust 10 likes → LikeLimitModal.
-5. Open Likes → tap blurred card → Spark+.
-6. Matches → open Mia chat → use icebreaker → send message.
-7. Profile detail → report/block.
-8. Pass on trash → red burst + sound (tap screen first on web).
+1. Complete onboarding (or clear app storage for fresh seed).
+2. **Matches tab** — see pre-matched Ava, Sofia, Amara, Isabella.
+3. **Likes tab** — 6 blurred incoming likes; Super Likes sent appears after using Rose.
+4. **Discover** — Standouts row + Recently active strip; compass → Explore categories.
+5. Tap **Spark Rose** on Priya (`11`) → super-match celebration → Chat now.
+6. Rose on other profiles → “Super Like sent!” → Continue search.
+7. Heart like on Mia (`3`) → regular match modal.
+8. Pass on trash → red burst (unchanged).
 
 ---
 

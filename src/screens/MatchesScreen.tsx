@@ -84,7 +84,14 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
   const { colors } = useTheme();
   const { conversations, matches } = useApp();
 
-  const newMatches = matches.filter(
+  const superMatches = matches.filter((match) => match.isSuperMatch);
+  const regularMatches = matches.filter((match) => !match.isSuperMatch);
+
+  const newMatches = regularMatches.filter(
+    (match) => !conversations.some((c) => c.match.id === match.id && c.messages.length > 0),
+  );
+
+  const newSuperMatches = superMatches.filter(
     (match) => !conversations.some((c) => c.match.id === match.id && c.messages.length > 0),
   );
 
@@ -97,6 +104,26 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
       />
 
       <ScrollView contentContainerStyle={styles.content}>
+        {newSuperMatches.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.superHeader}>
+              <Ionicons name="rose" size={14} color={colors.superLike} />
+              <Text style={[styles.sectionTitle, { color: colors.superLike, marginBottom: 0 }]}>
+                Super Matches
+              </Text>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.matchRow}>
+              {newSuperMatches.map((match) => (
+                <NewMatchItem
+                  key={match.id}
+                  match={match}
+                  onPress={() => onOpenChat(`conv-${match.profile.id}`)}
+                />
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
         {newMatches.length > 0 && (
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>New matches</Text>
@@ -151,6 +178,13 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 1,
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.sm,
+  },
+  superHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.sm,
   },

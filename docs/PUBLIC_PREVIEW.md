@@ -4,7 +4,7 @@ Try the app in **any browser** (phone, laptop, tablet) using these links.
 
 ## Live preview (Cloudflare)
 
-**https://penalty-cincinnati-shades-rocky.trycloudflare.com**
+**https://asn-stand-along-patricia.trycloudflare.com**
 
 > This link works outside Cursor. It forwards to the dev server running in the cloud workspace.  
 > Tunnels are **temporary** — if the link stops working, ask to regenerate it.

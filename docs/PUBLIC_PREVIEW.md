@@ -9,7 +9,15 @@ Try the app in **any browser** (phone, laptop, tablet) using these links.
 > This link works outside Cursor. It forwards to the dev server running in the cloud workspace.  
 > Tunnels are **temporary** — if the link stops working, ask to regenerate it.
 
-### How to test new v0.3 features
+### How to test Discover v0.4 features
+
+1. **Almost full-screen photos** — Discover tab: card fills most of the viewport.
+2. **Search more people** — tap below the card to load the next batch (6 at a time).
+3. **Expand location** — radius pill or expand sheet: 25 → 50 → 100 → 250 → Anywhere.
+4. **Fake map** — map icon (top-left) → pins → tap to preview → view in deck.
+5. **36 mock discover profiles** + 4 incoming likes for testing.
+
+### How to test v0.3 features
 
 1. **Onboarding** — tap "Continue with Apple" → rules → location → intent → **gender & orientation** → profile.
 2. **Discovery filters** — tap chips: Active today, New here, Has bio, Verified.

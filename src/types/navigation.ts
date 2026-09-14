@@ -10,6 +10,7 @@ export type RootStackParamList = {
   Safety: undefined;
   NotificationPreferences: undefined;
   ConsumablesShop: undefined;
+  MapDiscover: undefined;
 };
 
 export type MainTabParamList = {

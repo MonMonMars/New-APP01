@@ -6,6 +6,9 @@ import { colors, spacing } from '../theme';
 type ScreenHeaderProps = {
   title?: string;
   showLogo?: boolean;
+  compact?: boolean;
+  leftIcon?: keyof typeof Ionicons.glyphMap;
+  onLeftPress?: () => void;
   rightIcon?: keyof typeof Ionicons.glyphMap;
   onRightPress?: () => void;
 };
@@ -13,19 +16,31 @@ type ScreenHeaderProps = {
 export function ScreenHeader({
   title,
   showLogo = false,
+  compact = false,
+  leftIcon,
+  onLeftPress,
   rightIcon,
   onRightPress,
 }: ScreenHeaderProps) {
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, compact && styles.headerCompact]}>
+      {leftIcon ? (
+        <Pressable style={styles.iconButton} onPress={onLeftPress}>
+          <Ionicons name={leftIcon} size={22} color={colors.text} />
+        </Pressable>
+      ) : (
+        <View style={styles.iconButtonPlaceholder} />
+      )}
+
       {showLogo ? (
         <View style={styles.logoRow}>
-          <Ionicons name="flame" size={28} color={colors.gradientEnd} />
-          <Text style={styles.logo}>Spark</Text>
+          <Ionicons name="flame" size={compact ? 22 : 28} color={colors.gradientEnd} />
+          <Text style={[styles.logo, compact && styles.logoCompact]}>Spark</Text>
         </View>
       ) : (
         <Text style={styles.title}>{title}</Text>
       )}
+
       {rightIcon ? (
         <Pressable style={styles.iconButton} onPress={onRightPress}>
           <Ionicons name={rightIcon} size={22} color={colors.text} />
@@ -42,8 +57,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.md,
     paddingBottom: spacing.sm,
+  },
+  headerCompact: {
+    paddingBottom: spacing.xs,
   },
   logoRow: {
     flexDirection: 'row',
@@ -55,6 +73,9 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: '800',
     letterSpacing: -0.5,
+  },
+  logoCompact: {
+    fontSize: 22,
   },
   title: {
     color: colors.text,

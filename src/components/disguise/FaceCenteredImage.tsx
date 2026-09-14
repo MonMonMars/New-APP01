@@ -2,11 +2,7 @@ import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View, type ViewStyle } from 'react-native';
 
-import {
-  focalToContentPosition,
-  getFaceFocalPoint,
-  type FaceFocalPoint,
-} from '../../utils/faceThumbnailCenter';
+import { cropToImageLayout, getFaceCrop, type FaceCrop } from '../../utils/faceThumbnailCenter';
 
 type FaceCenteredImageProps = {
   imageUrl: string;
@@ -14,15 +10,17 @@ type FaceCenteredImageProps = {
   style?: ViewStyle;
 };
 
+const INITIAL_CROP: FaceCrop = { focal: { x: 0.5, y: 0.32 }, scale: 1.55 };
+
 export function FaceCenteredImage({ imageUrl, size, style }: FaceCenteredImageProps) {
   const radius = size / 2;
-  const [focal, setFocal] = useState<FaceFocalPoint>({ x: 0.5, y: 0.38 });
+  const [crop, setCrop] = useState<FaceCrop>(INITIAL_CROP);
 
   useEffect(() => {
     let cancelled = false;
-    void getFaceFocalPoint(imageUrl).then((point) => {
+    void getFaceCrop(imageUrl).then((next) => {
       if (!cancelled) {
-        setFocal(point);
+        setCrop(next);
       }
     });
     return () => {
@@ -30,7 +28,7 @@ export function FaceCenteredImage({ imageUrl, size, style }: FaceCenteredImagePr
     };
   }, [imageUrl]);
 
-  const position = focalToContentPosition(focal);
+  const layout = cropToImageLayout(crop, size);
 
   return (
     <View
@@ -42,10 +40,17 @@ export function FaceCenteredImage({ imageUrl, size, style }: FaceCenteredImagePr
     >
       <Image
         source={{ uri: imageUrl }}
-        style={[styles.image, { borderRadius: radius }]}
+        style={[
+          styles.image,
+          {
+            width: layout.width,
+            height: layout.height,
+            left: layout.left,
+            top: layout.top,
+          },
+        ]}
         contentFit="cover"
-        contentPosition={position}
-        transition={120}
+        transition={160}
         accessibilityIgnoresInvertColors
       />
     </View>
@@ -58,7 +63,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#1a1a1a',
   },
   image: {
-    width: '100%',
-    height: '100%',
+    position: 'absolute',
   },
 });

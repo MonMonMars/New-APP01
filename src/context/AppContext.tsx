@@ -1,0 +1,1097 @@
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
+
+import { seedConversations } from '../data/conversations';
+import {
+  incomingLikeProfiles,
+  INCOMING_LIKE_IDS,
+  mockProfiles,
+  MUTUAL_MATCH_IDS,
+  MUTUAL_SUPER_LIKE_IDS,
+} from '../data/profiles';
+import {
+  buildSeedConversations,
+  buildSeedMatches,
+  buildSeedSwipeState,
+} from '../data/seedState';
+import {
+  deleteSupabaseAccount,
+  isSupabaseConfigured,
+  loadFromSupabase,
+  syncToSupabase,
+} from '../services/supabase';
+import { Conversation, Match, Message } from '../types/match';
+import {
+  defaultPreferences,
+  DISCOVER_BATCH_SIZE,
+  DiscoverFilter,
+  DiscoveryPreferences,
+  ShowMePreference,
+} from '../types/preferences';
+import { Profile, UserProfile } from '../types/profile';
+import {
+  defaultNotificationPreferences,
+  NotificationPreferences,
+  ThemeMode,
+} from '../types/settings';
+import { FREE_DAILY_LIKE_LIMIT, FREE_DAILY_SPARK_NOTES } from '../types/subscription';
+import { BOOST_DURATION_MS } from '../types/subscription';
+import { requestNotificationPermission, scheduleMatchNotification } from '../utils/notifications';
+import {
+  clearPersistedState,
+  createDefaultPersistedState,
+  loadPersistedState,
+  PersistedAppState,
+  savePersistedState,
+} from '../utils/persistence';
+
+function matchesGenderFilter(profile: Profile, showMe: ShowMePreference): boolean {
+  switch (showMe) {
+    case 'everyone':
+      return true;
+    case 'women':
+      return profile.gender === 'woman';
+    case 'men':
+      return profile.gender === 'man';
+    default: {
+      const _exhaustive: never = showMe;
+      return _exhaustive;
+    }
+  }
+}
+
+function matchesDiscoverFilters(profile: Profile, filters: DiscoverFilter[]): boolean {
+  if (filters.length === 0) {
+    return true;
+  }
+  return filters.every((filter) => {
+    switch (filter) {
+      case 'active_today':
+        return profile.activeToday === true;
+      case 'new_here':
+        return profile.isNew === true;
+      case 'has_bio':
+        return profile.bio.trim().length > 0;
+      case 'verified':
+        return profile.verified === true;
+      default: {
+        const _exhaustive: never = filter;
+        return _exhaustive;
+      }
+    }
+  });
+}
+
+function filterDiscoverProfiles(
+  profiles: Profile[],
+  preferences: DiscoveryPreferences,
+  excludedIds: Set<string>,
+): Profile[] {
+  const filters = preferences.discoverFilters ?? [];
+  return profiles.filter(
+    (profile) =>
+      !excludedIds.has(profile.id) &&
+      profile.distanceMiles <= preferences.maxDistanceMiles &&
+      profile.age >= preferences.minAge &&
+      profile.age <= preferences.maxAge &&
+      matchesGenderFilter(profile, preferences.showMe) &&
+      matchesDiscoverFilters(profile, filters),
+  );
+}
+
+function arrayToSet(values: string[]): Set<string> {
+  return new Set(values);
+}
+
+function setToArray(set: Set<string>): string[] {
+  return Array.from(set);
+}
+
+function todayKey(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+type AppContextValue = {
+  hasOnboarded: boolean;
+  isHydrated: boolean;
+  isAuthenticated: boolean;
+  userId: string | null;
+  user: UserProfile;
+  preferences: DiscoveryPreferences;
+  discoverQueue: Profile[];
+  discoverPoolTotal: number;
+  hasMoreInPool: boolean;
+  passedIds: Set<string>;
+  likedIds: Set<string>;
+  pendingLikeIds: Set<string>;
+  superLikedIds: Set<string>;
+  blockedIds: Set<string>;
+  matches: Match[];
+  conversations: Conversation[];
+  incomingLikes: Profile[];
+  sparkNotes: Record<string, string>;
+  dailyLikesUsed: number;
+  remainingLikes: number;
+  remainingSparkNotes: number;
+  canLike: boolean;
+  canSendSparkNote: boolean;
+  likesTabBadge: number;
+  matchesTabBadge: number;
+  isSparkPlus: boolean;
+  isBoosted: boolean;
+  boostActiveUntil: string | null;
+  notificationsEnabled: boolean;
+  notificationPreferences: NotificationPreferences;
+  isPaused: boolean;
+  themeMode: ThemeMode;
+  canRewind: boolean;
+  rewindKey: number;
+  isSupabaseEnabled: boolean;
+  completeOnboarding: (user: UserProfile) => void;
+  signInWithAppleStub: () => Promise<void>;
+  updateUser: (user: UserProfile) => void;
+  updatePreferences: (preferences: DiscoveryPreferences) => void;
+  toggleDiscoverFilter: (filter: DiscoverFilter) => void;
+  searchMorePeople: () => void;
+  expandSearchRadius: (miles: number) => void;
+  prioritizeProfileInDeck: (profileId: string) => void;
+  passProfile: (profile: Profile) => void;
+  likeProfile: (profile: Profile, sparkNote?: string) => Match | null;
+  superLikeProfile: (profile: Profile) => Match | null;
+  sendMessage: (conversationId: string, text: string, imageUrl?: string) => void;
+  getConversationIdForProfile: (profileId: string) => string | null;
+  blockProfile: (profileId: string) => void;
+  reportProfile: (profileId: string, reason?: string) => void;
+  unmatchProfile: (profileId: string) => void;
+  activateSparkPlus: () => void;
+  restorePurchases: () => Promise<boolean>;
+  activateBoost: () => void;
+  purchaseSparkNotes: (count: number) => void;
+  rewindLastPass: () => void;
+  enableNotifications: () => Promise<boolean>;
+  updateNotificationPreferences: (prefs: NotificationPreferences) => void;
+  setThemeMode: (mode: ThemeMode) => void;
+  setPaused: (paused: boolean) => void;
+  deleteAccount: () => Promise<void>;
+  dismissNotificationPrompt: () => void;
+  showNotificationPrompt: boolean;
+};
+
+const defaultPersisted = createDefaultPersistedState();
+
+const AppContext = createContext<AppContextValue | null>(null);
+
+export function AppProvider({ children }: { children: ReactNode }) {
+  const [hasOnboarded, setHasOnboarded] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [user, setUser] = useState<UserProfile>(defaultPersisted.user);
+  const [preferences, setPreferences] = useState<DiscoveryPreferences>(defaultPreferences);
+  const [passedIds, setPassedIds] = useState<Set<string>>(new Set());
+  const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
+  const [pendingLikeIds, setPendingLikeIds] = useState<Set<string>>(new Set());
+  const [superLikedIds, setSuperLikedIds] = useState<Set<string>>(new Set());
+  const [blockedIds, setBlockedIds] = useState<Set<string>>(new Set());
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>(seedConversations);
+  const [sparkNotes, setSparkNotes] = useState<Record<string, string>>({});
+  const [dailyLikesUsed, setDailyLikesUsed] = useState(0);
+  const [isSparkPlus, setIsSparkPlus] = useState(false);
+  const [boostActiveUntil, setBoostActiveUntil] = useState<string | null>(null);
+  const [sparkNotesUsedToday, setSparkNotesUsedToday] = useState(0);
+  const [lastSparkNoteDate, setLastSparkNoteDate] = useState<string | null>(null);
+  const [bonusSparkNotes, setBonusSparkNotes] = useState(0);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences>(
+    defaultNotificationPreferences,
+  );
+  const [lastPassedProfileId, setLastPassedProfileId] = useState<string | null>(null);
+  const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
+  const [notificationPromptDismissed, setNotificationPromptDismissed] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [themeMode, setThemeModeState] = useState<ThemeMode>('dark');
+  const [rewindKey, setRewindKey] = useState(0);
+  const [discoverUnlockedCount, setDiscoverUnlockedCount] = useState(DISCOVER_BATCH_SIZE);
+  const [priorityProfileId, setPriorityProfileId] = useState<string | null>(null);
+
+  const hydratedRef = useRef(false);
+  const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    loadPersistedState().then(async (saved) => {
+      if (cancelled) {
+        return;
+      }
+
+      if (saved) {
+        setUser(saved.user);
+        setPreferences(saved.preferences);
+        setHasOnboarded(saved.hasOnboarded);
+        setIsAuthenticated(saved.isAuthenticated);
+        setUserId(saved.userId);
+        setPassedIds(arrayToSet(saved.passedIds));
+        setLikedIds(arrayToSet(saved.likedIds));
+        setPendingLikeIds(arrayToSet(saved.pendingLikeIds));
+        setSuperLikedIds(arrayToSet(saved.superLikedIds ?? []));
+        setBlockedIds(arrayToSet(saved.blockedIds));
+        setMatches(saved.matches);
+        setConversations(
+          saved.conversations.length > 0 ? saved.conversations : seedConversations,
+        );
+        setSparkNotes(saved.sparkNotes);
+        setDailyLikesUsed(saved.dailyLikesUsed);
+        setIsSparkPlus(saved.isSparkPlus);
+        setBoostActiveUntil(saved.boostActiveUntil);
+        setSparkNotesUsedToday(saved.sparkNotesUsedToday);
+        setLastSparkNoteDate(saved.lastSparkNoteDate);
+        setBonusSparkNotes(saved.bonusSparkNotes);
+        setNotificationsEnabled(saved.notificationsEnabled);
+        setNotificationPreferences(saved.notificationPreferences);
+        setLastPassedProfileId(saved.lastPassedProfileId);
+        setIsPaused(saved.isPaused);
+        setThemeModeState(saved.themeMode);
+
+        if (isSupabaseConfigured() && saved.userId) {
+          const remote = await loadFromSupabase(saved.userId);
+          if (remote && !cancelled) {
+            if (remote.user) {
+              setUser(remote.user);
+            }
+            if (remote.preferences) {
+              setPreferences(remote.preferences);
+            }
+            setPassedIds(arrayToSet(remote.passedIds ?? []));
+            setLikedIds(arrayToSet(remote.likedIds ?? []));
+            setPendingLikeIds(arrayToSet(remote.pendingLikeIds ?? []));
+            setSuperLikedIds(arrayToSet(saved.superLikedIds ?? []));
+            setBlockedIds(arrayToSet(remote.blockedIds ?? []));
+            setMatches(remote.matches ?? []);
+            if (remote.conversations && remote.conversations.length > 0) {
+              setConversations(remote.conversations);
+            }
+            setIsSparkPlus(remote.isSparkPlus ?? false);
+            setIsPaused(remote.isPaused ?? false);
+          }
+        }
+      } else {
+        const seedMatches = buildSeedMatches();
+        const seedSwipe = buildSeedSwipeState();
+        setMatches(seedMatches);
+        setConversations(buildSeedConversations(seedMatches));
+        setLikedIds(arrayToSet(seedSwipe.likedIds));
+        setPendingLikeIds(arrayToSet(seedSwipe.pendingLikeIds));
+        setPassedIds(arrayToSet(seedSwipe.passedIds));
+        setSuperLikedIds(arrayToSet(seedSwipe.superLikedIds));
+      }
+
+      hydratedRef.current = true;
+      setIsHydrated(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const buildPersistedState = useCallback((): PersistedAppState => {
+    return {
+      version: 4,
+      hasOnboarded,
+      isAuthenticated,
+      userId,
+      user,
+      preferences,
+      passedIds: setToArray(passedIds),
+      likedIds: setToArray(likedIds),
+      pendingLikeIds: setToArray(pendingLikeIds),
+      superLikedIds: setToArray(superLikedIds),
+      blockedIds: setToArray(blockedIds),
+      matches,
+      conversations,
+      dailyLikesUsed,
+      isSparkPlus,
+      sparkNotes,
+      boostActiveUntil,
+      sparkNotesUsedToday,
+      lastSparkNoteDate,
+      bonusSparkNotes,
+      notificationsEnabled,
+      notificationPreferences,
+      lastPassedProfileId,
+      isPaused,
+      themeMode,
+    };
+  }, [
+    hasOnboarded,
+    isAuthenticated,
+    userId,
+    user,
+    preferences,
+    passedIds,
+    likedIds,
+    pendingLikeIds,
+    superLikedIds,
+    blockedIds,
+    matches,
+    conversations,
+    dailyLikesUsed,
+    isSparkPlus,
+    sparkNotes,
+    boostActiveUntil,
+    sparkNotesUsedToday,
+    lastSparkNoteDate,
+    bonusSparkNotes,
+    notificationsEnabled,
+    notificationPreferences,
+    lastPassedProfileId,
+    isPaused,
+    themeMode,
+  ]);
+
+  const scheduleSync = useCallback(() => {
+    if (!isSupabaseConfigured() || !userId || !hasOnboarded) {
+      return;
+    }
+    if (syncTimeoutRef.current) {
+      clearTimeout(syncTimeoutRef.current);
+    }
+    syncTimeoutRef.current = setTimeout(() => {
+      void syncToSupabase({
+        userId,
+        user,
+        preferences,
+        passedIds: setToArray(passedIds),
+        likedIds: setToArray(likedIds),
+        pendingLikeIds: setToArray(pendingLikeIds),
+        blockedIds: setToArray(blockedIds),
+        matches,
+        conversations,
+        isSparkPlus,
+        isPaused,
+      });
+    }, 1500);
+  }, [
+    userId,
+    hasOnboarded,
+    user,
+    preferences,
+      passedIds,
+      likedIds,
+      pendingLikeIds,
+      superLikedIds,
+      blockedIds,
+      matches,
+    conversations,
+    isSparkPlus,
+    isPaused,
+  ]);
+
+  useEffect(() => {
+    if (!hydratedRef.current || !hasOnboarded) {
+      return;
+    }
+    void savePersistedState(buildPersistedState());
+    scheduleSync();
+  }, [buildPersistedState, hasOnboarded, scheduleSync]);
+
+  const excludedIds = useMemo(() => {
+    const ids = new Set<string>();
+    passedIds.forEach((id) => ids.add(id));
+    likedIds.forEach((id) => ids.add(id));
+    blockedIds.forEach((id) => ids.add(id));
+    return ids;
+  }, [blockedIds, likedIds, passedIds]);
+
+  const discoverPool = useMemo(() => {
+    if (isPaused) {
+      return [];
+    }
+    const incomingExcluded = new Set<string>(INCOMING_LIKE_IDS);
+    const pool = mockProfiles.filter((p) => !incomingExcluded.has(p.id));
+    return filterDiscoverProfiles(pool, preferences, excludedIds);
+  }, [excludedIds, isPaused, preferences]);
+
+  const discoverQueue = useMemo(() => {
+    if (isPaused) {
+      return [];
+    }
+    const unlocked = discoverPool.slice(0, discoverUnlockedCount);
+    if (!priorityProfileId) {
+      return unlocked;
+    }
+    const priorityIndex = unlocked.findIndex((profile) => profile.id === priorityProfileId);
+    if (priorityIndex <= 0) {
+      return unlocked;
+    }
+    const priorityProfile = unlocked[priorityIndex];
+    return [
+      priorityProfile,
+      ...unlocked.filter((profile) => profile.id !== priorityProfileId),
+    ];
+  }, [discoverPool, discoverUnlockedCount, isPaused, priorityProfileId]);
+
+  const discoverPoolTotal = discoverPool.length;
+  const hasMoreInPool = discoverPool.length > discoverUnlockedCount;
+
+  const isBoosted = useMemo(() => {
+    if (!boostActiveUntil) {
+      return false;
+    }
+    return new Date(boostActiveUntil).getTime() > Date.now();
+  }, [boostActiveUntil]);
+
+  const remainingLikes = isSparkPlus
+    ? Infinity
+    : Math.max(0, FREE_DAILY_LIKE_LIMIT - dailyLikesUsed);
+  const canLike = isSparkPlus || dailyLikesUsed < FREE_DAILY_LIKE_LIMIT;
+
+  const sparkNotesUsedForToday = useMemo(() => {
+    if (lastSparkNoteDate !== todayKey()) {
+      return 0;
+    }
+    return sparkNotesUsedToday;
+  }, [lastSparkNoteDate, sparkNotesUsedToday]);
+
+  const dailyNoteLimit = isSparkPlus ? Infinity : FREE_DAILY_SPARK_NOTES;
+  const remainingSparkNotes = isSparkPlus
+    ? Infinity
+    : Math.max(0, dailyNoteLimit - sparkNotesUsedForToday + bonusSparkNotes);
+  const canSendSparkNote =
+    isSparkPlus || sparkNotesUsedForToday < FREE_DAILY_SPARK_NOTES + bonusSparkNotes;
+
+  const likesTabBadge = isSparkPlus ? 0 : incomingLikeProfiles.length;
+
+  const matchesTabBadge = useMemo(() => {
+    const newMatchCount = matches.filter(
+      (match) =>
+        !conversations.some(
+          (conversation) =>
+            conversation.match.id === match.id && conversation.messages.length > 0,
+        ),
+    ).length;
+    const unreadCount = conversations.filter((conversation) => conversation.unread).length;
+    const yourTurnCount = conversations.filter(
+      (conversation) => conversation.yourTurn && !conversation.unread,
+    ).length;
+    return newMatchCount + unreadCount + yourTurnCount;
+  }, [conversations, matches]);
+
+  const canRewind = isSparkPlus && lastPassedProfileId !== null;
+
+  const signInWithAppleStub = useCallback(async () => {
+    setIsAuthenticated(true);
+    if (isSupabaseConfigured()) {
+      const demoUserId = `demo-${Date.now()}`;
+      setUserId(demoUserId);
+    }
+  }, []);
+
+  const completeOnboarding = useCallback(
+    (nextUser: UserProfile) => {
+      setUser(nextUser);
+      setHasOnboarded(true);
+      if (!userId && isSupabaseConfigured()) {
+        setUserId(`user-${Date.now()}`);
+      }
+      if (!notificationPromptDismissed && !notificationsEnabled) {
+        setShowNotificationPrompt(true);
+      }
+    },
+    [notificationPromptDismissed, notificationsEnabled, userId],
+  );
+
+  const updateUser = useCallback((nextUser: UserProfile) => {
+    setUser(nextUser);
+  }, []);
+
+  const updatePreferences = useCallback((next: DiscoveryPreferences) => {
+    setPreferences(next);
+  }, []);
+
+  const toggleDiscoverFilter = useCallback((filter: DiscoverFilter) => {
+    setPreferences((prev) => {
+      const current = prev.discoverFilters ?? [];
+      const next = current.includes(filter)
+        ? current.filter((f) => f !== filter)
+        : [...current, filter];
+      return { ...prev, discoverFilters: next };
+    });
+    setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
+  }, []);
+
+  const searchMorePeople = useCallback(() => {
+    setDiscoverUnlockedCount((count) => count + DISCOVER_BATCH_SIZE);
+  }, []);
+
+  const expandSearchRadius = useCallback((miles: number) => {
+    setPreferences((prev) => ({ ...prev, maxDistanceMiles: miles }));
+    setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
+    setPriorityProfileId(null);
+  }, []);
+
+  const prioritizeProfileInDeck = useCallback(
+    (profileId: string) => {
+      const poolIndex = discoverPool.findIndex((profile) => profile.id === profileId);
+      if (poolIndex < 0) {
+        return;
+      }
+      if (poolIndex >= discoverUnlockedCount) {
+        setDiscoverUnlockedCount(poolIndex + 1);
+      }
+      setPriorityProfileId(profileId);
+    },
+    [discoverPool, discoverUnlockedCount],
+  );
+
+  const passProfile = useCallback((profile: Profile) => {
+    setPassedIds((prev) => new Set(prev).add(profile.id));
+    setLastPassedProfileId(profile.id);
+  }, []);
+
+  const rewindLastPass = useCallback(() => {
+    if (!isSparkPlus || !lastPassedProfileId) {
+      return;
+    }
+    setPassedIds((prev) => {
+      const next = new Set(prev);
+      next.delete(lastPassedProfileId);
+      return next;
+    });
+    setLastPassedProfileId(null);
+    setRewindKey((k) => k + 1);
+  }, [isSparkPlus, lastPassedProfileId]);
+
+  const blockProfile = useCallback((profileId: string) => {
+    setBlockedIds((prev) => new Set(prev).add(profileId));
+    setMatches((prev) => prev.filter((match) => match.profile.id !== profileId));
+    setConversations((prev) =>
+      prev.filter((conversation) => conversation.match.profile.id !== profileId),
+    );
+    setPendingLikeIds((prev) => {
+      const next = new Set(prev);
+      next.delete(profileId);
+      return next;
+    });
+  }, []);
+
+  const unmatchProfile = useCallback((profileId: string) => {
+    setMatches((prev) => prev.filter((match) => match.profile.id !== profileId));
+    setConversations((prev) =>
+      prev.filter((conversation) => conversation.match.profile.id !== profileId),
+    );
+    setLikedIds((prev) => {
+      const next = new Set(prev);
+      next.delete(profileId);
+      return next;
+    });
+    setPendingLikeIds((prev) => {
+      const next = new Set(prev);
+      next.delete(profileId);
+      return next;
+    });
+    setPassedIds((prev) => new Set(prev).add(profileId));
+  }, []);
+
+  const reportProfile = useCallback(
+    (profileId: string, _reason?: string) => {
+      blockProfile(profileId);
+    },
+    [blockProfile],
+  );
+
+  const likeProfile = useCallback(
+    (profile: Profile, sparkNote?: string): Match | null => {
+      if (!canLike) {
+        return null;
+      }
+
+      setLikedIds((prev) => new Set(prev).add(profile.id));
+      if (!isSparkPlus) {
+        setDailyLikesUsed((count) => count + 1);
+      }
+
+      if (sparkNote) {
+        setSparkNotes((prev) => ({ ...prev, [profile.id]: sparkNote }));
+        const today = todayKey();
+        if (lastSparkNoteDate !== today) {
+          setLastSparkNoteDate(today);
+          setSparkNotesUsedToday(1);
+        } else {
+          setSparkNotesUsedToday((count) => count + 1);
+        }
+        if (bonusSparkNotes > 0 && !isSparkPlus) {
+          setBonusSparkNotes((count) => Math.max(0, count - 1));
+        }
+      }
+
+      if (!MUTUAL_MATCH_IDS.has(profile.id)) {
+        setPendingLikeIds((prev) => new Set(prev).add(profile.id));
+        return null;
+      }
+
+      setPendingLikeIds((prev) => {
+        const next = new Set(prev);
+        next.delete(profile.id);
+        return next;
+      });
+
+      const match: Match = {
+        id: `match-${profile.id}`,
+        profile,
+        matchedAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 86400000).toISOString(),
+      };
+
+      setMatches((prev) => {
+        if (prev.some((item) => item.profile.id === profile.id)) {
+          return prev;
+        }
+        return [match, ...prev];
+      });
+
+      setConversations((prev) => {
+        if (prev.some((item) => item.match.profile.id === profile.id)) {
+          return prev;
+        }
+        const conversation: Conversation = {
+          id: `conv-${profile.id}`,
+          match,
+          messages: [],
+          yourTurn: true,
+          unread: false,
+        };
+        return [conversation, ...prev];
+      });
+
+      if (notificationsEnabled && notificationPreferences.matches) {
+        void scheduleMatchNotification(profile.name);
+      } else if (!notificationPromptDismissed) {
+        setShowNotificationPrompt(true);
+      }
+
+      return match;
+    },
+    [
+      canLike,
+      isSparkPlus,
+      lastSparkNoteDate,
+      notificationsEnabled,
+      notificationPreferences.matches,
+      notificationPromptDismissed,
+      bonusSparkNotes,
+    ],
+  );
+
+  const createMatchFromLike = useCallback(
+    (profile: Profile, isSuperMatch: boolean): Match => {
+      const match: Match = {
+        id: `match-${profile.id}`,
+        profile,
+        matchedAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 86400000).toISOString(),
+        isSuperMatch,
+      };
+
+      setMatches((prev) => {
+        if (prev.some((item) => item.profile.id === profile.id)) {
+          return prev;
+        }
+        return [match, ...prev];
+      });
+
+      setConversations((prev) => {
+        if (prev.some((item) => item.match.profile.id === profile.id)) {
+          return prev;
+        }
+        const conversation: Conversation = {
+          id: `conv-${profile.id}`,
+          match,
+          messages: [],
+          yourTurn: true,
+          unread: false,
+        };
+        return [conversation, ...prev];
+      });
+
+      if (notificationsEnabled && notificationPreferences.matches) {
+        void scheduleMatchNotification(profile.name);
+      } else if (!notificationPromptDismissed) {
+        setShowNotificationPrompt(true);
+      }
+
+      return match;
+    },
+    [notificationsEnabled, notificationPreferences.matches, notificationPromptDismissed],
+  );
+
+  const superLikeProfile = useCallback(
+    (profile: Profile): Match | null => {
+      if (!canLike) {
+        return null;
+      }
+
+      setLikedIds((prev) => new Set(prev).add(profile.id));
+      setSuperLikedIds((prev) => new Set(prev).add(profile.id));
+      if (!isSparkPlus) {
+        setDailyLikesUsed((count) => count + 1);
+      }
+
+      const isMutual =
+        MUTUAL_SUPER_LIKE_IDS.has(profile.id) || MUTUAL_MATCH_IDS.has(profile.id);
+
+      if (!isMutual) {
+        setPendingLikeIds((prev) => new Set(prev).add(profile.id));
+        return null;
+      }
+
+      setPendingLikeIds((prev) => {
+        const next = new Set(prev);
+        next.delete(profile.id);
+        return next;
+      });
+
+      return createMatchFromLike(profile, MUTUAL_SUPER_LIKE_IDS.has(profile.id));
+    },
+    [canLike, createMatchFromLike, isSparkPlus],
+  );
+
+  const sendMessage = useCallback(
+    (conversationId: string, text: string, imageUrl?: string) => {
+      const trimmed = text.trim();
+      if (!trimmed && !imageUrl) {
+        return;
+      }
+
+      const message: Message = {
+        id: `msg-${Date.now()}`,
+        text: trimmed || '📷 Photo',
+        sentAt: new Date().toISOString(),
+        isMine: true,
+        imageUrl,
+        status: 'sent',
+      };
+
+      setConversations((prev) =>
+        prev.map((conversation) => {
+          if (conversation.id !== conversationId) {
+            return conversation;
+          }
+          const updatedMessages = [...conversation.messages, message];
+          return {
+            ...conversation,
+            messages: updatedMessages,
+            lastMessage: trimmed || 'Photo',
+            lastMessageAt: message.sentAt,
+            yourTurn: false,
+            unread: false,
+            isTyping: false,
+          };
+        }),
+      );
+
+      setTimeout(() => {
+        setConversations((prev) =>
+          prev.map((conversation) => {
+            if (conversation.id !== conversationId) {
+              return conversation;
+            }
+            return {
+              ...conversation,
+              messages: conversation.messages.map((m) =>
+                m.id === message.id ? { ...m, status: 'delivered' as const } : m,
+              ),
+            };
+          }),
+        );
+      }, 800);
+
+      if (isSparkPlus) {
+        setTimeout(() => {
+          setConversations((prev) =>
+            prev.map((conversation) => {
+              if (conversation.id !== conversationId) {
+                return conversation;
+              }
+              return {
+                ...conversation,
+                messages: conversation.messages.map((m) =>
+                  m.id === message.id ? { ...m, status: 'read' as const } : m,
+                ),
+              };
+            }),
+          );
+        }, 2000);
+      }
+
+      setTimeout(() => {
+        setConversations((prev) =>
+          prev.map((conversation) => {
+            if (conversation.id !== conversationId) {
+              return conversation;
+            }
+            return { ...conversation, isTyping: true };
+          }),
+        );
+      }, 2500);
+
+      setTimeout(() => {
+        setConversations((prev) =>
+          prev.map((conversation) => {
+            if (conversation.id !== conversationId) {
+              return conversation;
+            }
+            const reply: Message = {
+              id: `msg-reply-${Date.now()}`,
+              text: 'Haha, love that! 😊',
+              sentAt: new Date().toISOString(),
+              isMine: false,
+            };
+            return {
+              ...conversation,
+              isTyping: false,
+              messages: [...conversation.messages, reply],
+              lastMessage: reply.text,
+              lastMessageAt: reply.sentAt,
+              yourTurn: true,
+              unread: true,
+            };
+          }),
+        );
+      }, 4500);
+    },
+    [isSparkPlus],
+  );
+
+  const activateSparkPlus = useCallback(() => {
+    setIsSparkPlus(true);
+  }, []);
+
+  const restorePurchases = useCallback(async (): Promise<boolean> => {
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+    setIsSparkPlus(true);
+    return true;
+  }, []);
+
+  const activateBoost = useCallback(() => {
+    const until = new Date(Date.now() + BOOST_DURATION_MS).toISOString();
+    setBoostActiveUntil(until);
+  }, []);
+
+  const purchaseSparkNotes = useCallback((count: number) => {
+    setBonusSparkNotes((prev) => prev + count);
+  }, []);
+
+  const enableNotifications = useCallback(async () => {
+    const granted = await requestNotificationPermission();
+    setNotificationsEnabled(granted);
+    setShowNotificationPrompt(false);
+    setNotificationPromptDismissed(true);
+    return granted;
+  }, []);
+
+  const updateNotificationPreferences = useCallback((prefs: NotificationPreferences) => {
+    setNotificationPreferences(prefs);
+  }, []);
+
+  const setThemeMode = useCallback((mode: ThemeMode) => {
+    setThemeModeState(mode);
+  }, []);
+
+  const setPaused = useCallback((paused: boolean) => {
+    setIsPaused(paused);
+  }, []);
+
+  const deleteAccount = useCallback(async () => {
+    if (userId && isSupabaseConfigured()) {
+      await deleteSupabaseAccount(userId);
+    }
+    await clearPersistedState();
+    setHasOnboarded(false);
+    setIsAuthenticated(false);
+    setUserId(null);
+    setUser(defaultPersisted.user);
+    setPreferences(defaultPreferences);
+    setPassedIds(new Set());
+    setLikedIds(new Set());
+    setPendingLikeIds(new Set());
+    setSuperLikedIds(new Set());
+    setBlockedIds(new Set());
+    setMatches([]);
+    setConversations(seedConversations);
+    setSparkNotes({});
+    setDailyLikesUsed(0);
+    setIsSparkPlus(false);
+    setBoostActiveUntil(null);
+    setIsPaused(false);
+    setLastPassedProfileId(null);
+    setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
+    setPriorityProfileId(null);
+  }, [userId]);
+
+  const dismissNotificationPrompt = useCallback(() => {
+    setShowNotificationPrompt(false);
+    setNotificationPromptDismissed(true);
+  }, []);
+
+  const getConversationIdForProfile = useCallback(
+    (profileId: string) => {
+      const conversation = conversations.find(
+        (item) => item.match.profile.id === profileId,
+      );
+      return conversation?.id ?? `conv-${profileId}`;
+    },
+    [conversations],
+  );
+
+  const value = useMemo<AppContextValue>(
+    () => ({
+      hasOnboarded,
+      isHydrated,
+      isAuthenticated,
+      userId,
+      user,
+      preferences,
+      discoverQueue,
+      discoverPoolTotal,
+      hasMoreInPool,
+      passedIds,
+      likedIds,
+      pendingLikeIds,
+      superLikedIds,
+      blockedIds,
+      matches,
+      conversations,
+      incomingLikes: incomingLikeProfiles,
+      sparkNotes,
+      dailyLikesUsed,
+      remainingLikes,
+      remainingSparkNotes,
+      canLike,
+      canSendSparkNote,
+      likesTabBadge,
+      matchesTabBadge,
+      isSparkPlus,
+      isBoosted,
+      boostActiveUntil,
+      notificationsEnabled,
+      notificationPreferences,
+      isPaused,
+      themeMode,
+      canRewind,
+      rewindKey,
+      isSupabaseEnabled: isSupabaseConfigured(),
+      completeOnboarding,
+      signInWithAppleStub,
+      updateUser,
+      updatePreferences,
+      toggleDiscoverFilter,
+      searchMorePeople,
+      expandSearchRadius,
+      prioritizeProfileInDeck,
+      passProfile,
+      likeProfile,
+      superLikeProfile,
+      sendMessage,
+      getConversationIdForProfile,
+      blockProfile,
+      reportProfile,
+      unmatchProfile,
+      activateSparkPlus,
+      restorePurchases,
+      activateBoost,
+      purchaseSparkNotes,
+      rewindLastPass,
+      enableNotifications,
+      updateNotificationPreferences,
+      setThemeMode,
+      setPaused,
+      deleteAccount,
+      dismissNotificationPrompt,
+      showNotificationPrompt,
+    }),
+    [
+      hasOnboarded,
+      isHydrated,
+      isAuthenticated,
+      userId,
+      user,
+      preferences,
+      discoverQueue,
+      discoverPoolTotal,
+      hasMoreInPool,
+      passedIds,
+      likedIds,
+      pendingLikeIds,
+      superLikedIds,
+      blockedIds,
+      matches,
+      conversations,
+      sparkNotes,
+      dailyLikesUsed,
+      remainingLikes,
+      remainingSparkNotes,
+      canLike,
+      canSendSparkNote,
+      likesTabBadge,
+      matchesTabBadge,
+      isSparkPlus,
+      isBoosted,
+      boostActiveUntil,
+      notificationsEnabled,
+      notificationPreferences,
+      isPaused,
+      themeMode,
+      canRewind,
+      rewindKey,
+      completeOnboarding,
+      signInWithAppleStub,
+      updateUser,
+      updatePreferences,
+      toggleDiscoverFilter,
+      searchMorePeople,
+      expandSearchRadius,
+      prioritizeProfileInDeck,
+      passProfile,
+      likeProfile,
+      superLikeProfile,
+      sendMessage,
+      getConversationIdForProfile,
+      blockProfile,
+      reportProfile,
+      unmatchProfile,
+      activateSparkPlus,
+      restorePurchases,
+      activateBoost,
+      purchaseSparkNotes,
+      rewindLastPass,
+      enableNotifications,
+      updateNotificationPreferences,
+      setThemeMode,
+      setPaused,
+      deleteAccount,
+      dismissNotificationPrompt,
+      showNotificationPrompt,
+    ],
+  );
+
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+}
+
+export function useApp() {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error('useApp must be used within AppProvider');
+  }
+  return context;
+}

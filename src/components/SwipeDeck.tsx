@@ -255,15 +255,10 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           setSuperCelebrationKey((key) => key + 1);
           setShowSuperCelebration(true);
 
-          const zone = starZone.value;
-          const targetCenterX = zone.x + zone.width / 2;
-          const targetCenterY = zone.y + zone.height / 2;
-          const toX = targetCenterX - deckWidth.value / 2;
-          const toY = targetCenterY - deckHeight.value / 2;
-
-          translateX.value = withTiming(toX, { duration: 280 });
-          translateY.value = withTiming(toY, { duration: 280 });
-          cardScale.value = withTiming(0.08, { duration: 280 });
+          // Keep the card centered — star burst plays in the middle of the deck.
+          translateX.value = withTiming(0, { duration: 180 });
+          translateY.value = withTiming(0, { duration: 180 });
+          cardScale.value = withTiming(0.94, { duration: 180 });
           return;
         }
 

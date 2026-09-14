@@ -4,6 +4,8 @@ import { RefObject, useCallback, useRef } from 'react';
 import Animated, {
   SharedValue,
   useAnimatedStyle,
+  useSharedValue,
+  withSpring,
 } from 'react-native-reanimated';
 
 import { colors, spacing } from '../theme';
@@ -57,10 +59,12 @@ function TargetButton({
   onLayout,
   onPress,
 }: TargetButtonProps) {
+  const pressScale = useSharedValue(1);
+
   const animatedStyle = useAnimatedStyle(() => {
     const intensity = active.value;
     return {
-      transform: [{ scale: 1 + intensity * 0.22 }],
+      transform: [{ scale: pressScale.value * (1 + intensity * 0.22) }],
       borderColor,
       backgroundColor,
       shadowOpacity: 0.2 + intensity * 0.5,
@@ -73,7 +77,16 @@ function TargetButton({
   }));
 
   return (
-    <Pressable onPress={onPress} hitSlop={16}>
+    <Pressable
+      onPress={onPress}
+      hitSlop={16}
+      onPressIn={() => {
+        pressScale.value = withSpring(0.9, { damping: 14, stiffness: 420 });
+      }}
+      onPressOut={() => {
+        pressScale.value = withSpring(1, { damping: 14, stiffness: 420 });
+      }}
+    >
       <Animated.View
         ref={targetRef}
         style={[styles.target, { width: size, height: size, borderRadius: size / 2 }, animatedStyle]}

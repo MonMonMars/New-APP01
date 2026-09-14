@@ -1,6 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+
+import { AnimatedPressable } from './AnimatedPressable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
@@ -50,8 +52,9 @@ export function VibeGameSheet({ visible, profileName, onClose, onSendGuess }: Vi
           </Text>
           <View style={styles.grid}>
             {VIBE_LABELS.map((label, index) => (
-              <Pressable
+              <AnimatedPressable
                 key={label}
+                scaleTo={0.94}
                 style={[
                   styles.chip,
                   { backgroundColor: colors.surface, borderColor: colors.border },
@@ -61,7 +64,7 @@ export function VibeGameSheet({ visible, profileName, onClose, onSendGuess }: Vi
                 disabled={picked !== null}
               >
                 <Text style={[styles.chipText, { color: colors.text }]}>{label}</Text>
-              </Pressable>
+              </AnimatedPressable>
             ))}
           </View>
         </View>

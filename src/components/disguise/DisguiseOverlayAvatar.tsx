@@ -1,4 +1,6 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+
+import { FaceCenteredImage } from './FaceCenteredImage';
 
 export type DisguiseOverlayVariant = 'news' | 'ad';
 
@@ -7,6 +9,8 @@ type DisguiseOverlayAvatarProps = {
   overlayText: string;
   variant: DisguiseOverlayVariant;
   size?: number;
+  /** When true, only the BREAKING/AD badge sits on the circle; caption goes beside it in the parent. */
+  badgeOnly?: boolean;
 };
 
 export function DisguiseOverlayAvatar({
@@ -14,12 +18,13 @@ export function DisguiseOverlayAvatar({
   overlayText,
   variant,
   size = 40,
+  badgeOnly = false,
 }: DisguiseOverlayAvatarProps) {
   const radius = size / 2;
 
   return (
     <View style={[styles.wrap, { width: size, height: size, borderRadius: radius }]}>
-      <Image source={{ uri: imageUrl }} style={[styles.image, { borderRadius: radius }]} />
+      <FaceCenteredImage imageUrl={imageUrl} size={size} />
       <View
         style={[
           styles.scrim,
@@ -30,16 +35,30 @@ export function DisguiseOverlayAvatar({
       {variant === 'news' ? (
         <View style={styles.newsStack}>
           <Text style={styles.newsBadge}>BREAKING</Text>
-          <Text style={styles.newsText} numberOfLines={3} adjustsFontSizeToFit minimumFontScale={0.6}>
-            {overlayText}
-          </Text>
+          {!badgeOnly && (
+            <Text
+              style={styles.newsText}
+              numberOfLines={3}
+              adjustsFontSizeToFit
+              minimumFontScale={0.6}
+            >
+              {overlayText}
+            </Text>
+          )}
         </View>
       ) : (
         <View style={styles.adStack}>
           <Text style={styles.adBadge}>AD</Text>
-          <Text style={styles.adText} numberOfLines={3} adjustsFontSizeToFit minimumFontScale={0.6}>
-            {overlayText}
-          </Text>
+          {!badgeOnly && (
+            <Text
+              style={styles.adText}
+              numberOfLines={3}
+              adjustsFontSizeToFit
+              minimumFontScale={0.6}
+            >
+              {overlayText}
+            </Text>
+          )}
         </View>
       )}
     </View>
@@ -51,12 +70,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     position: 'relative',
   },
-  image: {
-    width: '100%',
-    height: '100%',
-  },
   scrim: {
-    ...StyleSheet.absoluteFill,
+    ...StyleSheet.absoluteFillObject,
   },
   scrimNews: {
     backgroundColor: 'rgba(120, 0, 0, 0.55)',
@@ -65,14 +80,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 40, 120, 0.6)',
   },
   newsStack: {
-    ...StyleSheet.absoluteFill,
+    ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 3,
     paddingVertical: 2,
   },
   adStack: {
-    ...StyleSheet.absoluteFill,
+    ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 3,

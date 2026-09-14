@@ -3,10 +3,9 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AdBannerCard } from '../../components/disguise/AdBannerCard';
+import { DisguisedProfileCard } from '../../components/disguise/DisguisedProfileCard';
 import { DisguiseAdGeneratorSheet } from '../../components/disguise/DisguiseAdGeneratorSheet';
 import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
-import { NewsPostCard } from '../../components/disguise/NewsPostCard';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
@@ -41,11 +40,7 @@ export function DisguiseProfileScreen() {
       <DisguiseHeader title="Profile" showSearch={false} />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.hero}>
-          {profileFeedItem.type === 'ad' ? (
-            <AdBannerCard ad={profileFeedItem} />
-          ) : (
-            <NewsPostCard post={profileFeedItem} />
-          )}
+          <DisguisedProfileCard post={profileFeedItem} />
           <Text style={[styles.name, { color: colors.text }]}>{user.name}</Text>
           <Text style={[styles.bio, { color: colors.textMuted }]}>
             {user.bio || 'News reader · Design · Always catching up on the feed'}

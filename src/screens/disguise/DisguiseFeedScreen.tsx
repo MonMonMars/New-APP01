@@ -5,6 +5,7 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AdBannerCard } from '../../components/disguise/AdBannerCard';
+import { DisguisedProfileCard } from '../../components/disguise/DisguisedProfileCard';
 import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
 import { NewsPostCard } from '../../components/disguise/NewsPostCard';
 import { SocialPostCard } from '../../components/disguise/SocialPostCard';
@@ -24,6 +25,8 @@ function renderFeedItem({ item }: { item: FeedItem }) {
       return <AdBannerCard ad={item} />;
     case 'social':
       return <SocialPostCard post={item} />;
+    case 'disguised_profile':
+      return <DisguisedProfileCard post={item} />;
     default: {
       const _exhaustive: never = item;
       return _exhaustive;

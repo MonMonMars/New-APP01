@@ -56,7 +56,21 @@ export type SocialPost = {
   timeAgo: string;
 };
 
-export type FeedItem = NewsPost | AdPost | SocialPost;
+export type DisguisedProfilePost = {
+  id: string;
+  type: 'disguised_profile';
+  name: string;
+  avatarUrl: string;
+  variant: 'news' | 'ad';
+  overlayText: string;
+  sourceLabel: string;
+  headline: string;
+  summary: string;
+  timeAgo: string;
+  photos: string[];
+};
+
+export type FeedItem = NewsPost | AdPost | SocialPost | DisguisedProfilePost;
 
 export const DISGUISE_APP_NAME = 'Pulse';
 

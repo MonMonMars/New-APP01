@@ -2,9 +2,9 @@
 
 ## Demo link (open now)
 
-**https://ultra-grove-cake-likes.trycloudflare.com**
+**https://pull-eyes-brisbane-patient.trycloudflare.com**
 
-_Last updated: Sep 14, 2026 — disguise profiles match news/ad/social cards (plain small avatars)_
+_Last updated: Sep 14, 2026 — disguise profiles blend at a glance; close-up cues distinguish profile vs news vs ad_
 
 > Tunnel links expire when the cloud workspace stops. If this 404s, ask for a fresh link.
 

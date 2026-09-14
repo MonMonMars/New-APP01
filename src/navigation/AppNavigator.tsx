@@ -18,6 +18,7 @@ import { MatchesScreen } from '../screens/MatchesScreen';
 import { NotificationPreferencesScreen } from '../screens/NotificationPreferencesScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { SafetyScreen } from '../screens/SafetyScreen';
+import { VerificationPolicyScreen } from '../screens/VerificationPolicyScreen';
 import { SparkPlusScreen } from '../screens/SparkPlusScreen';
 import { OnboardingFlow } from '../screens/onboarding/OnboardingFlow';
 import { DisguiseNavigator } from './DisguiseNavigator';
@@ -120,6 +121,12 @@ function SafetyWrapper({ navigation }: NativeStackScreenProps<RootStackParamList
   return <SafetyScreen onClose={() => navigation.goBack()} />;
 }
 
+function VerificationPolicyWrapper({
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, 'VerificationPolicy'>) {
+  return <VerificationPolicyScreen onClose={() => navigation.goBack()} />;
+}
+
 function NotificationPreferencesWrapper({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, 'NotificationPreferences'>) {
@@ -188,6 +195,11 @@ function RootNavigator() {
           <Stack.Screen
             name="Safety"
             component={SafetyWrapper}
+            options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="VerificationPolicy"
+            component={VerificationPolicyWrapper}
             options={{ animation: 'slide_from_right' }}
           />
           <Stack.Screen

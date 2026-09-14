@@ -47,7 +47,7 @@ export function ProfileVerificationDisplay({ profile }: ProfileVerificationDispl
 
       <View style={styles.row}>
         <View style={[styles.iconWrap, { backgroundColor: colors.background }, personOk && styles.iconWrapDone]}>
-          <Ionicons name="scan" size={16} color={personOk ? colors.like : colors.textMuted} />
+          <Ionicons name="person" size={16} color={personOk ? colors.like : colors.textMuted} />
         </View>
         <View style={styles.rowText}>
           <Text style={[styles.rowTitle, { color: colors.text }]}>Real person verified</Text>

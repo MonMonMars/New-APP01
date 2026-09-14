@@ -11,6 +11,7 @@ export type VerificationFlags = {
 
 type VerificationBadgesProps = VerificationFlags & {
   size?: 'sm' | 'md';
+  /** @deprecated Labels are always shown for clarity */
   showLabels?: boolean;
 };
 
@@ -27,22 +28,21 @@ export function VerificationBadges({
   personVerified = false,
   ageVerified = false,
   size = 'md',
-  showLabels = false,
 }: VerificationBadgesProps) {
-  const iconSize = size === 'sm' ? 14 : 18;
+  const iconSize = size === 'sm' ? 12 : 14;
   const badges: BadgeSpec[] = (
     [
       {
         key: 'photo',
         active: photoVerified,
         icon: 'camera' as const,
-        label: 'Photo',
+        label: 'Photo verified',
         color: '#3b82f6',
       },
       {
         key: 'person',
         active: personVerified,
-        icon: 'scan' as const,
+        icon: 'person' as const,
         label: 'Real person',
         color: colors.like,
       },
@@ -50,7 +50,7 @@ export function VerificationBadges({
         key: 'age',
         active: ageVerified,
         icon: 'shield-checkmark' as const,
-        label: '18+',
+        label: 'Age 18+',
         color: colors.superLike,
       },
     ] satisfies BadgeSpec[]
@@ -68,16 +68,20 @@ export function VerificationBadges({
           style={[
             styles.badge,
             size === 'sm' ? styles.badgeSm : styles.badgeMd,
-            { backgroundColor: `${badge.color}22`, borderColor: `${badge.color}55` },
+            { backgroundColor: `${badge.color}18`, borderColor: `${badge.color}44` },
           ]}
-          accessibilityLabel={`${badge.label} verified`}
+          accessibilityLabel={badge.label}
         >
           <Ionicons name={badge.icon} size={iconSize} color={badge.color} />
-          {showLabels && (
-            <Text style={[styles.label, size === 'sm' ? styles.labelSm : styles.labelMd, { color: badge.color }]}>
-              {badge.label}
-            </Text>
-          )}
+          <Text
+            style={[
+              styles.label,
+              size === 'sm' ? styles.labelSm : styles.labelMd,
+              { color: badge.color },
+            ]}
+          >
+            {badge.label}
+          </Text>
         </View>
       ))}
     </View>
@@ -103,15 +107,15 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   badgeSm: {
-    paddingHorizontal: 5,
+    paddingHorizontal: 6,
     paddingVertical: 3,
   },
   badgeMd: {
-    paddingHorizontal: 7,
+    paddingHorizontal: 8,
     paddingVertical: 4,
   },
   label: {
-    fontWeight: '800',
+    fontWeight: '700',
   },
   labelSm: {
     fontSize: 10,

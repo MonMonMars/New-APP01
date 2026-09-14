@@ -152,7 +152,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
             onPress={personVerified ? undefined : handleVerifyPerson}
             disabled={personVerified}
           >
-            <Ionicons name="scan" size={20} color={personVerified ? colors.like : colors.textMuted} />
+            <Ionicons name="person" size={20} color={personVerified ? colors.like : colors.textMuted} />
             <Text style={[styles.verifyText, { color: colors.text }]}>
               {personVerified ? 'Real person verified' : 'Verify you are a real person'}
             </Text>

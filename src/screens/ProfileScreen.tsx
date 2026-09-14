@@ -163,6 +163,7 @@ export function ProfileScreen() {
         <ProfileTrustSection
           user={user}
           onUpdate={(patch) => updateUser({ ...user, ...patch })}
+          onOpenPolicy={() => navigation.getParent()?.navigate('VerificationPolicy')}
         />
 
         {isSparkPlus && (

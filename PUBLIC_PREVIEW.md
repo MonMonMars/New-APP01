@@ -2,7 +2,7 @@
 
 ## Demo link (open now)
 
-**https://save-privacy-accomplished-tomorrow.trycloudflare.com**
+**https://kinds-hamilton-requesting-arrange.trycloudflare.com**
 
 _Last updated: Sep 14, 2026 — clean discover home, emergency logo, unified disguise cards_
 

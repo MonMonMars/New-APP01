@@ -1,22 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { useCallback, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, {
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated';
+import { useCallback, useRef, useState } from 'react';
+import {
+  PanResponder,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+  type LayoutChangeEvent,
+} from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
-import { spacing } from '../../theme';
-
-const UNLOCK_DRAG_THRESHOLD = 72;
+const THUMB_SIZE = 40;
+const TRACK_HEIGHT = 44;
+const UNLOCK_RATIO = 0.82;
 
 type ModeToggleLogoProps = {
   variant: 'pulse' | 'spark';
@@ -37,16 +36,18 @@ function triggerHaptic(style: 'light' | 'medium' | 'success' = 'medium') {
   );
 }
 
-/** Spark: tap logo for instant disguise. Pulse: hold and drag right to unlock Spark. */
+/** Spark: tap logo for instant disguise. Pulse: drag logo right along track to unlock Spark. */
 export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps) {
   const { colors } = useTheme();
   const { disguiseMode, setDisguiseMode } = useApp();
-  const [unlockHint, setUnlockHint] = useState(false);
+  const [dragX, setDragX] = useState(0);
+  const [trackWidth, setTrackWidth] = useState(148);
+  const maxDrag = Math.max(0, trackWidth - THUMB_SIZE - 8);
 
   const isPulse = variant === 'pulse';
   const icon = isPulse ? 'pulse' : 'flame';
   const iconColor = isPulse ? '#3b82f6' : colors.gradientEnd;
-  const iconBg = isPulse ? 'rgba(59,130,246,0.15)' : 'rgba(255,107,107,0.14)';
+  const iconBg = isPulse ? 'rgba(59,130,246,0.22)' : 'rgba(255,107,107,0.2)';
 
   const enterDisguise = useCallback(() => {
     triggerHaptic('medium');
@@ -56,163 +57,185 @@ export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps
   const exitDisguise = useCallback(() => {
     triggerHaptic('success');
     setDisguiseMode(false);
-    setUnlockHint(false);
+    setDragX(0);
   }, [setDisguiseMode]);
 
-  const dragX = useSharedValue(0);
-  const holding = useSharedValue(false);
-  const zoneOpacity = useSharedValue(disguiseMode ? 0 : 0.42);
+  const dragXRef = useRef(0);
+  const maxDragRef = useRef(maxDrag);
 
-  const longPress = Gesture.LongPress()
-    .minDuration(180)
-    .onStart(() => {
-      holding.value = true;
-      runOnJS(setUnlockHint)(true);
-      runOnJS(triggerHaptic)('light');
-    })
-    .onFinalize(() => {
-      holding.value = false;
-      dragX.value = withSpring(0);
-      runOnJS(setUnlockHint)(false);
-    });
+  dragXRef.current = dragX;
+  maxDragRef.current = maxDrag;
 
-  const pan = Gesture.Pan()
-    .onUpdate((event) => {
-      if (!holding.value) {
-        return;
-      }
-      dragX.value = Math.max(0, Math.min(event.translationX, 120));
-    })
-    .onEnd(() => {
-      if (dragX.value >= UNLOCK_DRAG_THRESHOLD) {
-        runOnJS(exitDisguise)();
-      }
-      holding.value = false;
-      dragX.value = withSpring(0);
-      runOnJS(setUnlockHint)(false);
-    });
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > 2,
+      onPanResponderGrant: () => {
+        triggerHaptic('light');
+      },
+      onPanResponderMove: (_, gesture) => {
+        const next = Math.max(0, Math.min(gesture.dx, maxDragRef.current));
+        dragXRef.current = next;
+        setDragX(next);
+      },
+      onPanResponderRelease: () => {
+        const threshold = maxDragRef.current * UNLOCK_RATIO;
+        if (dragXRef.current >= threshold) {
+          exitDisguise();
+          return;
+        }
+        dragXRef.current = 0;
+        setDragX(0);
+      },
+      onPanResponderTerminate: () => {
+        dragXRef.current = 0;
+        setDragX(0);
+      },
+    }),
+  ).current;
 
-  const unlockGesture = Gesture.Simultaneous(longPress, pan);
-
-  const logoAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: dragX.value }],
-  }));
-
-  const trackFillStyle = useAnimatedStyle(() => ({
-    width: dragX.value,
-    opacity: holding.value ? 0.9 : 0.35,
-  }));
-
-  const emergencyZoneStyle = useAnimatedStyle(() => ({
-    opacity: zoneOpacity.value,
-  }));
-
-  const handleEmergencyPress = () => {
-    zoneOpacity.value = withTiming(0.65, { duration: 80 }, () => {
-      zoneOpacity.value = withTiming(0.42, { duration: 200 });
-    });
-    enterDisguise();
+  const onTrackLayout = (event: LayoutChangeEvent) => {
+    const width = event.nativeEvent.layout.width;
+    if (width > 0) {
+      setTrackWidth(width);
+    }
   };
 
   if (!disguiseMode) {
     return (
       <Pressable
-        onPress={handleEmergencyPress}
-        style={styles.emergencyWrap}
+        onPress={enterDisguise}
+        style={({ pressed }) => [
+          styles.emergencyButton,
+          { backgroundColor: pressed ? 'rgba(255,255,255,0.32)' : 'rgba(255,255,255,0.2)' },
+        ]}
         accessibilityRole="button"
         accessibilityLabel={`Emergency — switch to ${DISGUISE_APP_NAME} disguise mode`}
         accessibilityHint="Tap instantly to hide Spark"
       >
-        <Animated.View style={[styles.emergencyZone, emergencyZoneStyle]} pointerEvents="none" />
         <View style={[styles.logoIcon, { backgroundColor: iconBg }]}>
           <Ionicons name={icon} size={compact ? 18 : 20} color={iconColor} />
         </View>
-        <Text style={[styles.emergencyLabel, { color: colors.textMuted }]}>Emergency</Text>
+        <View style={styles.emergencyBadge}>
+          <Ionicons name="shield" size={10} color="#fff" />
+        </View>
       </Pressable>
     );
   }
 
+  const fillWidth = dragX + THUMB_SIZE * 0.5;
+
   return (
-    <GestureDetector gesture={unlockGesture}>
+    <View
+      style={[styles.track, { borderColor: colors.border, backgroundColor: colors.surface }]}
+      onLayout={onTrackLayout}
+      accessibilityRole="adjustable"
+      accessibilityLabel="Drag right to unlock Spark"
+    >
       <View
-        style={styles.unlockWrap}
-        accessibilityRole="button"
-        accessibilityLabel="Hold and drag right to unlock Spark"
-        accessibilityHint="Keeps disguise mode until you deliberately unlock"
-      >
-        <View style={[styles.unlockTrack, { borderColor: colors.border }]}>
-          <Animated.View style={[styles.unlockFill, { backgroundColor: colors.gradientEnd }, trackFillStyle]} />
-          <Ionicons name="chevron-forward" size={14} color={colors.textMuted} style={styles.unlockChevron} />
-        </View>
-        <Animated.View style={[styles.logoIcon, { backgroundColor: iconBg }, logoAnimatedStyle]}>
-          <Ionicons name={icon} size={compact ? 18 : 20} color={iconColor} />
-        </Animated.View>
-        {unlockHint ? (
-          <Text style={[styles.unlockHint, { color: colors.gradientEnd }]}>Drag →</Text>
-        ) : (
-          <Text style={[styles.holdHint, { color: colors.textMuted }]}>Hold & drag</Text>
-        )}
+        style={[
+          styles.trackFill,
+          {
+            width: fillWidth,
+            backgroundColor: colors.gradientEnd,
+          },
+        ]}
+      />
+      <View style={styles.trackArrows} pointerEvents="none">
+        <Ionicons name="chevron-forward" size={14} color={colors.textMuted} />
+        <Ionicons name="chevron-forward" size={14} color={colors.textMuted} style={styles.arrowMid} />
+        <Ionicons name="chevron-forward" size={14} color={colors.textMuted} />
       </View>
-    </GestureDetector>
+      <View
+        style={[
+          styles.thumb,
+          {
+            transform: [{ translateX: dragX }],
+            backgroundColor: iconBg,
+            borderColor: colors.border,
+          },
+        ]}
+        {...panResponder.panHandlers}
+      >
+        <Ionicons name={icon} size={compact ? 18 : 20} color={iconColor} />
+        <View style={styles.thumbGrip}>
+          <View style={[styles.gripLine, { backgroundColor: colors.textMuted }]} />
+          <View style={[styles.gripLine, { backgroundColor: colors.textMuted }]} />
+        </View>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  emergencyWrap: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    minWidth: 72,
-    minHeight: 56,
-  },
-  emergencyZone: {
-    ...StyleSheet.absoluteFill,
+  emergencyButton: {
+    width: 52,
+    height: 52,
     borderRadius: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.22)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.28)',
-  },
-  emergencyLabel: {
-    fontSize: 9,
-    fontWeight: '800',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-    marginTop: 4,
-  },
-  unlockWrap: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
-  unlockTrack: {
-    width: 88,
-    height: 36,
-    borderRadius: 18,
+    justifyContent: 'center',
     borderWidth: 1,
-    overflow: 'hidden',
+    borderColor: 'rgba(255,255,255,0.35)',
+  },
+  emergencyBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: 'rgba(239, 68, 68, 0.9)',
+    alignItems: 'center',
     justifyContent: 'center',
   },
-  unlockFill: {
+  track: {
+    width: 148,
+    height: TRACK_HEIGHT,
+    borderRadius: TRACK_HEIGHT / 2,
+    borderWidth: 1,
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  trackFill: {
     position: 'absolute',
     left: 0,
     top: 0,
     bottom: 0,
-    borderRadius: 18,
-    opacity: 0.35,
+    opacity: 0.28,
+    borderRadius: TRACK_HEIGHT / 2,
   },
-  unlockChevron: {
+  trackArrows: {
     position: 'absolute',
-    right: 8,
+    right: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    opacity: 0.55,
   },
-  holdHint: {
-    fontSize: 10,
-    fontWeight: '700',
+  arrowMid: {
+    marginHorizontal: -6,
   },
-  unlockHint: {
-    fontSize: 11,
-    fontWeight: '800',
+  thumb: {
+    position: 'absolute',
+    left: 4,
+    width: THUMB_SIZE,
+    height: THUMB_SIZE - 4,
+    borderRadius: (THUMB_SIZE - 4) / 2,
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+    paddingHorizontal: 4,
+    zIndex: 2,
+  },
+  thumbGrip: {
+    gap: 2,
+    opacity: 0.65,
+  },
+  gripLine: {
+    width: 2,
+    height: 8,
+    borderRadius: 1,
   },
   logoIcon: {
     width: 32,

@@ -206,78 +206,14 @@ export function findAdPostByLandingUrl(landingUrl: string): AdPost | undefined {
   return adItems.find((item) => item.landingUrl === landingUrl);
 }
 
-const disguisedProfileFeedItems: (NewsPost | AdPost)[] = [
-  {
-    id: 'disguised-1',
-    type: 'ad',
-    brand: 'Alex Chen',
-    tagline: 'Free delivery tonight',
-    description: 'Finally tried that ramen spot everyone keeps posting about.',
-    imageUrl: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&q=80',
-    cta: 'Order now',
-    landingUrl: 'spark://disguise-demo-1',
-    sponsored: true,
-  },
-  {
-    id: 'disguised-2',
-    type: 'news',
-    source: 'Pulse',
-    headline: 'Wellness week sale',
-    summary: 'Hot take: the best productivity hack is still a 20-minute walk without your phone.',
-    articleBody: 'Wellness week sale — community picks and local deals curated for your feed.',
-    imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80',
-    timeAgo: '2h ago',
-    category: 'Lifestyle',
-    articleUrl: 'spark://disguise-demo-2',
-    reporters: [
-      {
-        id: 'disguised-2-reporter',
-        name: 'Maya Okonkwo',
-        avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80',
-        quote: 'Hot take: walk without your phone',
-        photos: [
-          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80',
-          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80',
-        ],
-      },
-    ],
-  },
-  {
-    id: 'disguised-3',
-    type: 'news',
-    source: 'Pulse',
-    headline: 'Tech hiring surges',
-    summary: 'Shipped a small UI refresh today. Nothing flashy — just cleaner spacing and better contrast.',
-    articleBody: 'Tech hiring surges across design and product teams — details inside.',
-    imageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=800&q=80',
-    timeAgo: '4h ago',
-    category: 'Tech',
-    articleUrl: 'spark://disguise-demo-3',
-    reporters: [
-      {
-        id: 'disguised-3-reporter',
-        name: 'Jordan Lee',
-        avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80',
-        quote: 'Details matter in every ship',
-        photos: [
-          'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80',
-          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80',
-        ],
-      },
-    ],
-  },
-];
-
+/** Static feed slots — disguised dating profiles are injected in buildDisguiseFeed(). */
 export const disguiseFeedItems: FeedItem[] = [
   newsItems[0],
   adItems[0],
-  disguisedProfileFeedItems[0],
   newsItems[1],
   adItems[1],
-  disguisedProfileFeedItems[1],
   newsItems[2],
   adItems[2],
-  disguisedProfileFeedItems[2],
   newsItems[3],
 ];
 

@@ -241,12 +241,14 @@ export function DiscoverScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
+      <View style={[styles.emergencyBar, { paddingTop: insets.top }]}>
+        <ModeToggleLogo variant="spark" compact />
+      </View>
       <View
         style={[
           styles.deckContainer,
           {
             height: deckHeight,
-            marginTop: insets.top,
           },
         ]}
       >
@@ -298,11 +300,6 @@ export function DiscoverScreen() {
           />
         )}
 
-        <View style={styles.topOverlay} pointerEvents="box-none">
-          <View style={styles.emergencyHeader}>
-            <ModeToggleLogo variant="spark" compact />
-          </View>
-        </View>
       </View>
 
       <MatchToast
@@ -404,16 +401,10 @@ const styles = StyleSheet.create({
     minHeight: 0,
     position: 'relative',
   },
-  topOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-  },
-  emergencyHeader: {
+  emergencyBar: {
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.xs,
+    paddingBottom: spacing.xs,
+    zIndex: 20,
     alignItems: 'flex-start',
   },
   emptyState: {

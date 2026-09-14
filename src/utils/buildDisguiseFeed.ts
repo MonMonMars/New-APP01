@@ -1,18 +1,45 @@
 import { disguiseFeedItems, FeedItem } from '../data/disguiseFeed';
 import { DisguiseAdCreative } from '../types/disguise';
 import { UserProfile } from '../types/profile';
-import { buildDisguisedProfileFeedItem } from './disguiseProfileFeed';
+import { buildDisguisedProfileFeedItem, buildDisguisedProfileFeedItems } from './disguiseProfileFeed';
+
+function weaveProfileCards(base: FeedItem[], profileCards: FeedItem[]): FeedItem[] {
+  if (profileCards.length === 0) {
+    return base;
+  }
+
+  const result: FeedItem[] = [];
+  let profileIndex = 0;
+
+  base.forEach((item, index) => {
+    result.push(item);
+    if ((index + 1) % 2 === 0 && profileIndex < profileCards.length) {
+      result.push(profileCards[profileIndex]);
+      profileIndex += 1;
+    }
+  });
+
+  while (profileIndex < profileCards.length) {
+    result.push(profileCards[profileIndex]);
+    profileIndex += 1;
+  }
+
+  return result;
+}
 
 export function buildDisguiseFeed(
   user: UserProfile,
   creative: DisguiseAdCreative | null,
 ): FeedItem[] {
+  const profileCards = buildDisguisedProfileFeedItems();
+  const withProfiles = weaveProfileCards(disguiseFeedItems, profileCards);
+
   if (!creative) {
-    return disguiseFeedItems;
+    return withProfiles;
   }
 
   const userItem = buildDisguisedProfileFeedItem(user, creative);
-  const withoutUserSlot = disguiseFeedItems.filter((item) => item.id !== 'disguised-user');
+  const withoutUserSlot = withProfiles.filter((item) => item.id !== 'disguised-user');
 
   return [withoutUserSlot[0], withoutUserSlot[1], userItem, ...withoutUserSlot.slice(2)];
 }

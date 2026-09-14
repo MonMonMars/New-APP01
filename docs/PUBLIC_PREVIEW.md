@@ -20,7 +20,7 @@ Until Pages is enabled, use the dev tunnel below.
 
 ### Dev tunnel (temporary fallback)
 
-**https://spark-demo.trycloudflare.com** _(regenerate with `npx serve dist -l 8080` + cloudflared if expired)_
+**https://niagara-honolulu-printer-rfc.trycloudflare.com**
 
 _Last updated: Sep 14, 2026_
 

@@ -14,6 +14,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { VideoProfileOverlay } from './VideoProfileOverlay';
+import { VerificationBadges } from './VerificationBadges';
 import { colors, radii, spacing } from '../theme';
 import { Profile } from '../types/profile';
 
@@ -171,9 +172,11 @@ export function ProfileCard({
           <Text style={[styles.name, compact && styles.nameCompact]}>
             {profile.name}, {profile.age}
           </Text>
-          {profile.verified && (
-            <Ionicons name="checkmark-circle" size={compact ? 16 : 20} color={colors.superLike} />
-          )}
+          <VerificationBadges
+            photoVerified={profile.photoVerified ?? profile.verified}
+            personVerified={profile.personVerified ?? profile.verified}
+            size="sm"
+          />
         </View>
         {profile.job && <Text style={[styles.job, compact && styles.jobCompact]}>{profile.job}</Text>}
         <Text style={[styles.distance, compact && styles.distanceCompact]}>

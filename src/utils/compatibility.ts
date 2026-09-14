@@ -13,7 +13,10 @@ export function computeCompatibilityScore(user: UserProfile, profile: Profile): 
   if (profile.bio.trim().length > 30) {
     score += 4;
   }
-  if (profile.verified) {
+  const isVerified =
+    (profile.photoVerified === true && profile.personVerified === true) ||
+    profile.verified === true;
+  if (isVerified) {
     score += 3;
   }
   if (profile.hasVideo) {

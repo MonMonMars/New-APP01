@@ -43,10 +43,22 @@ export function computeProfileCompletion(user: UserProfile): {
       suggestion: 'Clear intent helps match with people on the same page.',
     },
     {
-      id: 'verified',
+      id: 'photo',
+      label: 'Verify your photos',
+      done: user.photoVerified === true,
+      suggestion: 'Photo verification shows your selfies match your profile.',
+    },
+    {
+      id: 'person',
+      label: 'Verify you are a real person',
+      done: user.personVerified === true,
+      suggestion: 'Liveness checks help everyone trust who they are matching with.',
+    },
+    {
+      id: 'age',
       label: 'Verify your age',
       done: user.ageVerified === true,
-      suggestion: 'Verified profiles build trust and appear in Verified filter.',
+      suggestion: 'Age verification builds trust and unlocks the 18+ badge.',
     },
   ];
 

@@ -18,6 +18,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
+import { VerificationBadges } from '../components/VerificationBadges';
 import { MessageStatusIcon } from '../components/MessageStatusIcon';
 import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
 import { ReportReasonSheet, type ReportReason } from '../components/ReportReasonSheet';
@@ -163,7 +164,14 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         <Pressable style={styles.headerProfile} onPress={() => setShowProfile(true)}>
           <Image source={{ uri: profile.photos[0] }} style={styles.headerAvatar} />
           <View style={styles.headerText}>
-            <Text style={[styles.headerName, { color: colors.text }]}>{profile.name}</Text>
+            <View style={styles.headerNameRow}>
+              <Text style={[styles.headerName, { color: colors.text }]}>{profile.name}</Text>
+              <VerificationBadges
+                photoVerified={profile.photoVerified ?? profile.verified}
+                personVerified={profile.personVerified ?? profile.verified}
+                size="sm"
+              />
+            </View>
             <Text style={[styles.headerMeta, { color: colors.textMuted }]}>
               {expiryLabel ?? 'Matched recently'}
             </Text>
@@ -333,6 +341,12 @@ const styles = StyleSheet.create({
   },
   headerText: {
     flex: 1,
+  },
+  headerNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    flexWrap: 'wrap',
   },
   headerName: {
     fontSize: 17,

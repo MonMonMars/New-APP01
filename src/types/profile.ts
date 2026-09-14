@@ -57,6 +57,10 @@ export type Profile = {
   job?: string;
   school?: string;
   verified?: boolean;
+  /** Selfie matches profile photos */
+  photoVerified?: boolean;
+  /** Liveness / real-person check passed */
+  personVerified?: boolean;
   prompts?: ProfilePrompt[];
   /** Hinge-style "Most Compatible" daily pick */
   mostCompatible?: boolean;
@@ -94,4 +98,6 @@ export type UserProfile = {
   instagramConnected?: boolean;
   spotifyConnected?: boolean;
   ageVerified?: boolean;
+  photoVerified?: boolean;
+  personVerified?: boolean;
 };

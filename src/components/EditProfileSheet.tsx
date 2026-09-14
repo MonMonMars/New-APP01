@@ -29,6 +29,8 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
   const [instagramConnected, setInstagramConnected] = useState(user.instagramConnected ?? false);
   const [spotifyConnected, setSpotifyConnected] = useState(user.spotifyConnected ?? false);
   const [ageVerified, setAgeVerified] = useState(user.ageVerified ?? false);
+  const [photoVerified, setPhotoVerified] = useState(user.photoVerified ?? false);
+  const [personVerified, setPersonVerified] = useState(user.personVerified ?? false);
 
   useEffect(() => {
     if (visible) {
@@ -40,6 +42,8 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       setInstagramConnected(user.instagramConnected ?? false);
       setSpotifyConnected(user.spotifyConnected ?? false);
       setAgeVerified(user.ageVerified ?? false);
+      setPhotoVerified(user.photoVerified ?? false);
+      setPersonVerified(user.personVerified ?? false);
     }
   }, [visible, user]);
 
@@ -61,6 +65,28 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
     );
   };
 
+  const handleVerifyPhoto = () => {
+    Alert.alert(
+      'Photo verification',
+      'We compare a live selfie to your profile photos to confirm they are really you. In production this uses photo-matching (e.g. Bumble Photo Verification).',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Verify (demo)', onPress: () => setPhotoVerified(true) },
+      ],
+    );
+  };
+
+  const handleVerifyPerson = () => {
+    Alert.alert(
+      'Real person check',
+      'A quick liveness scan confirms you are a real person. In production this uses face liveness (e.g. Onfido, FaceTec).',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Start scan (demo)', onPress: () => setPersonVerified(true) },
+      ],
+    );
+  };
+
   const handleSave = () => {
     const parsedAge = Number.parseInt(age, 10);
     const nextAge = Number.isFinite(parsedAge) && parsedAge >= 18 && parsedAge <= 99
@@ -77,6 +103,8 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       instagramConnected,
       spotifyConnected,
       ageVerified,
+      photoVerified,
+      personVerified,
     });
     onClose();
   };
@@ -107,7 +135,35 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
             <Text style={[styles.addPhotoText, { color: colors.gradientEnd }]}>Add photo from library</Text>
           </Pressable>
 
-          <Pressable style={[styles.verifyRow, { backgroundColor: colors.surface }]} onPress={handleVerifyAge}>
+          <Pressable
+            style={[styles.verifyRow, { backgroundColor: colors.surface }]}
+            onPress={photoVerified ? undefined : handleVerifyPhoto}
+            disabled={photoVerified}
+          >
+            <Ionicons name="camera" size={20} color={photoVerified ? colors.like : colors.textMuted} />
+            <Text style={[styles.verifyText, { color: colors.text }]}>
+              {photoVerified ? 'Photo verified' : 'Verify your photos'}
+            </Text>
+            {photoVerified && <Ionicons name="checkmark-circle" size={18} color={colors.like} />}
+          </Pressable>
+
+          <Pressable
+            style={[styles.verifyRow, { backgroundColor: colors.surface }]}
+            onPress={personVerified ? undefined : handleVerifyPerson}
+            disabled={personVerified}
+          >
+            <Ionicons name="scan" size={20} color={personVerified ? colors.like : colors.textMuted} />
+            <Text style={[styles.verifyText, { color: colors.text }]}>
+              {personVerified ? 'Real person verified' : 'Verify you are a real person'}
+            </Text>
+            {personVerified && <Ionicons name="checkmark-circle" size={18} color={colors.like} />}
+          </Pressable>
+
+          <Pressable
+            style={[styles.verifyRow, { backgroundColor: colors.surface }]}
+            onPress={ageVerified ? undefined : handleVerifyAge}
+            disabled={ageVerified}
+          >
             <Ionicons name="shield-checkmark" size={20} color={ageVerified ? colors.like : colors.textMuted} />
             <Text style={[styles.verifyText, { color: colors.text }]}>
               {ageVerified ? 'Age verified (18+)' : 'Verify your age'}

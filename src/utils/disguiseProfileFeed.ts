@@ -41,7 +41,7 @@ function toDisguisedProfilePost(
   };
 }
 
-/** Compact disguised profile cards — small circle thumbnail + news/ad text layout. */
+/** Disguised profile cards — full-width hero image + news/ad card layout. */
 export function buildDisguisedProfileFeedItems(): DisguisedProfilePost[] {
   return incomingLikeProfiles.slice(0, 4).map((profile, index) => toDisguisedProfilePost(profile, index));
 }

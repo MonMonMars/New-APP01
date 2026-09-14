@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useEffect } from 'react';
-import { Dimensions, Platform, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -15,10 +15,7 @@ import Animated, {
 
 import { colors } from '../theme';
 
-const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 const PARTICLE_COUNT = 56;
-const CENTER_X = SCREEN_W / 2;
-const CENTER_Y = SCREEN_H / 2;
 
 type SuperLikeCelebrationProps = {
   visible: boolean;
@@ -52,8 +49,8 @@ function SuperParticle({ index, effectKey }: ParticleProps) {
     return {
       opacity: Math.max(0, 1 - progress.value * 0.92),
       transform: [
-        { translateX: CENTER_X + Math.cos(angle) * travel - 14 + wobble },
-        { translateY: CENTER_Y + Math.sin(angle) * travel - 14 },
+        { translateX: Math.cos(angle) * travel - 14 + wobble },
+        { translateY: Math.sin(angle) * travel - 14 },
         { scale: 0.4 + progress.value * (isGold ? 2.4 : 1.8) },
         { rotate: `${progress.value * 360}deg` },
       ],
@@ -103,18 +100,12 @@ export function SuperLikeCelebration({
 
   const roseStyle = useAnimatedStyle(() => ({
     opacity: roseOpacity.value,
-    transform: [
-      { translateX: CENTER_X - 72 },
-      { translateY: CENTER_Y - 72 },
-      { scale: roseScale.value },
-    ],
+    transform: [{ scale: roseScale.value }],
   }));
 
   const starBurstStyle = useAnimatedStyle(() => ({
     opacity: roseOpacity.value * 0.85,
     transform: [
-      { translateX: CENTER_X - 80 },
-      { translateY: CENTER_Y - 80 },
       { scale: starBurstScale.value },
       { rotate: `${starBurstScale.value * 45}deg` },
     ],
@@ -122,29 +113,17 @@ export function SuperLikeCelebration({
 
   const ring1Style = useAnimatedStyle(() => ({
     opacity: ring1Opacity.value,
-    transform: [
-      { translateX: CENTER_X - 80 },
-      { translateY: CENTER_Y - 80 },
-      { scale: ring1Scale.value },
-    ],
+    transform: [{ scale: ring1Scale.value }],
   }));
 
   const ring2Style = useAnimatedStyle(() => ({
     opacity: ring2Opacity.value,
-    transform: [
-      { translateX: CENTER_X - 100 },
-      { translateY: CENTER_Y - 100 },
-      { scale: ring2Scale.value },
-    ],
+    transform: [{ scale: ring2Scale.value }],
   }));
 
   const ring3Style = useAnimatedStyle(() => ({
     opacity: ring3Opacity.value,
-    transform: [
-      { translateX: CENTER_X - 120 },
-      { translateY: CENTER_Y - 120 },
-      { scale: ring3Scale.value },
-    ],
+    transform: [{ scale: ring3Scale.value }],
   }));
 
   useEffect(() => {
@@ -260,21 +239,25 @@ export function SuperLikeCelebration({
         />
       </Animated.View>
 
-      <Animated.View style={[styles.ring, ring3Style, styles.ringGold]} />
-      <Animated.View style={[styles.ring, ring2Style, styles.ringWhite]} />
-      <Animated.View style={[styles.ring, ring1Style, styles.ringBlue]} />
+      <View style={styles.centerStage}>
+        <View style={styles.burstCore}>
+          <Animated.View style={[styles.ring, ring3Style, styles.ringGold]} />
+          <Animated.View style={[styles.ring, ring2Style, styles.ringWhite]} />
+          <Animated.View style={[styles.ring, ring1Style, styles.ringBlue]} />
 
-      <Animated.View style={starBurstStyle}>
-        <Ionicons name="star" size={180} color="rgba(255,215,0,0.4)" />
-      </Animated.View>
+          <Animated.View style={starBurstStyle}>
+            <Ionicons name="star" size={180} color="rgba(255,215,0,0.4)" />
+          </Animated.View>
 
-      <Animated.View style={roseStyle}>
-        <Ionicons name="star" size={160} color={colors.heartRed} />
-      </Animated.View>
+          <Animated.View style={roseStyle}>
+            <Ionicons name="star" size={160} color={colors.heartRed} />
+          </Animated.View>
+        </View>
 
-      {Array.from({ length: PARTICLE_COUNT }).map((_, index) => (
-        <SuperParticle key={`${effectKey}-super-${index}`} index={index} effectKey={effectKey} />
-      ))}
+        {Array.from({ length: PARTICLE_COUNT }).map((_, index) => (
+          <SuperParticle key={`${effectKey}-super-${index}`} index={index} effectKey={effectKey} />
+        ))}
+      </View>
     </Animated.View>
   );
 }
@@ -288,6 +271,17 @@ const styles = StyleSheet.create({
   flash: {
     ...StyleSheet.absoluteFill,
     backgroundColor: colors.heartRed,
+  },
+  centerStage: {
+    ...StyleSheet.absoluteFill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  burstCore: {
+    width: 160,
+    height: 160,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   ring: {
     position: 'absolute',

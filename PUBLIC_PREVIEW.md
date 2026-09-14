@@ -1,36 +1,44 @@
-# Spark — Public Web Preview
+# Spark — Live Demo
 
-Try the app in **any browser** (phone, laptop, tablet).
+## Demo link (open now)
 
-## Live preview (Cloudflare)
+**https://hdtv-brake-anywhere-respiratory.trycloudflare.com**
 
-**https://guests-exclude-rehabilitation-fancy.trycloudflare.com**
+_Last verified: Sep 14, 2026 — includes disguise mode (default), AI ad generator, competitor features_
 
-_Last updated: Sep 14, 2026 — white-screen fix (verified in browser)_
+> Tunnel links expire when the cloud workspace stops. If this 404s, ask for a fresh link.
 
-> This link forwards to the Expo web dev server in the cloud workspace.  
-> Tunnels are **temporary** — if the link stops working, ask to regenerate it.
+---
 
-### How to test v0.5 features
+## Quick start
 
-1. **52 discover profiles + seeded state** — fresh install: 4 pre-matches, 5 pending likes, 6 incoming likes (see `profiles.ts` QA buckets).
-2. **Spark Rose super-like** — tap center rose button → full-screen blue/gold celebration (~1.8s) → result modal.
-3. **Super Match** — rose Priya (`11`), Riley (`29`), or Aaliyah (`34`) → “Super Match!” → Chat now.
-4. **Standouts / Top Picks** — horizontal row above the deck (Hinge/Tinder pattern).
-5. **Recently active strip** — green-dot activity row on Discover.
-6. **Explore** — compass button → Serious daters / New members / Nearby category stacks.
-7. **Likes tab** — Super Likes sent row + 6 blurred incoming likes.
-8. **Matches tab** — Super Matches row + pre-seeded conversations.
+1. Open the link in **Chrome or Safari**
+2. Tap **Skip sign-in (demo mode)** if prompted
+3. Complete onboarding (or accept defaults)
+4. You land in **Pulse** disguise mode (news & social feed) — the default
+5. Tap the **expand** button (top-right) to open **Spark** big-picture dating mode
+6. Tap **eye-off** on any Spark screen to return to Pulse
 
-### Earlier features (v0.4)
+---
 
-- Almost full-screen photos, batch loading (6 at a time), expand location, fake map.
-- Red heart burst / trash vignette, drag-to-target discovery.
+## What to try
 
-### Sound & effects
+### Disguise mode (Pulse) — default
+- News articles open real external links (Reuters, BBC, Verge, NYT)
+- Sponsored ads open real client landing pages
+- Social avatars show news/ad text over faces
+- **Profile → AI disguise ad image** — generate your own disguised ad from your photo
+- Long-press Pulse logo ~1.2s also unlocks Spark
 
-- Click anywhere on the page first (browser autoplay rule), then like/pass/rose for sound.
-- Rose = pitched-up chime + massive particle celebration.
+### Spark dating
+- **Discover** — drag card to heart (like), trash (pass), or tap red star (super-like)
+- **Standouts** + **Recently active** rows
+- **Most compatible** banner with compatibility %
+- **Hold** profiles, **prompt-specific likes**, **Suggest a Date** in chat
+- **Map** (top-left), **Explore** (compass), **Likes**, **Matches**
+
+### Sound
+- Click anywhere on the page first (browser autoplay), then like/pass/rose for sound
 
 ---
 
@@ -39,21 +47,21 @@ _Last updated: Sep 14, 2026 — white-screen fix (verified in browser)_
 ```bash
 git clone https://github.com/MonMonMars/New-APP01.git
 cd New-APP01
-git checkout cursor/fix-white-screen-7b60
+git checkout cursor/disguise-mode-7b60
 npm install
-npm run web
+npm run demo
+# → http://localhost:8090
 ```
 
-Open http://localhost:8081
+Phone (best UX): `npm start` → Expo Go
 
-## Backend setup
+---
 
-See [`docs/BACKEND_SETUP.md`](./docs/BACKEND_SETUP.md) for Supabase configuration.
+## Permanent hosting (GitHub Pages)
 
-## Phone (best experience)
+**https://monmonmars.github.io/New-APP01/** — enable Pages in repo settings:
 
-```bash
-npm start
-```
+1. https://github.com/MonMonMars/New-APP01/settings/pages
+2. Source → **Deploy from a branch** → branch **`gh-pages`** → **`/ (root)`** → Save
 
-Scan the QR code with **Expo Go** — drag, haptics, photo upload, and notifications work best on a real device.
+_Note: private repos need GitHub Pro/Team for Pages, or make the repo public._

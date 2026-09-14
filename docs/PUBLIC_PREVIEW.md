@@ -1,42 +1,33 @@
 # Spark — Live Demo Links
 
-## ✅ Working now (use these)
+## Working now
 
 | Link | Notes |
 |------|-------|
-| **https://modular-equilibrium-sizes-mirror.trycloudflare.com** | Primary — open in Chrome/Safari |
-| **https://dull-bikes-itch.loca.lt** | Backup — if prompted, click Continue (tunnel warning page) |
+| **https://hdtv-brake-anywhere-respiratory.trycloudflare.com** | Primary — latest build with disguise mode default |
 
 _Last verified: Sep 14, 2026_
 
-### Quick start in demo
+### Quick start
 1. Open link → **Skip sign-in (demo mode)**
-2. Tap through onboarding (or accept defaults)
-3. Discover tab → drag to heart (like) or trash (pass), red star = super-like
+2. Onboarding → defaults OK
+3. **Pulse** feed opens first (disguise mode)
+4. **Expand** icon → Spark swipe deck | **Eye-off** → back to Pulse
 
-> **Old tunnel URLs expire** when the workspace stops. If a link 404s, ask for a fresh one.
-
----
-
-## ❌ GitHub Pages (not live yet)
-
-**https://monmonmars.github.io/New-APP01/** → 404 until you enable Pages once:
-
-1. Open https://github.com/MonMonMars/New-APP01/settings/pages
-2. **Source** → **Deploy from a branch**
-3. Branch **`gh-pages`** → folder **`/ (root)`** → **Save**
-4. Wait 2–3 minutes, then reload the URL
-
-The `gh-pages` branch is already built and pushed by CI — only the setting is missing.
+> Tunnel URLs expire when the workspace stops. Ask for a fresh link if 404.
 
 ---
 
-## Run locally
+## GitHub Pages (optional permanent URL)
+
+**https://monmonmars.github.io/New-APP01/** → enable in repo Settings → Pages → branch `gh-pages`.
+
+---
+
+## Local
 
 ```bash
 npm install
 npm run demo
 # → http://localhost:8090
 ```
-
-For phone: `npm start` → Expo Go.

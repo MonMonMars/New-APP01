@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, radii, spacing } from '../theme';
@@ -64,20 +64,7 @@ export function SuperLikeResultModal({
             </View>
           ) : (
             <View style={styles.photoSection}>
-              <Text style={styles.photoLabel}>{profile.name}&apos;s photos</Text>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.photoRow}
-              >
-                {photos.map((photo, index) => (
-                  <Image
-                    key={`${profile.id}-super-${index}`}
-                    source={{ uri: photo }}
-                    style={[styles.photoCard, index === 0 && styles.photoCardHero]}
-                  />
-                ))}
-              </ScrollView>
+              <Image source={{ uri: photos[0] }} style={styles.singlePhoto} />
             </View>
           )}
 
@@ -176,31 +163,14 @@ const styles = StyleSheet.create({
   photoSection: {
     width: '100%',
     marginVertical: spacing.lg,
+    alignItems: 'center',
   },
-  photoLabel: {
-    color: colors.text,
-    fontSize: 13,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-    opacity: 0.85,
-    marginBottom: spacing.sm,
-    textAlign: 'center',
-  },
-  photoRow: {
-    gap: spacing.sm,
-    paddingHorizontal: spacing.xs,
-  },
-  photoCard: {
-    width: 100,
-    height: 130,
+  singlePhoto: {
+    width: 140,
+    height: 180,
     borderRadius: radii.card,
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.6)',
-  },
-  photoCardHero: {
-    width: 120,
-    height: 156,
+    borderWidth: 3,
+    borderColor: 'rgba(255,255,255,0.75)',
   },
   actions: {
     width: '100%',

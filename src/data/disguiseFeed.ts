@@ -249,14 +249,6 @@ export type DisguiseAlert = {
   landingUrl?: string;
 };
 
-export const disguiseTrendingTopics = [
-  { id: 't1', label: '#WeekendPlans', posts: '12.4K' },
-  { id: 't2', label: '#TechNews', posts: '8.1K' },
-  { id: 't3', label: '#CoffeeShops', posts: '5.6K' },
-  { id: 't4', label: '#CityLife', posts: '4.2K' },
-  { id: 't5', label: '#DesignTips', posts: '3.9K' },
-];
-
 export function findNewsPostByArticleUrl(articleUrl: string): NewsPost | undefined {
   return newsItems.find((item) => item.articleUrl === articleUrl);
 }

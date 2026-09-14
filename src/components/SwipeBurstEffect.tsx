@@ -70,7 +70,7 @@ function Particle({ index, kind, origin, effectKey }: ParticleProps) {
 
   const particleColor = isLike
     ? kind === 'super'
-      ? colors.superLike
+      ? colors.heartRed
       : index % 3 === 0
         ? colors.heartPink
         : colors.heartRed
@@ -270,9 +270,9 @@ export function SwipeBurstEffect({
       {isLike && (
         <Animated.View style={[styles.bigHeart, bigHeartStyle]}>
           <Ionicons
-            name={kind === 'super' ? 'rose' : 'heart'}
+            name={kind === 'super' ? 'star' : 'heart'}
             size={96}
-            color={kind === 'super' ? colors.superLike : colors.heartRed}
+            color={colors.heartRed}
           />
         </Animated.View>
       )}

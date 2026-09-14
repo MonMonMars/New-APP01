@@ -60,8 +60,8 @@ function SuperParticle({ index, effectKey }: ParticleProps) {
     };
   });
 
-  const iconName = index % 5 === 0 ? 'star' : index % 3 === 0 ? 'rose' : 'sparkles';
-  const iconColor = isGold ? '#FFD700' : index % 2 === 0 ? colors.superLike : '#FFFFFF';
+  const iconName = index % 4 === 0 ? 'star' : 'sparkles';
+  const iconColor = isGold ? '#FFD700' : index % 2 === 0 ? colors.heartRed : '#FFFFFF';
 
   return (
     <Animated.View style={[styles.particle, style]}>
@@ -253,7 +253,7 @@ export function SuperLikeCelebration({
       <Animated.View style={[styles.flash, flashStyle]} />
       <Animated.View style={[StyleSheet.absoluteFill, gradientStyle]}>
         <LinearGradient
-          colors={['#1EC3FF', '#FFD700', '#1EC3FF']}
+          colors={[colors.heartRed, '#FF6B8A', '#FFD700']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={StyleSheet.absoluteFill}
@@ -265,11 +265,11 @@ export function SuperLikeCelebration({
       <Animated.View style={[styles.ring, ring1Style, styles.ringBlue]} />
 
       <Animated.View style={starBurstStyle}>
-        <Ionicons name="star" size={160} color="rgba(255,215,0,0.35)" />
+        <Ionicons name="star" size={180} color="rgba(255,215,0,0.4)" />
       </Animated.View>
 
       <Animated.View style={roseStyle}>
-        <Ionicons name="rose" size={144} color={colors.superLike} />
+        <Ionicons name="star" size={160} color={colors.heartRed} />
       </Animated.View>
 
       {Array.from({ length: PARTICLE_COUNT }).map((_, index) => (
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
   },
   flash: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: colors.superLike,
+    backgroundColor: colors.heartRed,
   },
   ring: {
     position: 'absolute',
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
     borderWidth: 4,
   },
   ringBlue: {
-    borderColor: colors.superLike,
+    borderColor: colors.heartRed,
   },
   ringWhite: {
     borderColor: 'rgba(255,255,255,0.7)',

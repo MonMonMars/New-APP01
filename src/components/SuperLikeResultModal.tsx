@@ -11,8 +11,8 @@ type SuperLikeResultModalProps = {
   profile: Profile | null;
   isMatch: boolean;
   userPhoto: string;
-  onContinue: () => void;
-  onChat?: () => void;
+  onTalkLater: () => void;
+  onChatNow: () => void;
 };
 
 export function SuperLikeResultModal({
@@ -20,8 +20,8 @@ export function SuperLikeResultModal({
   profile,
   isMatch,
   userPhoto,
-  onContinue,
-  onChat,
+  onTalkLater,
+  onChatNow,
 }: SuperLikeResultModalProps) {
   const insets = useSafeAreaInsets();
 
@@ -33,54 +33,43 @@ export function SuperLikeResultModal({
     <Modal visible={visible} animationType="fade" transparent>
       <View style={styles.backdrop}>
         <LinearGradient
-          colors={isMatch ? ['#1EC3FF', '#0A84FF', '#FFD700'] : ['#1A1A2E', '#16213E', '#1EC3FF']}
+          colors={
+            isMatch
+              ? [colors.heartRed, '#FF6B8A', '#FFD700']
+              : ['#1A1A2E', colors.heartRed, '#FF6B8A']
+          }
           style={[styles.card, { paddingBottom: insets.bottom + spacing.lg }]}
         >
           <View style={styles.iconBadge}>
-            <Ionicons name="rose" size={36} color={colors.superLike} />
+            <Ionicons name="star" size={40} color={colors.heartRed} />
           </View>
 
-          <Text style={styles.kicker}>
-            {isMatch ? "It's a" : 'Spark Rose'}
-          </Text>
-          <Text style={styles.title}>
-            {isMatch ? 'Super Match!' : 'Super Like sent!'}
-          </Text>
+          <Text style={styles.kicker}>{isMatch ? "It's a" : 'Spark Star'}</Text>
+          <Text style={styles.title}>{isMatch ? 'Super Match!' : 'Super Like sent!'}</Text>
           <Text style={styles.subtitle}>
             {isMatch
               ? `You and ${profile.name} super-liked each other. Start the conversation!`
-              : `They'll see you first in their Likes. ${profile.name} knows you're really interested.`}
+              : `${profile.name} will see you first. We'll notify you if they like you back.`}
           </Text>
 
           {isMatch && (
             <View style={styles.avatarRow}>
               <Image source={{ uri: userPhoto }} style={[styles.avatar, styles.avatarLeft]} />
-              <View style={styles.roseBadge}>
-                <Ionicons name="rose" size={22} color={colors.superLike} />
+              <View style={styles.starBadge}>
+                <Ionicons name="star" size={22} color={colors.heartRed} />
               </View>
               <Image source={{ uri: profile.photos[0] }} style={[styles.avatar, styles.avatarRight]} />
             </View>
           )}
 
           <View style={styles.actions}>
-            {isMatch && onChat ? (
-              <>
-                <Pressable style={styles.primaryButton} onPress={onChat}>
-                  <Ionicons name="chatbubble" size={18} color="#0A84FF" />
-                  <Text style={styles.primaryButtonText}>Chat now</Text>
-                </Pressable>
-                <Pressable style={styles.secondaryButton} onPress={onContinue}>
-                  <Text style={styles.secondaryButtonText}>Continue search</Text>
-                </Pressable>
-              </>
-            ) : (
-              <>
-                <Pressable style={styles.primaryButton} onPress={onContinue}>
-                  <Text style={styles.primaryButtonText}>Continue search</Text>
-                </Pressable>
-                <Text style={styles.hint}>They&apos;ll see you first in their queue</Text>
-              </>
-            )}
+            <Pressable style={styles.primaryButton} onPress={onChatNow}>
+              <Ionicons name="chatbubble" size={18} color={colors.heartRed} />
+              <Text style={styles.primaryButtonText}>Chat now</Text>
+            </Pressable>
+            <Pressable style={styles.secondaryButton} onPress={onTalkLater}>
+              <Text style={styles.secondaryButtonText}>Talk later</Text>
+            </Pressable>
           </View>
         </LinearGradient>
       </View>
@@ -106,7 +95,7 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.95)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,
@@ -155,7 +144,7 @@ const styles = StyleSheet.create({
     marginLeft: -16,
     zIndex: 1,
   },
-  roseBadge: {
+  starBadge: {
     width: 44,
     height: 44,
     borderRadius: 22,
@@ -179,7 +168,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   primaryButtonText: {
-    color: '#0A84FF',
+    color: colors.heartRed,
     fontSize: 17,
     fontWeight: '800',
   },
@@ -196,12 +185,5 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 16,
     fontWeight: '700',
-  },
-  hint: {
-    color: 'rgba(255,255,255,0.75)',
-    fontSize: 13,
-    textAlign: 'center',
-    marginTop: spacing.md,
-    fontWeight: '600',
   },
 });

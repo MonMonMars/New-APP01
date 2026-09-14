@@ -2,7 +2,7 @@
 
 ## Demo link (open now)
 
-**https://kinds-hamilton-requesting-arrange.trycloudflare.com**
+**https://guam-year-shaped-tin.trycloudflare.com**
 
 _Last updated: Sep 14, 2026 — clean discover home, emergency logo, unified disguise cards_
 

@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-echo "Building web demo..."
+echo "Building web demo (root-hosted for tunnels)..."
 npm run build:web
 cp dist/index.html dist/404.html
 

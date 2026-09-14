@@ -169,7 +169,7 @@ export const disguiseFeedItems: FeedItem[] = [
 
 export type DisguiseAlert = {
   id: string;
-  icon: 'heart-outline' | 'person-add-outline' | 'chatbubble-outline' | 'newspaper-outline' | 'megaphone-outline';
+  icon: 'arrow-up-outline' | 'person-add-outline' | 'chatbubble-outline' | 'newspaper-outline' | 'megaphone-outline';
   text: string;
   time: string;
   articleUrl?: string;
@@ -185,7 +185,7 @@ export const disguiseTrendingTopics = [
 ];
 
 export const disguiseAlerts: DisguiseAlert[] = [
-  { id: 'a1', icon: 'heart-outline', text: 'Alex Chen liked your comment', time: '2m ago' },
+  { id: 'a1', icon: 'arrow-up-outline', text: 'Alex Chen upvoted your comment', time: '2m ago' },
   { id: 'a2', icon: 'person-add-outline', text: 'Maya Okonkwo started following you', time: '1h ago' },
   { id: 'a3', icon: 'chatbubble-outline', text: 'New reply on your post', time: '3h ago' },
   {

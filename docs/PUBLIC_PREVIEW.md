@@ -4,27 +4,31 @@ Try the app in **any browser** (phone, laptop, tablet).
 
 ## Live preview (Cloudflare)
 
-**https://asn-stand-along-patricia.trycloudflare.com**
+**https://conditions-states-achieving-purchase.trycloudflare.com**
 
 > This link forwards to the Expo web dev server in the cloud workspace.  
 > Tunnels are **temporary** — if the link stops working, ask to regenerate it.
 
-### How to test Discover v0.4 features
+### How to test v0.5 features
 
-1. **Almost full-screen photos** — Discover tab: card fills most of the viewport; compact name/distance overlay above drop targets.
-2. **Search more people** — swipe through the deck; tap **Search more people** below the card to load the next batch (6 at a time).
-3. **Expand location** — tap the radius pill (“Searching within 25 mi”) or the expand icon → pick 50 / 100 / 250 / Anywhere.
-4. **Fake map** — tap the **map icon** (top-left) → stylized map with pins → tap a pin → **View in deck** or **Search this area**.
-5. **More fake accounts** — 36 discover profiles + 4 incoming likes for testing swipes, filters, and radius expansion.
+1. **52 discover profiles + seeded state** — fresh install: 4 pre-matches, 5 pending likes, 6 incoming likes (see `profiles.ts` QA buckets).
+2. **Spark Rose super-like** — tap center rose button → full-screen blue/gold celebration (~1.8s) → result modal.
+3. **Super Match** — rose Priya (`11`), Riley (`29`), or Aaliyah (`34`) → “Super Match!” → Chat now.
+4. **Standouts / Top Picks** — horizontal row above the deck (Hinge/Tinder pattern).
+5. **Recently active strip** — green-dot activity row on Discover.
+6. **Explore** — compass button → Serious daters / New members / Nearby category stacks.
+7. **Likes tab** — Super Likes sent row + 6 blurred incoming likes.
+8. **Matches tab** — Super Matches row + pre-seeded conversations.
 
-### Earlier features (v0.3)
+### Earlier features (v0.4)
 
-- Onboarding, discovery filters, passport mode, video profile overlay, rewind, chat polish, Spark+, consumables, prompts editor, pause/delete account, dark/light mode.
+- Almost full-screen photos, batch loading (6 at a time), expand location, fake map.
+- Red heart burst / trash vignette, drag-to-target discovery.
 
 ### Sound & effects
 
-- Click anywhere on the page first (browser autoplay rule), then like/pass for sound.
-- Trash = dark vignette + whoosh; Heart = red burst + chime.
+- Click anywhere on the page first (browser autoplay rule), then like/pass/rose for sound.
+- Rose = pitched-up chime + massive particle celebration.
 
 ---
 
@@ -33,7 +37,7 @@ Try the app in **any browser** (phone, laptop, tablet).
 ```bash
 git clone https://github.com/MonMonMars/New-APP01.git
 cd New-APP01
-git checkout cursor/discover-fullscreen-map-7b60
+git checkout cursor/superlike-effects-accounts-7b60
 npm install
 npm run web
 ```

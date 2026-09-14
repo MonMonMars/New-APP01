@@ -11,7 +11,7 @@ import {
 } from '../types/settings';
 
 const STORAGE_KEY = '@spark/app_state';
-const STORAGE_VERSION = 8;
+const STORAGE_VERSION = 9;
 
 export type PersistedAppState = {
   version: number;
@@ -60,6 +60,8 @@ export function createDefaultPersistedState(): PersistedAppState {
       instagramConnected: false,
       spotifyConnected: false,
       ageVerified: false,
+      photoVerified: false,
+      personVerified: false,
     },
     preferences: defaultPreferences,
     passedIds: [],

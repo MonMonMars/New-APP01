@@ -116,6 +116,8 @@ export async function ensureProfileRow(userId: string, user: UserProfile): Promi
     instagram_connected: user.instagramConnected ?? false,
     spotify_connected: user.spotifyConnected ?? false,
     age_verified: user.ageVerified ?? false,
+    photo_verified: user.photoVerified ?? false,
+    person_verified: user.personVerified ?? false,
     updated_at: new Date().toISOString(),
   });
 }
@@ -215,6 +217,8 @@ export async function loadFromSupabase(userId: string): Promise<Partial<SyncPayl
         instagramConnected: profile.instagram_connected ?? false,
         spotifyConnected: profile.spotify_connected ?? false,
         ageVerified: profile.age_verified ?? false,
+        photoVerified: profile.photo_verified ?? false,
+        personVerified: profile.person_verified ?? false,
       }
     : {
         name: 'Spark User',

@@ -94,7 +94,10 @@ function matchesDiscoverFilters(profile: Profile, filters: DiscoverFilter[]): bo
       case 'has_bio':
         return profile.bio.trim().length > 0;
       case 'verified':
-        return profile.verified === true;
+        return (
+          (profile.photoVerified === true && profile.personVerified === true) ||
+          profile.verified === true
+        );
       default: {
         const _exhaustive: never = filter;
         return _exhaustive;

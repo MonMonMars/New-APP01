@@ -2,6 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ProfileVerificationDisplay } from './ProfileVerificationDisplay';
+import { VerificationBadges } from './VerificationBadges';
 import { colors, radii, spacing } from '../theme';
 import { Profile, ProfilePrompt } from '../types/profile';
 
@@ -67,9 +69,11 @@ export function ProfileDetailSheet({
               <Text style={styles.name}>
                 {profile.name}, {profile.age}
               </Text>
-              {profile.verified && (
-                <Ionicons name="checkmark-circle" size={22} color={colors.superLike} />
-              )}
+              <VerificationBadges
+                photoVerified={profile.photoVerified ?? profile.verified}
+                personVerified={profile.personVerified ?? profile.verified}
+                size="md"
+              />
             </View>
             {compatibilityScore !== undefined && (
               <View style={styles.compatBadge}>
@@ -86,6 +90,8 @@ export function ProfileDetailSheet({
             <Text style={styles.sectionTitle}>About</Text>
             <Text style={styles.bio}>{profile.bio}</Text>
           </View>
+
+          <ProfileVerificationDisplay profile={profile} />
 
           {profile.prompts?.map((prompt) => (
             <Pressable

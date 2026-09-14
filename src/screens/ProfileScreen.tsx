@@ -9,6 +9,8 @@ import { BoostCard } from '../components/BoostCard';
 import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesSheet';
 import { EditProfileSheet } from '../components/EditProfileSheet';
 import { ProfileCompletionCard } from '../components/ProfileCompletionCard';
+import { ProfileTrustSection } from '../components/ProfileTrustSection';
+import { VerificationBadges } from '../components/VerificationBadges';
 import { NotificationPromptSheet } from '../components/NotificationPromptSheet';
 import { PhotoCarousel } from '../components/PhotoCarousel';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -140,12 +142,12 @@ export function ProfileScreen() {
           <View style={styles.heroText}>
             <View style={styles.nameRow}>
               <Text style={[styles.name, { color: colors.text }]}>{user.name}, {user.age}</Text>
-              {user.ageVerified && (
-                <View style={[styles.verifiedBadge, { backgroundColor: colors.superLike }]}>
-                  <Ionicons name="shield-checkmark" size={12} color={colors.text} />
-                  <Text style={styles.verifiedText}>18+</Text>
-                </View>
-              )}
+              <VerificationBadges
+                photoVerified={user.photoVerified}
+                personVerified={user.personVerified}
+                ageVerified={user.ageVerified}
+                size="sm"
+              />
             </View>
             {user.intent && (
               <Text style={[styles.intent, { color: colors.gradientEnd }]}>{intentLabels[user.intent]}</Text>
@@ -161,6 +163,11 @@ export function ProfileScreen() {
           score={profileCompletion.score}
           tips={profileCompletion.tips}
           onEditPress={() => setShowEdit(true)}
+        />
+
+        <ProfileTrustSection
+          user={user}
+          onUpdate={(patch) => updateUser({ ...user, ...patch })}
         />
 
         {isSparkPlus && (

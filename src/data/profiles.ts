@@ -973,8 +973,22 @@ const rawProfiles: Profile[] = [
   },
 ];
 
+function withVerification(profile: Profile): Profile {
+  const id = Number(profile.id);
+  const legacyVerified = profile.verified === true;
+  const photoVerified = profile.photoVerified ?? (legacyVerified || id % 3 !== 0);
+  const personVerified = profile.personVerified ?? (legacyVerified || id % 4 !== 0);
+
+  return {
+    ...profile,
+    photoVerified,
+    personVerified,
+    verified: legacyVerified || (photoVerified && personVerified),
+  };
+}
+
 export const mockProfiles: Profile[] = rawProfiles.map((profile, index) =>
-  withMap(profile, Number(profile.id) || index + 1),
+  withVerification(withMap(profile, Number(profile.id) || index + 1)),
 );
 
 function incomingFromMock(id: string): Profile {
@@ -983,7 +997,7 @@ function incomingFromMock(id: string): Profile {
     throw new Error(`Missing incoming-like profile id ${id}`);
   }
   const { mapX, mapY } = mapPin(profile.distanceMiles, Number(id));
-  return { ...profile, mapX, mapY };
+  return withVerification({ ...profile, mapX, mapY });
 }
 
 /** Profiles that liked you — excluded from discover deck; see INCOMING_LIKE_IDS */

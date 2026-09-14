@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useEffect } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { Dimensions, Platform, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -152,8 +152,10 @@ export function SuperLikeCelebration({
       return;
     }
 
-    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    if (Platform.OS !== 'web') {
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    }
     if (onPlaySound) {
       onPlaySound();
     }

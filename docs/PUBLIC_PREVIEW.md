@@ -4,9 +4,9 @@ Try the app in **any browser** (phone, laptop, tablet).
 
 ## Live preview (Cloudflare)
 
-**https://comm-giving-cricket-matter.trycloudflare.com**
+**https://safe-love-constraints-speaker.trycloudflare.com**
 
-_Last updated: Sep 14, 2026 — fullscreen card + super-like branch_
+_Last updated: Sep 14, 2026 — white-screen fix branch_
 
 > This link forwards to the Expo web dev server in the cloud workspace.  
 > Tunnels are **temporary** — if the link stops working, ask to regenerate it.
@@ -33,7 +33,7 @@ _Last updated: Sep 14, 2026 — fullscreen card + super-like branch_
 ```bash
 git clone https://github.com/MonMonMars/New-APP01.git
 cd New-APP01
-git checkout cursor/fullscreen-card-fix-7b60
+git checkout cursor/fix-white-screen-7b60
 npm install
 npm run web
 ```

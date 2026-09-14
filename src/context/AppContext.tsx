@@ -11,11 +11,14 @@ import {
 
 import { seedConversations } from '../data/conversations';
 import {
+  getProfileById,
   incomingLikeProfiles,
   INCOMING_LIKE_IDS,
   mockProfiles,
   MUTUAL_MATCH_IDS,
   MUTUAL_SUPER_LIKE_IDS,
+  RECENTLY_ACTIVE_IDS,
+  STANDOUT_IDS,
 } from '../data/profiles';
 import {
   buildSeedConversations,
@@ -50,6 +53,7 @@ import {
 } from '../types/settings';
 import { FREE_DAILY_LIKE_LIMIT, FREE_DAILY_SPARK_NOTES } from '../types/subscription';
 import { BOOST_DURATION_MS } from '../types/subscription';
+import { computeCompatibilityScore, pickDailyMostCompatible } from '../utils/compatibility';
 import { requestNotificationPermission, scheduleMatchNotification } from '../utils/notifications';
 import {
   clearPersistedState,
@@ -140,6 +144,12 @@ type AppContextValue = {
   pendingLikeIds: Set<string>;
   superLikedIds: Set<string>;
   blockedIds: Set<string>;
+  heldIds: Set<string>;
+  heldProfiles: Profile[];
+  standoutsProfiles: Profile[];
+  recentlyActiveProfiles: Profile[];
+  dailyMostCompatible: Profile | null;
+  getCompatibilityScore: (profile: Profile) => number;
   matches: Match[];
   conversations: Conversation[];
   incomingLikes: Profile[];
@@ -174,6 +184,8 @@ type AppContextValue = {
   searchMorePeople: () => void;
   expandSearchRadius: (miles: number) => void;
   prioritizeProfileInDeck: (profileId: string) => void;
+  holdProfile: (profileId: string) => void;
+  unholdProfile: (profileId: string) => void;
   passProfile: (profile: Profile) => void;
   likeProfile: (profile: Profile, sparkNote?: string) => Match | null;
   superLikeProfile: (profile: Profile) => Match | null;
@@ -212,6 +224,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [pendingLikeIds, setPendingLikeIds] = useState<Set<string>>(new Set());
   const [superLikedIds, setSuperLikedIds] = useState<Set<string>>(new Set());
   const [blockedIds, setBlockedIds] = useState<Set<string>>(new Set());
+  const [heldIds, setHeldIds] = useState<Set<string>>(new Set());
   const [matches, setMatches] = useState<Match[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>(seedConversations);
   const [sparkNotes, setSparkNotes] = useState<Record<string, string>>({});
@@ -269,6 +282,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setPendingLikeIds(arrayToSet(saved.pendingLikeIds));
         setSuperLikedIds(arrayToSet(saved.superLikedIds ?? []));
         setBlockedIds(arrayToSet(saved.blockedIds));
+        setHeldIds(arrayToSet(saved.heldIds ?? []));
         setMatches(saved.matches);
         setConversations(
           saved.conversations.length > 0 ? saved.conversations : seedConversations,
@@ -341,7 +355,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const buildPersistedState = useCallback((): PersistedAppState => {
     return {
-      version: 4,
+      version: 5,
       hasOnboarded,
       isAuthenticated,
       userId,
@@ -352,6 +366,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       pendingLikeIds: setToArray(pendingLikeIds),
       superLikedIds: setToArray(superLikedIds),
       blockedIds: setToArray(blockedIds),
+      heldIds: setToArray(heldIds),
       matches,
       conversations,
       dailyLikesUsed,
@@ -378,6 +393,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     pendingLikeIds,
     superLikedIds,
     blockedIds,
+    heldIds,
     matches,
     conversations,
     dailyLikesUsed,
@@ -445,8 +461,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
     passedIds.forEach((id) => ids.add(id));
     likedIds.forEach((id) => ids.add(id));
     blockedIds.forEach((id) => ids.add(id));
+    heldIds.forEach((id) => ids.add(id));
     return ids;
-  }, [blockedIds, likedIds, passedIds]);
+  }, [blockedIds, heldIds, likedIds, passedIds]);
+
+  const heldProfiles = useMemo(
+    () =>
+      Array.from(heldIds)
+        .map((id) => getProfileById(id))
+        .filter((profile): profile is Profile => profile !== undefined),
+    [heldIds],
+  );
+
+  const standoutsProfiles = useMemo(
+    () =>
+      STANDOUT_IDS.map((id) => getProfileById(id)).filter(
+        (profile): profile is Profile =>
+          profile !== undefined && !excludedIds.has(profile.id),
+      ),
+    [excludedIds],
+  );
+
+  const recentlyActiveProfiles = useMemo(
+    () =>
+      RECENTLY_ACTIVE_IDS.map((id) => getProfileById(id)).filter(
+        (profile): profile is Profile =>
+          profile !== undefined && !excludedIds.has(profile.id),
+      ),
+    [excludedIds],
+  );
+
+  const getCompatibilityScore = useCallback(
+    (profile: Profile) => computeCompatibilityScore(user, profile),
+    [user],
+  );
 
   const discoverPool = useMemo(() => {
     if (isPaused) {
@@ -478,6 +526,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const discoverPoolTotal = discoverPool.length;
   const hasMoreInPool = discoverPool.length > discoverUnlockedCount;
+
+  const dailyMostCompatible = useMemo(
+    () => pickDailyMostCompatible(user, discoverPool, todayKey()),
+    [discoverPool, user],
+  );
 
   const isBoosted = useMemo(() => {
     if (!boostActiveUntil) {
@@ -662,6 +715,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     [discoverPool, discoverUnlockedCount],
   );
+
+  const holdProfile = useCallback((profileId: string) => {
+    setHeldIds((prev) => new Set(prev).add(profileId));
+  }, []);
+
+  const unholdProfile = useCallback((profileId: string) => {
+    setHeldIds((prev) => {
+      const next = new Set(prev);
+      next.delete(profileId);
+      return next;
+    });
+  }, []);
 
   const passProfile = useCallback((profile: Profile) => {
     setPassedIds((prev) => new Set(prev).add(profile.id));
@@ -1082,6 +1147,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       pendingLikeIds,
       superLikedIds,
       blockedIds,
+      heldIds,
+      heldProfiles,
+      standoutsProfiles,
+      recentlyActiveProfiles,
+      dailyMostCompatible,
+      getCompatibilityScore,
       matches,
       conversations,
       incomingLikes: incomingLikeProfiles,
@@ -1113,6 +1184,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       searchMorePeople,
       expandSearchRadius,
       prioritizeProfileInDeck,
+      holdProfile,
+      unholdProfile,
       passProfile,
       likeProfile,
       superLikeProfile,
@@ -1149,6 +1222,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       pendingLikeIds,
       superLikedIds,
       blockedIds,
+      heldIds,
+      heldProfiles,
+      standoutsProfiles,
+      recentlyActiveProfiles,
+      dailyMostCompatible,
+      getCompatibilityScore,
       matches,
       conversations,
       sparkNotes,
@@ -1178,6 +1257,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       searchMorePeople,
       expandSearchRadius,
       prioritizeProfileInDeck,
+      holdProfile,
+      unholdProfile,
       passProfile,
       likeProfile,
       superLikeProfile,

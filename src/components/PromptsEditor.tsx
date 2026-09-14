@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
 import { HINGE_PROMPT_OPTIONS, ProfilePrompt } from '../types/profile';
+import { getPromptFeedback } from '../utils/promptFeedback';
 import { radii, spacing } from '../theme';
 
 const MAX_PROMPTS = 3;
@@ -57,6 +58,11 @@ export function PromptsEditor({ prompts, onChange }: PromptsEditorProps) {
             style={[styles.answer, { color: colors.text }]}
             multiline
           />
+          {getPromptFeedback(prompt.answer) && (
+            <Text style={[styles.feedback, { color: colors.gradientEnd }]}>
+              💡 {getPromptFeedback(prompt.answer)}
+            </Text>
+          )}
           <Pressable onPress={() => removePrompt(index)} style={styles.remove}>
             <Ionicons name="trash-outline" size={16} color={colors.nope} />
             <Text style={[styles.removeText, { color: colors.nope }]}>Remove</Text>
@@ -104,6 +110,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     minHeight: 48,
     textAlignVertical: 'top',
+  },
+  feedback: {
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: spacing.xs,
+    fontStyle: 'italic',
   },
   remove: {
     flexDirection: 'row',

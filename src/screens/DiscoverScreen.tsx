@@ -8,21 +8,26 @@ import { DailyBatchIndicator } from '../components/DailyBatchIndicator';
 import { DiscoverFilterChips } from '../components/DiscoverFilterChips';
 import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesSheet';
 import { ExpandLocationSheet } from '../components/ExpandLocationSheet';
+import { HeldProfilesRow } from '../components/HeldProfilesRow';
 import { LikeLimitModal } from '../components/LikeLimitModal';
 import { MatchModal } from '../components/MatchModal';
 import { MatchToast } from '../components/MatchToast';
+import { MostCompatibleBanner } from '../components/MostCompatibleBanner';
+import { PromptLikeSheet } from '../components/PromptLikeSheet';
+import { RecentlyActiveStrip } from '../components/RecentlyActiveStrip';
 import { SuperLikeResultModal } from '../components/SuperLikeResultModal';
 import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
 import { ReportReasonSheet, type ReportReason } from '../components/ReportReasonSheet';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { SparkNoteSheet } from '../components/SparkNoteSheet';
+import { StandoutsRow } from '../components/StandoutsRow';
 import { SwipeDeck, SwipeDeckHandle } from '../components/SwipeDeck';
 import { WaitingForMatchModal } from '../components/WaitingForMatchModal';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { formatSearchRadius } from '../types/preferences';
 import { DiscoverFilter } from '../types/preferences';
-import { Profile } from '../types/profile';
+import { Profile, ProfilePrompt } from '../types/profile';
 import { spacing } from '../theme';
 
 const TAB_BAR_HEIGHT = 72;
@@ -60,6 +65,15 @@ export function DiscoverScreen() {
     blockProfile,
     reportProfile,
     rewindLastPass,
+    heldIds,
+    heldProfiles,
+    standoutsProfiles,
+    recentlyActiveProfiles,
+    dailyMostCompatible,
+    getCompatibilityScore,
+    holdProfile,
+    unholdProfile,
+    prioritizeProfileInDeck,
   } = useApp();
 
   const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
@@ -79,6 +93,11 @@ export function DiscoverScreen() {
   const [superLikeProfileState, setSuperLikeProfileState] = useState<Profile | null>(null);
   const [showSuperLikeResult, setShowSuperLikeResult] = useState(false);
   const [superLikeIsMatch, setSuperLikeIsMatch] = useState(false);
+  const [promptLikeTarget, setPromptLikeTarget] = useState<{
+    profile: Profile;
+    prompt: ProfilePrompt;
+  } | null>(null);
+  const [showPromptLike, setShowPromptLike] = useState(false);
 
   const activeFilters = preferences.discoverFilters ?? [];
   const showSearchMore = !isPaused && discoverQueue.length > 0;
@@ -257,6 +276,51 @@ export function DiscoverScreen() {
     dismissSuperLikeResult();
   }, [dismissSuperLikeResult]);
 
+  const handleSelectCuratedProfile = useCallback(
+    (profile: Profile) => {
+      prioritizeProfileInDeck(profile.id);
+    },
+    [prioritizeProfileInDeck],
+  );
+
+  const handleHoldCurrent = useCallback(() => {
+    if (!currentProfile) {
+      return;
+    }
+    if (heldIds.has(currentProfile.id)) {
+      unholdProfile(currentProfile.id);
+      Alert.alert('Removed from hold', `${currentProfile.name} is back in your deck.`);
+    } else {
+      holdProfile(currentProfile.id);
+      Alert.alert('On hold', `${currentProfile.name} saved for later.`);
+      deckRef.current?.advanceAfterSuperLike();
+    }
+  }, [currentProfile, deckRef, heldIds, holdProfile, unholdProfile]);
+
+  const handleLikePrompt = useCallback((prompt: ProfilePrompt) => {
+    if (!detailProfile) {
+      return;
+    }
+    setPromptLikeTarget({ profile: detailProfile, prompt });
+    setShowPromptLike(true);
+  }, [detailProfile]);
+
+  const handlePromptLikeSend = useCallback(
+    (comment: string) => {
+      if (!promptLikeTarget) {
+        return;
+      }
+      const note = comment
+        ? `Liked "${promptLikeTarget.prompt.question}": ${comment}`
+        : `Liked your answer: "${promptLikeTarget.prompt.answer}"`;
+      setShowPromptLike(false);
+      setDetailProfile(null);
+      processLike(promptLikeTarget.profile, note);
+      setPromptLikeTarget(null);
+    },
+    [processLike, promptLikeTarget],
+  );
+
   const handleSuperLikeChatNow = useCallback(() => {
     if (!superLikeProfileState) {
       return;
@@ -405,6 +469,22 @@ export function DiscoverScreen() {
 
           <DiscoverFilterChips activeFilters={activeFilters} onToggle={handleFilterToggle} compact />
 
+          {dailyMostCompatible && currentProfile?.id !== dailyMostCompatible.id && (
+            <MostCompatibleBanner
+              profile={dailyMostCompatible}
+              score={getCompatibilityScore(dailyMostCompatible)}
+              onPress={() => handleSelectCuratedProfile(dailyMostCompatible)}
+            />
+          )}
+
+          <StandoutsRow profiles={standoutsProfiles.slice(0, 6)} onSelect={handleSelectCuratedProfile} />
+          <RecentlyActiveStrip profiles={recentlyActiveProfiles.slice(0, 8)} onSelect={handleSelectCuratedProfile} />
+          <HeldProfilesRow
+            profiles={heldProfiles}
+            onSelect={handleSelectCuratedProfile}
+            onRemove={unholdProfile}
+          />
+
           <DailyBatchIndicator
             remaining={discoverQueue.length}
             total={discoverPoolTotal}
@@ -434,6 +514,16 @@ export function DiscoverScreen() {
               )}
               <Pressable style={[styles.actionPill, { backgroundColor: 'rgba(26, 26, 28, 0.82)' }]} onPress={openSparkNote}>
                 <Ionicons name="chatbubble-ellipses-outline" size={14} color={colors.gradientEnd} />
+              </Pressable>
+              <Pressable
+                style={[styles.actionPill, { backgroundColor: 'rgba(26, 26, 28, 0.82)' }]}
+                onPress={handleHoldCurrent}
+              >
+                <Ionicons
+                  name={currentProfile && heldIds.has(currentProfile.id) ? 'bookmark' : 'bookmark-outline'}
+                  size={14}
+                  color={colors.gradientEnd}
+                />
               </Pressable>
               <Pressable
                 style={[styles.actionPill, { backgroundColor: 'rgba(26, 26, 28, 0.82)' }]}
@@ -508,13 +598,28 @@ export function DiscoverScreen() {
       <ProfileDetailSheet
         profile={detailProfile}
         visible={detailProfile !== null}
+        compatibilityScore={detailProfile ? getCompatibilityScore(detailProfile) : undefined}
+        isHeld={detailProfile ? heldIds.has(detailProfile.id) : false}
         onClose={() => setDetailProfile(null)}
         onBlock={handleBlockDetail}
+        onHold={detailProfile ? handleHoldCurrent : undefined}
+        onLikePrompt={handleLikePrompt}
         onReport={(profileId) => {
           if (detailProfile) {
             openReportSheet(profileId, detailProfile.name);
           }
         }}
+      />
+
+      <PromptLikeSheet
+        visible={showPromptLike}
+        profile={promptLikeTarget?.profile ?? null}
+        prompt={promptLikeTarget?.prompt ?? null}
+        onClose={() => {
+          setShowPromptLike(false);
+          setPromptLikeTarget(null);
+        }}
+        onSend={handlePromptLikeSend}
       />
 
       <ReportReasonSheet

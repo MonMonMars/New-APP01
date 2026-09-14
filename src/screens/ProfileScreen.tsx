@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BoostCard } from '../components/BoostCard';
 import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesSheet';
 import { EditProfileSheet } from '../components/EditProfileSheet';
+import { ProfileCompletionCard } from '../components/ProfileCompletionCard';
 import { NotificationPromptSheet } from '../components/NotificationPromptSheet';
 import { PhotoCarousel } from '../components/PhotoCarousel';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -14,6 +15,7 @@ import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { RelationshipIntent } from '../types/profile';
 import { ThemeMode } from '../types/settings';
+import { computeProfileCompletion } from '../utils/profileCompletion';
 import { radii, spacing } from '../theme';
 
 const intentLabels: Record<RelationshipIntent, string> = {
@@ -116,6 +118,7 @@ export function ProfileScreen() {
   };
 
   const themeLabel = themeMode === 'light' ? 'Light' : 'Dark';
+  const profileCompletion = computeProfileCompletion(user);
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
@@ -147,6 +150,12 @@ export function ProfileScreen() {
             </Pressable>
           </View>
         </View>
+
+        <ProfileCompletionCard
+          score={profileCompletion.score}
+          tips={profileCompletion.tips}
+          onEditPress={() => setShowEdit(true)}
+        />
 
         {isSparkPlus && (
           <View style={[styles.sparkPlusBadge, { backgroundColor: colors.surface }]}>

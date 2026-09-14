@@ -2,9 +2,9 @@
 
 ## Demo link (open now)
 
-**https://screenshot-housewives-roland-nation.trycloudflare.com**
+**https://ultra-grove-cake-likes.trycloudflare.com**
 
-_Last updated: Sep 14, 2026 — voice mic + emotions, verification badges, simplified logo_
+_Last updated: Sep 14, 2026 — disguise profile cards aligned with news/ads, disguise button fix on Messages & Chat_
 
 > Tunnel links expire when the cloud workspace stops. If this 404s, ask for a fresh link.
 

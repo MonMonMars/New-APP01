@@ -58,7 +58,15 @@ import {
 import { defaultSecuritySettings, SecuritySettings } from '../types/security';
 import { FREE_DAILY_LIKE_LIMIT, FREE_DAILY_SPARK_NOTES } from '../types/subscription';
 import { BOOST_DURATION_MS } from '../types/subscription';
+import { logSecurityEvent, submitSecurityReport } from '../services/securityReports';
 import { unlockSpark } from '../utils/appLock';
+import { isAllowedImageUrl } from '../utils/urlSafety';
+import {
+  clearFailedUnlockAttempts,
+  getUnlockLockoutRemainingMs,
+  isUnlockLockedOut,
+  recordFailedUnlockAttempt,
+} from '../utils/unlockLockout';
 import { computeCompatibilityScore, pickDailyMostCompatible } from '../utils/compatibility';
 import { requestNotificationPermission, scheduleMatchNotification } from '../utils/notifications';
 import {
@@ -456,8 +464,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   ]);
 
   const runSparkUnlockFlow = useCallback(async (): Promise<boolean> => {
+    if (await isUnlockLockedOut()) {
+      const remaining = await getUnlockLockoutRemainingMs();
+      const minutes = Math.ceil(remaining / 60_000);
+      setUnlockError(`Too many failed attempts. Try again in ${minutes} min.`);
+      setUnlockModalVisible(true);
+      return false;
+    }
+
     const result = await unlockSpark(securitySettings);
     if (result.ok) {
+      await clearFailedUnlockAttempts();
+      void logSecurityEvent(userId, 'spark_unlock_success', { method: result.method });
       lastUnlockAtRef.current = Date.now();
       return true;
     }
@@ -469,12 +487,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setUnlockError(null);
       setUnlockModalVisible(true);
     });
-  }, [securitySettings]);
+  }, [securitySettings, userId]);
 
   const handleUnlockPinSubmit = useCallback(
     async (pin: string) => {
+      if (await isUnlockLockedOut()) {
+        const remaining = await getUnlockLockoutRemainingMs();
+        const minutes = Math.ceil(remaining / 60_000);
+        setUnlockError(`Too many failed attempts. Try again in ${minutes} min.`);
+        return;
+      }
+
       const result = await unlockSpark(securitySettings, pin);
       if (result.ok) {
+        await clearFailedUnlockAttempts();
+        void logSecurityEvent(userId, 'spark_unlock_success', { method: 'pin' });
         setUnlockModalVisible(false);
         setUnlockError(null);
         lastUnlockAtRef.current = Date.now();
@@ -482,9 +509,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
         unlockResolverRef.current = null;
         return;
       }
-      setUnlockError('Incorrect PIN. Try again.');
+
+      const lockout = await recordFailedUnlockAttempt();
+      void logSecurityEvent(userId, 'spark_unlock_failed', { method: 'pin' });
+      if (lockout.locked) {
+        setUnlockError('Too many failed attempts. Locked for 5 minutes.');
+        setUnlockModalVisible(false);
+        unlockResolverRef.current?.(false);
+        unlockResolverRef.current = null;
+        return;
+      }
+      setUnlockError(`Incorrect PIN. ${lockout.remainingAttempts} attempts left.`);
     },
-    [securitySettings],
+    [securitySettings, userId],
   );
 
   const handleUnlockCancel = useCallback(() => {
@@ -915,11 +952,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!checkClientRateLimit('report', 10, 60_000)) {
         return;
       }
-      const sanitizedReason = reason ? sanitizeReportReason(reason) : undefined;
-      void sanitizedReason;
+      const sanitizedReason = reason ? sanitizeReportReason(reason) : 'Reported from app';
+      if (userId) {
+        void submitSecurityReport({
+          reporterUserId: userId,
+          reportedProfileId: profileId,
+          reason: sanitizedReason,
+          context: 'profile',
+        });
+        void logSecurityEvent(userId, 'profile_reported', { profileId });
+      }
       blockProfile(profileId);
     },
-    [blockProfile],
+    [blockProfile, userId],
   );
 
   const likeProfile = useCallback(
@@ -1091,6 +1136,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       const trimmed = sanitizeMessage(text);
       if (!trimmed && !imageUrl) {
+        return;
+      }
+      if (imageUrl && !isAllowedImageUrl(imageUrl)) {
         return;
       }
 

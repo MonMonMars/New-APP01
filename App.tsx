@@ -3,6 +3,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AppErrorBoundary } from './src/components/AppErrorBoundary';
+import { PrivacyShield } from './src/components/security/PrivacyShield';
 import { AppProvider, useApp } from './src/context/AppContext';
 import { AppNavigator } from './src/navigation/AppNavigator';
 
@@ -19,6 +20,7 @@ export default function App() {
           <AppProvider>
             <StatusBarWrapper />
             <AppNavigator />
+            <PrivacyShield />
           </AppProvider>
         </SafeAreaProvider>
       </GestureHandlerRootView>

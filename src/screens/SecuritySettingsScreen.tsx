@@ -183,6 +183,22 @@ export function SecuritySettingsScreen({ onClose }: SecuritySettingsScreenProps)
           />
         </View>
 
+        <Text style={[styles.section, { color: colors.textMuted }]}>Screen protection</Text>
+        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <SettingRow
+            label="Block screenshots (Spark)"
+            hint="Prevent screenshots and screen recording on dating screens"
+            value={securitySettings.blockScreenshots}
+            onValueChange={(next) => patch({ blockScreenshots: next })}
+          />
+          <SettingRow
+            label="Privacy shield"
+            hint="Hide Spark in app switcher with Pulse overlay"
+            value={securitySettings.privacyShieldEnabled}
+            onValueChange={(next) => patch({ privacyShieldEnabled: next })}
+          />
+        </View>
+
         <Text style={[styles.footer, { color: colors.textMuted }]}>
           Local chat data is obfuscated on device. Production builds should proxy AI keys through
           your backend — never bundle OpenAI keys in the client. See docs/security/SECURITY.md.

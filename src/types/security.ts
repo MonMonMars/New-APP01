@@ -11,6 +11,10 @@ export type SecuritySettings = {
   disguiseSafeNotifications: boolean;
   /** Re-lock Spark after N minutes in background (0 = off). */
   sessionTimeoutMinutes: number;
+  /** Block screenshots and screen recording on Spark screens (native). */
+  blockScreenshots: boolean;
+  /** Hide Spark UI in app switcher with Pulse overlay. */
+  privacyShieldEnabled: boolean;
 };
 
 export const defaultSecuritySettings: SecuritySettings = {
@@ -20,4 +24,6 @@ export const defaultSecuritySettings: SecuritySettings = {
   autoDisguiseOnBackground: true,
   disguiseSafeNotifications: true,
   sessionTimeoutMinutes: 5,
+  blockScreenshots: true,
+  privacyShieldEnabled: true,
 };

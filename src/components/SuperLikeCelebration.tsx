@@ -21,7 +21,6 @@ type SuperLikeCelebrationProps = {
   visible: boolean;
   effectKey: number;
   onComplete: () => void;
-  onPlaySound?: () => void;
 };
 
 type ParticleProps = {
@@ -71,7 +70,6 @@ export function SuperLikeCelebration({
   visible,
   effectKey,
   onComplete,
-  onPlaySound,
 }: SuperLikeCelebrationProps) {
   const flashOpacity = useSharedValue(0);
   const gradientOpacity = useSharedValue(0);
@@ -135,10 +133,6 @@ export function SuperLikeCelebration({
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     }
-    if (onPlaySound) {
-      onPlaySound();
-    }
-
     flashOpacity.value = withSequence(
       withTiming(0.85, { duration: 100 }),
       withTiming(0.55, { duration: 200 }),
@@ -209,7 +203,6 @@ export function SuperLikeCelebration({
     flashOpacity,
     gradientOpacity,
     onComplete,
-    onPlaySound,
     ring1Opacity,
     ring1Scale,
     ring2Opacity,

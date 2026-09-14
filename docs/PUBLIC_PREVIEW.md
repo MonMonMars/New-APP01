@@ -8,11 +8,19 @@ Try the app in **any browser** — hosted on cloud, no local server required.
 
 **https://monmonmars.github.io/New-APP01/**
 
-Auto-deploys on push to `main` via GitHub Actions. No tunnel needed.
+Auto-deploys on push via GitHub Actions (`build` always runs; `deploy` needs Pages enabled).
+
+**One-time repo setup (required for deploy):**
+
+1. Open [GitHub Pages settings](https://github.com/MonMonMars/New-APP01/settings/pages)
+2. Under **Build and deployment → Source**, choose **GitHub Actions**
+3. Re-run the latest [Deploy Web workflow](https://github.com/MonMonMars/New-APP01/actions/workflows/deploy-web.yml) or push to `main`
+
+Until Pages is enabled, use the dev tunnel below.
 
 ### Dev tunnel (temporary fallback)
 
-**https://plugins-viii-less-fill.trycloudflare.com**
+**https://spark-demo.trycloudflare.com** _(regenerate with `npx serve dist -l 8080` + cloudflared if expired)_
 
 _Last updated: Sep 14, 2026_
 

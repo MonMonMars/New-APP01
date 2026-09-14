@@ -1,9 +1,9 @@
 import { Audio } from 'expo-av';
 import { useCallback, useEffect, useRef } from 'react';
 
-type SwipeSoundKind = 'like' | 'pass';
+type SwipeSoundKind = 'like' | 'pass' | 'super';
 
-const soundSources: Record<SwipeSoundKind, number> = {
+const soundSources: Record<'like' | 'pass', number> = {
   like: require('../../assets/sounds/like.mp3'),
   pass: require('../../assets/sounds/pass.mp3'),
 };
@@ -28,16 +28,22 @@ export function useSwipeSounds() {
 
   const playSound = useCallback(async (kind: SwipeSoundKind) => {
     try {
-      let sound = soundsRef.current[kind];
+      const sourceKind = kind === 'super' ? 'like' : kind;
+      let sound = soundsRef.current[sourceKind];
       if (!sound) {
-        const created = await Audio.Sound.createAsync(soundSources[kind], {
-          volume: kind === 'like' ? 0.9 : 0.75,
+        const created = await Audio.Sound.createAsync(soundSources[sourceKind], {
+          volume: kind === 'pass' ? 0.75 : 0.9,
         });
         sound = created.sound;
-        soundsRef.current[kind] = sound;
+        soundsRef.current[sourceKind] = sound;
       }
 
       await sound.setPositionAsync(0);
+      if (kind === 'super') {
+        await sound.setRateAsync(1.45, true);
+      } else {
+        await sound.setRateAsync(1, true);
+      }
       await sound.playAsync();
     } catch {
       // Sound is optional; browser may block until first user gesture.

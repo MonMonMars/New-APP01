@@ -19,7 +19,12 @@ Research synthesis from **Tinder**, **Bumble**, **Hinge**, **Badoo**, and **Coff
 | **Premium upsell** | Blurred like tap, like limit, Boost | Beeline tap, Spotlight | Rose limit, Hinge+ | Credits | **Likes tap, like limit modal, Spark+ from Profile** |
 | **Discovery gesture** | Swipe left/right (patented) | Swipe | Tap like on prompts | Swipe / tap | **Drag card → trash / heart** (legal differentiator) |
 | **Daily curated batch** | Top Picks / Chemistry | — | Most Compatible daily | Bagels at noon | **"Today's picks · X of Y left"** batch indicator (CMB) |
-| **Super-like / Rose** | Super Like (swipe up) | SuperSwipe | Rose (1 free/week) | Crush highlight | **Spark Rose** center button + blue burst effect (Hinge/Tinder) |
+| **Super-like / Rose** | Super Like (swipe up) | SuperSwipe | Rose (1 free/week) | Crush highlight | **Spark Rose** center button + **full-screen celebration** + result modal (Hinge/Tinder) |
+| **Top Picks / Standouts** | Top Picks | For You (4/day) | Standouts (Roses only) | Bagels at noon | **Standouts row** — 3 curated profiles on Discover |
+| **Recently active** | Active status dot | Online now | Active today | Online badge | **Recently active strip** on Discover |
+| **Explore categories** | Explore / Passport stacks | Modes (Date/BFF) | — | Encounters filters | **Explore screen** — Serious / New / Nearby stacks |
+| **Super Likes sent** | Super Likes tab (Gold) | SuperSwipe sent | Roses sent | — | **Super Likes sent** section in Likes tab |
+| **Super Matches** | — | — | — | — | **Super Matches** row in Matches tab |
 | **Compatibility signal** | Smart Photos / Top Picks | — | Most Compatible badge | Match % | **"Most Compatible"** badge on daily pick (Hinge) |
 | **Spotlight / Crush** | Boost visibility | Spotlight | Standouts | Crush moment | **"Crush"** badge + pulsing ring on spotlight profile (Badoo) |
 | **Match screen CTAs** | Send Message + Keep Swiping | Opening Move + chat | Comment-first toast | Quick reply | **"Start talking"** (primary) + **"Keep looking"** (outline) + Opening Move card (Bumble) |
@@ -75,17 +80,25 @@ Root Stack
     │   ├── Like limit pill + modal
     │   ├── Empty deck (expand radius / search more)
     │   ├── Waiting for match modal
+    │   ├── Standouts row (Top Picks) + Recently active strip
+    │   ├── Explore button → Explore screen (category stacks)
+    │   ├── Spark Rose → SuperLikeCelebration + SuperLikeResultModal
     │   ├── Profile detail sheet (prompts, report/block)
     │   └── Full-screen match celebration
     ├── MapDiscover (stack push from Discover)
     │   ├── Stylized map with profile pins
     │   ├── Tap pin → preview card
     │   └── “Search this area” → load batch / prioritize in deck
+    ├── Explore (stack push from Discover)
+    │   ├── Serious daters / New members / Nearby categories
+    │   └── Tap profile → prioritize in deck
     ├── Likes
     │   ├── Count badge banner
+    │   ├── Super Likes sent row (pending / matched status)
     │   ├── Blurred like grid → Spark+
     │   └── Tab badge (incoming count)
     ├── Matches
+    │   ├── Super Matches row (rose badge)
     │   ├── New matches (horizontal, expiry)
     │   ├── Message list (your turn, unread, expires)
     │   └── Tab badge (new + unread + your turn)
@@ -135,11 +148,12 @@ This avoids direct replication of Tinder's patented swipe gesture while keeping 
 
 - `AppContext` holds: discover queue (batched), pool total, likes, passes, pending likes, matches, conversations, daily like count, blocked IDs.
 - Discover loads **6 profiles per batch** from a pool filtered by radius (25 → 50 → 100 → 250 → Anywhere).
-- **36 mock discover profiles** (`1`–`6`, `11`–`36`) with cities, distances, map pins; **4 incoming likes** (`7`–`10`).
-- Mutual match demo IDs: `3` (Mia), `18` (Ryan) — instant match celebration.
-- Other likes → waiting modal.
-- Seed conversations with Ava and Mia (Mia has “Your turn” + expiry).
-- Incoming likes: blurred profiles `7`–`10` (Likes tab badge = 4).
+- **52 mock discover profiles** (`1`–`6`, `11`–`56`) with cities, distances, map pins.
+- **6 incoming likes** (`7`–`10`, `37`, `38`) — Likes tab badge = 6.
+- **4 pre-matched** (`1` Ava w/ messages, `5` Sofia empty, `15` Amara w/ messages, `27` Isabella new).
+- **5 pending likes** (`6`, `14`, `20`, `22`, `31`) — waiting for reciprocation.
+- **4 instant heart matches** (`3`, `18`, `41`, `45`); **3 super-match IDs** (`11`, `29`, `34`).
+- See `profiles.ts` header comment for full QA bucket map.
 
 ## References
 

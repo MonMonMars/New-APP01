@@ -10,7 +10,18 @@ import {
 } from 'react';
 
 import { seedConversations } from '../data/conversations';
-import { incomingLikeProfiles, mockProfiles, MUTUAL_MATCH_IDS } from '../data/profiles';
+import {
+  incomingLikeProfiles,
+  INCOMING_LIKE_IDS,
+  mockProfiles,
+  MUTUAL_MATCH_IDS,
+  MUTUAL_SUPER_LIKE_IDS,
+} from '../data/profiles';
+import {
+  buildSeedConversations,
+  buildSeedMatches,
+  buildSeedSwipeState,
+} from '../data/seedState';
 import {
   deleteSupabaseAccount,
   isSupabaseConfigured,
@@ -121,6 +132,7 @@ type AppContextValue = {
   passedIds: Set<string>;
   likedIds: Set<string>;
   pendingLikeIds: Set<string>;
+  superLikedIds: Set<string>;
   blockedIds: Set<string>;
   matches: Match[];
   conversations: Conversation[];
@@ -153,6 +165,7 @@ type AppContextValue = {
   prioritizeProfileInDeck: (profileId: string) => void;
   passProfile: (profile: Profile) => void;
   likeProfile: (profile: Profile, sparkNote?: string) => Match | null;
+  superLikeProfile: (profile: Profile) => Match | null;
   sendMessage: (conversationId: string, text: string, imageUrl?: string) => void;
   getConversationIdForProfile: (profileId: string) => string | null;
   blockProfile: (profileId: string) => void;
@@ -186,6 +199,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [passedIds, setPassedIds] = useState<Set<string>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [pendingLikeIds, setPendingLikeIds] = useState<Set<string>>(new Set());
+  const [superLikedIds, setSuperLikedIds] = useState<Set<string>>(new Set());
   const [blockedIds, setBlockedIds] = useState<Set<string>>(new Set());
   const [matches, setMatches] = useState<Match[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>(seedConversations);
@@ -229,6 +243,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setPassedIds(arrayToSet(saved.passedIds));
         setLikedIds(arrayToSet(saved.likedIds));
         setPendingLikeIds(arrayToSet(saved.pendingLikeIds));
+        setSuperLikedIds(arrayToSet(saved.superLikedIds ?? []));
         setBlockedIds(arrayToSet(saved.blockedIds));
         setMatches(saved.matches);
         setConversations(
@@ -259,6 +274,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             setPassedIds(arrayToSet(remote.passedIds ?? []));
             setLikedIds(arrayToSet(remote.likedIds ?? []));
             setPendingLikeIds(arrayToSet(remote.pendingLikeIds ?? []));
+            setSuperLikedIds(arrayToSet(saved.superLikedIds ?? []));
             setBlockedIds(arrayToSet(remote.blockedIds ?? []));
             setMatches(remote.matches ?? []);
             if (remote.conversations && remote.conversations.length > 0) {
@@ -268,6 +284,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
             setIsPaused(remote.isPaused ?? false);
           }
         }
+      } else {
+        const seedMatches = buildSeedMatches();
+        const seedSwipe = buildSeedSwipeState();
+        setMatches(seedMatches);
+        setConversations(buildSeedConversations(seedMatches));
+        setLikedIds(arrayToSet(seedSwipe.likedIds));
+        setPendingLikeIds(arrayToSet(seedSwipe.pendingLikeIds));
+        setPassedIds(arrayToSet(seedSwipe.passedIds));
+        setSuperLikedIds(arrayToSet(seedSwipe.superLikedIds));
       }
 
       hydratedRef.current = true;
@@ -281,7 +306,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const buildPersistedState = useCallback((): PersistedAppState => {
     return {
-      version: 3,
+      version: 4,
       hasOnboarded,
       isAuthenticated,
       userId,
@@ -290,6 +315,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       passedIds: setToArray(passedIds),
       likedIds: setToArray(likedIds),
       pendingLikeIds: setToArray(pendingLikeIds),
+      superLikedIds: setToArray(superLikedIds),
       blockedIds: setToArray(blockedIds),
       matches,
       conversations,
@@ -315,6 +341,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     passedIds,
     likedIds,
     pendingLikeIds,
+    superLikedIds,
     blockedIds,
     matches,
     conversations,
@@ -359,11 +386,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     hasOnboarded,
     user,
     preferences,
-    passedIds,
-    likedIds,
-    pendingLikeIds,
-    blockedIds,
-    matches,
+      passedIds,
+      likedIds,
+      pendingLikeIds,
+      superLikedIds,
+      blockedIds,
+      matches,
     conversations,
     isSparkPlus,
     isPaused,
@@ -389,7 +417,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (isPaused) {
       return [];
     }
-    return filterDiscoverProfiles(mockProfiles, preferences, excludedIds);
+    const incomingExcluded = new Set<string>(INCOMING_LIKE_IDS);
+    const pool = mockProfiles.filter((p) => !incomingExcluded.has(p.id));
+    return filterDiscoverProfiles(pool, preferences, excludedIds);
   }, [excludedIds, isPaused, preferences]);
 
   const discoverQueue = useMemo(() => {
@@ -663,6 +693,79 @@ export function AppProvider({ children }: { children: ReactNode }) {
     ],
   );
 
+  const createMatchFromLike = useCallback(
+    (profile: Profile, isSuperMatch: boolean): Match => {
+      const match: Match = {
+        id: `match-${profile.id}`,
+        profile,
+        matchedAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 86400000).toISOString(),
+        isSuperMatch,
+      };
+
+      setMatches((prev) => {
+        if (prev.some((item) => item.profile.id === profile.id)) {
+          return prev;
+        }
+        return [match, ...prev];
+      });
+
+      setConversations((prev) => {
+        if (prev.some((item) => item.match.profile.id === profile.id)) {
+          return prev;
+        }
+        const conversation: Conversation = {
+          id: `conv-${profile.id}`,
+          match,
+          messages: [],
+          yourTurn: true,
+          unread: false,
+        };
+        return [conversation, ...prev];
+      });
+
+      if (notificationsEnabled && notificationPreferences.matches) {
+        void scheduleMatchNotification(profile.name);
+      } else if (!notificationPromptDismissed) {
+        setShowNotificationPrompt(true);
+      }
+
+      return match;
+    },
+    [notificationsEnabled, notificationPreferences.matches, notificationPromptDismissed],
+  );
+
+  const superLikeProfile = useCallback(
+    (profile: Profile): Match | null => {
+      if (!canLike) {
+        return null;
+      }
+
+      setLikedIds((prev) => new Set(prev).add(profile.id));
+      setSuperLikedIds((prev) => new Set(prev).add(profile.id));
+      if (!isSparkPlus) {
+        setDailyLikesUsed((count) => count + 1);
+      }
+
+      const isMutual =
+        MUTUAL_SUPER_LIKE_IDS.has(profile.id) || MUTUAL_MATCH_IDS.has(profile.id);
+
+      if (!isMutual) {
+        setPendingLikeIds((prev) => new Set(prev).add(profile.id));
+        return null;
+      }
+
+      setPendingLikeIds((prev) => {
+        const next = new Set(prev);
+        next.delete(profile.id);
+        return next;
+      });
+
+      return createMatchFromLike(profile, MUTUAL_SUPER_LIKE_IDS.has(profile.id));
+    },
+    [canLike, createMatchFromLike, isSparkPlus],
+  );
+
   const sendMessage = useCallback(
     (conversationId: string, text: string, imageUrl?: string) => {
       const trimmed = text.trim();
@@ -822,6 +925,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPassedIds(new Set());
     setLikedIds(new Set());
     setPendingLikeIds(new Set());
+    setSuperLikedIds(new Set());
     setBlockedIds(new Set());
     setMatches([]);
     setConversations(seedConversations);
@@ -864,6 +968,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       passedIds,
       likedIds,
       pendingLikeIds,
+      superLikedIds,
       blockedIds,
       matches,
       conversations,
@@ -896,6 +1001,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       prioritizeProfileInDeck,
       passProfile,
       likeProfile,
+      superLikeProfile,
       sendMessage,
       getConversationIdForProfile,
       blockProfile,
@@ -927,6 +1033,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       passedIds,
       likedIds,
       pendingLikeIds,
+      superLikedIds,
       blockedIds,
       matches,
       conversations,
@@ -957,6 +1064,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       prioritizeProfileInDeck,
       passProfile,
       likeProfile,
+      superLikeProfile,
       sendMessage,
       getConversationIdForProfile,
       blockProfile,

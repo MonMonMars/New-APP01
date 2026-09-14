@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useCallback, useRef, useState } from 'react';
-import { Alert, Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Animated, Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DailyBatchIndicator } from '../components/DailyBatchIndicator';
@@ -11,6 +11,7 @@ import { ExpandLocationSheet } from '../components/ExpandLocationSheet';
 import { LikeLimitModal } from '../components/LikeLimitModal';
 import { MatchModal } from '../components/MatchModal';
 import { MatchToast } from '../components/MatchToast';
+import { SuperLikeResultModal } from '../components/SuperLikeResultModal';
 import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
 import { ReportReasonSheet, type ReportReason } from '../components/ReportReasonSheet';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -24,8 +25,12 @@ import { DiscoverFilter } from '../types/preferences';
 import { Profile } from '../types/profile';
 import { spacing } from '../theme';
 
+const TAB_BAR_HEIGHT = 72;
+const { height: WINDOW_HEIGHT } = Dimensions.get('window');
+
 export function DiscoverScreen() {
   const insets = useSafeAreaInsets();
+  const deckHeight = Math.round((WINDOW_HEIGHT - insets.top - TAB_BAR_HEIGHT) * 0.92);
   const navigation = useNavigation();
   const { colors } = useTheme();
   const deckRef = useRef<SwipeDeckHandle>(null);
@@ -34,8 +39,6 @@ export function DiscoverScreen() {
     discoverQueue,
     discoverPoolTotal,
     hasMoreInPool,
-    likedIds,
-    passedIds,
     preferences,
     updatePreferences,
     toggleDiscoverFilter,
@@ -43,6 +46,7 @@ export function DiscoverScreen() {
     expandSearchRadius,
     passProfile,
     likeProfile,
+    superLikeProfile,
     getConversationIdForProfile,
     canLike,
     remainingLikes,
@@ -72,6 +76,9 @@ export function DiscoverScreen() {
   const [sparkNoteProfile, setSparkNoteProfile] = useState<Profile | null>(null);
   const [reportProfileId, setReportProfileId] = useState<string | null>(null);
   const [reportProfileName, setReportProfileName] = useState('');
+  const [superLikeProfileState, setSuperLikeProfileState] = useState<Profile | null>(null);
+  const [showSuperLikeResult, setShowSuperLikeResult] = useState(false);
+  const [superLikeIsMatch, setSuperLikeIsMatch] = useState(false);
 
   const activeFilters = preferences.discoverFilters ?? [];
   const showSearchMore = !isPaused && discoverQueue.length > 0;
@@ -106,14 +113,31 @@ export function DiscoverScreen() {
   );
 
   const handleSwipe = useCallback(
-    (profile: Profile, direction: 'left' | 'right') => {
+    (profile: Profile, direction: 'left' | 'right' | 'super') => {
       if (direction === 'left') {
         passProfile(profile);
+        return;
+      }
+      if (direction === 'super') {
         return;
       }
       processLike(profile);
     },
     [passProfile, processLike],
+  );
+
+  const handleSuperLikeEffectComplete = useCallback(
+    (profile: Profile) => {
+      if (!canLike) {
+        setShowLikeLimit(true);
+        return;
+      }
+      const match = superLikeProfile(profile);
+      setSuperLikeProfileState(profile);
+      setSuperLikeIsMatch(match !== null);
+      setShowSuperLikeResult(true);
+    },
+    [canLike, superLikeProfile],
   );
 
   const handleRewind = useCallback(() => {
@@ -219,87 +243,44 @@ export function DiscoverScreen() {
     navigation.getParent()?.navigate('MapDiscover');
   }, [navigation]);
 
+  const openExplore = useCallback(() => {
+    navigation.getParent()?.navigate('Explore');
+  }, [navigation]);
+
+  const dismissSuperLikeResult = useCallback(() => {
+    setShowSuperLikeResult(false);
+    setSuperLikeProfileState(null);
+    deckRef.current?.advanceAfterSuperLike();
+  }, []);
+
+  const handleSuperLikeChat = useCallback(() => {
+    if (!superLikeProfileState) {
+      return;
+    }
+    const conversationId = getConversationIdForProfile(superLikeProfileState.id);
+    setShowSuperLikeResult(false);
+    setSuperLikeProfileState(null);
+    deckRef.current?.advanceAfterSuperLike();
+    navigation.getParent()?.navigate('Chat', { conversationId });
+  }, [getConversationIdForProfile, navigation, superLikeProfileState]);
+
   const rewindScale = rewindAnim.interpolate({
     inputRange: [0, 0.5, 1],
     outputRange: [1, 1.08, 1],
   });
 
   return (
-    <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
-      <ScreenHeader
-        showLogo
-        compact
-        leftIcon="map-outline"
-        onLeftPress={openMap}
-        rightIcon="options-outline"
-        onRightPress={() => setShowPreferences(true)}
-      />
-
-      <View style={styles.metaRow}>
-        <Pressable
-          style={[styles.radiusPill, { backgroundColor: colors.surface }]}
-          onPress={() => setShowExpandLocation(true)}
-        >
-          <Ionicons name="location-outline" size={14} color={colors.gradientEnd} />
-          <Text style={[styles.radiusText, { color: colors.textMuted }]}>
-            Searching within {formatSearchRadius(preferences.maxDistanceMiles)}
-          </Text>
-          <Ionicons name="chevron-down" size={14} color={colors.textMuted} />
-        </Pressable>
-
-        {!isSparkPlus && (
-          <Pressable
-            style={[
-              styles.likesPill,
-              { backgroundColor: colors.surface },
-              !canLike && { borderWidth: 1, borderColor: colors.gradientEnd },
-            ]}
-            onPress={() => {
-              if (!canLike) {
-                setShowLikeLimit(true);
-              }
-            }}
-          >
-            <Text style={[styles.likesPillText, { color: colors.gradientEnd }]}>
-              {remainingLikes === 0 ? '0 likes' : `${remainingLikes} likes`}
-            </Text>
-          </Pressable>
-        )}
-      </View>
-
-      {(isPaused || isBoosted || (preferences.travelMode && preferences.passportCity)) && (
-        <View style={styles.bannerRow}>
-          {isPaused && (
-            <View style={[styles.miniBanner, { backgroundColor: colors.surface }]}>
-              <Ionicons name="pause-circle" size={14} color={colors.rewind} />
-              <Text style={[styles.miniBannerText, { color: colors.rewind }]}>Paused</Text>
-            </View>
-          )}
-          {isBoosted && (
-            <View style={styles.miniBannerBoost}>
-              <Ionicons name="flash" size={14} color="#FFD700" />
-              <Text style={styles.miniBannerBoostText}>Boost</Text>
-            </View>
-          )}
-          {preferences.travelMode && preferences.passportCity && (
-            <View style={[styles.miniBanner, { backgroundColor: colors.surface }]}>
-              <Ionicons name="airplane" size={12} color={colors.superLike} />
-              <Text style={[styles.miniBannerText, { color: colors.superLike }]}>
-                {preferences.passportCity}
-              </Text>
-            </View>
-          )}
-        </View>
-      )}
-
-      <DiscoverFilterChips activeFilters={activeFilters} onToggle={handleFilterToggle} />
-
-      <DailyBatchIndicator
-        remaining={discoverQueue.length}
-        total={discoverPoolTotal}
-      />
-
-      <Animated.View style={[styles.deckArea, { transform: [{ scale: rewindScale }] }]}>
+    <View style={[styles.screen, { backgroundColor: colors.background }]}>
+      <Animated.View
+        style={[
+          styles.deckContainer,
+          {
+            height: deckHeight,
+            marginTop: insets.top,
+            transform: [{ scale: rewindScale }],
+          },
+        ]}
+      >
         {isPaused ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyEmoji}>⏸️</Text>
@@ -335,50 +316,132 @@ export function DiscoverScreen() {
             ref={deckRef}
             profiles={discoverQueue}
             onSwipe={handleSwipe}
+            onSuperLike={handleSuperLikeEffectComplete}
             onEmpty={() => undefined}
             canLike={canLike}
             onLikeBlocked={() => setShowLikeLimit(true)}
             compact
           />
         )}
-      </Animated.View>
 
-      {showSearchMore && discoverQueue.length > 0 && (
-        <Pressable
-          style={[styles.searchMoreButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
-          onPress={hasMoreInPool ? searchMorePeople : handleWidenFilters}
-        >
-          <Ionicons name="people-outline" size={18} color={colors.gradientEnd} />
-          <Text style={[styles.searchMoreText, { color: colors.gradientEnd }]}>
-            {hasMoreInPool ? 'Search more people' : 'Expand location for more'}
-          </Text>
-        </Pressable>
-      )}
+        <View style={styles.topOverlay} pointerEvents="box-none">
+          <ScreenHeader
+            showLogo
+            compact
+            leftIcon="map-outline"
+            onLeftPress={openMap}
+            rightIcon="options-outline"
+            onRightPress={() => setShowPreferences(true)}
+          />
 
-      {currentProfile && !isPaused && (
-        <View style={styles.actionRow}>
-          {canRewind && (
-            <Pressable style={[styles.actionPill, { backgroundColor: colors.surface }]} onPress={handleRewind}>
-              <Ionicons name="refresh" size={16} color={colors.gradientEnd} />
+          <View style={styles.metaRow}>
+            <Pressable
+              style={[styles.radiusPill, { backgroundColor: 'rgba(26, 26, 28, 0.72)' }]}
+              onPress={() => setShowExpandLocation(true)}
+            >
+              <Ionicons name="location-outline" size={12} color={colors.gradientEnd} />
+              <Text style={[styles.radiusText, { color: colors.textMuted }]} numberOfLines={1}>
+                {formatSearchRadius(preferences.maxDistanceMiles)}
+              </Text>
+              <Ionicons name="chevron-down" size={12} color={colors.textMuted} />
+            </Pressable>
+
+            {!isSparkPlus && (
+              <Pressable
+                style={[
+                  styles.likesPill,
+                  { backgroundColor: 'rgba(26, 26, 28, 0.72)' },
+                  !canLike && { borderWidth: 1, borderColor: colors.gradientEnd },
+                ]}
+                onPress={() => {
+                  if (!canLike) {
+                    setShowLikeLimit(true);
+                  }
+                }}
+              >
+                <Text style={[styles.likesPillText, { color: colors.gradientEnd }]}>
+                  {remainingLikes === 0 ? '0' : remainingLikes}
+                </Text>
+              </Pressable>
+            )}
+          </View>
+
+          {(isPaused || isBoosted || (preferences.travelMode && preferences.passportCity)) && (
+            <View style={styles.bannerRow}>
+              {isPaused && (
+                <View style={[styles.miniBanner, { backgroundColor: 'rgba(26, 26, 28, 0.72)' }]}>
+                  <Ionicons name="pause-circle" size={12} color={colors.rewind} />
+                  <Text style={[styles.miniBannerText, { color: colors.rewind }]}>Paused</Text>
+                </View>
+              )}
+              {isBoosted && (
+                <View style={styles.miniBannerBoost}>
+                  <Ionicons name="flash" size={12} color="#FFD700" />
+                  <Text style={styles.miniBannerBoostText}>Boost</Text>
+                </View>
+              )}
+              {preferences.travelMode && preferences.passportCity && (
+                <View style={[styles.miniBanner, { backgroundColor: 'rgba(26, 26, 28, 0.72)' }]}>
+                  <Ionicons name="airplane" size={11} color={colors.superLike} />
+                  <Text style={[styles.miniBannerText, { color: colors.superLike }]}>
+                    {preferences.passportCity}
+                  </Text>
+                </View>
+              )}
+            </View>
+          )}
+
+          <DiscoverFilterChips activeFilters={activeFilters} onToggle={handleFilterToggle} compact />
+
+          <DailyBatchIndicator
+            remaining={discoverQueue.length}
+            total={discoverPoolTotal}
+            slim
+          />
+        </View>
+
+        <View style={styles.bottomOverlay} pointerEvents="box-none">
+          {showSearchMore && discoverQueue.length > 0 && (
+            <Pressable
+              style={[styles.searchMorePill, { backgroundColor: 'rgba(26, 26, 28, 0.82)', borderColor: colors.border }]}
+              onPress={hasMoreInPool ? searchMorePeople : handleWidenFilters}
+            >
+              <Ionicons name="people-outline" size={14} color={colors.gradientEnd} />
+              <Text style={[styles.searchMoreText, { color: colors.gradientEnd }]}>
+                {hasMoreInPool ? 'More people' : 'Expand'}
+              </Text>
             </Pressable>
           )}
-          <Pressable style={[styles.actionPill, { backgroundColor: colors.surface }]} onPress={openSparkNote}>
-            <Ionicons name="chatbubble-ellipses-outline" size={16} color={colors.gradientEnd} />
-          </Pressable>
-          <Pressable
-            style={[styles.actionPill, { backgroundColor: colors.surface }]}
-            onPress={() => setShowExpandLocation(true)}
-          >
-            <Ionicons name="expand-outline" size={16} color={colors.gradientEnd} />
-          </Pressable>
-          <Pressable
-            style={[styles.actionPill, styles.actionPillWide, { backgroundColor: colors.surface }]}
-            onPress={() => setDetailProfile(currentProfile)}
-          >
-            <Text style={[styles.actionPillText, { color: colors.textMuted }]}>Profile</Text>
-          </Pressable>
+
+          {currentProfile && !isPaused && (
+            <View style={styles.actionRow}>
+              {canRewind && (
+                <Pressable style={[styles.actionPill, { backgroundColor: 'rgba(26, 26, 28, 0.82)' }]} onPress={handleRewind}>
+                  <Ionicons name="refresh" size={14} color={colors.gradientEnd} />
+                </Pressable>
+              )}
+              <Pressable style={[styles.actionPill, { backgroundColor: 'rgba(26, 26, 28, 0.82)' }]} onPress={openSparkNote}>
+                <Ionicons name="chatbubble-ellipses-outline" size={14} color={colors.gradientEnd} />
+              </Pressable>
+              <Pressable
+                style={[styles.actionPill, { backgroundColor: 'rgba(26, 26, 28, 0.82)' }]}
+                onPress={() => setShowExpandLocation(true)}
+              >
+                <Ionicons name="expand-outline" size={14} color={colors.gradientEnd} />
+              </Pressable>
+              <Pressable style={[styles.actionPill, { backgroundColor: 'rgba(26, 26, 28, 0.82)' }]} onPress={openExplore}>
+                <Ionicons name="compass-outline" size={14} color={colors.gradientEnd} />
+              </Pressable>
+              <Pressable
+                style={[styles.actionPill, styles.actionPillWide, { backgroundColor: 'rgba(26, 26, 28, 0.82)' }]}
+                onPress={() => setDetailProfile(currentProfile)}
+              >
+                <Text style={[styles.actionPillText, { color: colors.textMuted }]}>Profile</Text>
+              </Pressable>
+            </View>
+          )}
         </View>
-      )}
+      </Animated.View>
 
       <MatchToast
         visible={showMatchToast}
@@ -392,6 +455,15 @@ export function DiscoverScreen() {
         userPhoto={user.photos[0]}
         onClose={handleCloseMatch}
         onMessage={handleOpenChat}
+      />
+
+      <SuperLikeResultModal
+        visible={showSuperLikeResult}
+        profile={superLikeProfileState}
+        isMatch={superLikeIsMatch}
+        userPhoto={user.photos[0]}
+        onContinue={dismissSuperLikeResult}
+        onChat={superLikeIsMatch ? handleSuperLikeChat : undefined}
       />
 
       <WaitingForMatchModal
@@ -462,10 +534,32 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
+  deckContainer: {
+    flex: 1,
+    marginHorizontal: spacing.xs,
+    minHeight: 0,
+    position: 'relative',
+  },
+  topOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
+  bottomOverlay: {
+    position: 'absolute',
+    left: spacing.sm,
+    right: spacing.sm,
+    bottom: 78,
+    zIndex: 15,
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.xs,
     paddingHorizontal: spacing.md,
     marginBottom: spacing.xs,
   },
@@ -473,24 +567,26 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xs,
+    gap: 4,
     borderRadius: 999,
-    paddingHorizontal: spacing.sm + 2,
-    paddingVertical: spacing.xs + 2,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
   },
   radiusText: {
     flex: 1,
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 11,
+    fontWeight: '700',
   },
   likesPill: {
     borderRadius: 999,
-    paddingHorizontal: spacing.sm + 4,
-    paddingVertical: spacing.xs + 2,
+    minWidth: 32,
+    alignItems: 'center',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
   },
   likesPillText: {
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 11,
+    fontWeight: '800',
   },
   bannerRow: {
     flexDirection: 'row',
@@ -524,12 +620,6 @@ const styles = StyleSheet.create({
     color: '#FFD700',
     fontSize: 11,
     fontWeight: '700',
-  },
-  deckArea: {
-    flex: 1,
-    marginHorizontal: spacing.xs,
-    marginBottom: spacing.xs,
-    minHeight: 0,
   },
   emptyState: {
     flex: 1,
@@ -569,33 +659,29 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 14,
   },
-  searchMoreButton: {
+  searchMorePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.xs,
+    gap: spacing.xs,
     borderRadius: 999,
     borderWidth: 1,
-    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: 5,
   },
   searchMoreText: {
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: '700',
   },
   actionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.xs,
-    paddingHorizontal: spacing.md,
+    gap: spacing.xs,
   },
   actionPill: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: 'center',
     justifyContent: 'center',
   },

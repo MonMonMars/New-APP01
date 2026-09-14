@@ -10,7 +10,7 @@ import {
 } from '../types/settings';
 
 const STORAGE_KEY = '@spark/app_state';
-const STORAGE_VERSION = 3;
+const STORAGE_VERSION = 4;
 
 export type PersistedAppState = {
   version: number;
@@ -22,6 +22,7 @@ export type PersistedAppState = {
   passedIds: string[];
   likedIds: string[];
   pendingLikeIds: string[];
+  superLikedIds: string[];
   blockedIds: string[];
   matches: Match[];
   conversations: Conversation[];
@@ -60,6 +61,7 @@ export function createDefaultPersistedState(): PersistedAppState {
     passedIds: [],
     likedIds: [],
     pendingLikeIds: [],
+    superLikedIds: [],
     blockedIds: [],
     matches: [],
     conversations: [],
@@ -98,6 +100,7 @@ export async function loadPersistedState(): Promise<PersistedAppState | null> {
       passedIds: parsed.passedIds ?? [],
       likedIds: parsed.likedIds ?? [],
       pendingLikeIds: parsed.pendingLikeIds ?? [],
+      superLikedIds: parsed.superLikedIds ?? [],
       blockedIds: parsed.blockedIds ?? [],
       matches: parsed.matches ?? [],
       conversations: parsed.conversations ?? [],

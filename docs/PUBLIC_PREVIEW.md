@@ -20,11 +20,20 @@ Until Pages is enabled, use the dev tunnel below.
 
 ### Dev tunnel (temporary fallback)
 
-**https://limits-resource-holding-passengers.trycloudflare.com**
+**https://sheets-interventions-smtp-owned.trycloudflare.com**
 
 _Last updated: Sep 14, 2026_
 
-> Tunnels expire when the workspace stops. Prefer GitHub Pages for stable demos.
+> Tunnels expire when this workspace stops. Prefer GitHub Pages for stable demos.
+
+**GitHub Pages (permanent)** — requires one-time setup:
+
+1. [Pages settings](https://github.com/MonMonMars/New-APP01/settings/pages) → Source: **Deploy from a branch** → Branch: `gh-pages` / `/ (root)`  
+   *(or Source: **GitHub Actions** if you prefer the Actions deploy job)*
+2. Wait ~2 min after the deploy workflow runs on push
+3. Open **https://monmonmars.github.io/New-APP01/**
+
+The app is now built with `experiments.baseUrl: /New-APP01` so assets load correctly on GitHub Pages.
 
 ### How to test v0.5+ features
 

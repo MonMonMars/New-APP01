@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Modal, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
@@ -10,6 +10,7 @@ import {
   ShowMePreference,
 } from '../types/preferences';
 import { radii, spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type DiscoveryPreferencesSheetProps = {
   visible: boolean;
@@ -45,21 +46,21 @@ function StepperRow({
     <View style={[styles.row, { backgroundColor: colors.surface }]}>
       <Text style={[styles.rowLabel, { color: colors.text }]}>{label}</Text>
       <View style={styles.stepper}>
-        <Pressable
+        <AnimatedPressable
           style={[styles.stepButton, { backgroundColor: colors.border }]}
           onPress={() => onChange(Math.max(min, value - step))}
           disabled={value <= min}
         >
           <Ionicons name="remove" size={20} color={colors.text} />
-        </Pressable>
+        </AnimatedPressable>
         <Text style={[styles.stepValue, { color: colors.text }]}>{value}{suffix}</Text>
-        <Pressable
+        <AnimatedPressable
           style={[styles.stepButton, { backgroundColor: colors.border }]}
           onPress={() => onChange(Math.min(max, value + step))}
           disabled={value >= max}
         >
           <Ionicons name="add" size={20} color={colors.text} />
-        </Pressable>
+        </AnimatedPressable>
       </View>
     </View>
   );
@@ -79,9 +80,9 @@ export function DiscoveryPreferencesSheet({
       <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top + spacing.md }]}>
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text }]}>Discovery settings</Text>
-          <Pressable onPress={onClose} style={styles.doneButton}>
+          <AnimatedPressable onPress={onClose} style={styles.doneButton}>
             <Text style={[styles.doneText, { color: colors.gradientEnd }]}>Done</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -90,7 +91,7 @@ export function DiscoveryPreferencesSheet({
             {showMeOptions.map((option) => {
               const selected = preferences.showMe === option;
               return (
-                <Pressable
+                <AnimatedPressable
                   key={option}
                   style={[
                     styles.chip,
@@ -102,7 +103,7 @@ export function DiscoveryPreferencesSheet({
                   <Text style={[styles.chipText, { color: selected ? colors.text : colors.textMuted }]}>
                     {SHOW_ME_LABELS[option]}
                   </Text>
-                </Pressable>
+                </AnimatedPressable>
               );
             })}
           </View>
@@ -130,7 +131,7 @@ export function DiscoveryPreferencesSheet({
               {PASSPORT_CITIES.map((city) => {
                 const selected = preferences.passportCity === city;
                 return (
-                  <Pressable
+                  <AnimatedPressable
                     key={city}
                     style={[
                       styles.cityChip,
@@ -142,7 +143,7 @@ export function DiscoveryPreferencesSheet({
                     <Text style={[styles.cityText, { color: selected ? colors.text : colors.textMuted }]}>
                       {city}
                     </Text>
-                  </Pressable>
+                  </AnimatedPressable>
                 );
               })}
             </View>

@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type StandoutsRowProps = {
   profiles: Profile[];
@@ -26,7 +27,7 @@ export function StandoutsRow({ profiles, onSelect }: StandoutsRowProps) {
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {profiles.map((profile) => (
-          <Pressable
+          <AnimatedPressable
             key={profile.id}
             style={[styles.card, { borderColor: colors.superLike }]}
             onPress={() => onSelect(profile)}
@@ -38,7 +39,7 @@ export function StandoutsRow({ profiles, onSelect }: StandoutsRowProps) {
             <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
               {profile.name}
             </Text>
-          </Pressable>
+          </AnimatedPressable>
         ))}
       </ScrollView>
     </View>

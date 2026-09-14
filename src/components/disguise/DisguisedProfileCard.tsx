@@ -1,12 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
 import { DisguisedProfilePost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { DisguiseOverlayAvatar } from './DisguiseOverlayAvatar';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
+import { AnimatedPressable } from '../AnimatedPressable';
 
 type DisguisedProfileCardProps = {
   post: DisguisedProfilePost;
@@ -51,7 +52,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
       <>
         <View style={[styles.socialCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={styles.socialHeader}>
-            <Pressable
+            <AnimatedPressable
               onPress={openPreview}
               accessibilityRole="button"
               accessibilityLabel={`View profile photos from ${post.name}`}
@@ -63,20 +64,20 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
                 size={40}
                 badgeOnly
               />
-            </Pressable>
+            </AnimatedPressable>
             <View style={styles.socialHeaderText}>
               <Text style={[styles.socialAuthor, { color: colors.text }]}>{post.headline}</Text>
               <Text style={[styles.socialHandle, { color: colors.textMuted }]}>
                 {post.handle} · {post.timeAgo}
               </Text>
             </View>
-            <Pressable onPress={openPreview}>
+            <AnimatedPressable onPress={openPreview}>
               <Ionicons name="ellipsis-horizontal" size={18} color={colors.textMuted} />
-            </Pressable>
+            </AnimatedPressable>
           </View>
-          <Pressable onPress={openPreview}>
+          <AnimatedPressable onPress={openPreview}>
             <Text style={[styles.socialBody, { color: colors.text }]}>{post.summary}</Text>
-          </Pressable>
+          </AnimatedPressable>
           <View style={styles.socialActions}>
             <View style={styles.socialAction}>
               <Ionicons name="arrow-up-outline" size={18} color={colors.textMuted} />
@@ -97,7 +98,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   if (post.variant === 'ad') {
     return (
       <>
-        <Pressable
+        <AnimatedPressable
           style={[styles.card, { backgroundColor: '#1a1a2e', borderColor: colors.border }]}
           onPress={openPreview}
           accessibilityRole="button"
@@ -113,7 +114,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
             <Text style={styles.brand}>{post.headline}</Text>
             <Text style={styles.tagline}>{post.summary}</Text>
             <View style={styles.avatarQuoteRow}>
-              <Pressable
+              <AnimatedPressable
                 onPress={(event) => {
                   event.stopPropagation();
                   openPreview();
@@ -128,7 +129,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
                   size={44}
                   badgeOnly
                 />
-              </Pressable>
+              </AnimatedPressable>
               <Text style={[styles.quoteBesideAvatar, styles.quoteBesideAvatarAd]} numberOfLines={3}>
                 {post.overlayText}
               </Text>
@@ -142,7 +143,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
             </View>
             <OwnerHint label={post.hintLabel} color={colors.gradientEnd} />
           </View>
-        </Pressable>
+        </AnimatedPressable>
         {previewSheet}
       </>
     );
@@ -150,7 +151,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
 
   return (
     <>
-      <Pressable
+      <AnimatedPressable
         style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
         onPress={openPreview}
         accessibilityRole="button"
@@ -171,7 +172,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
           </Text>
 
           <View style={styles.reportersRow}>
-            <Pressable
+            <AnimatedPressable
               style={styles.avatarQuoteRow}
               onPress={(event) => {
                 event.stopPropagation();
@@ -190,11 +191,11 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
               <Text style={[styles.quoteBesideAvatar, { color: colors.text }]} numberOfLines={4}>
                 {post.overlayText}
               </Text>
-            </Pressable>
+            </AnimatedPressable>
           </View>
           <OwnerHint label={post.hintLabel} color={colors.gradientEnd} />
         </View>
-      </Pressable>
+      </AnimatedPressable>
       {previewSheet}
     </>
   );

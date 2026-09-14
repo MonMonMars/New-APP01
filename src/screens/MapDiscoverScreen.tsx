@@ -1,14 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useMemo, useState } from 'react';
-import {
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
@@ -19,6 +12,7 @@ import { mockProfiles } from '../data/profiles';
 import { formatSearchRadius } from '../types/preferences';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
+import { AnimatedPressable } from '../components/AnimatedPressable';
 
 type MapDiscoverScreenProps = {
   onClose: () => void;
@@ -36,7 +30,7 @@ function MapPin({ profile, selected, onPress }: MapPinProps) {
   const y = profile.mapY ?? 50;
 
   return (
-    <Pressable
+    <AnimatedPressable
       style={[styles.pin, { left: `${x}%`, top: `${y}%` }]}
       onPress={onPress}
       hitSlop={8}
@@ -61,7 +55,7 @@ function MapPin({ profile, selected, onPress }: MapPinProps) {
           </Text>
         </View>
       )}
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
@@ -111,9 +105,9 @@ export function MapDiscoverScreen({ onClose }: MapDiscoverScreenProps) {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <View style={styles.header}>
-        <Pressable style={[styles.iconButton, { backgroundColor: colors.surface }]} onPress={onClose}>
+        <AnimatedPressable style={[styles.iconButton, { backgroundColor: colors.surface }]} onPress={onClose}>
           <Ionicons name="arrow-back" size={22} color={colors.text} />
-        </Pressable>
+        </AnimatedPressable>
         <View style={styles.headerCenter}>
           <Text style={[styles.title, { color: colors.text }]}>Map</Text>
           <Text style={[styles.radius, { color: colors.textMuted }]}>
@@ -122,12 +116,12 @@ export function MapDiscoverScreen({ onClose }: MapDiscoverScreenProps) {
         </View>
         <View style={styles.headerActions}>
           <DisguiseModeButton />
-          <Pressable
+          <AnimatedPressable
             style={[styles.iconButton, { backgroundColor: colors.surface }]}
             onPress={widenRadius}
           >
             <Ionicons name="expand-outline" size={20} color={colors.gradientEnd} />
-          </Pressable>
+          </AnimatedPressable>
         </View>
       </View>
 
@@ -184,7 +178,7 @@ export function MapDiscoverScreen({ onClose }: MapDiscoverScreenProps) {
         </View>
 
         {selectedProfile && (
-          <Pressable
+          <AnimatedPressable
             style={[styles.previewCard, { backgroundColor: colors.surface }]}
             onPress={() => setShowProfileSheet(true)}
           >
@@ -204,7 +198,7 @@ export function MapDiscoverScreen({ onClose }: MapDiscoverScreenProps) {
               </Text>
               <Text style={[styles.previewTap, { color: colors.gradientEnd }]}>View profile</Text>
             </View>
-          </Pressable>
+          </AnimatedPressable>
         )}
 
         <Text style={[styles.pinCount, { color: colors.textMuted }]}>
@@ -212,7 +206,7 @@ export function MapDiscoverScreen({ onClose }: MapDiscoverScreenProps) {
           {preferences.passportCity ? ` · Passport: ${preferences.passportCity}` : ''}
         </Text>
 
-        <Pressable
+        <AnimatedPressable
           style={[styles.primaryButton, { backgroundColor: colors.gradientEnd }]}
           onPress={handleSearchArea}
         >
@@ -220,13 +214,13 @@ export function MapDiscoverScreen({ onClose }: MapDiscoverScreenProps) {
           <Text style={[styles.primaryButtonText, { color: colors.text }]}>
             {selectedProfile ? `View ${selectedProfile.name} in deck` : 'Search this area'}
           </Text>
-        </Pressable>
+        </AnimatedPressable>
 
-        <Pressable style={styles.secondaryButton} onPress={widenRadius}>
+        <AnimatedPressable style={styles.secondaryButton} onPress={widenRadius}>
           <Text style={[styles.secondaryButtonText, { color: colors.gradientEnd }]}>
             Expand search radius
           </Text>
-        </Pressable>
+        </AnimatedPressable>
       </ScrollView>
 
       <ProfileDetailSheet

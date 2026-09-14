@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useCallback, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DailyBatchIndicator } from '../components/DailyBatchIndicator';
@@ -19,6 +19,7 @@ import { DiscoverFilter } from '../types/preferences';
 import { formatSearchRadius } from '../types/preferences';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
+import { AnimatedPressable } from '../components/AnimatedPressable';
 
 type DiscoverHubScreenProps = {
   onClose: () => void;
@@ -177,7 +178,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
         <DailyBatchIndicator remaining={discoverQueue.length} total={discoverPoolTotal} />
 
         {!isPaused && (
-          <Pressable
+          <AnimatedPressable
             style={[styles.primaryButton, { backgroundColor: colors.gradientEnd }]}
             onPress={() => {
               if (hasMoreInPool) {
@@ -191,18 +192,18 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
             <Text style={[styles.primaryButtonText, { color: colors.text }]}>
               {hasMoreInPool ? 'Search more people' : 'Expand search area'}
             </Text>
-          </Pressable>
+          </AnimatedPressable>
         )}
 
         {!canLike && !isSparkPlus && (
-          <Pressable
+          <AnimatedPressable
             style={[styles.secondaryButton, { borderColor: colors.border }]}
             onPress={() => navigation.getParent()?.navigate('SparkPlus')}
           >
             <Text style={[styles.secondaryButtonText, { color: colors.gradientEnd }]}>
               Get unlimited likes with Spark+
             </Text>
-          </Pressable>
+          </AnimatedPressable>
         )}
       </ScrollView>
 
@@ -236,13 +237,13 @@ function HubTile({
   onPress: () => void;
 }) {
   return (
-    <Pressable
+    <AnimatedPressable
       style={[styles.hubTile, { backgroundColor: colors.surface, borderColor: colors.border }]}
       onPress={onPress}
     >
       <Ionicons name={icon} size={22} color={colors.text} />
       <Text style={[styles.hubTileLabel, { color: colors.text }]}>{label}</Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 

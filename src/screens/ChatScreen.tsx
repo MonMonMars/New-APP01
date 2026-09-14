@@ -3,17 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useMemo, useState } from 'react';
 
 import { useCloudConversation } from '../hooks/useCloudConversation';
-import {
-  Alert,
-  FlatList,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Alert, FlatList, Image, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -70,9 +60,9 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
     return (
       <View style={[styles.missing, { backgroundColor: colors.background }]}>
         <Text style={[styles.missingText, { color: colors.text }]}>Conversation not found.</Text>
-        <Pressable onPress={onBack}>
+        <AnimatedPressable onPress={onBack}>
           <Text style={[styles.backLink, { color: colors.gradientEnd }]}>Go back</Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
     );
   }
@@ -159,10 +149,10 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
-        <Pressable onPress={onBack} style={styles.backButton}>
+        <AnimatedPressable onPress={onBack} style={styles.backButton}>
           <Ionicons name="chevron-back" size={28} color={colors.text} />
-        </Pressable>
-        <Pressable style={styles.headerProfile} onPress={() => setShowProfile(true)}>
+        </AnimatedPressable>
+        <AnimatedPressable style={styles.headerProfile} onPress={() => setShowProfile(true)}>
           <Image source={{ uri: profile.photos[0] }} style={styles.headerAvatar} />
           <View style={styles.headerText}>
             <View style={styles.headerNameRow}>
@@ -177,7 +167,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
               {expiryLabel ?? 'Matched recently'}
             </Text>
           </View>
-        </Pressable>
+        </AnimatedPressable>
         <View style={styles.headerActions}>
           {turnLabel ? (
             <View
@@ -190,9 +180,9 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
             </View>
           ) : null}
           <DisguiseModeButton />
-          <Pressable style={styles.headerAction} onPress={() => setShowSafety(true)}>
+          <AnimatedPressable style={styles.headerAction} onPress={() => setShowSafety(true)}>
             <Ionicons name="ellipsis-vertical" size={22} color={colors.text} />
-          </Pressable>
+          </AnimatedPressable>
         </View>
       </View>
 

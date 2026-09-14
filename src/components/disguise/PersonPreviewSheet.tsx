@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../context/ThemeContext';
 import { NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { AnimatedPressable } from '../AnimatedPressable';
 
 type PersonPreviewSheetProps = {
   visible: boolean;
@@ -22,8 +23,8 @@ export function PersonPreviewSheet({ visible, reporter, onClose }: PersonPreview
 
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose}>
-        <Pressable
+      <AnimatedPressable style={styles.backdrop} onPress={onClose}>
+        <AnimatedPressable
           style={[
             styles.sheet,
             {
@@ -42,9 +43,9 @@ export function PersonPreviewSheet({ visible, reporter, onClose }: PersonPreview
                 "{reporter.quote}"
               </Text>
             </View>
-            <Pressable onPress={onClose} hitSlop={12} accessibilityLabel="Close">
+            <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel="Close">
               <Ionicons name="close" size={22} color={colors.textMuted} />
-            </Pressable>
+            </AnimatedPressable>
           </View>
 
           <ScrollView
@@ -61,8 +62,8 @@ export function PersonPreviewSheet({ visible, reporter, onClose }: PersonPreview
               />
             ))}
           </ScrollView>
-        </Pressable>
-      </Pressable>
+        </AnimatedPressable>
+      </AnimatedPressable>
     </Modal>
   );
 }

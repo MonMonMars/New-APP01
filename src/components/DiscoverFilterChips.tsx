@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+import { ScrollView, StyleSheet, Text } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
 import {
@@ -6,6 +6,7 @@ import {
   DiscoverFilter,
 } from '../types/preferences';
 import { radii, spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type DiscoverFilterChipsProps = {
   activeFilters: DiscoverFilter[];
@@ -27,7 +28,7 @@ export function DiscoverFilterChips({ activeFilters, onToggle, compact = false }
       {FILTER_OPTIONS.map((filter) => {
         const selected = activeFilters.includes(filter);
         return (
-          <Pressable
+          <AnimatedPressable
             key={filter}
             style={[
               styles.chip,
@@ -40,7 +41,7 @@ export function DiscoverFilterChips({ activeFilters, onToggle, compact = false }
             <Text style={[styles.chipText, compact && styles.chipTextCompact, { color: selected ? colors.text : colors.textMuted }]}>
               {DISCOVER_FILTER_LABELS[filter]}
             </Text>
-          </Pressable>
+          </AnimatedPressable>
         );
       })}
     </ScrollView>

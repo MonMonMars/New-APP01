@@ -1,7 +1,8 @@
 import { Component, type ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { darkColors, spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type Props = { children: ReactNode };
 type State = { error: Error | null };
@@ -23,9 +24,9 @@ export class AppErrorBoundary extends Component<Props, State> {
         <View style={styles.container}>
           <Text style={styles.title}>Spark hit a snag</Text>
           <Text style={styles.message}>{this.state.error.message}</Text>
-          <Pressable onPress={this.handleRetry} style={styles.button}>
+          <AnimatedPressable onPress={this.handleRetry} style={styles.button}>
             <Text style={styles.buttonText}>Try again</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
       );
     }

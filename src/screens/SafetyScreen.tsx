@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { legalDocumentLinks, LegalDocumentId } from '../content/legalDocuments';
 import { colors, radii, spacing } from '../theme';
+import { AnimatedPressable } from '../components/AnimatedPressable';
 
 type SafetyScreenProps = {
   onClose: () => void;
@@ -82,9 +83,9 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
       <View style={styles.header}>
-        <Pressable onPress={onClose} style={styles.back}>
+        <AnimatedPressable onPress={onClose} style={styles.back}>
           <Ionicons name="chevron-back" size={28} color={colors.text} />
-        </Pressable>
+        </AnimatedPressable>
         <Text style={styles.title}>Safety Center</Text>
         <DisguiseModeButton />
       </View>
@@ -115,7 +116,7 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
           in the repository.
         </Text>
         {legalDocumentLinks.map((item) => (
-          <Pressable
+          <AnimatedPressable
             key={item.id}
             style={styles.resourceRow}
             onPress={() => {
@@ -136,12 +137,12 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
               <Text style={styles.legalLabelZh}>{item.labelZh}</Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-          </Pressable>
+          </AnimatedPressable>
         ))}
 
         <Text style={styles.sectionTitle}>Quick actions</Text>
         {resources.map((item) => (
-          <Pressable
+          <AnimatedPressable
             key={item.label}
             style={styles.resourceRow}
             onPress={() => {
@@ -161,7 +162,7 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
             <Ionicons name={item.icon} size={22} color={colors.textMuted} />
             <Text style={styles.resourceLabel}>{item.label}</Text>
             <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-          </Pressable>
+          </AnimatedPressable>
         ))}
       </ScrollView>
     </View>

@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, radii, spacing } from '../theme';
 import { Profile } from '../types/profile';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type SparkNoteSheetProps = {
   visible: boolean;
@@ -40,8 +41,8 @@ export function SparkNoteSheet({
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <Pressable style={styles.overlay} onPress={onClose}>
-        <Pressable
+      <AnimatedPressable style={styles.overlay} onPress={onClose}>
+        <AnimatedPressable
           style={[styles.sheet, { paddingBottom: insets.bottom + spacing.lg }]}
           onPress={(event) => event.stopPropagation()}
         >
@@ -70,7 +71,7 @@ export function SparkNoteSheet({
             autoFocus
           />
 
-          <Pressable
+          <AnimatedPressable
             style={[styles.sendButton, !canSend && styles.sendButtonDisabled]}
             onPress={() => {
               if (canSend) {
@@ -81,13 +82,13 @@ export function SparkNoteSheet({
             disabled={!canSend}
           >
             <Text style={styles.sendText}>Send like + note</Text>
-          </Pressable>
+          </AnimatedPressable>
 
-          <Pressable style={styles.skipButton} onPress={onSkip}>
+          <AnimatedPressable style={styles.skipButton} onPress={onSkip}>
             <Text style={styles.skipText}>Like without note</Text>
-          </Pressable>
-        </Pressable>
-      </Pressable>
+          </AnimatedPressable>
+        </AnimatedPressable>
+      </AnimatedPressable>
     </Modal>
   );
 }

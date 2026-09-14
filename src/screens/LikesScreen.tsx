@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MatchModal } from '../components/MatchModal';
@@ -11,6 +11,7 @@ import { useApp } from '../context/AppContext';
 import { getProfileById } from '../data/profiles';
 import { Profile } from '../types/profile';
 import { colors, radii, spacing } from '../theme';
+import { AnimatedPressable } from '../components/AnimatedPressable';
 
 export function LikesScreen() {
   const insets = useSafeAreaInsets();
@@ -100,9 +101,9 @@ export function LikesScreen() {
               : 'Upgrade to Spark+ to see who they are and match instantly.'}
           </Text>
           {!isSparkPlus && (
-            <Pressable style={styles.upgradeButton} onPress={openPaywall}>
+            <AnimatedPressable style={styles.upgradeButton} onPress={openPaywall}>
               <Text style={styles.upgradeButtonText}>See who likes you</Text>
-            </Pressable>
+            </AnimatedPressable>
           )}
         </View>
 
@@ -115,7 +116,7 @@ export function LikesScreen() {
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.superRow}>
               {superLikesSent.map((profile) => (
-                <Pressable
+                <AnimatedPressable
                   key={profile.id}
                   style={styles.superCard}
                   onPress={() => openSuperLikeProfile(profile)}
@@ -125,7 +126,7 @@ export function LikesScreen() {
                   <Text style={styles.superStatus}>
                     {pendingLikeIds.has(profile.id) ? 'Pending' : 'Matched'}
                   </Text>
-                </Pressable>
+                </AnimatedPressable>
               ))}
             </ScrollView>
           </View>
@@ -139,13 +140,13 @@ export function LikesScreen() {
               <Text style={styles.emptySubtitle}>
                 Keep discovering — when someone likes you, they&apos;ll show up here.
               </Text>
-              <Pressable style={styles.discoverButton} onPress={openDiscover}>
+              <AnimatedPressable style={styles.discoverButton} onPress={openDiscover}>
                 <Text style={styles.discoverButtonText}>Start discovering</Text>
-              </Pressable>
+              </AnimatedPressable>
             </View>
           ) : (
             incomingLikes.map((profile) => (
-              <Pressable
+              <AnimatedPressable
                 key={profile.id}
                 style={styles.card}
                 onPress={isSparkPlus ? () => setSelectedProfile(profile) : openPaywall}
@@ -165,7 +166,7 @@ export function LikesScreen() {
                     <Text style={styles.cardHint}>{profile.distanceMiles} mi away</Text>
                   )}
                 </View>
-              </Pressable>
+              </AnimatedPressable>
             ))
           )}
         </View>

@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
 import { NewsPost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { NewsArticleSheet } from './NewsArticleSheet';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
+import { AnimatedPressable } from '../AnimatedPressable';
 
 type NewsPostCardProps = {
   post: NewsPost;
@@ -26,7 +27,7 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
 
   return (
     <>
-      <Pressable
+      <AnimatedPressable
         accessibilityRole="button"
         accessibilityLabel={`Read article: ${post.headline}`}
         onPress={() => setArticleOpen(true)}
@@ -48,7 +49,7 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
           {post.reporters.length > 0 && (
             <View style={styles.reportersRow}>
               {post.reporters.map((reporter) => (
-                <Pressable
+                <AnimatedPressable
                   key={reporter.id}
                   onPress={(event) => {
                     event.stopPropagation();
@@ -62,12 +63,12 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
                   <Text style={[styles.reporterQuote, { color: colors.text }]} numberOfLines={3}>
                     {reporter.quote}
                   </Text>
-                </Pressable>
+                </AnimatedPressable>
               ))}
             </View>
           )}
         </View>
-      </Pressable>
+      </AnimatedPressable>
 
       <NewsArticleSheet visible={articleOpen} post={post} onClose={() => setArticleOpen(false)} />
       <PersonPreviewSheet

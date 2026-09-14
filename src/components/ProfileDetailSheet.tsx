@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProfileVerificationDisplay } from './ProfileVerificationDisplay';
 import { VerificationBadges } from './VerificationBadges';
 import { colors, radii, spacing } from '../theme';
 import { Profile, ProfilePrompt } from '../types/profile';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type ProfileDetailSheetProps = {
   profile: Profile | null;
@@ -44,14 +45,14 @@ export function ProfileDetailSheet({
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.toolbar}>
-          <Pressable onPress={onClose} style={styles.closeButton}>
+          <AnimatedPressable onPress={onClose} style={styles.closeButton}>
             <Ionicons name="chevron-down" size={28} color={colors.text} />
-          </Pressable>
+          </AnimatedPressable>
           {onHold && (
-            <Pressable style={styles.holdButton} onPress={onHold}>
+            <AnimatedPressable style={styles.holdButton} onPress={onHold}>
               <Ionicons name={isHeld ? 'bookmark' : 'bookmark-outline'} size={22} color={colors.gradientEnd} />
               <Text style={styles.holdText}>{isHeld ? 'On hold' : 'Hold'}</Text>
-            </Pressable>
+            </AnimatedPressable>
           )}
         </View>
 
@@ -94,7 +95,7 @@ export function ProfileDetailSheet({
           <ProfileVerificationDisplay profile={profile} />
 
           {profile.prompts?.map((prompt) => (
-            <Pressable
+            <AnimatedPressable
               key={prompt.question}
               style={styles.promptCard}
               onPress={() => onLikePrompt?.(prompt)}
@@ -108,7 +109,7 @@ export function ProfileDetailSheet({
                   <Text style={styles.likePromptText}>Like this answer</Text>
                 </View>
               )}
-            </Pressable>
+            </AnimatedPressable>
           ))}
 
           <View style={styles.section}>
@@ -126,16 +127,16 @@ export function ProfileDetailSheet({
             <View style={styles.safetySection}>
               <Text style={styles.sectionTitle}>Safety</Text>
               {onReport && (
-                <Pressable style={styles.safetyRow} onPress={() => onReport(profile.id)}>
+                <AnimatedPressable style={styles.safetyRow} onPress={() => onReport(profile.id)}>
                   <Ionicons name="flag-outline" size={20} color={colors.rewind} />
                   <Text style={styles.safetyLabel}>Report {profile.name}</Text>
-                </Pressable>
+                </AnimatedPressable>
               )}
               {onBlock && (
-                <Pressable style={styles.safetyRow} onPress={() => onBlock(profile.id)}>
+                <AnimatedPressable style={styles.safetyRow} onPress={() => onBlock(profile.id)}>
                   <Ionicons name="hand-left-outline" size={20} color={colors.nope} />
                   <Text style={styles.safetyLabel}>Block {profile.name}</Text>
-                </Pressable>
+                </AnimatedPressable>
               )}
             </View>
           )}
@@ -144,14 +145,14 @@ export function ProfileDetailSheet({
         {(onLike || onPass) && (
           <View style={styles.actionBar}>
             {onPass && (
-              <Pressable style={[styles.passButton, styles.actionButton]} onPress={onPass}>
+              <AnimatedPressable style={[styles.passButton, styles.actionButton]} onPress={onPass}>
                 <Ionicons name="close" size={24} color={colors.nope} />
-              </Pressable>
+              </AnimatedPressable>
             )}
             {onLike && (
-              <Pressable style={[styles.likeButton, styles.actionButton]} onPress={onLike}>
+              <AnimatedPressable style={[styles.likeButton, styles.actionButton]} onPress={onLike}>
                 <Ionicons name="heart" size={26} color={colors.text} />
-              </Pressable>
+              </AnimatedPressable>
             )}
           </View>
         )}

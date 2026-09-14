@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import { useCallback, useRef, useState } from 'react';
-import { Alert, Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Dimensions, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesSheet';
@@ -19,6 +19,7 @@ import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Profile, ProfilePrompt } from '../types/profile';
 import { spacing } from '../theme';
+import { AnimatedPressable } from '../components/AnimatedPressable';
 
 const TAB_BAR_HEIGHT = 72;
 const { height: WINDOW_HEIGHT } = Dimensions.get('window');
@@ -267,24 +268,24 @@ export function DiscoverScreen() {
             <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
               Expand your search radius or load another batch to keep discovering.
             </Text>
-            <Pressable
+            <AnimatedPressable
               style={[styles.primaryButton, { backgroundColor: colors.gradientEnd }]}
               onPress={hasMoreInPool ? searchMorePeople : handleWidenFilters}
             >
               <Text style={[styles.primaryButtonText, { color: colors.text }]}>
                 {hasMoreInPool ? 'Search more people' : 'Expand location'}
               </Text>
-            </Pressable>
-            <Pressable style={styles.secondaryButton} onPress={() => setShowExpandLocation(true)}>
+            </AnimatedPressable>
+            <AnimatedPressable style={styles.secondaryButton} onPress={() => setShowExpandLocation(true)}>
               <Text style={[styles.secondaryButtonText, { color: colors.textMuted }]}>
                 Widen search radius
               </Text>
-            </Pressable>
-            <Pressable style={styles.secondaryButton} onPress={openDiscoverHub}>
+            </AnimatedPressable>
+            <AnimatedPressable style={styles.secondaryButton} onPress={openDiscoverHub}>
               <Text style={[styles.secondaryButtonText, { color: colors.textMuted }]}>
                 Open discover tools
               </Text>
-            </Pressable>
+            </AnimatedPressable>
           </View>
         ) : (
           <SwipeDeck

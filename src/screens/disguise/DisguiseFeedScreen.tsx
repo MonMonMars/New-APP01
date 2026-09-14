@@ -1,7 +1,7 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { useMemo } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AdBannerCard } from '../../components/disguise/AdBannerCard';
@@ -16,6 +16,7 @@ import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
 import { buildDisguiseFeed } from '../../utils/buildDisguiseFeed';
 import { filterDisguiseFeed, topicFilterLabel } from '../../utils/disguiseFeedFilter';
 import { spacing } from '../../theme';
+import { AnimatedPressable } from '../../components/AnimatedPressable';
 
 function renderFeedItem({ item }: { item: FeedItem }) {
   switch (item.type) {
@@ -61,12 +62,12 @@ export function DisguiseFeedScreen() {
           <View style={styles.headerRow}>
             <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>{sectionLabel}</Text>
             {topic ? (
-              <Pressable
+              <AnimatedPressable
                 onPress={() => navigation.navigate('Home', {})}
                 accessibilityLabel="Clear topic filter"
               >
                 <Text style={[styles.clearFilter, { color: colors.gradientEnd }]}>Clear</Text>
-              </Pressable>
+              </AnimatedPressable>
             ) : null}
           </View>
         }

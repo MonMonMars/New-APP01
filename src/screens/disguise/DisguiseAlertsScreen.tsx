@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AdLandingSheet } from '../../components/disguise/AdLandingSheet';
@@ -16,6 +16,7 @@ import {
 } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { showDemoToast } from '../../utils/demoFeedback';
+import { AnimatedPressable } from '../../components/AnimatedPressable';
 
 export function DisguiseAlertsScreen() {
   const insets = useSafeAreaInsets();
@@ -46,7 +47,7 @@ export function DisguiseAlertsScreen() {
                   };
 
           return (
-            <Pressable
+            <AnimatedPressable
               accessibilityRole="button"
               onPress={handlePress}
               style={[styles.row, { backgroundColor: colors.surface }]}
@@ -58,7 +59,7 @@ export function DisguiseAlertsScreen() {
                 <Text style={[styles.text, { color: colors.text }]}>{item.text}</Text>
                 <Text style={[styles.time, { color: colors.textMuted }]}>{item.time}</Text>
               </View>
-            </Pressable>
+            </AnimatedPressable>
           );
         }}
       />

@@ -1,16 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import {
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
 import { radii, spacing } from '../../theme';
+import { AnimatedPressable } from '../AnimatedPressable';
 
 type SparkUnlockModalProps = {
   visible: boolean;
@@ -49,13 +43,13 @@ export function SparkUnlockModal({
           </Text>
 
           {showBiometricRetry && onRetryBiometric && (
-            <Pressable
+            <AnimatedPressable
               style={[styles.biometricButton, { borderColor: colors.border }]}
               onPress={onRetryBiometric}
             >
               <Ionicons name="finger-print" size={20} color={colors.gradientEnd} />
               <Text style={[styles.biometricText, { color: colors.text }]}>Use Face ID / Touch ID</Text>
-            </Pressable>
+            </AnimatedPressable>
           )}
 
           <TextInput
@@ -80,16 +74,16 @@ export function SparkUnlockModal({
           {error && <Text style={styles.error}>{error}</Text>}
 
           <View style={styles.actions}>
-            <Pressable style={styles.cancel} onPress={onCancel}>
+            <AnimatedPressable style={styles.cancel} onPress={onCancel}>
               <Text style={[styles.cancelText, { color: colors.textMuted }]}>Cancel</Text>
-            </Pressable>
-            <Pressable
+            </AnimatedPressable>
+            <AnimatedPressable
               style={[styles.unlock, { backgroundColor: colors.gradientEnd }]}
               onPress={() => onSubmitPin(pin)}
               disabled={pin.length < 4}
             >
               <Text style={styles.unlockText}>Unlock</Text>
-            </Pressable>
+            </AnimatedPressable>
           </View>
         </View>
       </View>

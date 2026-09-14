@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
@@ -10,6 +10,7 @@ import { PhotoCarousel } from './PhotoCarousel';
 import { PromptsEditor } from './PromptsEditor';
 import { SocialConnectRows } from './SocialConnectRows';
 import { radii, spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type EditProfileSheetProps = {
   visible: boolean;
@@ -113,13 +114,13 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
       <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top + spacing.md }]}>
         <View style={styles.header}>
-          <Pressable onPress={onClose}>
+          <AnimatedPressable onPress={onClose}>
             <Text style={[styles.cancel, { color: colors.textMuted }]}>Cancel</Text>
-          </Pressable>
+          </AnimatedPressable>
           <Text style={[styles.title, { color: colors.text }]}>Edit profile</Text>
-          <Pressable onPress={handleSave}>
+          <AnimatedPressable onPress={handleSave}>
             <Text style={[styles.save, { color: colors.gradientEnd }]}>Save</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -130,12 +131,12 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
             height={240}
           />
 
-          <Pressable style={styles.addPhotoRow} onPress={handleAddPhoto}>
+          <AnimatedPressable style={styles.addPhotoRow} onPress={handleAddPhoto}>
             <Ionicons name="images-outline" size={20} color={colors.gradientEnd} />
             <Text style={[styles.addPhotoText, { color: colors.gradientEnd }]}>Add photo from library</Text>
-          </Pressable>
+          </AnimatedPressable>
 
-          <Pressable
+          <AnimatedPressable
             style={[styles.verifyRow, { backgroundColor: colors.surface }]}
             onPress={photoVerified ? undefined : handleVerifyPhoto}
             disabled={photoVerified}
@@ -145,9 +146,9 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
               {photoVerified ? 'Photo verified' : 'Verify your photos'}
             </Text>
             {photoVerified && <Ionicons name="checkmark-circle" size={18} color={colors.like} />}
-          </Pressable>
+          </AnimatedPressable>
 
-          <Pressable
+          <AnimatedPressable
             style={[styles.verifyRow, { backgroundColor: colors.surface }]}
             onPress={personVerified ? undefined : handleVerifyPerson}
             disabled={personVerified}
@@ -157,9 +158,9 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
               {personVerified ? 'Real person verified' : 'Verify you are a real person'}
             </Text>
             {personVerified && <Ionicons name="checkmark-circle" size={18} color={colors.like} />}
-          </Pressable>
+          </AnimatedPressable>
 
-          <Pressable
+          <AnimatedPressable
             style={[styles.verifyRow, { backgroundColor: colors.surface }]}
             onPress={ageVerified ? undefined : handleVerifyAge}
             disabled={ageVerified}
@@ -169,7 +170,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
               {ageVerified ? 'Age verified (18+)' : 'Verify your age'}
             </Text>
             {ageVerified && <Ionicons name="checkmark-circle" size={18} color={colors.like} />}
-          </Pressable>
+          </AnimatedPressable>
 
           <Text style={[styles.label, { color: colors.textMuted }]}>Name</Text>
           <TextInput

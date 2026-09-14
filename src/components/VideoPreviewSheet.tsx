@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type VideoPreviewSheetProps = {
   visible: boolean;
@@ -24,9 +25,9 @@ export function VideoPreviewSheet({ visible, profile, onClose }: VideoPreviewShe
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
         <View style={[styles.header, { borderBottomColor: colors.border }]}>
-          <Pressable onPress={onClose} hitSlop={12}>
+          <AnimatedPressable onPress={onClose} hitSlop={12}>
             <Ionicons name="close" size={24} color={colors.text} />
-          </Pressable>
+          </AnimatedPressable>
           <Text style={[styles.title, { color: colors.text }]}>Video intro</Text>
           <View style={styles.headerSpacer} />
         </View>

@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Platform, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
 import { SocialPost } from '../../data/disguiseFeed';
@@ -9,6 +9,7 @@ import { radii, spacing } from '../../theme';
 import { showDemoToast } from '../../utils/demoFeedback';
 import { DisguiseOverlayAvatar } from './DisguiseOverlayAvatar';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
+import { AnimatedPressable } from '../AnimatedPressable';
 
 type SocialPostCardProps = {
   post: SocialPost;
@@ -44,14 +45,14 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
             {post.handle} · {post.timeAgo}
           </Text>
         </View>
-        <Pressable
+        <AnimatedPressable
           onPress={() => {
             bump();
             showDemoToast('Post options', 'Mute, report, or save post.');
           }}
         >
           <Ionicons name="ellipsis-horizontal" size={18} color={colors.textMuted} />
-        </Pressable>
+        </AnimatedPressable>
       </View>
       <Text style={[styles.body, { color: colors.text }]}>{post.body}</Text>
       {post.imageUrl && post.imageMask ? (
@@ -64,7 +65,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
         </View>
       ) : null}
       <View style={styles.actions}>
-        <Pressable
+        <AnimatedPressable
           style={styles.action}
           onPress={() => {
             bump();
@@ -79,8 +80,8 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
           <Text style={[styles.actionText, { color: upvoted ? colors.gradientEnd : colors.textMuted }]}>
             {likeCount}
           </Text>
-        </Pressable>
-        <Pressable
+        </AnimatedPressable>
+        <AnimatedPressable
           style={styles.action}
           onPress={() => {
             bump();
@@ -89,8 +90,8 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
         >
           <Ionicons name="chatbubble-outline" size={18} color={colors.textMuted} />
           <Text style={[styles.actionText, { color: colors.textMuted }]}>{post.comments}</Text>
-        </Pressable>
-        <Pressable
+        </AnimatedPressable>
+        <AnimatedPressable
           style={styles.action}
           onPress={() => {
             bump();
@@ -98,7 +99,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
           }}
         >
           <Ionicons name="share-outline" size={18} color={colors.textMuted} />
-        </Pressable>
+        </AnimatedPressable>
       </View>
     </View>
   );

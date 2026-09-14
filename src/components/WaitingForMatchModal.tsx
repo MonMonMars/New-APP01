@@ -1,8 +1,9 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Modal, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radii, spacing } from '../theme';
 import { Profile } from '../types/profile';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type WaitingForMatchModalProps = {
   visible: boolean;
@@ -45,9 +46,9 @@ export function WaitingForMatchModal({
             Keep exploring — the more people you meet, the better your chances.
           </Text>
 
-          <Pressable style={styles.primaryButton} onPress={onFindMorePeople}>
+          <AnimatedPressable style={styles.primaryButton} onPress={onFindMorePeople}>
             <Text style={styles.primaryButtonText}>Find more people</Text>
-          </Pressable>
+          </AnimatedPressable>
         </LinearGradient>
       </View>
     </Modal>

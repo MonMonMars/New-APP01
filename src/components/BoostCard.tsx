@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { BOOST_DURATION_MS } from '../types/subscription';
 import { colors, radii, spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type BoostCardProps = {
   boostActiveUntil: string | null;
@@ -51,9 +52,9 @@ export function BoostCard({ boostActiveUntil, isSparkPlus, onActivate }: BoostCa
         </Text>
       </View>
       {!isActive && (
-        <Pressable style={styles.button} onPress={onActivate}>
+        <AnimatedPressable style={styles.button} onPress={onActivate}>
           <Text style={styles.buttonText}>Boost</Text>
-        </Pressable>
+        </AnimatedPressable>
       )}
       {isActive && (
         <View style={styles.activeBadge}>

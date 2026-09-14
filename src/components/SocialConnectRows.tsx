@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
 import { spacing } from '../theme';
 import { showDemoToast } from '../utils/demoFeedback';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type SocialConnectRowsProps = {
   instagramConnected: boolean;
@@ -43,22 +44,22 @@ export function SocialConnectRows({
   return (
     <View style={styles.container}>
       <Text style={[styles.title, { color: colors.textMuted }]}>Connected accounts</Text>
-      <Pressable style={[styles.row, { borderBottomColor: colors.border }]} onPress={handleInstagram}>
+      <AnimatedPressable style={[styles.row, { borderBottomColor: colors.border }]} onPress={handleInstagram}>
         <Ionicons name="logo-instagram" size={22} color="#E1306C" />
         <Text style={[styles.label, { color: colors.text }]}>Instagram</Text>
         <Text style={[styles.status, { color: instagramConnected ? colors.like : colors.textMuted }]}>
           {instagramConnected ? 'Connected' : 'Connect'}
         </Text>
         <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-      </Pressable>
-      <Pressable style={[styles.row, { borderBottomColor: colors.border }]} onPress={handleSpotify}>
+      </AnimatedPressable>
+      <AnimatedPressable style={[styles.row, { borderBottomColor: colors.border }]} onPress={handleSpotify}>
         <Ionicons name="musical-notes" size={22} color="#1DB954" />
         <Text style={[styles.label, { color: colors.text }]}>Spotify</Text>
         <Text style={[styles.status, { color: spotifyConnected ? colors.like : colors.textMuted }]}>
           {spotifyConnected ? 'Connected' : 'Connect'}
         </Text>
         <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-      </Pressable>
+      </AnimatedPressable>
     </View>
   );
 }

@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radii, spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type SafetyActionSheetProps = {
   visible: boolean;
@@ -26,14 +27,14 @@ export function SafetyActionSheet({
 }: SafetyActionSheetProps) {
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <Pressable style={styles.overlay} onPress={onClose}>
-        <Pressable style={styles.sheet} onPress={(event) => event.stopPropagation()}>
+      <AnimatedPressable style={styles.overlay} onPress={onClose}>
+        <AnimatedPressable style={styles.sheet} onPress={(event) => event.stopPropagation()}>
           <View style={styles.handle} />
           <Text style={styles.title}>Safety options</Text>
           <Text style={styles.subtitle}>Choose an action for {profileName}.</Text>
 
           {onOpenSafetyCenter && (
-            <Pressable
+            <AnimatedPressable
               style={styles.actionRow}
               onPress={() => {
                 onClose();
@@ -45,11 +46,11 @@ export function SafetyActionSheet({
                 <Text style={styles.actionLabel}>Safety Center</Text>
                 <Text style={styles.actionHint}>Tips, resources, and support links.</Text>
               </View>
-            </Pressable>
+            </AnimatedPressable>
           )}
 
           {showUnmatch && onUnmatch && (
-            <Pressable style={styles.actionRow} onPress={onUnmatch}>
+            <AnimatedPressable style={styles.actionRow} onPress={onUnmatch}>
               <Ionicons name="heart-dislike-outline" size={22} color={colors.textMuted} />
               <View style={styles.actionText}>
                 <Text style={styles.actionLabel}>Unmatch</Text>
@@ -57,30 +58,30 @@ export function SafetyActionSheet({
                   Remove this match and conversation. You can still block or report.
                 </Text>
               </View>
-            </Pressable>
+            </AnimatedPressable>
           )}
 
-          <Pressable style={styles.actionRow} onPress={onReport}>
+          <AnimatedPressable style={styles.actionRow} onPress={onReport}>
             <Ionicons name="flag-outline" size={22} color={colors.rewind} />
             <View style={styles.actionText}>
               <Text style={styles.actionLabel}>Report</Text>
               <Text style={styles.actionHint}>Flag inappropriate behavior to our team.</Text>
             </View>
-          </Pressable>
+          </AnimatedPressable>
 
-          <Pressable style={styles.actionRow} onPress={onBlock}>
+          <AnimatedPressable style={styles.actionRow} onPress={onBlock}>
             <Ionicons name="hand-left-outline" size={22} color={colors.nope} />
             <View style={styles.actionText}>
               <Text style={styles.actionLabel}>Block</Text>
               <Text style={styles.actionHint}>They won&apos;t see you and you won&apos;t see them.</Text>
             </View>
-          </Pressable>
+          </AnimatedPressable>
 
-          <Pressable style={styles.cancelButton} onPress={onClose}>
+          <AnimatedPressable style={styles.cancelButton} onPress={onClose}>
             <Text style={styles.cancelText}>Cancel</Text>
-          </Pressable>
-        </Pressable>
-      </Pressable>
+          </AnimatedPressable>
+        </AnimatedPressable>
+      </AnimatedPressable>
     </Modal>
   );
 }

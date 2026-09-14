@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { verificationHowItWorksSteps } from '../content/verificationPolicy';
 import { useTheme } from '../context/ThemeContext';
 import { UserProfile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { VerificationBadges } from './VerificationBadges';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type ProfileTrustSectionProps = {
   user: UserProfile;
@@ -126,7 +127,7 @@ export function ProfileTrustSection({ user, onUpdate, onOpenPolicy }: ProfileTru
       </View>
 
       {items.map((item) => (
-        <Pressable
+        <AnimatedPressable
           key={item.id}
           style={[styles.row, { borderTopColor: colors.border }]}
           onPress={item.done ? undefined : item.onVerify}
@@ -144,17 +145,17 @@ export function ProfileTrustSection({ user, onUpdate, onOpenPolicy }: ProfileTru
             <Text style={[styles.rowDesc, { color: colors.textMuted }]}>{item.description}</Text>
           </View>
           {!item.done && <Text style={[styles.cta, { color: colors.gradientEnd }]}>Verify</Text>}
-        </Pressable>
+        </AnimatedPressable>
       ))}
 
       {onOpenPolicy && (
-        <Pressable style={[styles.policyLink, { borderTopColor: colors.border }]} onPress={onOpenPolicy}>
+        <AnimatedPressable style={[styles.policyLink, { borderTopColor: colors.border }]} onPress={onOpenPolicy}>
           <Ionicons name="document-text-outline" size={18} color={colors.gradientEnd} />
           <Text style={[styles.policyLinkText, { color: colors.gradientEnd }]}>
             Read Trust & Verification Policy
           </Text>
           <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-        </Pressable>
+        </AnimatedPressable>
       )}
     </View>
   );

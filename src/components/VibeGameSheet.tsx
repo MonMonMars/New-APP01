@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, StyleSheet, Text, View } from 'react-native';
 
 import { AnimatedPressable } from './AnimatedPressable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -43,9 +43,9 @@ export function VibeGameSheet({ visible, profileName, onClose, onSendGuess }: Vi
         <View style={[styles.sheet, { backgroundColor: colors.background, paddingBottom: insets.bottom + spacing.md }]}>
           <View style={styles.header}>
             <Text style={[styles.title, { color: colors.text }]}>Read My Vibe</Text>
-            <Pressable onPress={onClose}>
+            <AnimatedPressable onPress={onClose}>
               <Ionicons name="close" size={24} color={colors.textMuted} />
-            </Pressable>
+            </AnimatedPressable>
           </View>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>
             What vibe is {profileName} giving off right now? Guess to break the ice.

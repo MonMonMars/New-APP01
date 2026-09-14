@@ -1,16 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Image,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Image, Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../../context/AppContext';
@@ -19,6 +9,7 @@ import { isDisguiseAiConfigured } from '../../services/disguiseImageGeneration';
 import { DisguiseOverlayVariant } from '../../types/disguise';
 import { radii, spacing } from '../../theme';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
+import { AnimatedPressable } from '../AnimatedPressable';
 
 type DisguiseAdGeneratorSheetProps = {
   visible: boolean;
@@ -69,9 +60,9 @@ export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGenerat
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
         <View style={[styles.header, { borderBottomColor: colors.border }]}>
-          <Pressable onPress={onClose} hitSlop={12}>
+          <AnimatedPressable onPress={onClose} hitSlop={12}>
             <Ionicons name="close" size={24} color={colors.text} />
-          </Pressable>
+          </AnimatedPressable>
           <Text style={[styles.title, { color: colors.text }]}>AI disguise ad</Text>
           <View style={styles.headerSpacer} />
         </View>
@@ -100,7 +91,7 @@ export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGenerat
             {VARIANTS.map((item) => {
               const selected = variant === item.id;
               return (
-                <Pressable
+                <AnimatedPressable
                   key={item.id}
                   onPress={() => setVariant(item.id)}
                   style={[
@@ -119,7 +110,7 @@ export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGenerat
                   <Text style={[styles.variantLabel, { color: selected ? colors.text : colors.textMuted }]}>
                     {item.label}
                   </Text>
-                </Pressable>
+                </AnimatedPressable>
               );
             })}
           </View>
@@ -153,7 +144,7 @@ export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGenerat
 
           {error && <Text style={styles.error}>{error}</Text>}
 
-          <Pressable
+          <AnimatedPressable
             onPress={() => void handleGenerate()}
             disabled={isGeneratingDisguiseAd}
             style={[styles.primaryBtn, { backgroundColor: colors.gradientEnd, opacity: isGeneratingDisguiseAd ? 0.7 : 1 }]}
@@ -168,7 +159,7 @@ export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGenerat
                 </Text>
               </>
             )}
-          </Pressable>
+          </AnimatedPressable>
 
           {!aiReady && (
             <Text style={[styles.hint, { color: colors.textMuted }]}>
@@ -178,9 +169,9 @@ export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGenerat
           )}
 
           {previewCreative && (
-            <Pressable onPress={clearDisguiseAd} style={styles.secondaryBtn}>
+            <AnimatedPressable onPress={clearDisguiseAd} style={styles.secondaryBtn}>
               <Text style={[styles.secondaryBtnText, { color: colors.textMuted }]}>Remove generated image</Text>
-            </Pressable>
+            </AnimatedPressable>
           )}
         </ScrollView>
       </View>

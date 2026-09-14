@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -9,6 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useLiveExpiry } from '../hooks/useLiveExpiry';
 import { Conversation } from '../types/match';
 import { radii, spacing } from '../theme';
+import { AnimatedPressable } from '../components/AnimatedPressable';
 
 type MatchesScreenProps = {
   onOpenChat: (conversationId: string) => void;
@@ -29,7 +30,7 @@ function ConversationRow({
   const turnLabel = yourTurn ? 'Your turn' : lastMessage ? 'Waiting for reply' : null;
 
   return (
-    <Pressable style={styles.row} onPress={onPress}>
+    <AnimatedPressable style={styles.row} onPress={onPress}>
       <View style={styles.avatarWrap}>
         <Image source={{ uri: profile.photos[0] }} style={styles.avatar} />
         {match.expiresAt && <View style={[styles.expiryRing, { borderColor: colors.rewind }]} />}
@@ -51,7 +52,7 @@ function ConversationRow({
         )}
       </View>
       {unread && <View style={[styles.unreadDot, { backgroundColor: colors.gradientEnd }]} />}
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
@@ -66,7 +67,7 @@ function NewMatchItem({
   const expiryLabel = useLiveExpiry(match.expiresAt);
 
   return (
-    <Pressable style={styles.newMatch} onPress={onPress}>
+    <AnimatedPressable style={styles.newMatch} onPress={onPress}>
       <View style={[styles.newMatchRing, { borderColor: colors.gradientEnd }]}>
         <Image source={{ uri: match.profile.photos[0] }} style={styles.newMatchPhoto} />
       </View>
@@ -74,7 +75,7 @@ function NewMatchItem({
       {expiryLabel && (
         <Text style={[styles.newMatchExpiry, { color: colors.rewind }]}>{expiryLabel}</Text>
       )}
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 

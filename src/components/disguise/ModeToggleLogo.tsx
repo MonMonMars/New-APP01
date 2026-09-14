@@ -1,17 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useCallback, useRef, useState } from 'react';
-import {
-  PanResponder,
-  Platform,
-  Pressable,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { PanResponder, Platform, StyleSheet, View } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
+import { AnimatedPressable } from '../AnimatedPressable';
 
 const UNLOCK_RATIO = 0.82;
 const TRACK_PADDING = 4;
@@ -133,15 +128,16 @@ export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps
 
   if (!disguiseMode) {
     return (
-      <Pressable
+      <AnimatedPressable
         onPress={enterDisguise}
-        style={({ pressed }) => [pressed && styles.pressed]}
+        haptic="medium"
+        scaleTo={0.94}
         accessibilityRole="button"
         accessibilityLabel={`Emergency — switch to ${DISGUISE_APP_NAME} disguise mode`}
         accessibilityHint="Tap instantly to hide Spark"
       >
         {bubble}
-      </Pressable>
+      </AnimatedPressable>
     );
   }
 
@@ -192,9 +188,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-  },
-  pressed: {
-    opacity: 0.82,
   },
   track: {
     justifyContent: 'center',

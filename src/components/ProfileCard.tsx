@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   Extrapolation,
@@ -17,6 +17,7 @@ import { VideoProfileOverlay } from './VideoProfileOverlay';
 import { VerificationBadges } from './VerificationBadges';
 import { colors, radii, spacing } from '../theme';
 import { Profile } from '../types/profile';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type ProfileCardProps = {
   profile: Profile;
@@ -161,8 +162,8 @@ export function ProfileCard({
             ))}
           </View>
           <View style={styles.tapZones}>
-            <Pressable style={styles.tapZone} onPress={() => goToPhoto('left')} />
-            <Pressable style={styles.tapZone} onPress={() => goToPhoto('right')} />
+            <AnimatedPressable style={styles.tapZone} onPress={() => goToPhoto('left')} />
+            <AnimatedPressable style={styles.tapZone} onPress={() => goToPhoto('right')} />
           </View>
         </>
       )}

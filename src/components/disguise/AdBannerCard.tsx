@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
 import { AdPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { AdLandingSheet } from './AdLandingSheet';
+import { AnimatedPressable } from '../AnimatedPressable';
 
 type AdBannerCardProps = {
   ad: AdPost;
@@ -17,7 +18,7 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
 
   return (
     <>
-      <Pressable
+      <AnimatedPressable
         accessibilityRole="button"
         accessibilityLabel={`Sponsored: ${ad.brand}`}
         onPress={() => setSheetOpen(true)}
@@ -36,7 +37,7 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
             <Ionicons name="chevron-forward" size={14} color="#fff" />
           </View>
         </View>
-      </Pressable>
+      </AnimatedPressable>
 
       <AdLandingSheet visible={sheetOpen} ad={ad} onClose={() => setSheetOpen(false)} />
     </>

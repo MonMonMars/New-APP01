@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type HeldProfilesRowProps = {
   profiles: Profile[];
@@ -29,7 +30,7 @@ export function HeldProfilesRow({ profiles, onSelect, onRemove }: HeldProfilesRo
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {profiles.map((profile) => (
           <View key={profile.id} style={styles.cardWrap}>
-            <Pressable
+            <AnimatedPressable
               style={[styles.card, { borderColor: colors.border }]}
               onPress={() => onSelect(profile)}
             >
@@ -37,10 +38,10 @@ export function HeldProfilesRow({ profiles, onSelect, onRemove }: HeldProfilesRo
               <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
                 {profile.name}
               </Text>
-            </Pressable>
-            <Pressable style={styles.remove} onPress={() => onRemove(profile.id)}>
+            </AnimatedPressable>
+            <AnimatedPressable style={styles.remove} onPress={() => onRemove(profile.id)}>
               <Ionicons name="close-circle" size={18} color={colors.textMuted} />
-            </Pressable>
+            </AnimatedPressable>
           </View>
         ))}
       </ScrollView>

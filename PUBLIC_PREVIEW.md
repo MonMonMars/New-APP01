@@ -2,9 +2,9 @@
 
 ## Demo link (open now)
 
-**https://cup-photographic-counting-worker.trycloudflare.com**
+**https://investigated-ballot-stage-uses.trycloudflare.com**
 
-_Last updated: Sep 14, 2026 — in-app ads, trending filters, video preview, modal polish_
+_Last updated: Sep 14, 2026 — likes match-back, chat/map polish, onboarding explainer_
 
 > Tunnel links expire when the cloud workspace stops. If this 404s, ask for a fresh link.
 
@@ -34,7 +34,9 @@ _Last updated: Sep 14, 2026 — in-app ads, trending filters, video preview, mod
 ### Spark safe mode
 - **Discover** — drag to heart/trash/star zones
 - **Video** badge on profiles → preview sheet
-- **Likes** (Spark+) → tap card for full profile
+- **Likes** (Spark+) → tap card → Like/Pass → instant match-back
+- **Chat** → tap header for profile · vibe game in composer
+- **Map** → tap preview card for full profile
 - **Map**, **Explore**, **Matches**, **Profile**
 - Spark+, Shop, Safety, Notifications — eye-off returns to Pulse
 

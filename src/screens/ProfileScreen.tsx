@@ -32,7 +32,6 @@ type SettingsRoute =
   | 'Safety'
   | 'SparkPlus'
   | 'DiscoveryPreferences'
-  | 'Notifications'
   | 'NotificationPreferences'
   | 'ConsumablesShop'
   | null;
@@ -82,14 +81,6 @@ export function ProfileScreen() {
   const handleRowPress = (route: SettingsRoute) => {
     if (route === 'DiscoveryPreferences') {
       setShowPreferences(true);
-      return;
-    }
-    if (route === 'Notifications') {
-      if (notificationsEnabled) {
-        Alert.alert('Notifications enabled', 'You will receive match and message alerts.');
-      } else {
-        setShowNotifPrompt(true);
-      }
       return;
     }
     if (route) {

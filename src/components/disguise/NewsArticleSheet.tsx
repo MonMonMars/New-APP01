@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { NewsPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { openExternalUrl } from '../../utils/openExternalUrl';
 
 type NewsArticleSheetProps = {
   visible: boolean;
@@ -61,6 +62,15 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
                 {paragraph}
               </Text>
             ))}
+            <Pressable
+              style={styles.readOriginal}
+              onPress={() => {
+                void openExternalUrl(post.articleUrl, post.source);
+              }}
+            >
+              <Text style={styles.readOriginalText}>Read on {post.source}</Text>
+              <Ionicons name="open-outline" size={16} color="#fff" />
+            </Pressable>
           </ScrollView>
         </View>
       </View>
@@ -131,5 +141,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
     marginBottom: spacing.md,
+  },
+  readOriginal: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    backgroundColor: '#3b82f6',
+    borderRadius: radii.button,
+    paddingVertical: spacing.md,
+    marginTop: spacing.sm,
+  },
+  readOriginalText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '700',
   },
 });

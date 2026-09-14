@@ -49,7 +49,7 @@ After onboarding, users land in **Pulse** — a news-and-social feed that disgui
 |---------|----------------|
 | **Brand** | Pulse (blue pulse icon); Spark hidden until unlocked |
 | **Feed** | News (BBC, Verge), sponsored ads, social posts with face overlays |
-| **News reader** | In-app bottom sheet; reporter avatars open photo preview |
+| **News reader** | In-app bottom sheet + optional “Read on {source}” link; reporter avatars open photo preview |
 | **Ads** | In-app landing sheet; optional external CTA |
 | **AI disguise** | Profile → generate ad/news overlay from user photo |
 | **Toggle** | Tap top-left **Pulse logo** → Spark; tap **Spark logo** or eye-off → Pulse |
@@ -176,8 +176,9 @@ flowchart LR
   SP -->|Subscribe| R[Reveal likes — planned]
 ```
 
-- Tab badge shows incoming count (4 in demo: profiles 7–10).
-- Spark+ subscribers: badge clears; reveal flow planned for backend phase.
+- Tab badge shows dynamic `incomingLikes.length` (14 seeded in demo via `INCOMING_LIKE_IDS`; decreases as you like/pass/block).
+- Spark+ subscribers: tap a card → full `ProfileDetailSheet` with Like/Pass; like-back triggers instant match.
+- Non-subscribers: blurred grid; tap any card → Spark+ paywall.
 - Pattern source: Tinder Gold / Bumble Beeline.
 
 ### 4.4 Matches & chat
@@ -290,7 +291,7 @@ Central state lives in `AppContext.tsx` (in-memory prototype; backend planned).
 | `blockedIds` | `Set<string>` | Blocked profiles |
 | `matches` | `Match[]` | Mutual matches with expiry |
 | `conversations` | `Conversation[]` | Threads with messages |
-| `incomingLikes` | `Profile[]` | Blurred likes inbox (ids 7–10) |
+| `incomingLikes` | `Profile[]` | Dynamic likes inbox (14 seeded ids; excludes actioned/matched) |
 | `dailyLikesUsed` | number | Resets conceptually daily (not persisted) |
 | `remainingLikes` | number | `FREE_DAILY_LIKE_LIMIT - used` or ∞ if Spark+ |
 | `canLike` | boolean | Gate before like action |
@@ -598,7 +599,7 @@ Prototype user: **Mon**, 28, designer bio, default Unsplash photo.
 
 1. Complete onboarding (or clear app storage for fresh seed).
 2. **Matches tab** — see pre-matched Ava, Sofia, Amara, Isabella.
-3. **Likes tab** — 6 blurred incoming likes; Super Likes sent appears after using Rose.
+3. **Likes tab** — 14 blurred incoming likes (Spark+ reveals + like-back); Super Likes sent appears after using Rose.
 4. **Discover** — Standouts row + Recently active strip; compass → Explore categories.
 5. Tap **Spark Rose** on Priya (`11`) → super-match celebration → Chat now.
 6. Rose on other profiles → “Super Like sent!” → Continue search.

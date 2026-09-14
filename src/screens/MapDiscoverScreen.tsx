@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
+import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { mockProfiles } from '../data/profiles';
@@ -78,6 +79,7 @@ export function MapDiscoverScreen({ onClose }: MapDiscoverScreenProps) {
   } = useApp();
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [showProfileSheet, setShowProfileSheet] = useState(false);
 
   const visibleProfiles = useMemo(() => {
     const excluded = new Set([...passedIds, ...likedIds, ...blockedIds]);
@@ -160,19 +162,32 @@ export function MapDiscoverScreen({ onClose }: MapDiscoverScreenProps) {
               <Text style={styles.youLabel}>You</Text>
             </View>
 
-            {visibleProfiles.map((profile) => (
-              <MapPin
-                key={profile.id}
-                profile={profile}
-                selected={selectedId === profile.id}
-                onPress={() => setSelectedId(profile.id)}
-              />
-            ))}
+            {visibleProfiles.length === 0 ? (
+              <View style={styles.emptyMap}>
+                <Ionicons name="map-outline" size={40} color="rgba(255,255,255,0.5)" />
+                <Text style={styles.emptyMapTitle}>No one nearby</Text>
+                <Text style={styles.emptyMapBody}>
+                  Try expanding your search radius or check back later.
+                </Text>
+              </View>
+            ) : (
+              visibleProfiles.map((profile) => (
+                <MapPin
+                  key={profile.id}
+                  profile={profile}
+                  selected={selectedId === profile.id}
+                  onPress={() => setSelectedId(profile.id)}
+                />
+              ))
+            )}
           </LinearGradient>
         </View>
 
         {selectedProfile && (
-          <View style={[styles.previewCard, { backgroundColor: colors.surface }]}>
+          <Pressable
+            style={[styles.previewCard, { backgroundColor: colors.surface }]}
+            onPress={() => setShowProfileSheet(true)}
+          >
             <Image
               source={{ uri: selectedProfile.photos[0] }}
               style={styles.previewPhoto}
@@ -187,8 +202,9 @@ export function MapDiscoverScreen({ onClose }: MapDiscoverScreenProps) {
               <Text style={[styles.previewBio, { color: colors.text }]} numberOfLines={2}>
                 {selectedProfile.bio}
               </Text>
+              <Text style={[styles.previewTap, { color: colors.gradientEnd }]}>View profile</Text>
             </View>
-          </View>
+          </Pressable>
         )}
 
         <Text style={[styles.pinCount, { color: colors.textMuted }]}>
@@ -212,6 +228,12 @@ export function MapDiscoverScreen({ onClose }: MapDiscoverScreenProps) {
           </Text>
         </Pressable>
       </ScrollView>
+
+      <ProfileDetailSheet
+        profile={selectedProfile}
+        visible={showProfileSheet}
+        onClose={() => setShowProfileSheet(false)}
+      />
     </View>
   );
 }
@@ -367,6 +389,29 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: spacing.xs,
     lineHeight: 18,
+  },
+  previewTap: {
+    fontSize: 12,
+    fontWeight: '700',
+    marginTop: spacing.xs,
+  },
+  emptyMap: {
+    ...StyleSheet.absoluteFill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xl,
+    gap: spacing.sm,
+  },
+  emptyMapTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  emptyMapBody: {
+    color: 'rgba(255,255,255,0.65)',
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
   },
   pinCount: {
     textAlign: 'center',

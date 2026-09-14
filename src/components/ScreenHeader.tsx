@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { DisguiseModeButton } from './disguise/ModeToggleButtons';
 import { colors, spacing } from '../theme';
 
 type ScreenHeaderProps = {
@@ -13,6 +14,7 @@ type ScreenHeaderProps = {
   onRightPress?: () => void;
   secondaryRightIcon?: keyof typeof Ionicons.glyphMap;
   onSecondaryRightPress?: () => void;
+  showDisguiseButton?: boolean;
 };
 
 export function ScreenHeader({
@@ -25,6 +27,7 @@ export function ScreenHeader({
   onRightPress,
   secondaryRightIcon,
   onSecondaryRightPress,
+  showDisguiseButton = false,
 }: ScreenHeaderProps) {
   return (
     <View style={[styles.header, compact && styles.headerCompact]}>
@@ -46,6 +49,7 @@ export function ScreenHeader({
       )}
 
       <View style={styles.rightGroup}>
+        {showDisguiseButton ? <DisguiseModeButton /> : null}
         {secondaryRightIcon ? (
           <Pressable style={styles.iconButton} onPress={onSecondaryRightPress}>
             <Ionicons name={secondaryRightIcon} size={20} color={colors.textMuted} />

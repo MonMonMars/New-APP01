@@ -62,7 +62,7 @@ export function ExploreScreen({ onClose }: ExploreScreenProps) {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
-      <ScreenHeader title="Explore" leftIcon="close" onLeftPress={onClose} />
+      <ScreenHeader title="Explore" leftIcon="close" onLeftPress={onClose} showDisguiseButton />
 
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={[styles.lead, { color: colors.textMuted }]}>

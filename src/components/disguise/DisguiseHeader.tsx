@@ -7,6 +7,7 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
 import { spacing } from '../../theme';
+import { BigPictureModeButton } from './ModeToggleButtons';
 
 type DisguiseHeaderProps = {
   title?: string;
@@ -52,16 +53,19 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
           {title ?? DISGUISE_APP_NAME}
         </Text>
       </Pressable>
-      {showSearch && (
-        <View style={styles.actions}>
-          <Pressable style={styles.iconBtn}>
-            <Ionicons name="search-outline" size={22} color={colors.text} />
-          </Pressable>
-          <Pressable style={styles.iconBtn}>
-            <Ionicons name="notifications-outline" size={22} color={colors.text} />
-          </Pressable>
-        </View>
-      )}
+      <View style={styles.actions}>
+        <BigPictureModeButton />
+        {showSearch && (
+          <>
+            <Pressable style={styles.iconBtn}>
+              <Ionicons name="search-outline" size={22} color={colors.text} />
+            </Pressable>
+            <Pressable style={styles.iconBtn}>
+              <Ionicons name="notifications-outline" size={22} color={colors.text} />
+            </Pressable>
+          </>
+        )}
+      </View>
     </View>
   );
 }

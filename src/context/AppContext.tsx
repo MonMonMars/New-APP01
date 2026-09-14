@@ -254,7 +254,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [notificationPromptDismissed, setNotificationPromptDismissed] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [themeMode, setThemeModeState] = useState<ThemeMode>('dark');
-  const [disguiseMode, setDisguiseModeState] = useState(false);
+  const [disguiseMode, setDisguiseModeState] = useState(true);
   const [disguiseAdCreative, setDisguiseAdCreative] = useState<DisguiseAdCreative | null>(null);
   const [isGeneratingDisguiseAd, setIsGeneratingDisguiseAd] = useState(false);
   const [rewindKey, setRewindKey] = useState(0);
@@ -313,7 +313,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setLastPassedProfileId(saved.lastPassedProfileId);
         setIsPaused(saved.isPaused);
         setThemeModeState(saved.themeMode);
-        setDisguiseModeState(saved.disguiseMode ?? false);
+        setDisguiseModeState(saved.disguiseMode ?? true);
         setDisguiseAdCreative(saved.disguiseAdCreative ?? null);
 
         if (isSupabaseConfigured()) {
@@ -1165,7 +1165,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIsSparkPlus(false);
     setBoostActiveUntil(null);
     setIsPaused(false);
-    setDisguiseModeState(false);
+    setDisguiseModeState(true);
     setDisguiseAdCreative(null);
     setLastPassedProfileId(null);
     setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);

@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { mockProfiles } from '../data/profiles';
@@ -117,12 +118,15 @@ export function MapDiscoverScreen({ onClose }: MapDiscoverScreenProps) {
             Within {formatSearchRadius(preferences.maxDistanceMiles)}
           </Text>
         </View>
-        <Pressable
-          style={[styles.iconButton, { backgroundColor: colors.surface }]}
-          onPress={widenRadius}
-        >
-          <Ionicons name="expand-outline" size={20} color={colors.gradientEnd} />
-        </Pressable>
+        <View style={styles.headerActions}>
+          <DisguiseModeButton />
+          <Pressable
+            style={[styles.iconButton, { backgroundColor: colors.surface }]}
+            onPress={widenRadius}
+          >
+            <Ionicons name="expand-outline" size={20} color={colors.gradientEnd} />
+          </Pressable>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -225,6 +229,11 @@ const styles = StyleSheet.create({
   },
   headerCenter: {
     alignItems: 'center',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
   },
   title: {
     fontSize: 18,

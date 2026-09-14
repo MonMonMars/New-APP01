@@ -99,6 +99,7 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <ScreenHeader
         title="Messages"
+        showDisguiseButton
         rightIcon="shield-checkmark-outline"
         onRightPress={() => navigation.getParent()?.navigate('Safety')}
       />

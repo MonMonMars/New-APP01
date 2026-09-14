@@ -67,7 +67,7 @@ export function DisguiseProfileScreen() {
             />
           </View>
           <Text style={[styles.hint, { color: colors.textMuted }]}>
-            Tip: Long-press the {DISGUISE_APP_NAME} logo on Home to open Spark instantly.
+            Tap the expand button in the header (or long-press the logo) to open Spark big-picture mode.
           </Text>
         </View>
 

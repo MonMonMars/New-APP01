@@ -11,7 +11,7 @@ import {
 } from '../types/settings';
 
 const STORAGE_KEY = '@spark/app_state';
-const STORAGE_VERSION = 7;
+const STORAGE_VERSION = 8;
 
 export type PersistedAppState = {
   version: number;
@@ -82,7 +82,7 @@ export function createDefaultPersistedState(): PersistedAppState {
     lastPassedProfileId: null,
     isPaused: false,
     themeMode: 'dark',
-    disguiseMode: false,
+    disguiseMode: true,
     disguiseAdCreative: null,
   };
 }
@@ -119,7 +119,7 @@ export async function loadPersistedState(): Promise<PersistedAppState | null> {
       themeMode: parsed.themeMode ?? 'dark',
       bonusSparkNotes: parsed.bonusSparkNotes ?? 0,
       isPaused: parsed.isPaused ?? false,
-      disguiseMode: parsed.disguiseMode ?? false,
+      disguiseMode: parsed.disguiseMode ?? true,
       disguiseAdCreative: parsed.disguiseAdCreative ?? null,
       heldIds: parsed.heldIds ?? [],
       userId: parsed.userId ?? null,

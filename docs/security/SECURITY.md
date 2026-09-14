@@ -15,8 +15,12 @@ This document describes privacy and security controls in Spark / Pulse. It is fo
 | Lock-screen leaks | Disguise-safe notification copy while in Pulse |
 | Client secret extraction | OpenAI key disabled in production builds; use server proxy |
 | XSS / injection in chat | Input sanitization + length limits |
-| Abuse / spam | Client rate limits (server limits required for production) |
+| Abuse / spam | Client rate limits + `security_reports` table (Supabase) |
+| Brute-force PIN | 5 failed attempts → 5 minute lockout |
+| Screenshots / screen recording | `expo-screen-capture` blocks capture on Spark screens |
+| App switcher preview | Privacy shield overlays Pulse branding |
 | Session hijack (web demo) | Treat web as demo-only; mobile uses SecureStore for Supabase session |
+| Subscription fraud | DB trigger blocks client self-granting `is_spark_plus` |
 
 ---
 
@@ -59,16 +63,44 @@ This document describes privacy and security controls in Spark / Pulse. It is fo
 ### 7. AI disguise generation
 
 - `EXPO_PUBLIC_OPENAI_API_KEY` is **ignored in production builds**
-- Use a **Supabase Edge Function** or API gateway with auth + rate limits
+- Use **`supabase/functions/openai-disguise-proxy`** with auth + rate limits
+
+### 8. Unlock lockout (`src/utils/unlockLockout.ts`)
+
+- **5 failed PIN attempts** → **5 minute lockout**
+- Failed attempts logged to `security_audit_events` when Supabase is configured
+
+### 9. Screenshot & privacy shield
+
+- **`expo-screen-capture`** — blocks screenshots/recording on Spark screens (native)
+- **`PrivacyShield`** — full-screen Pulse overlay in app switcher / background
+
+### 10. Server-side reports & audit
+
+- **`security_reports`** — persisted abuse reports (`docs/supabase-security-migration.sql`)
+- **`security_audit_events`** — unlock success/failure, report events
+- **`submitSecurityReport()`** — called from `reportProfile`
+
+### 11. URL safety
+
+- Chat image URLs must be HTTPS from allowlisted hosts (or local `file://` / `data:`)
+
+### 12. Edge Functions (templates)
+
+| Function | Purpose |
+|----------|---------|
+| `supabase/functions/delete-account` | Full GDPR delete (`auth.users` + rows) |
+| `supabase/functions/openai-disguise-proxy` | Server-side OpenAI with rate limit |
 
 ---
 
 ## Production checklist (not yet fully implemented)
 
-- [ ] Server-side matching, likes, blocks, reports (Edge Functions + RLS)
+- [ ] Deploy `supabase-security-migration.sql` to production project
+- [ ] Deploy Edge Functions with service role secrets
+- [ ] Server-side matching, likes, blocks (Edge Functions + RLS)
 - [ ] Private photo bucket + signed URLs (not public `profile-photos`)
-- [ ] Apple/Google receipt validation before `is_spark_plus`
-- [ ] Account deletion Edge Function (delete `auth.users` + storage)
+- [ ] Apple/Google receipt validation before `is_spark_plus` (server webhook)
 - [ ] WAF / DDoS protection on API
 - [ ] Penetration test before public launch
 - [ ] Bug bounty / security@ email in SECURITY.md

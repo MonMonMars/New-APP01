@@ -4,7 +4,7 @@
 
 **https://ultra-grove-cake-likes.trycloudflare.com**
 
-_Last updated: Sep 14, 2026 — disguise profile cards aligned with news/ads, disguise button fix on Messages & Chat_
+_Last updated: Sep 14, 2026 — super-like star centered, single photo result modal_
 
 > Tunnel links expire when the cloud workspace stops. If this 404s, ask for a fresh link.
 

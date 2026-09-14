@@ -15,6 +15,7 @@ import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { RelationshipIntent } from '../types/profile';
 import { ThemeMode } from '../types/settings';
+import { DISGUISE_APP_NAME } from '../data/disguiseFeed';
 import { computeProfileCompletion } from '../utils/profileCompletion';
 import { radii, spacing } from '../theme';
 
@@ -66,6 +67,8 @@ export function ProfileScreen() {
     setThemeMode,
     deleteAccount,
     isSupabaseEnabled,
+    disguiseMode,
+    setDisguiseMode,
   } = useApp();
   const [showEdit, setShowEdit] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
@@ -200,6 +203,22 @@ export function ProfileScreen() {
           <Pressable onPress={cycleTheme}>
             <Text style={[styles.themeToggle, { color: colors.gradientEnd }]}>{themeLabel}</Text>
           </Pressable>
+        </View>
+
+        <View style={[styles.toggleRow, { borderBottomColor: colors.border }]}>
+          <Ionicons name="eye-off-outline" size={22} color={colors.textMuted} />
+          <View style={styles.toggleText}>
+            <Text style={[styles.toggleLabel, { color: colors.text }]}>Disguise mode</Text>
+            <Text style={[styles.toggleDesc, { color: colors.textMuted }]}>
+              Show {DISGUISE_APP_NAME} (news & social) instead of Spark in public
+            </Text>
+          </View>
+          <Switch
+            value={disguiseMode}
+            onValueChange={setDisguiseMode}
+            trackColor={{ false: colors.border, true: colors.gradientEnd }}
+            thumbColor={colors.text}
+          />
         </View>
 
         {notificationsEnabled && (

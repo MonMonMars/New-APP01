@@ -10,7 +10,7 @@ import {
 } from '../types/settings';
 
 const STORAGE_KEY = '@spark/app_state';
-const STORAGE_VERSION = 5;
+const STORAGE_VERSION = 6;
 
 export type PersistedAppState = {
   version: number;
@@ -39,6 +39,7 @@ export type PersistedAppState = {
   lastPassedProfileId: string | null;
   isPaused: boolean;
   themeMode: ThemeMode;
+  disguiseMode: boolean;
 };
 
 export function createDefaultPersistedState(): PersistedAppState {
@@ -79,6 +80,7 @@ export function createDefaultPersistedState(): PersistedAppState {
     lastPassedProfileId: null,
     isPaused: false,
     themeMode: 'dark',
+    disguiseMode: false,
   };
 }
 
@@ -114,6 +116,8 @@ export async function loadPersistedState(): Promise<PersistedAppState | null> {
       themeMode: parsed.themeMode ?? 'dark',
       bonusSparkNotes: parsed.bonusSparkNotes ?? 0,
       isPaused: parsed.isPaused ?? false,
+      disguiseMode: parsed.disguiseMode ?? false,
+      heldIds: parsed.heldIds ?? [],
       userId: parsed.userId ?? null,
     };
   } catch {

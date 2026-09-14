@@ -11,6 +11,8 @@ type ScreenHeaderProps = {
   onLeftPress?: () => void;
   rightIcon?: keyof typeof Ionicons.glyphMap;
   onRightPress?: () => void;
+  secondaryRightIcon?: keyof typeof Ionicons.glyphMap;
+  onSecondaryRightPress?: () => void;
 };
 
 export function ScreenHeader({
@@ -21,6 +23,8 @@ export function ScreenHeader({
   onLeftPress,
   rightIcon,
   onRightPress,
+  secondaryRightIcon,
+  onSecondaryRightPress,
 }: ScreenHeaderProps) {
   return (
     <View style={[styles.header, compact && styles.headerCompact]}>
@@ -41,13 +45,20 @@ export function ScreenHeader({
         <Text style={styles.title}>{title}</Text>
       )}
 
-      {rightIcon ? (
-        <Pressable style={styles.iconButton} onPress={onRightPress}>
-          <Ionicons name={rightIcon} size={22} color={colors.text} />
-        </Pressable>
-      ) : (
-        <View style={styles.iconButtonPlaceholder} />
-      )}
+      <View style={styles.rightGroup}>
+        {secondaryRightIcon ? (
+          <Pressable style={styles.iconButton} onPress={onSecondaryRightPress}>
+            <Ionicons name={secondaryRightIcon} size={20} color={colors.textMuted} />
+          </Pressable>
+        ) : null}
+        {rightIcon ? (
+          <Pressable style={styles.iconButton} onPress={onRightPress}>
+            <Ionicons name={rightIcon} size={22} color={colors.text} />
+          </Pressable>
+        ) : (
+          <View style={styles.iconButtonPlaceholder} />
+        )}
+      </View>
     </View>
   );
 }
@@ -93,5 +104,10 @@ const styles = StyleSheet.create({
   iconButtonPlaceholder: {
     width: 40,
     height: 40,
+  },
+  rightGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
   },
 });

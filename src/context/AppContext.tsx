@@ -219,8 +219,6 @@ type AppContextValue = {
   clearDisguiseAd: () => void;
   setPaused: (paused: boolean) => void;
   deleteAccount: () => Promise<void>;
-  dismissNotificationPrompt: () => void;
-  showNotificationPrompt: boolean;
 };
 
 const defaultPersisted = createDefaultPersistedState();
@@ -254,8 +252,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     defaultNotificationPreferences,
   );
   const [lastPassedProfileId, setLastPassedProfileId] = useState<string | null>(null);
-  const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
-  const [notificationPromptDismissed, setNotificationPromptDismissed] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [themeMode, setThemeModeState] = useState<ThemeMode>('dark');
   const [disguiseMode, setDisguiseModeState] = useState(true);
@@ -669,11 +665,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!userId && isSupabaseConfigured()) {
         setUserId(`user-${Date.now()}`);
       }
-      if (!notificationPromptDismissed && !notificationsEnabled) {
-        setShowNotificationPrompt(true);
-      }
     },
-    [notificationPromptDismissed, notificationsEnabled, userId],
+    [userId],
   );
 
   const updateUser = useCallback(
@@ -884,8 +877,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       if (notificationsEnabled && notificationPreferences.matches) {
         void scheduleMatchNotification(profile.name);
-      } else if (!notificationPromptDismissed) {
-        setShowNotificationPrompt(true);
       }
 
       return match;
@@ -896,7 +887,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       lastSparkNoteDate,
       notificationsEnabled,
       notificationPreferences.matches,
-      notificationPromptDismissed,
       bonusSparkNotes,
     ],
   );
@@ -934,13 +924,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       if (notificationsEnabled && notificationPreferences.matches) {
         void scheduleMatchNotification(profile.name);
-      } else if (!notificationPromptDismissed) {
-        setShowNotificationPrompt(true);
       }
 
       return match;
     },
-    [notificationsEnabled, notificationPreferences.matches, notificationPromptDismissed],
+    [notificationsEnabled, notificationPreferences.matches],
   );
 
   const superLikeProfile = useCallback(
@@ -1106,8 +1094,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       await registerCloudPushToken(userId);
     }
     setNotificationsEnabled(granted);
-    setShowNotificationPrompt(false);
-    setNotificationPromptDismissed(true);
     return granted;
   }, [userId]);
 
@@ -1185,11 +1171,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
     setPriorityProfileId(null);
   }, [userId]);
-
-  const dismissNotificationPrompt = useCallback(() => {
-    setShowNotificationPrompt(false);
-    setNotificationPromptDismissed(true);
-  }, []);
 
   const getConversationIdForProfile = useCallback(
     (profileId: string) => {
@@ -1280,8 +1261,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       clearDisguiseAd,
       setPaused,
       deleteAccount,
-      dismissNotificationPrompt,
-      showNotificationPrompt,
     }),
     [
       hasOnboarded,
@@ -1360,8 +1339,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       clearDisguiseAd,
       setPaused,
       deleteAccount,
-      dismissNotificationPrompt,
-      showNotificationPrompt,
     ],
   );
 

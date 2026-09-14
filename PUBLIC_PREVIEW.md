@@ -2,9 +2,9 @@
 
 ## Demo link (open now)
 
-**https://trademarks-furthermore-generally-westminster.trycloudflare.com**
+**https://screenshot-housewives-roland-nation.trycloudflare.com**
 
-_Last updated: Sep 14, 2026 — verification badges, simplified logo bubble, clean discover home_
+_Last updated: Sep 14, 2026 — voice mic + emotions, verification badges, simplified logo_
 
 > Tunnel links expire when the cloud workspace stops. If this 404s, ask for a fresh link.
 

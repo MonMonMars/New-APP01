@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
 import { SocialPost } from '../../data/disguiseFeed';
@@ -17,12 +17,16 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
   return (
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={styles.header}>
-        <DisguiseOverlayAvatar
-          imageUrl={post.avatarUrl}
-          overlayText={post.avatarMask.text}
-          variant={post.avatarMask.variant}
-          size={40}
-        />
+        {post.maskAvatar !== false && post.avatarMask ? (
+          <DisguiseOverlayAvatar
+            imageUrl={post.avatarUrl}
+            overlayText={post.avatarMask.text}
+            variant={post.avatarMask.variant}
+            size={40}
+          />
+        ) : (
+          <Image source={{ uri: post.avatarUrl }} style={styles.avatar} />
+        )}
         <View style={styles.headerText}>
           <Text style={[styles.author, { color: colors.text }]}>{post.author}</Text>
           <Text style={[styles.handle, { color: colors.textMuted }]}>
@@ -72,6 +76,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.sm,
     gap: spacing.sm,
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
   headerText: {
     flex: 1,

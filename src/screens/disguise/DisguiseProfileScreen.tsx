@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { DisguiseAdGeneratorSheet } from '../../components/disguise/DisguiseAdGeneratorSheet';
 import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -11,14 +13,16 @@ import { radii, spacing } from '../../theme';
 export function DisguiseProfileScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { user, disguiseMode, setDisguiseMode } = useApp();
+  const { user, disguiseMode, setDisguiseMode, disguiseAdCreative } = useApp();
+  const [showGenerator, setShowGenerator] = useState(false);
+  const profilePhoto = disguiseAdCreative?.imageUrl ?? user.photos[0];
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader title="Profile" showSearch={false} />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.hero}>
-          <Image source={{ uri: user.photos[0] }} style={styles.avatar} />
+          <Image source={{ uri: profilePhoto }} style={styles.avatar} />
           <Text style={[styles.name, { color: colors.text }]}>{user.name}</Text>
           <Text style={[styles.bio, { color: colors.textMuted }]}>
             {user.bio || 'Coffee enthusiast · Design · NYC'}
@@ -66,7 +70,25 @@ export function DisguiseProfileScreen() {
             Tip: Long-press the {DISGUISE_APP_NAME} logo on Home to open Spark instantly.
           </Text>
         </View>
+
+        <Pressable
+          style={[styles.generatorCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          onPress={() => setShowGenerator(true)}
+        >
+          <Ionicons name="sparkles" size={22} color={colors.gradientEnd} />
+          <View style={styles.generatorText}>
+            <Text style={[styles.generatorTitle, { color: colors.text }]}>AI disguise ad image</Text>
+            <Text style={[styles.generatorDesc, { color: colors.textMuted }]}>
+              {disguiseAdCreative
+                ? `Using: ${disguiseAdCreative.overlayText}`
+                : 'Generate a sponsored post from your photo'}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+        </Pressable>
       </ScrollView>
+
+      <DisguiseAdGeneratorSheet visible={showGenerator} onClose={() => setShowGenerator(false)} />
     </View>
   );
 }
@@ -178,5 +200,27 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     lineHeight: 16,
     fontStyle: 'italic',
+  },
+  generatorCard: {
+    marginHorizontal: spacing.md,
+    marginTop: spacing.sm,
+    borderRadius: radii.card,
+    borderWidth: StyleSheet.hairlineWidth,
+    padding: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  generatorText: {
+    flex: 1,
+  },
+  generatorTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  generatorDesc: {
+    fontSize: 12,
+    marginTop: 2,
+    lineHeight: 17,
   },
 });

@@ -408,7 +408,6 @@ export function DiscoverScreen() {
             onLeftPress={openMap}
             rightIcon="options-outline"
             onRightPress={() => setShowPreferences(true)}
-            showDisguiseButton
           />
 
           <View style={styles.metaRow}>

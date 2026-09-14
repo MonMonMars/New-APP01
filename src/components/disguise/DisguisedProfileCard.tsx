@@ -61,6 +61,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
                 overlayText={maskSnippet}
                 variant="news"
                 size={40}
+                badgeOnly
               />
             </Pressable>
             <View style={styles.socialHeaderText}>
@@ -111,7 +112,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
           <View style={styles.body}>
             <Text style={styles.brand}>{post.headline}</Text>
             <Text style={styles.tagline}>{post.summary}</Text>
-            <View style={styles.spotlightRow}>
+            <View style={styles.avatarQuoteRow}>
               <Pressable
                 onPress={(event) => {
                   event.stopPropagation();
@@ -124,13 +125,17 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
                   imageUrl={post.avatarUrl}
                   overlayText="AD"
                   variant="ad"
-                  size={40}
+                  size={44}
+                  badgeOnly
                 />
               </Pressable>
-              <Text style={styles.spotlightText} numberOfLines={2}>
-                Reader spotlight — masked photo is a profile, not part of this ad.
+              <Text style={[styles.quoteBesideAvatar, styles.quoteBesideAvatarAd]} numberOfLines={3}>
+                {post.overlayText}
               </Text>
             </View>
+            <Text style={styles.spotlightHint} numberOfLines={2}>
+              Reader spotlight — masked photo is a profile, not part of this ad.
+            </Text>
             <View style={styles.cta}>
               <Text style={styles.ctaText}>{post.cta ?? 'Learn more'}</Text>
               <Ionicons name="chevron-forward" size={14} color="#fff" />
@@ -167,7 +172,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
 
           <View style={styles.reportersRow}>
             <Pressable
-              style={styles.reporterCell}
+              style={styles.avatarQuoteRow}
               onPress={(event) => {
                 event.stopPropagation();
                 openPreview();
@@ -180,8 +185,9 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
                 overlayText={maskSnippet}
                 variant="news"
                 size={44}
+                badgeOnly
               />
-              <Text style={[styles.reporterQuote, { color: colors.text }]} numberOfLines={3}>
+              <Text style={[styles.quoteBesideAvatar, { color: colors.text }]} numberOfLines={4}>
                 {post.overlayText}
               </Text>
             </Pressable>
@@ -286,18 +292,27 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: spacing.sm,
   },
-  spotlightRow: {
+  avatarQuoteRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    marginBottom: spacing.md,
-    paddingVertical: spacing.xs,
-  },
-  spotlightText: {
     flex: 1,
+  },
+  quoteBesideAvatar: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '600',
+  },
+  quoteBesideAvatarAd: {
+    color: '#ddd',
+  },
+  spotlightHint: {
     color: '#999',
     fontSize: 11,
     lineHeight: 15,
+    marginBottom: spacing.md,
+    marginTop: spacing.xs,
   },
   cta: {
     flexDirection: 'row',
@@ -315,24 +330,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   reportersRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
     marginTop: spacing.xs,
     paddingTop: spacing.sm,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(128,128,128,0.25)',
-  },
-  reporterCell: {
-    flex: 1,
-    alignItems: 'center',
-    maxWidth: 120,
-  },
-  reporterQuote: {
-    fontSize: 11,
-    lineHeight: 15,
-    textAlign: 'center',
-    fontWeight: '600',
-    marginTop: spacing.xs,
   },
   socialHeader: {
     flexDirection: 'row',

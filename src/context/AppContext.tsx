@@ -229,7 +229,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
 
-    loadPersistedState().then(async (saved) => {
+    let hydrationFinished = false;
+    const finishHydration = () => {
+      if (cancelled || hydrationFinished) {
+        return;
+      }
+      hydrationFinished = true;
+      hydratedRef.current = true;
+      setIsHydrated(true);
+    };
+
+    const hydrationTimeout = setTimeout(finishHydration, 8000);
+
+    void loadPersistedState()
+      .then(async (saved) => {
       if (cancelled) {
         return;
       }
@@ -295,12 +308,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setSuperLikedIds(arrayToSet(seedSwipe.superLikedIds));
       }
 
-      hydratedRef.current = true;
-      setIsHydrated(true);
-    });
+      finishHydration();
+    })
+      .catch(() => {
+        finishHydration();
+      });
 
     return () => {
       cancelled = true;
+      clearTimeout(hydrationTimeout);
     };
   }, []);
 

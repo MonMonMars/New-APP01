@@ -4,18 +4,20 @@ Try the app in **any browser** (phone, laptop, tablet) using these links.
 
 ## Live preview (Cloudflare)
 
-**https://asn-stand-along-patricia.trycloudflare.com**
+**https://comm-giving-cricket-matter.trycloudflare.com**
+
+_Last updated: Sep 14, 2026 — fullscreen card fix branch_
 
 > This link works outside Cursor. It forwards to the dev server running in the cloud workspace.  
 > Tunnels are **temporary** — if the link stops working, ask to regenerate it.
 
 ### How to test Discover v0.4 features
 
-1. **Almost full-screen photos** — Discover tab: card fills most of the viewport.
-2. **Search more people** — tap below the card to load the next batch (6 at a time).
-3. **Expand location** — radius pill or expand sheet: 25 → 50 → 100 → 250 → Anywhere.
-4. **Fake map** — map icon (top-left) → pins → tap to preview → view in deck.
-5. **36 mock discover profiles** + 4 incoming likes for testing.
+1. **Almost full-screen photos** — Discover tab: card fills ~90%+ of viewport; header/filters/search chrome overlaid on the photo (not stacked below).
+2. **Search more people** — swipe through the deck; tap **Search more people** below the card to load the next batch (6 at a time).
+3. **Expand location** — tap the radius pill (“Searching within 25 mi”) or the expand icon → pick 50 / 100 / 250 / Anywhere.
+4. **Fake map** — tap the **map icon** (top-left) → stylized map with pins → tap a pin → **View in deck** or **Search this area**.
+5. **More fake accounts** — 36 discover profiles + 4 incoming likes for testing swipes, filters, and radius expansion.
 
 ### How to test v0.3 features
 
@@ -49,7 +51,7 @@ Try the app in **any browser** (phone, laptop, tablet) using these links.
 ```bash
 git clone https://github.com/MonMonMars/New-APP01.git
 cd New-APP01
-git checkout cursor/finish-spark-app-7b60
+git checkout cursor/fullscreen-card-fix-7b60
 npm install
 npm run web
 ```

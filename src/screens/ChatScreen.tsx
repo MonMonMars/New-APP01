@@ -12,11 +12,12 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AnimatedPressable } from '../components/AnimatedPressable';
+import { ChatComposer } from '../components/ChatComposer';
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { VerificationBadges } from '../components/VerificationBadges';
 import { MessageStatusIcon } from '../components/MessageStatusIcon';
@@ -198,29 +199,32 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
           <View style={styles.icebreakers}>
             <Text style={[styles.icebreakerTitle, { color: colors.textMuted }]}>Break the ice</Text>
             {icebreakers.map((prompt) => (
-              <Pressable
+              <AnimatedPressable
                 key={prompt}
+                scaleTo={0.96}
                 style={[styles.icebreakerChip, { backgroundColor: colors.surface }]}
                 onPress={() => handleSend(prompt)}
               >
                 <Text style={[styles.icebreakerText, { color: colors.text }]}>{prompt}</Text>
-              </Pressable>
+              </AnimatedPressable>
             ))}
             <View style={styles.gameRow}>
-              <Pressable
+              <AnimatedPressable
+                scaleTo={0.95}
                 style={[styles.gameChip, { backgroundColor: colors.surface, borderColor: colors.gradientEnd }]}
                 onPress={() => setShowSuggestDate(true)}
               >
                 <Ionicons name="calendar-outline" size={16} color={colors.gradientEnd} />
                 <Text style={[styles.gameChipText, { color: colors.gradientEnd }]}>Suggest a date</Text>
-              </Pressable>
-              <Pressable
+              </AnimatedPressable>
+              <AnimatedPressable
+                scaleTo={0.95}
                 style={[styles.gameChip, { backgroundColor: colors.surface, borderColor: colors.gradientEnd }]}
                 onPress={() => setShowVibeGame(true)}
               >
                 <Ionicons name="color-wand-outline" size={16} color={colors.gradientEnd} />
                 <Text style={[styles.gameChipText, { color: colors.gradientEnd }]}>Read my vibe</Text>
-              </Pressable>
+              </AnimatedPressable>
             </View>
           </View>
         </View>
@@ -236,32 +240,15 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         />
       )}
 
-      <View style={[styles.composer, { borderTopColor: colors.border, paddingBottom: insets.bottom + spacing.sm }]}>
-        <Pressable style={styles.composerAction} onPress={() => setShowSuggestDate(true)}>
-          <Ionicons name="calendar-outline" size={22} color={colors.textMuted} />
-        </Pressable>
-        <Pressable style={styles.composerAction} onPress={() => setShowVibeGame(true)}>
-          <Ionicons name="color-wand-outline" size={22} color={colors.textMuted} />
-        </Pressable>
-        <Pressable style={styles.composerAction} onPress={handlePickImage}>
-          <Ionicons name="images-outline" size={22} color={colors.textMuted} />
-        </Pressable>
-        <TextInput
-          value={draft}
-          onChangeText={setDraft}
-          placeholder="Type a message..."
-          placeholderTextColor={colors.textMuted}
-          style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]}
-          onSubmitEditing={() => handleSend(draft)}
-        />
-        <Pressable
-          style={[styles.sendButton, { backgroundColor: colors.gradientEnd }, !draft.trim() && styles.sendButtonDisabled]}
-          onPress={() => handleSend(draft)}
-          disabled={!draft.trim()}
-        >
-          <Ionicons name="send" size={18} color={colors.text} />
-        </Pressable>
-      </View>
+      <ChatComposer
+        draft={draft}
+        onChangeDraft={setDraft}
+        onSend={handleSend}
+        onPickImage={handlePickImage}
+        onSuggestDate={() => setShowSuggestDate(true)}
+        onVibeGame={() => setShowVibeGame(true)}
+        paddingBottom={insets.bottom + spacing.sm}
+      />
 
       <SafetyActionSheet
         visible={showSafety}
@@ -462,33 +449,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     marginTop: 2,
-  },
-  composer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
-    gap: spacing.sm,
-    borderTopWidth: StyleSheet.hairlineWidth,
-  },
-  composerAction: {
-    padding: spacing.sm,
-  },
-  input: {
-    flex: 1,
-    borderRadius: radii.button,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
-    fontSize: 15,
-  },
-  sendButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sendButtonDisabled: {
-    opacity: 0.4,
   },
 });

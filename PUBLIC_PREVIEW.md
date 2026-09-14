@@ -2,9 +2,9 @@
 
 ## Demo link (open now)
 
-**https://guam-year-shaped-tin.trycloudflare.com**
+**https://trademarks-furthermore-generally-westminster.trycloudflare.com**
 
-_Last updated: Sep 14, 2026 — clean discover home, emergency logo, unified disguise cards_
+_Last updated: Sep 14, 2026 — verification badges, simplified logo bubble, clean discover home_
 
 > Tunnel links expire when the cloud workspace stops. If this 404s, ask for a fresh link.
 

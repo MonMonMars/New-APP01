@@ -7,15 +7,15 @@ import {
   Pressable,
   StyleSheet,
   View,
-  type LayoutChangeEvent,
 } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
-const THUMB_SIZE = 40;
-const TRACK_HEIGHT = 44;
+
 const UNLOCK_RATIO = 0.82;
+const TRACK_PADDING = 4;
+const TRACK_WIDTH = 132;
 
 type ModeToggleLogoProps = {
   variant: 'pulse' | 'spark';
@@ -36,13 +36,42 @@ function triggerHaptic(style: 'light' | 'medium' | 'success' = 'medium') {
   );
 }
 
+type LogoBubbleProps = {
+  icon: keyof typeof Ionicons.glyphMap;
+  iconColor: string;
+  iconBg: string;
+  compact?: boolean;
+};
+
+/** Single bubble — icon fill + matching outline, no nested frames or extra marks. */
+function LogoBubble({ icon, iconColor, iconBg, compact = false }: LogoBubbleProps) {
+  const size = compact ? 40 : 44;
+
+  return (
+    <View
+      style={[
+        styles.bubble,
+        {
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: iconBg,
+          borderColor: `${iconColor}66`,
+        },
+      ]}
+    >
+      <Ionicons name={icon} size={compact ? 18 : 20} color={iconColor} />
+    </View>
+  );
+}
+
 /** Spark: tap logo for instant disguise. Pulse: drag logo right along track to unlock Spark. */
 export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps) {
   const { colors } = useTheme();
   const { disguiseMode, setDisguiseMode } = useApp();
   const [dragX, setDragX] = useState(0);
-  const [trackWidth, setTrackWidth] = useState(148);
-  const maxDrag = Math.max(0, trackWidth - THUMB_SIZE - 8);
+  const bubbleSize = compact ? 40 : 44;
+  const maxDrag = Math.max(0, TRACK_WIDTH - bubbleSize - TRACK_PADDING * 2);
 
   const isPulse = variant === 'pulse';
   const icon = isPulse ? 'pulse' : 'flame';
@@ -94,41 +123,35 @@ export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps
     }),
   ).current;
 
-  const onTrackLayout = (event: LayoutChangeEvent) => {
-    const width = event.nativeEvent.layout.width;
-    if (width > 0) {
-      setTrackWidth(width);
-    }
-  };
+  const bubble = <LogoBubble icon={icon} iconColor={iconColor} iconBg={iconBg} compact={compact} />;
 
   if (!disguiseMode) {
     return (
       <Pressable
         onPress={enterDisguise}
-        style={({ pressed }) => [
-          styles.emergencyButton,
-          { backgroundColor: pressed ? 'rgba(255,255,255,0.32)' : 'rgba(255,255,255,0.2)' },
-        ]}
+        style={({ pressed }) => [pressed && styles.pressed]}
         accessibilityRole="button"
         accessibilityLabel={`Emergency — switch to ${DISGUISE_APP_NAME} disguise mode`}
         accessibilityHint="Tap instantly to hide Spark"
       >
-        <View style={[styles.logoIcon, { backgroundColor: iconBg }]}>
-          <Ionicons name={icon} size={compact ? 18 : 20} color={iconColor} />
-        </View>
-        <View style={styles.emergencyBadge}>
-          <Ionicons name="shield" size={10} color="#fff" />
-        </View>
+        {bubble}
       </Pressable>
     );
   }
 
-  const fillWidth = dragX + THUMB_SIZE * 0.5;
+  const fillWidth = dragX + bubbleSize * 0.55;
 
   return (
     <View
-      style={[styles.track, { borderColor: colors.border, backgroundColor: colors.surface }]}
-      onLayout={onTrackLayout}
+      style={[
+        styles.track,
+        {
+          width: TRACK_WIDTH,
+          height: bubbleSize + TRACK_PADDING * 2,
+          borderRadius: (bubbleSize + TRACK_PADDING * 2) / 2,
+          backgroundColor: colors.surface,
+        },
+      ]}
       accessibilityRole="adjustable"
       accessibilityLabel="Drag right to unlock Spark"
     >
@@ -137,62 +160,37 @@ export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps
           styles.trackFill,
           {
             width: fillWidth,
-            backgroundColor: colors.gradientEnd,
+            backgroundColor: iconColor,
+            borderRadius: (bubbleSize + TRACK_PADDING * 2) / 2,
           },
         ]}
+        pointerEvents="none"
       />
-      <View style={styles.trackArrows} pointerEvents="none">
-        <Ionicons name="chevron-forward" size={14} color={colors.textMuted} />
-        <Ionicons name="chevron-forward" size={14} color={colors.textMuted} style={styles.arrowMid} />
-        <Ionicons name="chevron-forward" size={14} color={colors.textMuted} />
-      </View>
       <View
         style={[
           styles.thumb,
           {
             transform: [{ translateX: dragX }],
-            backgroundColor: iconBg,
-            borderColor: colors.border,
           },
         ]}
         {...panResponder.panHandlers}
       >
-        <Ionicons name={icon} size={compact ? 18 : 20} color={iconColor} />
-        <View style={styles.thumbGrip}>
-          <View style={[styles.gripLine, { backgroundColor: colors.textMuted }]} />
-          <View style={[styles.gripLine, { backgroundColor: colors.textMuted }]} />
-        </View>
+        {bubble}
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  emergencyButton: {
-    width: 52,
-    height: 52,
-    borderRadius: 14,
+  bubble: {
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.35)',
   },
-  emergencyBadge: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: 'rgba(239, 68, 68, 0.9)',
-    alignItems: 'center',
-    justifyContent: 'center',
+  pressed: {
+    opacity: 0.82,
   },
   track: {
-    width: 148,
-    height: TRACK_HEIGHT,
-    borderRadius: TRACK_HEIGHT / 2,
-    borderWidth: 1,
     justifyContent: 'center',
     overflow: 'hidden',
   },
@@ -201,47 +199,11 @@ const styles = StyleSheet.create({
     left: 0,
     top: 0,
     bottom: 0,
-    opacity: 0.28,
-    borderRadius: TRACK_HEIGHT / 2,
-  },
-  trackArrows: {
-    position: 'absolute',
-    right: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    opacity: 0.55,
-  },
-  arrowMid: {
-    marginHorizontal: -6,
+    opacity: 0.2,
   },
   thumb: {
     position: 'absolute',
-    left: 4,
-    width: THUMB_SIZE,
-    height: THUMB_SIZE - 4,
-    borderRadius: (THUMB_SIZE - 4) / 2,
-    borderWidth: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 2,
-    paddingHorizontal: 4,
+    left: TRACK_PADDING,
     zIndex: 2,
-  },
-  thumbGrip: {
-    gap: 2,
-    opacity: 0.65,
-  },
-  gripLine: {
-    width: 2,
-    height: 8,
-    borderRadius: 1,
-  },
-  logoIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });

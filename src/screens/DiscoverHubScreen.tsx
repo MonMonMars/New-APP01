@@ -88,7 +88,12 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
-      <ScreenHeader title="Discover tools" leftIcon="chevron-back" onLeftPress={onClose} />
+      <ScreenHeader
+        title="Discover tools"
+        leftIcon="chevron-back"
+        onLeftPress={onClose}
+        showDisguiseButton
+      />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.quickGrid}>

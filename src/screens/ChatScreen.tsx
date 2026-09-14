@@ -178,15 +178,22 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
             </Text>
           </View>
         </Pressable>
-        {turnLabel && (
-          <View style={[styles.turnBadge, { backgroundColor: conversation.yourTurn ? colors.gradientEnd : colors.surface }]}>
-            <Text style={[styles.turnText, { color: colors.text }]}>{turnLabel}</Text>
-          </View>
-        )}
-        <DisguiseModeButton />
-        <Pressable style={styles.headerAction} onPress={() => setShowSafety(true)}>
-          <Ionicons name="ellipsis-vertical" size={22} color={colors.text} />
-        </Pressable>
+        <View style={styles.headerActions}>
+          {turnLabel ? (
+            <View
+              style={[
+                styles.turnBadge,
+                { backgroundColor: conversation.yourTurn ? colors.gradientEnd : colors.surface },
+              ]}
+            >
+              <Text style={[styles.turnText, { color: colors.text }]}>{turnLabel}</Text>
+            </View>
+          ) : null}
+          <DisguiseModeButton />
+          <Pressable style={styles.headerAction} onPress={() => setShowSafety(true)}>
+            <Ionicons name="ellipsis-vertical" size={22} color={colors.text} />
+          </Pressable>
+        </View>
       </View>
 
       {conversation.messages.length === 0 ? (
@@ -320,6 +327,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
+    minWidth: 0,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexShrink: 0,
+    gap: spacing.xs,
   },
   headerAvatar: {
     width: 40,

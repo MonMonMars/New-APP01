@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { useTheme } from '../context/ThemeContext';
+import { spacing } from '../theme';
 import { DisguiseModeButton } from './disguise/ModeToggleButtons';
 import { ModeToggleLogo } from './disguise/ModeToggleLogo';
-import { colors, spacing } from '../theme';
 
 type ScreenHeaderProps = {
   title?: string;
@@ -30,31 +31,42 @@ export function ScreenHeader({
   onSecondaryRightPress,
   showDisguiseButton = false,
 }: ScreenHeaderProps) {
+  const { colors } = useTheme();
+
   return (
     <View style={[styles.header, compact && styles.headerCompact]}>
-      {leftIcon ? (
-        <Pressable style={styles.iconButton} onPress={onLeftPress}>
-          <Ionicons name={leftIcon} size={22} color={colors.text} />
-        </Pressable>
-      ) : (
-        <View style={styles.iconButtonPlaceholder} />
-      )}
+      <View style={styles.leftSlot}>
+        {leftIcon ? (
+          <Pressable style={[styles.iconButton, { backgroundColor: colors.surface }]} onPress={onLeftPress}>
+            <Ionicons name={leftIcon} size={22} color={colors.text} />
+          </Pressable>
+        ) : (
+          <View style={styles.iconButtonPlaceholder} />
+        )}
+      </View>
 
-      {showLogo ? (
-        <ModeToggleLogo variant="spark" compact={compact} />
-      ) : (
-        <Text style={styles.title}>{title}</Text>
-      )}
+      <View style={styles.centerSlot}>
+        {showLogo ? (
+          <ModeToggleLogo variant="spark" compact={compact} />
+        ) : (
+          <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
+            {title}
+          </Text>
+        )}
+      </View>
 
       <View style={styles.rightGroup}>
         {showDisguiseButton ? <DisguiseModeButton /> : null}
         {secondaryRightIcon ? (
-          <Pressable style={styles.iconButton} onPress={onSecondaryRightPress}>
+          <Pressable
+            style={[styles.iconButton, { backgroundColor: colors.surface }]}
+            onPress={onSecondaryRightPress}
+          >
             <Ionicons name={secondaryRightIcon} size={20} color={colors.textMuted} />
           </Pressable>
         ) : null}
         {rightIcon ? (
-          <Pressable style={styles.iconButton} onPress={onRightPress}>
+          <Pressable style={[styles.iconButton, { backgroundColor: colors.surface }]} onPress={onRightPress}>
             <Ionicons name={rightIcon} size={22} color={colors.text} />
           </Pressable>
         ) : (
@@ -69,31 +81,27 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.sm,
+    gap: spacing.xs,
   },
   headerCompact: {
     paddingBottom: spacing.xs,
   },
-  logoRow: {
-    flexDirection: 'row',
+  leftSlot: {
+    width: 40,
+    flexShrink: 0,
+  },
+  centerSlot: {
+    flex: 1,
+    minWidth: 0,
     alignItems: 'center',
-    gap: spacing.sm,
-  },
-  logo: {
-    color: colors.text,
-    fontSize: 26,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-  },
-  logoCompact: {
-    fontSize: 22,
+    justifyContent: 'center',
   },
   title: {
-    color: colors.text,
     fontSize: 24,
     fontWeight: '800',
+    textAlign: 'center',
   },
   iconButton: {
     width: 40,
@@ -101,7 +109,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surface,
   },
   iconButtonPlaceholder: {
     width: 40,
@@ -111,5 +118,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
+    flexShrink: 0,
   },
 });

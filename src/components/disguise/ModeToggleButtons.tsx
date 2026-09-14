@@ -33,7 +33,8 @@ function ModeIconButton({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       onPress={handlePress}
-      style={[styles.button, { backgroundColor }]}
+      hitSlop={8}
+      style={({ pressed }) => [styles.button, { backgroundColor }, pressed && styles.pressed]}
     >
       <Ionicons name={icon} size={20} color={color} />
     </Pressable>
@@ -63,5 +64,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 2,
+  },
+  pressed: {
+    opacity: 0.75,
   },
 });

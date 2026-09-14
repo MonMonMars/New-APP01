@@ -1,8 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import {
+  CommonActions,
+  NavigationContainer,
+  useNavigation,
+  useNavigationContainerRef,
+} from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { useApp } from '../context/AppContext';
@@ -234,11 +239,30 @@ function RootNavigator() {
 }
 
 function ThemedNavigator() {
-  const { themeMode } = useApp();
+  const { themeMode, disguiseMode, hasOnboarded, isHydrated } = useApp();
+  const navigationRef = useNavigationContainerRef<RootStackParamList>();
+  const wasDisguiseMode = useRef(disguiseMode);
+
+  useEffect(() => {
+    if (!isHydrated || !hasOnboarded || !navigationRef.isReady()) {
+      return;
+    }
+
+    if (disguiseMode && !wasDisguiseMode.current) {
+      navigationRef.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'Main' }],
+        }),
+      );
+    }
+
+    wasDisguiseMode.current = disguiseMode;
+  }, [disguiseMode, hasOnboarded, isHydrated, navigationRef]);
 
   return (
     <ThemeProvider mode={themeMode}>
-      <NavigationContainer>
+      <NavigationContainer ref={navigationRef}>
         <HydrationGate>
           <RootNavigator />
         </HydrationGate>

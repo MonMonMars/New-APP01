@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { SparkPlusComparisonTable } from '../components/SparkPlusComparisonTable';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
@@ -45,9 +46,12 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <LinearGradient colors={[colors.gradientStart, colors.gradientEnd]} style={styles.hero}>
-        <Pressable style={styles.close} onPress={onClose}>
-          <Ionicons name="close" size={28} color={colors.text} />
-        </Pressable>
+        <View style={styles.heroTopRow}>
+          <Pressable style={styles.close} onPress={onClose}>
+            <Ionicons name="close" size={28} color={colors.text} />
+          </Pressable>
+          <DisguiseModeButton />
+        </View>
         <Ionicons name="diamond" size={48} color={colors.text} />
         <Text style={styles.heroTitle}>Spark+</Text>
         <Text style={styles.heroSubtitle}>
@@ -136,10 +140,16 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: radii.card,
     borderBottomRightRadius: radii.card,
   },
-  close: {
+  heroTopRow: {
     position: 'absolute',
     top: spacing.md,
+    left: spacing.md,
     right: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  close: {
     padding: spacing.sm,
   },
   heroTitle: {

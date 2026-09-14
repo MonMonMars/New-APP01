@@ -41,6 +41,22 @@ Spark implements industry-standard patterns from **Tinder**, **Bumble**, and **H
 
 **Tagline options:** “Match with intention.” · “Drag your heart into it.” · “Dating, without the mindless swipe.”
 
+### 1.1 Pulse disguise mode (default)
+
+After onboarding, users land in **Pulse** — a news-and-social feed that disguises Spark as a generic content app in public.
+
+| Feature | Implementation |
+|---------|----------------|
+| **Brand** | Pulse (blue pulse icon); Spark hidden until unlocked |
+| **Feed** | News (BBC, Verge), sponsored ads, social posts with face overlays |
+| **News reader** | In-app bottom sheet; reporter avatars open photo preview |
+| **Ads** | In-app landing sheet; optional external CTA |
+| **AI disguise** | Profile → generate ad/news overlay from user photo |
+| **Toggle** | Tap top-left **Pulse logo** → Spark; tap **Spark logo** or eye-off → Pulse |
+| **Tabs** | Home, Trending (topic filters), Activity, Profile |
+
+Disguise mode persists in AsyncStorage (`disguiseMode`, default `true`). See `DisguiseNavigator`, `ModeToggleLogo`, and `buildDisguiseFeed`.
+
 ---
 
 ## 2. Competitive landscape

@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
 import { spacing } from '../theme';
+import { showDemoToast } from '../utils/demoFeedback';
 
 type SocialConnectRowsProps = {
   instagramConnected: boolean;
@@ -21,16 +22,22 @@ export function SocialConnectRows({
 
   const handleInstagram = () => {
     if (!instagramConnected) {
-      Alert.alert('Connect Instagram', 'Instagram integration is coming soon. This is a preview stub.');
+      onToggleInstagram();
+      showDemoToast('Instagram connected', 'Your top photos will appear on your Spark profile in production.');
+    } else {
+      onToggleInstagram();
+      showDemoToast('Instagram disconnected');
     }
-    onToggleInstagram();
   };
 
   const handleSpotify = () => {
     if (!spotifyConnected) {
-      Alert.alert('Connect Spotify', 'Spotify integration is coming soon. This is a preview stub.');
+      onToggleSpotify();
+      showDemoToast('Spotify connected', 'Your anthem and top artists will show on your profile in production.');
+    } else {
+      onToggleSpotify();
+      showDemoToast('Spotify disconnected');
     }
-    onToggleSpotify();
   };
 
   return (

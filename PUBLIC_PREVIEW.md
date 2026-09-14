@@ -2,9 +2,9 @@
 
 ## Demo link (open now)
 
-**https://stadium-compressed-intimate-willow.trycloudflare.com**
+**https://cup-photographic-counting-worker.trycloudflare.com**
 
-_Last updated: Sep 14, 2026 — complete app polish, free news sources, logo mode toggle_
+_Last updated: Sep 14, 2026 — in-app ads, trending filters, video preview, modal polish_
 
 > Tunnel links expire when the cloud workspace stops. If this 404s, ask for a fresh link.
 
@@ -24,18 +24,19 @@ _Last updated: Sep 14, 2026 — complete app polish, free news sources, logo mod
 ## What to try
 
 ### Pulse disguise mode — default
-- News cards show reporter avatars + quotes; tap for photo preview
-- Articles open **in-app** (BBC News, BBC Good Food, The Verge — all free)
-- Sponsored ads open real client landing pages
-- Social posts: upvote, comment, share feedback
-- **Trending** topics · **Activity** alerts · **Profile** menu + AI disguise ad generator
+- News cards: reporter avatars + in-app article reader (BBC, Verge — free)
+- Sponsored ads open **in-app** landing sheets (optional external CTA)
+- **Trending** → tap a topic → filtered home feed
+- Social: upvote, comment, share · Activity alerts open in-app
+- **Profile** → AI disguise ad image · menu rows respond
+- Header search → Trending · bell → Activity
 
 ### Spark safe mode
-- **Discover** — drag card to heart (like), trash (pass), or tap red star (super-like)
-- **Standouts** + **Recently active** rows
-- **Most compatible** banner with compatibility %
-- **Hold** profiles, **prompt-specific likes**, **Suggest a Date** in chat
-- **Map**, **Explore**, **Likes**, **Matches**
+- **Discover** — drag to heart/trash/star zones
+- **Video** badge on profiles → preview sheet
+- **Likes** (Spark+) → tap card for full profile
+- **Map**, **Explore**, **Matches**, **Profile**
+- Spark+, Shop, Safety, Notifications — eye-off returns to Pulse
 
 ### Sound
 - Click anywhere on the page first (browser autoplay), then like/pass/rose for sound

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, radii, spacing } from '../theme';
@@ -29,6 +29,8 @@ export function SuperLikeResultModal({
     return null;
   }
 
+  const photos = profile.photos.length > 0 ? profile.photos : [userPhoto];
+
   return (
     <Modal visible={visible} animationType="fade" transparent>
       <View style={styles.backdrop}>
@@ -48,27 +50,45 @@ export function SuperLikeResultModal({
           <Text style={styles.title}>{isMatch ? 'Super Match!' : 'Super Like sent!'}</Text>
           <Text style={styles.subtitle}>
             {isMatch
-              ? `You and ${profile.name} super-liked each other. Start the conversation!`
-              : `${profile.name} will see you first. We'll notify you if they like you back.`}
+              ? `You and ${profile.name} super-liked each other.`
+              : `${profile.name} will see you first.`}
           </Text>
 
-          {isMatch && (
+          {isMatch ? (
             <View style={styles.avatarRow}>
               <Image source={{ uri: userPhoto }} style={[styles.avatar, styles.avatarLeft]} />
               <View style={styles.starBadge}>
                 <Ionicons name="star" size={22} color={colors.heartRed} />
               </View>
-              <Image source={{ uri: profile.photos[0] }} style={[styles.avatar, styles.avatarRight]} />
+              <Image source={{ uri: photos[0] }} style={[styles.avatar, styles.avatarRight]} />
+            </View>
+          ) : (
+            <View style={styles.photoSection}>
+              <Text style={styles.photoLabel}>{profile.name}&apos;s photos</Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.photoRow}
+              >
+                {photos.map((photo, index) => (
+                  <Image
+                    key={`${profile.id}-super-${index}`}
+                    source={{ uri: photo }}
+                    style={[styles.photoCard, index === 0 && styles.photoCardHero]}
+                  />
+                ))}
+              </ScrollView>
             </View>
           )}
 
           <View style={styles.actions}>
             <Pressable style={styles.primaryButton} onPress={onChatNow}>
-              <Ionicons name="chatbubble" size={18} color={colors.heartRed} />
-              <Text style={styles.primaryButtonText}>Chat now</Text>
+              <Text style={styles.primaryButtonText}>
+                {isMatch ? 'Message' : 'Send a note'}
+              </Text>
             </Pressable>
             <Pressable style={styles.secondaryButton} onPress={onTalkLater}>
-              <Text style={styles.secondaryButtonText}>Talk later</Text>
+              <Text style={styles.secondaryButtonText}>Keep swiping</Text>
             </Pressable>
           </View>
         </LinearGradient>
@@ -153,13 +173,40 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 2,
   },
+  photoSection: {
+    width: '100%',
+    marginVertical: spacing.lg,
+  },
+  photoLabel: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    opacity: 0.85,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  photoRow: {
+    gap: spacing.sm,
+    paddingHorizontal: spacing.xs,
+  },
+  photoCard: {
+    width: 100,
+    height: 130,
+    borderRadius: radii.card,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.6)',
+  },
+  photoCardHero: {
+    width: 120,
+    height: 156,
+  },
   actions: {
     width: '100%',
     marginTop: spacing.md,
   },
   primaryButton: {
-    flexDirection: 'row',
-    gap: spacing.sm,
     width: '100%',
     backgroundColor: colors.text,
     borderRadius: radii.button,

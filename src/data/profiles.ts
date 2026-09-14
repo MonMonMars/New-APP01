@@ -1,7 +1,49 @@
 import { Profile } from '../types/profile';
 
-/** Profiles that instantly match when liked — minority for demo realism. */
-export const MUTUAL_MATCH_IDS = new Set(['3', '18']);
+/**
+ * TEST SEED STATE — profile ID buckets for demo / QA
+ * ─────────────────────────────────────────────────
+ * PRE_MATCHED_IDS (4)     → Matches tab (some with messages, some empty)
+ * PENDING_LIKE_IDS (5)    → Liked by user, waiting for reciprocation
+ * INCOMING_LIKE_IDS (6)   → Likes tab (blurred unless Spark+)
+ * MUTUAL_MATCH_IDS (4)    → Instant match on regular heart like
+ * MUTUAL_SUPER_LIKE_IDS (3) → Instant super-match on Spark Rose
+ * STANDOUT_IDS (3)        → Top Picks / Standouts row on Discover
+ * EXPLORE_CATEGORY_MAP    → Explore screen category assignments
+ * All other mockProfiles  → Unmatched discover queue
+ */
+export const PRE_MATCHED_IDS = ['1', '5', '15', '27'] as const;
+export const PENDING_LIKE_IDS = ['6', '14', '20', '22', '31'] as const;
+export const INCOMING_LIKE_IDS = ['7', '8', '9', '10', '37', '38'] as const;
+export const MUTUAL_MATCH_IDS = new Set(['3', '18', '41', '45']);
+export const MUTUAL_SUPER_LIKE_IDS = new Set(['11', '29', '34']);
+export const STANDOUT_IDS = ['15', '30', '36', '48', '52'] as const;
+export const RECENTLY_ACTIVE_IDS = ['2', '13', '17', '25', '33', '40', '50'] as const;
+
+export const EXPLORE_CATEGORY_MAP: Record<string, 'serious' | 'new' | 'nearby'> = {
+  '4': 'new',
+  '6': 'new',
+  '13': 'new',
+  '16': 'new',
+  '19': 'new',
+  '23': 'new',
+  '28': 'new',
+  '32': 'new',
+  '39': 'new',
+  '44': 'new',
+  '30': 'serious',
+  '33': 'serious',
+  '46': 'serious',
+  '49': 'serious',
+  '53': 'serious',
+  '1': 'nearby',
+  '3': 'nearby',
+  '5': 'nearby',
+  '11': 'nearby',
+  '40': 'nearby',
+  '43': 'nearby',
+  '47': 'nearby',
+};
 
 function mapPin(distanceMiles: number, seed: number): { mapX: number; mapY: number } {
   const angle = (seed * 137.508) % 360;
@@ -538,12 +580,314 @@ const rawProfiles: Profile[] = [
     interests: ['Research', 'Bilingual', 'Skiing'],
     prompts: [{ question: 'Together we could', answer: 'Explore a new city every month.' }],
   },
+  {
+    id: '37',
+    name: 'Emma',
+    age: 25,
+    gender: 'woman',
+    bio: 'Bookworm and brunch enthusiast. Always has a novel in her bag.',
+    distanceMiles: 4,
+    city: 'Chelsea, NY',
+    job: 'Editorial Assistant',
+    photos: ['https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80'],
+    interests: ['Books', 'Brunch', 'Museums'],
+    activeToday: true,
+  },
+  {
+    id: '38',
+    name: 'Kai',
+    age: 28,
+    gender: 'man',
+    bio: 'Climber. Dog person. Always planning the next trip.',
+    distanceMiles: 7,
+    city: 'Lower East Side, NY',
+    job: 'Outdoor Guide',
+    photos: ['https://images.unsplash.com/photo-1504257432389-52343af06da3?w=800&q=80'],
+    interests: ['Climbing', 'Travel', 'Dogs'],
+    verified: true,
+  },
+  {
+    id: '39',
+    name: 'Zoe',
+    age: 23,
+    gender: 'woman',
+    bio: 'Film student. Loves indie cinemas and midnight screenings.',
+    distanceMiles: 2,
+    city: 'East Village, NY',
+    job: 'Film Student',
+    isNew: true,
+    photos: ['https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&q=80'],
+    interests: ['Film', 'Photography', 'Coffee'],
+    activeToday: true,
+  },
+  {
+    id: '40',
+    name: 'Sam',
+    age: 27,
+    gender: 'man',
+    bio: 'Chef. Will cook for you on the second date.',
+    distanceMiles: 5,
+    city: 'Tribeca, NY',
+    job: 'Sous Chef',
+    photos: ['https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=800&q=80'],
+    interests: ['Cooking', 'Wine', 'Farmers markets'],
+    activeToday: true,
+  },
+  {
+    id: '41',
+    name: 'Nora',
+    age: 26,
+    gender: 'woman',
+    bio: 'Therapist who practices what she preaches — boundaries and brunch.',
+    distanceMiles: 3,
+    city: 'West Village, NY',
+    job: 'Therapist',
+    school: 'Columbia',
+    verified: true,
+    photos: [
+      'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800&q=80',
+      'https://picsum.photos/seed/nora2/800/1000',
+    ],
+    interests: ['Psychology', 'Yoga', 'Brunch'],
+    mostCompatible: true,
+    prompts: [{ question: 'Green flags I look for', answer: 'Emotional intelligence and good humor.' }],
+  },
+  {
+    id: '42',
+    name: 'Felix',
+    age: 30,
+    gender: 'man',
+    bio: 'Product manager who bikes to work rain or shine.',
+    distanceMiles: 6,
+    city: 'Brooklyn Heights, NY',
+    job: 'Product Manager',
+    photos: ['https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80'],
+    interests: ['Cycling', 'Startups', 'Cooking'],
+    activeToday: true,
+  },
+  {
+    id: '43',
+    name: 'Jade',
+    age: 24,
+    gender: 'woman',
+    bio: 'Street photographer capturing NYC golden hour.',
+    distanceMiles: 1,
+    city: 'DUMBO, NY',
+    job: 'Photographer',
+    photos: [
+      'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=800&q=80',
+      'https://picsum.photos/seed/jade2/800/1000',
+    ],
+    interests: ['Photography', 'Art', 'Coffee'],
+    spotlight: true,
+    hasVideo: true,
+  },
+  {
+    id: '44',
+    name: 'Marco',
+    age: 32,
+    gender: 'man',
+    bio: 'Italian expat. Makes pasta from scratch every Sunday.',
+    distanceMiles: 9,
+    city: 'Little Italy, NY',
+    job: 'Restaurant Owner',
+    isNew: true,
+    photos: ['https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=800&q=80'],
+    interests: ['Cooking', 'Wine', 'Soccer'],
+  },
+  {
+    id: '45',
+    name: 'Sienna',
+    age: 27,
+    gender: 'woman',
+    bio: 'Nonprofit director. Passionate about community gardens.',
+    distanceMiles: 11,
+    city: 'Bronx, NY',
+    job: 'Nonprofit Director',
+    verified: true,
+    photos: ['https://images.unsplash.com/photo-1542596764-5df1ad7dabdd?w=800&q=80'],
+    interests: ['Community', 'Gardening', 'Running'],
+    prompts: [{ question: 'A life goal of mine', answer: 'Start a neighborhood compost program.' }],
+  },
+  {
+    id: '46',
+    name: 'Theo',
+    age: 29,
+    gender: 'man',
+    bio: 'PhD candidate in neuroscience. Can explain your dreams (sort of).',
+    distanceMiles: 14,
+    city: 'Upper West Side, NY',
+    job: 'PhD Student',
+    school: 'Columbia',
+    photos: ['https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=800&q=80'],
+    interests: ['Science', 'Chess', 'Jazz'],
+    mostCompatible: true,
+  },
+  {
+    id: '47',
+    name: 'Aria',
+    age: 25,
+    gender: 'woman',
+    bio: 'Voice actor and karaoke enthusiast. Your shower singer rival.',
+    distanceMiles: 2,
+    city: 'Hell\'s Kitchen, NY',
+    job: 'Voice Actor',
+    photos: [
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80',
+      'https://picsum.photos/seed/aria2/800/1000',
+    ],
+    interests: ['Music', 'Theater', 'Karaoke'],
+    activeToday: true,
+    hasVideo: true,
+  },
+  {
+    id: '48',
+    name: 'Derek',
+    age: 31,
+    gender: 'man',
+    bio: 'Firefighter who meal-preps and reads sci-fi on night shifts.',
+    distanceMiles: 16,
+    city: 'Queens, NY',
+    job: 'Firefighter',
+    verified: true,
+    photos: ['https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&q=80'],
+    interests: ['Fitness', 'Sci-fi', 'Cooking'],
+    spotlight: true,
+  },
+  {
+    id: '49',
+    name: 'Yuki',
+    age: 28,
+    gender: 'woman',
+    bio: 'Ceramic artist. My apartment smells like clay and incense.',
+    distanceMiles: 19,
+    city: 'Gowanus, NY',
+    job: 'Ceramic Artist',
+    school: 'Pratt',
+    photos: [
+      'https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=800&q=80',
+      'https://picsum.photos/seed/yuki2/800/1000',
+    ],
+    interests: ['Pottery', 'Design', 'Tea'],
+    prompts: [{ question: 'Typical Sunday', answer: 'Wheel throwing and a long bath.' }],
+  },
+  {
+    id: '50',
+    name: 'Connor',
+    age: 26,
+    gender: 'man',
+    bio: 'Stand-up comedian. Will make you laugh or try really hard.',
+    distanceMiles: 8,
+    city: 'Williamsburg, NY',
+    job: 'Comedian',
+    photos: ['https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=80'],
+    interests: ['Comedy', 'Podcasts', 'Tacos'],
+    activeToday: true,
+    isNew: true,
+  },
+  {
+    id: '51',
+    name: 'Bianca',
+    age: 30,
+    gender: 'woman',
+    bio: 'Event planner who throws the best dinner parties in Brooklyn.',
+    distanceMiles: 24,
+    city: 'Fort Greene, NY',
+    job: 'Event Planner',
+    verified: true,
+    photos: ['https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=800&q=80'],
+    interests: ['Entertaining', 'Wine', 'Decor'],
+  },
+  {
+    id: '52',
+    name: 'Raj',
+    age: 33,
+    gender: 'man',
+    bio: 'Cardiologist with a soft spot for board game nights.',
+    distanceMiles: 32,
+    city: 'Jersey City, NJ',
+    job: 'Cardiologist',
+    school: 'NYU',
+    verified: true,
+    photos: ['https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=800&q=80'],
+    interests: ['Medicine', 'Board games', 'Running'],
+    mostCompatible: true,
+  },
+  {
+    id: '53',
+    name: 'Camille',
+    age: 27,
+    gender: 'woman',
+    bio: 'Sustainability consultant. Thrifted wardrobe, zero-waste kitchen.',
+    distanceMiles: 38,
+    city: 'Hoboken, NJ',
+    job: 'Consultant',
+    photos: [
+      'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&q=80',
+      'https://picsum.photos/seed/camille2/800/1000',
+    ],
+    interests: ['Sustainability', 'Thrifting', 'Cooking'],
+    activeToday: true,
+  },
+  {
+    id: '54',
+    name: 'Gabe',
+    age: 29,
+    gender: 'man',
+    bio: 'Architectural photographer. Always chasing the perfect light.',
+    distanceMiles: 52,
+    city: 'Newark, NJ',
+    job: 'Photographer',
+    photos: ['https://images.unsplash.com/photo-1463453091185-3198b8c0205d?w=800&q=80'],
+    interests: ['Photography', 'Architecture', 'Travel'],
+    hasVideo: true,
+  },
+  {
+    id: '55',
+    name: 'Tessa',
+    age: 24,
+    gender: 'woman',
+    bio: 'Veterinary student. Will absolutely stop to pet every dog.',
+    distanceMiles: 68,
+    city: 'Stamford, CT',
+    job: 'Vet Student',
+    isNew: true,
+    photos: ['https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&q=80'],
+    interests: ['Animals', 'Hiking', 'Baking'],
+  },
+  {
+    id: '56',
+    name: 'Viktor',
+    age: 35,
+    gender: 'man',
+    bio: 'Sommelier turned tech founder. Pairing wine with startup pitches.',
+    distanceMiles: 85,
+    city: 'Greenwich, CT',
+    job: 'Founder',
+    verified: true,
+    photos: [
+      'https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=800&q=80',
+      'https://picsum.photos/seed/viktor2/800/1000',
+    ],
+    interests: ['Wine', 'Startups', 'Skiing'],
+    prompts: [{ question: 'Together we could', answer: 'Tour vineyards upstate.' }],
+  },
 ];
 
 export const mockProfiles: Profile[] = rawProfiles.map((profile, index) =>
   withMap(profile, Number(profile.id) || index + 1),
 );
 
+function incomingFromMock(id: string): Profile {
+  const profile = rawProfiles.find((p) => p.id === id);
+  if (!profile) {
+    throw new Error(`Missing incoming-like profile id ${id}`);
+  }
+  const { mapX, mapY } = mapPin(profile.distanceMiles, Number(id));
+  return { ...profile, mapX, mapY };
+}
+
+/** Profiles that liked you — excluded from discover deck; see INCOMING_LIKE_IDS */
 export const incomingLikeProfiles: Profile[] = [
   {
     id: '7',
@@ -593,6 +937,8 @@ export const incomingLikeProfiles: Profile[] = [
     interests: ['Cooking', 'Wine'],
     ...mapPin(5, 10),
   },
+  incomingFromMock('37'),
+  incomingFromMock('38'),
 ];
 
 export function getAllProfiles(): Profile[] {

@@ -74,6 +74,7 @@ export type DisguisedProfilePost = {
   coverImageUrl: string;
   category?: string;
   handle?: string;
+  cta?: string;
 };
 
 export type FeedItem = NewsPost | AdPost | SocialPost | DisguisedProfilePost;

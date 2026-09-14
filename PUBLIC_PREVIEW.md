@@ -4,7 +4,7 @@
 
 **https://ultra-grove-cake-likes.trycloudflare.com**
 
-_Last updated: Sep 14, 2026 — disguise profiles use small masked thumbnails in news/ad/comment cards_
+_Last updated: Sep 14, 2026 — disguise profiles match news/ad/social cards (plain small avatars)_
 
 > Tunnel links expire when the cloud workspace stops. If this 404s, ask for a fresh link.
 

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Pressable, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
+import { Platform, Pressable, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -15,10 +15,13 @@ type AnimatedPressableProps = PressableProps & {
   /** Opacity on press-in (default 0.88). */
   opacityTo?: number;
   haptic?: HapticStyle;
-  children: ReactNode;
+  children?: ReactNode;
 };
 
 export const PRESS_SPRING = { damping: 16, stiffness: 380, mass: 0.6 };
+
+/** Pressable with scale/opacity animation — style on the pressable itself so web hit targets match visuals. */
+const AnimatedPressableBase = Animated.createAnimatedComponent(Pressable);
 
 export function AnimatedPressable({
   style,
@@ -41,7 +44,7 @@ export function AnimatedPressable({
   }));
 
   return (
-    <Pressable
+    <AnimatedPressableBase
       disabled={disabled}
       onPressIn={(event) => {
         if (!disabled) {
@@ -57,9 +60,14 @@ export function AnimatedPressable({
         onPressOut?.(event);
       }}
       onPress={onPress}
+      style={[
+        style,
+        animatedStyle,
+        Platform.OS === 'web' ? { cursor: disabled ? 'default' : 'pointer' } : null,
+      ]}
       {...rest}
     >
-      <Animated.View style={[style, animatedStyle]}>{children}</Animated.View>
-    </Pressable>
+      {children}
+    </AnimatedPressableBase>
   );
 }

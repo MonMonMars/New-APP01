@@ -22,10 +22,14 @@ import {
   buildSeedMatches,
   buildSeedSwipeState,
 } from '../data/seedState';
+import { uploadPhotosToCloud } from '../services/cloudStorage';
+import { registerCloudPushToken } from '../services/pushCloud';
+import type { ConversationRealtimeUpdate } from '../services/realtimeChat';
 import {
   deleteSupabaseAccount,
   isSupabaseConfigured,
   loadFromSupabase,
+  signInWithMagicLink,
   syncToSupabase,
 } from '../services/supabase';
 import { Conversation, Match, Message } from '../types/match';
@@ -157,7 +161,12 @@ type AppContextValue = {
   isSupabaseEnabled: boolean;
   completeOnboarding: (user: UserProfile) => void;
   signInWithAppleStub: () => Promise<void>;
+  signInWithEmailMagicLink: (email: string) => Promise<{ ok: boolean; message: string }>;
   updateUser: (user: UserProfile) => void;
+  applyCloudConversationUpdate: (
+    conversationId: string,
+    update: ConversationRealtimeUpdate,
+  ) => void;
   updatePreferences: (preferences: DiscoveryPreferences) => void;
   toggleDiscoverFilter: (filter: DiscoverFilter) => void;
   searchMorePeople: () => void;
@@ -513,6 +522,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const signInWithEmailMagicLink = useCallback(async (email: string) => {
+    const trimmed = email.trim().toLowerCase();
+    if (!trimmed.includes('@')) {
+      return { ok: false, message: 'Enter a valid email address.' };
+    }
+
+    if (isSupabaseConfigured()) {
+      const result = await signInWithMagicLink(trimmed);
+      if (!result.ok) {
+        return { ok: false, message: result.error ?? 'Could not send magic link.' };
+      }
+      setIsAuthenticated(true);
+      setUserId(`email-${Date.now()}`);
+      return {
+        ok: true,
+        message: 'Magic link sent! Check your email, then continue setup.',
+      };
+    }
+
+    setIsAuthenticated(true);
+    setUserId(`demo-email-${Date.now()}`);
+    return { ok: true, message: 'Signed in (demo mode). Cloud email requires Supabase.' };
+  }, []);
+
   const completeOnboarding = useCallback(
     (nextUser: UserProfile) => {
       setUser(nextUser);
@@ -527,9 +560,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [notificationPromptDismissed, notificationsEnabled, userId],
   );
 
-  const updateUser = useCallback((nextUser: UserProfile) => {
-    setUser(nextUser);
-  }, []);
+  const updateUser = useCallback(
+    (nextUser: UserProfile) => {
+      setUser(nextUser);
+      if (userId && isSupabaseConfigured()) {
+        void uploadPhotosToCloud(userId, nextUser.photos).then((cloudPhotos) => {
+          const changed = cloudPhotos.some((url, index) => url !== nextUser.photos[index]);
+          if (changed) {
+            setUser((current) => ({ ...current, photos: cloudPhotos }));
+          }
+        });
+      }
+    },
+    [userId],
+  );
+
+  const applyCloudConversationUpdate = useCallback(
+    (conversationId: string, update: ConversationRealtimeUpdate) => {
+      setConversations((prev) =>
+        prev.map((conversation) =>
+          conversation.id === conversationId
+            ? {
+                ...conversation,
+                messages: update.messages,
+                yourTurn: update.yourTurn,
+                unread: update.unread,
+                lastMessage: update.lastMessage ?? conversation.lastMessage,
+                lastMessageAt: update.lastMessageAt ?? conversation.lastMessageAt,
+              }
+            : conversation,
+        ),
+      );
+    },
+    [],
+  );
 
   const updatePreferences = useCallback((next: DiscoveryPreferences) => {
     setPreferences(next);
@@ -910,11 +974,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const enableNotifications = useCallback(async () => {
     const granted = await requestNotificationPermission();
+    if (granted && userId) {
+      await registerCloudPushToken(userId);
+    }
     setNotificationsEnabled(granted);
     setShowNotificationPrompt(false);
     setNotificationPromptDismissed(true);
     return granted;
-  }, []);
+  }, [userId]);
 
   const updateNotificationPreferences = useCallback((prefs: NotificationPreferences) => {
     setNotificationPreferences(prefs);
@@ -1009,7 +1076,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       isSupabaseEnabled: isSupabaseConfigured(),
       completeOnboarding,
       signInWithAppleStub,
+      signInWithEmailMagicLink,
       updateUser,
+      applyCloudConversationUpdate,
       updatePreferences,
       toggleDiscoverFilter,
       searchMorePeople,
@@ -1072,7 +1141,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       rewindKey,
       completeOnboarding,
       signInWithAppleStub,
+      signInWithEmailMagicLink,
       updateUser,
+      applyCloudConversationUpdate,
       updatePreferences,
       toggleDiscoverFilter,
       searchMorePeople,

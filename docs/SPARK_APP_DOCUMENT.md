@@ -517,14 +517,22 @@ Public preview: see `docs/PUBLIC_PREVIEW.md`.
 - [x] Settings: dark / light mode toggle
 - [x] EAS build config stub (`eas.json`)
 
+### v0.4 — Cloud-first (current)
+
+- [x] GitHub Pages / Netlify / Vercel deploy (`npm run build:web`, no local server)
+- [x] Supabase Storage for profile photos (cloud HTTPS URLs)
+- [x] Supabase Realtime chat subscriptions
+- [x] Expo Push Service token registration (cloud push)
+- [x] Email magic link sign-in (Supabase Auth)
+- [x] `docs/CLOUD_SETUP.md` + `.env.example`
+
 ### Later (v1.0)
 
 - [ ] Android build & parity
 - [ ] Photo verification (real ID check)
 - [ ] City-by-city launch tooling
-- [ ] Real Apple Sign-In backend + push notification server
+- [ ] RevenueCat / real IAP
 - [ ] A/B ranking experiments
-- [ ] Real-time chat via Supabase subscriptions
 - [ ] Events / IRL modes
 - [ ] AI profile coaching
 

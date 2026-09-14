@@ -1,6 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useMemo, useState } from 'react';
+
+import { useCloudConversation } from '../hooks/useCloudConversation';
 import {
   Alert,
   FlatList,
@@ -50,6 +52,8 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
     () => conversations.find((c) => c.id === conversationId),
     [conversations, conversationId],
   );
+
+  useCloudConversation(conversationId);
 
   const expiryLabel = useLiveExpiry(conversation?.match.expiresAt);
 

@@ -31,12 +31,15 @@ export async function registerCloudPushToken(userId: string): Promise<string | n
 
   const supabase = getSupabaseClient();
   if (supabase && isSupabaseConfigured()) {
-    await supabase.from('push_tokens').upsert({
-      user_id: userId,
-      expo_push_token: token,
-      platform: Platform.OS,
-      updated_at: new Date().toISOString(),
-    });
+    await supabase.from('push_tokens').upsert(
+      {
+        user_id: userId,
+        expo_push_token: token,
+        platform: Platform.OS,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id,expo_push_token' },
+    );
   }
 
   return token;

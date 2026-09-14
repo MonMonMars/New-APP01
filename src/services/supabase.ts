@@ -43,6 +43,18 @@ export type SyncPayload = {
   isPaused: boolean;
 };
 
+export async function getSupabaseSession(): Promise<{ userId: string } | null> {
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    return null;
+  }
+  const { data } = await supabase.auth.getSession();
+  if (data.session?.user) {
+    return { userId: data.session.user.id };
+  }
+  return null;
+}
+
 export async function signInWithMagicLink(email: string): Promise<{ ok: boolean; error?: string }> {
   const supabase = getSupabaseClient();
   if (!supabase) {

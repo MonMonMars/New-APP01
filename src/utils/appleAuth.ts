@@ -4,6 +4,7 @@ import { Platform } from 'react-native';
 export type AppleAuthResult = {
   success: boolean;
   displayName?: string;
+  identityToken?: string;
   isStub: boolean;
 };
 
@@ -19,7 +20,12 @@ export async function signInWithApple(): Promise<AppleAuthResult> {
           ],
         });
         const name = credential.fullName?.givenName ?? undefined;
-        return { success: true, displayName: name, isStub: false };
+        return {
+          success: true,
+          displayName: name,
+          identityToken: credential.identityToken ?? undefined,
+          isStub: false,
+        };
       }
     } catch {
       // Fall through to demo stub on cancel or failure.

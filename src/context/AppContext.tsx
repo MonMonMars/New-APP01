@@ -27,8 +27,10 @@ import { registerCloudPushToken } from '../services/pushCloud';
 import type { ConversationRealtimeUpdate } from '../services/realtimeChat';
 import {
   deleteSupabaseAccount,
+  getSupabaseSession,
   isSupabaseConfigured,
   loadFromSupabase,
+  signInWithAppleToken,
   signInWithMagicLink,
   syncToSupabase,
 } from '../services/supabase';
@@ -160,7 +162,7 @@ type AppContextValue = {
   rewindKey: number;
   isSupabaseEnabled: boolean;
   completeOnboarding: (user: UserProfile) => void;
-  signInWithAppleStub: () => Promise<void>;
+  signInWithAppleStub: (identityToken?: string, displayName?: string) => Promise<void>;
   signInWithEmailMagicLink: (email: string) => Promise<{ ok: boolean; message: string }>;
   updateUser: (user: UserProfile) => void;
   applyCloudConversationUpdate: (
@@ -284,26 +286,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setIsPaused(saved.isPaused);
         setThemeModeState(saved.themeMode);
 
-        if (isSupabaseConfigured() && saved.userId) {
-          const remote = await loadFromSupabase(saved.userId);
-          if (remote && !cancelled) {
-            if (remote.user) {
-              setUser(remote.user);
+        if (isSupabaseConfigured()) {
+          const session = await getSupabaseSession();
+          const cloudUserId = session?.userId ?? saved.userId;
+          if (session?.userId && !cancelled) {
+            setUserId(session.userId);
+            setIsAuthenticated(true);
+          }
+          if (cloudUserId) {
+            const remote = await loadFromSupabase(cloudUserId);
+            if (remote && !cancelled) {
+              if (remote.user) {
+                setUser(remote.user);
+              }
+              if (remote.preferences) {
+                setPreferences(remote.preferences);
+              }
+              setPassedIds(arrayToSet(remote.passedIds ?? []));
+              setLikedIds(arrayToSet(remote.likedIds ?? []));
+              setPendingLikeIds(arrayToSet(remote.pendingLikeIds ?? []));
+              setSuperLikedIds(arrayToSet(saved.superLikedIds ?? []));
+              setBlockedIds(arrayToSet(remote.blockedIds ?? []));
+              setMatches(remote.matches ?? []);
+              if (remote.conversations && remote.conversations.length > 0) {
+                setConversations(remote.conversations);
+              }
+              setIsSparkPlus(remote.isSparkPlus ?? false);
+              setIsPaused(remote.isPaused ?? false);
             }
-            if (remote.preferences) {
-              setPreferences(remote.preferences);
-            }
-            setPassedIds(arrayToSet(remote.passedIds ?? []));
-            setLikedIds(arrayToSet(remote.likedIds ?? []));
-            setPendingLikeIds(arrayToSet(remote.pendingLikeIds ?? []));
-            setSuperLikedIds(arrayToSet(saved.superLikedIds ?? []));
-            setBlockedIds(arrayToSet(remote.blockedIds ?? []));
-            setMatches(remote.matches ?? []);
-            if (remote.conversations && remote.conversations.length > 0) {
-              setConversations(remote.conversations);
-            }
-            setIsSparkPlus(remote.isSparkPlus ?? false);
-            setIsPaused(remote.isPaused ?? false);
           }
         }
       } else {
@@ -514,13 +524,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const canRewind = isSparkPlus && lastPassedProfileId !== null;
 
-  const signInWithAppleStub = useCallback(async () => {
-    setIsAuthenticated(true);
-    if (isSupabaseConfigured()) {
-      const demoUserId = `demo-${Date.now()}`;
-      setUserId(demoUserId);
-    }
-  }, []);
+  const signInWithAppleStub = useCallback(
+    async (identityToken?: string, displayName?: string) => {
+      setIsAuthenticated(true);
+
+      if (isSupabaseConfigured() && identityToken) {
+        const result = await signInWithAppleToken(identityToken, displayName);
+        if (result.userId) {
+          setUserId(result.userId);
+          return;
+        }
+      }
+
+      if (isSupabaseConfigured()) {
+        const session = await getSupabaseSession();
+        if (session?.userId) {
+          setUserId(session.userId);
+          return;
+        }
+      }
+
+      if (!userId) {
+        setUserId(`demo-${Date.now()}`);
+      }
+    },
+    [userId],
+  );
 
   const signInWithEmailMagicLink = useCallback(async (email: string) => {
     const trimmed = email.trim().toLowerCase();

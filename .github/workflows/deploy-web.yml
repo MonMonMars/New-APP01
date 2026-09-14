@@ -2,11 +2,11 @@ name: Deploy Web to GitHub Pages
 
 on:
   push:
-    branches: [main, cursor/red-star-superlike-7b60, cursor/cloud-complete-7b60]
+    branches: [main, cursor/red-star-superlike-7b60, cursor/cloud-complete-7b60, cursor/competitor-features-7b60]
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -24,18 +24,20 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npm run build:web
-        env:
-          EXPO_PUBLIC_BASE_PATH: /New-APP01
+      - run: npm run build:web:pages
+      - name: Add SPA fallback for GitHub Pages
+        run: cp dist/index.html dist/404.html
       - uses: actions/upload-pages-artifact@v3
         with:
+          path: dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
           path: dist
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    # Pages deploy requires repo Settings → Pages → Source: GitHub Actions.
-    # Until enabled, this job is allowed to fail without blocking the build check.
     continue-on-error: true
     environment:
       name: github-pages
@@ -43,3 +45,18 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  deploy-gh-pages-branch:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: dist
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages

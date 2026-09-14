@@ -2,9 +2,9 @@
 
 ## Demo link (open now)
 
-**https://pull-eyes-brisbane-patient.trycloudflare.com**
+**https://late-collectors-input-trips.trycloudflare.com**
 
-_Last updated: Sep 14, 2026 — disguise profiles blend at a glance; close-up cues distinguish profile vs news vs ad_
+_Last updated: Sep 14, 2026 — disguise profile avatars: face-centered zoom, bottom badge strip, 48px circles_
 
 > Tunnel links expire when the cloud workspace stops. If this 404s, ask for a fresh link.
 

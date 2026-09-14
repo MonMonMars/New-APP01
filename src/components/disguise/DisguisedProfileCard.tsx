@@ -60,7 +60,6 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
                 imageUrl={post.avatarUrl}
                 overlayText={maskSnippet}
                 variant="news"
-                size={40}
                 badgeOnly
               />
             </Pressable>
@@ -125,7 +124,6 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
                   imageUrl={post.avatarUrl}
                   overlayText="AD"
                   variant="ad"
-                  size={44}
                   badgeOnly
                 />
               </Pressable>
@@ -184,7 +182,6 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
                 imageUrl={post.avatarUrl}
                 overlayText={maskSnippet}
                 variant="news"
-                size={44}
                 badgeOnly
               />
               <Text style={[styles.quoteBesideAvatar, { color: colors.text }]} numberOfLines={4}>
@@ -295,7 +292,7 @@ const styles = StyleSheet.create({
   avatarQuoteRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.md,
     flex: 1,
   },
   quoteBesideAvatar: {

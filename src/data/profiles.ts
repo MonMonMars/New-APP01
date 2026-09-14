@@ -3,22 +3,25 @@ import { Profile } from '../types/profile';
 /**
  * TEST SEED STATE — profile ID buckets for demo / QA
  * ─────────────────────────────────────────────────
- * PRE_MATCHED_IDS (4)     → Matches tab (some with messages, some empty)
- * PENDING_LIKE_IDS (5)    → Liked by user, waiting for reciprocation
- * INCOMING_LIKE_IDS (6)   → Likes tab (blurred unless Spark+)
- * MUTUAL_MATCH_IDS (4)    → Instant match on regular heart like
- * MUTUAL_SUPER_LIKE_IDS (3) → Instant super-match on Spark Rose
+ * PRE_MATCHED_IDS (10)    → Matches tab (some with messages, some empty)
+ * PENDING_LIKE_IDS (10)   → Liked by user, waiting for reciprocation
+ * INCOMING_LIKE_IDS (14)  → Likes tab (blurred unless Spark+)
+ * MUTUAL_MATCH_IDS (10)   → Instant match on regular heart like
+ * MUTUAL_SUPER_LIKE_IDS (8) → Instant super-match on red star
  * STANDOUT_IDS (3)        → Top Picks / Standouts row on Discover
  * EXPLORE_CATEGORY_MAP    → Explore screen category assignments
  * All other mockProfiles  → Unmatched discover queue
  */
-export const PRE_MATCHED_IDS = ['1', '5', '15', '27'] as const;
-export const PENDING_LIKE_IDS = ['6', '14', '20', '22', '31'] as const;
-export const INCOMING_LIKE_IDS = ['7', '8', '9', '10', '37', '38'] as const;
-export const MUTUAL_MATCH_IDS = new Set(['3', '18', '41', '45']);
-export const MUTUAL_SUPER_LIKE_IDS = new Set(['11', '29', '34']);
-export const STANDOUT_IDS = ['15', '30', '36', '48', '52'] as const;
-export const RECENTLY_ACTIVE_IDS = ['2', '13', '17', '25', '33', '40', '50'] as const;
+export const PRE_MATCHED_IDS = ['1', '5', '12', '15', '18', '24', '27', '30', '33', '42'] as const;
+export const PENDING_LIKE_IDS = ['6', '14', '20', '21', '22', '26', '31', '35', '39', '49'] as const;
+export const INCOMING_LIKE_IDS = [
+  '7', '8', '9', '10', '37', '38', '46', '51', '54', '61', '62', '63', '64', '65',
+] as const;
+export const MUTUAL_MATCH_IDS = new Set(['2', '3', '25', '41', '45', '50', '53', '57', '58', '67']);
+export const MUTUAL_SUPER_LIKE_IDS = new Set(['11', '29', '34', '36', '48', '59', '60', '68']);
+export const SUPER_PRE_MATCHED_IDS = new Set(['30', '33']);
+export const STANDOUT_IDS = ['15', '30', '36', '48', '52', '59', '68'] as const;
+export const RECENTLY_ACTIVE_IDS = ['2', '13', '17', '25', '33', '40', '50', '57', '66', '67'] as const;
 
 export const EXPLORE_CATEGORY_MAP: Record<string, 'serious' | 'new' | 'nearby'> = {
   '4': 'new',
@@ -43,6 +46,12 @@ export const EXPLORE_CATEGORY_MAP: Record<string, 'serious' | 'new' | 'nearby'> 
   '40': 'nearby',
   '43': 'nearby',
   '47': 'nearby',
+  '57': 'nearby',
+  '58': 'nearby',
+  '66': 'new',
+  '67': 'nearby',
+  '59': 'serious',
+  '68': 'new',
 };
 
 function mapPin(distanceMiles: number, seed: number): { mapX: number; mapY: number } {
@@ -872,6 +881,95 @@ const rawProfiles: Profile[] = [
     interests: ['Wine', 'Startups', 'Skiing'],
     prompts: [{ question: 'Together we could', answer: 'Tour vineyards upstate.' }],
   },
+  {
+    id: '57',
+    name: 'Luna',
+    age: 27,
+    gender: 'woman',
+    bio: 'Night owl designer. Museums by day, jazz bars by night.',
+    distanceMiles: 3,
+    city: 'Williamsburg, NY',
+    job: 'UX Designer',
+    verified: true,
+    photos: ['https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800&q=80'],
+    interests: ['Design', 'Jazz', 'Art'],
+  },
+  {
+    id: '58',
+    name: 'Marcus',
+    age: 31,
+    gender: 'man',
+    bio: 'Basketball coach who meal-preps on Sundays.',
+    distanceMiles: 6,
+    city: 'Harlem, NY',
+    job: 'Coach',
+    photos: ['https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80'],
+    interests: ['Sports', 'Cooking', 'Podcasts'],
+  },
+  {
+    id: '59',
+    name: 'Elena',
+    age: 28,
+    gender: 'woman',
+    bio: 'Fluent in three languages. Always booking the window seat.',
+    distanceMiles: 9,
+    city: 'Astoria, NY',
+    job: 'Translator',
+    spotlight: true,
+    photos: ['https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=800&q=80'],
+    interests: ['Travel', 'Languages', 'Food'],
+  },
+  {
+    id: '60',
+    name: 'James',
+    age: 33,
+    gender: 'man',
+    bio: 'Firefighter. Dad jokes are my cardio.',
+    distanceMiles: 11,
+    city: 'Queens, NY',
+    job: 'Firefighter',
+    verified: true,
+    photos: ['https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=80'],
+    interests: ['Fitness', 'BBQ', 'Dogs'],
+  },
+  {
+    id: '66',
+    name: 'Harper',
+    age: 26,
+    gender: 'woman',
+    bio: 'Plant mom with too many mugs. Looking for steady vibes.',
+    distanceMiles: 14,
+    city: 'Jersey City, NJ',
+    job: 'Teacher',
+    isNew: true,
+    photos: ['https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&q=80'],
+    interests: ['Plants', 'Reading', 'Yoga'],
+  },
+  {
+    id: '67',
+    name: 'Diego',
+    age: 29,
+    gender: 'man',
+    bio: 'Salsa on Thursdays. Tacos are a love language.',
+    distanceMiles: 5,
+    city: 'Washington Heights, NY',
+    job: 'Dentist',
+    photos: ['https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=800&q=80'],
+    interests: ['Dance', 'Food', 'Travel'],
+  },
+  {
+    id: '68',
+    name: 'Sienna',
+    age: 24,
+    gender: 'woman',
+    bio: 'Animation nerd. Will hype your side projects.',
+    distanceMiles: 4,
+    city: 'Bushwick, NY',
+    job: 'Animator',
+    mostCompatible: true,
+    photos: ['https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=800&q=80'],
+    interests: ['Animation', 'Gaming', 'Coffee'],
+  },
 ];
 
 export const mockProfiles: Profile[] = rawProfiles.map((profile, index) =>
@@ -939,6 +1037,70 @@ export const incomingLikeProfiles: Profile[] = [
   },
   incomingFromMock('37'),
   incomingFromMock('38'),
+  incomingFromMock('46'),
+  incomingFromMock('51'),
+  incomingFromMock('54'),
+  {
+    id: '61',
+    name: 'Taylor',
+    age: 28,
+    gender: 'nonbinary',
+    bio: 'Ceramicist. Farmers markets every Saturday.',
+    distanceMiles: 8,
+    city: 'Park Slope, NY',
+    photos: ['https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=800&q=80'],
+    interests: ['Pottery', 'Markets', 'Cats'],
+    ...mapPin(8, 61),
+  },
+  {
+    id: '62',
+    name: 'Chris',
+    age: 32,
+    gender: 'man',
+    bio: 'Marathon runner who still eats pizza after every race.',
+    distanceMiles: 12,
+    city: 'Long Island City, NY',
+    photos: ['https://images.unsplash.com/photo-1552374196-1ab2a5c59363?w=800&q=80'],
+    interests: ['Running', 'Pizza', 'Music'],
+    ...mapPin(12, 62),
+  },
+  {
+    id: '63',
+    name: 'Dana',
+    age: 27,
+    gender: 'woman',
+    bio: 'Therapist by day, karaoke legend by night.',
+    distanceMiles: 6,
+    city: 'Upper West Side, NY',
+    photos: ['https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&q=80'],
+    interests: ['Karaoke', 'Psychology', 'Wine'],
+    ...mapPin(6, 63),
+  },
+  {
+    id: '64',
+    name: 'Morgan',
+    age: 30,
+    gender: 'woman',
+    bio: 'Startup PM. Board games > bars.',
+    distanceMiles: 3,
+    city: 'SoHo, NY',
+    verified: true,
+    photos: ['https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80'],
+    interests: ['Board games', 'Startups', 'Coffee'],
+    ...mapPin(3, 64),
+  },
+  {
+    id: '65',
+    name: 'Blake',
+    age: 29,
+    gender: 'man',
+    bio: 'Photographer. Golden hour is a personality trait.',
+    distanceMiles: 10,
+    city: 'DUMBO, NY',
+    photos: ['https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=80'],
+    interests: ['Photography', 'Cycling', 'Film'],
+    ...mapPin(10, 65),
+  },
 ];
 
 export function getAllProfiles(): Profile[] {

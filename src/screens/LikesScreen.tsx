@@ -25,6 +25,7 @@ export function LikesScreen() {
     <View style={[styles.screen, { paddingTop: insets.top }]}>
       <ScreenHeader
         title="Likes"
+        showDisguiseButton
         rightIcon="diamond-outline"
         onRightPress={openPaywall}
       />

@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { MessageStatusIcon } from '../components/MessageStatusIcon';
 import { ReportReasonSheet, type ReportReason } from '../components/ReportReasonSheet';
 import { SafetyActionSheet } from '../components/SafetyActionSheet';
@@ -169,6 +170,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
             <Text style={[styles.turnText, { color: colors.text }]}>{turnLabel}</Text>
           </View>
         )}
+        <DisguiseModeButton />
         <Pressable style={styles.headerAction} onPress={() => setShowSafety(true)}>
           <Ionicons name="ellipsis-vertical" size={22} color={colors.text} />
         </Pressable>

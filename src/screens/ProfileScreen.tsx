@@ -128,7 +128,7 @@ export function ProfileScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
-      <ScreenHeader title="Profile" rightIcon="settings-outline" />
+      <ScreenHeader title="Profile" showDisguiseButton rightIcon="settings-outline" />
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={[styles.heroCard, { backgroundColor: colors.surface }]}>
@@ -213,7 +213,7 @@ export function ProfileScreen() {
           <View style={styles.toggleText}>
             <Text style={[styles.toggleLabel, { color: colors.text }]}>Disguise mode</Text>
             <Text style={[styles.toggleDesc, { color: colors.textMuted }]}>
-              Show {DISGUISE_APP_NAME} (news & social) instead of Spark in public
+              {DISGUISE_APP_NAME} is the default — turn off for Spark big-picture mode
             </Text>
           </View>
           <Switch

@@ -11,7 +11,6 @@ import { EditProfileSheet } from '../components/EditProfileSheet';
 import { ProfileCompletionCard } from '../components/ProfileCompletionCard';
 import { ProfileTrustSection } from '../components/ProfileTrustSection';
 import { VerificationBadges } from '../components/VerificationBadges';
-import { NotificationPromptSheet } from '../components/NotificationPromptSheet';
 import { PhotoCarousel } from '../components/PhotoCarousel';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { useApp } from '../context/AppContext';
@@ -63,9 +62,6 @@ export function ProfileScreen() {
     boostActiveUntil,
     activateBoost,
     notificationsEnabled,
-    enableNotifications,
-    showNotificationPrompt,
-    dismissNotificationPrompt,
     isPaused,
     setPaused,
     themeMode,
@@ -78,7 +74,6 @@ export function ProfileScreen() {
   } = useApp();
   const [showEdit, setShowEdit] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
-  const [showNotifPrompt, setShowNotifPrompt] = useState(false);
   const [showDisguiseGenerator, setShowDisguiseGenerator] = useState(false);
   const scrollRef = useRef<ScrollViewType>(null);
 
@@ -328,21 +323,6 @@ export function ProfileScreen() {
         preferences={preferences}
         onClose={() => setShowPreferences(false)}
         onChange={updatePreferences}
-      />
-
-      <NotificationPromptSheet
-        visible={showNotifPrompt || showNotificationPrompt}
-        onEnable={async () => {
-          const granted = await enableNotifications();
-          setShowNotifPrompt(false);
-          if (granted) {
-            Alert.alert('Notifications enabled', 'You will be notified about matches and messages.');
-          }
-        }}
-        onDismiss={() => {
-          setShowNotifPrompt(false);
-          dismissNotificationPrompt();
-        }}
       />
 
       <DisguiseAdGeneratorSheet

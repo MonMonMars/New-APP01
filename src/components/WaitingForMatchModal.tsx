@@ -28,7 +28,7 @@ export function WaitingForMatchModal({
         >
           <Text style={styles.title}>Waiting for a match</Text>
           <Text style={styles.subtitle}>
-            You liked {profile.name}. We'll notify you if they like you back.
+            You liked {profile.name}. Check back in Matches if they like you too.
           </Text>
 
           <View style={styles.avatarWrap}>

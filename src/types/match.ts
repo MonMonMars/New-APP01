@@ -5,6 +5,8 @@ export type Match = {
   profile: Profile;
   matchedAt: string;
   expiresAt?: string;
+  /** True when matched via Spark Rose super-like */
+  isSuperMatch?: boolean;
 };
 
 export type MessageStatus = 'sent' | 'delivered' | 'read';

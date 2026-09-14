@@ -1,15 +1,21 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '../components/ScreenHeader';
 import { useApp } from '../context/AppContext';
+import { getProfileById } from '../data/profiles';
 import { colors, radii, spacing } from '../theme';
 
 export function LikesScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const { incomingLikes, isSparkPlus } = useApp();
+  const { incomingLikes, isSparkPlus, superLikedIds, pendingLikeIds } = useApp();
+
+  const superLikesSent = Array.from(superLikedIds)
+    .map((id) => getProfileById(id))
+    .filter((profile) => profile !== undefined);
 
   const openPaywall = () => {
     navigation.getParent()?.navigate('SparkPlus');
@@ -41,6 +47,27 @@ export function LikesScreen() {
           </Pressable>
         )}
       </View>
+
+      {superLikesSent.length > 0 && (
+        <View style={styles.superSection}>
+          <View style={styles.superHeader}>
+            <Ionicons name="rose" size={18} color={colors.superLike} />
+            <Text style={styles.superTitle}>Super Likes sent</Text>
+            <Text style={styles.superCount}>{superLikesSent.length}</Text>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.superRow}>
+            {superLikesSent.map((profile) => (
+              <View key={profile.id} style={styles.superCard}>
+                <Image source={{ uri: profile.photos[0] }} style={styles.superPhoto} />
+                <Text style={styles.superName}>{profile.name}</Text>
+                <Text style={styles.superStatus}>
+                  {pendingLikeIds.has(profile.id) ? 'Pending' : 'Matched'}
+                </Text>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      )}
 
       <View style={styles.grid}>
         {incomingLikes.length === 0 ? (
@@ -131,6 +158,57 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontWeight: '700',
     fontSize: 15,
+  },
+  superSection: {
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+    backgroundColor: colors.surface,
+    borderRadius: radii.card,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(30,195,255,0.25)',
+  },
+  superHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  superTitle: {
+    flex: 1,
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  superCount: {
+    color: colors.superLike,
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  superRow: {
+    gap: spacing.sm,
+  },
+  superCard: {
+    width: 88,
+    alignItems: 'center',
+  },
+  superPhoto: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 2,
+    borderColor: colors.superLike,
+  },
+  superName: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: '700',
+    marginTop: spacing.xs,
+  },
+  superStatus: {
+    color: colors.textMuted,
+    fontSize: 10,
+    fontWeight: '600',
   },
   grid: {
     flexDirection: 'row',

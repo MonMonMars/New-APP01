@@ -30,8 +30,8 @@ type DropTargetsProps = {
 
 const TARGET_SIZE = 68;
 const TARGET_SIZE_COMPACT = 52;
-const ROSE_SIZE = 52;
-const ROSE_SIZE_COMPACT = 40;
+const ROSE_SIZE = 58;
+const ROSE_SIZE_COMPACT = 44;
 
 type TargetButtonProps = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -152,17 +152,20 @@ export function DropTargets({
       />
 
       {onRosePress && (
-        <TargetButton
-          icon="rose"
-          iconColor={colors.superLike}
-          backgroundColor={colors.surface}
-          borderColor={colors.superLike}
-          active={roseActiveValue}
-          targetRef={roseRef}
-          size={roseSize}
-          onLayout={() => undefined}
-          onPress={onRosePress}
-        />
+        <View style={styles.roseWrap}>
+          <View style={[styles.roseGlow, { width: roseSize + 20, height: roseSize + 20, borderRadius: (roseSize + 20) / 2 }]} />
+          <TargetButton
+            icon="rose"
+            iconColor={colors.superLike}
+            backgroundColor={colors.surface}
+            borderColor={colors.superLike}
+            active={roseActiveValue}
+            targetRef={roseRef}
+            size={roseSize}
+            onLayout={() => undefined}
+            onPress={onRosePress}
+          />
+        </View>
       )}
 
       <TargetButton
@@ -192,7 +195,7 @@ const styles = StyleSheet.create({
     zIndex: 20,
   },
   rowCompact: {
-    bottom: spacing.sm,
+    bottom: spacing.md,
     left: spacing.md,
     right: spacing.md,
   },
@@ -204,5 +207,15 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
     elevation: 6,
+  },
+  roseWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  roseGlow: {
+    position: 'absolute',
+    backgroundColor: 'rgba(30,195,255,0.2)',
+    borderWidth: 2,
+    borderColor: 'rgba(255,215,0,0.35)',
   },
 });

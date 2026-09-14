@@ -21,6 +21,7 @@ import { useSwipeSounds } from '../hooks/useSwipeSounds';
 import { Profile } from '../types/profile';
 import { DropTargets, ZoneLayout } from './DropTargets';
 import { ProfileCard } from './ProfileCard';
+import { SuperLikeCelebration } from './SuperLikeCelebration';
 import { SwipeBurstEffect, SwipeEffectKind, SwipeEffectOrigin } from './SwipeBurstEffect';
 
 const ZONE_HIT_PADDING = 36;
@@ -29,14 +30,16 @@ export type SwipeDeckHandle = {
   reject: () => void;
   like: () => void;
   superLike: () => void;
+  advanceAfterSuperLike: () => void;
 };
 
 type SwipeDeckProps = {
   profiles: Profile[];
-  onSwipe: (profile: Profile, direction: 'left' | 'right') => void;
+  onSwipe: (profile: Profile, direction: 'left' | 'right' | 'super') => void;
   onEmpty: () => void;
   canLike?: boolean;
   onLikeBlocked?: () => void;
+  onSuperLike?: (profile: Profile) => void;
   compact?: boolean;
 };
 
@@ -93,12 +96,15 @@ function zoneProximity(
 }
 
 export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
-  function SwipeDeck({ profiles, onSwipe, onEmpty, canLike = true, onLikeBlocked, compact = false }, ref) {
+  function SwipeDeck({ profiles, onSwipe, onEmpty, canLike = true, onLikeBlocked, onSuperLike, compact = false }, ref) {
     const { playSound } = useSwipeSounds();
     const containerRef = useRef<View>(null);
     const [activeIndex, setActiveIndex] = useState(0);
     const [activeEffect, setActiveEffect] = useState<ActiveEffect | null>(null);
     const [effectKey, setEffectKey] = useState(0);
+    const [superCelebrationKey, setSuperCelebrationKey] = useState(0);
+    const [showSuperCelebration, setShowSuperCelebration] = useState(false);
+    const pendingSuperProfileRef = useRef<Profile | null>(null);
     const translateX = useSharedValue(0);
     const translateY = useSharedValue(0);
     const cardScale = useSharedValue(1);
@@ -144,7 +150,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           },
         });
 
-        void playSound(kind === 'pass' ? 'pass' : 'like');
+        void playSound(kind === 'pass' ? 'pass' : kind === 'super' ? 'super' : 'like');
         void Haptics.notificationAsync(
           kind === 'pass'
             ? Haptics.NotificationFeedbackType.Warning
@@ -155,7 +161,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
     );
 
     const advanceCard = useCallback(
-      (direction: 'left' | 'right') => {
+      (direction: 'left' | 'right' | 'super') => {
         const current = profiles[activeIndex];
         if (!current) {
           return;
@@ -183,6 +189,42 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
       roseActive.value = withTiming(0, { duration: 120 });
     }, [cardScale, heartActive, passDim, roseActive, trashActive, translateX, translateY]);
 
+    const advanceAfterSuperLike = useCallback(() => {
+      translateX.value = 0;
+      translateY.value = 0;
+      cardScale.value = 1;
+      passDim.value = 0;
+      trashActive.value = 0;
+      heartActive.value = 0;
+      roseActive.value = 0;
+
+      const nextIndex = activeIndex + 1;
+      setActiveIndex(nextIndex);
+      if (nextIndex >= profiles.length) {
+        onEmpty();
+      }
+    }, [
+      activeIndex,
+      cardScale,
+      heartActive,
+      onEmpty,
+      passDim,
+      profiles.length,
+      roseActive,
+      trashActive,
+      translateX,
+      translateY,
+    ]);
+
+    const finishSuperLikeAnimation = useCallback(() => {
+      setShowSuperCelebration(false);
+      const profile = pendingSuperProfileRef.current;
+      pendingSuperProfileRef.current = null;
+      if (profile && onSuperLike) {
+        onSuperLike(profile);
+      }
+    }, [onSuperLike]);
+
     const dropToTarget = useCallback(
       (direction: 'left' | 'right', superLike = false) => {
         if (direction === 'right' && !canLike) {
@@ -193,8 +235,29 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           return;
         }
 
-        const effectKind: SwipeEffectKind =
-          direction === 'left' ? 'pass' : superLike ? 'super' : 'like';
+        const current = profiles[activeIndex];
+        if (!current) {
+          return;
+        }
+
+        if (superLike) {
+          roseActive.value = withTiming(1, { duration: 120 });
+          void playSound('super');
+          void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+          pendingSuperProfileRef.current = current;
+          setSuperCelebrationKey((key) => key + 1);
+          setShowSuperCelebration(true);
+
+          const toX = 0;
+          const toY = 0;
+          translateX.value = withTiming(toX, { duration: 260 });
+          translateY.value = withTiming(toY, { duration: 260 });
+          cardScale.value = withTiming(0.05, { duration: 260 });
+          return;
+        }
+
+        const effectKind: SwipeEffectKind = direction === 'left' ? 'pass' : 'like';
         triggerFeedback(effectKind);
 
         const zone = direction === 'left' ? trashZone.value : heartZone.value;
@@ -223,6 +286,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
         });
       },
       [
+        activeIndex,
         advanceCard,
         canLike,
         cardScale,
@@ -231,6 +295,8 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
         heartActive,
         onLikeBlocked,
         passDim,
+        playSound,
+        profiles,
         resetPosition,
         roseActive,
         trashActive,
@@ -248,8 +314,9 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
         reject: () => dropToTarget('left'),
         like: () => dropToTarget('right'),
         superLike: () => dropToTarget('right', true),
+        advanceAfterSuperLike,
       }),
-      [dropToTarget],
+      [advanceAfterSuperLike, dropToTarget],
     );
 
     const handleDeckLayout = useCallback((event: LayoutChangeEvent) => {
@@ -413,6 +480,15 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           effectKey={effectKey}
           onComplete={() => setActiveEffect(null)}
         />
+
+        <SuperLikeCelebration
+          visible={showSuperCelebration}
+          effectKey={superCelebrationKey}
+          onComplete={finishSuperLikeAnimation}
+          onPlaySound={() => {
+            void playSound('super');
+          }}
+        />
       </View>
     );
   },
@@ -421,9 +497,11 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    height: '100%',
   },
   deck: {
     flex: 1,
+    height: '100%',
   },
   cardSlot: {
     ...StyleSheet.absoluteFill,

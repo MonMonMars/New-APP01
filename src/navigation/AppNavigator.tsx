@@ -10,6 +10,7 @@ import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { ChatScreen } from '../screens/ChatScreen';
 import { ConsumablesShopScreen } from '../screens/ConsumablesShopScreen';
 import { DiscoverScreen } from '../screens/DiscoverScreen';
+import { ExploreScreen } from '../screens/ExploreScreen';
 import { MapDiscoverScreen } from '../screens/MapDiscoverScreen';
 import { LikesScreen } from '../screens/LikesScreen';
 import { MatchesScreen } from '../screens/MatchesScreen';
@@ -135,6 +136,12 @@ function MapDiscoverWrapper({
   return <MapDiscoverScreen onClose={() => navigation.goBack()} />;
 }
 
+function ExploreWrapper({
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, 'Explore'>) {
+  return <ExploreScreen onClose={() => navigation.goBack()} />;
+}
+
 function RootNavigator() {
   const { hasOnboarded } = useApp();
   const { colors } = useTheme();
@@ -180,6 +187,11 @@ function RootNavigator() {
           <Stack.Screen
             name="MapDiscover"
             component={MapDiscoverWrapper}
+            options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="Explore"
+            component={ExploreWrapper}
             options={{ animation: 'slide_from_right' }}
           />
         </>

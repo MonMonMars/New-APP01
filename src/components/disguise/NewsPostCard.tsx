@@ -54,17 +54,14 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
                     event.stopPropagation();
                     openReporter(reporter);
                   }}
-                  style={[styles.reporterCard, { borderColor: colors.border }]}
+                  style={styles.reporterCell}
                   accessibilityRole="button"
                   accessibilityLabel={`View photos from ${reporter.name}`}
                 >
-                  <Image source={{ uri: reporter.avatarUrl }} style={styles.reporterImage} resizeMode="cover" />
-                  <View style={styles.reporterBody}>
-                    <Text style={[styles.reporterSource, { color: colors.gradientEnd }]}>{reporter.name}</Text>
-                    <Text style={[styles.reporterHeadline, { color: colors.text }]} numberOfLines={2}>
-                      {reporter.quote}
-                    </Text>
-                  </View>
+                  <Image source={{ uri: reporter.avatarUrl }} style={styles.reporterAvatar} />
+                  <Text style={[styles.reporterQuote, { color: colors.text }]} numberOfLines={3}>
+                    {reporter.quote}
+                  </Text>
                 </Pressable>
               ))}
             </View>
@@ -139,30 +136,21 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(128,128,128,0.25)',
   },
-  reporterCard: {
+  reporterCell: {
     flex: 1,
-    borderRadius: radii.card,
-    borderWidth: StyleSheet.hairlineWidth,
-    overflow: 'hidden',
-    maxWidth: 160,
+    alignItems: 'center',
+    maxWidth: 120,
   },
-  reporterImage: {
-    width: '100%',
-    height: 72,
+  reporterAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    marginBottom: spacing.xs,
   },
-  reporterBody: {
-    padding: spacing.sm,
-  },
-  reporterSource: {
-    fontSize: 10,
-    fontWeight: '800',
-    textTransform: 'uppercase',
-    letterSpacing: 0.3,
-    marginBottom: 2,
-  },
-  reporterHeadline: {
-    fontSize: 12,
-    lineHeight: 16,
-    fontWeight: '700',
+  reporterQuote: {
+    fontSize: 11,
+    lineHeight: 15,
+    textAlign: 'center',
+    fontWeight: '600',
   },
 });

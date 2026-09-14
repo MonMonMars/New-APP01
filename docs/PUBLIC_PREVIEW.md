@@ -4,9 +4,9 @@ Try the app in **any browser** (phone, laptop, tablet).
 
 ## Live preview (Cloudflare)
 
-**https://guests-exclude-rehabilitation-fancy.trycloudflare.com**
+**https://plugins-viii-less-fill.trycloudflare.com**
 
-_Last updated: Sep 14, 2026 — white-screen fix (verified in browser)_
+_Last updated: Sep 14, 2026 — red star super-like + drag (verified in browser)_
 
 > This link forwards to the Expo web dev server in the cloud workspace.  
 > Tunnels are **temporary** — if the link stops working, ask to regenerate it.

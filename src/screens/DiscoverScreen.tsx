@@ -1,32 +1,22 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useCallback, useRef, useState } from 'react';
-import { Alert, Animated, Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { DailyBatchIndicator } from '../components/DailyBatchIndicator';
-import { DiscoverFilterChips } from '../components/DiscoverFilterChips';
 import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesSheet';
 import { ExpandLocationSheet } from '../components/ExpandLocationSheet';
-import { HeldProfilesRow } from '../components/HeldProfilesRow';
 import { LikeLimitModal } from '../components/LikeLimitModal';
 import { MatchModal } from '../components/MatchModal';
 import { MatchToast } from '../components/MatchToast';
-import { MostCompatibleBanner } from '../components/MostCompatibleBanner';
+import { ModeToggleLogo } from '../components/disguise/ModeToggleLogo';
 import { PromptLikeSheet } from '../components/PromptLikeSheet';
-import { RecentlyActiveStrip } from '../components/RecentlyActiveStrip';
 import { SuperLikeResultModal } from '../components/SuperLikeResultModal';
 import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
 import { ReportReasonSheet, type ReportReason } from '../components/ReportReasonSheet';
-import { ScreenHeader } from '../components/ScreenHeader';
-import { SparkNoteSheet } from '../components/SparkNoteSheet';
-import { StandoutsRow } from '../components/StandoutsRow';
 import { SwipeDeck, SwipeDeckHandle } from '../components/SwipeDeck';
 import { WaitingForMatchModal } from '../components/WaitingForMatchModal';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { formatSearchRadius } from '../types/preferences';
-import { DiscoverFilter } from '../types/preferences';
 import { Profile, ProfilePrompt } from '../types/profile';
 import { spacing } from '../theme';
 
@@ -39,14 +29,12 @@ export function DiscoverScreen() {
   const navigation = useNavigation();
   const { colors } = useTheme();
   const deckRef = useRef<SwipeDeckHandle>(null);
-  const rewindAnim = useRef(new Animated.Value(0)).current;
   const {
     discoverQueue,
     discoverPoolTotal,
     hasMoreInPool,
     preferences,
     updatePreferences,
-    toggleDiscoverFilter,
     searchMorePeople,
     expandSearchRadius,
     passProfile,
@@ -54,26 +42,13 @@ export function DiscoverScreen() {
     superLikeProfile,
     getConversationIdForProfile,
     canLike,
-    remainingLikes,
-    remainingSparkNotes,
-    isSparkPlus,
-    isBoosted,
-    canRewind,
     rewindKey,
     isPaused,
     user,
     blockProfile,
     reportProfile,
-    rewindLastPass,
     heldIds,
-    heldProfiles,
-    standoutsProfiles,
-    recentlyActiveProfiles,
-    dailyMostCompatible,
     getCompatibilityScore,
-    holdProfile,
-    unholdProfile,
-    prioritizeProfileInDeck,
   } = useApp();
 
   const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
@@ -86,8 +61,6 @@ export function DiscoverScreen() {
   const [showLikeLimit, setShowLikeLimit] = useState(false);
   const [toastProfileName, setToastProfileName] = useState<string | null>(null);
   const [showMatchToast, setShowMatchToast] = useState(false);
-  const [showSparkNote, setShowSparkNote] = useState(false);
-  const [sparkNoteProfile, setSparkNoteProfile] = useState<Profile | null>(null);
   const [reportProfileId, setReportProfileId] = useState<string | null>(null);
   const [reportProfileName, setReportProfileName] = useState('');
   const [superLikeProfileState, setSuperLikeProfileState] = useState<Profile | null>(null);
@@ -99,15 +72,9 @@ export function DiscoverScreen() {
   } | null>(null);
   const [showPromptLike, setShowPromptLike] = useState(false);
 
-  const activeFilters = preferences.discoverFilters ?? [];
-  const showSearchMore = !isPaused && discoverQueue.length > 0;
-
-  const handleFilterToggle = useCallback(
-    (filter: DiscoverFilter) => {
-      toggleDiscoverFilter(filter);
-    },
-    [toggleDiscoverFilter],
-  );
+  const openDiscoverHub = () => {
+    navigation.getParent()?.navigate('DiscoverHub');
+  };
 
   const processLike = useCallback(
     (profile: Profile, sparkNote?: string) => {
@@ -158,14 +125,6 @@ export function DiscoverScreen() {
     },
     [canLike, superLikeProfile],
   );
-
-  const handleRewind = useCallback(() => {
-    Animated.sequence([
-      Animated.timing(rewindAnim, { toValue: 1, duration: 200, useNativeDriver: true }),
-      Animated.timing(rewindAnim, { toValue: 0, duration: 300, useNativeDriver: true }),
-    ]).start();
-    rewindLastPass();
-  }, [rewindAnim, rewindLastPass]);
 
   const handleFindMorePeople = useCallback(() => {
     setShowWaiting(false);
@@ -227,45 +186,6 @@ export function DiscoverScreen() {
     setToastProfileName(null);
   }, []);
 
-  const currentProfile = discoverQueue[0] ?? null;
-
-  const openSparkNote = useCallback(() => {
-    if (!currentProfile) {
-      return;
-    }
-    setSparkNoteProfile(currentProfile);
-    setShowSparkNote(true);
-  }, [currentProfile]);
-
-  const handleSparkNoteSend = useCallback(
-    (note: string) => {
-      if (!sparkNoteProfile) {
-        return;
-      }
-      setShowSparkNote(false);
-      processLike(sparkNoteProfile, note);
-      setSparkNoteProfile(null);
-    },
-    [processLike, sparkNoteProfile],
-  );
-
-  const handleSparkNoteSkip = useCallback(() => {
-    if (!sparkNoteProfile) {
-      return;
-    }
-    setShowSparkNote(false);
-    processLike(sparkNoteProfile);
-    setSparkNoteProfile(null);
-  }, [processLike, sparkNoteProfile]);
-
-  const openMap = useCallback(() => {
-    navigation.getParent()?.navigate('MapDiscover');
-  }, [navigation]);
-
-  const openExplore = useCallback(() => {
-    navigation.getParent()?.navigate('Explore');
-  }, [navigation]);
-
   const dismissSuperLikeResult = useCallback(() => {
     setShowSuperLikeResult(false);
     setSuperLikeProfileState(null);
@@ -275,27 +195,6 @@ export function DiscoverScreen() {
   const handleSuperLikeTalkLater = useCallback(() => {
     dismissSuperLikeResult();
   }, [dismissSuperLikeResult]);
-
-  const handleSelectCuratedProfile = useCallback(
-    (profile: Profile) => {
-      prioritizeProfileInDeck(profile.id);
-    },
-    [prioritizeProfileInDeck],
-  );
-
-  const handleHoldCurrent = useCallback(() => {
-    if (!currentProfile) {
-      return;
-    }
-    if (heldIds.has(currentProfile.id)) {
-      unholdProfile(currentProfile.id);
-      Alert.alert('Removed from hold', `${currentProfile.name} is back in your deck.`);
-    } else {
-      holdProfile(currentProfile.id);
-      Alert.alert('On hold', `${currentProfile.name} saved for later.`);
-      deckRef.current?.advanceAfterSuperLike();
-    }
-  }, [currentProfile, deckRef, heldIds, holdProfile, unholdProfile]);
 
   const handleLikePrompt = useCallback((prompt: ProfilePrompt) => {
     if (!detailProfile) {
@@ -340,20 +239,14 @@ export function DiscoverScreen() {
     setShowWaiting(true);
   }, [dismissSuperLikeResult, getConversationIdForProfile, navigation, superLikeIsMatch, superLikeProfileState]);
 
-  const rewindScale = rewindAnim.interpolate({
-    inputRange: [0, 0.5, 1],
-    outputRange: [1, 1.08, 1],
-  });
-
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      <Animated.View
+      <View
         style={[
           styles.deckContainer,
           {
             height: deckHeight,
             marginTop: insets.top,
-            transform: [{ scale: rewindScale }],
           },
         ]}
       >
@@ -385,9 +278,9 @@ export function DiscoverScreen() {
                 Widen search radius
               </Text>
             </Pressable>
-            <Pressable style={styles.secondaryButton} onPress={() => setShowPreferences(true)}>
+            <Pressable style={styles.secondaryButton} onPress={openDiscoverHub}>
               <Text style={[styles.secondaryButtonText, { color: colors.textMuted }]}>
-                Discovery preferences
+                Open discover tools
               </Text>
             </Pressable>
           </View>
@@ -406,152 +299,11 @@ export function DiscoverScreen() {
         )}
 
         <View style={styles.topOverlay} pointerEvents="box-none">
-          <ScreenHeader
-            showLogo
-            compact
-            leftIcon="map-outline"
-            onLeftPress={openMap}
-            rightIcon="options-outline"
-            onRightPress={() => setShowPreferences(true)}
-            showDisguiseButton
-          />
-
-          <View style={styles.metaRow}>
-            <Pressable
-              style={[styles.radiusPill, { backgroundColor: 'rgba(26, 26, 28, 0.72)' }]}
-              onPress={() => setShowExpandLocation(true)}
-            >
-              <Ionicons name="location-outline" size={12} color={colors.gradientEnd} />
-              <Text style={[styles.radiusText, { color: colors.textMuted }]} numberOfLines={1}>
-                {formatSearchRadius(preferences.maxDistanceMiles)}
-              </Text>
-              <Ionicons name="chevron-down" size={12} color={colors.textMuted} />
-            </Pressable>
-
-            {!isSparkPlus && (
-              <Pressable
-                style={[
-                  styles.likesPill,
-                  { backgroundColor: 'rgba(26, 26, 28, 0.72)' },
-                  !canLike && { borderWidth: 1, borderColor: colors.gradientEnd },
-                ]}
-                onPress={() => {
-                  if (!canLike) {
-                    setShowLikeLimit(true);
-                  } else {
-                    navigation.getParent()?.navigate('SparkPlus');
-                  }
-                }}
-              >
-                <Text style={[styles.likesPillText, { color: colors.gradientEnd }]}>
-                  {remainingLikes === 0 ? '0' : remainingLikes}
-                </Text>
-              </Pressable>
-            )}
+          <View style={styles.emergencyHeader}>
+            <ModeToggleLogo variant="spark" compact />
           </View>
-
-          {(isPaused || isBoosted || (preferences.travelMode && preferences.passportCity)) && (
-            <View style={styles.bannerRow}>
-              {isPaused && (
-                <View style={[styles.miniBanner, { backgroundColor: 'rgba(26, 26, 28, 0.72)' }]}>
-                  <Ionicons name="pause-circle" size={12} color={colors.rewind} />
-                  <Text style={[styles.miniBannerText, { color: colors.rewind }]}>Paused</Text>
-                </View>
-              )}
-              {isBoosted && (
-                <View style={styles.miniBannerBoost}>
-                  <Ionicons name="flash" size={12} color="#FFD700" />
-                  <Text style={styles.miniBannerBoostText}>Boost</Text>
-                </View>
-              )}
-              {preferences.travelMode && preferences.passportCity && (
-                <View style={[styles.miniBanner, { backgroundColor: 'rgba(26, 26, 28, 0.72)' }]}>
-                  <Ionicons name="airplane" size={11} color={colors.superLike} />
-                  <Text style={[styles.miniBannerText, { color: colors.superLike }]}>
-                    {preferences.passportCity}
-                  </Text>
-                </View>
-              )}
-            </View>
-          )}
-
-          <DiscoverFilterChips activeFilters={activeFilters} onToggle={handleFilterToggle} compact />
-
-          {dailyMostCompatible && currentProfile?.id !== dailyMostCompatible.id && (
-            <MostCompatibleBanner
-              profile={dailyMostCompatible}
-              score={getCompatibilityScore(dailyMostCompatible)}
-              onPress={() => handleSelectCuratedProfile(dailyMostCompatible)}
-            />
-          )}
-
-          <StandoutsRow profiles={standoutsProfiles.slice(0, 6)} onSelect={handleSelectCuratedProfile} />
-          <RecentlyActiveStrip profiles={recentlyActiveProfiles.slice(0, 8)} onSelect={handleSelectCuratedProfile} />
-          <HeldProfilesRow
-            profiles={heldProfiles}
-            onSelect={handleSelectCuratedProfile}
-            onRemove={unholdProfile}
-          />
-
-          <DailyBatchIndicator
-            remaining={discoverQueue.length}
-            total={discoverPoolTotal}
-            slim
-          />
         </View>
-
-        <View style={styles.bottomOverlay} pointerEvents="box-none">
-          {showSearchMore && discoverQueue.length > 0 && (
-            <Pressable
-              style={[styles.searchMorePill, { backgroundColor: 'rgba(26, 26, 28, 0.82)', borderColor: colors.border }]}
-              onPress={hasMoreInPool ? searchMorePeople : handleWidenFilters}
-            >
-              <Ionicons name="people-outline" size={14} color={colors.gradientEnd} />
-              <Text style={[styles.searchMoreText, { color: colors.gradientEnd }]}>
-                {hasMoreInPool ? 'More people' : 'Expand'}
-              </Text>
-            </Pressable>
-          )}
-
-          {currentProfile && !isPaused && (
-            <View style={styles.actionRow}>
-              {canRewind && (
-                <Pressable style={[styles.actionPill, { backgroundColor: 'rgba(26, 26, 28, 0.82)' }]} onPress={handleRewind}>
-                  <Ionicons name="refresh" size={14} color={colors.gradientEnd} />
-                </Pressable>
-              )}
-              <Pressable style={[styles.actionPill, { backgroundColor: 'rgba(26, 26, 28, 0.82)' }]} onPress={openSparkNote}>
-                <Ionicons name="chatbubble-ellipses-outline" size={14} color={colors.gradientEnd} />
-              </Pressable>
-              <Pressable
-                style={[styles.actionPill, { backgroundColor: 'rgba(26, 26, 28, 0.82)' }]}
-                onPress={handleHoldCurrent}
-              >
-                <Ionicons
-                  name={currentProfile && heldIds.has(currentProfile.id) ? 'bookmark' : 'bookmark-outline'}
-                  size={14}
-                  color={colors.gradientEnd}
-                />
-              </Pressable>
-              <Pressable
-                style={[styles.actionPill, { backgroundColor: 'rgba(26, 26, 28, 0.82)' }]}
-                onPress={() => setShowExpandLocation(true)}
-              >
-                <Ionicons name="expand-outline" size={14} color={colors.gradientEnd} />
-              </Pressable>
-              <Pressable style={[styles.actionPill, { backgroundColor: 'rgba(26, 26, 28, 0.82)' }]} onPress={openExplore}>
-                <Ionicons name="compass-outline" size={14} color={colors.gradientEnd} />
-              </Pressable>
-              <Pressable
-                style={[styles.actionPill, styles.actionPillWide, { backgroundColor: 'rgba(26, 26, 28, 0.82)' }]}
-                onPress={() => setDetailProfile(currentProfile)}
-              >
-                <Text style={[styles.actionPillText, { color: colors.textMuted }]}>Profile</Text>
-              </Pressable>
-            </View>
-          )}
-        </View>
-      </Animated.View>
+      </View>
 
       <MatchToast
         visible={showMatchToast}
@@ -591,18 +343,6 @@ export function DiscoverScreen() {
         }}
       />
 
-      <SparkNoteSheet
-        visible={showSparkNote}
-        profile={sparkNoteProfile}
-        remainingNotes={remainingSparkNotes === Infinity ? 99 : remainingSparkNotes}
-        onClose={() => {
-          setShowSparkNote(false);
-          setSparkNoteProfile(null);
-        }}
-        onSend={handleSparkNoteSend}
-        onSkip={handleSparkNoteSkip}
-      />
-
       <ProfileDetailSheet
         profile={detailProfile}
         visible={detailProfile !== null}
@@ -610,7 +350,6 @@ export function DiscoverScreen() {
         isHeld={detailProfile ? heldIds.has(detailProfile.id) : false}
         onClose={() => setDetailProfile(null)}
         onBlock={handleBlockDetail}
-        onHold={detailProfile ? handleHoldCurrent : undefined}
         onLikePrompt={handleLikePrompt}
         onReport={(profileId) => {
           if (detailProfile) {
@@ -672,79 +411,10 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 10,
   },
-  bottomOverlay: {
-    position: 'absolute',
-    left: spacing.sm,
-    right: spacing.sm,
-    bottom: 78,
-    zIndex: 15,
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
+  emergencyHeader: {
     paddingHorizontal: spacing.md,
-    marginBottom: spacing.xs,
-  },
-  radiusPill: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    borderRadius: 999,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-  },
-  radiusText: {
-    flex: 1,
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  likesPill: {
-    borderRadius: 999,
-    minWidth: 32,
-    alignItems: 'center',
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-  },
-  likesPillText: {
-    fontSize: 11,
-    fontWeight: '800',
-  },
-  bannerRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.md,
-    marginBottom: spacing.xs,
-  },
-  miniBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    borderRadius: 999,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-  },
-  miniBannerText: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  miniBannerBoost: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    borderRadius: 999,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-    backgroundColor: 'rgba(255, 215, 0, 0.15)',
-  },
-  miniBannerBoostText: {
-    color: '#FFD700',
-    fontSize: 11,
-    fontWeight: '700',
+    paddingTop: spacing.xs,
+    alignItems: 'flex-start',
   },
   emptyState: {
     flex: 1,
@@ -783,39 +453,5 @@ const styles = StyleSheet.create({
   secondaryButtonText: {
     fontWeight: '600',
     fontSize: 14,
-  },
-  searchMorePill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    borderRadius: 999,
-    borderWidth: 1,
-    paddingHorizontal: spacing.sm + 2,
-    paddingVertical: 5,
-  },
-  searchMoreText: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  actionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-  },
-  actionPill: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  actionPillWide: {
-    width: 'auto',
-    paddingHorizontal: spacing.md,
-  },
-  actionPillText: {
-    fontSize: 13,
-    fontWeight: '600',
   },
 });

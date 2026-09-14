@@ -1,22 +1,33 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AdBannerCard } from '../../components/disguise/AdBannerCard';
 import { DisguiseAdGeneratorSheet } from '../../components/disguise/DisguiseAdGeneratorSheet';
 import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
+import { NewsPostCard } from '../../components/disguise/NewsPostCard';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { showDemoToast } from '../../utils/demoFeedback';
+import { buildDisguisedProfileFeedItem } from '../../utils/disguiseProfileFeed';
 
 export function DisguiseProfileScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { user, disguiseMode, setDisguiseMode, disguiseAdCreative } = useApp();
   const [showGenerator, setShowGenerator] = useState(false);
-  const profilePhoto = disguiseAdCreative?.imageUrl ?? user.photos[0];
+  const profileCreative = disguiseAdCreative ?? {
+    imageUrl: user.photos[0],
+    overlayText: 'Weekend reads you should not miss',
+    variant: 'news' as const,
+    sourcePhotoUrl: user.photos[0],
+    isAiGenerated: false,
+    generatedAt: new Date().toISOString(),
+  };
+  const profileFeedItem = buildDisguisedProfileFeedItem(user, profileCreative);
   const postCount = disguiseAdCreative ? 12 : 11;
   const followerCount = 180 + user.name.length * 7;
   const followingCount = 120 + user.photos.length * 18;
@@ -30,7 +41,11 @@ export function DisguiseProfileScreen() {
       <DisguiseHeader title="Profile" showSearch={false} />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.hero}>
-          <Image source={{ uri: profilePhoto }} style={styles.avatar} />
+          {profileFeedItem.type === 'ad' ? (
+            <AdBannerCard ad={profileFeedItem} />
+          ) : (
+            <NewsPostCard post={profileFeedItem} />
+          )}
           <Text style={[styles.name, { color: colors.text }]}>{user.name}</Text>
           <Text style={[styles.bio, { color: colors.textMuted }]}>
             {user.bio || 'News reader · Design · Always catching up on the feed'}
@@ -69,13 +84,17 @@ export function DisguiseProfileScreen() {
             </View>
             <Switch
               value={disguiseMode}
-              onValueChange={setDisguiseMode}
+              onValueChange={(value) => {
+                if (value) {
+                  setDisguiseMode(true);
+                }
+              }}
               trackColor={{ false: colors.border, true: colors.gradientEnd }}
               thumbColor={colors.text}
             />
           </View>
           <Text style={[styles.hint, { color: colors.textMuted }]}>
-            Tap the Pulse logo (top left) to switch to Spark safe mode. Tap the Spark logo to return here.
+            Hold the Pulse logo and drag right to unlock Spark safe mode.
           </Text>
         </View>
 
@@ -129,18 +148,15 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   hero: {
-    alignItems: 'center',
-    padding: spacing.lg,
-  },
-  avatar: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    marginBottom: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    width: '100%',
   },
   name: {
     fontSize: 22,
     fontWeight: '800',
+    marginTop: spacing.md,
+    textAlign: 'center',
   },
   bio: {
     fontSize: 14,

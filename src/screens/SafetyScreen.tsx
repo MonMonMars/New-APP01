@@ -4,6 +4,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
+import { legalDocumentLinks, LegalDocumentId } from '../content/legalDocuments';
 import { colors, radii, spacing } from '../theme';
 
 type SafetyScreenProps = {
@@ -61,6 +62,14 @@ const resources = [
   },
 ];
 
+const legalDocIconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
+  'document-text-outline': 'document-text-outline',
+  'lock-closed-outline': 'lock-closed-outline',
+  'people-outline': 'people-outline',
+  'eye-off-outline': 'eye-off-outline',
+  'shield-checkmark-outline': 'shield-checkmark-outline',
+};
+
 export function SafetyScreen({ onClose }: SafetyScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
@@ -93,6 +102,36 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
               <Text style={styles.tipBody}>{tip.body}</Text>
             </View>
           </View>
+        ))}
+
+        <Text style={styles.sectionTitle}>Legal & policies</Text>
+        <Text style={styles.legalIntro}>
+          Read our terms, privacy policy, and disguise-mode rules. Full bilingual text is in docs/legal/
+          in the repository.
+        </Text>
+        {legalDocumentLinks.map((item) => (
+          <Pressable
+            key={item.id}
+            style={styles.resourceRow}
+            onPress={() => {
+              if (item.id === 'verification') {
+                navigation.getParent()?.navigate('VerificationPolicy');
+                return;
+              }
+              navigation.getParent()?.navigate('LegalDocument', { documentId: item.id as LegalDocumentId });
+            }}
+          >
+            <Ionicons
+              name={legalDocIconMap[item.icon] ?? 'document-outline'}
+              size={22}
+              color={colors.textMuted}
+            />
+            <View style={styles.legalLabelWrap}>
+              <Text style={styles.resourceLabel}>{item.label}</Text>
+              <Text style={styles.legalLabelZh}>{item.labelZh}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+          </Pressable>
         ))}
 
         <Text style={styles.sectionTitle}>Quick actions</Text>
@@ -209,5 +248,19 @@ const styles = StyleSheet.create({
     flex: 1,
     color: colors.text,
     fontSize: 16,
+  },
+  legalIntro: {
+    color: colors.textMuted,
+    fontSize: 13,
+    lineHeight: 19,
+    marginBottom: spacing.sm,
+  },
+  legalLabelWrap: {
+    flex: 1,
+  },
+  legalLabelZh: {
+    color: colors.textMuted,
+    fontSize: 12,
+    marginTop: 2,
   },
 });

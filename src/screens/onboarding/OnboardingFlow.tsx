@@ -177,8 +177,13 @@ export function OnboardingFlow() {
               <Text style={styles.ruleText}>{rule}</Text>
             </View>
           ))}
+          <Text style={styles.legalNote}>
+            By continuing you agree to Spark&apos;s Terms of Service, Privacy Policy, Community
+            Guidelines, and Disguise Mode Policy. You must be 18 or older. Full legal documents are
+            available in Safety Center after setup (使用者條款 · 隱私政策 · 社群規範 · 偽裝模式政策).
+          </Text>
           <Pressable style={styles.primaryButton} onPress={() => setStep('location')}>
-            <Text style={styles.primaryButtonText}>I agree</Text>
+            <Text style={styles.primaryButtonText}>I agree — I am 18+</Text>
           </Pressable>
         </View>
       )}
@@ -403,6 +408,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     flex: 1,
     lineHeight: 22,
+  },
+  legalNote: {
+    color: colors.textMuted,
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: spacing.md,
+    marginBottom: spacing.lg,
   },
   mapPlaceholder: {
     backgroundColor: colors.surface,

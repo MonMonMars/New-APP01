@@ -49,7 +49,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
       ) : null}
       <View style={styles.actions}>
         <Pressable style={styles.action}>
-          <Ionicons name="heart-outline" size={18} color={colors.textMuted} />
+          <Ionicons name="arrow-up-outline" size={18} color={colors.textMuted} />
           <Text style={[styles.actionText, { color: colors.textMuted }]}>{post.likes}</Text>
         </Pressable>
         <Pressable style={styles.action}>

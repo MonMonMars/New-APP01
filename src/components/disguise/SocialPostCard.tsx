@@ -1,9 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { DisguiseOverlayAvatar } from './DisguiseOverlayAvatar';
+import { DisguiseOverlayImage } from './DisguiseOverlayImage';
 
 type SocialPostCardProps = {
   post: SocialPost;
@@ -15,7 +17,12 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
   return (
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={styles.header}>
-        <Image source={{ uri: post.avatarUrl }} style={styles.avatar} />
+        <DisguiseOverlayAvatar
+          imageUrl={post.avatarUrl}
+          overlayText={post.avatarMask.text}
+          variant={post.avatarMask.variant}
+          size={40}
+        />
         <View style={styles.headerText}>
           <Text style={[styles.author, { color: colors.text }]}>{post.author}</Text>
           <Text style={[styles.handle, { color: colors.textMuted }]}>
@@ -27,9 +34,15 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
         </Pressable>
       </View>
       <Text style={[styles.body, { color: colors.text }]}>{post.body}</Text>
-      {post.imageUrl && (
-        <Image source={{ uri: post.imageUrl }} style={styles.postImage} resizeMode="cover" />
-      )}
+      {post.imageUrl && post.imageMask ? (
+        <View style={styles.postImageWrap}>
+          <DisguiseOverlayImage
+            imageUrl={post.imageUrl}
+            overlayText={post.imageMask.text}
+            variant={post.imageMask.variant}
+          />
+        </View>
+      ) : null}
       <View style={styles.actions}>
         <Pressable style={styles.action}>
           <Ionicons name="heart-outline" size={18} color={colors.textMuted} />
@@ -60,11 +73,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
     gap: spacing.sm,
   },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
   headerText: {
     flex: 1,
   },
@@ -80,10 +88,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: spacing.sm,
   },
-  postImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: radii.card,
+  postImageWrap: {
     marginBottom: spacing.sm,
   },
   actions: {

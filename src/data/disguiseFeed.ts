@@ -23,14 +23,21 @@ export type AdPost = {
   sponsored: true;
 };
 
+export type SocialAvatarMask = {
+  variant: 'news' | 'ad';
+  text: string;
+};
+
 export type SocialPost = {
   id: string;
   type: 'social';
   author: string;
   handle: string;
   avatarUrl: string;
+  avatarMask: SocialAvatarMask;
   body: string;
   imageUrl?: string;
+  imageMask?: SocialAvatarMask;
   likes: number;
   comments: number;
   timeAgo: string;
@@ -111,8 +118,10 @@ const socialItems: SocialPost[] = [
     author: 'Alex Chen',
     handle: '@alexchen',
     avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
+    avatarMask: { variant: 'news', text: 'City food scene heats up' },
     body: 'Finally tried that ramen spot everyone keeps posting about. Worth the queue — the broth is unreal.',
     imageUrl: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&q=80',
+    imageMask: { variant: 'ad', text: 'Free delivery tonight' },
     likes: 284,
     comments: 41,
     timeAgo: '34m ago',
@@ -123,6 +132,7 @@ const socialItems: SocialPost[] = [
     author: 'Maya Okonkwo',
     handle: '@maya_o',
     avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80',
+    avatarMask: { variant: 'ad', text: 'Wellness week sale' },
     body: 'Hot take: the best productivity hack is still a 20‑minute walk without your phone.',
     likes: 1204,
     comments: 89,
@@ -134,6 +144,7 @@ const socialItems: SocialPost[] = [
     author: 'Jordan Lee',
     handle: '@jordanlee',
     avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80',
+    avatarMask: { variant: 'news', text: 'Tech hiring surges' },
     body: 'Shipped a small UI refresh today. Nothing flashy — just cleaner spacing and better contrast. Details matter.',
     likes: 567,
     comments: 23,

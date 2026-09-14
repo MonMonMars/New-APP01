@@ -391,12 +391,11 @@ export function DiscoverScreen() {
             </View>
           )}
 
-          <DiscoverFilterChips activeFilters={activeFilters} onToggle={handleFilterToggle} compact />
+          <DiscoverFilterChips activeFilters={activeFilters} onToggle={handleFilterToggle} />
 
           <DailyBatchIndicator
             remaining={discoverQueue.length}
             total={discoverPoolTotal}
-            slim
           />
         </View>
 

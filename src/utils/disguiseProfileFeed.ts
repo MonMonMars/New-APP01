@@ -79,9 +79,14 @@ function toDisguisedProfilePost(
     timeAgo: `${index + 1}h ago`,
     photos: profile.photos,
     coverImageUrl: isAd ? adCampaign.imageUrl : newsTemplate.coverImageUrl,
-    category: isSocial ? undefined : newsTemplate.category,
+    category: isSocial ? undefined : 'Community',
     handle: isSocial ? profileHandle(disguiseDisplayName(profile.name)) : undefined,
     cta: isAd ? adCampaign.cta : undefined,
+    hintLabel: isAd
+      ? 'Profile · tap masked photo'
+      : isSocial
+        ? 'Profile comment · tap avatar'
+        : 'Profile · tap BREAKING avatar',
   };
 }
 
@@ -111,9 +116,10 @@ export function buildDisguisedProfileFeedItem(
     timeAgo: 'Just now',
     photos: user.photos.length > 0 ? user.photos : [creative.sourcePhotoUrl],
     coverImageUrl: isAd ? adCampaign.imageUrl : newsTemplate.coverImageUrl,
-    category: isAd ? undefined : newsTemplate.category,
+    category: isAd ? undefined : 'Community',
     handle: profileHandle(disguiseDisplayName(user.name)),
     cta: isAd ? adCampaign.cta : undefined,
+    hintLabel: isAd ? 'Profile · tap masked photo' : 'Profile · tap BREAKING avatar',
   };
 }
 
@@ -138,8 +144,14 @@ export function profileToDisguisedProfilePost(
     timeAgo: 'Just now',
     photos: profile.photos,
     coverImageUrl: variant === 'ad' ? adCampaign.imageUrl : newsTemplate.coverImageUrl,
-    category: variant === 'news' ? newsTemplate.category : undefined,
+    category: variant === 'news' ? 'Community' : undefined,
     handle: variant === 'social' ? profileHandle(disguiseDisplayName(profile.name)) : undefined,
     cta: variant === 'ad' ? adCampaign.cta : undefined,
+    hintLabel:
+      variant === 'ad'
+        ? 'Profile · tap masked photo'
+        : variant === 'social'
+          ? 'Profile comment · tap avatar'
+          : 'Profile · tap BREAKING avatar',
   };
 }

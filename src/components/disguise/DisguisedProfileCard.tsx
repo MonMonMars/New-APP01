@@ -5,11 +5,21 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { DisguisedProfilePost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { DisguiseOverlayAvatar } from './DisguiseOverlayAvatar';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
 
 type DisguisedProfileCardProps = {
   post: DisguisedProfilePost;
 };
+
+function OwnerHint({ label, color }: { label: string; color: string }) {
+  return (
+    <View style={styles.hintRow}>
+      <Ionicons name="eye-outline" size={11} color={color} />
+      <Text style={[styles.hintText, { color }]}>{label}</Text>
+    </View>
+  );
+}
 
 export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   const { colors } = useTheme();
@@ -22,6 +32,9 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
     quote: post.overlayText,
     photos: post.photos,
   };
+
+  const maskVariant = post.variant === 'ad' ? 'ad' : 'news';
+  const maskSnippet = post.overlayText.split(' ').slice(0, 2).join(' ');
 
   const openPreview = () => setPreviewOpen(true);
 
@@ -41,9 +54,14 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
             <Pressable
               onPress={openPreview}
               accessibilityRole="button"
-              accessibilityLabel={`View photos from ${post.name}`}
+              accessibilityLabel={`View profile photos from ${post.name}`}
             >
-              <Image source={{ uri: post.avatarUrl }} style={styles.socialAvatar} />
+              <DisguiseOverlayAvatar
+                imageUrl={post.avatarUrl}
+                overlayText={maskSnippet}
+                variant="news"
+                size={40}
+              />
             </Pressable>
             <View style={styles.socialHeaderText}>
               <Text style={[styles.socialAuthor, { color: colors.text }]}>{post.headline}</Text>
@@ -68,6 +86,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
               <Text style={[styles.socialActionText, { color: colors.textMuted }]}>3</Text>
             </View>
           </View>
+          <OwnerHint label={post.hintLabel} color={colors.gradientEnd} />
         </View>
         {previewSheet}
       </>
@@ -81,20 +100,42 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
           style={[styles.card, { backgroundColor: '#1a1a2e', borderColor: colors.border }]}
           onPress={openPreview}
           accessibilityRole="button"
-          accessibilityLabel={`Sponsored: ${post.headline}`}
+          accessibilityLabel={`Profile disguised as ad: ${post.headline}`}
         >
           <View style={styles.sponsoredRow}>
             <Text style={styles.sponsored}>Sponsored</Text>
+            <Text style={[styles.profileTag, { color: colors.gradientEnd }]}>Profile</Text>
             <Ionicons name="information-circle-outline" size={14} color="#888" />
           </View>
           <Image source={{ uri: post.coverImageUrl }} style={styles.adImage} resizeMode="cover" />
           <View style={styles.body}>
             <Text style={styles.brand}>{post.headline}</Text>
             <Text style={styles.tagline}>{post.summary}</Text>
+            <View style={styles.spotlightRow}>
+              <Pressable
+                onPress={(event) => {
+                  event.stopPropagation();
+                  openPreview();
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="View profile photo"
+              >
+                <DisguiseOverlayAvatar
+                  imageUrl={post.avatarUrl}
+                  overlayText="AD"
+                  variant="ad"
+                  size={40}
+                />
+              </Pressable>
+              <Text style={styles.spotlightText} numberOfLines={2}>
+                Reader spotlight — masked photo is a profile, not part of this ad.
+              </Text>
+            </View>
             <View style={styles.cta}>
               <Text style={styles.ctaText}>{post.cta ?? 'Learn more'}</Text>
               <Ionicons name="chevron-forward" size={14} color="#fff" />
             </View>
+            <OwnerHint label={post.hintLabel} color={colors.gradientEnd} />
           </View>
         </Pressable>
         {previewSheet}
@@ -108,14 +149,15 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
         style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
         onPress={openPreview}
         accessibilityRole="button"
-        accessibilityLabel={`Read article: ${post.headline}`}
+        accessibilityLabel={`Profile disguised as news: ${post.headline}`}
       >
         <Image source={{ uri: post.coverImageUrl }} style={styles.newsImage} resizeMode="cover" />
         <View style={styles.body}>
           <View style={styles.metaRow}>
             <Text style={[styles.source, { color: colors.gradientEnd }]}>{post.sourceLabel}</Text>
             <Text style={[styles.dot, { color: colors.textMuted }]}>·</Text>
-            <Text style={[styles.category, { color: colors.textMuted }]}>{post.category}</Text>
+            <Text style={[styles.category, { color: colors.gradientEnd }]}>{post.category}</Text>
+            <Text style={[styles.profileTag, { color: colors.gradientEnd }]}>· Profile</Text>
             <Text style={[styles.time, { color: colors.textMuted }]}>{post.timeAgo}</Text>
           </View>
           <Text style={[styles.headline, { color: colors.text }]}>{post.headline}</Text>
@@ -131,14 +173,20 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
                 openPreview();
               }}
               accessibilityRole="button"
-              accessibilityLabel={`View photos from ${post.name}`}
+              accessibilityLabel="View profile — masked BREAKING avatar"
             >
-              <Image source={{ uri: post.avatarUrl }} style={styles.reporterAvatar} />
+              <DisguiseOverlayAvatar
+                imageUrl={post.avatarUrl}
+                overlayText={maskSnippet}
+                variant="news"
+                size={44}
+              />
               <Text style={[styles.reporterQuote, { color: colors.text }]} numberOfLines={3}>
                 {post.overlayText}
               </Text>
             </Pressable>
           </View>
+          <OwnerHint label={post.hintLabel} color={colors.gradientEnd} />
         </View>
       </Pressable>
       {previewSheet}
@@ -172,6 +220,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+  },
+  profileTag: {
+    fontSize: 10,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
   },
   newsImage: {
     width: '100%',
@@ -230,7 +284,20 @@ const styles = StyleSheet.create({
     color: '#aaa',
     fontSize: 14,
     lineHeight: 20,
+    marginBottom: spacing.sm,
+  },
+  spotlightRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
     marginBottom: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  spotlightText: {
+    flex: 1,
+    color: '#999',
+    fontSize: 11,
+    lineHeight: 15,
   },
   cta: {
     flexDirection: 'row',
@@ -260,28 +327,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     maxWidth: 120,
   },
-  reporterAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    marginBottom: spacing.xs,
-  },
   reporterQuote: {
     fontSize: 11,
     lineHeight: 15,
     textAlign: 'center',
     fontWeight: '600',
+    marginTop: spacing.xs,
   },
   socialHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: spacing.sm,
     gap: spacing.sm,
-  },
-  socialAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
   },
   socialHeaderText: {
     flex: 1,
@@ -302,6 +359,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.lg,
     paddingTop: spacing.xs,
+    marginBottom: spacing.xs,
   },
   socialAction: {
     flexDirection: 'row',
@@ -311,5 +369,17 @@ const styles = StyleSheet.create({
   socialActionText: {
     fontSize: 13,
     fontWeight: '600',
+  },
+  hintRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: spacing.sm,
+    opacity: 0.85,
+  },
+  hintText: {
+    fontSize: 10,
+    fontWeight: '600',
+    letterSpacing: 0.2,
   },
 });

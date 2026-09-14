@@ -75,6 +75,8 @@ export type DisguisedProfilePost = {
   category?: string;
   handle?: string;
   cta?: string;
+  /** Short owner hint — visible when reading closely, not from afar. */
+  hintLabel: string;
 };
 
 export type FeedItem = NewsPost | AdPost | SocialPost | DisguisedProfilePost;

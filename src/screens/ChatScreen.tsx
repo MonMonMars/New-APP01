@@ -20,7 +20,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MessageStatusIcon } from '../components/MessageStatusIcon';
 import { ReportReasonSheet, type ReportReason } from '../components/ReportReasonSheet';
 import { SafetyActionSheet } from '../components/SafetyActionSheet';
+import { SuggestDateSheet } from '../components/SuggestDateSheet';
 import { TypingIndicator } from '../components/TypingIndicator';
+import { VibeGameSheet } from '../components/VibeGameSheet';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { useLiveExpiry } from '../hooks/useLiveExpiry';
@@ -47,6 +49,8 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const [draft, setDraft] = useState('');
   const [showSafety, setShowSafety] = useState(false);
   const [showReport, setShowReport] = useState(false);
+  const [showSuggestDate, setShowSuggestDate] = useState(false);
+  const [showVibeGame, setShowVibeGame] = useState(false);
 
   const conversation = useMemo(
     () => conversations.find((c) => c.id === conversationId),
@@ -188,6 +192,22 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
                 <Text style={[styles.icebreakerText, { color: colors.text }]}>{prompt}</Text>
               </Pressable>
             ))}
+            <View style={styles.gameRow}>
+              <Pressable
+                style={[styles.gameChip, { backgroundColor: colors.surface, borderColor: colors.gradientEnd }]}
+                onPress={() => setShowSuggestDate(true)}
+              >
+                <Ionicons name="calendar-outline" size={16} color={colors.gradientEnd} />
+                <Text style={[styles.gameChipText, { color: colors.gradientEnd }]}>Suggest a date</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.gameChip, { backgroundColor: colors.surface, borderColor: colors.gradientEnd }]}
+                onPress={() => setShowVibeGame(true)}
+              >
+                <Ionicons name="color-wand-outline" size={16} color={colors.gradientEnd} />
+                <Text style={[styles.gameChipText, { color: colors.gradientEnd }]}>Read my vibe</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
       ) : (
@@ -203,6 +223,9 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
       )}
 
       <View style={[styles.composer, { borderTopColor: colors.border, paddingBottom: insets.bottom + spacing.sm }]}>
+        <Pressable style={styles.gifButton} onPress={() => setShowSuggestDate(true)}>
+          <Ionicons name="calendar-outline" size={22} color={colors.textMuted} />
+        </Pressable>
         <Pressable style={styles.gifButton} onPress={handlePickImage}>
           <Ionicons name="images-outline" size={22} color={colors.textMuted} />
         </Pressable>
@@ -239,6 +262,20 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         profileName={profile.name}
         onClose={() => setShowReport(false)}
         onSubmit={handleReportSubmit}
+      />
+
+      <SuggestDateSheet
+        visible={showSuggestDate}
+        profileName={profile.name}
+        onClose={() => setShowSuggestDate(false)}
+        onSelect={(message) => handleSend(message)}
+      />
+
+      <VibeGameSheet
+        visible={showVibeGame}
+        profileName={profile.name}
+        onClose={() => setShowVibeGame(false)}
+        onSendGuess={(message) => handleSend(message)}
       />
     </KeyboardAvoidingView>
   );
@@ -335,6 +372,25 @@ const styles = StyleSheet.create({
   },
   icebreakerText: {
     fontSize: 14,
+  },
+  gameRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  gameChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    borderRadius: radii.button,
+    borderWidth: 1,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  gameChipText: {
+    fontSize: 13,
+    fontWeight: '700',
   },
   messages: {
     padding: spacing.lg,

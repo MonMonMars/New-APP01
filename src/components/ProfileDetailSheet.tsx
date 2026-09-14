@@ -3,22 +3,30 @@ import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'rea
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, radii, spacing } from '../theme';
-import { Profile } from '../types/profile';
+import { Profile, ProfilePrompt } from '../types/profile';
 
 type ProfileDetailSheetProps = {
   profile: Profile | null;
   visible: boolean;
+  compatibilityScore?: number;
+  isHeld?: boolean;
   onClose: () => void;
   onReport?: (profileId: string) => void;
   onBlock?: (profileId: string) => void;
+  onLikePrompt?: (prompt: ProfilePrompt) => void;
+  onHold?: () => void;
 };
 
 export function ProfileDetailSheet({
   profile,
   visible,
+  compatibilityScore,
+  isHeld = false,
   onClose,
   onReport,
   onBlock,
+  onLikePrompt,
+  onHold,
 }: ProfileDetailSheetProps) {
   const insets = useSafeAreaInsets();
 
@@ -33,6 +41,12 @@ export function ProfileDetailSheet({
           <Pressable onPress={onClose} style={styles.closeButton}>
             <Ionicons name="chevron-down" size={28} color={colors.text} />
           </Pressable>
+          {onHold && (
+            <Pressable style={styles.holdButton} onPress={onHold}>
+              <Ionicons name={isHeld ? 'bookmark' : 'bookmark-outline'} size={22} color={colors.gradientEnd} />
+              <Text style={styles.holdText}>{isHeld ? 'On hold' : 'Hold'}</Text>
+            </Pressable>
+          )}
         </View>
 
         <ScrollView contentContainerStyle={styles.content}>
@@ -53,6 +67,12 @@ export function ProfileDetailSheet({
                 <Ionicons name="checkmark-circle" size={22} color={colors.superLike} />
               )}
             </View>
+            {compatibilityScore !== undefined && (
+              <View style={styles.compatBadge}>
+                <Ionicons name="sparkles" size={14} color={colors.gradientEnd} />
+                <Text style={styles.compatText}>{compatibilityScore}% compatible</Text>
+              </View>
+            )}
             {profile.job && <Text style={styles.meta}>{profile.job}</Text>}
             {profile.school && <Text style={styles.meta}>{profile.school}</Text>}
             <Text style={styles.distance}>{profile.distanceMiles} miles away</Text>
@@ -64,10 +84,21 @@ export function ProfileDetailSheet({
           </View>
 
           {profile.prompts?.map((prompt) => (
-            <View key={prompt.question} style={styles.promptCard}>
+            <Pressable
+              key={prompt.question}
+              style={styles.promptCard}
+              onPress={() => onLikePrompt?.(prompt)}
+              disabled={!onLikePrompt}
+            >
               <Text style={styles.promptQuestion}>{prompt.question}</Text>
               <Text style={styles.promptAnswer}>{prompt.answer}</Text>
-            </View>
+              {onLikePrompt && (
+                <View style={styles.likePromptRow}>
+                  <Ionicons name="heart-outline" size={16} color={colors.heartPink} />
+                  <Text style={styles.likePromptText}>Like this answer</Text>
+                </View>
+              )}
+            </Pressable>
           ))}
 
           <View style={styles.section}>
@@ -110,11 +141,25 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   toolbar: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
   closeButton: {
     padding: spacing.sm,
+  },
+  holdButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    padding: spacing.sm,
+  },
+  holdText: {
+    color: colors.gradientEnd,
+    fontSize: 14,
+    fontWeight: '700',
   },
   content: {
     paddingBottom: spacing.xl,
@@ -137,6 +182,22 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 30,
     fontWeight: '800',
+  },
+  compatBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: spacing.sm,
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(30,195,255,0.12)',
+    borderRadius: radii.button,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+  },
+  compatText: {
+    color: colors.gradientEnd,
+    fontSize: 13,
+    fontWeight: '700',
   },
   meta: {
     color: colors.textMuted,
@@ -179,6 +240,20 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: spacing.sm,
     lineHeight: 26,
+  },
+  likePromptRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: spacing.sm,
+    paddingTop: spacing.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#2A2A2E',
+  },
+  likePromptText: {
+    color: colors.heartPink,
+    fontSize: 13,
+    fontWeight: '700',
   },
   tags: {
     flexDirection: 'row',

@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, radii, spacing } from '../theme';
@@ -32,10 +32,26 @@ const tips = [
 ];
 
 const resources = [
-  { label: 'Report a profile', icon: 'flag-outline' as const },
-  { label: 'Block someone', icon: 'hand-left-outline' as const },
-  { label: 'Safety tips & FAQ', icon: 'book-outline' as const },
-  { label: 'Contact support', icon: 'mail-outline' as const },
+  {
+    label: 'Report a profile',
+    icon: 'flag-outline' as const,
+    message: 'Open any profile or chat, tap the menu, and choose Report. We review every report within 24 hours.',
+  },
+  {
+    label: 'Block someone',
+    icon: 'hand-left-outline' as const,
+    message: 'Blocking removes them from your deck and chats immediately. You can unblock from Profile → Safety.',
+  },
+  {
+    label: 'Safety tips & FAQ',
+    icon: 'book-outline' as const,
+    message: 'Meet in public, tell a friend your plans, and trust your instincts. Full FAQ at spark.app/safety (demo).',
+  },
+  {
+    label: 'Contact support',
+    icon: 'mail-outline' as const,
+    message: 'Email support@spark.app — demo builds show this confirmation only.',
+  },
 ];
 
 export function SafetyScreen({ onClose }: SafetyScreenProps) {
@@ -73,7 +89,11 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
 
         <Text style={styles.sectionTitle}>Quick actions</Text>
         {resources.map((item) => (
-          <Pressable key={item.label} style={styles.resourceRow}>
+          <Pressable
+            key={item.label}
+            style={styles.resourceRow}
+            onPress={() => Alert.alert(item.label, item.message)}
+          >
             <Ionicons name={item.icon} size={22} color={colors.textMuted} />
             <Text style={styles.resourceLabel}>{item.label}</Text>
             <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />

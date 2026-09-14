@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
 import { useTheme } from '../../context/ThemeContext';
 import { disguiseTrendingTopics } from '../../data/disguiseFeed';
-import { radii, spacing } from '../../theme';
+import { spacing } from '../../theme';
+import { showDemoToast } from '../../utils/demoFeedback';
 
 export function DisguiseTrendingScreen() {
   const insets = useSafeAreaInsets();
@@ -14,17 +15,21 @@ export function DisguiseTrendingScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader title="Trending" showSearch={false} />
-      <FlatList
-        data={disguiseTrendingTopics}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        ListHeaderComponent={
-          <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-            What people are talking about today
-          </Text>
-        }
-        renderItem={({ item, index }) => (
-          <Pressable style={[styles.row, { borderBottomColor: colors.border }]}>
+      <ScrollView contentContainerStyle={styles.list}>
+        <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+          What people are talking about today
+        </Text>
+        {disguiseTrendingTopics.map((item, index) => (
+          <Pressable
+            key={item.id}
+            style={[styles.row, { borderBottomColor: colors.border }]}
+            onPress={() =>
+              showDemoToast(
+                item.label,
+                `${item.posts} posts in the last 24 hours. A filtered feed view would open here in production.`,
+              )
+            }
+          >
             <Text style={[styles.rank, { color: colors.textMuted }]}>{index + 1}</Text>
             <View style={styles.topicText}>
               <Text style={[styles.label, { color: colors.text }]}>{item.label}</Text>
@@ -32,8 +37,8 @@ export function DisguiseTrendingScreen() {
             </View>
             <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
           </Pressable>
-        )}
-      />
+        ))}
+      </ScrollView>
     </View>
   );
 }

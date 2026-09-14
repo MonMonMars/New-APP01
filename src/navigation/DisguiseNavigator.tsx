@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import { useTheme } from '../context/ThemeContext';
+import { disguiseAlerts } from '../data/disguiseFeed';
 import { DisguiseAlertsScreen } from '../screens/disguise/DisguiseAlertsScreen';
 import { DisguiseFeedScreen } from '../screens/disguise/DisguiseFeedScreen';
 import { DisguiseProfileScreen } from '../screens/disguise/DisguiseProfileScreen';
@@ -48,7 +49,11 @@ export function DisguiseNavigator() {
     >
       <Tab.Screen name="Home" component={DisguiseFeedScreen} options={{ title: 'Home' }} />
       <Tab.Screen name="Trending" component={DisguiseTrendingScreen} />
-      <Tab.Screen name="Activity" component={DisguiseAlertsScreen} options={{ tabBarBadge: 3 }} />
+      <Tab.Screen
+        name="Activity"
+        component={DisguiseAlertsScreen}
+        options={{ tabBarBadge: disguiseAlerts.length > 0 ? disguiseAlerts.length : undefined }}
+      />
       <Tab.Screen name="Profile" component={DisguiseProfileScreen} />
     </Tab.Navigator>
   );

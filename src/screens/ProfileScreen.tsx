@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import type { ScrollView as ScrollViewType } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BoostCard } from '../components/BoostCard';
@@ -76,6 +77,7 @@ export function ProfileScreen() {
   const [showPreferences, setShowPreferences] = useState(false);
   const [showNotifPrompt, setShowNotifPrompt] = useState(false);
   const [showDisguiseGenerator, setShowDisguiseGenerator] = useState(false);
+  const scrollRef = useRef<ScrollViewType>(null);
 
   const handleRowPress = (route: SettingsRoute) => {
     if (route === 'DiscoveryPreferences') {
@@ -128,9 +130,14 @@ export function ProfileScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
-      <ScreenHeader title="Profile" showDisguiseButton rightIcon="settings-outline" />
+      <ScreenHeader
+        title="Profile"
+        showDisguiseButton
+        rightIcon="settings-outline"
+        onRightPress={() => scrollRef.current?.scrollTo({ y: 420, animated: true })}
+      />
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
         <View style={[styles.heroCard, { backgroundColor: colors.surface }]}>
           {user.photos.length > 1 ? (
             <PhotoCarousel photos={user.photos} height={120} />

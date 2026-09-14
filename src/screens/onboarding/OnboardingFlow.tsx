@@ -34,10 +34,10 @@ const rules = [
 ];
 
 const intentOptions: { value: RelationshipIntent; label: string; hint: string }[] = [
-  { value: 'long_term', label: 'Long-term partner', hint: 'Ready for something real' },
-  { value: 'short_term', label: 'Something casual', hint: 'Keep it light and fun' },
-  { value: 'new_friends', label: 'New friends', hint: 'Meet people, no pressure' },
-  { value: 'not_sure', label: 'Still figuring it out', hint: 'Open to seeing where it goes' },
+  { value: 'long_term', label: 'Tech & business', hint: 'Startups, markets, product news' },
+  { value: 'short_term', label: 'Local & city life', hint: 'Transit, events, neighborhood updates' },
+  { value: 'new_friends', label: 'Food & lifestyle', hint: 'Recipes, culture, weekend ideas' },
+  { value: 'not_sure', label: 'Mix of everything', hint: 'A balanced home feed' },
 ];
 
 export function OnboardingFlow() {
@@ -184,16 +184,16 @@ export function OnboardingFlow() {
 
       {step === 'location' && (
         <View style={styles.step}>
-          <Text style={styles.title}>Enable location</Text>
+          <Text style={styles.title}>Choose your region</Text>
           <Text style={styles.subtitle}>
-            You&apos;ll see people nearby. We never share your exact location.
+            Local headlines and trending topics for your area. We never share your exact location.
           </Text>
           <View style={styles.mapPlaceholder}>
             <Text style={styles.mapEmoji}>📍</Text>
-            <Text style={styles.mapText}>People within 25 miles</Text>
+            <Text style={styles.mapText}>Top stories near you</Text>
           </View>
           <Pressable style={styles.primaryButton} onPress={() => setStep('intent')}>
-            <Text style={styles.primaryButtonText}>Allow location</Text>
+            <Text style={styles.primaryButtonText}>Use my location</Text>
           </Pressable>
           <Pressable onPress={() => setStep('intent')}>
             <Text style={styles.link}>Tell me more</Text>
@@ -230,9 +230,9 @@ export function OnboardingFlow() {
 
       {step === 'identity' && (
         <View style={styles.step}>
-          <Text style={styles.title}>About you</Text>
+          <Text style={styles.title}>Your public profile</Text>
           <Text style={styles.subtitle}>
-            Help us show you the right people. You can change this anytime.
+            How you appear on Pulse. Spark safe mode uses this privately when you unlock it.
           </Text>
 
           <Text style={styles.label}>I am a</Text>

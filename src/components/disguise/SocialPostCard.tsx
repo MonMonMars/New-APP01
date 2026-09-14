@@ -1,9 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { useState } from 'react';
+import { Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { showDemoToast } from '../../utils/demoFeedback';
 import { DisguiseOverlayAvatar } from './DisguiseOverlayAvatar';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
 
@@ -13,6 +16,14 @@ type SocialPostCardProps = {
 
 export function SocialPostCard({ post }: SocialPostCardProps) {
   const { colors } = useTheme();
+  const [upvoted, setUpvoted] = useState(false);
+  const likeCount = upvoted ? post.likes + 1 : post.likes;
+
+  const bump = () => {
+    if (Platform.OS !== 'web') {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+  };
 
   return (
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -33,7 +44,12 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
             {post.handle} · {post.timeAgo}
           </Text>
         </View>
-        <Pressable>
+        <Pressable
+          onPress={() => {
+            bump();
+            showDemoToast('Post options', 'Mute, report, or save post.');
+          }}
+        >
           <Ionicons name="ellipsis-horizontal" size={18} color={colors.textMuted} />
         </Pressable>
       </View>
@@ -48,15 +64,39 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
         </View>
       ) : null}
       <View style={styles.actions}>
-        <Pressable style={styles.action}>
-          <Ionicons name="arrow-up-outline" size={18} color={colors.textMuted} />
-          <Text style={[styles.actionText, { color: colors.textMuted }]}>{post.likes}</Text>
+        <Pressable
+          style={styles.action}
+          onPress={() => {
+            bump();
+            setUpvoted((value) => !value);
+          }}
+        >
+          <Ionicons
+            name={upvoted ? 'arrow-up' : 'arrow-up-outline'}
+            size={18}
+            color={upvoted ? colors.gradientEnd : colors.textMuted}
+          />
+          <Text style={[styles.actionText, { color: upvoted ? colors.gradientEnd : colors.textMuted }]}>
+            {likeCount}
+          </Text>
         </Pressable>
-        <Pressable style={styles.action}>
+        <Pressable
+          style={styles.action}
+          onPress={() => {
+            bump();
+            showDemoToast('Comments', `${post.comments} replies on this post.`);
+          }}
+        >
           <Ionicons name="chatbubble-outline" size={18} color={colors.textMuted} />
           <Text style={[styles.actionText, { color: colors.textMuted }]}>{post.comments}</Text>
         </Pressable>
-        <Pressable style={styles.action}>
+        <Pressable
+          style={styles.action}
+          onPress={() => {
+            bump();
+            showDemoToast('Shared', 'Link copied to clipboard in this demo.');
+          }}
+        >
           <Ionicons name="share-outline" size={18} color={colors.textMuted} />
         </Pressable>
       </View>

@@ -1,7 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
+import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
 import { spacing } from '../../theme';
 import { ModeToggleLogo } from './ModeToggleLogo';
 
@@ -12,6 +15,7 @@ type DisguiseHeaderProps = {
 
 export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps) {
   const { colors } = useTheme();
+  const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
 
   return (
     <View style={[styles.header, { borderBottomColor: colors.border }]}>
@@ -19,10 +23,18 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
       <View style={styles.actions}>
         {showSearch && (
           <>
-            <Pressable style={styles.iconBtn}>
+            <Pressable
+              style={styles.iconBtn}
+              accessibilityLabel="Search trending topics"
+              onPress={() => navigation.navigate('Trending')}
+            >
               <Ionicons name="search-outline" size={22} color={colors.text} />
             </Pressable>
-            <Pressable style={styles.iconBtn}>
+            <Pressable
+              style={styles.iconBtn}
+              accessibilityLabel="Open activity"
+              onPress={() => navigation.navigate('Activity')}
+            >
               <Ionicons name="notifications-outline" size={22} color={colors.text} />
             </Pressable>
           </>

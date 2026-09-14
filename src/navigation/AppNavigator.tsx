@@ -19,6 +19,7 @@ import { ProfileScreen } from '../screens/ProfileScreen';
 import { SafetyScreen } from '../screens/SafetyScreen';
 import { SparkPlusScreen } from '../screens/SparkPlusScreen';
 import { OnboardingFlow } from '../screens/onboarding/OnboardingFlow';
+import { DisguiseNavigator } from './DisguiseNavigator';
 import { MainTabParamList, RootStackParamList } from '../types/navigation';
 
 function HydrationGate({ children }: { children: ReactNode }) {
@@ -142,6 +143,14 @@ function ExploreWrapper({
   return <ExploreScreen onClose={() => navigation.goBack()} />;
 }
 
+function MainShell() {
+  const { disguiseMode } = useApp();
+  if (disguiseMode) {
+    return <DisguiseNavigator />;
+  }
+  return <MainTabs />;
+}
+
 function RootNavigator() {
   const { hasOnboarded } = useApp();
   const { colors } = useTheme();
@@ -158,7 +167,7 @@ function RootNavigator() {
         <Stack.Screen name="Onboarding" component={OnboardingFlow} />
       ) : (
         <>
-          <Stack.Screen name="Main" component={MainTabs} />
+          <Stack.Screen name="Main" component={MainShell} />
           <Stack.Screen
             name="Chat"
             component={ChatScreenWrapper}

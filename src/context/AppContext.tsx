@@ -168,6 +168,7 @@ type AppContextValue = {
   notificationPreferences: NotificationPreferences;
   isPaused: boolean;
   themeMode: ThemeMode;
+  disguiseMode: boolean;
   canRewind: boolean;
   rewindKey: number;
   isSupabaseEnabled: boolean;
@@ -202,6 +203,7 @@ type AppContextValue = {
   enableNotifications: () => Promise<boolean>;
   updateNotificationPreferences: (prefs: NotificationPreferences) => void;
   setThemeMode: (mode: ThemeMode) => void;
+  setDisguiseMode: (enabled: boolean) => void;
   setPaused: (paused: boolean) => void;
   deleteAccount: () => Promise<void>;
   dismissNotificationPrompt: () => void;
@@ -243,6 +245,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [notificationPromptDismissed, setNotificationPromptDismissed] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [themeMode, setThemeModeState] = useState<ThemeMode>('dark');
+  const [disguiseMode, setDisguiseModeState] = useState(false);
   const [rewindKey, setRewindKey] = useState(0);
   const [discoverUnlockedCount, setDiscoverUnlockedCount] = useState(DISCOVER_BATCH_SIZE);
   const [priorityProfileId, setPriorityProfileId] = useState<string | null>(null);
@@ -299,6 +302,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setLastPassedProfileId(saved.lastPassedProfileId);
         setIsPaused(saved.isPaused);
         setThemeModeState(saved.themeMode);
+        setDisguiseModeState(saved.disguiseMode ?? false);
 
         if (isSupabaseConfigured()) {
           const session = await getSupabaseSession();
@@ -355,7 +359,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const buildPersistedState = useCallback((): PersistedAppState => {
     return {
-      version: 5,
+      version: 6,
       hasOnboarded,
       isAuthenticated,
       userId,
@@ -381,6 +385,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       lastPassedProfileId,
       isPaused,
       themeMode,
+      disguiseMode,
     };
   }, [
     hasOnboarded,
@@ -408,6 +413,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     lastPassedProfileId,
     isPaused,
     themeMode,
+    disguiseMode,
   ]);
 
   const scheduleSync = useCallback(() => {
@@ -1085,6 +1091,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setThemeModeState(mode);
   }, []);
 
+  const setDisguiseMode = useCallback((enabled: boolean) => {
+    setDisguiseModeState(enabled);
+  }, []);
+
   const setPaused = useCallback((paused: boolean) => {
     setIsPaused(paused);
   }, []);
@@ -1171,6 +1181,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       notificationPreferences,
       isPaused,
       themeMode,
+      disguiseMode,
       canRewind,
       rewindKey,
       isSupabaseEnabled: isSupabaseConfigured(),
@@ -1202,6 +1213,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       enableNotifications,
       updateNotificationPreferences,
       setThemeMode,
+      setDisguiseMode,
       setPaused,
       deleteAccount,
       dismissNotificationPrompt,
@@ -1245,6 +1257,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       notificationPreferences,
       isPaused,
       themeMode,
+      disguiseMode,
       canRewind,
       rewindKey,
       completeOnboarding,
@@ -1275,6 +1288,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       enableNotifications,
       updateNotificationPreferences,
       setThemeMode,
+      setDisguiseMode,
       setPaused,
       deleteAccount,
       dismissNotificationPrompt,

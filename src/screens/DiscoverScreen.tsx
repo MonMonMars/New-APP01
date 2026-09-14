@@ -74,6 +74,7 @@ export function DiscoverScreen() {
     holdProfile,
     unholdProfile,
     prioritizeProfileInDeck,
+    setDisguiseMode,
   } = useApp();
 
   const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
@@ -408,6 +409,8 @@ export function DiscoverScreen() {
             onLeftPress={openMap}
             rightIcon="options-outline"
             onRightPress={() => setShowPreferences(true)}
+            secondaryRightIcon="eye-off-outline"
+            onSecondaryRightPress={() => setDisguiseMode(true)}
           />
 
           <View style={styles.metaRow}>

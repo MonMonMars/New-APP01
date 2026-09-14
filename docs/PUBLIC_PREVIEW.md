@@ -14,7 +14,7 @@ _Last updated: Sep 14, 2026 — red star super-like + drag (verified in browser)
 ### How to test v0.5 features
 
 1. **Almost full-screen photos** — Discover: card fills ~90%+ of viewport; chrome overlaid on photo.
-2. **52 discover profiles + seeded state** — 4 pre-matches, 5 pending likes, 6 incoming likes.
+2. **59+ profiles + seeded state** — 10 pre-matches, 10 pending likes, 14 incoming likes.
 3. **Spark Rose super-like** — center rose button → full-screen celebration → Chat now / Continue search.
 4. **Super Match** — rose Priya (`11`), Riley (`29`), or Aaliyah (`34`).
 5. **Standouts / Recently active** — horizontal rows above deck.

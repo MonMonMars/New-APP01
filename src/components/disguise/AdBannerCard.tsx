@@ -4,6 +4,7 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { AdPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { openExternalUrl } from '../../utils/openExternalUrl';
 
 type AdBannerCardProps = {
   ad: AdPost;
@@ -12,8 +13,17 @@ type AdBannerCardProps = {
 export function AdBannerCard({ ad }: AdBannerCardProps) {
   const { colors } = useTheme();
 
+  const handlePress = () => {
+    void openExternalUrl(ad.landingUrl, ad.brand);
+  };
+
   return (
-    <View style={[styles.card, { backgroundColor: '#1a1a2e', borderColor: colors.border }]}>
+    <Pressable
+      accessibilityRole="link"
+      accessibilityLabel={`Sponsored: ${ad.brand}`}
+      onPress={handlePress}
+      style={[styles.card, { backgroundColor: '#1a1a2e', borderColor: colors.border }]}
+    >
       <View style={styles.sponsoredRow}>
         <Text style={styles.sponsored}>Sponsored</Text>
         <Ionicons name="information-circle-outline" size={14} color="#888" />
@@ -22,12 +32,12 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
       <View style={styles.body}>
         <Text style={styles.brand}>{ad.brand}</Text>
         <Text style={styles.tagline}>{ad.tagline}</Text>
-        <Pressable style={styles.cta}>
+        <View style={styles.cta}>
           <Text style={styles.ctaText}>{ad.cta}</Text>
           <Ionicons name="open-outline" size={14} color="#fff" />
-        </Pressable>
+        </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 

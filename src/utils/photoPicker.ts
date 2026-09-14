@@ -1,6 +1,8 @@
 import * as ImagePicker from 'expo-image-picker';
 import { Alert, Platform } from 'react-native';
 
+import { uploadProfilePhotoToCloud } from '../services/cloudStorage';
+
 export async function pickProfilePhoto(): Promise<string | null> {
   if (Platform.OS !== 'web') {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -25,4 +27,16 @@ export async function pickProfilePhoto(): Promise<string | null> {
   }
 
   return result.assets[0].uri;
+}
+
+/** Pick a photo and upload to cloud storage when userId + Supabase are available. */
+export async function pickAndUploadProfilePhoto(userId?: string): Promise<string | null> {
+  const localUri = await pickProfilePhoto();
+  if (!localUri) {
+    return null;
+  }
+  if (!userId) {
+    return localUri;
+  }
+  return uploadProfilePhotoToCloud(userId, localUri);
 }

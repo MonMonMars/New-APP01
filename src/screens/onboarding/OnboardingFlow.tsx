@@ -42,8 +42,10 @@ const intentOptions: { value: RelationshipIntent; label: string; hint: string }[
 
 export function OnboardingFlow() {
   const insets = useSafeAreaInsets();
-  const { completeOnboarding, signInWithAppleStub, user } = useApp();
+  const { completeOnboarding, signInWithAppleStub, signInWithEmailMagicLink, user } = useApp();
   const [step, setStep] = useState<Step>('welcome');
+  const [email, setEmail] = useState('');
+  const [emailMessage, setEmailMessage] = useState<string | null>(null);
   const [name, setName] = useState(user.name);
   const [bio, setBio] = useState(user.bio);
   const [age, setAge] = useState(String(user.age));
@@ -55,6 +57,20 @@ export function OnboardingFlow() {
 
   const genderOptions: ProfileGender[] = ['woman', 'man', 'nonbinary'];
   const orientationOptions: Orientation[] = ['straight', 'gay', 'lesbian', 'bisexual', 'pansexual', 'queer', 'asexual', 'other'];
+
+  const handleEmailSignIn = async () => {
+    setAuthLoading(true);
+    setEmailMessage(null);
+    try {
+      const result = await signInWithEmailMagicLink(email);
+      setEmailMessage(result.message);
+      if (result.ok) {
+        setStep('rules');
+      }
+    } finally {
+      setAuthLoading(false);
+    }
+  };
 
   const handleAppleSignIn = async () => {
     setAuthLoading(true);
@@ -123,8 +139,29 @@ export function OnboardingFlow() {
               </>
             )}
           </Pressable>
+          <View style={styles.emailBlock}>
+            <TextInput
+              style={styles.emailInput}
+              placeholder="Email for magic link"
+              placeholderTextColor={colors.textMuted}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <Pressable
+              style={styles.emailButton}
+              onPress={handleEmailSignIn}
+              disabled={authLoading || !email.trim()}
+            >
+              <Ionicons name="mail-outline" size={18} color={colors.text} />
+              <Text style={styles.emailButtonText}>Continue with email</Text>
+            </Pressable>
+            {emailMessage && <Text style={styles.emailHint}>{emailMessage}</Text>}
+          </View>
           <Pressable onPress={() => { signInWithAppleStub(); setStep('rules'); }}>
-            <Text style={styles.link}>Use phone number instead</Text>
+            <Text style={styles.link}>Skip sign-in (demo mode)</Text>
           </Pressable>
         </View>
       )}
@@ -468,5 +505,40 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 16,
     fontWeight: '700',
+  },
+  emailBlock: {
+    width: '100%',
+    marginTop: spacing.lg,
+    gap: spacing.sm,
+  },
+  emailInput: {
+    backgroundColor: colors.surface,
+    borderRadius: radii.button,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    color: colors.text,
+    fontSize: 16,
+  },
+  emailButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.surface,
+    borderRadius: radii.button,
+    paddingVertical: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  emailButtonText: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  emailHint: {
+    color: colors.textMuted,
+    fontSize: 13,
+    textAlign: 'center',
+    lineHeight: 18,
   },
 });

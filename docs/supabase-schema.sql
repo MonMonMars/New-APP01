@@ -98,3 +98,32 @@ create policy "Users manage own matches"
 
 create policy "Users manage own conversations"
   on public.conversations for all using (auth.uid() = user_id);
+
+-- Push tokens (Expo Push Service)
+create table if not exists public.push_tokens (
+  user_id uuid references auth.users(id) on delete cascade,
+  expo_push_token text not null,
+  platform text,
+  updated_at timestamptz default now(),
+  primary key (user_id, expo_push_token)
+);
+
+alter table public.push_tokens enable row level security;
+create policy "Users manage own push tokens"
+  on public.push_tokens for all using (auth.uid() = user_id);
+
+-- Profile photo storage (public read)
+insert into storage.buckets (id, name, public)
+values ('profile-photos', 'profile-photos', true)
+on conflict (id) do nothing;
+
+create policy "Users upload own photos"
+  on storage.objects for insert
+  with check (bucket_id = 'profile-photos' and auth.uid()::text = (storage.foldername(name))[1]);
+
+create policy "Public read profile photos"
+  on storage.objects for select
+  using (bucket_id = 'profile-photos');
+
+-- Realtime for live chat sync
+alter publication supabase_realtime add table public.conversations;

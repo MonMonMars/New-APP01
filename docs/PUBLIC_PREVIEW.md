@@ -4,7 +4,7 @@ Try the app in **any browser** (phone, laptop, tablet).
 
 ## Live preview (Cloudflare)
 
-**https://penalty-cincinnati-shades-rocky.trycloudflare.com**
+**https://myspace-tournament-vernon-advancement.trycloudflare.com**
 
 > This link forwards to the Expo web dev server in the cloud workspace.  
 > Tunnels are **temporary** — if the link stops working, ask to regenerate it.

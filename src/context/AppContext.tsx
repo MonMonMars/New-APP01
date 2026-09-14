@@ -14,6 +14,7 @@ import {
   getProfileById,
   incomingLikeProfiles,
   INCOMING_LIKE_IDS,
+  INCOMING_LIKE_IDS_SET,
   mockProfiles,
   MUTUAL_MATCH_IDS,
   MUTUAL_SUPER_LIKE_IDS,
@@ -578,7 +579,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const canSendSparkNote =
     isSparkPlus || sparkNotesUsedForToday < FREE_DAILY_SPARK_NOTES + bonusSparkNotes;
 
-  const likesTabBadge = isSparkPlus ? 0 : incomingLikeProfiles.length;
+  const incomingLikes = useMemo(() => {
+    const actioned = new Set([...likedIds, ...passedIds, ...blockedIds]);
+    return incomingLikeProfiles.filter(
+      (profile) =>
+        !actioned.has(profile.id) &&
+        !matches.some((match) => match.profile.id === profile.id),
+    );
+  }, [likedIds, passedIds, blockedIds, matches]);
+
+  const likesTabBadge = isSparkPlus ? 0 : incomingLikes.length;
 
   const matchesTabBadge = useMemo(() => {
     const newMatchCount = matches.filter(
@@ -830,7 +840,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      if (!MUTUAL_MATCH_IDS.has(profile.id)) {
+      if (!MUTUAL_MATCH_IDS.has(profile.id) && !INCOMING_LIKE_IDS_SET.has(profile.id)) {
         setPendingLikeIds((prev) => new Set(prev).add(profile.id));
         return null;
       }
@@ -1212,7 +1222,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       getCompatibilityScore,
       matches,
       conversations,
-      incomingLikes: incomingLikeProfiles,
+      incomingLikes,
       sparkNotes,
       dailyLikesUsed,
       remainingLikes,
@@ -1293,6 +1303,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       getCompatibilityScore,
       matches,
       conversations,
+      incomingLikes,
       sparkNotes,
       dailyLikesUsed,
       remainingLikes,

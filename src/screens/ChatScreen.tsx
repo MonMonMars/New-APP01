@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { MessageStatusIcon } from '../components/MessageStatusIcon';
+import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
 import { ReportReasonSheet, type ReportReason } from '../components/ReportReasonSheet';
 import { SafetyActionSheet } from '../components/SafetyActionSheet';
 import { SuggestDateSheet } from '../components/SuggestDateSheet';
@@ -52,6 +53,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const [showReport, setShowReport] = useState(false);
   const [showSuggestDate, setShowSuggestDate] = useState(false);
   const [showVibeGame, setShowVibeGame] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   const conversation = useMemo(
     () => conversations.find((c) => c.id === conversationId),
@@ -158,13 +160,15 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         <Pressable onPress={onBack} style={styles.backButton}>
           <Ionicons name="chevron-back" size={28} color={colors.text} />
         </Pressable>
-        <Image source={{ uri: profile.photos[0] }} style={styles.headerAvatar} />
-        <View style={styles.headerText}>
-          <Text style={[styles.headerName, { color: colors.text }]}>{profile.name}</Text>
-          <Text style={[styles.headerMeta, { color: colors.textMuted }]}>
-            {expiryLabel ?? 'Matched recently'}
-          </Text>
-        </View>
+        <Pressable style={styles.headerProfile} onPress={() => setShowProfile(true)}>
+          <Image source={{ uri: profile.photos[0] }} style={styles.headerAvatar} />
+          <View style={styles.headerText}>
+            <Text style={[styles.headerName, { color: colors.text }]}>{profile.name}</Text>
+            <Text style={[styles.headerMeta, { color: colors.textMuted }]}>
+              {expiryLabel ?? 'Matched recently'}
+            </Text>
+          </View>
+        </Pressable>
         {turnLabel && (
           <View style={[styles.turnBadge, { backgroundColor: conversation.yourTurn ? colors.gradientEnd : colors.surface }]}>
             <Text style={[styles.turnText, { color: colors.text }]}>{turnLabel}</Text>
@@ -225,10 +229,13 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
       )}
 
       <View style={[styles.composer, { borderTopColor: colors.border, paddingBottom: insets.bottom + spacing.sm }]}>
-        <Pressable style={styles.gifButton} onPress={() => setShowSuggestDate(true)}>
+        <Pressable style={styles.composerAction} onPress={() => setShowSuggestDate(true)}>
           <Ionicons name="calendar-outline" size={22} color={colors.textMuted} />
         </Pressable>
-        <Pressable style={styles.gifButton} onPress={handlePickImage}>
+        <Pressable style={styles.composerAction} onPress={() => setShowVibeGame(true)}>
+          <Ionicons name="color-wand-outline" size={22} color={colors.textMuted} />
+        </Pressable>
+        <Pressable style={styles.composerAction} onPress={handlePickImage}>
           <Ionicons name="images-outline" size={22} color={colors.textMuted} />
         </Pressable>
         <TextInput
@@ -279,6 +286,12 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         onClose={() => setShowVibeGame(false)}
         onSendGuess={(message) => handleSend(message)}
       />
+
+      <ProfileDetailSheet
+        profile={profile}
+        visible={showProfile}
+        onClose={() => setShowProfile(false)}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -306,6 +319,12 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: spacing.xs,
+  },
+  headerProfile: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
   },
   headerAvatar: {
     width: 40,
@@ -438,7 +457,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
-  gifButton: {
+  composerAction: {
     padding: spacing.sm,
   },
   input: {

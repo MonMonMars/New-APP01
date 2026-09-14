@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   StyleSheet,
   Text,
@@ -195,7 +196,15 @@ export function OnboardingFlow() {
           <Pressable style={styles.primaryButton} onPress={() => setStep('intent')}>
             <Text style={styles.primaryButtonText}>Use my location</Text>
           </Pressable>
-          <Pressable onPress={() => setStep('intent')}>
+          <Pressable
+            onPress={() =>
+              Alert.alert(
+                'How location works',
+                'We use your region to surface local headlines and trending topics — never your exact GPS coordinates. You can change this anytime in Profile → Discovery preferences.',
+                [{ text: 'Got it' }],
+              )
+            }
+          >
             <Text style={styles.link}>Tell me more</Text>
           </Pressable>
         </View>

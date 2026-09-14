@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   scrim: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   scrimNews: {
     backgroundColor: 'rgba(0, 0, 0, 0.25)',

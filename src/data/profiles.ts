@@ -17,6 +17,7 @@ export const PENDING_LIKE_IDS = ['6', '14', '20', '21', '22', '26', '31', '35', 
 export const INCOMING_LIKE_IDS = [
   '7', '8', '9', '10', '37', '38', '46', '51', '54', '61', '62', '63', '64', '65',
 ] as const;
+export const INCOMING_LIKE_IDS_SET = new Set<string>(INCOMING_LIKE_IDS);
 export const MUTUAL_MATCH_IDS = new Set(['2', '3', '25', '41', '45', '50', '53', '57', '58', '67']);
 export const MUTUAL_SUPER_LIKE_IDS = new Set(['11', '29', '34', '36', '48', '59', '60', '68']);
 export const SUPER_PRE_MATCHED_IDS = new Set(['30', '33']);

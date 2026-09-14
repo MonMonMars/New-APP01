@@ -385,6 +385,11 @@ export function DiscoverScreen() {
                 Widen search radius
               </Text>
             </Pressable>
+            <Pressable style={styles.secondaryButton} onPress={() => setShowPreferences(true)}>
+              <Text style={[styles.secondaryButtonText, { color: colors.textMuted }]}>
+                Discovery preferences
+              </Text>
+            </Pressable>
           </View>
         ) : (
           <SwipeDeck
@@ -433,6 +438,8 @@ export function DiscoverScreen() {
                 onPress={() => {
                   if (!canLike) {
                     setShowLikeLimit(true);
+                  } else {
+                    navigation.getParent()?.navigate('SparkPlus');
                   }
                 }}
               >

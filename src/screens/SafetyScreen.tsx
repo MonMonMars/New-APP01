@@ -41,7 +41,7 @@ const resources = [
   {
     label: 'Block someone',
     icon: 'hand-left-outline' as const,
-    message: 'Blocking removes them from your deck and chats immediately. You can unblock from Profile → Safety.',
+    message: 'Blocking removes them from your deck and chats immediately. Blocked profiles stay hidden for the rest of this session.',
   },
   {
     label: 'Safety tips & FAQ',

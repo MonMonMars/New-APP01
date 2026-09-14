@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { MatchModal } from '../components/MatchModal';
 import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { useApp } from '../context/AppContext';
@@ -14,8 +15,21 @@ import { colors, radii, spacing } from '../theme';
 export function LikesScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const { incomingLikes, isSparkPlus, superLikedIds, pendingLikeIds } = useApp();
+  const {
+    user,
+    incomingLikes,
+    isSparkPlus,
+    superLikedIds,
+    pendingLikeIds,
+    matches,
+    likeProfile,
+    passProfile,
+    canLike,
+    getConversationIdForProfile,
+  } = useApp();
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
+  const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
+  const [showMatch, setShowMatch] = useState(false);
 
   const superLikesSent = Array.from(superLikedIds)
     .map((id) => getProfileById(id))
@@ -23,6 +37,44 @@ export function LikesScreen() {
 
   const openPaywall = () => {
     navigation.getParent()?.navigate('SparkPlus');
+  };
+
+  const openDiscover = () => {
+    navigation.navigate('Discover' as never);
+  };
+
+  const handleLike = (profile: Profile) => {
+    if (!canLike) {
+      openPaywall();
+      return;
+    }
+    const match = likeProfile(profile);
+    setSelectedProfile(null);
+    if (match) {
+      setMatchProfile(profile);
+      setShowMatch(true);
+    }
+  };
+
+  const handlePass = (profile: Profile) => {
+    passProfile(profile);
+    setSelectedProfile(null);
+  };
+
+  const openChat = (profile: Profile) => {
+    const conversationId = getConversationIdForProfile(profile.id);
+    navigation.getParent()?.navigate('Chat', { conversationId });
+  };
+
+  const openSuperLikeProfile = (profile: Profile) => {
+    const matched = matches.some((match) => match.profile.id === profile.id);
+    if (matched) {
+      openChat(profile);
+      return;
+    }
+    if (isSparkPlus) {
+      setSelectedProfile(profile);
+    }
   };
 
   return (
@@ -34,84 +86,110 @@ export function LikesScreen() {
         onRightPress={openPaywall}
       />
 
-      <View style={styles.banner}>
-        <View style={styles.bannerBadge}>
-          <Text style={styles.bannerCount}>{incomingLikes.length}</Text>
-        </View>
-        <Text style={styles.bannerTitle}>
-          {incomingLikes.length} {incomingLikes.length === 1 ? 'person' : 'people'} liked you
-        </Text>
-        <Text style={styles.bannerSubtitle}>
-          {isSparkPlus
-            ? 'Spark+ unlocked — see who liked you below.'
-            : 'Upgrade to Spark+ to see who they are and match instantly.'}
-        </Text>
-        {!isSparkPlus && (
-          <Pressable style={styles.upgradeButton} onPress={openPaywall}>
-            <Text style={styles.upgradeButtonText}>See who likes you</Text>
-          </Pressable>
-        )}
-      </View>
-
-      {superLikesSent.length > 0 && (
-        <View style={styles.superSection}>
-          <View style={styles.superHeader}>
-            <Ionicons name="rose" size={18} color={colors.superLike} />
-            <Text style={styles.superTitle}>Super Likes sent</Text>
-            <Text style={styles.superCount}>{superLikesSent.length}</Text>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.banner}>
+          <View style={styles.bannerBadge}>
+            <Text style={styles.bannerCount}>{incomingLikes.length}</Text>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.superRow}>
-            {superLikesSent.map((profile) => (
-              <View key={profile.id} style={styles.superCard}>
-                <Image source={{ uri: profile.photos[0] }} style={styles.superPhoto} />
-                <Text style={styles.superName}>{profile.name}</Text>
-                <Text style={styles.superStatus}>
-                  {pendingLikeIds.has(profile.id) ? 'Pending' : 'Matched'}
-                </Text>
-              </View>
-            ))}
-          </ScrollView>
+          <Text style={styles.bannerTitle}>
+            {incomingLikes.length} {incomingLikes.length === 1 ? 'person' : 'people'} liked you
+          </Text>
+          <Text style={styles.bannerSubtitle}>
+            {isSparkPlus
+              ? 'Spark+ unlocked — like back to match instantly.'
+              : 'Upgrade to Spark+ to see who they are and match instantly.'}
+          </Text>
+          {!isSparkPlus && (
+            <Pressable style={styles.upgradeButton} onPress={openPaywall}>
+              <Text style={styles.upgradeButtonText}>See who likes you</Text>
+            </Pressable>
+          )}
         </View>
-      )}
 
-      <View style={styles.grid}>
-        {incomingLikes.length === 0 ? (
-          <View style={styles.empty}>
-            <Text style={styles.emptyEmoji}>💫</Text>
-            <Text style={styles.emptyTitle}>No likes yet</Text>
-            <Text style={styles.emptySubtitle}>
-              Keep discovering — when someone likes you, they&apos;ll show up here.
-            </Text>
-          </View>
-        ) : incomingLikes.map((profile) => (
-          <Pressable
-            key={profile.id}
-            style={styles.card}
-            onPress={isSparkPlus ? () => setSelectedProfile(profile) : openPaywall}
-          >
-            <Image
-              source={{ uri: profile.photos[0] }}
-              style={styles.photo}
-              blurRadius={isSparkPlus ? 0 : 18}
-            />
-            <View style={[styles.cardOverlay, isSparkPlus && styles.cardOverlayRevealed]}>
-              <Text style={styles.cardName}>
-                {isSparkPlus ? `${profile.name}, ${profile.age}` : '???'}
-              </Text>
-              {!isSparkPlus ? (
-                <Text style={styles.cardHint}>Tap to reveal</Text>
-              ) : (
-                <Text style={styles.cardHint}>{profile.distanceMiles} mi away</Text>
-              )}
+        {superLikesSent.length > 0 && (
+          <View style={styles.superSection}>
+            <View style={styles.superHeader}>
+              <Ionicons name="rose" size={18} color={colors.superLike} />
+              <Text style={styles.superTitle}>Super Likes sent</Text>
+              <Text style={styles.superCount}>{superLikesSent.length}</Text>
             </View>
-          </Pressable>
-        ))}
-      </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.superRow}>
+              {superLikesSent.map((profile) => (
+                <Pressable
+                  key={profile.id}
+                  style={styles.superCard}
+                  onPress={() => openSuperLikeProfile(profile)}
+                >
+                  <Image source={{ uri: profile.photos[0] }} style={styles.superPhoto} />
+                  <Text style={styles.superName}>{profile.name}</Text>
+                  <Text style={styles.superStatus}>
+                    {pendingLikeIds.has(profile.id) ? 'Pending' : 'Matched'}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
+        <View style={styles.grid}>
+          {incomingLikes.length === 0 ? (
+            <View style={styles.empty}>
+              <Text style={styles.emptyEmoji}>💫</Text>
+              <Text style={styles.emptyTitle}>No likes yet</Text>
+              <Text style={styles.emptySubtitle}>
+                Keep discovering — when someone likes you, they&apos;ll show up here.
+              </Text>
+              <Pressable style={styles.discoverButton} onPress={openDiscover}>
+                <Text style={styles.discoverButtonText}>Start discovering</Text>
+              </Pressable>
+            </View>
+          ) : (
+            incomingLikes.map((profile) => (
+              <Pressable
+                key={profile.id}
+                style={styles.card}
+                onPress={isSparkPlus ? () => setSelectedProfile(profile) : openPaywall}
+              >
+                <Image
+                  source={{ uri: profile.photos[0] }}
+                  style={styles.photo}
+                  blurRadius={isSparkPlus ? 0 : 18}
+                />
+                <View style={[styles.cardOverlay, isSparkPlus && styles.cardOverlayRevealed]}>
+                  <Text style={styles.cardName}>
+                    {isSparkPlus ? `${profile.name}, ${profile.age}` : '???'}
+                  </Text>
+                  {!isSparkPlus ? (
+                    <Text style={styles.cardHint}>Tap to reveal</Text>
+                  ) : (
+                    <Text style={styles.cardHint}>{profile.distanceMiles} mi away</Text>
+                  )}
+                </View>
+              </Pressable>
+            ))
+          )}
+        </View>
+      </ScrollView>
 
       <ProfileDetailSheet
         profile={selectedProfile}
         visible={selectedProfile !== null}
         onClose={() => setSelectedProfile(null)}
+        onLike={selectedProfile ? () => handleLike(selectedProfile) : undefined}
+        onPass={selectedProfile ? () => handlePass(selectedProfile) : undefined}
+      />
+
+      <MatchModal
+        visible={showMatch}
+        profile={matchProfile}
+        userPhoto={user.photos[0]}
+        onClose={() => setShowMatch(false)}
+        onMessage={() => {
+          if (matchProfile) {
+            setShowMatch(false);
+            openChat(matchProfile);
+          }
+        }}
       />
     </View>
   );
@@ -121,6 +199,9 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  scrollContent: {
+    paddingBottom: spacing.xl,
   },
   banner: {
     marginHorizontal: spacing.lg,
@@ -261,7 +342,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   empty: {
-    flex: 1,
     alignItems: 'center',
     padding: spacing.xl,
     width: '100%',
@@ -281,5 +361,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
     marginTop: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  discoverButton: {
+    backgroundColor: colors.gradientEnd,
+    borderRadius: radii.button,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm + 2,
+  },
+  discoverButtonText: {
+    color: colors.text,
+    fontWeight: '700',
+    fontSize: 15,
   },
 });

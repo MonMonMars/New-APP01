@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   scrim: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   scrimNews: {
     backgroundColor: 'rgba(120, 0, 0, 0.55)',
@@ -65,14 +65,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 40, 120, 0.6)',
   },
   newsStack: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 3,
     paddingVertical: 2,
   },
   adStack: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 3,

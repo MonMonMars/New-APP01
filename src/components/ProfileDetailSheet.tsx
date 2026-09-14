@@ -15,6 +15,8 @@ type ProfileDetailSheetProps = {
   onBlock?: (profileId: string) => void;
   onLikePrompt?: (prompt: ProfilePrompt) => void;
   onHold?: () => void;
+  onLike?: () => void;
+  onPass?: () => void;
 };
 
 export function ProfileDetailSheet({
@@ -27,6 +29,8 @@ export function ProfileDetailSheet({
   onBlock,
   onLikePrompt,
   onHold,
+  onLike,
+  onPass,
 }: ProfileDetailSheetProps) {
   const insets = useSafeAreaInsets();
 
@@ -130,6 +134,21 @@ export function ProfileDetailSheet({
             </View>
           )}
         </ScrollView>
+
+        {(onLike || onPass) && (
+          <View style={styles.actionBar}>
+            {onPass && (
+              <Pressable style={[styles.passButton, styles.actionButton]} onPress={onPass}>
+                <Ionicons name="close" size={24} color={colors.nope} />
+              </Pressable>
+            )}
+            {onLike && (
+              <Pressable style={[styles.likeButton, styles.actionButton]} onPress={onLike}>
+                <Ionicons name="heart" size={26} color={colors.text} />
+              </Pressable>
+            )}
+          </View>
+        )}
       </View>
     </Modal>
   );
@@ -288,5 +307,31 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 15,
     fontWeight: '600',
+  },
+  actionBar: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing.xl,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#2A2A2E',
+    backgroundColor: colors.background,
+  },
+  actionButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  passButton: {
+    backgroundColor: colors.surface,
+    borderWidth: 2,
+    borderColor: colors.nope,
+  },
+  likeButton: {
+    backgroundColor: colors.heartRed,
   },
 });

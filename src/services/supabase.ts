@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
+import { supabaseSecureAuthStorage } from '../utils/secureStorage';
 import { Conversation, Match } from '../types/match';
 import { DiscoveryPreferences } from '../types/preferences';
 import { UserProfile } from '../types/profile';
@@ -23,6 +24,7 @@ export function getSupabaseClient(): SupabaseClient | null {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: false,
+        storage: supabaseSecureAuthStorage,
       },
     });
   }

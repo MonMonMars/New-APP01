@@ -25,15 +25,26 @@ export async function requestNotificationPermission(): Promise<boolean> {
   return status === 'granted';
 }
 
-export async function scheduleMatchNotification(profileName: string): Promise<void> {
+type NotificationPrivacyOptions = {
+  disguiseSafe?: boolean;
+};
+
+export async function scheduleMatchNotification(
+  profileName: string,
+  options?: NotificationPrivacyOptions,
+): Promise<void> {
   if (Platform.OS === 'web') {
     return;
   }
 
+  const disguiseSafe = options?.disguiseSafe ?? false;
+
   await Notifications.scheduleNotificationAsync({
     content: {
-      title: "It's a Match! 🎉",
-      body: `You and ${profileName} liked each other. Say hi!`,
+      title: disguiseSafe ? 'Pulse — new activity' : "It's a Match! 🎉",
+      body: disguiseSafe
+        ? 'Someone interacted with your feed. Open Pulse to see more.'
+        : `You and ${profileName} liked each other. Say hi!`,
       sound: true,
     },
     trigger: null,
@@ -43,15 +54,18 @@ export async function scheduleMatchNotification(profileName: string): Promise<vo
 export async function scheduleMessageNotification(
   profileName: string,
   preview: string,
+  options?: NotificationPrivacyOptions,
 ): Promise<void> {
   if (Platform.OS === 'web') {
     return;
   }
 
+  const disguiseSafe = options?.disguiseSafe ?? false;
+
   await Notifications.scheduleNotificationAsync({
     content: {
-      title: profileName,
-      body: preview,
+      title: disguiseSafe ? 'Pulse — new reply' : profileName,
+      body: disguiseSafe ? 'You have a new comment thread update.' : preview,
       sound: true,
     },
     trigger: null,

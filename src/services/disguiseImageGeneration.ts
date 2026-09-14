@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 
 import { DisguiseAdCreative, DisguiseOverlayVariant } from '../types/disguise';
 import { compositeDisguiseImage } from '../utils/disguiseImageCompositor';
+import { isProductionBuild } from '../utils/securityGuards';
 
 type GenerateParams = {
   sourcePhotoUrl: string;
@@ -23,6 +24,9 @@ function buildAiPrompt(overlayText: string, variant: DisguiseOverlayVariant): st
 }
 
 export function isDisguiseAiConfigured(): boolean {
+  if (isProductionBuild()) {
+    return false;
+  }
   const key = process.env.EXPO_PUBLIC_OPENAI_API_KEY?.trim();
   return Boolean(key && key.length > 10);
 }
@@ -89,7 +93,7 @@ export async function generateDisguiseAdImage(
     throw new Error('Add a profile photo before generating a disguise ad.');
   }
 
-  const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY?.trim();
+  const apiKey = !isProductionBuild() ? process.env.EXPO_PUBLIC_OPENAI_API_KEY?.trim() : undefined;
   if (apiKey) {
     try {
       const aiUrl = await generateWithOpenAI(params, apiKey);

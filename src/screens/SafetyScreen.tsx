@@ -60,6 +60,11 @@ const resources = [
     icon: 'shield-checkmark-outline' as const,
     action: 'verification-policy' as const,
   },
+  {
+    label: 'Security settings',
+    icon: 'lock-closed-outline' as const,
+    action: 'security-settings' as const,
+  },
 ];
 
 const legalDocIconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
@@ -142,6 +147,10 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
             onPress={() => {
               if ('action' in item && item.action === 'verification-policy') {
                 navigation.getParent()?.navigate('VerificationPolicy');
+                return;
+              }
+              if ('action' in item && item.action === 'security-settings') {
+                navigation.getParent()?.navigate('SecuritySettings');
                 return;
               }
               if ('message' in item && item.message) {

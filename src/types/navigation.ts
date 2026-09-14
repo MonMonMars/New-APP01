@@ -1,3 +1,4 @@
+import { LegalDocumentId } from '../content/legalDocuments';
 import { Conversation } from './match';
 import { Profile } from './profile';
 
@@ -9,6 +10,7 @@ export type RootStackParamList = {
   SparkPlus: undefined;
   Safety: undefined;
   VerificationPolicy: undefined;
+  LegalDocument: { documentId: LegalDocumentId };
   NotificationPreferences: undefined;
   ConsumablesShop: undefined;
   MapDiscover: undefined;

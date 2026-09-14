@@ -23,6 +23,7 @@ import { MatchesScreen } from '../screens/MatchesScreen';
 import { NotificationPreferencesScreen } from '../screens/NotificationPreferencesScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { SafetyScreen } from '../screens/SafetyScreen';
+import { LegalDocumentScreen } from '../screens/LegalDocumentScreen';
 import { VerificationPolicyScreen } from '../screens/VerificationPolicyScreen';
 import { SparkPlusScreen } from '../screens/SparkPlusScreen';
 import { OnboardingFlow } from '../screens/onboarding/OnboardingFlow';
@@ -132,6 +133,18 @@ function VerificationPolicyWrapper({
   return <VerificationPolicyScreen onClose={() => navigation.goBack()} />;
 }
 
+function LegalDocumentWrapper({
+  route,
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, 'LegalDocument'>) {
+  return (
+    <LegalDocumentScreen
+      documentId={route.params.documentId}
+      onClose={() => navigation.goBack()}
+    />
+  );
+}
+
 function NotificationPreferencesWrapper({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, 'NotificationPreferences'>) {
@@ -205,6 +218,11 @@ function RootNavigator() {
           <Stack.Screen
             name="VerificationPolicy"
             component={VerificationPolicyWrapper}
+            options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="LegalDocument"
+            component={LegalDocumentWrapper}
             options={{ animation: 'slide_from_right' }}
           />
           <Stack.Screen

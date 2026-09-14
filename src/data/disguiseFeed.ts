@@ -56,18 +56,24 @@ export type SocialPost = {
   timeAgo: string;
 };
 
+export type DisguisedProfileVariant = 'news' | 'ad' | 'social';
+
 export type DisguisedProfilePost = {
   id: string;
   type: 'disguised_profile';
   name: string;
   avatarUrl: string;
-  variant: 'news' | 'ad';
+  variant: DisguisedProfileVariant;
   overlayText: string;
   sourceLabel: string;
   headline: string;
   summary: string;
   timeAgo: string;
   photos: string[];
+  /** Stock hero image for news/ad cards — never the profile photo. */
+  coverImageUrl: string;
+  category?: string;
+  handle?: string;
 };
 
 export type FeedItem = NewsPost | AdPost | SocialPost | DisguisedProfilePost;

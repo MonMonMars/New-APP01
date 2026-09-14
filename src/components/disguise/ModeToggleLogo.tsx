@@ -80,13 +80,19 @@ export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps
 
   const enterDisguise = useCallback(() => {
     triggerHaptic('medium');
-    setDisguiseMode(true);
+    void setDisguiseMode(true);
   }, [setDisguiseMode]);
 
   const exitDisguise = useCallback(() => {
-    triggerHaptic('success');
-    setDisguiseMode(false);
-    setDragX(0);
+    void setDisguiseMode(false).then((unlocked) => {
+      if (unlocked) {
+        triggerHaptic('success');
+        setDragX(0);
+      } else {
+        dragXRef.current = 0;
+        setDragX(0);
+      }
+    });
   }, [setDisguiseMode]);
 
   const dragXRef = useRef(0);

@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { AppState, type AppStateStatus } from 'react-native';
 
 import { seedConversations } from '../data/conversations';
 import {
@@ -54,10 +55,20 @@ import {
   NotificationPreferences,
   ThemeMode,
 } from '../types/settings';
+import { defaultSecuritySettings, SecuritySettings } from '../types/security';
 import { FREE_DAILY_LIKE_LIMIT, FREE_DAILY_SPARK_NOTES } from '../types/subscription';
 import { BOOST_DURATION_MS } from '../types/subscription';
+import { unlockSpark } from '../utils/appLock';
 import { computeCompatibilityScore, pickDailyMostCompatible } from '../utils/compatibility';
 import { requestNotificationPermission, scheduleMatchNotification } from '../utils/notifications';
+import {
+  checkClientRateLimit,
+  isProductionBuild,
+  sanitizeMessage,
+  sanitizeReportReason,
+} from '../utils/securityGuards';
+import { clearVaultKey } from '../utils/secureStorage';
+import { SparkUnlockModal } from '../components/security/SparkUnlockModal';
 import {
   clearPersistedState,
   createDefaultPersistedState,
@@ -177,6 +188,7 @@ type AppContextValue = {
   disguiseMode: boolean;
   disguiseAdCreative: DisguiseAdCreative | null;
   isGeneratingDisguiseAd: boolean;
+  securitySettings: SecuritySettings;
   canRewind: boolean;
   rewindKey: number;
   isSupabaseEnabled: boolean;
@@ -211,7 +223,8 @@ type AppContextValue = {
   enableNotifications: () => Promise<boolean>;
   updateNotificationPreferences: (prefs: NotificationPreferences) => void;
   setThemeMode: (mode: ThemeMode) => void;
-  setDisguiseMode: (enabled: boolean) => void;
+  setDisguiseMode: (enabled: boolean) => Promise<boolean>;
+  updateSecuritySettings: (settings: SecuritySettings) => void;
   generateDisguiseAd: (
     overlayText: string,
     variant: DisguiseOverlayVariant,
@@ -257,6 +270,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [disguiseMode, setDisguiseModeState] = useState(true);
   const [disguiseAdCreative, setDisguiseAdCreative] = useState<DisguiseAdCreative | null>(null);
   const [isGeneratingDisguiseAd, setIsGeneratingDisguiseAd] = useState(false);
+  const [securitySettings, setSecuritySettings] = useState<SecuritySettings>(defaultSecuritySettings);
+  const [unlockModalVisible, setUnlockModalVisible] = useState(false);
+  const [unlockError, setUnlockError] = useState<string | null>(null);
+  const unlockResolverRef = useRef<((ok: boolean) => void) | null>(null);
+  const lastUnlockAtRef = useRef<number>(Date.now());
+  const backgroundedAtRef = useRef<number | null>(null);
   const [rewindKey, setRewindKey] = useState(0);
   const [discoverUnlockedCount, setDiscoverUnlockedCount] = useState(DISCOVER_BATCH_SIZE);
   const [priorityProfileId, setPriorityProfileId] = useState<string | null>(null);
@@ -315,6 +334,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setThemeModeState(saved.themeMode);
         setDisguiseModeState(saved.disguiseMode ?? true);
         setDisguiseAdCreative(saved.disguiseAdCreative ?? null);
+        setSecuritySettings({
+          ...defaultSecuritySettings,
+          ...saved.securitySettings,
+        });
 
         if (isSupabaseConfigured()) {
           const session = await getSupabaseSession();
@@ -399,6 +422,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       themeMode,
       disguiseMode,
       disguiseAdCreative,
+      securitySettings,
     };
   }, [
     hasOnboarded,
@@ -428,7 +452,87 @@ export function AppProvider({ children }: { children: ReactNode }) {
     themeMode,
     disguiseMode,
     disguiseAdCreative,
+    securitySettings,
   ]);
+
+  const runSparkUnlockFlow = useCallback(async (): Promise<boolean> => {
+    const result = await unlockSpark(securitySettings);
+    if (result.ok) {
+      lastUnlockAtRef.current = Date.now();
+      return true;
+    }
+    if (!securitySettings.pinEnabled) {
+      return false;
+    }
+    return new Promise<boolean>((resolve) => {
+      unlockResolverRef.current = resolve;
+      setUnlockError(null);
+      setUnlockModalVisible(true);
+    });
+  }, [securitySettings]);
+
+  const handleUnlockPinSubmit = useCallback(
+    async (pin: string) => {
+      const result = await unlockSpark(securitySettings, pin);
+      if (result.ok) {
+        setUnlockModalVisible(false);
+        setUnlockError(null);
+        lastUnlockAtRef.current = Date.now();
+        unlockResolverRef.current?.(true);
+        unlockResolverRef.current = null;
+        return;
+      }
+      setUnlockError('Incorrect PIN. Try again.');
+    },
+    [securitySettings],
+  );
+
+  const handleUnlockCancel = useCallback(() => {
+    setUnlockModalVisible(false);
+    setUnlockError(null);
+    unlockResolverRef.current?.(false);
+    unlockResolverRef.current = null;
+  }, []);
+
+  const handleRetryBiometric = useCallback(async () => {
+    const result = await unlockSpark(securitySettings);
+    if (result.ok) {
+      setUnlockModalVisible(false);
+      setUnlockError(null);
+      lastUnlockAtRef.current = Date.now();
+      unlockResolverRef.current?.(true);
+      unlockResolverRef.current = null;
+    }
+  }, [securitySettings]);
+
+  useEffect(() => {
+    const onAppStateChange = (nextState: AppStateStatus) => {
+      if (nextState === 'background' || nextState === 'inactive') {
+        backgroundedAtRef.current = Date.now();
+        if (securitySettings.autoDisguiseOnBackground && !disguiseMode) {
+          setDisguiseModeState(true);
+        }
+        return;
+      }
+
+      if (nextState === 'active' && backgroundedAtRef.current) {
+        const elapsedMs = Date.now() - backgroundedAtRef.current;
+        const timeoutMs = securitySettings.sessionTimeoutMinutes * 60_000;
+        if (
+          timeoutMs > 0 &&
+          !disguiseMode &&
+          elapsedMs >= timeoutMs &&
+          securitySettings.appLockEnabled
+        ) {
+          setDisguiseModeState(true);
+        }
+        backgroundedAtRef.current = null;
+      }
+    };
+
+    const subscription = AppState.addEventListener('change', onAppStateChange);
+    return () => subscription.remove();
+  }, [disguiseMode, securitySettings]);
 
   const scheduleSync = useCallback(() => {
     if (!isSupabaseConfigured() || !userId || !hasOnboarded) {
@@ -626,7 +730,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      if (!userId) {
+      if (!userId && !isProductionBuild()) {
         setUserId(`demo-${Date.now()}`);
       }
     },
@@ -644,12 +748,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!result.ok) {
         return { ok: false, message: result.error ?? 'Could not send magic link.' };
       }
-      setIsAuthenticated(true);
-      setUserId(`email-${Date.now()}`);
       return {
         ok: true,
-        message: 'Magic link sent! Check your email, then continue setup.',
+        message: 'Magic link sent! Check your email to complete sign-in before continuing.',
       };
+    }
+
+    if (isProductionBuild()) {
+      return { ok: false, message: 'Email sign-in requires Supabase configuration.' };
     }
 
     setIsAuthenticated(true);
@@ -805,7 +911,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const reportProfile = useCallback(
-    (profileId: string, _reason?: string) => {
+    (profileId: string, reason?: string) => {
+      if (!checkClientRateLimit('report', 10, 60_000)) {
+        return;
+      }
+      const sanitizedReason = reason ? sanitizeReportReason(reason) : undefined;
+      void sanitizedReason;
       blockProfile(profileId);
     },
     [blockProfile],
@@ -876,7 +987,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       });
 
       if (notificationsEnabled && notificationPreferences.matches) {
-        void scheduleMatchNotification(profile.name);
+        void scheduleMatchNotification(profile.name, {
+          disguiseSafe: disguiseMode && securitySettings.disguiseSafeNotifications,
+        });
       }
 
       return match;
@@ -888,6 +1001,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       notificationsEnabled,
       notificationPreferences.matches,
       bonusSparkNotes,
+      disguiseMode,
+      securitySettings.disguiseSafeNotifications,
     ],
   );
 
@@ -923,12 +1038,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
       });
 
       if (notificationsEnabled && notificationPreferences.matches) {
-        void scheduleMatchNotification(profile.name);
+        void scheduleMatchNotification(profile.name, {
+          disguiseSafe: disguiseMode && securitySettings.disguiseSafeNotifications,
+        });
       }
 
       return match;
     },
-    [notificationsEnabled, notificationPreferences.matches],
+    [
+      notificationsEnabled,
+      notificationPreferences.matches,
+      disguiseMode,
+      securitySettings.disguiseSafeNotifications,
+    ],
   );
 
   const superLikeProfile = useCallback(
@@ -964,7 +1086,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const sendMessage = useCallback(
     (conversationId: string, text: string, imageUrl?: string) => {
-      const trimmed = text.trim();
+      if (!checkClientRateLimit(`message:${conversationId}`, 30, 60_000)) {
+        return;
+      }
+      const trimmed = sanitizeMessage(text);
       if (!trimmed && !imageUrl) {
         return;
       }
@@ -1105,8 +1230,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setThemeModeState(mode);
   }, []);
 
-  const setDisguiseMode = useCallback((enabled: boolean) => {
-    setDisguiseModeState(enabled);
+  const setDisguiseMode = useCallback(
+    async (enabled: boolean): Promise<boolean> => {
+      if (enabled) {
+        setDisguiseModeState(true);
+        return true;
+      }
+      const unlocked = await runSparkUnlockFlow();
+      if (unlocked) {
+        setDisguiseModeState(false);
+      }
+      return unlocked;
+    },
+    [runSparkUnlockFlow],
+  );
+
+  const updateSecuritySettings = useCallback((settings: SecuritySettings) => {
+    setSecuritySettings(settings);
   }, []);
 
   const generateDisguiseAd = useCallback(
@@ -1148,6 +1288,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       await deleteSupabaseAccount(userId);
     }
     await clearPersistedState();
+    await clearVaultKey();
     setHasOnboarded(false);
     setIsAuthenticated(false);
     setUserId(null);
@@ -1167,6 +1308,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIsPaused(false);
     setDisguiseModeState(true);
     setDisguiseAdCreative(null);
+    setSecuritySettings(defaultSecuritySettings);
     setLastPassedProfileId(null);
     setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
     setPriorityProfileId(null);
@@ -1225,6 +1367,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       disguiseMode,
       disguiseAdCreative,
       isGeneratingDisguiseAd,
+      securitySettings,
       canRewind,
       rewindKey,
       isSupabaseEnabled: isSupabaseConfigured(),
@@ -1257,6 +1400,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateNotificationPreferences,
       setThemeMode,
       setDisguiseMode,
+      updateSecuritySettings,
       generateDisguiseAd,
       clearDisguiseAd,
       setPaused,
@@ -1304,6 +1448,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       disguiseMode,
       disguiseAdCreative,
       isGeneratingDisguiseAd,
+      securitySettings,
       canRewind,
       rewindKey,
       completeOnboarding,
@@ -1335,6 +1480,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateNotificationPreferences,
       setThemeMode,
       setDisguiseMode,
+      updateSecuritySettings,
       generateDisguiseAd,
       clearDisguiseAd,
       setPaused,
@@ -1342,7 +1488,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     ],
   );
 
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider value={value}>
+      {children}
+      <SparkUnlockModal
+        visible={unlockModalVisible}
+        error={unlockError}
+        onSubmitPin={handleUnlockPinSubmit}
+        onCancel={handleUnlockCancel}
+        onRetryBiometric={handleRetryBiometric}
+        showBiometricRetry={securitySettings.biometricEnabled}
+      />
+    </AppContext.Provider>
+  );
 }
 
 export function useApp() {

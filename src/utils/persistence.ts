@@ -9,9 +9,17 @@ import {
   NotificationPreferences,
   ThemeMode,
 } from '../types/settings';
+import { defaultSecuritySettings, SecuritySettings } from '../types/security';
+import { decryptLocalPayload, encryptLocalPayload } from './localEncryption';
 
 const STORAGE_KEY = '@spark/app_state';
-const STORAGE_VERSION = 9;
+const SENSITIVE_VAULT_KEY = '@spark/sensitive_vault';
+const STORAGE_VERSION = 10;
+
+type SensitiveVault = {
+  conversations: Conversation[];
+  sparkNotes: Record<string, string>;
+};
 
 export type PersistedAppState = {
   version: number;
@@ -42,6 +50,7 @@ export type PersistedAppState = {
   themeMode: ThemeMode;
   disguiseMode: boolean;
   disguiseAdCreative: DisguiseAdCreative | null;
+  securitySettings: SecuritySettings;
 };
 
 export function createDefaultPersistedState(): PersistedAppState {
@@ -86,7 +95,33 @@ export function createDefaultPersistedState(): PersistedAppState {
     themeMode: 'dark',
     disguiseMode: true,
     disguiseAdCreative: null,
+    securitySettings: defaultSecuritySettings,
   };
+}
+
+async function loadSensitiveVault(): Promise<SensitiveVault | null> {
+  try {
+    const raw = await AsyncStorage.getItem(SENSITIVE_VAULT_KEY);
+    if (!raw) {
+      return null;
+    }
+    const decrypted = await decryptLocalPayload(raw);
+    if (!decrypted) {
+      return null;
+    }
+    return JSON.parse(decrypted) as SensitiveVault;
+  } catch {
+    return null;
+  }
+}
+
+async function saveSensitiveVault(vault: SensitiveVault): Promise<void> {
+  try {
+    const encrypted = await encryptLocalPayload(JSON.stringify(vault));
+    await AsyncStorage.setItem(SENSITIVE_VAULT_KEY, encrypted);
+  } catch {
+    // Fall back silently — prototype builds may lack secure vault key.
+  }
 }
 
 export async function loadPersistedState(): Promise<PersistedAppState | null> {
@@ -100,6 +135,8 @@ export async function loadPersistedState(): Promise<PersistedAppState | null> {
       return null;
     }
     const defaults = createDefaultPersistedState();
+    const vault = await loadSensitiveVault();
+
     return {
       ...defaults,
       ...parsed,
@@ -112,8 +149,8 @@ export async function loadPersistedState(): Promise<PersistedAppState | null> {
       superLikedIds: parsed.superLikedIds ?? [],
       blockedIds: parsed.blockedIds ?? [],
       matches: parsed.matches ?? [],
-      conversations: parsed.conversations ?? [],
-      sparkNotes: parsed.sparkNotes ?? {},
+      conversations: vault?.conversations ?? parsed.conversations ?? [],
+      sparkNotes: vault?.sparkNotes ?? parsed.sparkNotes ?? {},
       notificationPreferences: {
         ...defaultNotificationPreferences,
         ...parsed.notificationPreferences,
@@ -125,6 +162,10 @@ export async function loadPersistedState(): Promise<PersistedAppState | null> {
       disguiseAdCreative: parsed.disguiseAdCreative ?? null,
       heldIds: parsed.heldIds ?? [],
       userId: parsed.userId ?? null,
+      securitySettings: {
+        ...defaultSecuritySettings,
+        ...parsed.securitySettings,
+      },
     };
   } catch {
     return null;
@@ -133,9 +174,16 @@ export async function loadPersistedState(): Promise<PersistedAppState | null> {
 
 export async function savePersistedState(state: PersistedAppState): Promise<void> {
   try {
+    const { conversations, sparkNotes, ...publicState } = state;
+    await saveSensitiveVault({ conversations, sparkNotes });
     await AsyncStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ ...state, version: STORAGE_VERSION }),
+      JSON.stringify({
+        ...publicState,
+        version: STORAGE_VERSION,
+        conversations: [],
+        sparkNotes: {},
+      }),
     );
   } catch {
     // Prototype: fail silently if storage unavailable (e.g. web private mode).
@@ -144,7 +192,7 @@ export async function savePersistedState(state: PersistedAppState): Promise<void
 
 export async function clearPersistedState(): Promise<void> {
   try {
-    await AsyncStorage.removeItem(STORAGE_KEY);
+    await AsyncStorage.multiRemove([STORAGE_KEY, SENSITIVE_VAULT_KEY]);
   } catch {
     // Ignore storage errors in prototype.
   }

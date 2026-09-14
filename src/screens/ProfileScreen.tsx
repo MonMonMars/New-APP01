@@ -221,7 +221,9 @@ export function ProfileScreen() {
           </View>
           <Switch
             value={disguiseMode}
-            onValueChange={setDisguiseMode}
+            onValueChange={(value) => {
+              void setDisguiseMode(value);
+            }}
             trackColor={{ false: colors.border, true: colors.gradientEnd }}
             thumbColor={colors.text}
           />

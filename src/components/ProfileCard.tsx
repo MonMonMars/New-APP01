@@ -168,16 +168,14 @@ export function ProfileCard({
       )}
 
       <View style={[styles.info, compact && styles.infoCompact]}>
-        <View style={styles.nameRow}>
-          <Text style={[styles.name, compact && styles.nameCompact]}>
-            {profile.name}, {profile.age}
-          </Text>
-          <VerificationBadges
-            photoVerified={profile.photoVerified ?? profile.verified}
-            personVerified={profile.personVerified ?? profile.verified}
-            size="sm"
-          />
-        </View>
+        <Text style={[styles.name, compact && styles.nameCompact]}>
+          {profile.name}, {profile.age}
+        </Text>
+        <VerificationBadges
+          photoVerified={profile.photoVerified ?? profile.verified}
+          personVerified={profile.personVerified ?? profile.verified}
+          size="sm"
+        />
         {profile.job && <Text style={[styles.job, compact && styles.jobCompact]}>{profile.job}</Text>}
         <Text style={[styles.distance, compact && styles.distanceCompact]}>
           {profile.city ? `${profile.city} · ` : ''}{profile.distanceMiles} mi

@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -53,10 +54,16 @@ const resources = [
     icon: 'mail-outline' as const,
     message: 'Email support@spark.app — demo builds show this confirmation only.',
   },
+  {
+    label: 'Trust & Verification Policy',
+    icon: 'shield-checkmark-outline' as const,
+    action: 'verification-policy' as const,
+  },
 ];
 
 export function SafetyScreen({ onClose }: SafetyScreenProps) {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
@@ -93,7 +100,15 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
           <Pressable
             key={item.label}
             style={styles.resourceRow}
-            onPress={() => Alert.alert(item.label, item.message)}
+            onPress={() => {
+              if ('action' in item && item.action === 'verification-policy') {
+                navigation.getParent()?.navigate('VerificationPolicy');
+                return;
+              }
+              if ('message' in item && item.message) {
+                Alert.alert(item.label, item.message);
+              }
+            }}
           >
             <Ionicons name={item.icon} size={22} color={colors.textMuted} />
             <Text style={styles.resourceLabel}>{item.label}</Text>

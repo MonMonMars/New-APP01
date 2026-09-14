@@ -8,6 +8,7 @@ export type RootStackParamList = {
   ProfileDetail: { profileId: string };
   SparkPlus: undefined;
   Safety: undefined;
+  VerificationPolicy: undefined;
   NotificationPreferences: undefined;
   ConsumablesShop: undefined;
   MapDiscover: undefined;

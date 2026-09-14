@@ -3,6 +3,7 @@
     "name": "Spark",
     "slug": "spark-dating",
     "version": "1.0.0",
+    "description": "Spark dating app with Pulse disguise mode — news feed cover and private safe-mode discovery.",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -29,6 +30,7 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
+      "disguiseAppName": "Pulse",
       "eas": {
         "projectId": "spark-dating-demo"
       }

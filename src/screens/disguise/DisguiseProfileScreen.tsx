@@ -9,6 +9,7 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { showDemoToast } from '../../utils/demoFeedback';
 
 export function DisguiseProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -16,6 +17,13 @@ export function DisguiseProfileScreen() {
   const { user, disguiseMode, setDisguiseMode, disguiseAdCreative } = useApp();
   const [showGenerator, setShowGenerator] = useState(false);
   const profilePhoto = disguiseAdCreative?.imageUrl ?? user.photos[0];
+  const postCount = disguiseAdCreative ? 12 : 11;
+  const followerCount = 180 + user.name.length * 7;
+  const followingCount = 120 + user.photos.length * 18;
+
+  const handleMenuPress = (label: string) => {
+    showDemoToast(label, 'Saved locally in this demo build.');
+  };
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
@@ -25,29 +33,29 @@ export function DisguiseProfileScreen() {
           <Image source={{ uri: profilePhoto }} style={styles.avatar} />
           <Text style={[styles.name, { color: colors.text }]}>{user.name}</Text>
           <Text style={[styles.bio, { color: colors.textMuted }]}>
-            {user.bio || 'Coffee enthusiast · Design · NYC'}
+            {user.bio || 'News reader · Design · Always catching up on the feed'}
           </Text>
           <View style={styles.stats}>
             <View style={styles.stat}>
-              <Text style={[styles.statNum, { color: colors.text }]}>248</Text>
+              <Text style={[styles.statNum, { color: colors.text }]}>{postCount}</Text>
               <Text style={[styles.statLabel, { color: colors.textMuted }]}>Posts</Text>
             </View>
             <View style={styles.stat}>
-              <Text style={[styles.statNum, { color: colors.text }]}>1.2K</Text>
+              <Text style={[styles.statNum, { color: colors.text }]}>{followerCount}</Text>
               <Text style={[styles.statLabel, { color: colors.textMuted }]}>Followers</Text>
             </View>
             <View style={styles.stat}>
-              <Text style={[styles.statNum, { color: colors.text }]}>384</Text>
+              <Text style={[styles.statNum, { color: colors.text }]}>{followingCount}</Text>
               <Text style={[styles.statLabel, { color: colors.textMuted }]}>Following</Text>
             </View>
           </View>
         </View>
 
         <View style={[styles.menuSection, { backgroundColor: colors.surface }]}>
-          <MenuRow icon="bookmark-outline" label="Saved posts" colors={colors} />
-          <MenuRow icon="time-outline" label="Reading history" colors={colors} />
-          <MenuRow icon="settings-outline" label="Settings" colors={colors} />
-          <MenuRow icon="help-circle-outline" label="Help center" colors={colors} />
+          <MenuRow icon="bookmark-outline" label="Saved posts" colors={colors} onPress={() => handleMenuPress('Saved posts')} />
+          <MenuRow icon="time-outline" label="Reading history" colors={colors} onPress={() => handleMenuPress('Reading history')} />
+          <MenuRow icon="settings-outline" label="Settings" colors={colors} onPress={() => handleMenuPress('Settings')} />
+          <MenuRow icon="help-circle-outline" label="Help center" colors={colors} onPress={() => handleMenuPress('Help center')} />
         </View>
 
         <View style={[styles.privacyCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -67,7 +75,7 @@ export function DisguiseProfileScreen() {
             />
           </View>
           <Text style={[styles.hint, { color: colors.textMuted }]}>
-            Tap the expand button in the header (or long-press the logo) to open Spark big-picture mode.
+            Tap the Pulse logo (top left) to switch to Spark safe mode. Tap the Spark logo to return here.
           </Text>
         </View>
 
@@ -97,13 +105,15 @@ function MenuRow({
   icon,
   label,
   colors,
+  onPress,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
   colors: { text: string; textMuted: string; border: string };
+  onPress: () => void;
 }) {
   return (
-    <Pressable style={[styles.menuRow, { borderBottomColor: colors.border }]}>
+    <Pressable style={[styles.menuRow, { borderBottomColor: colors.border }]} onPress={onPress}>
       <Ionicons name={icon} size={20} color={colors.textMuted} />
       <Text style={[styles.menuLabel, { color: colors.text }]}>{label}</Text>
       <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />

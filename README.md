@@ -4,48 +4,61 @@ A dating app prototype inspired by **Tinder**, **Bumble**, and **Hinge** — bui
 
 > See [`docs/SPARK_APP_DOCUMENT.md`](docs/SPARK_APP_DOCUMENT.md) for the full product & technical reference.
 
+## Live demo
+
+**Latest link:** see [`PUBLIC_PREVIEW.md`](PUBLIC_PREVIEW.md) — updated after each release.
+
+```bash
+npm install
+npm run demo          # http://localhost:8090
+npm run demo:tunnel   # public Cloudflare URL (requires cloudflared)
+```
+
+## Two modes
+
+| Mode | Brand | What it looks like |
+|------|-------|-------------------|
+| **Disguise (default)** | Pulse | News & social feed — safe in public |
+| **Safe mode** | Spark | Full dating: discover, likes, matches, chat |
+
+**Toggle:** tap the **top-left logo** (Pulse ↔ Spark). Eye-off button on Spark tabs also returns to Pulse.
+
 ## Features
+
+### Pulse disguise mode
+- News feed with reporter avatars, in-app article reader (BBC, Verge — free sources)
+- Sponsored ads with real client landing pages
+- Social posts with news/ad overlays on photos
+- AI disguise ad generator (Profile)
+- Trending, Activity alerts, disguise profile
 
 ### Onboarding
 - Apple Sign-In stub (real on iOS, demo on web)
-- House rules, location, relationship intent
+- Community guidelines, region, feed interests
 - Profile setup with **photo upload** (expo-image-picker)
-- Full onboarding persisted locally
+- Lands in **Pulse** by default after onboarding
 
-### Discovery (Spark differentiator)
+### Spark discovery
 - One profile card at a time
-- **Drag to trash** (bottom-left, white) to pass
-- **Drag to heart** (bottom-right, red) to like
-- **Spark Note** — send a message with your like (Hinge-style)
-- **Rewind** last pass (Spark+)
-- **Boost** banner when profile is boosted
-- Full profile sheet with Hinge-style prompts
-- Report (reason picker) and block
+- **Drag to trash** (pass) · **Drag to heart** (like) · **Red star** (super-like)
+- Spark Note, Rewind (Spark+), Boost, profile sheet, report/block
 
-### Main tabs
+### Main tabs (Spark)
 | Tab | Highlights |
 |-----|------------|
 | **Discover** | Drag targets, daily like limit, spark notes, rewind |
 | **Likes** | Blurred grid → Spark+ reveals names/photos |
 | **Matches** | New matches row, expiry, your turn |
-| **Profile** | Edit profile + photos, Boost, Spark+, notifications |
+| **Profile** | Edit profile + photos, Boost, Spark+, disguise toggle |
 
 ### Chat
-- Icebreaker prompts (Bumble-style)
-- Unmatch with confirm dialog
-- Report / block safety menu
+- Icebreaker prompts, unmatch, report / block
 
 ### Premium (Spark+)
-- See who likes you (unblur grid)
-- Unlimited likes
-- Unlimited Spark Notes
-- Rewind last pass
-- Boost profile (30 min)
+- See who likes you, unlimited likes & notes, rewind, boost
 
-### Persistence & notifications
-- **AsyncStorage** — matches, chats, likes, passes, boost, Spark+, photos survive restart
-- **Push notification stub** — permission prompt + local notification on match
-- Hydration loading gate on app boot
+### Persistence
+- **AsyncStorage** — matches, chats, disguise settings survive restart
 
 ## Run
 
@@ -57,25 +70,21 @@ npm run ios        # Mac + Xcode simulator
 npx tsc --noEmit   # Type check
 ```
 
-### Try in your browser (public link)
-
-See [`docs/PUBLIC_PREVIEW.md`](docs/PUBLIC_PREVIEW.md) for the latest live demo URL.
-
 ## Project structure
 
 ```
 src/
-  context/         # App state + AsyncStorage persistence
-  navigation/      # React Navigation (stack + tabs)
-  screens/         # Discover, Likes, Matches, Profile, Chat, Onboarding
-  components/      # Swipe deck, modals, photo carousel, boost, spark note
-  data/            # Mock profiles & conversations
-  utils/           # Persistence, notifications, photo picker, Apple auth
+  components/disguise/   # Pulse feed, news cards, mode toggle
+  context/               # App state + AsyncStorage
+  navigation/            # Spark tabs + DisguiseNavigator
+  screens/               # Discover, disguise, onboarding, chat
+  data/                  # Mock profiles, disguise feed
 docs/
-  SPARK_APP_DOCUMENT.md    # Full product & technical reference
-  PUBLIC_PREVIEW.md        # Live browser demo links
+  SPARK_APP_DOCUMENT.md
+  PUBLIC_PREVIEW.md
+PUBLIC_PREVIEW.md        # Live demo URL (canonical)
 ```
 
 ## Legal note
 
-Tinder holds patents and trademarks on swipe-based matching. Spark uses **drag-to-target** (trash/heart) instead of swipe-left/right. See docs before App Store launch.
+Prototype for demonstration. Not affiliated with Tinder, Bumble, or Hinge.

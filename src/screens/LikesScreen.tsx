@@ -1,17 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { useApp } from '../context/AppContext';
 import { getProfileById } from '../data/profiles';
+import { Profile } from '../types/profile';
 import { colors, radii, spacing } from '../theme';
 
 export function LikesScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { incomingLikes, isSparkPlus, superLikedIds, pendingLikeIds } = useApp();
+  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
 
   const superLikesSent = Array.from(superLikedIds)
     .map((id) => getProfileById(id))
@@ -83,7 +87,7 @@ export function LikesScreen() {
           <Pressable
             key={profile.id}
             style={styles.card}
-            onPress={isSparkPlus ? undefined : openPaywall}
+            onPress={isSparkPlus ? () => setSelectedProfile(profile) : openPaywall}
           >
             <Image
               source={{ uri: profile.photos[0] }}
@@ -103,6 +107,12 @@ export function LikesScreen() {
           </Pressable>
         ))}
       </View>
+
+      <ProfileDetailSheet
+        profile={selectedProfile}
+        visible={selectedProfile !== null}
+        onClose={() => setSelectedProfile(null)}
+      />
     </View>
   );
 }

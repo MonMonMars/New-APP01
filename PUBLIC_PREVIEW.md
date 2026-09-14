@@ -2,9 +2,9 @@
 
 ## Demo link (open now)
 
-**https://hdtv-brake-anywhere-respiratory.trycloudflare.com**
+**https://stadium-compressed-intimate-willow.trycloudflare.com**
 
-_Last verified: Sep 14, 2026 — includes disguise mode (default), AI ad generator, competitor features_
+_Last updated: Sep 14, 2026 — complete app polish, free news sources, logo mode toggle_
 
 > Tunnel links expire when the cloud workspace stops. If this 404s, ask for a fresh link.
 
@@ -16,26 +16,26 @@ _Last verified: Sep 14, 2026 — includes disguise mode (default), AI ad generat
 2. Tap **Skip sign-in (demo mode)** if prompted
 3. Complete onboarding (or accept defaults)
 4. You land in **Pulse** disguise mode (news & social feed) — the default
-5. Tap the **expand** button (top-right) to open **Spark** big-picture dating mode
-6. Tap **eye-off** on any Spark screen to return to Pulse
+5. Tap the **Pulse logo** (top left) to open **Spark** safe mode
+6. Tap the **Spark logo** or **eye-off** button to return to Pulse
 
 ---
 
 ## What to try
 
-### Disguise mode (Pulse) — default
-- News articles use free sources (BBC News, BBC Good Food, The Verge) and open in-app
+### Pulse disguise mode — default
+- News cards show reporter avatars + quotes; tap for photo preview
+- Articles open **in-app** (BBC News, BBC Good Food, The Verge — all free)
 - Sponsored ads open real client landing pages
-- Social avatars show news/ad text over faces
-- **Profile → AI disguise ad image** — generate your own disguised ad from your photo
-- Long-press Pulse logo ~1.2s also unlocks Spark
+- Social posts: upvote, comment, share feedback
+- **Trending** topics · **Activity** alerts · **Profile** menu + AI disguise ad generator
 
-### Spark dating
+### Spark safe mode
 - **Discover** — drag card to heart (like), trash (pass), or tap red star (super-like)
 - **Standouts** + **Recently active** rows
 - **Most compatible** banner with compatibility %
 - **Hold** profiles, **prompt-specific likes**, **Suggest a Date** in chat
-- **Map** (top-left), **Explore** (compass), **Likes**, **Matches**
+- **Map**, **Explore**, **Likes**, **Matches**
 
 ### Sound
 - Click anywhere on the page first (browser autoplay), then like/pass/rose for sound
@@ -47,10 +47,13 @@ _Last verified: Sep 14, 2026 — includes disguise mode (default), AI ad generat
 ```bash
 git clone https://github.com/MonMonMars/New-APP01.git
 cd New-APP01
-git checkout cursor/disguise-mode-7b60
+git checkout cursor/complete-app-details-7b60
 npm install
 npm run demo
 # → http://localhost:8090
+
+# Public URL from your machine:
+npm run demo:tunnel
 ```
 
 Phone (best UX): `npm start` → Expo Go

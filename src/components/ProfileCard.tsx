@@ -25,6 +25,7 @@ type ProfileCardProps = {
   translateY?: SharedValue<number>;
   scale?: SharedValue<number>;
   passDim?: SharedValue<number>;
+  compact?: boolean;
   onPhotoTap?: (side: 'left' | 'right') => void;
 };
 
@@ -36,6 +37,7 @@ export function ProfileCard({
   translateY,
   scale,
   passDim,
+  compact = false,
   onPhotoTap,
 }: ProfileCardProps) {
   const isTop = index === activeIndex;
@@ -164,25 +166,31 @@ export function ProfileCard({
         </>
       )}
 
-      <View style={styles.info}>
+      <View style={[styles.info, compact && styles.infoCompact]}>
         <View style={styles.nameRow}>
-          <Text style={styles.name}>
+          <Text style={[styles.name, compact && styles.nameCompact]}>
             {profile.name}, {profile.age}
           </Text>
           {profile.verified && (
-            <Ionicons name="checkmark-circle" size={20} color={colors.superLike} />
+            <Ionicons name="checkmark-circle" size={compact ? 16 : 20} color={colors.superLike} />
           )}
         </View>
-        {profile.job && <Text style={styles.job}>{profile.job}</Text>}
-        <Text style={styles.distance}>{profile.distanceMiles} miles away</Text>
-        <Text style={styles.bio} numberOfLines={2}>{profile.bio}</Text>
-        <View style={styles.tags}>
-          {profile.interests.slice(0, 3).map((interest) => (
-            <View key={interest} style={styles.tag}>
-              <Text style={styles.tagText}>{interest}</Text>
+        {profile.job && <Text style={[styles.job, compact && styles.jobCompact]}>{profile.job}</Text>}
+        <Text style={[styles.distance, compact && styles.distanceCompact]}>
+          {profile.city ? `${profile.city} · ` : ''}{profile.distanceMiles} mi
+        </Text>
+        {!compact && (
+          <>
+            <Text style={styles.bio} numberOfLines={2}>{profile.bio}</Text>
+            <View style={styles.tags}>
+              {profile.interests.slice(0, 3).map((interest) => (
+                <View key={interest} style={styles.tag}>
+                  <Text style={styles.tagText}>{interest}</Text>
+                </View>
+              ))}
             </View>
-          ))}
-        </View>
+          </>
+        )}
       </View>
     </Animated.View>
   );
@@ -282,6 +290,11 @@ const styles = StyleSheet.create({
     right: spacing.md,
     bottom: spacing.lg,
   },
+  infoCompact: {
+    bottom: spacing.xl + 36,
+    left: spacing.sm + 4,
+    right: spacing.sm + 4,
+  },
   nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -292,16 +305,25 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
   },
+  nameCompact: {
+    fontSize: 24,
+  },
   job: {
     color: colors.text,
     fontSize: 15,
     marginTop: spacing.xs,
     opacity: 0.9,
   },
+  jobCompact: {
+    fontSize: 13,
+  },
   distance: {
     color: colors.textMuted,
     fontSize: 14,
     marginTop: spacing.xs,
+  },
+  distanceCompact: {
+    fontSize: 12,
   },
   bio: {
     color: colors.text,

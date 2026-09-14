@@ -37,6 +37,7 @@ type SwipeDeckProps = {
   onEmpty: () => void;
   canLike?: boolean;
   onLikeBlocked?: () => void;
+  compact?: boolean;
 };
 
 type ActiveEffect = {
@@ -92,7 +93,7 @@ function zoneProximity(
 }
 
 export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
-  function SwipeDeck({ profiles, onSwipe, onEmpty, canLike = true, onLikeBlocked }, ref) {
+  function SwipeDeck({ profiles, onSwipe, onEmpty, canLike = true, onLikeBlocked, compact = false }, ref) {
     const { playSound } = useSwipeSounds();
     const containerRef = useRef<View>(null);
     const [activeIndex, setActiveIndex] = useState(0);
@@ -373,6 +374,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
                         translateY={translateY}
                         scale={cardScale}
                         passDim={passDim}
+                        compact={compact}
                       />
                     </Animated.View>
                   </GestureDetector>
@@ -385,6 +387,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
                     profile={profile}
                     index={index}
                     activeIndex={activeIndex}
+                    compact={compact}
                   />
                 </View>
               );
@@ -396,6 +399,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           trashActive={trashActive}
           heartActive={heartActive}
           roseActive={roseActive}
+          compact={compact}
           onTrashLayout={handleTrashLayout}
           onHeartLayout={handleHeartLayout}
           onTrashPress={() => dropToTarget('left')}

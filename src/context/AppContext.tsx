@@ -20,6 +20,7 @@ import {
 import { Conversation, Match, Message } from '../types/match';
 import {
   defaultPreferences,
+  DISCOVER_BATCH_SIZE,
   DiscoverFilter,
   DiscoveryPreferences,
   ShowMePreference,
@@ -115,6 +116,8 @@ type AppContextValue = {
   user: UserProfile;
   preferences: DiscoveryPreferences;
   discoverQueue: Profile[];
+  discoverPoolTotal: number;
+  hasMoreInPool: boolean;
   passedIds: Set<string>;
   likedIds: Set<string>;
   pendingLikeIds: Set<string>;
@@ -145,6 +148,9 @@ type AppContextValue = {
   updateUser: (user: UserProfile) => void;
   updatePreferences: (preferences: DiscoveryPreferences) => void;
   toggleDiscoverFilter: (filter: DiscoverFilter) => void;
+  searchMorePeople: () => void;
+  expandSearchRadius: (miles: number) => void;
+  prioritizeProfileInDeck: (profileId: string) => void;
   passProfile: (profile: Profile) => void;
   likeProfile: (profile: Profile, sparkNote?: string) => Match | null;
   sendMessage: (conversationId: string, text: string, imageUrl?: string) => void;
@@ -200,6 +206,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [isPaused, setIsPaused] = useState(false);
   const [themeMode, setThemeModeState] = useState<ThemeMode>('dark');
   const [rewindKey, setRewindKey] = useState(0);
+  const [discoverUnlockedCount, setDiscoverUnlockedCount] = useState(DISCOVER_BATCH_SIZE);
+  const [priorityProfileId, setPriorityProfileId] = useState<string | null>(null);
 
   const hydratedRef = useRef(false);
   const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -377,18 +385,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return ids;
   }, [blockedIds, likedIds, passedIds]);
 
+  const discoverPool = useMemo(() => {
+    if (isPaused) {
+      return [];
+    }
+    return filterDiscoverProfiles(mockProfiles, preferences, excludedIds);
+  }, [excludedIds, isPaused, preferences]);
+
   const discoverQueue = useMemo(() => {
     if (isPaused) {
       return [];
     }
-    const queue = filterDiscoverProfiles(mockProfiles, preferences, excludedIds);
-    const now = Date.now();
-    const boosted = boostActiveUntil && new Date(boostActiveUntil).getTime() > now;
-    if (boosted) {
-      return [...queue];
+    const unlocked = discoverPool.slice(0, discoverUnlockedCount);
+    if (!priorityProfileId) {
+      return unlocked;
     }
-    return queue;
-  }, [boostActiveUntil, excludedIds, isPaused, preferences]);
+    const priorityIndex = unlocked.findIndex((profile) => profile.id === priorityProfileId);
+    if (priorityIndex <= 0) {
+      return unlocked;
+    }
+    const priorityProfile = unlocked[priorityIndex];
+    return [
+      priorityProfile,
+      ...unlocked.filter((profile) => profile.id !== priorityProfileId),
+    ];
+  }, [discoverPool, discoverUnlockedCount, isPaused, priorityProfileId]);
+
+  const discoverPoolTotal = discoverPool.length;
+  const hasMoreInPool = discoverPool.length > discoverUnlockedCount;
 
   const isBoosted = useMemo(() => {
     if (!boostActiveUntil) {
@@ -473,7 +497,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
         : [...current, filter];
       return { ...prev, discoverFilters: next };
     });
+    setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
   }, []);
+
+  const searchMorePeople = useCallback(() => {
+    setDiscoverUnlockedCount((count) => count + DISCOVER_BATCH_SIZE);
+  }, []);
+
+  const expandSearchRadius = useCallback((miles: number) => {
+    setPreferences((prev) => ({ ...prev, maxDistanceMiles: miles }));
+    setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
+    setPriorityProfileId(null);
+  }, []);
+
+  const prioritizeProfileInDeck = useCallback(
+    (profileId: string) => {
+      const poolIndex = discoverPool.findIndex((profile) => profile.id === profileId);
+      if (poolIndex < 0) {
+        return;
+      }
+      if (poolIndex >= discoverUnlockedCount) {
+        setDiscoverUnlockedCount(poolIndex + 1);
+      }
+      setPriorityProfileId(profileId);
+    },
+    [discoverPool, discoverUnlockedCount],
+  );
 
   const passProfile = useCallback((profile: Profile) => {
     setPassedIds((prev) => new Set(prev).add(profile.id));
@@ -782,6 +831,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setBoostActiveUntil(null);
     setIsPaused(false);
     setLastPassedProfileId(null);
+    setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
+    setPriorityProfileId(null);
   }, [userId]);
 
   const dismissNotificationPrompt = useCallback(() => {
@@ -808,6 +859,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       user,
       preferences,
       discoverQueue,
+      discoverPoolTotal,
+      hasMoreInPool,
       passedIds,
       likedIds,
       pendingLikeIds,
@@ -838,6 +891,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateUser,
       updatePreferences,
       toggleDiscoverFilter,
+      searchMorePeople,
+      expandSearchRadius,
+      prioritizeProfileInDeck,
       passProfile,
       likeProfile,
       sendMessage,
@@ -866,6 +922,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       user,
       preferences,
       discoverQueue,
+      discoverPoolTotal,
+      hasMoreInPool,
       passedIds,
       likedIds,
       pendingLikeIds,
@@ -894,6 +952,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateUser,
       updatePreferences,
       toggleDiscoverFilter,
+      searchMorePeople,
+      expandSearchRadius,
+      prioritizeProfileInDeck,
       passProfile,
       likeProfile,
       sendMessage,

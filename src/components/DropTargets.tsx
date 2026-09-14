@@ -20,6 +20,7 @@ type DropTargetsProps = {
   trashActive: SharedValue<number>;
   heartActive: SharedValue<number>;
   roseActive?: SharedValue<number>;
+  compact?: boolean;
   onTrashLayout: (layout: ZoneLayout) => void;
   onHeartLayout: (layout: ZoneLayout) => void;
   onTrashPress?: () => void;
@@ -28,7 +29,9 @@ type DropTargetsProps = {
 };
 
 const TARGET_SIZE = 68;
+const TARGET_SIZE_COMPACT = 52;
 const ROSE_SIZE = 52;
+const ROSE_SIZE_COMPACT = 40;
 
 type TargetButtonProps = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -88,6 +91,7 @@ export function DropTargets({
   trashActive,
   heartActive,
   roseActive,
+  compact = false,
   onTrashLayout,
   onHeartLayout,
   onTrashPress,
@@ -98,6 +102,8 @@ export function DropTargets({
   const heartRef = useRef<View>(null);
   const roseRef = useRef<View>(null);
   const roseActiveValue = roseActive ?? trashActive;
+  const targetSize = compact ? TARGET_SIZE_COMPACT : TARGET_SIZE;
+  const roseSize = compact ? ROSE_SIZE_COMPACT : ROSE_SIZE;
 
   const measureZone = useCallback(
     (targetRef: RefObject<View | null>, callback: (layout: ZoneLayout) => void) => {
@@ -132,7 +138,7 @@ export function DropTargets({
   }, [reportHeartZone, reportTrashZone]);
 
   return (
-    <View style={styles.row} pointerEvents="box-none" onLayout={reportZones}>
+    <View style={[styles.row, compact && styles.rowCompact]} pointerEvents="box-none" onLayout={reportZones}>
       <TargetButton
         icon="trash-outline"
         iconColor={colors.textDark}
@@ -140,6 +146,7 @@ export function DropTargets({
         borderColor="rgba(0,0,0,0.08)"
         active={trashActive}
         targetRef={trashRef}
+        size={targetSize}
         onLayout={reportTrashZone}
         onPress={onTrashPress}
       />
@@ -152,7 +159,7 @@ export function DropTargets({
           borderColor={colors.superLike}
           active={roseActiveValue}
           targetRef={roseRef}
-          size={ROSE_SIZE}
+          size={roseSize}
           onLayout={() => undefined}
           onPress={onRosePress}
         />
@@ -165,6 +172,7 @@ export function DropTargets({
         borderColor={colors.heartRed}
         active={heartActive}
         targetRef={heartRef}
+        size={targetSize}
         onLayout={reportHeartZone}
         onPress={onHeartPress}
       />
@@ -182,6 +190,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     zIndex: 20,
+  },
+  rowCompact: {
+    bottom: spacing.sm,
+    left: spacing.md,
+    right: spacing.md,
   },
   target: {
     borderWidth: 2,

@@ -68,6 +68,11 @@ export type Profile = {
   activeToday?: boolean;
   /** Joined within last 7 days */
   isNew?: boolean;
+  /** City label for map / discovery */
+  city?: string;
+  /** Fake map pin position (0–100 % of map viewport) */
+  mapX?: number;
+  mapY?: number;
 };
 
 export type RelationshipIntent =

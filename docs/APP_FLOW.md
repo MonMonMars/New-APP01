@@ -68,12 +68,19 @@ Root Stack
 │   └── Profile setup
 └── Main (Bottom Tabs)
     ├── Discover
-    │   ├── Card deck (drag → trash / heart)
-    │   ├── Like limit banner + modal
-    │   ├── Empty deck (widen filters)
+    │   ├── Almost full-screen photo card deck (drag → trash / heart / rose)
+    │   ├── Map button → MapDiscover (fake map + pins)
+    │   ├── Search radius pill + Expand location sheet (25 → Anywhere)
+    │   ├── Batch loading — 6 profiles at a time, “Search more people” CTA
+    │   ├── Like limit pill + modal
+    │   ├── Empty deck (expand radius / search more)
     │   ├── Waiting for match modal
     │   ├── Profile detail sheet (prompts, report/block)
     │   └── Full-screen match celebration
+    ├── MapDiscover (stack push from Discover)
+    │   ├── Stylized map with profile pins
+    │   ├── Tap pin → preview card
+    │   └── “Search this area” → load batch / prioritize in deck
     ├── Likes
     │   ├── Count badge banner
     │   ├── Blurred like grid → Spark+
@@ -126,8 +133,10 @@ This avoids direct replication of Tinder's patented swipe gesture while keeping 
 
 ## Data flow (prototype)
 
-- `AppContext` holds: discover queue, likes, passes, pending likes, matches, conversations, daily like count, blocked IDs.
-- Mutual match demo ID: `3` (Mia) — instant match celebration.
+- `AppContext` holds: discover queue (batched), pool total, likes, passes, pending likes, matches, conversations, daily like count, blocked IDs.
+- Discover loads **6 profiles per batch** from a pool filtered by radius (25 → 50 → 100 → 250 → Anywhere).
+- **36 mock discover profiles** (`1`–`6`, `11`–`36`) with cities, distances, map pins; **4 incoming likes** (`7`–`10`).
+- Mutual match demo IDs: `3` (Mia), `18` (Ryan) — instant match celebration.
 - Other likes → waiting modal.
 - Seed conversations with Ava and Mia (Mia has “Your turn” + expiry).
 - Incoming likes: blurred profiles `7`–`10` (Likes tab badge = 4).

@@ -32,6 +32,25 @@ export type DiscoveryPreferences = {
   discoverFilters?: DiscoverFilter[];
 };
 
+export const SEARCH_RADIUS_PRESETS = [
+  { label: '25 mi', value: 25 },
+  { label: '50 mi', value: 50 },
+  { label: '100 mi', value: 100 },
+  { label: '250 mi', value: 250 },
+  { label: 'Anywhere', value: 9999 },
+] as const;
+
+export type SearchRadiusPreset = (typeof SEARCH_RADIUS_PRESETS)[number]['value'];
+
+export function formatSearchRadius(miles: number): string {
+  if (miles >= 9999) {
+    return 'Anywhere';
+  }
+  return `${miles} mi`;
+}
+
+export const DISCOVER_BATCH_SIZE = 6;
+
 export const defaultPreferences: DiscoveryPreferences = {
   maxDistanceMiles: 25,
   minAge: 21,

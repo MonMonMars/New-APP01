@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import {
   ActivityIndicator,
@@ -13,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PhotoCarousel } from '../../components/PhotoCarousel';
 import { useApp } from '../../context/AppContext';
+import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
 import {
   GENDER_LABELS,
   ORIENTATION_LABELS,
@@ -27,10 +27,10 @@ import { colors, radii, spacing } from '../../theme';
 type Step = 'welcome' | 'rules' | 'location' | 'intent' | 'identity' | 'profile';
 
 const rules = [
-  'Be yourself. Use recent photos.',
-  'Stay safe. Meet in public first.',
-  'Be kind. No harassment or hate.',
-  'Report bad behavior — we take it seriously.',
+  'Respectful comments only — keep discussions civil.',
+  'Verify news before you share it.',
+  'No spam, scams, or misleading posts.',
+  'Report suspicious activity — we review every report.',
 ];
 
 const intentOptions: { value: RelationshipIntent; label: string; hint: string }[] = [
@@ -118,12 +118,12 @@ export function OnboardingFlow() {
     <View style={[styles.screen, { paddingTop: insets.top + spacing.lg, paddingBottom: insets.bottom + spacing.lg }]}>
       {step === 'welcome' && (
         <View style={styles.step}>
-          <LinearGradient colors={[colors.gradientStart, colors.gradientEnd]} style={styles.badge}>
-            <Text style={styles.badgeText}>♥</Text>
-          </LinearGradient>
-          <Text style={styles.title}>Welcome to Spark</Text>
+          <View style={styles.badge}>
+            <Ionicons name="pulse" size={36} color="#3b82f6" />
+          </View>
+          <Text style={styles.title}>Welcome to {DISGUISE_APP_NAME}</Text>
           <Text style={styles.subtitle}>
-            Match. Chat. Date. It starts with a drag.
+            News, trending topics, and updates from people you follow.
           </Text>
           <Pressable
             style={styles.appleButton}
@@ -168,8 +168,8 @@ export function OnboardingFlow() {
 
       {step === 'rules' && (
         <View style={styles.step}>
-          <Text style={styles.title}>House Rules</Text>
-          <Text style={styles.subtitle}>A few guidelines before you start matching.</Text>
+          <Text style={styles.title}>Community guidelines</Text>
+          <Text style={styles.subtitle}>A few rules before you join the feed.</Text>
           {rules.map((rule) => (
             <View key={rule} style={styles.ruleRow}>
               <Text style={styles.ruleBullet}>•</Text>
@@ -203,9 +203,9 @@ export function OnboardingFlow() {
 
       {step === 'intent' && (
         <View style={styles.step}>
-          <Text style={styles.title}>What brings you to Spark?</Text>
+          <Text style={styles.title}>Personalize your feed</Text>
           <Text style={styles.subtitle}>
-            Be honest — it helps us show you people who want the same thing.
+            Pick what you want to see more of in your timeline.
           </Text>
           {intentOptions.map((option) => {
             const selected = intent === option.value;
@@ -280,7 +280,7 @@ export function OnboardingFlow() {
       {step === 'profile' && (
         <View style={styles.step}>
           <Text style={styles.title}>Create your profile</Text>
-          <Text style={styles.subtitle}>Photo-first, like the apps you know.</Text>
+          <Text style={styles.subtitle}>Add a photo so friends recognize you.</Text>
 
           <PhotoCarousel
             photos={photos}
@@ -321,7 +321,7 @@ export function OnboardingFlow() {
             multiline
           />
           <Pressable style={styles.primaryButton} onPress={finish}>
-            <Text style={styles.primaryButtonText}>Start matching</Text>
+            <Text style={styles.primaryButtonText}>Open {DISGUISE_APP_NAME}</Text>
           </Pressable>
         </View>
       )}
@@ -342,14 +342,11 @@ const styles = StyleSheet.create({
   badge: {
     width: 72,
     height: 72,
-    borderRadius: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.lg,
-  },
-  badgeText: {
-    fontSize: 32,
-    color: colors.text,
+    backgroundColor: 'rgba(59,130,246,0.15)',
   },
   title: {
     color: colors.text,

@@ -652,6 +652,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     (nextUser: UserProfile) => {
       setUser(nextUser);
       setHasOnboarded(true);
+      setDisguiseModeState(true);
       if (!userId && isSupabaseConfigured()) {
         setUserId(`user-${Date.now()}`);
       }

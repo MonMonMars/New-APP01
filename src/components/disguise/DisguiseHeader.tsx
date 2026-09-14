@@ -19,7 +19,7 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
 
   return (
     <View style={[styles.header, { borderBottomColor: colors.border }]}>
-      <ModeToggleLogo variant="pulse" title={title} />
+      <ModeToggleLogo variant="pulse" />
       <View style={styles.actions}>
         {showSearch && (
           <>

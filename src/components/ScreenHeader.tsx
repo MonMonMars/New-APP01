@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { DisguiseModeButton } from './disguise/ModeToggleButtons';
+import { ModeToggleLogo } from './disguise/ModeToggleLogo';
 import { colors, spacing } from '../theme';
 
 type ScreenHeaderProps = {
@@ -40,10 +41,7 @@ export function ScreenHeader({
       )}
 
       {showLogo ? (
-        <View style={styles.logoRow}>
-          <Ionicons name="flame" size={compact ? 22 : 28} color={colors.gradientEnd} />
-          <Text style={[styles.logo, compact && styles.logoCompact]}>Spark</Text>
-        </View>
+        <ModeToggleLogo variant="spark" compact={compact} />
       ) : (
         <Text style={styles.title}>{title}</Text>
       )}

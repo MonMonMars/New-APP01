@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
-import { NewsPost } from '../../data/disguiseFeed';
+import { NewsPost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
-import { openExternalUrl } from '../../utils/openExternalUrl';
+import { NewsArticleSheet } from './NewsArticleSheet';
+import { PersonPreviewSheet } from './PersonPreviewSheet';
 
 type NewsPostCardProps = {
   post: NewsPost;
@@ -11,32 +13,69 @@ type NewsPostCardProps = {
 
 export function NewsPostCard({ post }: NewsPostCardProps) {
   const { colors } = useTheme();
+  const [articleOpen, setArticleOpen] = useState(false);
+  const [selectedReporter, setSelectedReporter] = useState<NewsReporter | null>(null);
 
-  const handlePress = () => {
-    void openExternalUrl(post.articleUrl, post.headline);
+  const openReporter = (reporter: NewsReporter) => {
+    setSelectedReporter(reporter);
+  };
+
+  const closeReporter = () => {
+    setSelectedReporter(null);
   };
 
   return (
-    <Pressable
-      accessibilityRole="link"
-      accessibilityLabel={`Read article: ${post.headline}`}
-      onPress={handlePress}
-      style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
-    >
-      <Image source={{ uri: post.imageUrl }} style={styles.image} resizeMode="cover" />
-      <View style={styles.body}>
-        <View style={styles.metaRow}>
-          <Text style={[styles.source, { color: colors.gradientEnd }]}>{post.source}</Text>
-          <Text style={[styles.dot, { color: colors.textMuted }]}>·</Text>
-          <Text style={[styles.category, { color: colors.textMuted }]}>{post.category}</Text>
-          <Text style={[styles.time, { color: colors.textMuted }]}>{post.timeAgo}</Text>
+    <>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Read article: ${post.headline}`}
+        onPress={() => setArticleOpen(true)}
+        style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
+      >
+        <Image source={{ uri: post.imageUrl }} style={styles.image} resizeMode="cover" />
+        <View style={styles.body}>
+          <View style={styles.metaRow}>
+            <Text style={[styles.source, { color: colors.gradientEnd }]}>{post.source}</Text>
+            <Text style={[styles.dot, { color: colors.textMuted }]}>·</Text>
+            <Text style={[styles.category, { color: colors.textMuted }]}>{post.category}</Text>
+            <Text style={[styles.time, { color: colors.textMuted }]}>{post.timeAgo}</Text>
+          </View>
+          <Text style={[styles.headline, { color: colors.text }]}>{post.headline}</Text>
+          <Text style={[styles.summary, { color: colors.textMuted }]} numberOfLines={3}>
+            {post.summary}
+          </Text>
+
+          {post.reporters.length > 0 && (
+            <View style={styles.reportersRow}>
+              {post.reporters.map((reporter) => (
+                <Pressable
+                  key={reporter.id}
+                  onPress={(event) => {
+                    event.stopPropagation();
+                    openReporter(reporter);
+                  }}
+                  style={styles.reporterCell}
+                  accessibilityRole="button"
+                  accessibilityLabel={`View photos from ${reporter.name}`}
+                >
+                  <Image source={{ uri: reporter.avatarUrl }} style={styles.reporterAvatar} />
+                  <Text style={[styles.reporterQuote, { color: colors.text }]} numberOfLines={3}>
+                    {reporter.quote}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          )}
         </View>
-        <Text style={[styles.headline, { color: colors.text }]}>{post.headline}</Text>
-        <Text style={[styles.summary, { color: colors.textMuted }]} numberOfLines={3}>
-          {post.summary}
-        </Text>
-      </View>
-    </Pressable>
+      </Pressable>
+
+      <NewsArticleSheet visible={articleOpen} post={post} onClose={() => setArticleOpen(false)} />
+      <PersonPreviewSheet
+        visible={selectedReporter !== null}
+        reporter={selectedReporter}
+        onClose={closeReporter}
+      />
+    </>
   );
 }
 
@@ -87,5 +126,31 @@ const styles = StyleSheet.create({
   summary: {
     fontSize: 14,
     lineHeight: 20,
+    marginBottom: spacing.sm,
+  },
+  reportersRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    marginTop: spacing.xs,
+    paddingTop: spacing.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(128,128,128,0.25)',
+  },
+  reporterCell: {
+    flex: 1,
+    alignItems: 'center',
+    maxWidth: 120,
+  },
+  reporterAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    marginBottom: spacing.xs,
+  },
+  reporterQuote: {
+    fontSize: 11,
+    lineHeight: 15,
+    textAlign: 'center',
+    fontWeight: '600',
   },
 });

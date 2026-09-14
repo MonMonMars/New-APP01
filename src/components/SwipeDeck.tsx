@@ -17,7 +17,6 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { useSwipeSounds } from '../hooks/useSwipeSounds';
 import { Profile } from '../types/profile';
 import { DropTargets, ZoneLayout } from './DropTargets';
 import { ProfileCard } from './ProfileCard';
@@ -97,7 +96,6 @@ function zoneProximity(
 
 export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
   function SwipeDeck({ profiles, onSwipe, onEmpty, canLike = true, onLikeBlocked, onSuperLike, compact = false }, ref) {
-    const { playSound } = useSwipeSounds();
     const containerRef = useRef<View>(null);
     const [activeIndex, setActiveIndex] = useState(0);
     const [activeEffect, setActiveEffect] = useState<ActiveEffect | null>(null);
@@ -156,14 +154,13 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           },
         });
 
-        void playSound(kind === 'pass' ? 'pass' : kind === 'super' ? 'super' : 'like');
         void Haptics.notificationAsync(
           kind === 'pass'
             ? Haptics.NotificationFeedbackType.Warning
             : Haptics.NotificationFeedbackType.Success,
         );
       },
-      [heartZone, playSound, trashZone],
+      [heartZone, trashZone],
     );
 
     const advanceCard = useCallback(
@@ -248,7 +245,6 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
 
         if (superLike) {
           starActive.value = withTiming(1, { duration: 120 });
-          void playSound('super');
           void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
           pendingSuperProfileRef.current = current;
@@ -300,7 +296,6 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
         heartActive,
         onLikeBlocked,
         passDim,
-        playSound,
         profiles,
         resetPosition,
         starActive,
@@ -522,9 +517,6 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           visible={showSuperCelebration}
           effectKey={superCelebrationKey}
           onComplete={finishSuperLikeAnimation}
-          onPlaySound={() => {
-            void playSound('super');
-          }}
         />
       </View>
     );

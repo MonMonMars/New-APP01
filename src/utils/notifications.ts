@@ -4,7 +4,7 @@ import { Platform } from 'react-native';
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
-    shouldPlaySound: true,
+    shouldPlaySound: false,
     shouldSetBadge: false,
     shouldShowBanner: true,
     shouldShowList: true,
@@ -45,7 +45,6 @@ export async function scheduleMatchNotification(
       body: disguiseSafe
         ? 'Someone interacted with your feed. Open Pulse to see more.'
         : `You and ${profileName} liked each other. Say hi!`,
-      sound: true,
     },
     trigger: null,
   });
@@ -66,7 +65,6 @@ export async function scheduleMessageNotification(
     content: {
       title: disguiseSafe ? 'Pulse — new reply' : profileName,
       body: disguiseSafe ? 'You have a new comment thread update.' : preview,
-      sound: true,
     },
     trigger: null,
   });

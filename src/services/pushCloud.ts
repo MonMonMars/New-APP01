@@ -62,7 +62,6 @@ export async function sendExpoPushNotification(
         to: expoPushToken,
         title,
         body,
-        sound: 'default',
       }),
     });
   } catch {

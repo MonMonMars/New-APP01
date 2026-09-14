@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
@@ -19,6 +19,7 @@ import {
 } from '../../data/disguiseTrending';
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
 import { radii, spacing } from '../../theme';
+import { AnimatedPressable } from '../../components/AnimatedPressable';
 
 const PULSE_BLUE = '#3b82f6';
 
@@ -115,7 +116,7 @@ export function DisguiseTrendingScreen() {
           Stories, local radar, and topics worth your time today
         </Text>
 
-        <Pressable
+        <AnimatedPressable
           style={[styles.briefCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
           onPress={() => openTopic(pulseBrief.topic)}
           accessibilityRole="button"
@@ -139,7 +140,7 @@ export function DisguiseTrendingScreen() {
               {pulseBrief.summary}
             </Text>
           </View>
-        </Pressable>
+        </AnimatedPressable>
 
         <ScrollView
           horizontal
@@ -147,21 +148,21 @@ export function DisguiseTrendingScreen() {
           contentContainerStyle={styles.chipRow}
         >
           {trendingCategoryChips.map((chip) => (
-            <Pressable
+            <AnimatedPressable
               key={chip.id}
               style={[styles.chip, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => openTopic(chip.topic)}
             >
               <Ionicons name={chipIcon(chip.icon)} size={14} color={PULSE_BLUE} />
               <Text style={[styles.chipLabel, { color: colors.text }]}>{chip.label}</Text>
-            </Pressable>
+            </AnimatedPressable>
           ))}
         </ScrollView>
 
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Local radar</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.radarRow}>
           {localRadarItems.map((item) => (
-            <Pressable
+            <AnimatedPressable
               key={item.id}
               style={[styles.radarCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => openTopic(item.topic)}
@@ -171,14 +172,14 @@ export function DisguiseTrendingScreen() {
               </View>
               <Text style={[styles.radarTitle, { color: colors.text }]}>{item.title}</Text>
               <Text style={[styles.radarDetail, { color: colors.textMuted }]}>{item.detail}</Text>
-            </Pressable>
+            </AnimatedPressable>
           ))}
         </ScrollView>
 
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Markets at a glance</Text>
         <View style={[styles.marketsRow, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           {marketPulseSnapshots.map((market) => (
-            <Pressable
+            <AnimatedPressable
               key={market.id}
               style={styles.marketCell}
               onPress={() => openTopic('#MarketWatch')}
@@ -188,14 +189,14 @@ export function DisguiseTrendingScreen() {
               <Text style={[styles.marketChange, { color: market.up ? '#22c55e' : '#ef4444' }]}>
                 {market.change}
               </Text>
-            </Pressable>
+            </AnimatedPressable>
           ))}
         </View>
 
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Breaking now</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.breakingRow}>
           {breakingNowCards.map((card) => (
-            <Pressable
+            <AnimatedPressable
               key={card.id}
               style={[styles.breakingCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => openTopic(card.topic)}
@@ -209,13 +210,13 @@ export function DisguiseTrendingScreen() {
                   {card.headline}
                 </Text>
               </View>
-            </Pressable>
+            </AnimatedPressable>
           ))}
         </ScrollView>
 
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Trending topics</Text>
         {disguiseTrendingTopics.map((item, index) => (
-          <Pressable
+          <AnimatedPressable
             key={item.id}
             style={[styles.topicRow, { borderBottomColor: colors.border }]}
             onPress={() => openTopic(item.label)}
@@ -252,12 +253,12 @@ export function DisguiseTrendingScreen() {
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-          </Pressable>
+          </AnimatedPressable>
         ))}
 
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Editor&apos;s picks</Text>
         {editorsPicks.map((pick) => (
-          <Pressable
+          <AnimatedPressable
             key={pick.id}
             style={[styles.pickRow, { backgroundColor: colors.surface, borderColor: colors.border }]}
             onPress={() => openTopic(pick.topic)}
@@ -268,7 +269,7 @@ export function DisguiseTrendingScreen() {
               <Text style={[styles.pickSubtitle, { color: colors.textMuted }]}>{pick.subtitle}</Text>
             </View>
             <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-          </Pressable>
+          </AnimatedPressable>
         ))}
       </ScrollView>
     </View>

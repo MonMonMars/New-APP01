@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   runOnJS,
   useAnimatedStyle,
@@ -10,6 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { colors, radii, spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type MatchToastProps = {
   visible: boolean;
@@ -49,13 +50,13 @@ export function MatchToast({ visible, profileName, onDismiss }: MatchToastProps)
 
   return (
     <Animated.View style={[styles.container, animatedStyle]}>
-      <Pressable style={styles.toast} onPress={onDismiss}>
+      <AnimatedPressable style={styles.toast} onPress={onDismiss}>
         <Text style={styles.emoji}>✨</Text>
         <View style={styles.textCol}>
           <Text style={styles.title}>New match!</Text>
           <Text style={styles.subtitle}>You and {profileName} liked each other</Text>
         </View>
-      </Pressable>
+      </AnimatedPressable>
     </Animated.View>
   );
 }

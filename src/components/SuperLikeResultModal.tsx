@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, radii, spacing } from '../theme';
 import { Profile } from '../types/profile';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type SuperLikeResultModalProps = {
   visible: boolean;
@@ -69,14 +70,14 @@ export function SuperLikeResultModal({
           )}
 
           <View style={styles.actions}>
-            <Pressable style={styles.primaryButton} onPress={onChatNow}>
+            <AnimatedPressable style={styles.primaryButton} onPress={onChatNow}>
               <Text style={styles.primaryButtonText}>
                 {isMatch ? 'Message' : 'Send a note'}
               </Text>
-            </Pressable>
-            <Pressable style={styles.secondaryButton} onPress={onTalkLater}>
+            </AnimatedPressable>
+            <AnimatedPressable style={styles.secondaryButton} onPress={onTalkLater}>
               <Text style={styles.secondaryButtonText}>Keep swiping</Text>
-            </Pressable>
+            </AnimatedPressable>
           </View>
         </LinearGradient>
       </View>

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -9,6 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 import { EXPLORE_CATEGORY_MAP, mockProfiles } from '../data/profiles';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
+import { AnimatedPressable } from '../components/AnimatedPressable';
 
 type ExploreCategory = 'serious' | 'new' | 'nearby';
 
@@ -86,7 +87,7 @@ export function ExploreScreen({ onClose }: ExploreScreenProps) {
               ) : (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
                   {profiles.map((profile) => (
-                    <Pressable
+                    <AnimatedPressable
                       key={profile.id}
                       style={[styles.card, { backgroundColor: colors.surface }]}
                       onPress={() => openInDeck(profile.id)}
@@ -94,7 +95,7 @@ export function ExploreScreen({ onClose }: ExploreScreenProps) {
                       <Image source={{ uri: profile.photos[0] }} style={styles.photo} />
                       <Text style={[styles.name, { color: colors.text }]}>{profile.name}, {profile.age}</Text>
                       <Text style={[styles.distance, { color: colors.textMuted }]}>{profile.distanceMiles} mi</Text>
-                    </Pressable>
+                    </AnimatedPressable>
                   ))}
                 </ScrollView>
               )}

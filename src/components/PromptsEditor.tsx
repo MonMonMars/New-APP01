@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
 import { HINGE_PROMPT_OPTIONS, ProfilePrompt } from '../types/profile';
 import { getPromptFeedback } from '../utils/promptFeedback';
 import { radii, spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
 
 const MAX_PROMPTS = 3;
 
@@ -46,10 +47,10 @@ export function PromptsEditor({ prompts, onChange }: PromptsEditorProps) {
       <Text style={[styles.title, { color: colors.textMuted }]}>Prompts (up to {MAX_PROMPTS})</Text>
       {prompts.map((prompt, index) => (
         <View key={`prompt-${index}`} style={[styles.card, { backgroundColor: colors.surface }]}>
-          <Pressable style={styles.questionRow} onPress={() => cycleQuestion(index)}>
+          <AnimatedPressable style={styles.questionRow} onPress={() => cycleQuestion(index)}>
             <Text style={[styles.question, { color: colors.gradientEnd }]}>{prompt.question}</Text>
             <Ionicons name="swap-horizontal" size={16} color={colors.textMuted} />
-          </Pressable>
+          </AnimatedPressable>
           <TextInput
             value={prompt.answer}
             onChangeText={(text) => updatePrompt(index, 'answer', text)}
@@ -63,17 +64,17 @@ export function PromptsEditor({ prompts, onChange }: PromptsEditorProps) {
               💡 {getPromptFeedback(prompt.answer)}
             </Text>
           )}
-          <Pressable onPress={() => removePrompt(index)} style={styles.remove}>
+          <AnimatedPressable onPress={() => removePrompt(index)} style={styles.remove}>
             <Ionicons name="trash-outline" size={16} color={colors.nope} />
             <Text style={[styles.removeText, { color: colors.nope }]}>Remove</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
       ))}
       {prompts.length < MAX_PROMPTS && (
-        <Pressable style={[styles.addButton, { borderColor: colors.gradientEnd }]} onPress={addPrompt}>
+        <AnimatedPressable style={[styles.addButton, { borderColor: colors.gradientEnd }]} onPress={addPrompt}>
           <Ionicons name="add-circle-outline" size={20} color={colors.gradientEnd} />
           <Text style={[styles.addText, { color: colors.gradientEnd }]}>Add a prompt</Text>
-        </Pressable>
+        </AnimatedPressable>
       )}
     </View>
   );

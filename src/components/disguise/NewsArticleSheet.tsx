@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../context/ThemeContext';
 import { NewsPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { openExternalUrl } from '../../utils/openExternalUrl';
+import { AnimatedPressable } from '../AnimatedPressable';
 
 type NewsArticleSheetProps = {
   visible: boolean;
@@ -26,7 +27,7 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Close article" />
+        <AnimatedPressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Close article" />
         <View
           style={[
             styles.sheet,
@@ -42,9 +43,9 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
               <Text style={[styles.source, { color: colors.gradientEnd }]}>{post.source}</Text>
               <Text style={[styles.category, { color: colors.textMuted }]}>{post.category}</Text>
             </View>
-            <Pressable onPress={onClose} hitSlop={12} accessibilityLabel="Close">
+            <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel="Close">
               <Ionicons name="close" size={24} color={colors.text} />
-            </Pressable>
+            </AnimatedPressable>
           </View>
 
           <ScrollView
@@ -62,7 +63,7 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
                 {paragraph}
               </Text>
             ))}
-            <Pressable
+            <AnimatedPressable
               style={styles.readOriginal}
               onPress={() => {
                 void openExternalUrl(post.articleUrl, post.source);
@@ -70,7 +71,7 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
             >
               <Text style={styles.readOriginalText}>Read on {post.source}</Text>
               <Ionicons name="open-outline" size={16} color="#fff" />
-            </Pressable>
+            </AnimatedPressable>
           </ScrollView>
         </View>
       </View>

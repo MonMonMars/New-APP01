@@ -1,12 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
 import { spacing } from '../../theme';
 import { ModeToggleLogo } from './ModeToggleLogo';
+import { AnimatedPressable } from '../AnimatedPressable';
 
 type DisguiseHeaderProps = {
   title?: string;
@@ -23,20 +24,20 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
       <View style={styles.actions}>
         {showSearch && (
           <>
-            <Pressable
+            <AnimatedPressable
               style={styles.iconBtn}
               accessibilityLabel="Search trending topics"
               onPress={() => navigation.navigate('Trending')}
             >
               <Ionicons name="search-outline" size={22} color={colors.text} />
-            </Pressable>
-            <Pressable
+            </AnimatedPressable>
+            <AnimatedPressable
               style={styles.iconBtn}
               accessibilityLabel="Open activity"
               onPress={() => navigation.navigate('Activity')}
             >
               <Ionicons name="notifications-outline" size={22} color={colors.text} />
-            </Pressable>
+            </AnimatedPressable>
           </>
         )}
       </View>

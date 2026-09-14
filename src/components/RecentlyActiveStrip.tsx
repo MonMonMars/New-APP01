@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
 import { Profile } from '../types/profile';
 import { spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type RecentlyActiveStripProps = {
   profiles: Profile[];
@@ -25,14 +26,14 @@ export function RecentlyActiveStrip({ profiles, onSelect }: RecentlyActiveStripP
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {profiles.map((profile) => (
-          <Pressable key={profile.id} style={styles.item} onPress={() => onSelect(profile)}>
+          <AnimatedPressable key={profile.id} style={styles.item} onPress={() => onSelect(profile)}>
             <View style={[styles.ring, { borderColor: colors.like }]}>
               <Image source={{ uri: profile.photos[0] }} style={styles.avatar} />
             </View>
             <Text style={[styles.name, { color: colors.textMuted }]} numberOfLines={1}>
               {profile.name}
             </Text>
-          </Pressable>
+          </AnimatedPressable>
         ))}
       </ScrollView>
     </View>

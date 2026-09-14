@@ -1,9 +1,10 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, radii, spacing } from '../theme';
 import { Profile } from '../types/profile';
+import { Button } from './Button';
 
 type MatchModalProps = {
   visible: boolean;
@@ -69,13 +70,8 @@ export function MatchModal({
         </View>
 
         <View style={[styles.actions, { paddingBottom: insets.bottom + spacing.lg }]}>
-          <Pressable style={styles.primaryButton} onPress={onMessage}>
-            <Text style={styles.primaryButtonText}>Start talking</Text>
-          </Pressable>
-
-          <Pressable style={styles.secondaryButton} onPress={onClose}>
-            <Text style={styles.secondaryButtonText}>Keep looking</Text>
-          </Pressable>
+          <Button label="Start talking" onPress={onMessage} haptic="success" />
+          <Button label="Keep looking" variant="ghost" onPress={onClose} />
         </View>
       </LinearGradient>
     </Modal>

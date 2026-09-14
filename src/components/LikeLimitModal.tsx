@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, StyleSheet, Text, View } from 'react-native';
 
 import { FREE_DAILY_LIKE_LIMIT } from '../types/subscription';
 import { colors, radii, spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type LikeLimitModalProps = {
   visible: boolean;
@@ -21,12 +22,12 @@ export function LikeLimitModal({ visible, onClose, onUpgrade }: LikeLimitModalPr
             Free members get {FREE_DAILY_LIKE_LIMIT} likes per day. Upgrade to Spark+ for unlimited
             likes, see who liked you, and more.
           </Text>
-          <Pressable style={styles.primaryButton} onPress={onUpgrade}>
+          <AnimatedPressable style={styles.primaryButton} onPress={onUpgrade}>
             <Text style={styles.primaryText}>Get Spark+</Text>
-          </Pressable>
-          <Pressable style={styles.secondaryButton} onPress={onClose}>
+          </AnimatedPressable>
+          <AnimatedPressable style={styles.secondaryButton} onPress={onClose}>
             <Text style={styles.secondaryText}>Come back tomorrow</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
       </View>
     </Modal>

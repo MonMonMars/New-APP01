@@ -1,12 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { radii, spacing } from '../theme';
+import { AnimatedPressable } from '../components/AnimatedPressable';
 
 type ConsumablesShopScreenProps = {
   onClose: () => void;
@@ -80,9 +81,9 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <View style={styles.header}>
-        <Pressable onPress={onClose}>
+        <AnimatedPressable onPress={onClose}>
           <Ionicons name="close" size={28} color={colors.text} />
-        </Pressable>
+        </AnimatedPressable>
         <Text style={[styles.title, { color: colors.text }]}>Shop</Text>
         <DisguiseModeButton />
       </View>
@@ -97,7 +98,7 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
         </LinearGradient>
 
         {PACKS.map((pack) => (
-          <Pressable
+          <AnimatedPressable
             key={pack.id}
             style={[styles.packCard, { backgroundColor: colors.surface }]}
             onPress={() => handlePurchase(pack)}
@@ -111,7 +112,7 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
               <Text style={[styles.packQty, { color: pack.color }]}>{pack.quantity}</Text>
             </View>
             <Text style={[styles.packPrice, { color: colors.text }]}>{pack.price}</Text>
-          </Pressable>
+          </AnimatedPressable>
         ))}
 
         <Text style={[styles.legal, { color: colors.textMuted }]}>

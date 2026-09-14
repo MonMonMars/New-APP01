@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
@@ -9,6 +9,7 @@ import {
   SearchRadiusPreset,
 } from '../types/preferences';
 import { radii, spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type ExpandLocationSheetProps = {
   visible: boolean;
@@ -38,9 +39,9 @@ export function ExpandLocationSheet({
       >
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text }]}>Expand location</Text>
-          <Pressable onPress={onClose} hitSlop={12}>
+          <AnimatedPressable onPress={onClose} hitSlop={12}>
             <Ionicons name="close" size={24} color={colors.textMuted} />
-          </Pressable>
+          </AnimatedPressable>
         </View>
 
         <Text style={[styles.subtitle, { color: colors.textMuted }]}>
@@ -55,7 +56,7 @@ export function ExpandLocationSheet({
           {SEARCH_RADIUS_PRESETS.map((preset) => {
             const isActive = currentRadius === preset.value;
             return (
-              <Pressable
+              <AnimatedPressable
                 key={preset.label}
                 style={[
                   styles.chip,
@@ -82,7 +83,7 @@ export function ExpandLocationSheet({
                 >
                   {preset.label}
                 </Text>
-              </Pressable>
+              </AnimatedPressable>
             );
           })}
         </View>

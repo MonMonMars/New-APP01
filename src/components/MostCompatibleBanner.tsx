@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type MostCompatibleBannerProps = {
   profile: Profile;
@@ -15,7 +16,7 @@ export function MostCompatibleBanner({ profile, score, onPress }: MostCompatible
   const { colors } = useTheme();
 
   return (
-    <Pressable
+    <AnimatedPressable
       style={[styles.banner, { backgroundColor: 'rgba(26, 26, 28, 0.88)', borderColor: colors.gradientEnd }]}
       onPress={onPress}
     >
@@ -28,7 +29,7 @@ export function MostCompatibleBanner({ profile, score, onPress }: MostCompatible
       </View>
       <Image source={{ uri: profile.photos[0] }} style={styles.avatar} />
       <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 

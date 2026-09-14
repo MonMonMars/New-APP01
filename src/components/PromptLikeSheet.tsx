@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
 import { Profile, ProfilePrompt } from '../types/profile';
 import { radii, spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type PromptLikeSheetProps = {
   visible: boolean;
@@ -31,9 +32,9 @@ export function PromptLikeSheet({ visible, profile, prompt, onClose, onSend }: P
         <View style={[styles.sheet, { backgroundColor: colors.background, paddingBottom: insets.bottom + spacing.md }]}>
           <View style={styles.handleRow}>
             <Text style={[styles.title, { color: colors.text }]}>Like {profile.name}&apos;s answer</Text>
-            <Pressable onPress={onClose}>
+            <AnimatedPressable onPress={onClose}>
               <Ionicons name="close" size={24} color={colors.textMuted} />
-            </Pressable>
+            </AnimatedPressable>
           </View>
           <View style={[styles.promptCard, { backgroundColor: colors.surface }]}>
             <Text style={[styles.question, { color: colors.gradientEnd }]}>{prompt.question}</Text>
@@ -47,7 +48,7 @@ export function PromptLikeSheet({ visible, profile, prompt, onClose, onSend }: P
             style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]}
             multiline
           />
-          <Pressable
+          <AnimatedPressable
             style={[styles.sendButton, { backgroundColor: colors.heartPink }]}
             onPress={() => {
               onSend(comment.trim());
@@ -56,7 +57,7 @@ export function PromptLikeSheet({ visible, profile, prompt, onClose, onSend }: P
           >
             <Ionicons name="heart" size={18} color="#fff" />
             <Text style={styles.sendText}>Send Like</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
       </View>
     </Modal>

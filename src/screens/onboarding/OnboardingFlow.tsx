@@ -1,14 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PhotoCarousel } from '../../components/PhotoCarousel';
@@ -24,6 +16,7 @@ import {
 import { signInWithApple } from '../../utils/appleAuth';
 import { pickProfilePhoto } from '../../utils/photoPicker';
 import { colors, radii, spacing } from '../../theme';
+import { AnimatedPressable } from '../../components/AnimatedPressable';
 
 type Step = 'welcome' | 'rules' | 'location' | 'intent' | 'identity' | 'profile';
 
@@ -126,7 +119,7 @@ export function OnboardingFlow() {
           <Text style={styles.subtitle}>
             News, trending topics, and updates from people you follow.
           </Text>
-          <Pressable
+          <AnimatedPressable
             style={styles.appleButton}
             onPress={handleAppleSignIn}
             disabled={authLoading}
@@ -139,7 +132,7 @@ export function OnboardingFlow() {
                 <Text style={styles.appleButtonText}>Continue with Apple</Text>
               </>
             )}
-          </Pressable>
+          </AnimatedPressable>
           <View style={styles.emailBlock}>
             <TextInput
               style={styles.emailInput}
@@ -151,19 +144,19 @@ export function OnboardingFlow() {
               autoCapitalize="none"
               autoCorrect={false}
             />
-            <Pressable
+            <AnimatedPressable
               style={styles.emailButton}
               onPress={handleEmailSignIn}
               disabled={authLoading || !email.trim()}
             >
               <Ionicons name="mail-outline" size={18} color={colors.text} />
               <Text style={styles.emailButtonText}>Continue with email</Text>
-            </Pressable>
+            </AnimatedPressable>
             {emailMessage && <Text style={styles.emailHint}>{emailMessage}</Text>}
           </View>
-          <Pressable onPress={() => { signInWithAppleStub(); setStep('rules'); }}>
+          <AnimatedPressable onPress={() => { signInWithAppleStub(); setStep('rules'); }}>
             <Text style={styles.link}>Skip sign-in (demo mode)</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
       )}
 
@@ -182,9 +175,9 @@ export function OnboardingFlow() {
             Guidelines, and Disguise Mode Policy. You must be 18 or older. Full legal documents are
             available in Safety Center after setup (使用者條款 · 隱私政策 · 社群規範 · 偽裝模式政策).
           </Text>
-          <Pressable style={styles.primaryButton} onPress={() => setStep('location')}>
+          <AnimatedPressable style={styles.primaryButton} onPress={() => setStep('location')}>
             <Text style={styles.primaryButtonText}>I agree — I am 18+</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
       )}
 
@@ -198,10 +191,10 @@ export function OnboardingFlow() {
             <Text style={styles.mapEmoji}>📍</Text>
             <Text style={styles.mapText}>Top stories near you</Text>
           </View>
-          <Pressable style={styles.primaryButton} onPress={() => setStep('intent')}>
+          <AnimatedPressable style={styles.primaryButton} onPress={() => setStep('intent')}>
             <Text style={styles.primaryButtonText}>Use my location</Text>
-          </Pressable>
-          <Pressable
+          </AnimatedPressable>
+          <AnimatedPressable
             onPress={() =>
               Alert.alert(
                 'How location works',
@@ -211,7 +204,7 @@ export function OnboardingFlow() {
             }
           >
             <Text style={styles.link}>Tell me more</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
       )}
 
@@ -224,7 +217,7 @@ export function OnboardingFlow() {
           {intentOptions.map((option) => {
             const selected = intent === option.value;
             return (
-              <Pressable
+              <AnimatedPressable
                 key={option.value}
                 style={[styles.intentCard, selected && styles.intentCardSelected]}
                 onPress={() => setIntent(option.value)}
@@ -233,12 +226,12 @@ export function OnboardingFlow() {
                   {option.label}
                 </Text>
                 <Text style={styles.intentHint}>{option.hint}</Text>
-              </Pressable>
+              </AnimatedPressable>
             );
           })}
-          <Pressable style={styles.primaryButton} onPress={() => setStep('identity')}>
+          <AnimatedPressable style={styles.primaryButton} onPress={() => setStep('identity')}>
             <Text style={styles.primaryButtonText}>Continue</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
       )}
 
@@ -254,7 +247,7 @@ export function OnboardingFlow() {
             {genderOptions.map((option) => {
               const selected = gender === option;
               return (
-                <Pressable
+                <AnimatedPressable
                   key={option}
                   style={[styles.chip, selected && styles.chipSelected]}
                   onPress={() => setGender(option)}
@@ -262,7 +255,7 @@ export function OnboardingFlow() {
                   <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
                     {GENDER_LABELS[option]}
                   </Text>
-                </Pressable>
+                </AnimatedPressable>
               );
             })}
           </View>
@@ -272,7 +265,7 @@ export function OnboardingFlow() {
             {orientationOptions.map((option) => {
               const selected = orientation === option;
               return (
-                <Pressable
+                <AnimatedPressable
                   key={option}
                   style={[styles.chip, selected && styles.chipSelected]}
                   onPress={() => setOrientation(option)}
@@ -280,14 +273,14 @@ export function OnboardingFlow() {
                   <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
                     {ORIENTATION_LABELS[option]}
                   </Text>
-                </Pressable>
+                </AnimatedPressable>
               );
             })}
           </View>
 
-          <Pressable style={styles.primaryButton} onPress={() => setStep('profile')}>
+          <AnimatedPressable style={styles.primaryButton} onPress={() => setStep('profile')}>
             <Text style={styles.primaryButtonText}>Continue</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
       )}
 
@@ -303,10 +296,10 @@ export function OnboardingFlow() {
             height={200}
           />
 
-          <Pressable style={styles.addPhotoButton} onPress={handleAddPhoto}>
+          <AnimatedPressable style={styles.addPhotoButton} onPress={handleAddPhoto}>
             <Ionicons name="camera-outline" size={18} color={colors.gradientEnd} />
             <Text style={styles.addPhotoText}>Add photos</Text>
-          </Pressable>
+          </AnimatedPressable>
 
           <Text style={styles.label}>Name</Text>
           <TextInput
@@ -334,9 +327,9 @@ export function OnboardingFlow() {
             placeholder="A line about you"
             multiline
           />
-          <Pressable style={styles.primaryButton} onPress={finish}>
+          <AnimatedPressable style={styles.primaryButton} onPress={finish}>
             <Text style={styles.primaryButtonText}>Open {DISGUISE_APP_NAME}</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
       )}
     </View>

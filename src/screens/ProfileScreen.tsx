@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useRef, useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import type { ScrollView as ScrollViewType } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -21,6 +21,7 @@ import { DisguiseAdGeneratorSheet } from '../components/disguise/DisguiseAdGener
 import { DISGUISE_APP_NAME } from '../data/disguiseFeed';
 import { computeProfileCompletion } from '../utils/profileCompletion';
 import { radii, spacing } from '../theme';
+import { AnimatedPressable } from '../components/AnimatedPressable';
 
 const intentLabels: Record<RelationshipIntent, string> = {
   long_term: 'Long-term partner',
@@ -148,9 +149,9 @@ export function ProfileScreen() {
               <Text style={[styles.intent, { color: colors.gradientEnd }]}>{intentLabels[user.intent]}</Text>
             )}
             <Text style={[styles.bio, { color: colors.textMuted }]}>{user.bio}</Text>
-            <Pressable style={[styles.editButton, { borderColor: colors.gradientEnd }]} onPress={() => setShowEdit(true)}>
+            <AnimatedPressable style={[styles.editButton, { borderColor: colors.gradientEnd }]} onPress={() => setShowEdit(true)}>
               <Text style={[styles.editButtonText, { color: colors.gradientEnd }]}>Edit profile</Text>
-            </Pressable>
+            </AnimatedPressable>
           </View>
         </View>
 
@@ -206,9 +207,9 @@ export function ProfileScreen() {
             <Text style={[styles.toggleLabel, { color: colors.text }]}>Appearance</Text>
             <Text style={[styles.toggleDesc, { color: colors.textMuted }]}>{themeLabel} mode</Text>
           </View>
-          <Pressable onPress={cycleTheme}>
+          <AnimatedPressable onPress={cycleTheme}>
             <Text style={[styles.themeToggle, { color: colors.gradientEnd }]}>{themeLabel}</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
 
         <View style={[styles.toggleRow, { borderBottomColor: colors.border }]}>
@@ -229,7 +230,7 @@ export function ProfileScreen() {
           />
         </View>
 
-        <Pressable
+        <AnimatedPressable
           style={[styles.disguiseAdRow, { borderBottomColor: colors.border }]}
           onPress={() => setShowDisguiseGenerator(true)}
         >
@@ -243,7 +244,7 @@ export function ProfileScreen() {
             </Text>
           </View>
           <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-        </Pressable>
+        </AnimatedPressable>
 
         {notificationsEnabled && (
           <View style={styles.notifBadge}>
@@ -296,7 +297,7 @@ export function ProfileScreen() {
 
         <View style={styles.section}>
           {settingsRows.map((row) => (
-            <Pressable
+            <AnimatedPressable
               key={row.label}
               style={[styles.settingsRow, { borderBottomColor: colors.border }]}
               onPress={() => handleRowPress(row.route)}
@@ -304,14 +305,14 @@ export function ProfileScreen() {
               <Ionicons name={row.icon} size={20} color={colors.textMuted} />
               <Text style={[styles.settingsLabel, { color: colors.text }]}>{row.label}</Text>
               <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-            </Pressable>
+            </AnimatedPressable>
           ))}
         </View>
 
-        <Pressable style={styles.deleteRow} onPress={handleDeleteAccount}>
+        <AnimatedPressable style={styles.deleteRow} onPress={handleDeleteAccount}>
           <Ionicons name="trash-outline" size={20} color={colors.nope} />
           <Text style={[styles.deleteText, { color: colors.nope }]}>Delete account</Text>
-        </Pressable>
+        </AnimatedPressable>
       </ScrollView>
 
       <EditProfileSheet

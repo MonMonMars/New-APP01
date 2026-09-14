@@ -8,6 +8,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 
+import { PRESS_SPRING } from './AnimatedPressable';
 import { colors, spacing } from '../theme';
 
 export type ZoneLayout = {
@@ -81,10 +82,10 @@ function TargetButton({
       onPress={onPress}
       hitSlop={16}
       onPressIn={() => {
-        pressScale.value = withSpring(0.9, { damping: 14, stiffness: 420 });
+        pressScale.value = withSpring(0.92, PRESS_SPRING);
       }}
       onPressOut={() => {
-        pressScale.value = withSpring(1, { damping: 14, stiffness: 420 });
+        pressScale.value = withSpring(1, PRESS_SPRING);
       }}
     >
       <Animated.View

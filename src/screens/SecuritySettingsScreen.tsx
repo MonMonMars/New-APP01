@@ -1,15 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Alert, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
@@ -19,6 +10,7 @@ import { SecuritySettings } from '../types/security';
 import { isBiometricAvailable } from '../utils/appLock';
 import { hashPin, setStoredPinHash, clearStoredPinHash } from '../utils/secureStorage';
 import { radii, spacing } from '../theme';
+import { AnimatedPressable } from '../components/AnimatedPressable';
 
 type SecuritySettingsScreenProps = {
   onClose: () => void;
@@ -91,9 +83,9 @@ export function SecuritySettingsScreen({ onClose }: SecuritySettingsScreenProps)
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <View style={styles.header}>
-        <Pressable onPress={onClose} style={styles.back}>
+        <AnimatedPressable onPress={onClose} style={styles.back}>
           <Ionicons name="chevron-back" size={28} color={colors.text} />
-        </Pressable>
+        </AnimatedPressable>
         <Text style={[styles.title, { color: colors.text }]}>Security</Text>
         <DisguiseModeButton />
       </View>
@@ -150,13 +142,13 @@ export function SecuritySettingsScreen({ onClose }: SecuritySettingsScreenProps)
             maxLength={6}
           />
           <View style={styles.pinActions}>
-            <Pressable style={[styles.pinButton, { borderColor: colors.border }]} onPress={savePin}>
+            <AnimatedPressable style={[styles.pinButton, { borderColor: colors.border }]} onPress={savePin}>
               <Text style={[styles.pinButtonText, { color: colors.text }]}>Save PIN</Text>
-            </Pressable>
+            </AnimatedPressable>
             {securitySettings.pinEnabled && (
-              <Pressable style={[styles.pinButton, { borderColor: colors.border }]} onPress={removePin}>
+              <AnimatedPressable style={[styles.pinButton, { borderColor: colors.border }]} onPress={removePin}>
                 <Text style={[styles.pinButtonText, { color: '#ef4444' }]}>Remove PIN</Text>
-              </Pressable>
+              </AnimatedPressable>
             )}
           </View>
         </View>

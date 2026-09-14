@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radii, spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type PhotoCarouselProps = {
   photos: string[];
@@ -37,10 +38,10 @@ export function PhotoCarousel({
 
   if (photos.length === 0) {
     return (
-      <Pressable style={[styles.empty, { height }]} onPress={onAddPhoto}>
+      <AnimatedPressable style={[styles.empty, { height }]} onPress={onAddPhoto}>
         <Ionicons name="camera" size={32} color={colors.textMuted} />
         <Text style={styles.emptyText}>Add a photo</Text>
-      </Pressable>
+      </AnimatedPressable>
     );
   }
 
@@ -50,8 +51,8 @@ export function PhotoCarousel({
 
       {photos.length > 1 && (
         <>
-          <Pressable style={styles.tapLeft} onPress={goPrev} />
-          <Pressable style={styles.tapRight} onPress={goNext} />
+          <AnimatedPressable style={styles.tapLeft} onPress={goPrev} />
+          <AnimatedPressable style={styles.tapRight} onPress={goNext} />
           <View style={styles.dots}>
             {photos.map((_, dotIndex) => (
               <View
@@ -64,9 +65,9 @@ export function PhotoCarousel({
       )}
 
       {editable && onAddPhoto && (
-        <Pressable style={styles.addButton} onPress={onAddPhoto}>
+        <AnimatedPressable style={styles.addButton} onPress={onAddPhoto}>
           <Ionicons name="add" size={20} color={colors.text} />
-        </Pressable>
+        </AnimatedPressable>
       )}
     </View>
   );

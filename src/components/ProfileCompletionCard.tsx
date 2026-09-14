@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
 import { ProfileTip } from '../utils/profileCompletion';
 import { radii, spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type ProfileCompletionCardProps = {
   score: number;
@@ -23,9 +24,9 @@ export function ProfileCompletionCard({ score, tips, onEditPress }: ProfileCompl
           <Text style={[styles.title, { color: colors.text }]}>Profile strength</Text>
           <Text style={[styles.score, { color: colors.gradientEnd }]}>{score}% complete</Text>
         </View>
-        <Pressable style={[styles.editButton, { borderColor: colors.gradientEnd }]} onPress={onEditPress}>
+        <AnimatedPressable style={[styles.editButton, { borderColor: colors.gradientEnd }]} onPress={onEditPress}>
           <Text style={[styles.editText, { color: colors.gradientEnd }]}>Improve</Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
       <View style={[styles.barTrack, { backgroundColor: colors.border }]}>
         <View style={[styles.barFill, { width: `${score}%`, backgroundColor: colors.gradientEnd }]} />

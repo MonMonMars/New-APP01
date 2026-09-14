@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../context/ThemeContext';
 import { AdPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { openExternalUrl } from '../../utils/openExternalUrl';
+import { AnimatedPressable } from '../AnimatedPressable';
 
 type AdLandingSheetProps = {
   visible: boolean;
@@ -30,7 +31,7 @@ export function AdLandingSheet({ visible, ad, onClose }: AdLandingSheetProps) {
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Close ad" />
+        <AnimatedPressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Close ad" />
         <View
           style={[
             styles.sheet,
@@ -43,9 +44,9 @@ export function AdLandingSheet({ visible, ad, onClose }: AdLandingSheetProps) {
         >
           <View style={[styles.toolbar, { borderBottomColor: colors.border }]}>
             <Text style={styles.sponsored}>Sponsored</Text>
-            <Pressable onPress={onClose} hitSlop={12} accessibilityLabel="Close">
+            <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel="Close">
               <Ionicons name="close" size={24} color={colors.text} />
-            </Pressable>
+            </AnimatedPressable>
           </View>
 
           <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -60,10 +61,10 @@ export function AdLandingSheet({ visible, ad, onClose }: AdLandingSheetProps) {
                 {paragraph}
               </Text>
             ))}
-            <Pressable style={styles.cta} onPress={handleVisit}>
+            <AnimatedPressable style={styles.cta} onPress={handleVisit}>
               <Text style={styles.ctaText}>{ad.cta}</Text>
               <Ionicons name="open-outline" size={16} color="#fff" />
-            </Pressable>
+            </AnimatedPressable>
           </ScrollView>
         </View>
       </View>

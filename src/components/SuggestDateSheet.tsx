@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
 import { DATE_SUGGESTIONS } from '../utils/dateSuggestions';
 import { radii, spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type SuggestDateSheetProps = {
   visible: boolean;
@@ -24,16 +25,16 @@ export function SuggestDateSheet({ visible, profileName, onClose, onSelect }: Su
         <View style={[styles.sheet, { backgroundColor: colors.background, paddingBottom: insets.bottom + spacing.md }]}>
           <View style={styles.header}>
             <Text style={[styles.title, { color: colors.text }]}>Suggest a date</Text>
-            <Pressable onPress={onClose}>
+            <AnimatedPressable onPress={onClose}>
               <Ionicons name="close" size={24} color={colors.textMuted} />
-            </Pressable>
+            </AnimatedPressable>
           </View>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>
             Skip small talk — send {profileName} a clear invite to meet.
           </Text>
           <ScrollView contentContainerStyle={styles.list}>
             {DATE_SUGGESTIONS.map((item) => (
-              <Pressable
+              <AnimatedPressable
                 key={item.id}
                 style={[styles.option, { backgroundColor: colors.surface, borderColor: colors.border }]}
                 onPress={() => {
@@ -49,7 +50,7 @@ export function SuggestDateSheet({ visible, profileName, onClose, onSelect }: Su
                   </Text>
                 </View>
                 <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-              </Pressable>
+              </AnimatedPressable>
             ))}
           </ScrollView>
         </View>

@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
 import { spacing } from '../theme';
+import { IconButton } from './Button';
 import { DisguiseModeButton } from './disguise/ModeToggleButtons';
 import { ModeToggleLogo } from './disguise/ModeToggleLogo';
 
@@ -37,9 +38,7 @@ export function ScreenHeader({
     <View style={[styles.header, compact && styles.headerCompact]}>
       <View style={styles.leftSlot}>
         {leftIcon ? (
-          <Pressable style={[styles.iconButton, { backgroundColor: colors.surface }]} onPress={onLeftPress}>
-            <Ionicons name={leftIcon} size={22} color={colors.text} />
-          </Pressable>
+          <IconButton icon={leftIcon} onPress={onLeftPress} backgroundColor={colors.surface} />
         ) : (
           <View style={styles.iconButtonPlaceholder} />
         )}
@@ -58,17 +57,16 @@ export function ScreenHeader({
       <View style={styles.rightGroup}>
         {showDisguiseButton ? <DisguiseModeButton /> : null}
         {secondaryRightIcon ? (
-          <Pressable
-            style={[styles.iconButton, { backgroundColor: colors.surface }]}
+          <IconButton
+            icon={secondaryRightIcon}
+            iconSize={20}
+            color={colors.textMuted}
             onPress={onSecondaryRightPress}
-          >
-            <Ionicons name={secondaryRightIcon} size={20} color={colors.textMuted} />
-          </Pressable>
+            backgroundColor={colors.surface}
+          />
         ) : null}
         {rightIcon ? (
-          <Pressable style={[styles.iconButton, { backgroundColor: colors.surface }]} onPress={onRightPress}>
-            <Ionicons name={rightIcon} size={22} color={colors.text} />
-          </Pressable>
+          <IconButton icon={rightIcon} onPress={onRightPress} backgroundColor={colors.surface} />
         ) : (
           <View style={styles.iconButtonPlaceholder} />
         )}
@@ -102,13 +100,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '800',
     textAlign: 'center',
-  },
-  iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   iconButtonPlaceholder: {
     width: 40,

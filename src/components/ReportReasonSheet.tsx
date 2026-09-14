@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, radii, spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
 
 export const REPORT_REASONS = [
   'Inappropriate photos',
@@ -32,8 +33,8 @@ export function ReportReasonSheet({
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <Pressable style={styles.overlay} onPress={onClose}>
-        <Pressable
+      <AnimatedPressable style={styles.overlay} onPress={onClose}>
+        <AnimatedPressable
           style={[styles.sheet, { paddingBottom: insets.bottom + spacing.lg }]}
           onPress={(event) => event.stopPropagation()}
         >
@@ -44,7 +45,7 @@ export function ReportReasonSheet({
           </Text>
 
           {REPORT_REASONS.map((reason) => (
-            <Pressable
+            <AnimatedPressable
               key={reason}
               style={styles.reasonRow}
               onPress={() => onSubmit(reason)}
@@ -52,14 +53,14 @@ export function ReportReasonSheet({
               <Ionicons name="flag-outline" size={18} color={colors.rewind} />
               <Text style={styles.reasonText}>{reason}</Text>
               <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-            </Pressable>
+            </AnimatedPressable>
           ))}
 
-          <Pressable style={styles.cancelButton} onPress={onClose}>
+          <AnimatedPressable style={styles.cancelButton} onPress={onClose}>
             <Text style={styles.cancelText}>Cancel</Text>
-          </Pressable>
-        </Pressable>
-      </Pressable>
+          </AnimatedPressable>
+        </AnimatedPressable>
+      </AnimatedPressable>
     </Modal>
   );
 }

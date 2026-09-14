@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguisedProfileCard } from '../../components/disguise/DisguisedProfileCard';
@@ -12,6 +12,7 @@ import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { showDemoToast } from '../../utils/demoFeedback';
 import { buildDisguisedProfileFeedItem } from '../../utils/disguiseProfileFeed';
+import { AnimatedPressable } from '../../components/AnimatedPressable';
 
 export function DisguiseProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -93,7 +94,7 @@ export function DisguiseProfileScreen() {
           </Text>
         </View>
 
-        <Pressable
+        <AnimatedPressable
           style={[styles.generatorCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
           onPress={() => setShowGenerator(true)}
         >
@@ -107,7 +108,7 @@ export function DisguiseProfileScreen() {
             </Text>
           </View>
           <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-        </Pressable>
+        </AnimatedPressable>
       </ScrollView>
 
       <DisguiseAdGeneratorSheet visible={showGenerator} onClose={() => setShowGenerator(false)} />
@@ -127,11 +128,11 @@ function MenuRow({
   onPress: () => void;
 }) {
   return (
-    <Pressable style={[styles.menuRow, { borderBottomColor: colors.border }]} onPress={onPress}>
+    <AnimatedPressable style={[styles.menuRow, { borderBottomColor: colors.border }]} onPress={onPress}>
       <Ionicons name={icon} size={20} color={colors.textMuted} />
       <Text style={[styles.menuLabel, { color: colors.text }]}>{label}</Text>
       <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 

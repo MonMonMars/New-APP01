@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
@@ -14,6 +14,7 @@ import {
   SparkPlusPlan,
 } from '../types/subscription';
 import { radii, spacing } from '../theme';
+import { AnimatedPressable } from '../components/AnimatedPressable';
 
 type SparkPlusScreenProps = {
   onClose: () => void;
@@ -47,9 +48,9 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <LinearGradient colors={[colors.gradientStart, colors.gradientEnd]} style={styles.hero}>
         <View style={styles.heroTopRow}>
-          <Pressable style={styles.close} onPress={onClose}>
+          <AnimatedPressable style={styles.close} onPress={onClose}>
             <Ionicons name="close" size={28} color={colors.text} />
-          </Pressable>
+          </AnimatedPressable>
           <DisguiseModeButton />
         </View>
         <Ionicons name="diamond" size={48} color={colors.text} />
@@ -83,7 +84,7 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
           const pricing = SPARK_PLUS_PRICING[plan];
           const isSelected = selectedPlan === plan;
           return (
-            <Pressable
+            <AnimatedPressable
               key={plan}
               style={[
                 styles.planCard,
@@ -104,23 +105,23 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
                   <Text style={[styles.planPerMonth, { color: colors.textMuted }]}>{pricing.perMonth}</Text>
                 )}
               </View>
-            </Pressable>
+            </AnimatedPressable>
           );
         })}
 
-        <Pressable style={[styles.subscribeButton, { backgroundColor: colors.gradientEnd }]} onPress={handleSubscribe}>
+        <AnimatedPressable style={[styles.subscribeButton, { backgroundColor: colors.gradientEnd }]} onPress={handleSubscribe}>
           <Text style={[styles.subscribeText, { color: colors.text }]}>
             Continue — {SPARK_PLUS_PRICING[selectedPlan].price}
           </Text>
-        </Pressable>
+        </AnimatedPressable>
 
-        <Pressable style={styles.restoreButton} onPress={handleRestore} disabled={restoring}>
+        <AnimatedPressable style={styles.restoreButton} onPress={handleRestore} disabled={restoring}>
           {restoring ? (
             <ActivityIndicator color={colors.textMuted} />
           ) : (
             <Text style={[styles.restoreText, { color: colors.textMuted }]}>Restore purchases</Text>
           )}
-        </Pressable>
+        </AnimatedPressable>
 
         <Text style={[styles.legal, { color: colors.textMuted }]}>
           Recurring billing. Cancel anytime in App Store settings. This is a prototype — no real charge.

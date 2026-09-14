@@ -1,10 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
-import { Platform, Pressable, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
+import { AnimatedPressable } from '../AnimatedPressable';
 
 type IconButtonProps = {
   onPress: () => void;
@@ -21,23 +21,18 @@ function ModeIconButton({
   backgroundColor,
   accessibilityLabel,
 }: IconButtonProps) {
-  const handlePress = () => {
-    if (Platform.OS !== 'web') {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    onPress();
-  };
-
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
-      onPress={handlePress}
+      onPress={onPress}
       hitSlop={8}
-      style={({ pressed }) => [styles.button, { backgroundColor }, pressed && styles.pressed]}
+      haptic="light"
+      scaleTo={0.92}
+      style={[styles.button, { backgroundColor }]}
     >
       <Ionicons name={icon} size={20} color={color} />
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
@@ -65,8 +60,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 2,
-  },
-  pressed: {
-    opacity: 0.75,
   },
 });

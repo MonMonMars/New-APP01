@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { VideoPreviewSheet } from './VideoPreviewSheet';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type VideoProfileOverlayProps = {
   visible: boolean;
@@ -22,7 +23,7 @@ export function VideoProfileOverlay({ visible, profile }: VideoProfileOverlayPro
 
   return (
     <>
-      <Pressable style={styles.overlay} onPress={() => setSheetOpen(true)}>
+      <AnimatedPressable style={styles.overlay} onPress={() => setSheetOpen(true)}>
         <View style={[styles.playButton, { backgroundColor: colors.overlay }]}>
           <Ionicons name="play" size={28} color={colors.text} />
         </View>
@@ -30,7 +31,7 @@ export function VideoProfileOverlay({ visible, profile }: VideoProfileOverlayPro
           <Ionicons name="videocam" size={12} color={colors.gradientEnd} />
           <Text style={[styles.badgeText, { color: colors.text }]}>Video</Text>
         </View>
-      </Pressable>
+      </AnimatedPressable>
 
       <VideoPreviewSheet
         visible={sheetOpen}

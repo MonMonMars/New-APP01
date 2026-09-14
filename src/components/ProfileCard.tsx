@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
     bottom: spacing.lg,
   },
   infoCompact: {
-    bottom: spacing.xl + 36,
+    bottom: spacing.lg + 52,
     left: spacing.sm + 4,
     right: spacing.sm + 4,
   },

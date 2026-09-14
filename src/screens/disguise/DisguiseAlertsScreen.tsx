@@ -6,6 +6,7 @@ import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
 import { useTheme } from '../../context/ThemeContext';
 import { disguiseAlerts } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { openExternalUrl } from '../../utils/openExternalUrl';
 
 export function DisguiseAlertsScreen() {
   const insets = useSafeAreaInsets();
@@ -18,8 +19,20 @@ export function DisguiseAlertsScreen() {
         data={disguiseAlerts}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
-        renderItem={({ item }) => (
-          <Pressable style={[styles.row, { backgroundColor: colors.surface }]}>
+        renderItem={({ item }) => {
+          const externalUrl = item.articleUrl ?? item.landingUrl;
+          const handlePress = externalUrl
+            ? () => {
+                void openExternalUrl(externalUrl, item.text);
+              }
+            : undefined;
+
+          return (
+          <Pressable
+            accessibilityRole={externalUrl ? 'link' : 'button'}
+            onPress={handlePress}
+            style={[styles.row, { backgroundColor: colors.surface }]}
+          >
             <View style={[styles.iconWrap, { backgroundColor: 'rgba(59,130,246,0.12)' }]}>
               <Ionicons name={item.icon} size={20} color="#3b82f6" />
             </View>
@@ -28,7 +41,8 @@ export function DisguiseAlertsScreen() {
               <Text style={[styles.time, { color: colors.textMuted }]}>{item.time}</Text>
             </View>
           </Pressable>
-        )}
+          );
+        }}
       />
     </View>
   );

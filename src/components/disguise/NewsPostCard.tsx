@@ -3,6 +3,7 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { NewsPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { openExternalUrl } from '../../utils/openExternalUrl';
 
 type NewsPostCardProps = {
   post: NewsPost;
@@ -11,8 +12,17 @@ type NewsPostCardProps = {
 export function NewsPostCard({ post }: NewsPostCardProps) {
   const { colors } = useTheme();
 
+  const handlePress = () => {
+    void openExternalUrl(post.articleUrl, post.headline);
+  };
+
   return (
-    <Pressable style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+    <Pressable
+      accessibilityRole="link"
+      accessibilityLabel={`Read article: ${post.headline}`}
+      onPress={handlePress}
+      style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
+    >
       <Image source={{ uri: post.imageUrl }} style={styles.image} resizeMode="cover" />
       <View style={styles.body}>
         <View style={styles.metaRow}>

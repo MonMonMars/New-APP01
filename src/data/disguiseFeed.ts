@@ -1,3 +1,5 @@
+import { disguiseClientAds } from './disguiseClientAds';
+
 export type NewsPost = {
   id: string;
   type: 'news';
@@ -7,6 +9,7 @@ export type NewsPost = {
   imageUrl: string;
   timeAgo: string;
   category: string;
+  articleUrl: string;
 };
 
 export type AdPost = {
@@ -16,6 +19,7 @@ export type AdPost = {
   tagline: string;
   imageUrl: string;
   cta: string;
+  landingUrl: string;
   sponsored: true;
 };
 
@@ -36,26 +40,71 @@ export type FeedItem = NewsPost | AdPost | SocialPost;
 
 export const DISGUISE_APP_NAME = 'Pulse';
 
-export const disguiseFeedItems: FeedItem[] = [
+const newsItems: NewsPost[] = [
   {
     id: 'news-1',
     type: 'news',
     source: 'Reuters',
-    headline: 'Markets steady as tech earnings beat expectations',
-    summary: 'Major indices closed flat as investors weighed strong cloud revenue against cautious forward guidance from chip makers.',
+    headline: 'Big Tech may be breaking the bank for AI, but investors love it',
+    summary:
+      'Microsoft, Meta, Amazon and Alphabet reported strong cloud and ad revenue as AI spending climbs — and markets are largely buying the story.',
     imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c9aeeda0bf6?w=800&q=80',
     timeAgo: '12m ago',
     category: 'Business',
+    articleUrl:
+      'https://www.reuters.com/business/retail-consumer/big-tech-may-be-breaking-bank-ai-investors-love-it-2025-07-31/',
   },
   {
-    id: 'ad-1',
-    type: 'ad',
-    brand: 'NordVPN',
-    tagline: 'Browse privately on public Wi‑Fi. 2 years + 3 months free.',
-    imageUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3d58c?w=800&q=80',
-    cta: 'Learn more',
-    sponsored: true,
+    id: 'news-2',
+    type: 'news',
+    source: 'BBC News',
+    headline: "New night routes and earlier starts for Bristol's buses",
+    summary:
+      'First Bus is adding overnight Friday and Saturday services and extending routes to better serve the city’s night-time economy.',
+    imageUrl: 'https://images.unsplash.com/photo-1544627677-05470f41cd8a?w=800&q=80',
+    timeAgo: '1h ago',
+    category: 'Local',
+    articleUrl: 'https://www.bbc.co.uk/news/articles/cz0y7kl938do',
   },
+  {
+    id: 'news-3',
+    type: 'news',
+    source: 'The Verge',
+    headline: 'New smartphone labels for battery life and repairability are coming to the EU',
+    summary:
+      'From June 20, phones sold in the EU must meet ecodesign standards — including longer software support and repairability ratings.',
+    imageUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&q=80',
+    timeAgo: '3h ago',
+    category: 'Tech',
+    articleUrl:
+      'https://www.theverge.com/news/655275/smartphone-tablet-labels-eu-energy-efficiency-battery-life-repairability',
+  },
+  {
+    id: 'news-4',
+    type: 'news',
+    source: 'NYT Cooking',
+    headline: 'Pasta with chorizo, chickpeas and kale',
+    summary:
+      'A 30-minute pantry dinner: dried chorizo, canned chickpeas and kale tossed with short pasta and shaved Manchego.',
+    imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80',
+    timeAgo: '5h ago',
+    category: 'Lifestyle',
+    articleUrl: 'https://cooking.nytimes.com/recipes/1020999-pasta-with-chorizo-chickpeas-and-kale',
+  },
+];
+
+const adItems: AdPost[] = disguiseClientAds.map((campaign) => ({
+  id: campaign.id,
+  type: 'ad',
+  brand: campaign.brand,
+  tagline: campaign.tagline,
+  imageUrl: campaign.imageUrl,
+  cta: campaign.cta,
+  landingUrl: campaign.landingUrl,
+  sponsored: true,
+}));
+
+const socialItems: SocialPost[] = [
   {
     id: 'social-1',
     type: 'social',
@@ -69,25 +118,6 @@ export const disguiseFeedItems: FeedItem[] = [
     timeAgo: '34m ago',
   },
   {
-    id: 'news-2',
-    type: 'news',
-    source: 'BBC News',
-    headline: 'City announces expanded night bus routes for weekends',
-    summary: 'Transit officials say the pilot program will run through summer, with stops added near major entertainment districts.',
-    imageUrl: 'https://images.unsplash.com/photo-1544627677-05470f41cd8a?w=800&q=80',
-    timeAgo: '1h ago',
-    category: 'Local',
-  },
-  {
-    id: 'ad-2',
-    type: 'ad',
-    brand: 'Spotify Premium',
-    tagline: '3 months free. Cancel anytime. Listen offline on your commute.',
-    imageUrl: 'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=800&q=80',
-    cta: 'Try free',
-    sponsored: true,
-  },
-  {
     id: 'social-2',
     type: 'social',
     author: 'Maya Okonkwo',
@@ -97,25 +127,6 @@ export const disguiseFeedItems: FeedItem[] = [
     likes: 1204,
     comments: 89,
     timeAgo: '2h ago',
-  },
-  {
-    id: 'news-3',
-    type: 'news',
-    source: 'The Verge',
-    headline: 'New EU rules push phone makers toward longer software support',
-    summary: 'Manufacturers will need to provide security updates for at least five years on many device categories.',
-    imageUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&q=80',
-    timeAgo: '3h ago',
-    category: 'Tech',
-  },
-  {
-    id: 'ad-3',
-    type: 'ad',
-    brand: 'Airbnb',
-    tagline: 'Weekend getaways under $150/night. Flexible cancellation.',
-    imageUrl: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&q=80',
-    cta: 'Explore stays',
-    sponsored: true,
   },
   {
     id: 'social-3',
@@ -128,17 +139,29 @@ export const disguiseFeedItems: FeedItem[] = [
     comments: 23,
     timeAgo: '4h ago',
   },
-  {
-    id: 'news-4',
-    type: 'news',
-    source: 'NYT Cooking',
-    headline: 'Five pantry dinners you can make in under 30 minutes',
-    summary: 'From chickpea curry to sheet-pan gnocchi, these recipes minimize prep without sacrificing flavor.',
-    imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80',
-    timeAgo: '5h ago',
-    category: 'Lifestyle',
-  },
 ];
+
+export const disguiseFeedItems: FeedItem[] = [
+  newsItems[0],
+  adItems[0],
+  socialItems[0],
+  newsItems[1],
+  adItems[1],
+  socialItems[1],
+  newsItems[2],
+  adItems[2],
+  socialItems[2],
+  newsItems[3],
+];
+
+export type DisguiseAlert = {
+  id: string;
+  icon: 'heart-outline' | 'person-add-outline' | 'chatbubble-outline' | 'newspaper-outline' | 'megaphone-outline';
+  text: string;
+  time: string;
+  articleUrl?: string;
+  landingUrl?: string;
+};
 
 export const disguiseTrendingTopics = [
   { id: 't1', label: '#WeekendPlans', posts: '12.4K' },
@@ -148,10 +171,23 @@ export const disguiseTrendingTopics = [
   { id: 't5', label: '#DesignTips', posts: '3.9K' },
 ];
 
-export const disguiseAlerts = [
-  { id: 'a1', icon: 'heart-outline' as const, text: 'Alex Chen liked your comment', time: '2m ago' },
-  { id: 'a2', icon: 'person-add-outline' as const, text: 'Maya Okonkwo started following you', time: '1h ago' },
-  { id: 'a3', icon: 'chatbubble-outline' as const, text: 'New reply on your post', time: '3h ago' },
-  { id: 'a4', icon: 'newspaper-outline' as const, text: 'Morning briefing is ready', time: '6h ago' },
-  { id: 'a5', icon: 'megaphone-outline' as const, text: 'Spotify: your wrapped preview is live', time: '1d ago' },
+export const disguiseAlerts: DisguiseAlert[] = [
+  { id: 'a1', icon: 'heart-outline', text: 'Alex Chen liked your comment', time: '2m ago' },
+  { id: 'a2', icon: 'person-add-outline', text: 'Maya Okonkwo started following you', time: '1h ago' },
+  { id: 'a3', icon: 'chatbubble-outline', text: 'New reply on your post', time: '3h ago' },
+  {
+    id: 'a4',
+    icon: 'newspaper-outline',
+    text: 'Reuters: Big Tech AI spending story trending',
+    time: '6h ago',
+    articleUrl:
+      'https://www.reuters.com/business/retail-consumer/big-tech-may-be-breaking-bank-ai-investors-love-it-2025-07-31/',
+  },
+  {
+    id: 'a5',
+    icon: 'megaphone-outline',
+    text: 'Spotify Premium: 3 months free offer',
+    time: '1d ago',
+    landingUrl: 'https://www.spotify.com/premium/',
+  },
 ];

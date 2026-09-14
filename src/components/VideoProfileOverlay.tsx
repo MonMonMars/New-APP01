@@ -1,34 +1,43 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
+import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
+import { VideoPreviewSheet } from './VideoPreviewSheet';
 
 type VideoProfileOverlayProps = {
   visible: boolean;
+  profile: Profile;
 };
 
-export function VideoProfileOverlay({ visible }: VideoProfileOverlayProps) {
+export function VideoProfileOverlay({ visible, profile }: VideoProfileOverlayProps) {
   const { colors } = useTheme();
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   if (!visible) {
     return null;
   }
 
-  const handlePress = () => {
-    Alert.alert('Video profiles', 'Short video intros are coming soon in Spark v1.0!');
-  };
-
   return (
-    <Pressable style={styles.overlay} onPress={handlePress}>
-      <View style={[styles.playButton, { backgroundColor: colors.overlay }]}>
-        <Ionicons name="play" size={28} color={colors.text} />
-      </View>
-      <View style={[styles.badge, { backgroundColor: colors.surface }]}>
-        <Ionicons name="videocam" size={12} color={colors.gradientEnd} />
-        <Text style={[styles.badgeText, { color: colors.text }]}>Video</Text>
-      </View>
-    </Pressable>
+    <>
+      <Pressable style={styles.overlay} onPress={() => setSheetOpen(true)}>
+        <View style={[styles.playButton, { backgroundColor: colors.overlay }]}>
+          <Ionicons name="play" size={28} color={colors.text} />
+        </View>
+        <View style={[styles.badge, { backgroundColor: colors.surface }]}>
+          <Ionicons name="videocam" size={12} color={colors.gradientEnd} />
+          <Text style={[styles.badgeText, { color: colors.text }]}>Video</Text>
+        </View>
+      </Pressable>
+
+      <VideoPreviewSheet
+        visible={sheetOpen}
+        profile={profile}
+        onClose={() => setSheetOpen(false)}
+      />
+    </>
   );
 }
 

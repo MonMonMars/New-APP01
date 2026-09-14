@@ -3,17 +3,25 @@ import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AdLandingSheet } from '../../components/disguise/AdLandingSheet';
 import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
 import { NewsArticleSheet } from '../../components/disguise/NewsArticleSheet';
 import { useTheme } from '../../context/ThemeContext';
-import { disguiseAlerts, findNewsPostByArticleUrl, NewsPost } from '../../data/disguiseFeed';
+import {
+  AdPost,
+  disguiseAlerts,
+  findAdPostByLandingUrl,
+  findNewsPostByArticleUrl,
+  NewsPost,
+} from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
-import { openExternalUrl } from '../../utils/openExternalUrl';
+import { showDemoToast } from '../../utils/demoFeedback';
 
 export function DisguiseAlertsScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const [articlePost, setArticlePost] = useState<NewsPost | null>(null);
+  const [adPost, setAdPost] = useState<AdPost | null>(null);
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
@@ -24,17 +32,22 @@ export function DisguiseAlertsScreen() {
         contentContainerStyle={styles.list}
         renderItem={({ item }) => {
           const newsPost = item.articleUrl ? findNewsPostByArticleUrl(item.articleUrl) : undefined;
+          const ad = item.landingUrl ? findAdPostByLandingUrl(item.landingUrl) : undefined;
           const handlePress = item.articleUrl && newsPost
             ? () => setArticlePost(newsPost)
-            : item.landingUrl
-              ? () => {
-                  void openExternalUrl(item.landingUrl!, item.text);
-                }
-              : undefined;
+            : item.landingUrl && ad
+              ? () => setAdPost(ad)
+              : item.landingUrl
+                ? () => {
+                    showDemoToast('Sponsored offer', item.text);
+                  }
+                : () => {
+                    showDemoToast('Activity', item.text);
+                  };
 
           return (
             <Pressable
-              accessibilityRole={handlePress ? 'button' : undefined}
+              accessibilityRole="button"
               onPress={handlePress}
               style={[styles.row, { backgroundColor: colors.surface }]}
             >
@@ -55,6 +68,7 @@ export function DisguiseAlertsScreen() {
         post={articlePost}
         onClose={() => setArticlePost(null)}
       />
+      <AdLandingSheet visible={adPost !== null} ad={adPost} onClose={() => setAdPost(null)} />
     </View>
   );
 }

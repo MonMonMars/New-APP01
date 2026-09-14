@@ -56,22 +56,6 @@ export function DisguiseModeButton() {
   );
 }
 
-/** Open Spark safe mode (big-picture dating) from any Pulse screen. */
-export function BigPictureModeButton() {
-  const { colors } = useTheme();
-  const { setDisguiseMode } = useApp();
-
-  return (
-    <ModeIconButton
-      icon="expand-outline"
-      color={colors.gradientEnd}
-      backgroundColor="rgba(59,130,246,0.14)"
-      accessibilityLabel="Open Spark safe mode"
-      onPress={() => setDisguiseMode(false)}
-    />
-  );
-}
-
 const styles = StyleSheet.create({
   button: {
     width: 40,

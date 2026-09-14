@@ -9,7 +9,7 @@ import { DisguiseProfileScreen } from '../screens/disguise/DisguiseProfileScreen
 import { DisguiseTrendingScreen } from '../screens/disguise/DisguiseTrendingScreen';
 
 export type DisguiseTabParamList = {
-  Home: undefined;
+  Home: { topic?: string } | undefined;
   Trending: undefined;
   Activity: undefined;
   Profile: undefined;

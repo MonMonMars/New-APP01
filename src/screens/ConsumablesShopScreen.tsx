@@ -3,6 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { radii, spacing } from '../theme';
@@ -83,7 +84,7 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
           <Ionicons name="close" size={28} color={colors.text} />
         </Pressable>
         <Text style={[styles.title, { color: colors.text }]}>Shop</Text>
-        <View style={{ width: 28 }} />
+        <DisguiseModeButton />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>

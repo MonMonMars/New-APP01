@@ -147,7 +147,7 @@ export function ProfileCard({
         </View>
       )}
 
-      {profile.hasVideo && isTop && <VideoProfileOverlay visible />}
+      {profile.hasVideo && isTop && <VideoProfileOverlay visible profile={profile} />}
 
       {isTop && photoCount > 1 && (
         <>

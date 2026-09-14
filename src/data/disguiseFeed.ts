@@ -27,6 +27,7 @@ export type AdPost = {
   type: 'ad';
   brand: string;
   tagline: string;
+  description: string;
   imageUrl: string;
   cta: string;
   landingUrl: string;
@@ -194,11 +195,16 @@ const adItems: AdPost[] = disguiseClientAds.map((campaign) => ({
   type: 'ad',
   brand: campaign.brand,
   tagline: campaign.tagline,
+  description: campaign.description,
   imageUrl: campaign.imageUrl,
   cta: campaign.cta,
   landingUrl: campaign.landingUrl,
   sponsored: true,
 }));
+
+export function findAdPostByLandingUrl(landingUrl: string): AdPost | undefined {
+  return adItems.find((item) => item.landingUrl === landingUrl);
+}
 
 const socialItems: SocialPost[] = [
   {

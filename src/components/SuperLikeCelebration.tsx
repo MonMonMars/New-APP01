@@ -153,10 +153,10 @@ export function SuperLikeCelebration({
     roseScale.value = 0.1;
     roseOpacity.value = 1;
     roseScale.value = withSequence(
-      withTiming(3.2, { duration: 350, easing: Easing.out(Easing.back(2)) }),
-      withTiming(2.6, { duration: 200 }),
-      withTiming(3.8, { duration: 250 }),
-      withTiming(0.2, { duration: 500 }),
+      withTiming(1.4, { duration: 280, easing: Easing.out(Easing.back(1.8)) }),
+      withTiming(1.2, { duration: 160 }),
+      withTiming(1.6, { duration: 200 }),
+      withTiming(0.2, { duration: 450 }),
     );
     roseOpacity.value = withSequence(
       withTiming(1, { duration: 100 }),
@@ -165,8 +165,8 @@ export function SuperLikeCelebration({
 
     starBurstScale.value = withSequence(
       withTiming(0.2, { duration: 50 }),
-      withTiming(4.5, { duration: 600, easing: Easing.out(Easing.cubic) }),
-      withTiming(6, { duration: 400 }),
+      withTiming(2.2, { duration: 500, easing: Easing.out(Easing.cubic) }),
+      withTiming(2.8, { duration: 350 }),
     );
 
     ring1Opacity.value = 1;
@@ -252,11 +252,13 @@ export function SuperLikeCelebration({
           <Animated.View style={roseStyle}>
             <Ionicons name="star" size={160} color={colors.heartRed} />
           </Animated.View>
-        </View>
 
-        {Array.from({ length: PARTICLE_COUNT }).map((_, index) => (
-          <SuperParticle key={`${effectKey}-super-${index}`} index={index} effectKey={effectKey} />
-        ))}
+          <View style={styles.particleAnchor}>
+            {Array.from({ length: PARTICLE_COUNT }).map((_, index) => (
+              <SuperParticle key={`${effectKey}-super-${index}`} index={index} effectKey={effectKey} />
+            ))}
+          </View>
+        </View>
       </View>
     </Animated.View>
   );
@@ -280,6 +282,11 @@ const styles = StyleSheet.create({
   burstCore: {
     width: 160,
     height: 160,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  particleAnchor: {
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
   },

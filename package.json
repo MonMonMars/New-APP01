@@ -1,6 +1,7 @@
 {
-  "name": "expo-app",
+  "name": "spark-dating",
   "version": "1.0.0",
+  "description": "Spark — dating with Pulse disguise mode for private discovery.",
   "main": "index.ts",
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",

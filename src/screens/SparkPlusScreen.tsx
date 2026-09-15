@@ -124,7 +124,7 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
         </AnimatedPressable>
 
         <Text style={[styles.legal, { color: colors.textMuted }]}>
-          Recurring billing. Cancel anytime in App Store settings. This is a prototype — no real charge.
+          Recurring billing. Cancel anytime in your App Store or Google Play subscription settings.
         </Text>
       </ScrollView>
     </View>

@@ -155,7 +155,7 @@ export function OnboardingFlow() {
             {emailMessage && <Text style={styles.emailHint}>{emailMessage}</Text>}
           </View>
           <AnimatedPressable onPress={() => { signInWithAppleStub(); setStep('rules'); }}>
-            <Text style={styles.link}>Skip sign-in (demo mode)</Text>
+            <Text style={styles.link}>Continue without account</Text>
           </AnimatedPressable>
         </View>
       )}

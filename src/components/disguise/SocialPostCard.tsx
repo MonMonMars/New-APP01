@@ -1,15 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, Share, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { triggerHaptic } from '../../utils/haptics';
-import { showDemoToast } from '../../utils/demoFeedback';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
 import { DisguisePhotoLightbox } from './DisguisePhotoLightbox';
 import { FeedPersonRow } from './FeedPersonRow';
+import { SocialCommentSheet } from './SocialCommentSheet';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type SocialPostCardProps = {
@@ -20,6 +20,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
   const { colors } = useTheme();
   const [upvoted, setUpvoted] = useState(false);
   const [photoOpen, setPhotoOpen] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
   const likeCount = upvoted ? post.likes + 1 : post.likes;
 
   const photoReporter = {
@@ -63,7 +64,12 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
           style={styles.moreButton}
           onPress={() => {
             bump();
-            showDemoToast('Post options', 'Mute, report, or save post.');
+            Alert.alert('Post options', undefined, [
+              { text: 'Save post', onPress: () => {} },
+              { text: 'Mute author', onPress: () => {} },
+              { text: 'Report', style: 'destructive', onPress: () => {} },
+              { text: 'Cancel', style: 'cancel' },
+            ]);
           }}
         >
           <Ionicons name="ellipsis-horizontal" size={18} color={colors.textMuted} />
@@ -105,7 +111,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
           style={styles.action}
           onPress={() => {
             bump();
-            showDemoToast('Comments', `${post.comments} replies on this post.`);
+            setCommentsOpen(true);
           }}
         >
           <Ionicons name="chatbubble-outline" size={18} color={colors.textMuted} />
@@ -115,7 +121,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
           style={styles.action}
           onPress={() => {
             bump();
-            showDemoToast('Shared', 'Link copied to clipboard in this demo.');
+            void Share.share({ message: `${post.author}: ${post.body}`, title: 'Share post' });
           }}
         >
           <Ionicons name="share-outline" size={18} color={colors.textMuted} />
@@ -129,6 +135,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
         photoIndex={0}
         onClose={() => setPhotoOpen(false)}
       />
+      <SocialCommentSheet visible={commentsOpen} post={post} onClose={() => setCommentsOpen(false)} />
     </View>
   );
 }

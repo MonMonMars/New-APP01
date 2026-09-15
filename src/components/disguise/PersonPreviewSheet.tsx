@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
 import { Image, Modal, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../context/ThemeContext';
 import { NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { DisguisePhotoLightbox } from './DisguisePhotoLightbox';
 import { FeedPersonRow } from './FeedPersonRow';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -17,58 +19,82 @@ type PersonPreviewSheetProps = {
 export function PersonPreviewSheet({ visible, reporter, onClose }: PersonPreviewSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
+
+  const closeLightbox = () => setSelectedPhotoIndex(null);
+
+  const handleClose = () => {
+    setSelectedPhotoIndex(null);
+    onClose();
+  };
 
   if (!reporter) {
     return null;
   }
 
-  return (
-    <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
-      <AnimatedPressable style={styles.backdrop} onPress={onClose}>
-        <AnimatedPressable
-          style={[
-            styles.sheet,
-            {
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
-              marginBottom: insets.bottom + spacing.md,
-            },
-          ]}
-          onPress={(event) => event.stopPropagation()}
-        >
-          <View style={styles.header}>
-            <FeedPersonRow
-              plainAvatar
-              imageUrl={reporter.avatarUrl}
-              title={reporter.name}
-              subtitle="Reader comment"
-              body={`"${reporter.quote}"`}
-              titleStyle={{ color: colors.text }}
-              bodyStyle={{ color: colors.textMuted, fontStyle: 'italic', fontWeight: '500' }}
-              style={styles.headerRow}
-            />
-            <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel="Close">
-              <Ionicons name="close" size={22} color={colors.textMuted} />
-            </AnimatedPressable>
-          </View>
+  const selectedPhoto =
+    selectedPhotoIndex !== null ? reporter.photos[selectedPhotoIndex] ?? null : null;
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.photoRow}
+  return (
+    <>
+      <Modal visible={visible} animationType="fade" transparent onRequestClose={handleClose}>
+        <AnimatedPressable style={styles.backdrop} onPress={handleClose}>
+          <AnimatedPressable
+            style={[
+              styles.sheet,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+                marginBottom: insets.bottom + spacing.md,
+              },
+            ]}
+            onPress={(event) => event.stopPropagation()}
           >
-            {reporter.photos.map((photoUrl, index) => (
-              <Image
-                key={`${reporter.id}-photo-${index}`}
-                source={{ uri: photoUrl }}
-                style={styles.photo}
-                resizeMode="cover"
+            <View style={styles.header}>
+              <FeedPersonRow
+                plainAvatar
+                imageUrl={reporter.avatarUrl}
+                title={reporter.name}
+                subtitle="Reader comment"
+                body={`"${reporter.quote}"`}
+                titleStyle={{ color: colors.text }}
+                bodyStyle={{ color: colors.textMuted, fontStyle: 'italic', fontWeight: '500' }}
+                style={styles.headerRow}
               />
-            ))}
-          </ScrollView>
+              <AnimatedPressable onPress={handleClose} hitSlop={12} accessibilityLabel="Close">
+                <Ionicons name="close" size={22} color={colors.textMuted} />
+              </AnimatedPressable>
+            </View>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.photoRow}
+            >
+              {reporter.photos.map((photoUrl, index) => (
+                <AnimatedPressable
+                  key={`${reporter.id}-photo-${index}`}
+                  onPress={() => setSelectedPhotoIndex(index)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Open photo ${index + 1} of ${reporter.photos.length}`}
+                  scaleTo={0.97}
+                >
+                  <Image source={{ uri: photoUrl }} style={styles.photo} resizeMode="cover" />
+                </AnimatedPressable>
+              ))}
+            </ScrollView>
+          </AnimatedPressable>
         </AnimatedPressable>
-      </AnimatedPressable>
-    </Modal>
+      </Modal>
+
+      <DisguisePhotoLightbox
+        visible={visible && selectedPhotoIndex !== null}
+        reporter={reporter}
+        photoUrl={selectedPhoto}
+        photoIndex={selectedPhotoIndex ?? 0}
+        onClose={closeLightbox}
+      />
+    </>
   );
 }
 

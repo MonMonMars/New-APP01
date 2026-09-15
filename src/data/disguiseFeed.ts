@@ -8,6 +8,8 @@ export type NewsReporter = {
   avatarUrl: string;
   quote: string;
   photos: string[];
+  /** When woven from a disguised dating profile, links mini like/pass actions. */
+  profileId?: string;
 };
 
 export type NewsPost = {

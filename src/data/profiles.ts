@@ -116,6 +116,7 @@ const rawProfiles: Profile[] = [
       'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=80',
     ],
     interests: ['Design', 'Music', 'Food'],
+    openingMove: 'Best hidden gem in the city?',
     prompts: [
       { question: 'Together we could', answer: 'Hunt for the best taco spot in town.' },
     ],
@@ -135,6 +136,7 @@ const rawProfiles: Profile[] = [
       'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80',
     ],
     interests: ['Travel', 'Yoga', 'Ramen'],
+    openingMove: 'Coffee or cocktails first date?',
     spotlight: true,
     hasVideo: true,
     activeToday: true,
@@ -1012,6 +1014,7 @@ export const incomingLikeProfiles: Profile[] = [
     city: 'Chelsea, NY',
     photos: ['https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80'],
     interests: ['Books', 'Brunch'],
+    openingMove: "What's your go-to weekend plan?",
     ...mapPin(4, 7),
   },
   {

@@ -20,15 +20,10 @@ import { VibeGameSheet } from '../components/VibeGameSheet';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { useLiveExpiry } from '../hooks/useLiveExpiry';
-import { Message } from '../types/match';
+import { Message, MessageStatus } from '../types/match';
+import { getIcebreakerSuggestions } from '../utils/openingMove';
 import { pickProfilePhoto } from '../utils/photoPicker';
 import { radii, spacing } from '../theme';
-
-const icebreakers = [
-  "What's your go-to weekend plan?",
-  'Two truths and a lie?',
-  "Best meal you've had lately?",
-];
 
 type ChatScreenProps = {
   conversationId: string;
@@ -39,7 +34,8 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { colors } = useTheme();
-  const { conversations, sendMessage, blockProfile, reportProfile, unmatchProfile } = useApp();
+  const { conversations, sendMessage, blockProfile, reportProfile, unmatchProfile, isSparkPlus, user } =
+    useApp();
   const [draft, setDraft] = useState('');
   const [showSafety, setShowSafety] = useState(false);
   const [showReport, setShowReport] = useState(false);
@@ -125,6 +121,18 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
     );
   };
 
+  const displayStatus = (status?: MessageStatus): MessageStatus | undefined => {
+    if (!status) {
+      return undefined;
+    }
+    if (!isSparkPlus && status === 'read') {
+      return 'delivered';
+    }
+    return status;
+  };
+
+  const icebreakers = getIcebreakerSuggestions(profile, user);
+
   const renderMessage = ({ item }: { item: Message }) => (
     <View style={[styles.bubbleRow, item.isMine ? styles.bubbleRowMine : styles.bubbleRowTheirs]}>
       <View style={[styles.bubble, item.isMine ? { backgroundColor: colors.gradientEnd } : { backgroundColor: colors.surface }]}>
@@ -136,7 +144,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         )}
         {item.isMine && (
           <View style={styles.statusRow}>
-            <MessageStatusIcon status={item.status} size={13} />
+            <MessageStatusIcon status={displayStatus(item.status)} size={13} />
           </View>
         )}
       </View>
@@ -194,7 +202,14 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
             Matches expire in 24 hours — send the first message to keep the spark alive.
           </Text>
           <View style={styles.icebreakers}>
-            <Text style={[styles.icebreakerTitle, { color: colors.textMuted }]}>Break the ice</Text>
+            <Text style={[styles.icebreakerTitle, { color: colors.textMuted }]}>
+              {profile.openingMove ? `${profile.name}'s Opening Move` : 'Break the ice'}
+            </Text>
+            {profile.openingMove && (
+              <Text style={[styles.openingMovePreview, { color: colors.text }]}>
+                {profile.openingMove}
+              </Text>
+            )}
             {icebreakers.map((prompt) => (
               <AnimatedPressable
                 key={prompt}
@@ -205,6 +220,18 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
                 <Text style={[styles.icebreakerText, { color: colors.text }]}>{prompt}</Text>
               </AnimatedPressable>
             ))}
+            {!isSparkPlus && (
+              <AnimatedPressable
+                scaleTo={0.96}
+                style={[styles.readReceiptHint, { backgroundColor: colors.surface }]}
+                onPress={() => navigation.getParent()?.navigate('SparkPlus')}
+              >
+                <Ionicons name="checkmark-done" size={14} color={colors.textMuted} />
+                <Text style={[styles.readReceiptHintText, { color: colors.textMuted }]}>
+                  Spark+ unlocks read receipts
+                </Text>
+              </AnimatedPressable>
+            )}
             <View style={styles.gameRow}>
               <AnimatedPressable
                 scaleTo={0.95}
@@ -389,6 +416,26 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: spacing.xs,
+  },
+  openingMovePreview: {
+    fontSize: 15,
+    fontWeight: '600',
+    lineHeight: 22,
+    marginBottom: spacing.sm,
+  },
+  readReceiptHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    alignSelf: 'flex-start',
+    borderRadius: radii.button,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  readReceiptHintText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
   icebreakerChip: {
     alignSelf: 'flex-start',

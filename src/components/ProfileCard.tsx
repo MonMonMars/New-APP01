@@ -29,6 +29,7 @@ type ProfileCardProps = {
   passDim?: SharedValue<number>;
   compact?: boolean;
   onPhotoTap?: (side: 'left' | 'right') => void;
+  onOpenDetail?: () => void;
 };
 
 export function ProfileCard({
@@ -41,6 +42,7 @@ export function ProfileCard({
   passDim,
   compact = false,
   onPhotoTap,
+  onOpenDetail,
 }: ProfileCardProps) {
   const isTop = index === activeIndex;
   const [photoIndex, setPhotoIndex] = useState(0);
@@ -150,6 +152,12 @@ export function ProfileCard({
       )}
 
       {profile.hasVideo && isTop && <VideoProfileOverlay visible profile={profile} />}
+
+      {isTop && onOpenDetail && (
+        <AnimatedPressable style={styles.infoButton} onPress={onOpenDetail}>
+          <Ionicons name="information-circle" size={28} color={colors.text} />
+        </AnimatedPressable>
+      )}
 
       {isTop && photoCount > 1 && (
         <>
@@ -285,6 +293,18 @@ const styles = StyleSheet.create({
   },
   tapZone: {
     flex: 1,
+  },
+  infoButton: {
+    position: 'absolute',
+    bottom: spacing.lg + 8,
+    right: spacing.md,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 7,
   },
   info: {
     position: 'absolute',

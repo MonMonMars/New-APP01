@@ -38,6 +38,7 @@ type SwipeDeckProps = {
   canLike?: boolean;
   onLikeBlocked?: () => void;
   onSuperLike?: (profile: Profile) => void;
+  onOpenProfile?: (profile: Profile) => void;
   compact?: boolean;
 };
 
@@ -94,7 +95,7 @@ function zoneProximity(
 }
 
 export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
-  function SwipeDeck({ profiles, onSwipe, onEmpty, canLike = true, onLikeBlocked, onSuperLike, compact = false }, ref) {
+  function SwipeDeck({ profiles, onSwipe, onEmpty, canLike = true, onLikeBlocked, onSuperLike, onOpenProfile, compact = false }, ref) {
     const containerRef = useRef<View>(null);
     const [activeIndex, setActiveIndex] = useState(0);
     const [activeEffect, setActiveEffect] = useState<ActiveEffect | null>(null);
@@ -466,6 +467,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
                         scale={cardScale}
                         passDim={passDim}
                         compact={compact}
+                        onOpenDetail={onOpenProfile ? () => onOpenProfile(profile) : undefined}
                       />
                     </Animated.View>
                   </GestureDetector>

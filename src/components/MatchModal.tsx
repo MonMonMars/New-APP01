@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, radii, spacing } from '../theme';
 import { Profile } from '../types/profile';
+import { pickOpeningMove } from '../utils/openingMove';
 import { Button } from './Button';
 
 type MatchModalProps = {
@@ -13,21 +14,6 @@ type MatchModalProps = {
   onClose: () => void;
   onMessage: () => void;
 };
-
-const OPENING_MOVES = [
-  'What\'s your go-to weekend plan?',
-  'Best hidden gem in the city?',
-  'Coffee or cocktails first date?',
-];
-
-function pickOpeningMove(profile: Profile): string {
-  if (profile.prompts && profile.prompts.length > 0) {
-    const prompt = profile.prompts[0];
-    return `Try: "${prompt.answer}"`;
-  }
-  const index = parseInt(profile.id, 10) % OPENING_MOVES.length;
-  return OPENING_MOVES[index];
-}
 
 export function MatchModal({
   visible,

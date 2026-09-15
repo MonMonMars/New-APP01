@@ -12,6 +12,7 @@ import { ModeToggleLogo } from '../components/disguise/ModeToggleLogo';
 import { PromptLikeSheet } from '../components/PromptLikeSheet';
 import { SuperLikeResultModal } from '../components/SuperLikeResultModal';
 import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
+import { IncognitoBanner } from '../components/IncognitoBanner';
 import { SparkNoteSheet } from '../components/SparkNoteSheet';
 import { ReportReasonSheet, type ReportReason } from '../components/ReportReasonSheet';
 import { SwipeDeck, SwipeDeckHandle } from '../components/SwipeDeck';
@@ -53,6 +54,7 @@ export function DiscoverScreen() {
     getCompatibilityScore,
     remainingSparkNotes,
     canSendSparkNote,
+    isIncognitoActive,
   } = useApp();
 
   const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
@@ -305,6 +307,7 @@ export function DiscoverScreen() {
       <View style={[styles.emergencyBar, { paddingTop: insets.top }]}>
         <ModeToggleLogo variant="spark" compact />
       </View>
+      {isIncognitoActive && <IncognitoBanner />}
       <View
         style={[
           styles.deckContainer,

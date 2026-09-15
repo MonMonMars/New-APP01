@@ -19,6 +19,7 @@ type ChatComposerProps = {
   onPickImage: () => void;
   onSuggestDate: () => void;
   onVibeGame: () => void;
+  onVoiceNote?: () => void;
   paddingBottom: number;
 };
 
@@ -36,6 +37,7 @@ export function ChatComposer({
   onPickImage,
   onSuggestDate,
   onVibeGame,
+  onVoiceNote,
   paddingBottom,
 }: ChatComposerProps) {
   const { colors } = useTheme();
@@ -77,7 +79,7 @@ export function ChatComposer({
       id: 'voice',
       icon: 'mic-outline',
       label: 'Voice',
-      onPress: () => onSend('🎤 Voice note: Hey!'),
+      onPress: () => (onVoiceNote ? onVoiceNote() : onSend('🎤 Voice note: Hey!')),
     },
   ];
 

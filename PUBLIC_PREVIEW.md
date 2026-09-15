@@ -2,9 +2,9 @@
 
 ## Demo link (open now)
 
-**https://python-competing-change-bar.trycloudflare.com**
+**https://clearly-class-shanghai-archived.trycloudflare.com**
 
-_Last updated: Sep 14, 2026 — fix web button/tap hit targets (AnimatedPressable)_
+_Last updated: Sep 15, 2026 — Phase B: incognito, voice prompt, date check-in_
 
 > Tunnel links expire when the cloud workspace stops. If this 404s, ask for a fresh link.
 

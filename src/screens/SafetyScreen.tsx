@@ -34,6 +34,11 @@ const tips = [
     title: 'Video chat first',
     body: 'A quick video call before meeting helps verify who you\'re talking to.',
   },
+  {
+    icon: 'calendar' as const,
+    title: 'Date check-in',
+    body: 'In chat, open the menu → Date check-in to share where you\'re meeting and tap Check in when you arrive.',
+  },
 ];
 
 const resources = [

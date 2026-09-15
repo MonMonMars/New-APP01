@@ -9,6 +9,8 @@ export type PrivacyPreferences = {
   locationSharing: boolean;
   /** Show active / online status to matches */
   showActiveStatus: boolean;
+  /** Browse without appearing in others' stacks until you like them (Spark+) */
+  incognitoMode: boolean;
 };
 
 export const defaultPrivacyPreferences: PrivacyPreferences = {
@@ -17,6 +19,7 @@ export const defaultPrivacyPreferences: PrivacyPreferences = {
   marketingConsent: false,
   locationSharing: true,
   showActiveStatus: true,
+  incognitoMode: false,
 };
 
 export type LegalConsentRecord = {

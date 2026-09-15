@@ -13,6 +13,7 @@ type SafetyActionSheetProps = {
   onBlock: () => void;
   onUnmatch?: () => void;
   onOpenSafetyCenter?: () => void;
+  onDateCheckIn?: () => void;
 };
 
 export function SafetyActionSheet({
@@ -24,6 +25,7 @@ export function SafetyActionSheet({
   onBlock,
   onUnmatch,
   onOpenSafetyCenter,
+  onDateCheckIn,
 }: SafetyActionSheetProps) {
   return (
     <Modal visible={visible} animationType="slide" transparent>
@@ -32,6 +34,16 @@ export function SafetyActionSheet({
           <View style={styles.handle} />
           <Text style={styles.title}>Safety options</Text>
           <Text style={styles.subtitle}>Choose an action for {profileName}.</Text>
+
+          {onDateCheckIn && (
+            <AnimatedPressable style={styles.actionRow} onPress={onDateCheckIn}>
+              <Ionicons name="calendar-outline" size={22} color={colors.gradientEnd} />
+              <View style={styles.actionText}>
+                <Text style={styles.actionLabel}>Date check-in</Text>
+                <Text style={styles.actionHint}>Share your meet-up plan and check in when you arrive.</Text>
+              </View>
+            </AnimatedPressable>
+          )}
 
           {onOpenSafetyCenter && (
             <AnimatedPressable

@@ -12,6 +12,7 @@ import { ProfileCompletionCard } from '../components/ProfileCompletionCard';
 import { ProfileTrustSection } from '../components/ProfileTrustSection';
 import { ReferralCard } from '../components/ReferralCard';
 import { VerificationBadges } from '../components/VerificationBadges';
+import { VoicePromptCard } from '../components/VoicePromptCard';
 import { PhotoCarousel } from '../components/PhotoCarousel';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { useApp } from '../context/AppContext';
@@ -171,6 +172,10 @@ export function ProfileScreen() {
           onUpdate={(patch) => updateUser({ ...user, ...patch })}
           onOpenPolicy={() => navigation.getParent()?.navigate('VerificationPolicy')}
         />
+
+        {user.voicePrompt && (
+          <VoicePromptCard voicePrompt={user.voicePrompt} profileName={user.name} compact />
+        )}
 
         {isSparkPlus && (
           <View style={[styles.sparkPlusBadge, { backgroundColor: colors.surface }]}>

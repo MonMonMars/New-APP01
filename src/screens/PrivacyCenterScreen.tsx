@@ -47,7 +47,14 @@ export function PrivacyCenterScreen({ onClose }: PrivacyCenterScreenProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const navigation = useNavigation();
-  const { privacyPreferences, updatePrivacyPreferences, exportUserData, deleteAccount } = useApp();
+  const {
+    privacyPreferences,
+    updatePrivacyPreferences,
+    exportUserData,
+    deleteAccount,
+    isSparkPlus,
+    setIncognitoMode,
+  } = useApp();
 
   const patch = (partial: Partial<PrivacyPreferences>) => {
     updatePrivacyPreferences({ ...privacyPreferences, ...partial });
@@ -138,6 +145,24 @@ export function PrivacyCenterScreen({ onClose }: PrivacyCenterScreenProps) {
             hint="Let matches see when you were recently active"
             value={privacyPreferences.showActiveStatus}
             onValueChange={(next) => patch({ showActiveStatus: next })}
+          />
+          <PreferenceRow
+            label="Incognito mode"
+            hint={
+              isSparkPlus
+                ? 'Browse without appearing in stacks until you like someone'
+                : 'Spark+ feature — upgrade to browse invisibly'
+            }
+            value={privacyPreferences.incognitoMode && isSparkPlus}
+            onValueChange={(next) => {
+              if (next && !setIncognitoMode(true)) {
+                navigation.getParent()?.navigate('SparkPlus');
+                return;
+              }
+              if (!next) {
+                setIncognitoMode(false);
+              }
+            }}
           />
         </View>
 

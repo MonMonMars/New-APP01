@@ -14,7 +14,9 @@ import { MessageStatusIcon } from '../components/MessageStatusIcon';
 import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
 import { ReportReasonSheet, type ReportReason } from '../components/ReportReasonSheet';
 import { SafetyActionSheet } from '../components/SafetyActionSheet';
+import { DateCheckInSheet } from '../components/DateCheckInSheet';
 import { SuggestDateSheet } from '../components/SuggestDateSheet';
+import { VoiceNoteSheet } from '../components/VoiceNoteSheet';
 import { TypingIndicator } from '../components/TypingIndicator';
 import { VibeGameSheet } from '../components/VibeGameSheet';
 import { useApp } from '../context/AppContext';
@@ -34,14 +36,27 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { colors } = useTheme();
-  const { conversations, sendMessage, blockProfile, reportProfile, unmatchProfile, isSparkPlus, user } =
-    useApp();
+  const {
+    conversations,
+    sendMessage,
+    blockProfile,
+    reportProfile,
+    unmatchProfile,
+    isSparkPlus,
+    user,
+    getActiveDateCheckIn,
+    startDateCheckIn,
+    checkInDateNow,
+    completeDateCheckIn,
+  } = useApp();
   const [draft, setDraft] = useState('');
   const [showSafety, setShowSafety] = useState(false);
   const [showReport, setShowReport] = useState(false);
   const [showSuggestDate, setShowSuggestDate] = useState(false);
   const [showVibeGame, setShowVibeGame] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showDateCheckIn, setShowDateCheckIn] = useState(false);
+  const [showVoiceNote, setShowVoiceNote] = useState(false);
 
   const conversation = useMemo(
     () => conversations.find((c) => c.id === conversationId),
@@ -64,6 +79,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   }
 
   const profile = conversation.match.profile;
+  const activeDateCheckIn = getActiveDateCheckIn(profile.id);
   const turnLabel = conversation.yourTurn
     ? 'Your turn'
     : conversation.messages.length > 0
@@ -194,6 +210,40 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         </View>
       </View>
 
+      {activeDateCheckIn && (
+        <View style={[styles.checkInCard, { backgroundColor: colors.surface, borderColor: colors.gradientEnd }]}>
+          <Ionicons name="shield-checkmark" size={18} color={colors.gradientEnd} />
+          <View style={styles.checkInText}>
+            <Text style={[styles.checkInTitle, { color: colors.text }]}>Date check-in active</Text>
+            <Text style={[styles.checkInMeta, { color: colors.textMuted }]}>
+              {activeDateCheckIn.location}
+              {activeDateCheckIn.checkedInAt ? ' · Arrived' : ' · Plan saved'}
+            </Text>
+          </View>
+          {!activeDateCheckIn.checkedInAt ? (
+            <AnimatedPressable
+              style={[styles.checkInButton, { backgroundColor: colors.gradientEnd }]}
+              onPress={() => {
+                checkInDateNow(activeDateCheckIn.id);
+                handleSend(`✅ Checked in safely at ${activeDateCheckIn.location}`);
+              }}
+            >
+              <Text style={[styles.checkInButtonText, { color: colors.text }]}>Check in</Text>
+            </AnimatedPressable>
+          ) : (
+            <AnimatedPressable
+              style={[styles.checkInButton, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
+              onPress={() => {
+                completeDateCheckIn(activeDateCheckIn.id);
+                handleSend('🏠 Home safe — ending date check-in');
+              }}
+            >
+              <Text style={[styles.checkInButtonText, { color: colors.text }]}>Home safe</Text>
+            </AnimatedPressable>
+          )}
+        </View>
+      )}
+
       {conversation.messages.length === 0 ? (
         <View style={styles.emptyThread}>
           <Text style={styles.emptyEmoji}>👋</Text>
@@ -271,6 +321,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         onPickImage={handlePickImage}
         onSuggestDate={() => setShowSuggestDate(true)}
         onVibeGame={() => setShowVibeGame(true)}
+        onVoiceNote={() => setShowVoiceNote(true)}
         paddingBottom={insets.bottom + spacing.sm}
       />
 
@@ -283,6 +334,29 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         onBlock={handleBlock}
         onUnmatch={handleUnmatch}
         onOpenSafetyCenter={() => navigation.getParent()?.navigate('Safety')}
+        onDateCheckIn={() => {
+          setShowSafety(false);
+          setShowDateCheckIn(true);
+        }}
+      />
+
+      <DateCheckInSheet
+        visible={showDateCheckIn}
+        profileName={profile.name}
+        onClose={() => setShowDateCheckIn(false)}
+        onStart={(payload) => {
+          startDateCheckIn(profile.id, profile.name, payload);
+          handleSend(
+            `📍 Date check-in: meeting at ${payload.location}${payload.emergencyContact ? ` · Contact: ${payload.emergencyContact}` : ''}`,
+          );
+        }}
+      />
+
+      <VoiceNoteSheet
+        visible={showVoiceNote}
+        profileName={profile.name}
+        onClose={() => setShowVoiceNote(false)}
+        onSend={handleSend}
       />
 
       <ReportReasonSheet
@@ -384,6 +458,36 @@ const styles = StyleSheet.create({
   },
   headerAction: {
     padding: spacing.sm,
+  },
+  checkInCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginHorizontal: spacing.md,
+    marginTop: spacing.sm,
+    padding: spacing.md,
+    borderRadius: radii.card,
+    borderWidth: 1,
+  },
+  checkInText: {
+    flex: 1,
+  },
+  checkInTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  checkInMeta: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  checkInButton: {
+    borderRadius: radii.button,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs + 2,
+  },
+  checkInButtonText: {
+    fontSize: 12,
+    fontWeight: '700',
   },
   emptyThread: {
     flex: 1,

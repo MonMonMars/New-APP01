@@ -2,7 +2,7 @@
 
 ## Demo link (open now)
 
-**https://liquid-specifics-review-arbitrary.trycloudflare.com**
+**https://kay-testimonials-harold-belongs.trycloudflare.com**
 
 _Last updated: Sep 15, 2026 — Phase C: advanced filters, AI profile coach, post-3rd-match upsell_
 
@@ -35,6 +35,7 @@ _Last updated: Sep 15, 2026 — Phase C: advanced filters, AI profile coach, pos
 - **20 new profiles** (Riley, Marcus, Priya, Felix, Zoe…) — swipe deck + likes + instant matches
 - **Smart demo replies** — matches respond with personality-aware messages (optional Groq LLM via `EXPO_PUBLIC_GROQ_API_KEY`)
 - **Phase B** — Incognito (Spark+ · Privacy controls), voice prompts (profile + chat), date check-in (chat menu)
+- **Phase C** — Advanced filters (intent + shared interests, Spark+), AI profile coach, post-3rd-match Spark+ upsell, boost banner on Discover
 - **Discover** — clean home: emergency logo + card deck + three bottom targets only
 - **Profile → Discover tools** — map, explore, filters, standouts, held profiles, etc.
 - Drag cards to heart/trash/star zones

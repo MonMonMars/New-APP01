@@ -27,7 +27,6 @@ function ModeIconButton({
       accessibilityLabel={accessibilityLabel}
       onPress={onPress}
       hitSlop={8}
-      haptic="light"
       scaleTo={0.92}
       style={[styles.button, { backgroundColor }]}
     >

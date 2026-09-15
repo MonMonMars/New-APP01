@@ -29,7 +29,6 @@ export function ReferralCard() {
     <AnimatedPressable
       style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
       onPress={() => void handleInvite()}
-      haptic="light"
     >
       <View style={[styles.iconWrap, { backgroundColor: `${colors.gradientEnd}22` }]}>
         <Ionicons name="gift-outline" size={22} color={colors.gradientEnd} />

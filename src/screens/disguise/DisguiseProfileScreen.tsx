@@ -164,7 +164,6 @@ export function DisguiseProfileScreen() {
             <AnimatedPressable
               style={[styles.unlockButton, { backgroundColor: colors.gradientEnd }]}
               onPress={() => void setDisguiseMode(false)}
-              haptic="medium"
               accessibilityRole="button"
               accessibilityLabel="Unlock Spark"
             >

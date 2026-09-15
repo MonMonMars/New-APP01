@@ -70,7 +70,7 @@ export function MatchModal({
         </View>
 
         <View style={[styles.actions, { paddingBottom: insets.bottom + spacing.lg }]}>
-          <Button label="Start talking" onPress={onMessage} haptic="success" />
+          <Button label="Start talking" onPress={onMessage} />
           <Button label="Keep looking" variant="ghost" onPress={onClose} />
         </View>
       </LinearGradient>

@@ -1,8 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as Haptics from 'expo-haptics';
 import { useEffect } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -129,10 +128,6 @@ export function SuperLikeCelebration({
       return;
     }
 
-    if (Platform.OS !== 'web') {
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    }
     flashOpacity.value = withSequence(
       withTiming(0.85, { duration: 100 }),
       withTiming(0.55, { duration: 200 }),

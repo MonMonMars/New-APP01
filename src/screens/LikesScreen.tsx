@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MatchModal } from '../components/MatchModal';
 import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
+import { SparkNoteSheet } from '../components/SparkNoteSheet';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { useApp } from '../context/AppContext';
 import { getProfileById } from '../data/profiles';
@@ -27,10 +28,13 @@ export function LikesScreen() {
     passProfile,
     canLike,
     getConversationIdForProfile,
+    remainingSparkNotes,
+    canSendSparkNote,
   } = useApp();
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
   const [showMatch, setShowMatch] = useState(false);
+  const [showSparkNote, setShowSparkNote] = useState(false);
 
   const superLikesSent = Array.from(superLikedIds)
     .map((id) => getProfileById(id))
@@ -44,17 +48,29 @@ export function LikesScreen() {
     navigation.navigate('Discover' as never);
   };
 
-  const handleLike = (profile: Profile) => {
+  const handleLike = (profile: Profile, sparkNote?: string) => {
     if (!canLike) {
       openPaywall();
       return;
     }
-    const match = likeProfile(profile);
+    const match = likeProfile(profile, sparkNote);
     setSelectedProfile(null);
+    setShowSparkNote(false);
     if (match) {
       setMatchProfile(profile);
       setShowMatch(true);
     }
+  };
+
+  const handleSparkNote = () => {
+    if (!selectedProfile) {
+      return;
+    }
+    if (!canSendSparkNote) {
+      openPaywall();
+      return;
+    }
+    setShowSparkNote(true);
   };
 
   const handlePass = (profile: Profile) => {
@@ -178,6 +194,24 @@ export function LikesScreen() {
         onClose={() => setSelectedProfile(null)}
         onLike={selectedProfile ? () => handleLike(selectedProfile) : undefined}
         onPass={selectedProfile ? () => handlePass(selectedProfile) : undefined}
+        onSparkNote={selectedProfile && canSendSparkNote ? handleSparkNote : undefined}
+      />
+
+      <SparkNoteSheet
+        visible={showSparkNote}
+        profile={selectedProfile}
+        remainingNotes={remainingSparkNotes}
+        onClose={() => setShowSparkNote(false)}
+        onSend={(note) => {
+          if (selectedProfile) {
+            handleLike(selectedProfile, note);
+          }
+        }}
+        onSkip={() => {
+          if (selectedProfile) {
+            handleLike(selectedProfile);
+          }
+        }}
       />
 
       <MatchModal

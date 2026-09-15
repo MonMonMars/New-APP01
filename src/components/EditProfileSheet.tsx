@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
 import { RelationshipIntent, UserProfile } from '../types/profile';
+import { OPENING_MOVE_SUGGESTIONS } from '../utils/openingMove';
 import { pickProfilePhoto } from '../utils/photoPicker';
 import { runVerificationFlow } from '../utils/verificationFlow';
 import { InterestsEditor } from './InterestsEditor';
@@ -43,6 +44,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
   const [ageVerified, setAgeVerified] = useState(user.ageVerified ?? false);
   const [photoVerified, setPhotoVerified] = useState(user.photoVerified ?? false);
   const [personVerified, setPersonVerified] = useState(user.personVerified ?? false);
+  const [openingMove, setOpeningMove] = useState(user.openingMove ?? '');
 
   useEffect(() => {
     if (visible) {
@@ -58,6 +60,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       setAgeVerified(user.ageVerified ?? false);
       setPhotoVerified(user.photoVerified ?? false);
       setPersonVerified(user.personVerified ?? false);
+      setOpeningMove(user.openingMove ?? '');
     }
   }, [visible, user]);
 
@@ -100,6 +103,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       ageVerified,
       photoVerified,
       personVerified,
+      openingMove: openingMove.trim() || undefined,
     });
     onClose();
   };
@@ -223,6 +227,41 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
 
           <PromptsEditor prompts={prompts} onChange={setPrompts} />
 
+          <Text style={[styles.label, { color: colors.textMuted }]}>Opening Move</Text>
+          <Text style={[styles.openingMoveHint, { color: colors.textMuted }]}>
+            Pick a conversation starter matches see when you connect — like Bumble&apos;s Opening Move.
+          </Text>
+          <TextInput
+            value={openingMove}
+            onChangeText={setOpeningMove}
+            style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]}
+            placeholder="Ask something fun to break the ice..."
+            placeholderTextColor={colors.textMuted}
+            maxLength={120}
+          />
+          <View style={styles.openingMoveRow}>
+            {OPENING_MOVE_SUGGESTIONS.slice(0, 4).map((suggestion) => {
+              const selected = openingMove === suggestion;
+              return (
+                <AnimatedPressable
+                  key={suggestion}
+                  style={[
+                    styles.openingMoveChip,
+                    {
+                      backgroundColor: selected ? colors.gradientEnd : colors.surface,
+                      borderColor: selected ? colors.gradientEnd : colors.border,
+                    },
+                  ]}
+                  onPress={() => setOpeningMove(suggestion)}
+                >
+                  <Text style={[styles.openingMoveChipText, { color: selected ? '#fff' : colors.text }]}>
+                    {suggestion}
+                  </Text>
+                </AnimatedPressable>
+              );
+            })}
+          </View>
+
           <SocialConnectRows
             instagramConnected={instagramConnected}
             spotifyConnected={spotifyConnected}
@@ -311,6 +350,27 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   intentChipText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  openingMoveHint: {
+    fontSize: 13,
+    lineHeight: 19,
+    marginBottom: spacing.sm,
+  },
+  openingMoveRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+  },
+  openingMoveChip: {
+    borderRadius: radii.button,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  openingMoveChipText: {
     fontSize: 13,
     fontWeight: '600',
   },

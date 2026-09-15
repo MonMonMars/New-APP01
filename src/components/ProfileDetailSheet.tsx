@@ -20,6 +20,7 @@ type ProfileDetailSheetProps = {
   onHold?: () => void;
   onLike?: () => void;
   onPass?: () => void;
+  onSparkNote?: () => void;
 };
 
 export function ProfileDetailSheet({
@@ -34,6 +35,7 @@ export function ProfileDetailSheet({
   onHold,
   onLike,
   onPass,
+  onSparkNote,
 }: ProfileDetailSheetProps) {
   const insets = useSafeAreaInsets();
 
@@ -142,11 +144,16 @@ export function ProfileDetailSheet({
           )}
         </ScrollView>
 
-        {(onLike || onPass) && (
+        {(onLike || onPass || onSparkNote) && (
           <View style={styles.actionBar}>
             {onPass && (
               <AnimatedPressable style={[styles.passButton, styles.actionButton]} onPress={onPass}>
                 <Ionicons name="close" size={24} color={colors.nope} />
+              </AnimatedPressable>
+            )}
+            {onSparkNote && (
+              <AnimatedPressable style={[styles.sparkNoteButton, styles.actionButton]} onPress={onSparkNote}>
+                <Ionicons name="chatbubble-ellipses" size={22} color={colors.gradientEnd} />
               </AnimatedPressable>
             )}
             {onLike && (
@@ -337,6 +344,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 2,
     borderColor: colors.nope,
+  },
+  sparkNoteButton: {
+    backgroundColor: colors.surface,
+    borderWidth: 2,
+    borderColor: colors.gradientEnd,
   },
   likeButton: {
     backgroundColor: colors.heartRed,

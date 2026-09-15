@@ -72,6 +72,8 @@ export type Profile = {
   activeToday?: boolean;
   /** Joined within last 7 days */
   isNew?: boolean;
+  /** Bumble-style conversation starter shown on match */
+  openingMove?: string;
   /** City label for map / discovery */
   city?: string;
   /** Fake map pin position (0–100 % of map viewport) */
@@ -95,6 +97,8 @@ export type UserProfile = {
   gender?: ProfileGender;
   orientation?: Orientation;
   prompts?: ProfilePrompt[];
+  /** Bumble-style Opening Move — shown to matches when you connect */
+  openingMove?: string;
   instagramConnected?: boolean;
   spotifyConnected?: boolean;
   ageVerified?: boolean;

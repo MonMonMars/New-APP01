@@ -12,6 +12,7 @@ import { ModeToggleLogo } from '../components/disguise/ModeToggleLogo';
 import { PromptLikeSheet } from '../components/PromptLikeSheet';
 import { SuperLikeResultModal } from '../components/SuperLikeResultModal';
 import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
+import { SparkNoteSheet } from '../components/SparkNoteSheet';
 import { ReportReasonSheet, type ReportReason } from '../components/ReportReasonSheet';
 import { SwipeDeck, SwipeDeckHandle } from '../components/SwipeDeck';
 import { WaitingForMatchModal } from '../components/WaitingForMatchModal';
@@ -50,6 +51,8 @@ export function DiscoverScreen() {
     reportProfile,
     heldIds,
     getCompatibilityScore,
+    remainingSparkNotes,
+    canSendSparkNote,
   } = useApp();
 
   const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
@@ -72,6 +75,8 @@ export function DiscoverScreen() {
     prompt: ProfilePrompt;
   } | null>(null);
   const [showPromptLike, setShowPromptLike] = useState(false);
+  const [showSparkNote, setShowSparkNote] = useState(false);
+  const [sparkNoteTarget, setSparkNoteTarget] = useState<Profile | null>(null);
 
   const openDiscoverHub = () => {
     navigation.getParent()?.navigate('DiscoverHub');
@@ -205,6 +210,61 @@ export function DiscoverScreen() {
     setShowPromptLike(true);
   }, [detailProfile]);
 
+  const openSparkNote = useCallback((profile: Profile) => {
+    setSparkNoteTarget(profile);
+    setShowSparkNote(true);
+  }, []);
+
+  const handleSparkNoteSend = useCallback(
+    (note: string) => {
+      if (!sparkNoteTarget) {
+        return;
+      }
+      setShowSparkNote(false);
+      setDetailProfile(null);
+      processLike(sparkNoteTarget, note);
+      setSparkNoteTarget(null);
+    },
+    [processLike, sparkNoteTarget],
+  );
+
+  const handleSparkNoteSkip = useCallback(() => {
+    if (!sparkNoteTarget) {
+      return;
+    }
+    setShowSparkNote(false);
+    setDetailProfile(null);
+    processLike(sparkNoteTarget);
+    setSparkNoteTarget(null);
+  }, [processLike, sparkNoteTarget]);
+
+  const handleDetailLike = useCallback(() => {
+    if (!detailProfile) {
+      return;
+    }
+    setDetailProfile(null);
+    processLike(detailProfile);
+  }, [detailProfile, processLike]);
+
+  const handleDetailPass = useCallback(() => {
+    if (!detailProfile) {
+      return;
+    }
+    passProfile(detailProfile);
+    setDetailProfile(null);
+  }, [detailProfile, passProfile]);
+
+  const handleDetailSparkNote = useCallback(() => {
+    if (!detailProfile) {
+      return;
+    }
+    if (!canSendSparkNote) {
+      setShowLikeLimit(true);
+      return;
+    }
+    openSparkNote(detailProfile);
+  }, [canSendSparkNote, detailProfile, openSparkNote]);
+
   const handlePromptLikeSend = useCallback(
     (comment: string) => {
       if (!promptLikeTarget) {
@@ -294,6 +354,7 @@ export function DiscoverScreen() {
             profiles={discoverQueue}
             onSwipe={handleSwipe}
             onSuperLike={handleSuperLikeEffectComplete}
+            onOpenProfile={setDetailProfile}
             onEmpty={() => undefined}
             canLike={canLike}
             onLikeBlocked={() => setShowLikeLimit(true)}
@@ -349,11 +410,26 @@ export function DiscoverScreen() {
         onClose={() => setDetailProfile(null)}
         onBlock={handleBlockDetail}
         onLikePrompt={handleLikePrompt}
+        onLike={handleDetailLike}
+        onPass={handleDetailPass}
+        onSparkNote={canSendSparkNote ? handleDetailSparkNote : undefined}
         onReport={(profileId) => {
           if (detailProfile) {
             openReportSheet(profileId, detailProfile.name);
           }
         }}
+      />
+
+      <SparkNoteSheet
+        visible={showSparkNote}
+        profile={sparkNoteTarget}
+        remainingNotes={remainingSparkNotes}
+        onClose={() => {
+          setShowSparkNote(false);
+          setSparkNoteTarget(null);
+        }}
+        onSend={handleSparkNoteSend}
+        onSkip={handleSparkNoteSkip}
       />
 
       <PromptLikeSheet

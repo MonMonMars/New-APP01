@@ -68,7 +68,12 @@ import {
   recordFailedUnlockAttempt,
 } from '../utils/unlockLockout';
 import { computeCompatibilityScore, pickDailyMostCompatible } from '../utils/compatibility';
-import { requestNotificationPermission, scheduleMatchNotification } from '../utils/notifications';
+import {
+  requestNotificationPermission,
+  scheduleMatchNotification,
+  scheduleMessageNotification,
+} from '../utils/notifications';
+import { defaultPulseSocialState, PulseComment, PulseSocialState } from '../types/pulseSocial';
 import {
   checkClientRateLimit,
   isProductionBuild,
@@ -137,12 +142,14 @@ function filterDiscoverProfiles(
   profiles: Profile[],
   preferences: DiscoveryPreferences,
   excludedIds: Set<string>,
+  locationSharing = true,
 ): Profile[] {
   const filters = preferences.discoverFilters ?? [];
+  const maxDistance = locationSharing ? preferences.maxDistanceMiles : 9999;
   return profiles.filter(
     (profile) =>
       !excludedIds.has(profile.id) &&
-      profile.distanceMiles <= preferences.maxDistanceMiles &&
+      profile.distanceMiles <= maxDistance &&
       profile.age >= preferences.minAge &&
       profile.age <= preferences.maxAge &&
       matchesGenderFilter(profile, preferences.showMe) &&
@@ -177,8 +184,10 @@ type AppContextValue = {
   pendingLikeIds: Set<string>;
   superLikedIds: Set<string>;
   blockedIds: Set<string>;
+  blockedProfiles: Profile[];
   heldIds: Set<string>;
   heldProfiles: Profile[];
+  pulseSocial: PulseSocialState;
   standoutsProfiles: Profile[];
   recentlyActiveProfiles: Profile[];
   dailyMostCompatible: Profile | null;
@@ -231,8 +240,18 @@ type AppContextValue = {
   sendMessage: (conversationId: string, text: string, imageUrl?: string) => void;
   getConversationIdForProfile: (profileId: string) => string | null;
   blockProfile: (profileId: string) => void;
+  unblockProfile: (profileId: string) => void;
+  unlikeProfile: (profileId: string) => void;
   reportProfile: (profileId: string, reason?: string) => void;
   unmatchProfile: (profileId: string) => void;
+  savePulsePost: (postId: string) => void;
+  unsavePulsePost: (postId: string) => void;
+  mutePulseAuthor: (handle: string) => void;
+  unmutePulseAuthor: (handle: string) => void;
+  reportPulsePost: (postId: string, reason?: string) => void;
+  addPulseComment: (postId: string, body: string) => void;
+  getPulseComments: (postId: string) => PulseComment[];
+  recordReferralShare: () => number;
   activateSparkPlus: () => void;
   restorePurchases: () => Promise<boolean>;
   activateBoost: () => void;
@@ -298,6 +317,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     defaultPrivacyPreferences,
   );
   const [legalConsent, setLegalConsent] = useState<LegalConsentRecord>(defaultLegalConsent);
+  const [pulseSocial, setPulseSocial] = useState<PulseSocialState>(defaultPulseSocialState);
   const [unlockModalVisible, setUnlockModalVisible] = useState(false);
   const [disguisePolicyModalVisible, setDisguisePolicyModalVisible] = useState(false);
   const [unlockError, setUnlockError] = useState<string | null>(null);
@@ -374,6 +394,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setLegalConsent({
           ...defaultLegalConsent,
           ...saved.legalConsent,
+        });
+        setPulseSocial({
+          ...defaultPulseSocialState,
+          ...saved.pulseSocial,
+          postComments: saved.pulseSocial?.postComments ?? {},
         });
 
         if (isSupabaseConfigured()) {
@@ -462,6 +487,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       securitySettings,
       privacyPreferences,
       legalConsent,
+      pulseSocial,
     };
   }, [
     hasOnboarded,
@@ -479,6 +505,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     conversations,
     privacyPreferences,
     legalConsent,
+    pulseSocial,
     dailyLikesUsed,
     isSparkPlus,
     sparkNotes,
@@ -668,22 +695,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [heldIds],
   );
 
-  const standoutsProfiles = useMemo(
-    () =>
-      STANDOUT_IDS.map((id) => getProfileById(id)).filter(
-        (profile): profile is Profile =>
-          profile !== undefined && !excludedIds.has(profile.id),
-      ),
-    [excludedIds],
-  );
+  const standoutsProfiles = useMemo(() => {
+    if (!privacyPreferences.personalisationEnabled) {
+      return [];
+    }
+    return STANDOUT_IDS.map((id) => getProfileById(id)).filter(
+      (profile): profile is Profile =>
+        profile !== undefined && !excludedIds.has(profile.id),
+    );
+  }, [excludedIds, privacyPreferences.personalisationEnabled]);
 
-  const recentlyActiveProfiles = useMemo(
+  const recentlyActiveProfiles = useMemo(() => {
+    if (!privacyPreferences.showActiveStatus) {
+      return [];
+    }
+    return RECENTLY_ACTIVE_IDS.map((id) => getProfileById(id)).filter(
+      (profile): profile is Profile =>
+        profile !== undefined && !excludedIds.has(profile.id),
+    );
+  }, [excludedIds, privacyPreferences.showActiveStatus]);
+
+  const blockedProfiles = useMemo(
     () =>
-      RECENTLY_ACTIVE_IDS.map((id) => getProfileById(id)).filter(
-        (profile): profile is Profile =>
-          profile !== undefined && !excludedIds.has(profile.id),
-      ),
-    [excludedIds],
+      Array.from(blockedIds)
+        .map((id) => getProfileById(id))
+        .filter((profile): profile is Profile => profile !== undefined),
+    [blockedIds],
   );
 
   const getCompatibilityScore = useCallback(
@@ -691,20 +728,45 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [user],
   );
 
+  const isBoosted = useMemo(() => {
+    if (!boostActiveUntil) {
+      return false;
+    }
+    return new Date(boostActiveUntil).getTime() > Date.now();
+  }, [boostActiveUntil]);
+
   const discoverPool = useMemo(() => {
     if (isPaused) {
       return [];
     }
     const incomingExcluded = new Set<string>(INCOMING_LIKE_IDS);
     const pool = mockProfiles.filter((p) => !incomingExcluded.has(p.id));
-    return filterDiscoverProfiles(pool, preferences, excludedIds);
-  }, [excludedIds, isPaused, preferences]);
+    return filterDiscoverProfiles(
+      pool,
+      preferences,
+      excludedIds,
+      privacyPreferences.locationSharing,
+    );
+  }, [excludedIds, isPaused, preferences, privacyPreferences.locationSharing]);
 
   const discoverQueue = useMemo(() => {
     if (isPaused) {
       return [];
     }
-    const unlocked = discoverPool.slice(0, discoverUnlockedCount);
+    let unlocked = [...discoverPool.slice(0, discoverUnlockedCount)];
+
+    if (isBoosted) {
+      unlocked.sort((a, b) => {
+        const aIncoming = INCOMING_LIKE_IDS_SET.has(a.id) ? 1 : 0;
+        const bIncoming = INCOMING_LIKE_IDS_SET.has(b.id) ? 1 : 0;
+        return bIncoming - aIncoming;
+      });
+    } else if (privacyPreferences.personalisationEnabled) {
+      unlocked.sort(
+        (a, b) => computeCompatibilityScore(user, b) - computeCompatibilityScore(user, a),
+      );
+    }
+
     if (!priorityProfileId) {
       return unlocked;
     }
@@ -717,22 +779,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
       priorityProfile,
       ...unlocked.filter((profile) => profile.id !== priorityProfileId),
     ];
-  }, [discoverPool, discoverUnlockedCount, isPaused, priorityProfileId]);
+  }, [
+    discoverPool,
+    discoverUnlockedCount,
+    isBoosted,
+    isPaused,
+    priorityProfileId,
+    privacyPreferences.personalisationEnabled,
+    user,
+  ]);
 
   const discoverPoolTotal = discoverPool.length;
   const hasMoreInPool = discoverPool.length > discoverUnlockedCount;
 
   const dailyMostCompatible = useMemo(
-    () => pickDailyMostCompatible(user, discoverPool, todayKey()),
-    [discoverPool, user],
+    () =>
+      privacyPreferences.personalisationEnabled
+        ? pickDailyMostCompatible(user, discoverPool, todayKey())
+        : null,
+    [discoverPool, privacyPreferences.personalisationEnabled, user],
   );
-
-  const isBoosted = useMemo(() => {
-    if (!boostActiveUntil) {
-      return false;
-    }
-    return new Date(boostActiveUntil).getTime() > Date.now();
-  }, [boostActiveUntil]);
 
   const remainingLikes = isSparkPlus
     ? Infinity
@@ -963,6 +1029,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const unblockProfile = useCallback((profileId: string) => {
+    setBlockedIds((prev) => {
+      const next = new Set(prev);
+      next.delete(profileId);
+      return next;
+    });
+  }, []);
+
+  const unlikeProfile = useCallback((profileId: string) => {
+    setLikedIds((prev) => {
+      const next = new Set(prev);
+      next.delete(profileId);
+      return next;
+    });
+    setPendingLikeIds((prev) => {
+      const next = new Set(prev);
+      next.delete(profileId);
+      return next;
+    });
+    setSuperLikedIds((prev) => {
+      const next = new Set(prev);
+      next.delete(profileId);
+      return next;
+    });
+    setSparkNotes((prev) => {
+      const next = { ...prev };
+      delete next[profileId];
+      return next;
+    });
+  }, []);
+
   const unmatchProfile = useCallback((profileId: string) => {
     setMatches((prev) => prev.filter((match) => match.profile.id !== profileId));
     setConversations((prev) =>
@@ -1185,6 +1282,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         status: 'sent',
       };
 
+      const targetConversation = conversations.find((item) => item.id === conversationId);
+
       setConversations((prev) =>
         prev.map((conversation) => {
           if (conversation.id !== conversationId) {
@@ -1202,6 +1301,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
           };
         }),
       );
+
+      if (
+        notificationsEnabled &&
+        notificationPreferences.messages &&
+        trimmed &&
+        targetConversation
+      ) {
+        void scheduleMessageNotification(targetConversation.match.profile.name, trimmed, {
+          disguiseSafe: disguiseMode && securitySettings.disguiseSafeNotifications,
+        });
+      }
 
       setTimeout(() => {
         setConversations((prev) =>
@@ -1273,7 +1383,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         );
       }, 4500);
     },
-    [isSparkPlus],
+    [
+      conversations,
+      disguiseMode,
+      isSparkPlus,
+      notificationPreferences.messages,
+      notificationsEnabled,
+      securitySettings.disguiseSafeNotifications,
+    ],
   );
 
   const activateSparkPlus = useCallback(() => {
@@ -1289,7 +1406,112 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const activateBoost = useCallback(() => {
     const until = new Date(Date.now() + BOOST_DURATION_MS).toISOString();
     setBoostActiveUntil(until);
+    if (notificationsEnabled && notificationPreferences.boosts) {
+      void scheduleMatchNotification('You', {
+        disguiseSafe: disguiseMode && securitySettings.disguiseSafeNotifications,
+      });
+    }
+  }, [
+    disguiseMode,
+    notificationPreferences.boosts,
+    notificationsEnabled,
+    securitySettings.disguiseSafeNotifications,
+  ]);
+
+  const savePulsePost = useCallback((postId: string) => {
+    setPulseSocial((prev) => ({
+      ...prev,
+      savedPostIds: prev.savedPostIds.includes(postId)
+        ? prev.savedPostIds
+        : [...prev.savedPostIds, postId],
+    }));
   }, []);
+
+  const unsavePulsePost = useCallback((postId: string) => {
+    setPulseSocial((prev) => ({
+      ...prev,
+      savedPostIds: prev.savedPostIds.filter((id) => id !== postId),
+    }));
+  }, []);
+
+  const mutePulseAuthor = useCallback((handle: string) => {
+    const normalized = handle.trim().toLowerCase();
+    if (!normalized) {
+      return;
+    }
+    setPulseSocial((prev) => ({
+      ...prev,
+      mutedAuthors: prev.mutedAuthors.includes(normalized)
+        ? prev.mutedAuthors
+        : [...prev.mutedAuthors, normalized],
+    }));
+  }, []);
+
+  const unmutePulseAuthor = useCallback((handle: string) => {
+    const normalized = handle.trim().toLowerCase();
+    setPulseSocial((prev) => ({
+      ...prev,
+      mutedAuthors: prev.mutedAuthors.filter((author) => author !== normalized),
+    }));
+  }, []);
+
+  const reportPulsePost = useCallback(
+    (postId: string, reason?: string) => {
+      setPulseSocial((prev) => ({
+        ...prev,
+        reportedPostIds: prev.reportedPostIds.includes(postId)
+          ? prev.reportedPostIds
+          : [...prev.reportedPostIds, postId],
+      }));
+      if (userId) {
+        void submitSecurityReport({
+          reporterUserId: userId,
+          reportedProfileId: postId,
+          reason: reason ? sanitizeReportReason(reason) : 'Reported Pulse post',
+          context: 'pulse_post',
+        });
+      }
+    },
+    [userId],
+  );
+
+  const addPulseComment = useCallback(
+    (postId: string, body: string) => {
+      const trimmed = body.trim();
+      if (!trimmed) {
+        return;
+      }
+      const comment: PulseComment = {
+        author: user.name,
+        handle: `@${user.name.toLowerCase().replace(/\s+/g, '')}`,
+        body: trimmed,
+        sentAt: new Date().toISOString(),
+      };
+      setPulseSocial((prev) => ({
+        ...prev,
+        postComments: {
+          ...prev.postComments,
+          [postId]: [...(prev.postComments[postId] ?? []), comment],
+        },
+      }));
+    },
+    [user.name],
+  );
+
+  const getPulseComments = useCallback(
+    (postId: string) => pulseSocial.postComments[postId] ?? [],
+    [pulseSocial.postComments],
+  );
+
+  const recordReferralShare = useCallback(() => {
+    const nextCount = pulseSocial.referralShareCount + 1;
+    setPulseSocial((prev) => ({ ...prev, referralShareCount: nextCount }));
+    if (nextCount >= 3 && nextCount % 3 === 0) {
+      const until = new Date(Date.now() + BOOST_DURATION_MS).toISOString();
+      setBoostActiveUntil(until);
+    }
+    return nextCount;
+  }, [pulseSocial.referralShareCount]);
 
   const purchaseSparkNotes = useCallback((count: number) => {
     setBonusSparkNotes((prev) => prev + count);
@@ -1304,9 +1526,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return granted;
   }, [userId]);
 
-  const updateNotificationPreferences = useCallback((prefs: NotificationPreferences) => {
-    setNotificationPreferences(prefs);
-  }, []);
+  const updateNotificationPreferences = useCallback(
+    (prefs: NotificationPreferences) => {
+      setNotificationPreferences(prefs);
+      setPrivacyPreferences((prev) => ({
+        ...prev,
+        marketingConsent: prefs.marketing,
+      }));
+    },
+    [],
+  );
 
   const setThemeMode = useCallback((mode: ThemeMode) => {
     setThemeModeState(mode);
@@ -1444,6 +1673,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setSecuritySettings(defaultSecuritySettings);
     setPrivacyPreferences(defaultPrivacyPreferences);
     setLegalConsent(defaultLegalConsent);
+    setPulseSocial(defaultPulseSocialState);
     setLastPassedProfileId(null);
     setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
     setPriorityProfileId(null);
@@ -1475,8 +1705,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       pendingLikeIds,
       superLikedIds,
       blockedIds,
+      blockedProfiles,
       heldIds,
       heldProfiles,
+      pulseSocial,
       standoutsProfiles,
       recentlyActiveProfiles,
       dailyMostCompatible,
@@ -1526,8 +1758,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
       sendMessage,
       getConversationIdForProfile,
       blockProfile,
+      unblockProfile,
+      unlikeProfile,
       reportProfile,
       unmatchProfile,
+      savePulsePost,
+      unsavePulsePost,
+      mutePulseAuthor,
+      unmutePulseAuthor,
+      reportPulsePost,
+      addPulseComment,
+      getPulseComments,
+      recordReferralShare,
       activateSparkPlus,
       restorePurchases,
       activateBoost,
@@ -1563,8 +1805,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       pendingLikeIds,
       superLikedIds,
       blockedIds,
+      blockedProfiles,
       heldIds,
       heldProfiles,
+      pulseSocial,
       standoutsProfiles,
       recentlyActiveProfiles,
       dailyMostCompatible,
@@ -1613,8 +1857,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
       sendMessage,
       getConversationIdForProfile,
       blockProfile,
+      unblockProfile,
+      unlikeProfile,
       reportProfile,
       unmatchProfile,
+      savePulsePost,
+      unsavePulsePost,
+      mutePulseAuthor,
+      unmutePulseAuthor,
+      reportPulsePost,
+      addPulseComment,
+      getPulseComments,
+      recordReferralShare,
       activateSparkPlus,
       restorePurchases,
       activateBoost,

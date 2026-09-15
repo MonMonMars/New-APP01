@@ -38,8 +38,15 @@ const intentOptions: { value: RelationshipIntent; label: string; hint: string }[
 
 export function OnboardingFlow() {
   const insets = useSafeAreaInsets();
-  const { completeOnboarding, signInWithAppleStub, signInWithEmailMagicLink, acceptOnboardingLegal, user } =
-    useApp();
+  const {
+    completeOnboarding,
+    signInWithAppleStub,
+    signInWithEmailMagicLink,
+    acceptOnboardingLegal,
+    updatePreferences,
+    preferences,
+    user,
+  } = useApp();
   const [step, setStep] = useState<Step>('welcome');
   const [legalAccepted, setLegalAccepted] = useState(false);
   const [legalPreviewId, setLegalPreviewId] = useState<LegalDocumentId | null>(null);
@@ -228,7 +235,13 @@ export function OnboardingFlow() {
             <Text style={styles.mapEmoji}>📍</Text>
             <Text style={styles.mapText}>Top stories near you</Text>
           </View>
-          <AnimatedPressable style={styles.primaryButton} onPress={() => setStep('intent')}>
+          <AnimatedPressable
+            style={styles.primaryButton}
+            onPress={() => {
+              updatePreferences({ ...preferences, passportCity: 'London, UK' });
+              setStep('intent');
+            }}
+          >
             <Text style={styles.primaryButtonText}>Use my location</Text>
           </AnimatedPressable>
           <AnimatedPressable

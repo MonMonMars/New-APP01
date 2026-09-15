@@ -5,7 +5,7 @@ export type SecurityReportPayload = {
   reporterUserId: string;
   reportedProfileId: string;
   reason: string;
-  context?: 'profile' | 'chat' | 'discover';
+  context?: 'profile' | 'chat' | 'discover' | 'pulse_post';
 };
 
 export async function submitSecurityReport(

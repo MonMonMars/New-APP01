@@ -9,17 +9,23 @@ import { AnimatedPressable } from './AnimatedPressable';
 
 export function ReferralCard() {
   const { colors } = useTheme();
-  const { user, userId } = useApp();
+  const { user, userId, recordReferralShare, pulseSocial } = useApp();
   const inviteLink = buildInviteLink(userId);
 
   const handleInvite = async () => {
     const message = buildInviteMessage(user.name, inviteLink);
     try {
-      await Share.share({
+      const result = await Share.share({
         message,
         title: 'Invite to Spark',
         url: inviteLink,
       });
+      if (result.action !== Share.dismissedAction) {
+        const count = recordReferralShare();
+        if (count >= 3 && count % 3 === 0) {
+          Alert.alert('Boost unlocked!', 'Three friends invited — enjoy a free 30-minute Boost.');
+        }
+      }
     } catch {
       Alert.alert('Invite friends', `Share your link:\n${inviteLink}`);
     }
@@ -36,7 +42,10 @@ export function ReferralCard() {
       <View style={styles.text}>
         <Text style={[styles.title, { color: colors.text }]}>Invite friends</Text>
         <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-          Share Spark and unlock a free Boost when 3 friends join.
+          Share Spark and unlock a free Boost when 3 friends join
+          {pulseSocial.referralShareCount > 0
+            ? ` (${pulseSocial.referralShareCount}/3 shares)`
+            : ''}.
         </Text>
       </View>
       <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />

@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { RelationshipIntent, UserProfile } from '../types/profile';
 import { pickProfilePhoto } from '../utils/photoPicker';
+import { runVerificationFlow } from '../utils/verificationFlow';
 import { InterestsEditor } from './InterestsEditor';
 import { PhotoCarousel } from './PhotoCarousel';
 import { PromptsEditor } from './PromptsEditor';
@@ -68,36 +69,15 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
   };
 
   const handleVerifyPhoto = () => {
-    Alert.alert(
-      'Photo verification',
-      'We compare a live selfie to your profile photos to confirm they are really you.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Take selfie', onPress: () => setPhotoVerified(true) },
-      ],
-    );
+    runVerificationFlow('photo', () => setPhotoVerified(true));
   };
 
   const handleVerifyPerson = () => {
-    Alert.alert(
-      'Real person check',
-      'A quick liveness scan confirms you are a real person, not a bot or fake account.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Start scan', onPress: () => setPersonVerified(true) },
-      ],
-    );
+    runVerificationFlow('person', () => setPersonVerified(true));
   };
 
   const handleVerifyAge = () => {
-    Alert.alert(
-      'Age verification',
-      'Submit a government ID through our secure partner to confirm you are 18+. We store pass/fail status only.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Continue', onPress: () => setAgeVerified(true) },
-      ],
-    );
+    runVerificationFlow('age', () => setAgeVerified(true));
   };
 
   const handleSave = () => {

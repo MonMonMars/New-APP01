@@ -11,7 +11,9 @@ import {
 import { AppState, type AppStateStatus } from 'react-native';
 
 import { seedConversations } from '../data/conversations';
+import { getAiPersonaConfig } from '../data/aiPersonas';
 import {
+  AI_PERSONA_IDS,
   getProfileById,
   incomingLikeProfiles,
   INCOMING_LIKE_IDS,
@@ -1152,7 +1154,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      if (!MUTUAL_MATCH_IDS.has(profile.id) && !INCOMING_LIKE_IDS_SET.has(profile.id)) {
+      const isInstantMatch =
+        MUTUAL_MATCH_IDS.has(profile.id) ||
+        INCOMING_LIKE_IDS_SET.has(profile.id) ||
+        AI_PERSONA_IDS.has(profile.id);
+
+      if (!isInstantMatch) {
         setPendingLikeIds((prev) => new Set(prev).add(profile.id));
         return null;
       }
@@ -1181,12 +1188,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (prev.some((item) => item.match.profile.id === profile.id)) {
           return prev;
         }
+
+        const persona = getAiPersonaConfig(profile);
+        const openerText = persona?.openerMessages[0];
+        const openerMessage = openerText
+          ? {
+              id: `msg-opener-${profile.id}`,
+              text: openerText,
+              sentAt: new Date().toISOString(),
+              isMine: false,
+            }
+          : null;
+
         const conversation: Conversation = {
           id: `conv-${profile.id}`,
           match,
-          messages: [],
+          messages: openerMessage ? [openerMessage] : [],
           yourTurn: true,
           unread: false,
+          lastMessage: openerText,
+          lastMessageAt: openerMessage?.sentAt,
         };
         return [conversation, ...prev];
       });

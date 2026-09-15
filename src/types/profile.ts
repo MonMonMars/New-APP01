@@ -90,6 +90,10 @@ export type Profile = {
   openingMove?: string;
   /** Hinge-style voice prompt on profile */
   voicePrompt?: VoicePrompt;
+  /** Spark AI practice persona — not a real person */
+  isAiPersona?: boolean;
+  /** Links to AI_PERSONA_CONFIGS for chat personality */
+  aiPersonaId?: string;
   /** City label for map / discovery */
   city?: string;
   /** Fake map pin position (0–100 % of map viewport) */

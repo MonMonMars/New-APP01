@@ -8,7 +8,9 @@ import { DailyBatchIndicator } from '../components/DailyBatchIndicator';
 import { DiscoverFilterChips } from '../components/DiscoverFilterChips';
 import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesSheet';
 import { ExpandLocationSheet } from '../components/ExpandLocationSheet';
+import { AiPersonasRow } from '../components/AiPersonasRow';
 import { HeldProfilesRow } from '../components/HeldProfilesRow';
+import { MatchModal } from '../components/MatchModal';
 import { MostCompatibleBanner } from '../components/MostCompatibleBanner';
 import { RecentlyActiveStrip } from '../components/RecentlyActiveStrip';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -50,10 +52,15 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
     getCompatibilityScore,
     unholdProfile,
     prioritizeProfileInDeck,
+    likeProfile,
+    getConversationIdForProfile,
+    user,
   } = useApp();
 
   const [showPreferences, setShowPreferences] = useState(false);
   const [showExpandLocation, setShowExpandLocation] = useState(false);
+  const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
+  const [showMatch, setShowMatch] = useState(false);
 
   const activeFilters = preferences.discoverFilters ?? [];
 
@@ -76,6 +83,32 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
     },
     [onClose, prioritizeProfileInDeck],
   );
+
+  const handleSelectAiPersona = useCallback(
+    (profile: Profile) => {
+      if (!canLike) {
+        Alert.alert('Like limit reached', 'Come back tomorrow or upgrade to Spark+ for unlimited likes.');
+        return;
+      }
+      const match = likeProfile(profile);
+      if (match) {
+        setMatchProfile(profile);
+        setShowMatch(true);
+      }
+    },
+    [canLike, likeProfile],
+  );
+
+  const handleOpenChat = useCallback(() => {
+    if (!matchProfile) {
+      return;
+    }
+    const conversationId = getConversationIdForProfile(matchProfile.id);
+    setShowMatch(false);
+    setMatchProfile(null);
+    onClose();
+    navigation.getParent()?.navigate('Chat', { conversationId });
+  }, [getConversationIdForProfile, matchProfile, navigation, onClose]);
 
   const handleWidenFilters = () => {
     if (preferences.maxDistanceMiles >= 9999) {
@@ -140,6 +173,8 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
           activeFilters={activeFilters}
           onToggle={(filter: DiscoverFilter) => toggleDiscoverFilter(filter)}
         />
+
+        <AiPersonasRow onSelect={handleSelectAiPersona} />
 
         {dailyMostCompatible && (
           <>
@@ -220,6 +255,17 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
         poolTotal={discoverPoolTotal}
         onClose={() => setShowExpandLocation(false)}
         onSelectRadius={expandSearchRadius}
+      />
+
+      <MatchModal
+        visible={showMatch}
+        profile={matchProfile}
+        userPhoto={user.photos[0] ?? ''}
+        onClose={() => {
+          setShowMatch(false);
+          setMatchProfile(null);
+        }}
+        onMessage={handleOpenChat}
       />
     </View>
   );

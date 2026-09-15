@@ -6,6 +6,7 @@ import { useCloudConversation } from '../hooks/useCloudConversation';
 import { Alert, FlatList, Image, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AiPersonaBadge } from '../components/AiPersonaBadge';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { ChatComposer } from '../components/ChatComposer';
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
@@ -19,6 +20,7 @@ import { SuggestDateSheet } from '../components/SuggestDateSheet';
 import { VoiceNoteSheet } from '../components/VoiceNoteSheet';
 import { TypingIndicator } from '../components/TypingIndicator';
 import { VibeGameSheet } from '../components/VibeGameSheet';
+import { isAiPersonaProfile } from '../data/aiPersonas';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { useLiveExpiry } from '../hooks/useLiveExpiry';
@@ -181,6 +183,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
           <View style={styles.headerText}>
             <View style={styles.headerNameRow}>
               <Text style={[styles.headerName, { color: colors.text }]}>{profile.name}</Text>
+              <AiPersonaBadge profile={profile} compact />
               <VerificationBadges
                 photoVerified={profile.photoVerified ?? profile.verified}
                 personVerified={profile.personVerified ?? profile.verified}
@@ -244,12 +247,22 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         </View>
       )}
 
+      {isAiPersonaProfile(profile) && (
+        <View style={[styles.aiBanner, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Text style={[styles.aiBannerText, { color: colors.textMuted }]}>
+            ✨ AI practice match — replies are generated to help you practice chatting. Not a real person.
+          </Text>
+        </View>
+      )}
+
       {conversation.messages.length === 0 ? (
         <View style={styles.emptyThread}>
           <Text style={styles.emptyEmoji}>👋</Text>
           <Text style={[styles.emptyTitle, { color: colors.text }]}>Say hi to {profile.name}</Text>
           <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-            Matches expire in 24 hours — send the first message to keep the spark alive.
+            {isAiPersonaProfile(profile)
+              ? 'They already sent an opener — reply to keep the practice going.'
+              : 'Matches expire in 24 hours — send the first message to keep the spark alive.'}
           </Text>
           <View style={styles.icebreakers}>
             <Text style={[styles.icebreakerTitle, { color: colors.textMuted }]}>
@@ -488,6 +501,18 @@ const styles = StyleSheet.create({
   checkInButtonText: {
     fontSize: 12,
     fontWeight: '700',
+  },
+  aiBanner: {
+    marginHorizontal: spacing.md,
+    marginTop: spacing.sm,
+    padding: spacing.sm + 2,
+    borderRadius: radii.card,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  aiBannerText: {
+    fontSize: 12,
+    lineHeight: 17,
+    textAlign: 'center',
   },
   emptyThread: {
     flex: 1,

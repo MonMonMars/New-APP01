@@ -13,6 +13,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { AiPersonaBadge } from './AiPersonaBadge';
 import { VideoProfileOverlay } from './VideoProfileOverlay';
 import { VerificationBadges } from './VerificationBadges';
 import { colors, radii, spacing } from '../theme';
@@ -177,14 +178,17 @@ export function ProfileCard({
       )}
 
       <View style={[styles.info, compact && styles.infoCompact]}>
-        <Text style={[styles.name, compact && styles.nameCompact]}>
-          {profile.name}, {profile.age}
-        </Text>
-        <VerificationBadges
-          photoVerified={profile.photoVerified ?? profile.verified}
-          personVerified={profile.personVerified ?? profile.verified}
-          size="sm"
-        />
+        <View style={styles.nameRow}>
+          <Text style={[styles.name, compact && styles.nameCompact]}>
+            {profile.name}, {profile.age}
+          </Text>
+          <AiPersonaBadge profile={profile} compact />
+          <VerificationBadges
+            photoVerified={profile.photoVerified ?? profile.verified}
+            personVerified={profile.personVerified ?? profile.verified}
+            size="sm"
+          />
+        </View>
         {profile.job && <Text style={[styles.job, compact && styles.jobCompact]}>{profile.job}</Text>}
         <Text style={[styles.distance, compact && styles.distanceCompact]}>
           {profile.city ? `${profile.city} · ` : ''}{profile.distanceMiles} mi
@@ -321,6 +325,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
   },
   name: {
     color: colors.text,

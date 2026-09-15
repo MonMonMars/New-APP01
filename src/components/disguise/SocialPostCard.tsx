@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Alert, Share, StyleSheet, Text, View } from 'react-native';
 
+import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
@@ -17,9 +18,17 @@ type SocialPostCardProps = {
 
 export function SocialPostCard({ post }: SocialPostCardProps) {
   const { colors } = useTheme();
+  const {
+    pulseSocial,
+    savePulsePost,
+    unsavePulsePost,
+    mutePulseAuthor,
+    reportPulsePost,
+  } = useApp();
   const [upvoted, setUpvoted] = useState(false);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const isSaved = pulseSocial.savedPostIds.includes(post.id);
   const likeCount = upvoted ? post.likes + 1 : post.likes;
 
   const photoReporter = {
@@ -31,6 +40,42 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
   };
 
   const maskSnippet = post.avatarMask?.text.split(' ').slice(0, 2).join(' ') ?? 'LIVE';
+
+  const handleSave = () => {
+    if (isSaved) {
+      unsavePulsePost(post.id);
+      Alert.alert('Removed', 'Post removed from saved.');
+      return;
+    }
+    savePulsePost(post.id);
+    Alert.alert('Saved', 'Post added to your saved list.');
+  };
+
+  const handleMute = () => {
+    mutePulseAuthor(post.handle);
+    Alert.alert('Muted', `${post.author} will no longer appear in your feed.`);
+  };
+
+  const handleReport = () => {
+    Alert.alert('Report post', 'Why are you reporting this post?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Misleading',
+        onPress: () => {
+          reportPulsePost(post.id, 'Misleading content');
+          Alert.alert('Reported', 'Thanks — we will review this post.');
+        },
+      },
+      {
+        text: 'Harmful',
+        style: 'destructive',
+        onPress: () => {
+          reportPulsePost(post.id, 'Harmful content');
+          Alert.alert('Reported', 'Thanks — we will review this post.');
+        },
+      },
+    ]);
+  };
 
   return (
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -59,9 +104,9 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
           style={styles.moreButton}
           onPress={() => {
             Alert.alert('Post options', undefined, [
-              { text: 'Save post', onPress: () => {} },
-              { text: 'Mute author', onPress: () => {} },
-              { text: 'Report', style: 'destructive', onPress: () => {} },
+              { text: isSaved ? 'Unsave post' : 'Save post', onPress: handleSave },
+              { text: 'Mute author', onPress: handleMute },
+              { text: 'Report', style: 'destructive', onPress: handleReport },
               { text: 'Cancel', style: 'cancel' },
             ]);
           }}

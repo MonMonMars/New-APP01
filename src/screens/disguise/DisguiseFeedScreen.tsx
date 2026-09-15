@@ -38,15 +38,25 @@ function renderFeedItem({ item }: { item: FeedItem }) {
 export function DisguiseFeedScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { user, disguiseAdCreative } = useApp();
+  const { user, disguiseAdCreative, pulseSocial } = useApp();
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
   const route = useRoute<RouteProp<DisguiseTabParamList, 'Home'>>();
   const topic = route.params?.topic;
 
   const feedItems = useMemo(() => {
     const base = buildDisguiseFeed(user, disguiseAdCreative);
-    return filterDisguiseFeed(base, topic);
-  }, [user, disguiseAdCreative, topic]);
+    const filtered = filterDisguiseFeed(base, topic);
+    return filtered.filter((item) => {
+      if (item.type !== 'social') {
+        return true;
+      }
+      if (pulseSocial.reportedPostIds.includes(item.id)) {
+        return false;
+      }
+      const authorHandle = item.handle.trim().toLowerCase();
+      return !pulseSocial.mutedAuthors.includes(authorHandle);
+    });
+  }, [user, disguiseAdCreative, topic, pulseSocial.mutedAuthors, pulseSocial.reportedPostIds]);
 
   const sectionLabel = topicFilterLabel(topic);
 

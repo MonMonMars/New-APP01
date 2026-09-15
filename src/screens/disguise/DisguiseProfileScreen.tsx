@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,6 +10,9 @@ import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
+import { PASSPORT_CITIES } from '../../types/preferences';
+import { ThemeMode } from '../../types/settings';
+import { LEGAL_ENTITY } from '../../constants/legalEntity';
 import { radii, spacing } from '../../theme';
 import {
   buildDisguisedProfileFeedItem,
@@ -40,8 +44,18 @@ const HELP_ITEMS: PulseDetailItem[] = [
 
 export function DisguiseProfileScreen() {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
   const { colors } = useTheme();
-  const { user, disguiseMode, setDisguiseMode, disguiseAdCreative } = useApp();
+  const {
+    user,
+    disguiseMode,
+    setDisguiseMode,
+    disguiseAdCreative,
+    themeMode,
+    setThemeMode,
+    updatePreferences,
+    preferences,
+  } = useApp();
   const [showGenerator, setShowGenerator] = useState(false);
   const [detailSheet, setDetailSheet] = useState<DetailSheetKey>(null);
   const profileCreative = disguiseAdCreative ?? {
@@ -198,11 +212,52 @@ export function DisguiseProfileScreen() {
           items={detailConfig[detailSheet].items}
           onClose={() => setDetailSheet(null)}
           onItemPress={(item) => {
+            if (item.id === 'st1') {
+              setDetailSheet(null);
+              navigation.getParent()?.navigate('NotificationPreferences');
+              return;
+            }
+            if (item.id === 'st2') {
+              const next: ThemeMode =
+                themeMode === 'dark' ? 'light' : themeMode === 'light' ? 'system' : 'dark';
+              setThemeMode(next);
+              Alert.alert('Appearance updated', `Theme set to ${next}.`);
+              return;
+            }
+            if (item.id === 'st3') {
+              Alert.alert('Region & language', 'Choose your region', [
+                ...PASSPORT_CITIES.slice(0, 5).map((city) => ({
+                  text: city,
+                  onPress: () => {
+                    updatePreferences({ ...preferences, passportCity: city });
+                    Alert.alert('Region updated', `Showing content for ${city}.`);
+                  },
+                })),
+                { text: 'Cancel', style: 'cancel' },
+              ]);
+              return;
+            }
             if (item.id === 'st4') {
+              setDetailSheet(null);
+              navigation.getParent()?.navigate('PrivacyCenter');
+              return;
+            }
+            if (item.id === 'h1') {
               Alert.alert(
-                'Data & privacy',
-                'Unlock Spark and open Profile → Safety & privacy → Privacy controls to download your data, manage consent, or delete your account.',
+                'Disguise mode',
+                'Pulse looks like a news app in public. Tap the Pulse logo and enter your PIN to unlock Spark when it is safe.',
               );
+              return;
+            }
+            if (item.id === 'h2') {
+              Alert.alert(
+                'Report a post',
+                'Tap the ••• menu on any post, then choose Report. We review reports within 24 hours.',
+              );
+              return;
+            }
+            if (item.id === 'h3') {
+              Alert.alert('Contact support', `Email ${LEGAL_ENTITY.supportEmail} — we typically reply within one business day.`);
             }
           }}
         />

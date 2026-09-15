@@ -172,7 +172,7 @@ export function DisguiseTrendingScreen() {
         />
 
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Stock market</Text>
-        <DisguiseMarketsPanel onQuotePress={() => openTopic('#MarketWatch')} />
+        <DisguiseMarketsPanel onQuotePress={(symbol) => openTopic(`#${symbol}`)} />
 
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Local radar</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.radarRow}>

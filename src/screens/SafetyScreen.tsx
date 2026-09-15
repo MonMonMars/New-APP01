@@ -4,6 +4,7 @@ import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
+import { useApp } from '../context/AppContext';
 import { legalDocumentLinks, LegalDocumentId } from '../content/legalDocuments';
 import { colors, radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -89,6 +90,7 @@ const legalDocIconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
 export function SafetyScreen({ onClose }: SafetyScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const { blockedProfiles, unblockProfile } = useApp();
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
@@ -148,6 +150,25 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
             <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
           </AnimatedPressable>
         ))}
+
+        {blockedProfiles.length > 0 ? (
+          <>
+            <Text style={styles.sectionTitle}>Blocked users</Text>
+            {blockedProfiles.map((profile) => (
+              <View key={profile.id} style={styles.blockedRow}>
+                <Text style={styles.blockedName}>{profile.name}</Text>
+                <AnimatedPressable
+                  onPress={() => {
+                    unblockProfile(profile.id);
+                    Alert.alert('Unblocked', `${profile.name} can appear in your deck again.`);
+                  }}
+                >
+                  <Text style={styles.unblockText}>Unblock</Text>
+                </AnimatedPressable>
+              </View>
+            ))}
+          </>
+        ) : null}
 
         <Text style={styles.sectionTitle}>Quick actions</Text>
         {resources.map((item) => (
@@ -289,5 +310,23 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: 12,
     marginTop: 2,
+  },
+  blockedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#2A2A2E',
+  },
+  blockedName: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  unblockText: {
+    color: colors.gradientEnd,
+    fontSize: 14,
+    fontWeight: '700',
   },
 });

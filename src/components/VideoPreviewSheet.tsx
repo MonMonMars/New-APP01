@@ -1,5 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
 import { Image, Modal, StyleSheet, Text, View } from 'react-native';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
@@ -16,6 +24,31 @@ type VideoPreviewSheetProps = {
 export function VideoPreviewSheet({ visible, profile, onClose }: VideoPreviewSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const [playing, setPlaying] = useState(false);
+  const kenBurns = useSharedValue(1);
+
+  useEffect(() => {
+    if (!visible) {
+      setPlaying(false);
+      kenBurns.value = 1;
+    }
+  }, [visible, kenBurns]);
+
+  useEffect(() => {
+    if (playing) {
+      kenBurns.value = withRepeat(
+        withTiming(1.08, { duration: 8000, easing: Easing.inOut(Easing.ease) }),
+        -1,
+        true,
+      );
+    } else {
+      kenBurns.value = withTiming(1, { duration: 300 });
+    }
+  }, [playing, kenBurns]);
+
+  const imageStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: kenBurns.value }],
+  }));
 
   if (!profile) {
     return null;
@@ -32,15 +65,29 @@ export function VideoPreviewSheet({ visible, profile, onClose }: VideoPreviewShe
           <View style={styles.headerSpacer} />
         </View>
 
-        <View style={styles.player}>
-          <Image source={{ uri: profile.photos[0] }} style={styles.previewImage} resizeMode="cover" />
-          <View style={styles.playOverlay}>
-            <View style={[styles.playButton, { backgroundColor: colors.overlay }]}>
-              <Ionicons name="play" size={36} color={colors.text} />
+        <AnimatedPressable
+          style={styles.player}
+          onPress={() => setPlaying((value) => !value)}
+          accessibilityRole="button"
+          accessibilityLabel={playing ? 'Pause video' : 'Play video'}
+        >
+          <Animated.View style={[styles.imageWrap, imageStyle]}>
+            <Image source={{ uri: profile.photos[0] }} style={styles.previewImage} resizeMode="cover" />
+          </Animated.View>
+          {!playing ? (
+            <View style={styles.playOverlay}>
+              <View style={[styles.playButton, { backgroundColor: colors.overlay }]}>
+                <Ionicons name="play" size={36} color={colors.text} />
+              </View>
+              <Text style={[styles.playLabel, { color: colors.text }]}>Tap to play</Text>
             </View>
-            <Text style={[styles.playLabel, { color: colors.text }]}>Tap to play</Text>
-          </View>
-        </View>
+          ) : (
+            <View style={styles.playingBadge}>
+              <Ionicons name="pause" size={16} color="#fff" />
+              <Text style={styles.playingText}>Playing preview</Text>
+            </View>
+          )}
+        </AnimatedPressable>
 
         <View style={styles.meta}>
           <Text style={[styles.name, { color: colors.text }]}>{profile.name}, {profile.age}</Text>
@@ -80,6 +127,11 @@ const styles = StyleSheet.create({
     maxHeight: 420,
     alignSelf: 'center',
     width: '100%',
+    backgroundColor: '#000',
+  },
+  imageWrap: {
+    width: '100%',
+    height: '100%',
   },
   previewImage: {
     width: '100%',
@@ -105,6 +157,23 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     opacity: 0.9,
+  },
+  playingBadge: {
+    position: 'absolute',
+    top: spacing.sm,
+    right: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+    borderRadius: radii.button,
+  },
+  playingText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
   },
   meta: {
     paddingHorizontal: spacing.lg,

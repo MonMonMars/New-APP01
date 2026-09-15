@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { verificationHowItWorksSteps } from '../content/verificationPolicy';
+import { runVerificationFlow } from '../utils/verificationFlow';
 import { useTheme } from '../context/ThemeContext';
 import { UserProfile } from '../types/profile';
 import { radii, spacing } from '../theme';
@@ -27,48 +28,15 @@ export function ProfileTrustSection({ user, onUpdate, onOpenPolicy }: ProfileTru
   const { colors } = useTheme();
 
   const verifyPhoto = () => {
-    Alert.alert(
-      'Photo verification',
-      'Take a live selfie. We compare it to your profile photos to confirm they are you. See the Verification Policy for full details.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Read policy', onPress: onOpenPolicy },
-        {
-          text: 'Take selfie',
-          onPress: () => onUpdate({ photoVerified: true }),
-        },
-      ],
-    );
+    runVerificationFlow('photo', () => onUpdate({ photoVerified: true }), onOpenPolicy);
   };
 
   const verifyPerson = () => {
-    Alert.alert(
-      'Real person check',
-      'Complete a short liveness scan (blink, turn your head). This confirms you are a real human, not a bot or fake account.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Read policy', onPress: onOpenPolicy },
-        {
-          text: 'Start scan',
-          onPress: () => onUpdate({ personVerified: true }),
-        },
-      ],
-    );
+    runVerificationFlow('person', () => onUpdate({ personVerified: true }), onOpenPolicy);
   };
 
   const verifyAge = () => {
-    Alert.alert(
-      'Age verification',
-      'Submit a government ID through a secure flow to confirm you are 18+. We store pass/fail status only.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Read policy', onPress: onOpenPolicy },
-        {
-          text: 'Continue',
-          onPress: () => onUpdate({ ageVerified: true }),
-        },
-      ],
-    );
+    runVerificationFlow('age', () => onUpdate({ ageVerified: true }), onOpenPolicy);
   };
 
   const items: TrustItem[] = [

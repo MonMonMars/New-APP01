@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
@@ -20,13 +22,40 @@ const SEED_REPLIES = [
   { author: 'Omar K.', handle: '@omark', body: 'Needed this today — thanks for posting.', timeAgo: '6h' },
 ];
 
+function formatTimeAgo(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const minutes = Math.max(1, Math.floor(diffMs / 60_000));
+  if (minutes < 60) {
+    return `${minutes}m`;
+  }
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) {
+    return `${hours}h`;
+  }
+  return `${Math.floor(hours / 24)}d`;
+}
+
 export function SocialCommentSheet({ visible, post, onClose }: SocialCommentSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { addPulseComment, getPulseComments } = useApp();
+  const [draft, setDraft] = useState('');
 
   if (!post) {
     return null;
   }
+
+  const userComments = getPulseComments(post.id);
+  const seedReplies = SEED_REPLIES.slice(0, Math.min(post.comments, SEED_REPLIES.length));
+
+  const handlePost = () => {
+    const trimmed = draft.trim();
+    if (!trimmed) {
+      return;
+    }
+    addPulseComment(post.id, trimmed);
+    setDraft('');
+  };
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
@@ -51,7 +80,7 @@ export function SocialCommentSheet({ visible, post, onClose }: SocialCommentShee
             />
           </View>
 
-          {SEED_REPLIES.slice(0, Math.min(post.comments, SEED_REPLIES.length)).map((reply) => (
+          {seedReplies.map((reply) => (
             <View key={reply.handle} style={[styles.reply, { borderBottomColor: colors.border }]}>
               <Text style={[styles.replyAuthor, { color: colors.text }]}>
                 {reply.author} <Text style={{ color: colors.textMuted }}>{reply.handle}</Text>
@@ -60,7 +89,45 @@ export function SocialCommentSheet({ visible, post, onClose }: SocialCommentShee
               <Text style={[styles.replyTime, { color: colors.textMuted }]}>{reply.timeAgo}</Text>
             </View>
           ))}
+
+          {userComments.map((reply) => (
+            <View key={`${reply.sentAt}-${reply.body}`} style={[styles.reply, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.replyAuthor, { color: colors.text }]}>
+                {reply.author} <Text style={{ color: colors.textMuted }}>{reply.handle}</Text>
+              </Text>
+              <Text style={[styles.replyBody, { color: colors.text }]}>{reply.body}</Text>
+              <Text style={[styles.replyTime, { color: colors.textMuted }]}>{formatTimeAgo(reply.sentAt)}</Text>
+            </View>
+          ))}
         </ScrollView>
+
+        <View
+          style={[
+            styles.composer,
+            {
+              borderTopColor: colors.border,
+              paddingBottom: insets.bottom + spacing.sm,
+              backgroundColor: colors.background,
+            },
+          ]}
+        >
+          <TextInput
+            value={draft}
+            onChangeText={setDraft}
+            placeholder="Add a comment..."
+            placeholderTextColor={colors.textMuted}
+            style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]}
+            onSubmitEditing={handlePost}
+            returnKeyType="send"
+          />
+          <AnimatedPressable
+            onPress={handlePost}
+            disabled={!draft.trim()}
+            style={[styles.sendBtn, { backgroundColor: draft.trim() ? colors.gradientEnd : colors.surface }]}
+          >
+            <Ionicons name="send" size={18} color={draft.trim() ? '#fff' : colors.textMuted} />
+          </AnimatedPressable>
+        </View>
       </View>
     </Modal>
   );
@@ -107,5 +174,27 @@ const styles = StyleSheet.create({
   replyTime: {
     fontSize: 11,
     marginTop: 4,
+  },
+  composer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  input: {
+    flex: 1,
+    borderRadius: radii.button,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    fontSize: 15,
+  },
+  sendBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

@@ -61,7 +61,9 @@ export function PrivacyCenterScreen({ onClose }: PrivacyCenterScreenProps) {
     const ok = await exportUserData();
     if (!ok) {
       Alert.alert('Export failed', 'Could not prepare your data export. Try again.');
+      return;
     }
+    Alert.alert('Export ready', 'Your data export was prepared. Use the share sheet to save or send it.');
   };
 
   const handleDelete = () => {

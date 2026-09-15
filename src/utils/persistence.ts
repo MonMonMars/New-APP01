@@ -10,6 +10,7 @@ import {
   LegalConsentRecord,
   PrivacyPreferences,
 } from '../types/privacy';
+import { defaultPulseSocialState, PulseSocialState } from '../types/pulseSocial';
 import {
   defaultNotificationPreferences,
   NotificationPreferences,
@@ -20,7 +21,7 @@ import { decryptLocalPayload, encryptLocalPayload } from './localEncryption';
 
 const STORAGE_KEY = '@spark/app_state';
 const SENSITIVE_VAULT_KEY = '@spark/sensitive_vault';
-const STORAGE_VERSION = 11;
+const STORAGE_VERSION = 12;
 
 type SensitiveVault = {
   conversations: Conversation[];
@@ -59,6 +60,7 @@ export type PersistedAppState = {
   securitySettings: SecuritySettings;
   privacyPreferences: PrivacyPreferences;
   legalConsent: LegalConsentRecord;
+  pulseSocial: PulseSocialState;
 };
 
 export function createDefaultPersistedState(): PersistedAppState {
@@ -106,6 +108,7 @@ export function createDefaultPersistedState(): PersistedAppState {
     securitySettings: defaultSecuritySettings,
     privacyPreferences: defaultPrivacyPreferences,
     legalConsent: defaultLegalConsent,
+    pulseSocial: defaultPulseSocialState,
   };
 }
 
@@ -183,6 +186,11 @@ export async function loadPersistedState(): Promise<PersistedAppState | null> {
       legalConsent: {
         ...defaultLegalConsent,
         ...parsed.legalConsent,
+      },
+      pulseSocial: {
+        ...defaultPulseSocialState,
+        ...parsed.pulseSocial,
+        postComments: parsed.pulseSocial?.postComments ?? {},
       },
     };
   } catch {

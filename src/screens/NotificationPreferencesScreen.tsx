@@ -44,10 +44,14 @@ function ToggleRow({ icon, label, description, value, onToggle }: ToggleRowProps
 export function NotificationPreferencesScreen({ onClose }: NotificationPreferencesScreenProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { notificationPreferences, updateNotificationPreferences } = useApp();
+  const { notificationPreferences, updateNotificationPreferences, enableNotifications, notificationsEnabled } =
+    useApp();
 
   const toggle = (key: keyof NotificationPreferences) => (value: boolean) => {
     updateNotificationPreferences({ ...notificationPreferences, [key]: value });
+    if (value && !notificationsEnabled && key !== 'marketing' && key !== 'disguiseSafe') {
+      void enableNotifications();
+    }
   };
 
   return (

@@ -28,7 +28,7 @@ export function DisguisePhotoLightbox({
 }: DisguisePhotoLightboxProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { likeProfile, passProfile } = useApp();
+  const { likeProfile, passProfile, unlikeProfile } = useApp();
   const [liked, setLiked] = useState(false);
   const [passed, setPassed] = useState(false);
 
@@ -56,6 +56,9 @@ export function DisguisePhotoLightbox({
 
   const handleUnlike = () => {
     setLiked(false);
+    if (linkedProfile) {
+      unlikeProfile(linkedProfile.id);
+    }
   };
 
   const handlePass = () => {

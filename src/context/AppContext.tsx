@@ -90,6 +90,7 @@ import {
   LegalConsentRecord,
   PrivacyPreferences,
 } from '../types/privacy';
+import { generateDemoReply } from '../services/demoChatLlm';
 import { buildUserDataExport, shareUserDataExport } from '../utils/dataExport';
 import {
   clearPersistedState,
@@ -1386,29 +1387,47 @@ export function AppProvider({ children }: { children: ReactNode }) {
         );
       }, 2500);
 
+      const replyProfile = targetConversation?.match.profile;
+      const replyHistory = targetConversation
+        ? [...targetConversation.messages, message]
+        : [message];
+
       setTimeout(() => {
-        setConversations((prev) =>
-          prev.map((conversation) => {
-            if (conversation.id !== conversationId) {
-              return conversation;
-            }
-            const reply: Message = {
-              id: `msg-reply-${Date.now()}`,
-              text: 'Haha, love that! 😊',
-              sentAt: new Date().toISOString(),
-              isMine: false,
-            };
-            return {
-              ...conversation,
-              isTyping: false,
-              messages: [...conversation.messages, reply],
-              lastMessage: reply.text,
-              lastMessageAt: reply.sentAt,
-              yourTurn: true,
-              unread: true,
-            };
-          }),
-        );
+        void (async () => {
+          let replyText = 'Haha, love that! 😊';
+          if (replyProfile) {
+            const result = await generateDemoReply({
+              profile: replyProfile,
+              userMessage: trimmed || (imageUrl ? 'sent a photo' : ''),
+              recentMessages: replyHistory,
+              userName: user.name,
+            });
+            replyText = result.text;
+          }
+
+          setConversations((prev) =>
+            prev.map((conversation) => {
+              if (conversation.id !== conversationId) {
+                return conversation;
+              }
+              const reply: Message = {
+                id: `msg-reply-${Date.now()}`,
+                text: replyText,
+                sentAt: new Date().toISOString(),
+                isMine: false,
+              };
+              return {
+                ...conversation,
+                isTyping: false,
+                messages: [...conversation.messages, reply],
+                lastMessage: reply.text,
+                lastMessageAt: reply.sentAt,
+                yourTurn: true,
+                unread: true,
+              };
+            }),
+          );
+        })();
       }, 4500);
     },
     [
@@ -1418,6 +1437,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       notificationPreferences.messages,
       notificationsEnabled,
       securitySettings.disguiseSafeNotifications,
+      user.name,
     ],
   );
 

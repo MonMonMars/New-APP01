@@ -233,6 +233,92 @@ export function buildSeedConversations(matches: Match[]): Conversation[] {
     });
   }
 
+  const jordan = findMatch(matches, '2');
+  if (jordan) {
+    conversations.push({
+      id: 'conv-2',
+      match: jordan,
+      messages: [
+        {
+          id: 'm2-1',
+          text: 'That taco spot on your profile — is it still open?',
+          sentAt: new Date(Date.now() - 2400000).toISOString(),
+          isMine: false,
+        },
+      ],
+      lastMessage: 'That taco spot on your profile — is it still open?',
+      lastMessageAt: new Date(Date.now() - 2400000).toISOString(),
+      yourTurn: true,
+      unread: true,
+    });
+  }
+
+  const mia = findMatch(matches, '3');
+  if (mia) {
+    conversations.push({
+      id: 'conv-3',
+      match: mia,
+      messages: [
+        {
+          id: 'm3-1',
+          text: 'Okay but what is your actual favorite ramen ranking in the city?',
+          sentAt: new Date(Date.now() - 4200000).toISOString(),
+          isMine: false,
+        },
+        {
+          id: 'm3-2',
+          text: 'Ichiran when I am feeling chaotic, otherwise a tiny place in East Village',
+          sentAt: new Date(Date.now() - 3900000).toISOString(),
+          isMine: true,
+        },
+      ],
+      lastMessage: 'Ichiran when I am feeling chaotic, otherwise a tiny place in East Village',
+      lastMessageAt: new Date(Date.now() - 3900000).toISOString(),
+      yourTurn: false,
+      unread: false,
+    });
+  }
+
+  const riley = findMatch(matches, '69');
+  if (riley) {
+    conversations.push({
+      id: 'conv-69',
+      match: riley,
+      messages: [
+        {
+          id: 'm69-1',
+          text: 'Desert island album? I need your answer before we proceed 😄',
+          sentAt: new Date(Date.now() - 1800000).toISOString(),
+          isMine: false,
+        },
+      ],
+      lastMessage: 'Desert island album? I need your answer before we proceed 😄',
+      lastMessageAt: new Date(Date.now() - 1800000).toISOString(),
+      yourTurn: true,
+      unread: true,
+    });
+  }
+
+  const marcus = findMatch(matches, '70');
+  if (marcus) {
+    conversations.push({
+      id: 'conv-70',
+      match: marcus,
+      messages: [
+        {
+          id: 'm70-1',
+          text: 'Celtics or Knicks? This is important.',
+          sentAt: new Date(Date.now() - 3000000).toISOString(),
+          isMine: false,
+        },
+      ],
+      lastMessage: 'Celtics or Knicks? This is important.',
+      lastMessageAt: new Date(Date.now() - 3000000).toISOString(),
+      yourTurn: true,
+      unread: true,
+    });
+  }
+
   return conversations;
 }
 

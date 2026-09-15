@@ -12,6 +12,8 @@ export type RootStackParamList = {
   VerificationPolicy: undefined;
   LegalDocument: { documentId: LegalDocumentId };
   SecuritySettings: undefined;
+  PrivacyCenter: undefined;
+  SecurityProtocols: undefined;
   NotificationPreferences: undefined;
   ConsumablesShop: undefined;
   MapDiscover: undefined;

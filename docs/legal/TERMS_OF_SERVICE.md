@@ -1,8 +1,8 @@
 # Spark — Terms of Service
 
-**Effective date:** [EFFECTIVE_DATE]  
+**Effective date:** 15 September 2025  
 **Last updated:** 14 September 2026  
-**Operator:** [LEGAL_ENTITY_NAME] (“**Spark**”, “**we**”, “**us**”, “**our**”)  
+**Operator:** Spark Labs Ltd. (“**Spark**”, “**we**”, “**us**”, “**our**”)  
 **Service:** Spark mobile and web applications, including Pulse disguise mode (the “**Service**”)
 
 ---
@@ -130,7 +130,7 @@ Some jurisdictions do not allow certain limitations; in those cases our liabilit
 
 ## 13. Indemnification
 
-You agree to defend, indemnify, and hold harmless [LEGAL_ENTITY_NAME] and its officers, directors, employees, and agents from claims, damages, losses, and expenses (including reasonable legal fees) arising from:
+You agree to defend, indemnify, and hold harmless Spark Labs Ltd. and its officers, directors, employees, and agents from claims, damages, losses, and expenses (including reasonable legal fees) arising from:
 
 - Your use of the Service  
 - Your content or conduct  
@@ -141,11 +141,11 @@ You agree to defend, indemnify, and hold harmless [LEGAL_ENTITY_NAME] and its of
 
 ## 14. Dispute resolution
 
-**Governing law:** These Terms are governed by the laws of **[JURISDICTION]**, without regard to conflict-of-law rules.
+**Governing law:** These Terms are governed by the laws of **England and Wales**, without regard to conflict-of-law rules.
 
-**Informal resolution:** Contact `[SUPPORT_EMAIL]` before formal proceedings.
+**Informal resolution:** Contact `support@spark.app` before formal proceedings.
 
-**Arbitration / courts:** [CHOOSE ONE WITH COUNSEL — e.g. “Disputes shall be resolved by binding arbitration in [city]” OR “Courts of [JURISDICTION] shall have exclusive jurisdiction.”]
+**Arbitration / courts:** Courts of England and Wales shall have exclusive jurisdiction, except where mandatory consumer protection laws in your country require otherwise.
 
 **Class action waiver:** To the extent permitted by law, disputes are resolved only on an individual basis, not as a class or representative action.
 
@@ -167,10 +167,10 @@ We may update these Terms. Material changes will be notified in-app or by email 
 
 ## 17. Contact
 
-**[LEGAL_ENTITY_NAME]**  
-Address: [REGISTERED_ADDRESS]  
-Email: [SUPPORT_EMAIL]  
-Website: [WEBSITE_URL]
+**Spark Labs Ltd.**  
+Address: 71-75 Shelton Street, Covent Garden, London WC2H 9JQ, United Kingdom  
+Email: support@spark.app  
+Website: https://spark.app
 
 ---
 

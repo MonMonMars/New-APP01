@@ -3,7 +3,9 @@ import { useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { LegalPreviewSheet } from '../../components/legal/LegalPreviewSheet';
 import { PhotoCarousel } from '../../components/PhotoCarousel';
+import { LegalDocumentId } from '../../content/legalDocuments';
 import { useApp } from '../../context/AppContext';
 import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
 import {
@@ -21,10 +23,10 @@ import { AnimatedPressable } from '../../components/AnimatedPressable';
 type Step = 'welcome' | 'rules' | 'location' | 'intent' | 'identity' | 'profile';
 
 const rules = [
-  'Respectful comments only — keep discussions civil.',
-  'Verify news before you share it.',
-  'No spam, scams, or misleading posts.',
-  'Report suspicious activity — we review every report.',
+  'Be honest — use your own recent photos and accurate age.',
+  'Be respectful — no harassment, hate speech, or unwanted contact.',
+  'Stay safe — meet in public and report suspicious behaviour.',
+  '18+ only — one person, one account.',
 ];
 
 const intentOptions: { value: RelationshipIntent; label: string; hint: string }[] = [
@@ -36,8 +38,11 @@ const intentOptions: { value: RelationshipIntent; label: string; hint: string }[
 
 export function OnboardingFlow() {
   const insets = useSafeAreaInsets();
-  const { completeOnboarding, signInWithAppleStub, signInWithEmailMagicLink, user } = useApp();
+  const { completeOnboarding, signInWithAppleStub, signInWithEmailMagicLink, acceptOnboardingLegal, user } =
+    useApp();
   const [step, setStep] = useState<Step>('welcome');
+  const [legalAccepted, setLegalAccepted] = useState(false);
+  const [legalPreviewId, setLegalPreviewId] = useState<LegalDocumentId | null>(null);
   const [email, setEmail] = useState('');
   const [emailMessage, setEmailMessage] = useState<string | null>(null);
   const [name, setName] = useState(user.name);
@@ -171,12 +176,44 @@ export function OnboardingFlow() {
             </View>
           ))}
           <Text style={styles.legalNote}>
-            By continuing you agree to Spark&apos;s Terms of Service, Privacy Policy, Community
-            Guidelines, and Disguise Mode Policy. You must be 18 or older. Full legal documents are
-            available in Safety Center after setup (使用者條款 · 隱私政策 · 社群規範 · 偽裝模式政策).
+            I agree to Spark&apos;s{' '}
+            <Text style={styles.legalLink} onPress={() => setLegalPreviewId('terms')}>
+              Terms
+            </Text>
+            ,{' '}
+            <Text style={styles.legalLink} onPress={() => setLegalPreviewId('privacy')}>
+              Privacy Policy
+            </Text>
+            ,{' '}
+            <Text style={styles.legalLink} onPress={() => setLegalPreviewId('community')}>
+              Community Guidelines
+            </Text>
+            , and{' '}
+            <Text style={styles.legalLink} onPress={() => setLegalPreviewId('disguise')}>
+              Disguise Mode Policy
+            </Text>
+            . I am 18 or older.
           </Text>
-          <AnimatedPressable style={styles.primaryButton} onPress={() => setStep('location')}>
-            <Text style={styles.primaryButtonText}>I agree — I am 18+</Text>
+          <AnimatedPressable
+            style={[styles.checkboxRow, legalAccepted && styles.checkboxRowActive]}
+            onPress={() => setLegalAccepted((v) => !v)}
+          >
+            <Ionicons
+              name={legalAccepted ? 'checkbox' : 'square-outline'}
+              size={22}
+              color={legalAccepted ? colors.gradientEnd : colors.textMuted}
+            />
+            <Text style={styles.checkboxLabel}>I have read and agree to the policies above</Text>
+          </AnimatedPressable>
+          <AnimatedPressable
+            style={[styles.primaryButton, !legalAccepted && styles.primaryButtonDisabled]}
+            onPress={() => {
+              acceptOnboardingLegal();
+              setStep('location');
+            }}
+            disabled={!legalAccepted}
+          >
+            <Text style={styles.primaryButtonText}>Continue — I am 18+</Text>
           </AnimatedPressable>
         </View>
       )}
@@ -332,6 +369,12 @@ export function OnboardingFlow() {
           </AnimatedPressable>
         </View>
       )}
+
+      <LegalPreviewSheet
+        visible={legalPreviewId !== null}
+        documentId={legalPreviewId}
+        onClose={() => setLegalPreviewId(null)}
+      />
     </View>
   );
 }
@@ -407,7 +450,35 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 19,
     marginTop: spacing.md,
+    marginBottom: spacing.md,
+  },
+  legalLink: {
+    color: colors.gradientEnd,
+    fontWeight: '700',
+    textDecorationLine: 'underline',
+  },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
     marginBottom: spacing.lg,
+    padding: spacing.sm,
+    borderRadius: radii.card,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+  },
+  checkboxRowActive: {
+    borderColor: colors.gradientEnd,
+    backgroundColor: 'rgba(99,102,241,0.08)',
+  },
+  checkboxLabel: {
+    color: colors.text,
+    fontSize: 14,
+    flex: 1,
+    lineHeight: 20,
+  },
+  primaryButtonDisabled: {
+    opacity: 0.45,
   },
   mapPlaceholder: {
     backgroundColor: colors.surface,

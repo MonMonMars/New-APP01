@@ -24,6 +24,8 @@ import { NotificationPreferencesScreen } from '../screens/NotificationPreference
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { SafetyScreen } from '../screens/SafetyScreen';
 import { LegalDocumentScreen } from '../screens/LegalDocumentScreen';
+import { PrivacyCenterScreen } from '../screens/PrivacyCenterScreen';
+import { SecurityProtocolsScreen } from '../screens/SecurityProtocolsScreen';
 import { SecuritySettingsScreen } from '../screens/SecuritySettingsScreen';
 import { VerificationPolicyScreen } from '../screens/VerificationPolicyScreen';
 import { SparkPlusScreen } from '../screens/SparkPlusScreen';
@@ -152,6 +154,18 @@ function SecuritySettingsWrapper({
   return <SecuritySettingsScreen onClose={() => navigation.goBack()} />;
 }
 
+function PrivacyCenterWrapper({
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, 'PrivacyCenter'>) {
+  return <PrivacyCenterScreen onClose={() => navigation.goBack()} />;
+}
+
+function SecurityProtocolsWrapper({
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, 'SecurityProtocols'>) {
+  return <SecurityProtocolsScreen onClose={() => navigation.goBack()} />;
+}
+
 function NotificationPreferencesWrapper({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, 'NotificationPreferences'>) {
@@ -235,6 +249,16 @@ function RootNavigator() {
           <Stack.Screen
             name="SecuritySettings"
             component={SecuritySettingsWrapper}
+            options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="PrivacyCenter"
+            component={PrivacyCenterWrapper}
+            options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="SecurityProtocols"
+            component={SecurityProtocolsWrapper}
             options={{ animation: 'slide_from_right' }}
           />
           <Stack.Screen

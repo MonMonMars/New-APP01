@@ -1,8 +1,8 @@
 # Spark — 使用者條款（服務條款）
 
-**生效日期：** [EFFECTIVE_DATE]  
+**生效日期：** 15 September 2025  
 **最後更新：** 2026 年 9 月 14 日  
-**營運方：** [LEGAL_ENTITY_NAME]（「**Spark**」、「**我們**」）  
+**營運方：** Spark Labs Ltd.（「**Spark**」、「**我們**」）  
 **服務範圍：** Spark 行動與網頁應用程式，含 Pulse 偽裝模式（「**本服務**」）
 
 ---
@@ -130,7 +130,7 @@ Spark、Pulse、標誌及服務設計為我們或授權人之財產。未經書�
 
 ## 13. 補償
 
-您同意為 [LEGAL_ENTITY_NAME] 及其負責人、董事、員工及代理人辯護、補償並使其免受因下列事由所生之請求、損害、損失及費用（含合理律師費）：
+您同意為 Spark Labs Ltd. 及其負責人、董事、員工及代理人辯護、補償並使其免受因下列事由所生之請求、損害、損失及費用（含合理律師費）：
 
 - 您使用本服務  
 - 您的內容或行為  
@@ -141,11 +141,11 @@ Spark、Pulse、標誌及服務設計為我們或授權人之財產。未經書�
 
 ## 14. 爭議解決
 
-**準據法：** 本條款受 **[JURISDICTION]** 法律管轄，不適用法律衝突原則。
+**準據法：** 本條款受 **England and Wales** 法律管轄，不適用法律衝突原則。
 
-**非正式解決：** 正式程序前請先聯絡 `[SUPPORT_EMAIL]`。
+**非正式解決：** 正式程序前請先聯絡 `support@spark.app`。
 
-**仲裁／法院：** [與律師選擇其一 — 例如「爭議應在 [城市] 以具拘束力仲裁解決」或「[JURISDICTION] 法院享有專屬管轄權」]
+**仲裁／法院：** 除您所在國家強制消費者保護法律另有規定外，England and Wales 法院享有專屬管轄權。
 
 **集體訴訟拋棄：** 在法律允許範圍內，爭議僅以個人方式解決，不得作為集體或代表訴訟。
 
@@ -167,10 +167,10 @@ Spark、Pulse、標誌及服務設計為我們或授權人之財產。未經書�
 
 ## 17. 聯絡方式
 
-**[LEGAL_ENTITY_NAME]**  
-地址：[REGISTERED_ADDRESS]  
-電子郵件：[SUPPORT_EMAIL]  
-網站：[WEBSITE_URL]
+**Spark Labs Ltd.**  
+地址：71-75 Shelton Street, Covent Garden, London WC2H 9JQ, United Kingdom  
+電子郵件：support@spark.app  
+網站：https://spark.app
 
 ---
 

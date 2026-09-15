@@ -24,7 +24,7 @@ export type TrendingBrief = {
 export type TrendingCategoryChip = {
   id: string;
   label: string;
-  icon: 'flash' | 'business' | 'location' | 'restaurant' | 'trending-up' | 'calendar';
+  icon: 'flash' | 'business' | 'location' | 'restaurant' | 'trending-up' | 'calendar' | 'cloud';
   topic?: string;
 };
 
@@ -67,11 +67,12 @@ export const pulseBrief: TrendingBrief = {
 
 export const trendingCategoryChips: TrendingCategoryChip[] = [
   { id: 'c0', label: 'For you', icon: 'flash' },
-  { id: 'c1', label: 'Tech', icon: 'business', topic: '#TechNews' },
-  { id: 'c2', label: 'Local', icon: 'location', topic: '#CityLife' },
-  { id: 'c3', label: 'Food', icon: 'restaurant', topic: '#CoffeeShops' },
-  { id: 'c4', label: 'Markets', icon: 'trending-up', topic: '#MarketWatch' },
-  { id: 'c5', label: 'Weekend', icon: 'calendar', topic: '#WeekendPlans' },
+  { id: 'c1', label: 'Weather', icon: 'cloud', topic: '#WeekendPlans' },
+  { id: 'c2', label: 'Markets', icon: 'trending-up', topic: '#MarketWatch' },
+  { id: 'c3', label: 'Tech', icon: 'business', topic: '#TechNews' },
+  { id: 'c4', label: 'Local', icon: 'location', topic: '#CityLife' },
+  { id: 'c5', label: 'Food', icon: 'restaurant', topic: '#CoffeeShops' },
+  { id: 'c6', label: 'Weekend', icon: 'calendar', topic: '#WeekendPlans' },
 ];
 
 export const localRadarItems: LocalRadarItem[] = [

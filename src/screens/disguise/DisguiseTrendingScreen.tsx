@@ -5,18 +5,20 @@ import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
+import { DisguiseMarketsPanel } from '../../components/disguise/DisguiseMarketsPanel';
+import { DisguiseWeatherPanel } from '../../components/disguise/DisguiseWeatherPanel';
 import { useTheme } from '../../context/ThemeContext';
 import {
   breakingNowCards,
   disguiseTrendingTopics,
   editorsPicks,
   localRadarItems,
-  marketPulseSnapshots,
   pulseBrief,
   trendingCategoryChips,
   TrendDirection,
   TrendingCategoryChip,
 } from '../../data/disguiseTrending';
+import { useDisguiseWeather } from '../../hooks/useDisguiseWeather';
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
 import { radii, spacing } from '../../theme';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
@@ -74,6 +76,8 @@ function chipIcon(icon: TrendingCategoryChip['icon']): keyof typeof Ionicons.gly
       return 'trending-up-outline';
     case 'calendar':
       return 'calendar-outline';
+    case 'cloud':
+      return 'partly-sunny-outline';
     default: {
       const _exhaustive: never = icon;
       return _exhaustive;
@@ -102,6 +106,7 @@ export function DisguiseTrendingScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
+  const { weather, isLive } = useDisguiseWeather();
 
   const openTopic = (topic?: string) => {
     navigation.navigate('Home', topic ? { topic } : {});
@@ -113,7 +118,7 @@ export function DisguiseTrendingScreen() {
       <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
         <Text style={[styles.pageTitle, { color: colors.text }]}>Trending & useful</Text>
         <Text style={[styles.pageSubtitle, { color: colors.textMuted }]}>
-          Stories, local radar, and topics worth your time today
+          Weather, markets, local radar, and topics worth your time today
         </Text>
 
         <AnimatedPressable
@@ -159,6 +164,16 @@ export function DisguiseTrendingScreen() {
           ))}
         </ScrollView>
 
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Weather</Text>
+        <DisguiseWeatherPanel
+          weather={weather}
+          isLive={isLive}
+          onPress={() => openTopic('#WeekendPlans')}
+        />
+
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Stock market</Text>
+        <DisguiseMarketsPanel onQuotePress={() => openTopic('#MarketWatch')} />
+
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Local radar</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.radarRow}>
           {localRadarItems.map((item) => (
@@ -175,23 +190,6 @@ export function DisguiseTrendingScreen() {
             </AnimatedPressable>
           ))}
         </ScrollView>
-
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Markets at a glance</Text>
-        <View style={[styles.marketsRow, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          {marketPulseSnapshots.map((market) => (
-            <AnimatedPressable
-              key={market.id}
-              style={styles.marketCell}
-              onPress={() => openTopic('#MarketWatch')}
-            >
-              <Text style={[styles.marketSymbol, { color: colors.textMuted }]}>{market.symbol}</Text>
-              <Text style={[styles.marketValue, { color: colors.text }]}>{market.value}</Text>
-              <Text style={[styles.marketChange, { color: market.up ? '#22c55e' : '#ef4444' }]}>
-                {market.change}
-              </Text>
-            </AnimatedPressable>
-          ))}
-        </View>
 
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Breaking now</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.breakingRow}>
@@ -398,35 +396,6 @@ const styles = StyleSheet.create({
   radarDetail: {
     fontSize: 12,
     lineHeight: 16,
-  },
-  marketsRow: {
-    flexDirection: 'row',
-    borderRadius: radii.card,
-    borderWidth: StyleSheet.hairlineWidth,
-    marginBottom: spacing.lg,
-    overflow: 'hidden',
-  },
-  marketCell: {
-    flex: 1,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.sm,
-    alignItems: 'center',
-  },
-  marketSymbol: {
-    fontSize: 10,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.3,
-  },
-  marketValue: {
-    fontSize: 15,
-    fontWeight: '800',
-    marginTop: 4,
-  },
-  marketChange: {
-    fontSize: 11,
-    fontWeight: '700',
-    marginTop: 2,
   },
   breakingRow: {
     gap: spacing.sm,

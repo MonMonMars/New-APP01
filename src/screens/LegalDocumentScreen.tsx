@@ -50,8 +50,8 @@ export function LegalDocumentScreen({ documentId, onClose }: LegalDocumentScreen
         <View style={[styles.notice, { backgroundColor: colors.surface }]}>
           <Ionicons name="information-circle-outline" size={18} color={colors.textMuted} />
           <Text style={[styles.noticeText, { color: colors.textMuted }]}>
-            These summaries support in-app transparency. They are not legal advice. Consult qualified
-            counsel and read the full documents in docs/legal/ before a public launch.
+            These summaries support in-app transparency. They are not legal advice. For formal requests
+            or counsel review, contact legal@spark.app.
           </Text>
         </View>
 

@@ -51,10 +51,10 @@ export const verificationPolicySections: PolicySection[] = [
       'Badges do not mean we ran a criminal background check, that someone is safe to meet alone, or that verification cannot be revoked. Report or block anyone who makes you uncomfortable.',
   },
   {
-    id: 'demo',
-    title: 'Demo builds',
+    id: 'revocation',
+    title: 'Revocation & appeals',
     body:
-      'In this prototype, tapping Verify runs a demo flow only — no real biometric or ID processing. Production Spark will use live vendor checks. Badges in demo mode are for illustration.',
+      'We may revoke badges if photos change, fraud is suspected, or checks fail on re-review. You can appeal a decision by emailing support@spark.app with "Verification appeal".',
   },
   {
     id: 'contact',

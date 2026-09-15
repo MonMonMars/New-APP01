@@ -798,7 +798,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     setIsAuthenticated(true);
     setUserId(`demo-email-${Date.now()}`);
-    return { ok: true, message: 'Signed in (demo mode). Cloud email requires Supabase.' };
+    return { ok: true, message: 'Signed in locally. Connect Supabase for cloud email sign-in.' };
   }, []);
 
   const completeOnboarding = useCallback(

@@ -18,7 +18,7 @@ export const disguiseClientAds: ClientAdCampaign[] = [
     brand: 'NordVPN',
     tagline: 'Browse privately on public Wi‑Fi. 2 years + 3 months free.',
     description:
-      'Protect your connection on coffee-shop Wi‑Fi, flights, and hotel networks. NordVPN encrypts traffic with one tap and includes Threat Protection Lite on supported plans.\n\nThis demo offer shows 2 years plus 3 bonus months. Cancel within 30 days for a full refund on annual plans.',
+      'Protect your connection on coffee-shop Wi‑Fi, flights, and hotel networks. NordVPN encrypts traffic with one tap and includes Threat Protection Lite on supported plans.\n\nLimited-time offer: 2 years plus 3 bonus months. Cancel within 30 days for a full refund on annual plans.',
     imageUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3d58c?w=800&q=80',
     cta: 'Learn more',
     landingUrl: 'https://nordvpn.com/special/',

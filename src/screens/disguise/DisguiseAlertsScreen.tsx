@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ActivityAlertSheet } from '../../components/disguise/ActivityAlertSheet';
 import { AdLandingSheet } from '../../components/disguise/AdLandingSheet';
 import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
 import { FeedPersonRow } from '../../components/disguise/FeedPersonRow';
@@ -10,13 +11,13 @@ import { NewsArticleSheet } from '../../components/disguise/NewsArticleSheet';
 import { useTheme } from '../../context/ThemeContext';
 import {
   AdPost,
+  DisguiseAlert,
   disguiseAlerts,
   findAdPostByLandingUrl,
   findNewsPostByArticleUrl,
   NewsPost,
 } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
-import { showDemoToast } from '../../utils/demoFeedback';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 
 export function DisguiseAlertsScreen() {
@@ -24,6 +25,7 @@ export function DisguiseAlertsScreen() {
   const { colors } = useTheme();
   const [articlePost, setArticlePost] = useState<NewsPost | null>(null);
   const [adPost, setAdPost] = useState<AdPost | null>(null);
+  const [activityAlert, setActivityAlert] = useState<DisguiseAlert | null>(null);
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
@@ -39,13 +41,7 @@ export function DisguiseAlertsScreen() {
             ? () => setArticlePost(newsPost)
             : item.landingUrl && ad
               ? () => setAdPost(ad)
-              : item.landingUrl
-                ? () => {
-                    showDemoToast('Sponsored offer', item.text);
-                  }
-                : () => {
-                    showDemoToast('Activity', item.text);
-                  };
+              : () => setActivityAlert(item);
 
           return (
             <AnimatedPressable
@@ -89,6 +85,11 @@ export function DisguiseAlertsScreen() {
         onClose={() => setArticlePost(null)}
       />
       <AdLandingSheet visible={adPost !== null} ad={adPost} onClose={() => setAdPost(null)} />
+      <ActivityAlertSheet
+        visible={activityAlert !== null}
+        alert={activityAlert}
+        onClose={() => setActivityAlert(null)}
+      />
     </View>
   );
 }

@@ -7,7 +7,6 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
-import { showDemoToast } from '../../utils/demoFeedback';
 import { resolveDisguiseProfile } from '../../utils/resolveDisguiseProfile';
 import { triggerHaptic } from '../../utils/haptics';
 import { DisguiseMiniSparkBar } from './DisguiseMiniSparkBar';
@@ -54,16 +53,12 @@ export function DisguisePhotoLightbox({
     setLiked(true);
     if (linkedProfile) {
       likeProfile(linkedProfile);
-      showDemoToast('Liked', `${linkedProfile.name} added to your likes.`);
-      return;
     }
-    showDemoToast('Helpful', 'Thanks — we will show more like this.');
   };
 
   const handleUnlike = () => {
     triggerHaptic('light');
     setLiked(false);
-    showDemoToast('Removed', 'Like removed from this preview.');
   };
 
   const handlePass = () => {
@@ -72,11 +67,8 @@ export function DisguisePhotoLightbox({
     setPassed(true);
     if (linkedProfile) {
       passProfile(linkedProfile);
-      showDemoToast('Passed', `${linkedProfile.name} hidden from your queue.`);
       onClose();
-      return;
     }
-    showDemoToast('Not helpful', 'We will show fewer posts like this.');
   };
 
   return (

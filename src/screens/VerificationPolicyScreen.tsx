@@ -62,7 +62,7 @@ export function VerificationPolicyScreen({ onClose }: VerificationPolicyScreenPr
         ))}
 
         <Text style={[styles.footer, { color: colors.textMuted }]}>
-          Full legal text: docs/legal/TRUST_AND_VERIFICATION_POLICY.md in the Spark repository.
+          Questions or appeals: support@spark.app — include &ldquo;Verification&rdquo; in the subject line.
         </Text>
       </ScrollView>
     </View>

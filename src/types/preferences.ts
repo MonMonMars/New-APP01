@@ -1,6 +1,22 @@
 export type ShowMePreference = 'women' | 'men' | 'everyone';
 
+import { RelationshipIntent } from './profile';
+
 export type DiscoverFilter = 'active_today' | 'new_here' | 'has_bio' | 'verified';
+
+export type AdvancedDiscoverFilters = {
+  /** Filter to profiles with matching relationship intent (Spark+) */
+  intents?: RelationshipIntent[];
+  /** Only show profiles sharing at least one interest with you (Spark+) */
+  sharedInterestsOnly?: boolean;
+};
+
+export const RELATIONSHIP_INTENT_LABELS: Record<RelationshipIntent, string> = {
+  long_term: 'Long-term',
+  short_term: 'Casual',
+  new_friends: 'New friends',
+  not_sure: 'Figuring it out',
+};
 
 export const DISCOVER_FILTER_LABELS: Record<DiscoverFilter, string> = {
   active_today: 'Active today',
@@ -30,6 +46,7 @@ export type DiscoveryPreferences = {
   passportCity?: string;
   travelMode?: boolean;
   discoverFilters?: DiscoverFilter[];
+  advancedFilters?: AdvancedDiscoverFilters;
 };
 
 export const SEARCH_RADIUS_PRESETS = [
@@ -59,6 +76,7 @@ export const defaultPreferences: DiscoveryPreferences = {
   passportCity: undefined,
   travelMode: false,
   discoverFilters: [],
+  advancedFilters: {},
 };
 
 export const SHOW_ME_LABELS: Record<ShowMePreference, string> = {

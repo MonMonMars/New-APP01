@@ -7,6 +7,7 @@ import { VoicePromptCard } from './VoicePromptCard';
 import { ProfileVerificationDisplay } from './ProfileVerificationDisplay';
 import { VerificationBadges } from './VerificationBadges';
 import { isAiPersonaProfile } from '../data/aiPersonas';
+import { RELATIONSHIP_INTENT_LABELS } from '../types/preferences';
 import { colors, radii, spacing } from '../theme';
 import { Profile, ProfilePrompt } from '../types/profile';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -90,6 +91,9 @@ export function ProfileDetailSheet({
             )}
             {profile.job && <Text style={styles.meta}>{profile.job}</Text>}
             {profile.school && <Text style={styles.meta}>{profile.school}</Text>}
+            {profile.intent && (
+              <Text style={styles.intentMeta}>{RELATIONSHIP_INTENT_LABELS[profile.intent]}</Text>
+            )}
             <Text style={styles.distance}>{profile.distanceMiles} miles away</Text>
           </View>
 
@@ -251,6 +255,12 @@ const styles = StyleSheet.create({
   meta: {
     color: colors.textMuted,
     fontSize: 16,
+    marginTop: spacing.xs,
+  },
+  intentMeta: {
+    color: colors.gradientEnd,
+    fontSize: 14,
+    fontWeight: '700',
     marginTop: spacing.xs,
   },
   distance: {

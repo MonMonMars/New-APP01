@@ -2,6 +2,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { Modal, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useNavigation } from '@react-navigation/native';
+
+import { AdvancedFiltersSection } from './AdvancedFiltersSection';
+import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import {
   DiscoveryPreferences,
@@ -73,7 +77,13 @@ export function DiscoveryPreferencesSheet({
   onChange,
 }: DiscoveryPreferencesSheetProps) {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
   const { colors } = useTheme();
+  const { isSparkPlus } = useApp();
+
+  const openSparkPlus = () => {
+    navigation.getParent()?.navigate('SparkPlus');
+  };
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
@@ -178,6 +188,13 @@ export function DiscoveryPreferencesSheet({
             max={60}
             step={1}
             onChange={(maxAge) => onChange({ ...preferences, maxAge })}
+          />
+
+          <AdvancedFiltersSection
+            filters={preferences.advancedFilters ?? {}}
+            isSparkPlus={isSparkPlus}
+            onChange={(advancedFilters) => onChange({ ...preferences, advancedFilters })}
+            onUpgrade={openSparkPlus}
           />
 
           <Text style={[styles.hint, { color: colors.textMuted }]}>

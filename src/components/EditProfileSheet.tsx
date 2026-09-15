@@ -8,6 +8,7 @@ import { RelationshipIntent, UserProfile, VoicePrompt } from '../types/profile';
 import { OPENING_MOVE_SUGGESTIONS } from '../utils/openingMove';
 import { pickProfilePhoto } from '../utils/photoPicker';
 import { runVerificationFlow } from '../utils/verificationFlow';
+import { ProfileCoachSheet } from './ProfileCoachSheet';
 import { VoicePromptSheet } from './VoicePromptSheet';
 import { InterestsEditor } from './InterestsEditor';
 import { PhotoCarousel } from './PhotoCarousel';
@@ -48,6 +49,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
   const [openingMove, setOpeningMove] = useState(user.openingMove ?? '');
   const [voicePrompt, setVoicePrompt] = useState<VoicePrompt | undefined>(user.voicePrompt);
   const [showVoicePrompt, setShowVoicePrompt] = useState(false);
+  const [showProfileCoach, setShowProfileCoach] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -194,7 +196,12 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
             placeholderTextColor={colors.textMuted}
           />
 
-          <Text style={[styles.label, { color: colors.textMuted }]}>Bio</Text>
+          <View style={styles.labelRow}>
+            <Text style={[styles.label, { color: colors.textMuted }]}>Bio</Text>
+            <AnimatedPressable onPress={() => setShowProfileCoach(true)}>
+              <Text style={[styles.coachLink, { color: colors.gradientEnd }]}>AI coach ✨</Text>
+            </AnimatedPressable>
+          </View>
           <TextInput
             value={bio}
             onChangeText={setBio}
@@ -288,6 +295,22 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
         </ScrollView>
       </View>
 
+      <ProfileCoachSheet
+        visible={showProfileCoach}
+        user={{
+          ...user,
+          name,
+          bio,
+          age: Number.parseInt(age, 10) || user.age,
+          interests,
+          openingMove,
+          intent,
+        }}
+        onClose={() => setShowProfileCoach(false)}
+        onApplyBio={setBio}
+        onApplyOpeningMove={setOpeningMove}
+      />
+
       <VoicePromptSheet
         visible={showVoicePrompt}
         existing={voicePrompt}
@@ -344,6 +367,16 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     fontWeight: '600',
+  },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+  },
+  coachLink: {
+    fontSize: 13,
+    fontWeight: '700',
   },
   label: {
     fontSize: 13,

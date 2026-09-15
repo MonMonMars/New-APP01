@@ -142,10 +142,42 @@ function matchesDiscoverFilters(profile: Profile, filters: DiscoverFilter[]): bo
   });
 }
 
+function matchesAdvancedFilters(
+  profile: Profile,
+  user: UserProfile,
+  advanced: DiscoveryPreferences['advancedFilters'],
+  isSparkPlus: boolean,
+): boolean {
+  if (!isSparkPlus || !advanced) {
+    return true;
+  }
+
+  const intentFilter = advanced.intents ?? [];
+  if (intentFilter.length > 0) {
+    if (!profile.intent || !intentFilter.includes(profile.intent)) {
+      return false;
+    }
+  }
+
+  if (advanced.sharedInterestsOnly) {
+    const userInterests = new Set(user.interests.map((interest) => interest.toLowerCase()));
+    const hasShared = profile.interests.some((interest) =>
+      userInterests.has(interest.toLowerCase()),
+    );
+    if (!hasShared) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 function filterDiscoverProfiles(
   profiles: Profile[],
   preferences: DiscoveryPreferences,
   excludedIds: Set<string>,
+  user: UserProfile,
+  isSparkPlus: boolean,
   locationSharing = true,
 ): Profile[] {
   const filters = preferences.discoverFilters ?? [];
@@ -157,7 +189,8 @@ function filterDiscoverProfiles(
       profile.age >= preferences.minAge &&
       profile.age <= preferences.maxAge &&
       matchesGenderFilter(profile, preferences.showMe) &&
-      matchesDiscoverFilters(profile, filters),
+      matchesDiscoverFilters(profile, filters) &&
+      matchesAdvancedFilters(profile, user, preferences.advancedFilters, isSparkPlus),
   );
 }
 
@@ -224,6 +257,8 @@ type AppContextValue = {
   dateCheckIns: DateCheckIn[];
   canRewind: boolean;
   rewindKey: number;
+  showMomentumUpsell: boolean;
+  dismissMomentumUpsell: () => void;
   isSupabaseEnabled: boolean;
   completeOnboarding: (user: UserProfile) => void;
   signInWithAppleStub: (identityToken?: string, displayName?: string) => Promise<void>;
@@ -313,6 +348,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [sparkNotes, setSparkNotes] = useState<Record<string, string>>({});
   const [dailyLikesUsed, setDailyLikesUsed] = useState(0);
   const [isSparkPlus, setIsSparkPlus] = useState(false);
+  const [showMomentumUpsell, setShowMomentumUpsell] = useState(false);
+  const [momentumUpsellDismissed, setMomentumUpsellDismissed] = useState(false);
   const [boostActiveUntil, setBoostActiveUntil] = useState<string | null>(null);
   const [sparkNotesUsedToday, setSparkNotesUsedToday] = useState(0);
   const [lastSparkNoteDate, setLastSparkNoteDate] = useState<string | null>(null);
@@ -764,9 +801,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       pool,
       preferences,
       excludedIds,
+      user,
+      isSparkPlus,
       privacyPreferences.locationSharing,
     );
-  }, [excludedIds, isPaused, preferences, privacyPreferences.locationSharing]);
+  }, [excludedIds, isPaused, isSparkPlus, preferences, privacyPreferences.locationSharing, user]);
 
   const discoverQueue = useMemo(() => {
     if (isPaused) {
@@ -1181,7 +1220,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (prev.some((item) => item.profile.id === profile.id)) {
           return prev;
         }
-        return [match, ...prev];
+        const next = [match, ...prev];
+        if (!isSparkPlus && !momentumUpsellDismissed && next.length === 3) {
+          setShowMomentumUpsell(true);
+        }
+        return next;
       });
 
       setConversations((prev) => {
@@ -1223,6 +1266,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [
       canLike,
       isSparkPlus,
+      momentumUpsellDismissed,
       lastSparkNoteDate,
       notificationsEnabled,
       notificationPreferences.matches,
@@ -1231,6 +1275,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       securitySettings.disguiseSafeNotifications,
     ],
   );
+
+  const dismissMomentumUpsell = useCallback(() => {
+    setShowMomentumUpsell(false);
+    setMomentumUpsellDismissed(true);
+  }, []);
 
   const createMatchFromLike = useCallback(
     (profile: Profile, isSuperMatch: boolean): Match => {
@@ -1860,6 +1909,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       dateCheckIns,
       canRewind,
       rewindKey,
+      showMomentumUpsell,
+      dismissMomentumUpsell,
       isSupabaseEnabled: isSupabaseConfigured(),
       completeOnboarding,
       signInWithAppleStub,
@@ -1967,6 +2018,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       dateCheckIns,
       canRewind,
       rewindKey,
+      showMomentumUpsell,
+      dismissMomentumUpsell,
       completeOnboarding,
       signInWithAppleStub,
       signInWithEmailMagicLink,

@@ -94,6 +94,8 @@ export type Profile = {
   isAiPersona?: boolean;
   /** Links to AI_PERSONA_CONFIGS for chat personality */
   aiPersonaId?: string;
+  /** Relationship intent — used for Spark+ advanced filters */
+  intent?: RelationshipIntent;
   /** City label for map / discovery */
   city?: string;
   /** Fake map pin position (0–100 % of map viewport) */

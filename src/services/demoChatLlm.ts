@@ -1,6 +1,9 @@
 import { Message } from '../types/match';
 import { Profile } from '../types/profile';
 
+import { getAiPersonaConfig, isAiPersonaProfile } from '../data/aiPersonas';
+
+import { generateAiPersonaReply } from './demoAiPersonaBrain';
 import { DemoReplyContext, generateLocalDemoReply } from './demoChatBrain';
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
@@ -13,6 +16,11 @@ function getGroqApiKey(): string | null {
 }
 
 function buildSystemPrompt(profile: Profile): string {
+  const persona = getAiPersonaConfig(profile);
+  if (persona) {
+    return persona.systemPrompt;
+  }
+
   const interests = profile.interests.join(', ');
   const promptLine = profile.prompts?.[0]
     ? `Favorite prompt answer: "${profile.prompts[0].answer}"`
@@ -114,6 +122,16 @@ export type DemoReplyResult = {
  * otherwise uses the local personality-aware reply brain.
  */
 export async function generateDemoReply(ctx: DemoReplyContext): Promise<DemoReplyResult> {
+  const isAi = isAiPersonaProfile(ctx.profile);
+
+  if (isAi) {
+    const llmText = await fetchGroqReply(ctx);
+    if (llmText) {
+      return { text: llmText, source: 'llm' };
+    }
+    return { text: generateAiPersonaReply(ctx), source: 'local' };
+  }
+
   const llmText = await fetchGroqReply(ctx);
   if (llmText) {
     return { text: llmText, source: 'llm' };

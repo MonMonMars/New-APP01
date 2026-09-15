@@ -1,5 +1,8 @@
+import { aiPersonaProfiles, AI_PERSONA_IDS } from './aiPersonas';
 import { extraRawProfiles } from './extraProfiles';
 import { Profile } from '../types/profile';
+
+export { AI_PERSONA_IDS };
 
 /**
  * TEST SEED STATE — profile ID buckets for demo / QA
@@ -1009,6 +1012,7 @@ const rawProfiles: Profile[] = [
     interests: ['Animation', 'Gaming', 'Coffee'],
   },
   ...extraRawProfiles,
+  ...aiPersonaProfiles,
 ];
 
 function withVerification(profile: Profile): Profile {

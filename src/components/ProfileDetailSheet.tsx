@@ -2,9 +2,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image, Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AiPersonaBadge } from './AiPersonaBadge';
 import { VoicePromptCard } from './VoicePromptCard';
 import { ProfileVerificationDisplay } from './ProfileVerificationDisplay';
 import { VerificationBadges } from './VerificationBadges';
+import { isAiPersonaProfile } from '../data/aiPersonas';
 import { colors, radii, spacing } from '../theme';
 import { Profile, ProfilePrompt } from '../types/profile';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -73,6 +75,7 @@ export function ProfileDetailSheet({
               <Text style={styles.name}>
                 {profile.name}, {profile.age}
               </Text>
+              <AiPersonaBadge profile={profile} />
               <VerificationBadges
                 photoVerified={profile.photoVerified ?? profile.verified}
                 personVerified={profile.personVerified ?? profile.verified}
@@ -93,6 +96,14 @@ export function ProfileDetailSheet({
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>About</Text>
             <Text style={styles.bio}>{profile.bio}</Text>
+            {isAiPersonaProfile(profile) && (
+              <View style={styles.aiDisclaimer}>
+                <Text style={styles.aiDisclaimerText}>
+                  This is a Spark AI practice persona — not a real person. Chat safely to practice
+                  before matching with real people.
+                </Text>
+              </View>
+            )}
           </View>
 
           <ProfileVerificationDisplay profile={profile} />
@@ -308,6 +319,19 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 14,
     fontWeight: '600',
+  },
+  aiDisclaimer: {
+    marginTop: spacing.md,
+    backgroundColor: 'rgba(138, 43, 226, 0.15)',
+    borderRadius: radii.card,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(138, 43, 226, 0.35)',
+  },
+  aiDisclaimerText: {
+    color: colors.textMuted,
+    fontSize: 13,
+    lineHeight: 19,
   },
   safetySection: {
     paddingHorizontal: spacing.lg,

@@ -1,9 +1,9 @@
 # Spark — Privacy Policy
 
-**Effective date:** [EFFECTIVE_DATE]  
+**Effective date:** 15 September 2025  
 **Last updated:** 14 September 2026  
-**Data controller:** [LEGAL_ENTITY_NAME] (“**Spark**”, “**we**”, “**us**”)  
-**Contact:** [PRIVACY_EMAIL]
+**Data controller:** Spark Labs Ltd. (“**Spark**”, “**we**”, “**us**”)  
+**Contact:** privacy@spark.app
 
 ---
 
@@ -110,7 +110,7 @@ Depending on your location, you may have rights to:
 - Withdraw consent (without affecting prior lawful processing)  
 - Lodge a complaint with a supervisory authority  
 
-**Requests:** Email [PRIVACY_EMAIL] with subject “Data subject request”. We respond within applicable deadlines (e.g. 30 days under GDPR).
+**Requests:** Email privacy@spark.app with subject “Data subject request”. We respond within applicable deadlines (e.g. 30 days under GDPR).
 
 **Account deletion:** Available in Settings → Delete account. Deletion is irreversible after the grace period.
 
@@ -124,7 +124,7 @@ Spark is for adults **18+** only. We do not knowingly collect data from anyone u
 
 ## 10. Security
 
-We use technical and organisational measures (encryption in transit, access controls, vendor due diligence). No system is 100% secure — report concerns to [PRIVACY_EMAIL].
+We use technical and organisational measures (encryption in transit, access controls, vendor due diligence). No system is 100% secure — report concerns to privacy@spark.app.
 
 ---
 
@@ -149,10 +149,10 @@ We may update this policy. Material changes will be communicated in-app or by em
 ## 14. Regional notices
 
 ### European Economic Area / United Kingdom
-Data controller: [LEGAL_ENTITY_NAME], [REGISTERED_ADDRESS]. EU/UK representative (if required): [EU_REPRESENTATIVE].
+Data controller: Spark Labs Ltd., 71-75 Shelton Street, Covent Garden, London WC2H 9JQ, United Kingdom. EU/UK representative (if required): Contact privacy@spark.app for EU representative details.
 
 ### California (CCPA/CPRA)
-California residents may have additional rights (know, delete, correct, opt-out of sale/sharing). We do not sell personal information. Contact [PRIVACY_EMAIL].
+California residents may have additional rights (know, delete, correct, opt-out of sale/sharing). We do not sell personal information. Contact privacy@spark.app.
 
 ### Hong Kong (PDPO)
 You may request access to and correction of personal data held about you under the Personal Data (Privacy) Ordinance.
@@ -165,9 +165,9 @@ You may exercise rights under the Personal Data Protection Act, including reques
 ## 15. Contact
 
 **Privacy team**  
-[LEGAL_ENTITY_NAME]  
-[PRIVACY_EMAIL]  
-[REGISTERED_ADDRESS]
+Spark Labs Ltd.  
+privacy@spark.app  
+71-75 Shelton Street, Covent Garden, London WC2H 9JQ, United Kingdom
 
 ---
 

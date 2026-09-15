@@ -5,6 +5,12 @@ import { defaultPreferences, DiscoveryPreferences } from '../types/preferences';
 import { UserProfile } from '../types/profile';
 import { DisguiseAdCreative } from '../types/disguise';
 import {
+  defaultLegalConsent,
+  defaultPrivacyPreferences,
+  LegalConsentRecord,
+  PrivacyPreferences,
+} from '../types/privacy';
+import {
   defaultNotificationPreferences,
   NotificationPreferences,
   ThemeMode,
@@ -14,7 +20,7 @@ import { decryptLocalPayload, encryptLocalPayload } from './localEncryption';
 
 const STORAGE_KEY = '@spark/app_state';
 const SENSITIVE_VAULT_KEY = '@spark/sensitive_vault';
-const STORAGE_VERSION = 10;
+const STORAGE_VERSION = 11;
 
 type SensitiveVault = {
   conversations: Conversation[];
@@ -51,6 +57,8 @@ export type PersistedAppState = {
   disguiseMode: boolean;
   disguiseAdCreative: DisguiseAdCreative | null;
   securitySettings: SecuritySettings;
+  privacyPreferences: PrivacyPreferences;
+  legalConsent: LegalConsentRecord;
 };
 
 export function createDefaultPersistedState(): PersistedAppState {
@@ -96,6 +104,8 @@ export function createDefaultPersistedState(): PersistedAppState {
     disguiseMode: true,
     disguiseAdCreative: null,
     securitySettings: defaultSecuritySettings,
+    privacyPreferences: defaultPrivacyPreferences,
+    legalConsent: defaultLegalConsent,
   };
 }
 
@@ -165,6 +175,14 @@ export async function loadPersistedState(): Promise<PersistedAppState | null> {
       securitySettings: {
         ...defaultSecuritySettings,
         ...parsed.securitySettings,
+      },
+      privacyPreferences: {
+        ...defaultPrivacyPreferences,
+        ...parsed.privacyPreferences,
+      },
+      legalConsent: {
+        ...defaultLegalConsent,
+        ...parsed.legalConsent,
       },
     };
   } catch {

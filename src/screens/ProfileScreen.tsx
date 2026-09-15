@@ -34,6 +34,7 @@ const intentLabels: Record<RelationshipIntent, string> = {
 type SettingsRoute =
   | 'Safety'
   | 'SecuritySettings'
+  | 'PrivacyCenter'
   | 'SparkPlus'
   | 'DiscoverHub'
   | 'DiscoveryPreferences'
@@ -45,6 +46,7 @@ const settingsRows: { icon: keyof typeof Ionicons.glyphMap; label: string; route
   { icon: 'flame-outline', label: 'Discover tools', route: 'DiscoverHub' },
   { icon: 'options-outline', label: 'Discovery preferences', route: 'DiscoveryPreferences' },
   { icon: 'lock-closed-outline', label: 'Security & app lock', route: 'SecuritySettings' },
+  { icon: 'hand-left-outline', label: 'Privacy controls', route: 'PrivacyCenter' },
   { icon: 'shield-checkmark-outline', label: 'Safety & privacy', route: 'Safety' },
   { icon: 'notifications-outline', label: 'Notifications', route: 'NotificationPreferences' },
   { icon: 'bag-outline', label: 'Shop — Boosts & Notes', route: 'ConsumablesShop' },

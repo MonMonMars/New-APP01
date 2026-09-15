@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -48,6 +49,7 @@ function SettingRow({
 
 export function SecuritySettingsScreen({ onClose }: SecuritySettingsScreenProps) {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
   const { colors } = useTheme();
   const { securitySettings, updateSecuritySettings } = useApp();
   const [pinDraft, setPinDraft] = useState('');
@@ -191,9 +193,20 @@ export function SecuritySettingsScreen({ onClose }: SecuritySettingsScreenProps)
           />
         </View>
 
+        <AnimatedPressable
+          style={[styles.protocolLink, { borderColor: colors.border, backgroundColor: colors.surface }]}
+          onPress={() => navigation.getParent()?.navigate('SecurityProtocols')}
+        >
+          <Ionicons name="shield-half-outline" size={20} color={colors.gradientEnd} />
+          <Text style={[styles.protocolLinkText, { color: colors.text }]}>
+            Read security protocols — anti-phishing & hacker protection
+          </Text>
+          <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+        </AnimatedPressable>
+
         <Text style={[styles.footer, { color: colors.textMuted }]}>
-          Local chat data is obfuscated on device. Production builds should proxy AI keys through
-          your backend — never bundle OpenAI keys in the client. See docs/security/SECURITY.md.
+          Local chat data is encrypted on device. Never share your PIN, magic links, or verification
+          selfies with anyone claiming to be Spark support.
         </Text>
       </ScrollView>
     </View>
@@ -289,6 +302,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   pinButtonText: { fontSize: 15, fontWeight: '700' },
+  protocolLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radii.card,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+  },
+  protocolLinkText: { flex: 1, fontSize: 14, fontWeight: '600', lineHeight: 19 },
   footer: {
     fontSize: 12,
     lineHeight: 18,

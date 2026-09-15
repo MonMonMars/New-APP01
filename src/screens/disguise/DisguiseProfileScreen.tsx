@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguisedProfileCard } from '../../components/disguise/DisguisedProfileCard';
@@ -198,6 +198,14 @@ export function DisguiseProfileScreen() {
           title={detailConfig[detailSheet].title}
           items={detailConfig[detailSheet].items}
           onClose={() => setDetailSheet(null)}
+          onItemPress={(item) => {
+            if (item.id === 'st4') {
+              Alert.alert(
+                'Data & privacy',
+                'Unlock Spark and open Profile → Safety & privacy → Privacy controls to download your data, manage consent, or delete your account.',
+              );
+            }
+          }}
         />
       ) : null}
     </View>

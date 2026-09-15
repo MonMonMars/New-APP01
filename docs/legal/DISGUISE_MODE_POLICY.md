@@ -1,6 +1,6 @@
 # Spark — Pulse Disguise Mode Policy
 
-**Effective date:** [EFFECTIVE_DATE]  
+**Effective date:** 15 September 2025  
 **Last updated:** 14 September 2026  
 **Applies to:** Pulse disguise mode within Spark (the “**Disguise Feature**”)
 
@@ -96,7 +96,7 @@ We may update this policy. Material changes will be communicated in-app where pr
 
 ## 9. Contact
 
-**Pulse / Disguise support** — [SUPPORT_EMAIL]
+**Pulse / Disguise support** — support@spark.app
 
 ---
 

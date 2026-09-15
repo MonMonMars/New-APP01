@@ -1,6 +1,6 @@
 # Spark — Pulse 偽裝模式政策
 
-**生效日期：** [EFFECTIVE_DATE]  
+**生效日期：** 15 September 2025  
 **最後更新：** 2026 年 9 月 14 日  
 **適用範圍：** Spark 內之 Pulse 偽裝模式（「**偽裝功能**」）
 
@@ -96,7 +96,7 @@
 
 ## 9. 聯絡方式
 
-**Pulse／偽裝支援** — [SUPPORT_EMAIL]
+**Pulse／偽裝支援** — support@spark.app
 
 ---
 

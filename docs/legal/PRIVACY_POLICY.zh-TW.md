@@ -1,9 +1,9 @@
 # Spark — 隱私政策
 
-**生效日期：** [EFFECTIVE_DATE]  
+**生效日期：** 15 September 2025  
 **最後更新：** 2026 年 9 月 14 日  
-**資料控制者：** [LEGAL_ENTITY_NAME]（「**Spark**」、「**我們**」）  
-**聯絡：** [PRIVACY_EMAIL]
+**資料控制者：** Spark Labs Ltd.（「**Spark**」、「**我們**」）  
+**聯絡：** privacy@spark.app
 
 ---
 
@@ -110,7 +110,7 @@
 - 撤回同意（不影響撤回前合法處理）  
 - 向監管機關申訴  
 
-**申請方式：** 寄信至 [PRIVACY_EMAIL]，主旨「資料主體申請」。我們將在適用期限內回覆（如 GDPR 30 日）。
+**申請方式：** 寄信至 privacy@spark.app，主旨「資料主體申請」。我們將在適用期限內回覆（如 GDPR 30 日）。
 
 **刪除帳號：** 設定 → 刪除帳號。寬限期後不可恢復。
 
@@ -124,7 +124,7 @@ Spark 僅供 **18 歲以上** 成人使用。我們 knowingly 不收集 18 歲�
 
 ## 10. 安全
 
-我們採取技術及組織措施（傳輸加密、存取控制、供應商盡職調查）。沒有系統百分之百安全 — 疑慮請寄 [PRIVACY_EMAIL]。
+我們採取技術及組織措施（傳輸加密、存取控制、供應商盡職調查）。沒有系統百分之百安全 — 疑慮請寄 privacy@spark.app。
 
 ---
 
@@ -149,10 +149,10 @@ Spark 僅供 **18 歲以上** 成人使用。我們 knowingly 不收集 18 歲�
 ## 14. 地區附則
 
 ### 歐盟經濟區／英國
-資料控制者：[LEGAL_ENTITY_NAME]，[REGISTERED_ADDRESS]。
+資料控制者：Spark Labs Ltd.，71-75 Shelton Street, Covent Garden, London WC2H 9JQ, United Kingdom。
 
 ### 加州（CCPA/CPRA）
-加州居民可能享有額外權利。我們不出售個人資訊。聯絡 [PRIVACY_EMAIL]。
+加州居民可能享有額外權利。我們不出售個人資訊。聯絡 privacy@spark.app。
 
 ### 香港（《個人資料（私隱）條例》）
 您可依條例要求查閱及更正我們持有的個人資料。
@@ -165,9 +165,9 @@ Spark 僅供 **18 歲以上** 成人使用。我們 knowingly 不收集 18 歲�
 ## 15. 聯絡方式
 
 **隱私團隊**  
-[LEGAL_ENTITY_NAME]  
-[PRIVACY_EMAIL]  
-[REGISTERED_ADDRESS]
+Spark Labs Ltd.  
+privacy@spark.app  
+71-75 Shelton Street, Covent Garden, London WC2H 9JQ, United Kingdom
 
 ---
 

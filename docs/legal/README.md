@@ -25,7 +25,7 @@ These documents are **starting templates** for product design and engineering. T
 | Privacy Policy | [PRIVACY_POLICY.md](./PRIVACY_POLICY.md) | [PRIVACY_POLICY.zh-TW.md](./PRIVACY_POLICY.zh-TW.md) | Safety → Privacy Policy |
 | Community Guidelines | [COMMUNITY_GUIDELINES.md](./COMMUNITY_GUIDELINES.md) | [COMMUNITY_GUIDELINES.zh-TW.md](./COMMUNITY_GUIDELINES.zh-TW.md) | Safety → Community Guidelines |
 | Disguise Mode Policy | [DISGUISE_MODE_POLICY.md](./DISGUISE_MODE_POLICY.md) | [DISGUISE_MODE_POLICY.zh-TW.md](./DISGUISE_MODE_POLICY.zh-TW.md) | Safety → Disguise Mode Policy |
-| Trust & Verification | [TRUST_AND_VERIFICATION_POLICY.md](./TRUST_AND_VERIFICATION_POLICY.md) | — | Safety → Verification Policy |
+| Trust & Verification | [TRUST_AND_VERIFICATION_POLICY.md](./TRUST_AND_VERIFICATION_POLICY.md) | [TRUST_AND_VERIFICATION_POLICY.zh-TW.md](./TRUST_AND_VERIFICATION_POLICY.zh-TW.md) | Safety → Verification Policy |
 
 ---
 
@@ -33,13 +33,13 @@ These documents are **starting templates** for product design and engineering. T
 
 | Placeholder | Example |
 |-------------|---------|
-| `[LEGAL_ENTITY_NAME]` | Spark Labs Ltd. |
-| `[REGISTERED_ADDRESS]` | Full registered office address |
-| `[JURISDICTION]` | Hong Kong / Taiwan / England & Wales |
-| `[SUPPORT_EMAIL]` | legal@spark.app |
-| `[PRIVACY_EMAIL]` | privacy@spark.app |
-| `[WEBSITE_URL]` | https://spark.app |
-| `[EFFECTIVE_DATE]` | Date users first accept the terms |
+| `Spark Labs Ltd.` | Spark Labs Ltd. |
+| `71-75 Shelton Street, Covent Garden, London WC2H 9JQ, United Kingdom` | Full registered office address |
+| `England and Wales` | Hong Kong / Taiwan / England & Wales |
+| `support@spark.app` | legal@spark.app |
+| `privacy@spark.app` | privacy@spark.app |
+| `https://spark.app` | https://spark.app |
+| `15 September 2025` | Date users first accept the terms |
 
 ---
 
@@ -55,4 +55,4 @@ These documents are **starting templates** for product design and engineering. T
 
 ## Contact
 
-**Legal / Trust & Safety:** `[SUPPORT_EMAIL]`
+**Legal / Trust & Safety:** `support@spark.app`

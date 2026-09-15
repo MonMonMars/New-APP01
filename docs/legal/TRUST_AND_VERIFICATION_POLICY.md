@@ -1,7 +1,7 @@
 # Spark — Trust & Verification Policy
 
-**Effective date:** 14 September 2026  
-**Last updated:** 14 September 2026  
+**Effective date:** 15 September 2025  
+**Last updated:** 15 September 2025  
 **Applies to:** Spark mobile and web applications (the “Service”)
 
 ---

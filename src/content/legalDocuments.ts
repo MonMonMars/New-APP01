@@ -1,3 +1,5 @@
+import { LEGAL_ENTITY } from '../constants/legalEntity';
+
 export type LegalDocumentId =
   | 'terms'
   | 'privacy'
@@ -21,15 +23,15 @@ export type LegalDocument = {
   footer: string;
 };
 
-export const LEGAL_CONTACT_EMAIL = 'legal@spark.app';
-export const LEGAL_PRIVACY_EMAIL = 'privacy@spark.app';
+export const LEGAL_CONTACT_EMAIL = LEGAL_ENTITY.legalEmail;
+export const LEGAL_PRIVACY_EMAIL = LEGAL_ENTITY.privacyEmail;
 
 export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
   terms: {
     id: 'terms',
     title: 'Terms of Service',
     titleZh: '使用者條款',
-    effective: 'Effective 15 September 2025',
+    effective: `Effective ${LEGAL_ENTITY.effectiveDate}`,
     intro:
       'By using Spark you agree to these Terms, our Privacy Policy, Community Guidelines, and related policies.',
     sections: [
@@ -82,7 +84,7 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
     id: 'privacy',
     title: 'Privacy Policy',
     titleZh: '隱私政策',
-    effective: 'Effective 15 September 2025',
+    effective: `Effective ${LEGAL_ENTITY.effectiveDate}`,
     intro:
       'This summary explains how Spark collects and uses personal data. Biometric verification requires explicit consent where required by law.',
     sections: [
@@ -129,7 +131,7 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
     id: 'community',
     title: 'Community Guidelines',
     titleZh: '社群規範',
-    effective: 'Effective 15 September 2025',
+    effective: `Effective ${LEGAL_ENTITY.effectiveDate}`,
     intro: 'Spark is for respectful, honest connections — in both Spark and Pulse disguise mode.',
     sections: [
       {
@@ -166,7 +168,7 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
     id: 'disguise',
     title: 'Disguise Mode Policy',
     titleZh: '偽裝模式政策',
-    effective: 'Effective 15 September 2025',
+    effective: `Effective ${LEGAL_ENTITY.effectiveDate}`,
     intro:
       'Pulse disguise mode shows dating activity as a news/social feed. This policy explains what it does and does not do.',
     sections: [

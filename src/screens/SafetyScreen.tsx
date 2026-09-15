@@ -44,7 +44,7 @@ const resources = [
   {
     label: 'Block someone',
     icon: 'hand-left-outline' as const,
-    message: 'Blocking removes them from your deck and chats immediately. Blocked profiles stay hidden for the rest of this session.',
+    message: 'Blocking removes them from your deck and chats immediately. Blocked profiles stay hidden until you unblock them in Settings.',
   },
   {
     label: 'Safety tips & FAQ',
@@ -65,6 +65,16 @@ const resources = [
     label: 'Security settings',
     icon: 'lock-closed-outline' as const,
     action: 'security-settings' as const,
+  },
+  {
+    label: 'Privacy controls',
+    icon: 'hand-left-outline' as const,
+    action: 'privacy-center' as const,
+  },
+  {
+    label: 'Security protocols',
+    icon: 'shield-half-outline' as const,
+    action: 'security-protocols' as const,
   },
 ];
 
@@ -151,6 +161,14 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
               }
               if ('action' in item && item.action === 'security-settings') {
                 navigation.getParent()?.navigate('SecuritySettings');
+                return;
+              }
+              if ('action' in item && item.action === 'privacy-center') {
+                navigation.getParent()?.navigate('PrivacyCenter');
+                return;
+              }
+              if ('action' in item && item.action === 'security-protocols') {
+                navigation.getParent()?.navigate('SecurityProtocols');
                 return;
               }
               if ('message' in item && item.message) {

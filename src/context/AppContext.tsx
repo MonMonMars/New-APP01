@@ -76,7 +76,15 @@ import {
   sanitizeReportReason,
 } from '../utils/securityGuards';
 import { clearVaultKey } from '../utils/secureStorage';
+import { DisguisePolicyModal } from '../components/legal/DisguisePolicyModal';
 import { SparkUnlockModal } from '../components/security/SparkUnlockModal';
+import {
+  defaultLegalConsent,
+  defaultPrivacyPreferences,
+  LegalConsentRecord,
+  PrivacyPreferences,
+} from '../types/privacy';
+import { buildUserDataExport, shareUserDataExport } from '../utils/dataExport';
 import {
   clearPersistedState,
   createDefaultPersistedState,
@@ -197,6 +205,8 @@ type AppContextValue = {
   disguiseAdCreative: DisguiseAdCreative | null;
   isGeneratingDisguiseAd: boolean;
   securitySettings: SecuritySettings;
+  privacyPreferences: PrivacyPreferences;
+  legalConsent: LegalConsentRecord;
   canRewind: boolean;
   rewindKey: number;
   isSupabaseEnabled: boolean;
@@ -233,6 +243,11 @@ type AppContextValue = {
   setThemeMode: (mode: ThemeMode) => void;
   setDisguiseMode: (enabled: boolean) => Promise<boolean>;
   updateSecuritySettings: (settings: SecuritySettings) => void;
+  updatePrivacyPreferences: (prefs: PrivacyPreferences) => void;
+  acceptOnboardingLegal: () => void;
+  acceptDisguisePolicy: () => void;
+  acceptCookieConsent: () => void;
+  exportUserData: () => Promise<boolean>;
   generateDisguiseAd: (
     overlayText: string,
     variant: DisguiseOverlayVariant,
@@ -279,9 +294,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [disguiseAdCreative, setDisguiseAdCreative] = useState<DisguiseAdCreative | null>(null);
   const [isGeneratingDisguiseAd, setIsGeneratingDisguiseAd] = useState(false);
   const [securitySettings, setSecuritySettings] = useState<SecuritySettings>(defaultSecuritySettings);
+  const [privacyPreferences, setPrivacyPreferences] = useState<PrivacyPreferences>(
+    defaultPrivacyPreferences,
+  );
+  const [legalConsent, setLegalConsent] = useState<LegalConsentRecord>(defaultLegalConsent);
   const [unlockModalVisible, setUnlockModalVisible] = useState(false);
+  const [disguisePolicyModalVisible, setDisguisePolicyModalVisible] = useState(false);
   const [unlockError, setUnlockError] = useState<string | null>(null);
   const unlockResolverRef = useRef<((ok: boolean) => void) | null>(null);
+  const pendingDisguiseUnlockRef = useRef(false);
   const lastUnlockAtRef = useRef<number>(Date.now());
   const backgroundedAtRef = useRef<number | null>(null);
   const [rewindKey, setRewindKey] = useState(0);
@@ -345,6 +366,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setSecuritySettings({
           ...defaultSecuritySettings,
           ...saved.securitySettings,
+        });
+        setPrivacyPreferences({
+          ...defaultPrivacyPreferences,
+          ...saved.privacyPreferences,
+        });
+        setLegalConsent({
+          ...defaultLegalConsent,
+          ...saved.legalConsent,
         });
 
         if (isSupabaseConfigured()) {
@@ -431,6 +460,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       disguiseMode,
       disguiseAdCreative,
       securitySettings,
+      privacyPreferences,
+      legalConsent,
     };
   }, [
     hasOnboarded,
@@ -446,6 +477,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     heldIds,
     matches,
     conversations,
+    privacyPreferences,
+    legalConsent,
     dailyLikesUsed,
     isSparkPlus,
     sparkNotes,
@@ -1279,23 +1312,74 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setThemeModeState(mode);
   }, []);
 
+  const proceedSparkUnlock = useCallback(async (): Promise<boolean> => {
+    const unlocked = await runSparkUnlockFlow();
+    if (unlocked) {
+      setDisguiseModeState(false);
+    }
+    return unlocked;
+  }, [runSparkUnlockFlow]);
+
   const setDisguiseMode = useCallback(
     async (enabled: boolean): Promise<boolean> => {
       if (enabled) {
         setDisguiseModeState(true);
         return true;
       }
-      const unlocked = await runSparkUnlockFlow();
-      if (unlocked) {
-        setDisguiseModeState(false);
+      if (!legalConsent.disguisePolicyAcceptedAt) {
+        pendingDisguiseUnlockRef.current = true;
+        setDisguisePolicyModalVisible(true);
+        return false;
       }
-      return unlocked;
+      return proceedSparkUnlock();
     },
-    [runSparkUnlockFlow],
+    [legalConsent.disguisePolicyAcceptedAt, proceedSparkUnlock],
   );
 
   const updateSecuritySettings = useCallback((settings: SecuritySettings) => {
     setSecuritySettings(settings);
+  }, []);
+
+  const updatePrivacyPreferences = useCallback((prefs: PrivacyPreferences) => {
+    setPrivacyPreferences(prefs);
+  }, []);
+
+  const acceptOnboardingLegal = useCallback(() => {
+    const now = new Date().toISOString();
+    setLegalConsent((prev) => ({
+      ...prev,
+      termsAcceptedAt: now,
+      privacyAcceptedAt: now,
+    }));
+  }, []);
+
+  const acceptDisguisePolicy = useCallback(() => {
+    const now = new Date().toISOString();
+    setLegalConsent((prev) => ({ ...prev, disguisePolicyAcceptedAt: now }));
+    setDisguisePolicyModalVisible(false);
+    if (pendingDisguiseUnlockRef.current) {
+      pendingDisguiseUnlockRef.current = false;
+      void proceedSparkUnlock();
+    }
+  }, [proceedSparkUnlock]);
+
+  const acceptCookieConsent = useCallback(() => {
+    setLegalConsent((prev) => ({ ...prev, cookieConsentAt: new Date().toISOString() }));
+  }, []);
+
+  const exportUserData = useCallback(async (): Promise<boolean> => {
+    try {
+      const payload = buildUserDataExport(buildPersistedState());
+      await shareUserDataExport(payload);
+      return true;
+    } catch {
+      return false;
+    }
+  }, [buildPersistedState]);
+
+  const cancelDisguisePolicy = useCallback(() => {
+    pendingDisguiseUnlockRef.current = false;
+    setDisguisePolicyModalVisible(false);
   }, []);
 
   const generateDisguiseAd = useCallback(
@@ -1358,6 +1442,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setDisguiseModeState(true);
     setDisguiseAdCreative(null);
     setSecuritySettings(defaultSecuritySettings);
+    setPrivacyPreferences(defaultPrivacyPreferences);
+    setLegalConsent(defaultLegalConsent);
     setLastPassedProfileId(null);
     setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
     setPriorityProfileId(null);
@@ -1417,6 +1503,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       disguiseAdCreative,
       isGeneratingDisguiseAd,
       securitySettings,
+      privacyPreferences,
+      legalConsent,
       canRewind,
       rewindKey,
       isSupabaseEnabled: isSupabaseConfigured(),
@@ -1450,6 +1538,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setThemeMode,
       setDisguiseMode,
       updateSecuritySettings,
+      updatePrivacyPreferences,
+      acceptOnboardingLegal,
+      acceptDisguisePolicy,
+      acceptCookieConsent,
+      exportUserData,
       generateDisguiseAd,
       clearDisguiseAd,
       setPaused,
@@ -1498,6 +1591,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       disguiseAdCreative,
       isGeneratingDisguiseAd,
       securitySettings,
+      privacyPreferences,
+      legalConsent,
       canRewind,
       rewindKey,
       completeOnboarding,
@@ -1530,6 +1625,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setThemeMode,
       setDisguiseMode,
       updateSecuritySettings,
+      updatePrivacyPreferences,
+      acceptOnboardingLegal,
+      acceptDisguisePolicy,
+      acceptCookieConsent,
+      exportUserData,
       generateDisguiseAd,
       clearDisguiseAd,
       setPaused,
@@ -1540,6 +1640,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider value={value}>
       {children}
+      <DisguisePolicyModal
+        visible={disguisePolicyModalVisible}
+        onAccept={acceptDisguisePolicy}
+        onCancel={cancelDisguisePolicy}
+      />
       <SparkUnlockModal
         visible={unlockModalVisible}
         error={unlockError}

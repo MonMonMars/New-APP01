@@ -1,6 +1,6 @@
 # Spark — Community Guidelines
 
-**Effective date:** [EFFECTIVE_DATE]  
+**Effective date:** 15 September 2025  
 **Last updated:** 14 September 2026
 
 Spark is built for **respectful, honest connections**. These guidelines apply to all members in **Spark** and **Pulse** disguise mode. Violations may result in content removal, feature restrictions, or permanent ban.
@@ -86,13 +86,13 @@ We are not obligated to provide advance notice in cases involving imminent harm 
 
 ## 8. Appeals
 
-Email [SUPPORT_EMAIL] with “Guidelines appeal” and your account email. We aim to review within a reasonable time. Decisions are final where required by safety or law.
+Email support@spark.app with “Guidelines appeal” and your account email. We aim to review within a reasonable time. Decisions are final where required by safety or law.
 
 ---
 
 ## 9. Contact
 
-**Trust & Safety** — [SUPPORT_EMAIL]
+**Trust & Safety** — support@spark.app
 
 ---
 

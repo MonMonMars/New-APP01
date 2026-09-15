@@ -2,9 +2,9 @@
 
 ## Demo link (open now)
 
-**https://clearly-class-shanghai-archived.trycloudflare.com**
+**https://question-tutorials-athletics-ottawa.trycloudflare.com**
 
-_Last updated: Sep 15, 2026 — Phase B: incognito, voice prompt, date check-in_
+_Last updated: Sep 15, 2026 — 20 new demo profiles + smart chat replies_
 
 > Tunnel links expire when the cloud workspace stops. If this 404s, ask for a fresh link.
 
@@ -32,6 +32,9 @@ _Last updated: Sep 15, 2026 — Phase B: incognito, voice prompt, date check-in_
 - Header search → Trending · bell → Activity
 
 ### Spark safe mode
+- **20 new profiles** (Riley, Marcus, Priya, Felix, Zoe…) — swipe deck + likes + instant matches
+- **Smart demo replies** — matches respond with personality-aware messages (optional Groq LLM via `EXPO_PUBLIC_GROQ_API_KEY`)
+- **Phase B** — Incognito (Spark+ · Privacy controls), voice prompts (profile + chat), date check-in (chat menu)
 - **Discover** — clean home: emergency logo + card deck + three bottom targets only
 - **Profile → Discover tools** — map, explore, filters, standouts, held profiles, etc.
 - Drag cards to heart/trash/star zones

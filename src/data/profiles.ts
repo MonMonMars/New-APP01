@@ -1,3 +1,4 @@
+import { extraRawProfiles } from './extraProfiles';
 import { Profile } from '../types/profile';
 
 /**
@@ -12,17 +13,26 @@ import { Profile } from '../types/profile';
  * EXPLORE_CATEGORY_MAP    → Explore screen category assignments
  * All other mockProfiles  → Unmatched discover queue
  */
-export const PRE_MATCHED_IDS = ['1', '5', '12', '15', '18', '24', '27', '30', '33', '42'] as const;
+export const PRE_MATCHED_IDS = [
+  '1', '2', '3', '5', '12', '15', '18', '24', '27', '30', '33', '42', '69', '70',
+] as const;
 export const PENDING_LIKE_IDS = ['6', '14', '20', '21', '22', '26', '31', '35', '39', '49'] as const;
 export const INCOMING_LIKE_IDS = [
   '7', '8', '9', '10', '37', '38', '46', '51', '54', '61', '62', '63', '64', '65',
+  '71', '72', '73', '78', '81', '84', '85', '88',
 ] as const;
 export const INCOMING_LIKE_IDS_SET = new Set<string>(INCOMING_LIKE_IDS);
-export const MUTUAL_MATCH_IDS = new Set(['2', '3', '25', '41', '45', '50', '53', '57', '58', '67']);
+export const MUTUAL_MATCH_IDS = new Set([
+  '2', '3', '25', '41', '45', '50', '53', '57', '58', '67',
+  '69', '70', '74', '77', '82', '86',
+]);
 export const MUTUAL_SUPER_LIKE_IDS = new Set(['11', '29', '34', '36', '48', '59', '60', '68']);
 export const SUPER_PRE_MATCHED_IDS = new Set(['30', '33']);
-export const STANDOUT_IDS = ['15', '30', '36', '48', '52', '59', '68'] as const;
-export const RECENTLY_ACTIVE_IDS = ['2', '13', '17', '25', '33', '40', '50', '57', '66', '67'] as const;
+export const STANDOUT_IDS = ['15', '30', '36', '48', '52', '59', '68', '72', '81', '84'] as const;
+export const RECENTLY_ACTIVE_IDS = [
+  '2', '13', '17', '25', '33', '40', '50', '57', '66', '67',
+  '69', '71', '73', '77', '83', '88',
+] as const;
 
 export const EXPLORE_CATEGORY_MAP: Record<string, 'serious' | 'new' | 'nearby'> = {
   '4': 'new',
@@ -53,6 +63,26 @@ export const EXPLORE_CATEGORY_MAP: Record<string, 'serious' | 'new' | 'nearby'> 
   '67': 'nearby',
   '59': 'serious',
   '68': 'new',
+  '69': 'nearby',
+  '70': 'new',
+  '71': 'serious',
+  '72': 'nearby',
+  '73': 'new',
+  '74': 'serious',
+  '75': 'new',
+  '76': 'nearby',
+  '77': 'serious',
+  '78': 'nearby',
+  '79': 'new',
+  '80': 'nearby',
+  '81': 'serious',
+  '82': 'new',
+  '83': 'nearby',
+  '84': 'serious',
+  '85': 'new',
+  '86': 'nearby',
+  '87': 'serious',
+  '88': 'nearby',
 };
 
 function mapPin(distanceMiles: number, seed: number): { mapX: number; mapY: number } {
@@ -978,6 +1008,7 @@ const rawProfiles: Profile[] = [
     photos: ['https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=800&q=80'],
     interests: ['Animation', 'Gaming', 'Coffee'],
   },
+  ...extraRawProfiles,
 ];
 
 function withVerification(profile: Profile): Profile {
@@ -1124,6 +1155,14 @@ export const incomingLikeProfiles: Profile[] = [
     interests: ['Photography', 'Cycling', 'Film'],
     ...mapPin(10, 65),
   },
+  incomingFromMock('71'),
+  incomingFromMock('72'),
+  incomingFromMock('73'),
+  incomingFromMock('78'),
+  incomingFromMock('81'),
+  incomingFromMock('84'),
+  incomingFromMock('85'),
+  incomingFromMock('88'),
 ];
 
 export function getAllProfiles(): Profile[] {

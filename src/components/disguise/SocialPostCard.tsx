@@ -1,14 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { Image, Platform, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { triggerHaptic } from '../../utils/haptics';
 import { showDemoToast } from '../../utils/demoFeedback';
-import { DisguiseOverlayAvatar } from './DisguiseOverlayAvatar';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
+import { FeedPersonRow } from './FeedPersonRow';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type SocialPostCardProps = {
@@ -21,31 +21,36 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
   const likeCount = upvoted ? post.likes + 1 : post.likes;
 
   const bump = () => {
-    if (Platform.OS !== 'web') {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    triggerHaptic('light');
   };
+
+  const maskSnippet = post.avatarMask?.text.split(' ').slice(0, 2).join(' ') ?? 'LIVE';
 
   return (
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={styles.header}>
-        {post.maskAvatar !== false && post.avatarMask ? (
-          <DisguiseOverlayAvatar
-            imageUrl={post.avatarUrl}
-            overlayText={post.avatarMask.text}
-            variant={post.avatarMask.variant}
-            size={40}
-          />
-        ) : (
-          <Image source={{ uri: post.avatarUrl }} style={styles.avatar} />
-        )}
-        <View style={styles.headerText}>
-          <Text style={[styles.author, { color: colors.text }]}>{post.author}</Text>
-          <Text style={[styles.handle, { color: colors.textMuted }]}>
-            {post.handle} · {post.timeAgo}
-          </Text>
+        <View style={styles.headerMain}>
+          {post.maskAvatar !== false && post.avatarMask ? (
+            <FeedPersonRow
+              imageUrl={post.avatarUrl}
+              overlayText={maskSnippet}
+              overlayVariant={post.avatarMask.variant}
+              title={post.author}
+              subtitle={`${post.handle} · ${post.timeAgo}`}
+              titleStyle={{ color: colors.text }}
+            />
+          ) : (
+            <FeedPersonRow
+              plainAvatar
+              imageUrl={post.avatarUrl}
+              title={post.author}
+              subtitle={`${post.handle} · ${post.timeAgo}`}
+              titleStyle={{ color: colors.text }}
+            />
+          )}
         </View>
         <AnimatedPressable
+          style={styles.moreButton}
           onPress={() => {
             bump();
             showDemoToast('Post options', 'Mute, report, or save post.');
@@ -114,24 +119,16 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: spacing.sm,
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  headerText: {
+  headerMain: {
     flex: 1,
+    minWidth: 0,
   },
-  author: {
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  handle: {
-    fontSize: 12,
+  moreButton: {
+    paddingTop: 4,
   },
   body: {
     fontSize: 15,

@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AdLandingSheet } from '../../components/disguise/AdLandingSheet';
 import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
+import { FeedPersonRow } from '../../components/disguise/FeedPersonRow';
 import { NewsArticleSheet } from '../../components/disguise/NewsArticleSheet';
 import { useTheme } from '../../context/ThemeContext';
 import {
@@ -50,15 +51,33 @@ export function DisguiseAlertsScreen() {
             <AnimatedPressable
               accessibilityRole="button"
               onPress={handlePress}
-              style={[styles.row, { backgroundColor: colors.surface }]}
+              style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.border }]}
             >
-              <View style={[styles.iconWrap, { backgroundColor: 'rgba(59,130,246,0.12)' }]}>
-                <Ionicons name={item.icon} size={20} color="#3b82f6" />
-              </View>
-              <View style={styles.textWrap}>
-                <Text style={[styles.text, { color: colors.text }]}>{item.text}</Text>
-                <Text style={[styles.time, { color: colors.textMuted }]}>{item.time}</Text>
-              </View>
+              {item.person ? (
+                <FeedPersonRow
+                  imageUrl={item.person.avatarUrl}
+                  overlayText={item.person.overlayText ?? 'LIVE'}
+                  overlayVariant={item.person.overlayVariant ?? 'news'}
+                  plainAvatar={!item.person.overlayVariant}
+                  title={item.person.name}
+                  body={item.text}
+                  titleStyle={{ color: colors.text }}
+                  bodyStyle={{ color: colors.textMuted, fontWeight: '500' }}
+                  rightAccessory={
+                    <Text style={[styles.time, { color: colors.textMuted }]}>{item.time}</Text>
+                  }
+                />
+              ) : (
+                <>
+                  <View style={[styles.iconWrap, { backgroundColor: 'rgba(59,130,246,0.12)' }]}>
+                    <Ionicons name={item.icon} size={20} color="#3b82f6" />
+                  </View>
+                  <View style={styles.textWrap}>
+                    <Text style={[styles.text, { color: colors.text }]}>{item.text}</Text>
+                    <Text style={[styles.time, { color: colors.textMuted }]}>{item.time}</Text>
+                  </View>
+                </>
+              )}
             </AnimatedPressable>
           );
         }}
@@ -80,14 +99,12 @@ const styles = StyleSheet.create({
   },
   list: {
     padding: spacing.md,
-    gap: spacing.sm,
+    paddingBottom: spacing.xl * 3,
   },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
     padding: spacing.md,
     borderRadius: radii.card,
-    gap: spacing.md,
+    borderWidth: StyleSheet.hairlineWidth,
     marginBottom: spacing.sm,
   },
   iconWrap: {
@@ -106,7 +123,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   time: {
-    fontSize: 12,
-    marginTop: 4,
+    fontSize: 11,
+    marginTop: 2,
   },
 });

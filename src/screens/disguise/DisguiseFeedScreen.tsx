@@ -57,7 +57,7 @@ export function DisguiseFeedScreen() {
         data={feedItems}
         keyExtractor={(item) => item.id}
         renderItem={renderFeedItem}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[styles.list, { paddingBottom: spacing.xl * 4 }]}
         ListHeaderComponent={
           <View style={styles.headerRow}>
             <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>{sectionLabel}</Text>

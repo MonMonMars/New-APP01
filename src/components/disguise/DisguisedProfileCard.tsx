@@ -5,7 +5,8 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { DisguisedProfilePost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
-import { DisguiseOverlayAvatar } from './DisguiseOverlayAvatar';
+import { FeedPersonRow } from './FeedPersonRow';
+import { PROFILE_AVATAR_SIZE } from './DisguiseOverlayAvatar';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -47,34 +48,38 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
     />
   );
 
+  const avatarRow = (
+    <FeedPersonRow
+      imageUrl={post.avatarUrl}
+      overlayText={maskSnippet}
+      overlayVariant={maskVariant}
+      body={post.overlayText}
+      size={PROFILE_AVATAR_SIZE}
+      bodyStyle={
+        post.variant === 'ad'
+          ? styles.quoteAd
+          : post.variant === 'social'
+            ? { color: colors.text }
+            : { color: colors.text }
+      }
+    />
+  );
+
   if (post.variant === 'social') {
     return (
       <>
         <View style={[styles.socialCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <View style={styles.socialHeader}>
-            <AnimatedPressable
-              onPress={openPreview}
-              accessibilityRole="button"
-              accessibilityLabel={`View profile photos from ${post.name}`}
-            >
-              <DisguiseOverlayAvatar
-                imageUrl={post.avatarUrl}
-                overlayText={maskSnippet}
-                variant="news"
-                size={40}
-                badgeOnly
-              />
-            </AnimatedPressable>
-            <View style={styles.socialHeaderText}>
-              <Text style={[styles.socialAuthor, { color: colors.text }]}>{post.headline}</Text>
-              <Text style={[styles.socialHandle, { color: colors.textMuted }]}>
-                {post.handle} · {post.timeAgo}
-              </Text>
-            </View>
-            <AnimatedPressable onPress={openPreview}>
-              <Ionicons name="ellipsis-horizontal" size={18} color={colors.textMuted} />
-            </AnimatedPressable>
-          </View>
+          <AnimatedPressable onPress={openPreview} accessibilityRole="button">
+            <FeedPersonRow
+              imageUrl={post.avatarUrl}
+              overlayText={maskSnippet}
+              overlayVariant="news"
+              title={post.headline}
+              subtitle={`${post.handle} · ${post.timeAgo}`}
+              titleStyle={{ color: colors.text }}
+              size={PROFILE_AVATAR_SIZE}
+            />
+          </AnimatedPressable>
           <AnimatedPressable onPress={openPreview}>
             <Text style={[styles.socialBody, { color: colors.text }]}>{post.summary}</Text>
           </AnimatedPressable>
@@ -113,27 +118,16 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
           <View style={styles.body}>
             <Text style={styles.brand}>{post.headline}</Text>
             <Text style={styles.tagline}>{post.summary}</Text>
-            <View style={styles.avatarQuoteRow}>
-              <AnimatedPressable
-                onPress={(event) => {
-                  event.stopPropagation();
-                  openPreview();
-                }}
-                accessibilityRole="button"
-                accessibilityLabel="View profile photo"
-              >
-                <DisguiseOverlayAvatar
-                  imageUrl={post.avatarUrl}
-                  overlayText="AD"
-                  variant="ad"
-                  size={44}
-                  badgeOnly
-                />
-              </AnimatedPressable>
-              <Text style={[styles.quoteBesideAvatar, styles.quoteBesideAvatarAd]} numberOfLines={3}>
-                {post.overlayText}
-              </Text>
-            </View>
+            <AnimatedPressable
+              onPress={(event) => {
+                event.stopPropagation();
+                openPreview();
+              }}
+              accessibilityRole="button"
+              accessibilityLabel="View profile photo"
+            >
+              {avatarRow}
+            </AnimatedPressable>
             <Text style={styles.spotlightHint} numberOfLines={2}>
               Reader spotlight — masked photo is a profile, not part of this ad.
             </Text>
@@ -173,7 +167,6 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
 
           <View style={styles.reportersRow}>
             <AnimatedPressable
-              style={styles.avatarQuoteRow}
               onPress={(event) => {
                 event.stopPropagation();
                 openPreview();
@@ -181,16 +174,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
               accessibilityRole="button"
               accessibilityLabel="View profile — masked BREAKING avatar"
             >
-              <DisguiseOverlayAvatar
-                imageUrl={post.avatarUrl}
-                overlayText={maskSnippet}
-                variant="news"
-                size={44}
-                badgeOnly
-              />
-              <Text style={[styles.quoteBesideAvatar, { color: colors.text }]} numberOfLines={4}>
-                {post.overlayText}
-              </Text>
+              {avatarRow}
             </AnimatedPressable>
           </View>
           <OwnerHint label={post.hintLabel} color={colors.gradientEnd} />
@@ -293,19 +277,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: spacing.sm,
   },
-  avatarQuoteRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    flex: 1,
-  },
-  quoteBesideAvatar: {
-    flex: 1,
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: '600',
-  },
-  quoteBesideAvatarAd: {
+  quoteAd: {
     color: '#ddd',
   },
   spotlightHint: {
@@ -336,25 +308,10 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(128,128,128,0.25)',
   },
-  socialHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.sm,
-    gap: spacing.sm,
-  },
-  socialHeaderText: {
-    flex: 1,
-  },
-  socialAuthor: {
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  socialHandle: {
-    fontSize: 12,
-  },
   socialBody: {
     fontSize: 15,
     lineHeight: 22,
+    marginTop: spacing.sm,
     marginBottom: spacing.sm,
   },
   socialActions: {

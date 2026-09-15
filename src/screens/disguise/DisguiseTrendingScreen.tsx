@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
   },
   list: {
     padding: spacing.md,
-    paddingBottom: spacing.xl * 2,
+    paddingBottom: spacing.xl * 5,
   },
   pageTitle: {
     fontSize: 26,

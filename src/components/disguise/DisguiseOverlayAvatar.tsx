@@ -1,8 +1,11 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { FaceCenteredImage } from './FaceCenteredImage';
 
 export type DisguiseOverlayVariant = 'news' | 'ad';
+
+export const PROFILE_AVATAR_SIZE = 48;
 
 type DisguiseOverlayAvatarProps = {
   imageUrl: string;
@@ -17,50 +20,67 @@ export function DisguiseOverlayAvatar({
   imageUrl,
   overlayText,
   variant,
-  size = 40,
+  size = PROFILE_AVATAR_SIZE,
   badgeOnly = false,
 }: DisguiseOverlayAvatarProps) {
   const radius = size / 2;
+  const isNews = variant === 'news';
 
   return (
-    <View style={[styles.wrap, { width: size, height: size, borderRadius: radius }]}>
+    <View
+      style={[
+        styles.wrap,
+        {
+          width: size,
+          height: size,
+          borderRadius: radius,
+          borderColor: isNews ? 'rgba(220, 38, 38, 0.85)' : 'rgba(37, 99, 235, 0.85)',
+        },
+      ]}
+    >
       <FaceCenteredImage imageUrl={imageUrl} size={size} />
-      <View
-        style={[
-          styles.scrim,
-          variant === 'news' ? styles.scrimNews : styles.scrimAd,
-          { borderRadius: radius },
-        ]}
+
+      <LinearGradient
+        colors={
+          isNews
+            ? ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(127,29,29,0.72)']
+            : ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(30,58,138,0.78)']
+        }
+        locations={[0, 0.52, 1]}
+        style={[styles.bottomScrim, { borderRadius: radius }]}
       />
-      {variant === 'news' ? (
-        <View style={styles.newsStack}>
-          <Text style={styles.newsBadge}>BREAKING</Text>
-          {!badgeOnly && (
-            <Text
-              style={styles.newsText}
-              numberOfLines={3}
-              adjustsFontSizeToFit
-              minimumFontScale={0.6}
-            >
-              {overlayText}
-            </Text>
-          )}
-        </View>
-      ) : (
-        <View style={styles.adStack}>
-          <Text style={styles.adBadge}>AD</Text>
-          {!badgeOnly && (
-            <Text
-              style={styles.adText}
-              numberOfLines={3}
-              adjustsFontSizeToFit
-              minimumFontScale={0.6}
-            >
-              {overlayText}
-            </Text>
-          )}
-        </View>
-      )}
+
+      <View style={styles.badgeStrip}>
+        {isNews ? (
+          <>
+            <Text style={styles.newsBadge}>BREAKING</Text>
+            {!badgeOnly && (
+              <Text
+                style={styles.newsText}
+                numberOfLines={2}
+                adjustsFontSizeToFit
+                minimumFontScale={0.55}
+              >
+                {overlayText}
+              </Text>
+            )}
+          </>
+        ) : (
+          <>
+            <Text style={styles.adBadge}>AD</Text>
+            {!badgeOnly && (
+              <Text
+                style={styles.adText}
+                numberOfLines={2}
+                adjustsFontSizeToFit
+                minimumFontScale={0.55}
+              >
+                {overlayText}
+              </Text>
+            )}
+          </>
+        )}
+      </View>
     </View>
   );
 }
@@ -69,58 +89,56 @@ const styles = StyleSheet.create({
   wrap: {
     overflow: 'hidden',
     position: 'relative',
+    borderWidth: 1.5,
   },
-  scrim: {
-    ...StyleSheet.absoluteFillObject,
+  bottomScrim: {
+    ...StyleSheet.absoluteFill,
   },
-  scrimNews: {
-    backgroundColor: 'rgba(120, 0, 0, 0.55)',
-  },
-  scrimAd: {
-    backgroundColor: 'rgba(0, 40, 120, 0.6)',
-  },
-  newsStack: {
-    ...StyleSheet.absoluteFillObject,
+  badgeStrip: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 3,
-    paddingVertical: 2,
-  },
-  adStack: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 3,
-    paddingVertical: 2,
+    justifyContent: 'flex-end',
+    paddingHorizontal: 2,
+    paddingBottom: 3,
+    minHeight: '38%',
   },
   newsBadge: {
     color: '#fde047',
-    fontSize: 5,
+    fontSize: 6,
     fontWeight: '900',
-    letterSpacing: 0.4,
-    marginBottom: 1,
+    letterSpacing: 0.35,
+    textShadowColor: 'rgba(0,0,0,0.9)',
+    textShadowOffset: { width: 0, height: 0.5 },
+    textShadowRadius: 2,
   },
   newsText: {
     color: '#fff',
-    fontSize: 7,
+    fontSize: 5.5,
     fontWeight: '900',
     textAlign: 'center',
-    lineHeight: 8,
+    lineHeight: 6.5,
     textTransform: 'uppercase',
+    marginTop: 1,
   },
   adBadge: {
     color: '#86efac',
-    fontSize: 5,
+    fontSize: 6,
     fontWeight: '900',
-    letterSpacing: 0.5,
-    marginBottom: 1,
+    letterSpacing: 0.4,
+    textShadowColor: 'rgba(0,0,0,0.9)',
+    textShadowOffset: { width: 0, height: 0.5 },
+    textShadowRadius: 2,
   },
   adText: {
     color: '#fff',
-    fontSize: 7,
+    fontSize: 5.5,
     fontWeight: '900',
     textAlign: 'center',
-    lineHeight: 8,
+    lineHeight: 6.5,
     textTransform: 'uppercase',
+    marginTop: 1,
   },
 });

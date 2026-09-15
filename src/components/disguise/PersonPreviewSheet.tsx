@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Modal, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../context/ThemeContext';
 import { NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { FeedPersonRow } from './FeedPersonRow';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type PersonPreviewSheetProps = {
@@ -36,13 +37,16 @@ export function PersonPreviewSheet({ visible, reporter, onClose }: PersonPreview
           onPress={(event) => event.stopPropagation()}
         >
           <View style={styles.header}>
-            <Image source={{ uri: reporter.avatarUrl }} style={styles.avatar} />
-            <View style={styles.headerText}>
-              <Text style={[styles.name, { color: colors.text }]}>{reporter.name}</Text>
-              <Text style={[styles.quote, { color: colors.textMuted }]} numberOfLines={2}>
-                "{reporter.quote}"
-              </Text>
-            </View>
+            <FeedPersonRow
+              plainAvatar
+              imageUrl={reporter.avatarUrl}
+              title={reporter.name}
+              subtitle="Reader comment"
+              body={`"${reporter.quote}"`}
+              titleStyle={{ color: colors.text }}
+              bodyStyle={{ color: colors.textMuted, fontStyle: 'italic', fontWeight: '500' }}
+              style={styles.headerRow}
+            />
             <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel="Close">
               <Ionicons name="close" size={22} color={colors.textMuted} />
             </AnimatedPressable>
@@ -83,27 +87,12 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: spacing.sm,
     marginBottom: spacing.md,
   },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-  },
-  headerText: {
+  headerRow: {
     flex: 1,
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: '800',
-  },
-  quote: {
-    fontSize: 13,
-    lineHeight: 18,
-    marginTop: 2,
-    fontStyle: 'italic',
   },
   photoRow: {
     gap: spacing.sm,

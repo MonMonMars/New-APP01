@@ -44,9 +44,15 @@ export async function unlockSpark(
   }
 
   if (settings.biometricEnabled) {
-    const biometricOk = await authenticateWithBiometric('Unlock Spark');
-    if (biometricOk) {
-      return { ok: true, method: 'biometric' };
+    const biometricAvailable = await isBiometricAvailable();
+    if (biometricAvailable) {
+      const biometricOk = await authenticateWithBiometric('Unlock Spark');
+      if (biometricOk) {
+        return { ok: true, method: 'biometric' };
+      }
+    } else if (!settings.pinEnabled) {
+      // Web and other platforms without biometrics can still leave disguise when no PIN is set.
+      return { ok: true, method: 'none' };
     }
   }
 

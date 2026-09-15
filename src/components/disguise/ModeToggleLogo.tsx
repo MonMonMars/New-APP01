@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useCallback, useRef, useState } from 'react';
-import { PanResponder, Platform, StyleSheet, View } from 'react-native';
+import { PanResponder, Platform, StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -142,6 +142,45 @@ export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps
   }
 
   const fillWidth = dragX + bubbleSize * 0.55;
+  const trackHeight = bubbleSize + TRACK_PADDING * 2;
+
+  if (Platform.OS === 'web') {
+    return (
+      <AnimatedPressable
+        onPress={exitDisguise}
+        haptic="medium"
+        scaleTo={0.98}
+        style={[
+          styles.track,
+          styles.webTrack,
+          {
+            width: TRACK_WIDTH,
+            height: trackHeight,
+            borderRadius: trackHeight / 2,
+            backgroundColor: colors.surface,
+            borderColor: `${iconColor}44`,
+          },
+        ]}
+        accessibilityRole="button"
+        accessibilityLabel="Tap to unlock Spark"
+        accessibilityHint="Returns to Spark dating mode"
+      >
+        <View
+          style={[
+            styles.trackFill,
+            {
+              width: TRACK_WIDTH * 0.42,
+              backgroundColor: iconColor,
+              borderRadius: trackHeight / 2,
+            },
+          ]}
+          pointerEvents="none"
+        />
+        <View style={styles.webThumb}>{bubble}</View>
+        <Text style={[styles.webHint, { color: colors.textMuted }]}>Tap to unlock</Text>
+      </AnimatedPressable>
+    );
+  }
 
   return (
     <View
@@ -149,8 +188,8 @@ export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps
         styles.track,
         {
           width: TRACK_WIDTH,
-          height: bubbleSize + TRACK_PADDING * 2,
-          borderRadius: (bubbleSize + TRACK_PADDING * 2) / 2,
+          height: trackHeight,
+          borderRadius: trackHeight / 2,
           backgroundColor: colors.surface,
         },
       ]}
@@ -163,7 +202,7 @@ export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps
           {
             width: fillWidth,
             backgroundColor: iconColor,
-            borderRadius: (bubbleSize + TRACK_PADDING * 2) / 2,
+            borderRadius: trackHeight / 2,
           },
         ]}
         pointerEvents="none"
@@ -204,5 +243,22 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: TRACK_PADDING,
     zIndex: 2,
+  },
+  webTrack: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    paddingRight: TRACK_PADDING,
+    gap: 6,
+  },
+  webThumb: {
+    marginLeft: TRACK_PADDING,
+    zIndex: 2,
+  },
+  webHint: {
+    flex: 1,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.2,
   },
 });

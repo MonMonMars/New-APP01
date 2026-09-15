@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
   },
   list: {
     padding: spacing.md,
-    paddingBottom: spacing.xl * 3,
+    paddingBottom: spacing.xl * 5,
   },
   row: {
     padding: spacing.md,

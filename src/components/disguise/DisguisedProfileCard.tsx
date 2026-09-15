@@ -111,7 +111,6 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
         >
           <View style={styles.sponsoredRow}>
             <Text style={styles.sponsored}>Sponsored</Text>
-            <Text style={[styles.profileTag, { color: colors.gradientEnd }]}>Profile</Text>
             <Ionicons name="information-circle-outline" size={14} color="#888" />
           </View>
           <Image source={{ uri: post.coverImageUrl }} style={styles.adImage} resizeMode="cover" />
@@ -129,7 +128,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
               {avatarRow}
             </AnimatedPressable>
             <Text style={styles.spotlightHint} numberOfLines={2}>
-              Reader spotlight — masked photo is a profile, not part of this ad.
+              Reader spotlight — verified comment from a Pulse member.
             </Text>
             <View style={styles.cta}>
               <Text style={styles.ctaText}>{post.cta ?? 'Learn more'}</Text>
@@ -157,7 +156,6 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
             <Text style={[styles.source, { color: colors.gradientEnd }]}>{post.sourceLabel}</Text>
             <Text style={[styles.dot, { color: colors.textMuted }]}>·</Text>
             <Text style={[styles.category, { color: colors.gradientEnd }]}>{post.category}</Text>
-            <Text style={[styles.profileTag, { color: colors.gradientEnd }]}>· Profile</Text>
             <Text style={[styles.time, { color: colors.textMuted }]}>{post.timeAgo}</Text>
           </View>
           <Text style={[styles.headline, { color: colors.text }]}>{post.headline}</Text>
@@ -211,12 +209,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-  },
-  profileTag: {
-    fontSize: 10,
-    fontWeight: '800',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
   },
   newsImage: {
     width: '100%',

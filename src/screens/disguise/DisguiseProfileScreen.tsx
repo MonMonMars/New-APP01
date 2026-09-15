@@ -31,7 +31,7 @@ export function DisguiseProfileScreen() {
     generatedAt: new Date().toISOString(),
   };
   const profileFeedItem = buildDisguisedProfileFeedItem(user, profileCreative);
-  const recentPosts = buildDisguisedProfileFeedItems().slice(0, 6);
+  const recentPosts = buildDisguisedProfileFeedItems();
   const readingHistory = [
     'Tech giants are spending big on AI in a bid to dominate the boom',
     'New night routes and earlier starts for Bristol\'s buses',
@@ -41,6 +41,12 @@ export function DisguiseProfileScreen() {
     'EU smartphone labels for repairability land in June',
     'Health-tech hiring picks up after a quiet Q1',
     'Night transit safety upgrades roll out at busy stops',
+    'How to spot reliable sources in your feed',
+    'Markets open: what moved overnight',
+    'Brunch walk-ins: editors\' 12-spot list',
+    'AI investing: chip makers vs cloud',
+    'Remote work async guide for hybrid teams',
+    'EU repair labels: what changes in June',
   ];
   const postCount = disguiseAdCreative ? 28 : 24;
   const followerCount = 180 + user.name.length * 7;
@@ -113,17 +119,27 @@ export function DisguiseProfileScreen() {
             <Switch
               value={disguiseMode}
               onValueChange={(value) => {
-                if (value) {
-                  setDisguiseMode(true);
-                }
+                void setDisguiseMode(value);
               }}
               trackColor={{ false: colors.border, true: colors.gradientEnd }}
               thumbColor={colors.text}
             />
           </View>
           <Text style={[styles.hint, { color: colors.textMuted }]}>
-            Hold the Pulse logo and drag right to unlock Spark safe mode.
+            Turn off disguise here, or use the Pulse logo in the header to unlock Spark.
           </Text>
+          {disguiseMode ? (
+            <AnimatedPressable
+              style={[styles.unlockButton, { backgroundColor: colors.gradientEnd }]}
+              onPress={() => void setDisguiseMode(false)}
+              haptic="medium"
+              accessibilityRole="button"
+              accessibilityLabel="Unlock Spark"
+            >
+              <Ionicons name="flame" size={18} color="#fff" />
+              <Text style={styles.unlockButtonText}>Unlock Spark</Text>
+            </AnimatedPressable>
+          ) : null}
         </View>
 
         <AnimatedPressable
@@ -258,6 +274,21 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     lineHeight: 16,
     fontStyle: 'italic',
+  },
+  unlockButton: {
+    marginTop: spacing.md,
+    borderRadius: radii.button,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+  },
+  unlockButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '700',
   },
   generatorCard: {
     marginTop: spacing.sm,

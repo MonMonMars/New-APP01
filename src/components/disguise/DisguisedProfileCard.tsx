@@ -8,6 +8,7 @@ import { radii, spacing } from '../../theme';
 import { FeedPersonRow } from './FeedPersonRow';
 import { PROFILE_AVATAR_SIZE } from './DisguiseOverlayAvatar';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
+import { profileIdFromPostId } from '../../utils/resolveDisguiseProfile';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type DisguisedProfileCardProps = {
@@ -33,6 +34,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
     avatarUrl: post.avatarUrl,
     quote: post.overlayText,
     photos: post.photos,
+    profileId: profileIdFromPostId(post.id),
   };
 
   const maskVariant = post.variant === 'ad' ? 'ad' : 'news';

@@ -8,6 +8,7 @@ import { radii, spacing } from '../../theme';
 import { triggerHaptic } from '../../utils/haptics';
 import { showDemoToast } from '../../utils/demoFeedback';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
+import { DisguisePhotoLightbox } from './DisguisePhotoLightbox';
 import { FeedPersonRow } from './FeedPersonRow';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -18,7 +19,16 @@ type SocialPostCardProps = {
 export function SocialPostCard({ post }: SocialPostCardProps) {
   const { colors } = useTheme();
   const [upvoted, setUpvoted] = useState(false);
+  const [photoOpen, setPhotoOpen] = useState(false);
   const likeCount = upvoted ? post.likes + 1 : post.likes;
+
+  const photoReporter = {
+    id: `social-${post.id}`,
+    name: post.author,
+    avatarUrl: post.avatarUrl,
+    quote: post.body,
+    photos: post.imageUrl ? [post.imageUrl] : [post.avatarUrl],
+  };
 
   const bump = () => {
     triggerHaptic('light');
@@ -61,13 +71,18 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
       </View>
       <Text style={[styles.body, { color: colors.text }]}>{post.body}</Text>
       {post.imageUrl && post.imageMask ? (
-        <View style={styles.postImageWrap}>
+        <AnimatedPressable
+          style={styles.postImageWrap}
+          onPress={() => setPhotoOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Open post photo"
+        >
           <DisguiseOverlayImage
             imageUrl={post.imageUrl}
             overlayText={post.imageMask.text}
             variant={post.imageMask.variant}
           />
-        </View>
+        </AnimatedPressable>
       ) : null}
       <View style={styles.actions}>
         <AnimatedPressable
@@ -106,6 +121,14 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
           <Ionicons name="share-outline" size={18} color={colors.textMuted} />
         </AnimatedPressable>
       </View>
+
+      <DisguisePhotoLightbox
+        visible={photoOpen}
+        reporter={photoReporter}
+        photoUrl={post.imageUrl ?? post.avatarUrl}
+        photoIndex={0}
+        onClose={() => setPhotoOpen(false)}
+      />
     </View>
   );
 }

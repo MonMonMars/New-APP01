@@ -1,4 +1,5 @@
-import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { useCallback, useRef, useState } from 'react';
 import { Alert, Dimensions, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -30,6 +31,7 @@ export function DiscoverScreen() {
   const insets = useSafeAreaInsets();
   const deckHeight = Math.round((WINDOW_HEIGHT - insets.top - TAB_BAR_HEIGHT) * 0.92);
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
   const { colors } = useTheme();
   const deckRef = useRef<SwipeDeckHandle>(null);
   const {
@@ -306,6 +308,9 @@ export function DiscoverScreen() {
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <View style={[styles.emergencyBar, { paddingTop: insets.top }]}>
         <ModeToggleLogo variant="spark" compact />
+        <AnimatedPressable style={styles.hubButton} onPress={openDiscoverHub} accessibilityLabel="Discover tools">
+          <Ionicons name="options-outline" size={22} color={colors.textMuted} />
+        </AnimatedPressable>
       </View>
       {isIncognitoActive && <IncognitoBanner />}
       <View
@@ -350,7 +355,7 @@ export function DiscoverScreen() {
               </Text>
             </AnimatedPressable>
           </View>
-        ) : (
+        ) : isFocused ? (
           <SwipeDeck
             key={`deck-${rewindKey}`}
             ref={deckRef}
@@ -363,7 +368,7 @@ export function DiscoverScreen() {
             onLikeBlocked={() => setShowLikeLimit(true)}
             compact
           />
-        )}
+        ) : null}
 
       </View>
 
@@ -474,18 +479,29 @@ export function DiscoverScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    overflow: 'hidden',
   },
   deckContainer: {
     flex: 1,
     marginHorizontal: spacing.xs,
     minHeight: 0,
     position: 'relative',
+    overflow: 'hidden',
   },
   emergencyBar: {
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.xs,
     zIndex: 20,
-    alignItems: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  hubButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   emptyState: {
     flex: 1,

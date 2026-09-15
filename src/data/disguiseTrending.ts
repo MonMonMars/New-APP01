@@ -252,6 +252,33 @@ export const disguiseTrendingTopics: TrendingTopic[] = [
     category: 'Food',
     preview: 'Quick pantry recipes and brunch lists',
   },
+  {
+    id: 't13',
+    label: '#ClimateTech',
+    posts: '1.9K',
+    direction: 'up',
+    changeLabel: '+14%',
+    category: 'Science',
+    preview: 'Grid storage startups raise fresh rounds',
+  },
+  {
+    id: 't14',
+    label: '#BookClub',
+    posts: '1.6K',
+    direction: 'stable',
+    category: 'Culture',
+    preview: 'Summer reads and indie bookstore picks',
+  },
+  {
+    id: 't15',
+    label: '#TransitTalk',
+    posts: '1.4K',
+    direction: 'hot',
+    changeLabel: 'Live',
+    category: 'Local',
+    preview: 'Riders debate real-time tracking at night stops',
+    imageUrl: 'https://images.unsplash.com/photo-1544627677-05470f41cd8a?w=200&q=80',
+  },
 ];
 
 export const editorsPicks = [

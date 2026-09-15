@@ -480,6 +480,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return true;
     }
     if (!securitySettings.pinEnabled) {
+      // Biometric was declined on device and no PIN fallback is configured.
       return false;
     }
     return new Promise<boolean>((resolve) => {

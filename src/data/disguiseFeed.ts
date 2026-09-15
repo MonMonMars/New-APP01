@@ -257,6 +257,16 @@ export const disguiseFeedItems: FeedItem[] = [
   allNewsItems[7],
   disguiseSocialPosts[7],
   adItems[2],
+  allNewsItems[0],
+  disguiseSocialPosts[0],
+  allNewsItems[3],
+  disguiseSocialPosts[4],
+  adItems[0],
+  allNewsItems[5],
+  disguiseSocialPosts[6],
+  allNewsItems[2],
+  disguiseSocialPosts[2],
+  adItems[1],
 ];
 
 export function findNewsPostByArticleUrl(articleUrl: string): NewsPost | undefined {
@@ -424,6 +434,54 @@ export const disguiseAlerts: DisguiseAlert[] = [
     person: {
       name: 'Dana W.',
       avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&q=80',
+    },
+  },
+  {
+    id: 'a16',
+    icon: 'newspaper-outline',
+    text: 'Remote teams rethink async standups — trending in Business',
+    time: '4d ago',
+    articleUrl: 'https://www.bbc.co.uk/news/articles/remote-standups-demo',
+  },
+  {
+    id: 'a17',
+    icon: 'arrow-up-outline',
+    text: 'Taylor B. upvoted your brunch walk-ins comment',
+    time: '4d ago',
+    person: {
+      name: 'Taylor B.',
+      avatarUrl: 'https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=200&q=80',
+      overlayVariant: 'news',
+      overlayText: 'LIVE',
+    },
+  },
+  {
+    id: 'a18',
+    icon: 'person-add-outline',
+    text: 'Chris P. started following you',
+    time: '5d ago',
+    person: {
+      name: 'Chris P.',
+      avatarUrl: 'https://images.unsplash.com/photo-1552374196-1ab2a5c59363?w=200&q=80',
+    },
+  },
+  {
+    id: 'a19',
+    icon: 'megaphone-outline',
+    text: 'Booking.com: Save 15% on weekend stays',
+    time: '5d ago',
+    landingUrl: 'https://www.booking.com/deal-demo',
+  },
+  {
+    id: 'a20',
+    icon: 'chatbubble-outline',
+    text: 'Morgan S. replied on night transit safety',
+    time: '6d ago',
+    person: {
+      name: 'Morgan S.',
+      avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80',
+      overlayVariant: 'ad',
+      overlayText: 'AD',
     },
   },
 ];

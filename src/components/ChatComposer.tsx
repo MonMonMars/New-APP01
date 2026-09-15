@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { Platform, StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -30,13 +29,6 @@ type ExtraAction = {
   onPress: () => void;
 };
 
-function triggerHaptic() {
-  if (Platform.OS === 'web') {
-    return;
-  }
-  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-}
-
 export function ChatComposer({
   draft,
   onChangeDraft,
@@ -59,14 +51,12 @@ export function ChatComposer({
   }));
 
   const toggleExtras = () => {
-    triggerHaptic();
     const next = !extrasOpen;
     setExtrasOpen(next);
     extrasProgress.value = withSpring(next ? 1 : 0, { damping: 16, stiffness: 280 });
   };
 
   const runExtra = (action: () => void) => {
-    triggerHaptic();
     action();
     setExtrasOpen(false);
     extrasProgress.value = withTiming(0, { duration: 180 });
@@ -76,7 +66,6 @@ export function ChatComposer({
     if (!hasText) {
       return;
     }
-    triggerHaptic();
     onSend(draft);
   };
 

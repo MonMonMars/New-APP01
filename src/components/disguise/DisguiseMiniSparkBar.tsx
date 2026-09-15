@@ -38,7 +38,6 @@ export function DisguiseMiniSparkBar({
             passed && { backgroundColor: 'rgba(239,68,68,0.22)', borderColor: colors.nope },
           ]}
           onPress={onPass}
-          haptic="light"
           scaleTo={0.92}
           accessibilityRole="button"
           accessibilityLabel={sparkLinked ? 'Pass profile' : 'Mark not helpful'}
@@ -53,7 +52,6 @@ export function DisguiseMiniSparkBar({
             liked && { backgroundColor: colors.heartRed, borderColor: colors.heartRed },
           ]}
           onPress={liked ? onUnlike : onLike}
-          haptic="medium"
           scaleTo={0.92}
           accessibilityRole="button"
           accessibilityLabel={liked ? 'Unlike photo' : sparkLinked ? 'Like profile' : 'Mark helpful'}

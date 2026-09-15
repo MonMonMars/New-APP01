@@ -5,7 +5,6 @@ import { Alert, Share, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
-import { triggerHaptic } from '../../utils/haptics';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
 import { DisguisePhotoLightbox } from './DisguisePhotoLightbox';
 import { FeedPersonRow } from './FeedPersonRow';
@@ -29,10 +28,6 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
     avatarUrl: post.avatarUrl,
     quote: post.body,
     photos: post.imageUrl ? [post.imageUrl] : [post.avatarUrl],
-  };
-
-  const bump = () => {
-    triggerHaptic('light');
   };
 
   const maskSnippet = post.avatarMask?.text.split(' ').slice(0, 2).join(' ') ?? 'LIVE';
@@ -63,7 +58,6 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
         <AnimatedPressable
           style={styles.moreButton}
           onPress={() => {
-            bump();
             Alert.alert('Post options', undefined, [
               { text: 'Save post', onPress: () => {} },
               { text: 'Mute author', onPress: () => {} },
@@ -93,10 +87,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
       <View style={styles.actions}>
         <AnimatedPressable
           style={styles.action}
-          onPress={() => {
-            bump();
-            setUpvoted((value) => !value);
-          }}
+          onPress={() => setUpvoted((value) => !value)}
         >
           <Ionicons
             name={upvoted ? 'arrow-up' : 'arrow-up-outline'}
@@ -109,10 +100,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
         </AnimatedPressable>
         <AnimatedPressable
           style={styles.action}
-          onPress={() => {
-            bump();
-            setCommentsOpen(true);
-          }}
+          onPress={() => setCommentsOpen(true)}
         >
           <Ionicons name="chatbubble-outline" size={18} color={colors.textMuted} />
           <Text style={[styles.actionText, { color: colors.textMuted }]}>{post.comments}</Text>
@@ -120,7 +108,6 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
         <AnimatedPressable
           style={styles.action}
           onPress={() => {
-            bump();
             void Share.share({ message: `${post.author}: ${post.body}`, title: 'Share post' });
           }}
         >

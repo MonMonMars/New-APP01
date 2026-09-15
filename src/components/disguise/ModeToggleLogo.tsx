@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { useCallback, useRef, useState } from 'react';
 import { PanResponder, Platform, StyleSheet, Text, View } from 'react-native';
 
@@ -17,19 +16,6 @@ type ModeToggleLogoProps = {
   title?: string;
   compact?: boolean;
 };
-
-function triggerHaptic(style: 'light' | 'medium' | 'success' = 'medium') {
-  if (Platform.OS === 'web') {
-    return;
-  }
-  if (style === 'success') {
-    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    return;
-  }
-  void Haptics.impactAsync(
-    style === 'light' ? Haptics.ImpactFeedbackStyle.Light : Haptics.ImpactFeedbackStyle.Medium,
-  );
-}
 
 type LogoBubbleProps = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -74,14 +60,12 @@ export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps
   const iconBg = isPulse ? 'rgba(59,130,246,0.22)' : 'rgba(255,107,107,0.2)';
 
   const enterDisguise = useCallback(() => {
-    triggerHaptic('medium');
     void setDisguiseMode(true);
   }, [setDisguiseMode]);
 
   const exitDisguise = useCallback(() => {
     void setDisguiseMode(false).then((unlocked) => {
       if (unlocked) {
-        triggerHaptic('success');
         setDragX(0);
       } else {
         dragXRef.current = 0;
@@ -100,9 +84,6 @@ export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > 2,
-      onPanResponderGrant: () => {
-        triggerHaptic('light');
-      },
       onPanResponderMove: (_, gesture) => {
         const next = Math.max(0, Math.min(gesture.dx, maxDragRef.current));
         dragXRef.current = next;
@@ -130,7 +111,6 @@ export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps
     return (
       <AnimatedPressable
         onPress={enterDisguise}
-        haptic="medium"
         scaleTo={0.94}
         accessibilityRole="button"
         accessibilityLabel={`Emergency — switch to ${DISGUISE_APP_NAME} disguise mode`}
@@ -148,7 +128,6 @@ export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps
     return (
       <AnimatedPressable
         onPress={exitDisguise}
-        haptic="medium"
         scaleTo={0.98}
         style={[
           styles.track,

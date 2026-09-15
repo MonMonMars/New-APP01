@@ -4,30 +4,30 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  withTiming,
 } from 'react-native-reanimated';
-
-import { HapticStyle, triggerHaptic } from '../utils/haptics';
 
 type AnimatedPressableProps = PressableProps & {
   style?: StyleProp<ViewStyle>;
-  /** Scale on press-in (default 0.97). */
+  /** Scale on press-in (default 0.96). */
   scaleTo?: number;
-  /** Opacity on press-in (default 0.88). */
+  /** Opacity on press-in (default 0.86). */
   opacityTo?: number;
-  haptic?: HapticStyle;
   children?: ReactNode;
 };
 
-export const PRESS_SPRING = { damping: 16, stiffness: 380, mass: 0.6 };
+export const PRESS_SPRING = { damping: 15, stiffness: 420, mass: 0.55 };
 
-/** Pressable with scale/opacity animation — style on the pressable itself so web hit targets match visuals. */
+const PRESS_IN_MS = 110;
+const PRESS_OUT_MS = 180;
+
+/** Pressable with scale + opacity transition — style on the pressable for correct web hit targets. */
 const AnimatedPressableBase = Animated.createAnimatedComponent(Pressable);
 
 export function AnimatedPressable({
   style,
-  scaleTo = 0.97,
-  opacityTo = 0.88,
-  haptic = 'none',
+  scaleTo = 0.96,
+  opacityTo = 0.86,
   disabled,
   onPress,
   onPressIn,
@@ -49,14 +49,13 @@ export function AnimatedPressable({
       onPressIn={(event) => {
         if (!disabled) {
           scale.value = withSpring(scaleTo, PRESS_SPRING);
-          pressOpacity.value = withSpring(opacityTo, PRESS_SPRING);
-          triggerHaptic(haptic);
+          pressOpacity.value = withTiming(opacityTo, { duration: PRESS_IN_MS });
         }
         onPressIn?.(event);
       }}
       onPressOut={(event) => {
         scale.value = withSpring(1, PRESS_SPRING);
-        pressOpacity.value = withSpring(1, PRESS_SPRING);
+        pressOpacity.value = withTiming(1, { duration: PRESS_OUT_MS });
         onPressOut?.(event);
       }}
       onPress={onPress}

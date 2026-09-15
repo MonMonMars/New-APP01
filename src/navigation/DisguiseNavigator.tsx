@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
+import { TabBarButton } from '../components/TabBarButton';
 import { useTheme } from '../context/ThemeContext';
 import { disguiseAlerts } from '../data/disguiseFeed';
 import { DisguiseAlertsScreen } from '../screens/disguise/DisguiseAlertsScreen';
@@ -24,6 +25,7 @@ export function DisguiseNavigator() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
+        tabBarButton: (props) => <TabBarButton {...props} />,
         tabBarStyle: {
           backgroundColor: colors.background,
           borderTopColor: colors.border,

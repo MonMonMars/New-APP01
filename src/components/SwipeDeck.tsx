@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import {
   forwardRef,
   useCallback,
@@ -154,11 +153,6 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           },
         });
 
-        void Haptics.notificationAsync(
-          kind === 'pass'
-            ? Haptics.NotificationFeedbackType.Warning
-            : Haptics.NotificationFeedbackType.Success,
-        );
       },
       [heartZone, trashZone],
     );
@@ -245,7 +239,6 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
 
         if (superLike) {
           starActive.value = withTiming(1, { duration: 120 });
-          void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
           pendingSuperProfileRef.current = current;
           setSuperCelebrationKey((key) => key + 1);

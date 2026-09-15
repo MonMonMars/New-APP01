@@ -4,7 +4,6 @@ import { ActivityIndicator, StyleSheet, Text, type StyleProp, type ViewStyle } f
 
 import { useTheme } from '../context/ThemeContext';
 import { ColorPalette, radii, spacing } from '../theme';
-import { HapticStyle } from '../utils/haptics';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive' | 'outline';
@@ -17,7 +16,6 @@ type ButtonProps = {
   size?: ButtonSize;
   disabled?: boolean;
   loading?: boolean;
-  haptic?: HapticStyle;
   iconLeft?: keyof typeof Ionicons.glyphMap;
   iconRight?: keyof typeof Ionicons.glyphMap;
   gradient?: boolean;
@@ -39,7 +37,6 @@ export function Button({
   size = 'md',
   disabled = false,
   loading = false,
-  haptic = 'light',
   iconLeft,
   iconRight,
   gradient = false,
@@ -86,8 +83,7 @@ export function Button({
       <AnimatedPressable
         onPress={onPress}
         disabled={isDisabled}
-        haptic={haptic}
-        scaleTo={0.98}
+        scaleTo={0.97}
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel ?? label}
         style={[fullWidth && styles.fullWidth, style]}
@@ -112,8 +108,7 @@ export function Button({
     <AnimatedPressable
       onPress={onPress}
       disabled={isDisabled}
-      haptic={haptic}
-      scaleTo={0.98}
+      scaleTo={0.97}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
       style={pressableStyle}
@@ -130,7 +125,6 @@ type IconButtonProps = {
   iconSize?: number;
   color?: string;
   backgroundColor?: string;
-  haptic?: HapticStyle;
   disabled?: boolean;
   accessibilityLabel?: string;
 };
@@ -142,7 +136,6 @@ export function IconButton({
   iconSize = 22,
   color,
   backgroundColor,
-  haptic = 'light',
   disabled,
   accessibilityLabel,
 }: IconButtonProps) {
@@ -152,7 +145,6 @@ export function IconButton({
     <AnimatedPressable
       onPress={onPress}
       disabled={disabled}
-      haptic={haptic}
       scaleTo={0.92}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}

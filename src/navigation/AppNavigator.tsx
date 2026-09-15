@@ -30,6 +30,7 @@ import { SecuritySettingsScreen } from '../screens/SecuritySettingsScreen';
 import { VerificationPolicyScreen } from '../screens/VerificationPolicyScreen';
 import { SparkPlusScreen } from '../screens/SparkPlusScreen';
 import { OnboardingFlow } from '../screens/onboarding/OnboardingFlow';
+import { TabBarButton } from '../components/TabBarButton';
 import { DisguiseNavigator } from './DisguiseNavigator';
 import { MainTabParamList, RootStackParamList } from '../types/navigation';
 
@@ -71,6 +72,7 @@ function MainTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
+        tabBarButton: (props) => <TabBarButton {...props} />,
         tabBarStyle: {
           backgroundColor: colors.background,
           borderTopColor: colors.border,

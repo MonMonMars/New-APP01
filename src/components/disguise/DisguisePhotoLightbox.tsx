@@ -8,7 +8,6 @@ import { useTheme } from '../../context/ThemeContext';
 import { NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { resolveDisguiseProfile } from '../../utils/resolveDisguiseProfile';
-import { triggerHaptic } from '../../utils/haptics';
 import { DisguiseMiniSparkBar } from './DisguiseMiniSparkBar';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -48,7 +47,6 @@ export function DisguisePhotoLightbox({
   const sparkLinked = linkedProfile !== null;
 
   const handleLike = () => {
-    triggerHaptic('medium');
     setPassed(false);
     setLiked(true);
     if (linkedProfile) {
@@ -57,12 +55,10 @@ export function DisguisePhotoLightbox({
   };
 
   const handleUnlike = () => {
-    triggerHaptic('light');
     setLiked(false);
   };
 
   const handlePass = () => {
-    triggerHaptic('light');
     setLiked(false);
     setPassed(true);
     if (linkedProfile) {

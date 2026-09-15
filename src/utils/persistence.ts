@@ -16,12 +16,13 @@ import {
   NotificationPreferences,
   ThemeMode,
 } from '../types/settings';
+import { DateCheckIn } from '../types/safetyCheckIn';
 import { defaultSecuritySettings, SecuritySettings } from '../types/security';
 import { decryptLocalPayload, encryptLocalPayload } from './localEncryption';
 
 const STORAGE_KEY = '@spark/app_state';
 const SENSITIVE_VAULT_KEY = '@spark/sensitive_vault';
-const STORAGE_VERSION = 13;
+const STORAGE_VERSION = 14;
 
 type SensitiveVault = {
   conversations: Conversation[];
@@ -61,6 +62,7 @@ export type PersistedAppState = {
   privacyPreferences: PrivacyPreferences;
   legalConsent: LegalConsentRecord;
   pulseSocial: PulseSocialState;
+  dateCheckIns: DateCheckIn[];
 };
 
 export function createDefaultPersistedState(): PersistedAppState {
@@ -109,6 +111,7 @@ export function createDefaultPersistedState(): PersistedAppState {
     privacyPreferences: defaultPrivacyPreferences,
     legalConsent: defaultLegalConsent,
     pulseSocial: defaultPulseSocialState,
+    dateCheckIns: [],
   };
 }
 
@@ -192,6 +195,7 @@ export async function loadPersistedState(): Promise<PersistedAppState | null> {
         ...parsed.pulseSocial,
         postComments: parsed.pulseSocial?.postComments ?? {},
       },
+      dateCheckIns: parsed.dateCheckIns ?? [],
     };
   } catch {
     return null;

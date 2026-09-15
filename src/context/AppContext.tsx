@@ -50,6 +50,7 @@ import {
 } from '../types/preferences';
 import { DisguiseAdCreative, DisguiseOverlayVariant } from '../types/disguise';
 import { Profile, UserProfile } from '../types/profile';
+import { DateCheckIn, isDateCheckInActive } from '../types/safetyCheckIn';
 import {
   defaultNotificationPreferences,
   NotificationPreferences,
@@ -215,7 +216,9 @@ type AppContextValue = {
   isGeneratingDisguiseAd: boolean;
   securitySettings: SecuritySettings;
   privacyPreferences: PrivacyPreferences;
+  isIncognitoActive: boolean;
   legalConsent: LegalConsentRecord;
+  dateCheckIns: DateCheckIn[];
   canRewind: boolean;
   rewindKey: number;
   isSupabaseEnabled: boolean;
@@ -263,6 +266,15 @@ type AppContextValue = {
   setDisguiseMode: (enabled: boolean) => Promise<boolean>;
   updateSecuritySettings: (settings: SecuritySettings) => void;
   updatePrivacyPreferences: (prefs: PrivacyPreferences) => void;
+  setIncognitoMode: (enabled: boolean) => boolean;
+  getActiveDateCheckIn: (profileId: string) => DateCheckIn | null;
+  startDateCheckIn: (
+    profileId: string,
+    profileName: string,
+    payload: { location: string; plannedAt: string; emergencyContact?: string },
+  ) => void;
+  checkInDateNow: (checkInId: string) => void;
+  completeDateCheckIn: (checkInId: string) => void;
   acceptOnboardingLegal: () => void;
   acceptDisguisePolicy: () => void;
   acceptCookieConsent: () => void;
@@ -318,6 +330,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
   const [legalConsent, setLegalConsent] = useState<LegalConsentRecord>(defaultLegalConsent);
   const [pulseSocial, setPulseSocial] = useState<PulseSocialState>(defaultPulseSocialState);
+  const [dateCheckIns, setDateCheckIns] = useState<DateCheckIn[]>([]);
   const [unlockModalVisible, setUnlockModalVisible] = useState(false);
   const [disguisePolicyModalVisible, setDisguisePolicyModalVisible] = useState(false);
   const [unlockError, setUnlockError] = useState<string | null>(null);
@@ -400,6 +413,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ...saved.pulseSocial,
           postComments: saved.pulseSocial?.postComments ?? {},
         });
+        setDateCheckIns(saved.dateCheckIns ?? []);
 
         if (isSupabaseConfigured()) {
           const session = await getSupabaseSession();
@@ -488,6 +502,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       privacyPreferences,
       legalConsent,
       pulseSocial,
+      dateCheckIns,
     };
   }, [
     hasOnboarded,
@@ -506,6 +521,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     privacyPreferences,
     legalConsent,
     pulseSocial,
+    dateCheckIns,
     dailyLikesUsed,
     isSparkPlus,
     sparkNotes,
@@ -846,6 +862,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [conversations, matches]);
 
   const canRewind = isSparkPlus && lastPassedProfileId !== null;
+
+  const isIncognitoActive = isSparkPlus && privacyPreferences.incognitoMode;
+
+  const getActiveDateCheckIn = useCallback(
+    (profileId: string): DateCheckIn | null => {
+      const active = dateCheckIns.find(
+        (checkIn) => checkIn.profileId === profileId && isDateCheckInActive(checkIn),
+      );
+      return active ?? null;
+    },
+    [dateCheckIns],
+  );
 
   const signInWithAppleStub = useCallback(
     async (identityToken?: string, displayName?: string) => {
@@ -1573,6 +1601,56 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPrivacyPreferences(prefs);
   }, []);
 
+  const setIncognitoMode = useCallback(
+    (enabled: boolean): boolean => {
+      if (enabled && !isSparkPlus) {
+        return false;
+      }
+      setPrivacyPreferences((prev) => ({ ...prev, incognitoMode: enabled }));
+      return true;
+    },
+    [isSparkPlus],
+  );
+
+  const startDateCheckIn = useCallback(
+    (
+      profileId: string,
+      profileName: string,
+      payload: { location: string; plannedAt: string; emergencyContact?: string },
+    ) => {
+      const checkIn: DateCheckIn = {
+        id: `checkin-${Date.now()}`,
+        profileId,
+        profileName,
+        location: payload.location,
+        plannedAt: payload.plannedAt,
+        emergencyContact: payload.emergencyContact,
+      };
+      setDateCheckIns((prev) => [checkIn, ...prev.filter((item) => item.profileId !== profileId)]);
+    },
+    [],
+  );
+
+  const checkInDateNow = useCallback((checkInId: string) => {
+    setDateCheckIns((prev) =>
+      prev.map((checkIn) =>
+        checkIn.id === checkInId
+          ? { ...checkIn, checkedInAt: new Date().toISOString() }
+          : checkIn,
+      ),
+    );
+  }, []);
+
+  const completeDateCheckIn = useCallback((checkInId: string) => {
+    setDateCheckIns((prev) =>
+      prev.map((checkIn) =>
+        checkIn.id === checkInId
+          ? { ...checkIn, completedAt: new Date().toISOString() }
+          : checkIn,
+      ),
+    );
+  }, []);
+
   const acceptOnboardingLegal = useCallback(() => {
     const now = new Date().toISOString();
     setLegalConsent((prev) => ({
@@ -1736,7 +1814,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       isGeneratingDisguiseAd,
       securitySettings,
       privacyPreferences,
+      isIncognitoActive,
       legalConsent,
+      dateCheckIns,
       canRewind,
       rewindKey,
       isSupabaseEnabled: isSupabaseConfigured(),
@@ -1781,6 +1861,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setDisguiseMode,
       updateSecuritySettings,
       updatePrivacyPreferences,
+      setIncognitoMode,
+      getActiveDateCheckIn,
+      startDateCheckIn,
+      checkInDateNow,
+      completeDateCheckIn,
       acceptOnboardingLegal,
       acceptDisguisePolicy,
       acceptCookieConsent,
@@ -1836,7 +1921,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       isGeneratingDisguiseAd,
       securitySettings,
       privacyPreferences,
+      isIncognitoActive,
       legalConsent,
+      dateCheckIns,
       canRewind,
       rewindKey,
       completeOnboarding,
@@ -1880,6 +1967,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setDisguiseMode,
       updateSecuritySettings,
       updatePrivacyPreferences,
+      setIncognitoMode,
+      getActiveDateCheckIn,
+      startDateCheckIn,
+      checkInDateNow,
+      completeDateCheckIn,
       acceptOnboardingLegal,
       acceptDisguisePolicy,
       acceptCookieConsent,

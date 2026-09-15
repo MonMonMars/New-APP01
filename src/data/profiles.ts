@@ -117,6 +117,11 @@ const rawProfiles: Profile[] = [
     ],
     interests: ['Design', 'Music', 'Food'],
     openingMove: 'Best hidden gem in the city?',
+    voicePrompt: {
+      question: 'I geek out on…',
+      durationSeconds: 12,
+      recordedAt: '2026-01-01T00:00:00.000Z',
+    },
     prompts: [
       { question: 'Together we could', answer: 'Hunt for the best taco spot in town.' },
     ],

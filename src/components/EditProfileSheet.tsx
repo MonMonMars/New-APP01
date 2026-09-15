@@ -4,10 +4,11 @@ import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'rea
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
-import { RelationshipIntent, UserProfile } from '../types/profile';
+import { RelationshipIntent, UserProfile, VoicePrompt } from '../types/profile';
 import { OPENING_MOVE_SUGGESTIONS } from '../utils/openingMove';
 import { pickProfilePhoto } from '../utils/photoPicker';
 import { runVerificationFlow } from '../utils/verificationFlow';
+import { VoicePromptSheet } from './VoicePromptSheet';
 import { InterestsEditor } from './InterestsEditor';
 import { PhotoCarousel } from './PhotoCarousel';
 import { PromptsEditor } from './PromptsEditor';
@@ -45,6 +46,8 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
   const [photoVerified, setPhotoVerified] = useState(user.photoVerified ?? false);
   const [personVerified, setPersonVerified] = useState(user.personVerified ?? false);
   const [openingMove, setOpeningMove] = useState(user.openingMove ?? '');
+  const [voicePrompt, setVoicePrompt] = useState<VoicePrompt | undefined>(user.voicePrompt);
+  const [showVoicePrompt, setShowVoicePrompt] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -61,6 +64,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       setPhotoVerified(user.photoVerified ?? false);
       setPersonVerified(user.personVerified ?? false);
       setOpeningMove(user.openingMove ?? '');
+      setVoicePrompt(user.voicePrompt);
     }
   }, [visible, user]);
 
@@ -104,6 +108,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       photoVerified,
       personVerified,
       openingMove: openingMove.trim() || undefined,
+      voicePrompt,
     });
     onClose();
   };
@@ -262,6 +267,18 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
             })}
           </View>
 
+          <Text style={[styles.label, { color: colors.textMuted }]}>Voice prompt</Text>
+          <AnimatedPressable
+            style={[styles.verifyRow, { backgroundColor: colors.surface }]}
+            onPress={() => setShowVoicePrompt(true)}
+          >
+            <Ionicons name="mic" size={20} color={colors.gradientEnd} />
+            <Text style={[styles.verifyText, { color: colors.text }]}>
+              {voicePrompt ? 'Edit voice prompt' : 'Add a voice prompt'}
+            </Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+          </AnimatedPressable>
+
           <SocialConnectRows
             instagramConnected={instagramConnected}
             spotifyConnected={spotifyConnected}
@@ -270,6 +287,14 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
           />
         </ScrollView>
       </View>
+
+      <VoicePromptSheet
+        visible={showVoicePrompt}
+        existing={voicePrompt}
+        onClose={() => setShowVoicePrompt(false)}
+        onSave={(prompt) => setVoicePrompt(prompt)}
+        onRemove={() => setVoicePrompt(undefined)}
+      />
     </Modal>
   );
 }

@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image, Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { VoicePromptCard } from './VoicePromptCard';
 import { ProfileVerificationDisplay } from './ProfileVerificationDisplay';
 import { VerificationBadges } from './VerificationBadges';
 import { colors, radii, spacing } from '../theme';
@@ -95,6 +96,10 @@ export function ProfileDetailSheet({
           </View>
 
           <ProfileVerificationDisplay profile={profile} />
+
+          {profile.voicePrompt && (
+            <VoicePromptCard voicePrompt={profile.voicePrompt} profileName={profile.name} />
+          )}
 
           {profile.prompts?.map((prompt) => (
             <AnimatedPressable

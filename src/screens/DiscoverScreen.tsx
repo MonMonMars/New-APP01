@@ -6,7 +6,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesSheet';
 import { ExpandLocationSheet } from '../components/ExpandLocationSheet';
+import { BoostBanner } from '../components/BoostBanner';
 import { LikeLimitModal } from '../components/LikeLimitModal';
+import { PostMatchMomentumModal } from '../components/PostMatchMomentumModal';
 import { MatchModal } from '../components/MatchModal';
 import { MatchToast } from '../components/MatchToast';
 import { ModeToggleLogo } from '../components/disguise/ModeToggleLogo';
@@ -57,6 +59,9 @@ export function DiscoverScreen() {
     remainingSparkNotes,
     canSendSparkNote,
     isIncognitoActive,
+    isBoosted,
+    showMomentumUpsell,
+    dismissMomentumUpsell,
   } = useApp();
 
   const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
@@ -313,6 +318,7 @@ export function DiscoverScreen() {
         </AnimatedPressable>
       </View>
       {isIncognitoActive && <IncognitoBanner />}
+      <BoostBanner visible={isBoosted} />
       <View
         style={[
           styles.deckContainer,
@@ -406,6 +412,15 @@ export function DiscoverScreen() {
         onClose={() => setShowLikeLimit(false)}
         onUpgrade={() => {
           setShowLikeLimit(false);
+          navigation.getParent()?.navigate('SparkPlus');
+        }}
+      />
+
+      <PostMatchMomentumModal
+        visible={showMomentumUpsell}
+        onClose={dismissMomentumUpsell}
+        onUpgrade={() => {
+          dismissMomentumUpsell();
           navigation.getParent()?.navigate('SparkPlus');
         }}
       />

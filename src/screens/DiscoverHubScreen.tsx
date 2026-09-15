@@ -5,6 +5,7 @@ import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DailyBatchIndicator } from '../components/DailyBatchIndicator';
+import { AdvancedFiltersSection } from '../components/AdvancedFiltersSection';
 import { DiscoverFilterChips } from '../components/DiscoverFilterChips';
 import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesSheet';
 import { ExpandLocationSheet } from '../components/ExpandLocationSheet';
@@ -172,6 +173,13 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
         <DiscoverFilterChips
           activeFilters={activeFilters}
           onToggle={(filter: DiscoverFilter) => toggleDiscoverFilter(filter)}
+        />
+
+        <AdvancedFiltersSection
+          filters={preferences.advancedFilters ?? {}}
+          isSparkPlus={isSparkPlus}
+          onChange={(advancedFilters) => updatePreferences({ ...preferences, advancedFilters })}
+          onUpgrade={() => navigation.getParent()?.navigate('SparkPlus')}
         />
 
         <AiPersonasRow onSelect={handleSelectAiPersona} />

@@ -1,6 +1,8 @@
 import { aiPersonaProfiles, AI_PERSONA_IDS } from './aiPersonas';
 import { extraRawProfiles } from './extraProfiles';
-import { Profile } from '../types/profile';
+import { Profile, RelationshipIntent } from '../types/profile';
+
+const PROFILE_INTENTS: RelationshipIntent[] = ['long_term', 'short_term', 'new_friends', 'not_sure'];
 
 export { AI_PERSONA_IDS };
 
@@ -105,6 +107,13 @@ function withMap(
 ): Profile {
   const { mapX, mapY } = mapPin(profile.distanceMiles, seed);
   return { ...profile, mapX, mapY };
+}
+
+function withIntent(profile: Profile, seed: number): Profile {
+  if (profile.intent || profile.isAiPersona) {
+    return profile;
+  }
+  return { ...profile, intent: PROFILE_INTENTS[seed % PROFILE_INTENTS.length] };
 }
 
 const rawProfiles: Profile[] = [
@@ -1029,9 +1038,10 @@ function withVerification(profile: Profile): Profile {
   };
 }
 
-export const mockProfiles: Profile[] = rawProfiles.map((profile, index) =>
-  withVerification(withMap(profile, Number(profile.id) || index + 1)),
-);
+export const mockProfiles: Profile[] = rawProfiles.map((profile, index) => {
+  const seed = Number(profile.id) || index + 1;
+  return withVerification(withIntent(withMap(profile, seed), seed));
+});
 
 function incomingFromMock(id: string): Profile {
   const profile = rawProfiles.find((p) => p.id === id);

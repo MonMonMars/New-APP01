@@ -4,7 +4,7 @@
 
 **https://liquid-specifics-review-arbitrary.trycloudflare.com**
 
-_Last updated: Sep 15, 2026 — AI personas + tab navigation fix (Discover no longer bleeds into other tabs)_
+_Last updated: Sep 15, 2026 — Phase C: advanced filters, AI profile coach, post-3rd-match upsell_
 
 > Tunnel links expire when the cloud workspace stops. If this 404s, ask for a fresh link.
 

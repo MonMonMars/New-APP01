@@ -1,4 +1,6 @@
 import { disguiseClientAds } from './disguiseClientAds';
+import { disguiseNewsExtra } from './disguiseNewsExtra';
+import { disguiseSocialPosts } from './disguiseSocialPosts';
 
 export type NewsReporter = {
   id: string;
@@ -229,16 +231,44 @@ export function findAdPostByLandingUrl(landingUrl: string): AdPost | undefined {
   return adItems.find((item) => item.landingUrl === landingUrl);
 }
 
+const allNewsItems = [...newsItems, ...disguiseNewsExtra];
+
 /** Static feed slots — disguised dating profiles are injected in buildDisguiseFeed(). */
 export const disguiseFeedItems: FeedItem[] = [
-  newsItems[0],
+  allNewsItems[0],
+  disguiseSocialPosts[0],
   adItems[0],
-  newsItems[1],
+  allNewsItems[1],
+  disguiseSocialPosts[1],
   adItems[1],
-  newsItems[2],
+  allNewsItems[2],
+  disguiseSocialPosts[2],
   adItems[2],
-  newsItems[3],
+  allNewsItems[3],
+  disguiseSocialPosts[3],
+  allNewsItems[4],
+  disguiseSocialPosts[4],
+  adItems[0],
+  allNewsItems[5],
+  disguiseSocialPosts[5],
+  adItems[1],
+  allNewsItems[6],
+  disguiseSocialPosts[6],
+  allNewsItems[7],
+  disguiseSocialPosts[7],
+  adItems[2],
 ];
+
+export function findNewsPostByArticleUrl(articleUrl: string): NewsPost | undefined {
+  return allNewsItems.find((item) => item.articleUrl === articleUrl);
+}
+
+export type DisguiseAlertPerson = {
+  name: string;
+  avatarUrl: string;
+  overlayVariant?: 'news' | 'ad';
+  overlayText?: string;
+};
 
 export type DisguiseAlert = {
   id: string;
@@ -247,28 +277,153 @@ export type DisguiseAlert = {
   time: string;
   articleUrl?: string;
   landingUrl?: string;
+  person?: DisguiseAlertPerson;
 };
 
-export function findNewsPostByArticleUrl(articleUrl: string): NewsPost | undefined {
-  return newsItems.find((item) => item.articleUrl === articleUrl);
-}
-
 export const disguiseAlerts: DisguiseAlert[] = [
-  { id: 'a1', icon: 'arrow-up-outline', text: 'Alex Chen upvoted your comment', time: '2m ago' },
-  { id: 'a2', icon: 'person-add-outline', text: 'Maya Okonkwo started following you', time: '1h ago' },
-  { id: 'a3', icon: 'chatbubble-outline', text: 'New reply on your post', time: '3h ago' },
+  {
+    id: 'a1',
+    icon: 'arrow-up-outline',
+    text: 'Alex Chen upvoted your comment on night buses',
+    time: '2m ago',
+    person: {
+      name: 'Alex Chen',
+      avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
+      overlayVariant: 'news',
+      overlayText: 'LIVE',
+    },
+  },
+  {
+    id: 'a2',
+    icon: 'person-add-outline',
+    text: 'Maya Okonkwo started following you',
+    time: '18m ago',
+    person: {
+      name: 'Maya O.',
+      avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80',
+    },
+  },
+  {
+    id: 'a3',
+    icon: 'chatbubble-outline',
+    text: 'Jordan Lee replied: "Same — gallery night was packed"',
+    time: '45m ago',
+    person: {
+      name: 'Jordan Lee',
+      avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80',
+      overlayVariant: 'ad',
+      overlayText: 'AD',
+    },
+  },
   {
     id: 'a4',
+    icon: 'arrow-up-outline',
+    text: 'Priya N. upvoted your thread on AI capex',
+    time: '1h ago',
+    person: {
+      name: 'Priya N.',
+      avatarUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80',
+      overlayVariant: 'news',
+      overlayText: 'BREAKING',
+    },
+  },
+  {
+    id: 'a5',
+    icon: 'chatbubble-outline',
+    text: 'New reply on your weekend brunch list',
+    time: '2h ago',
+    person: {
+      name: 'Elena R.',
+      avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80',
+    },
+  },
+  {
+    id: 'a6',
+    icon: 'person-add-outline',
+    text: 'Marcus T. started following you',
+    time: '3h ago',
+    person: {
+      name: 'Marcus T.',
+      avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80',
+    },
+  },
+  {
+    id: 'a7',
     icon: 'newspaper-outline',
     text: 'BBC News: Tech giants AI spending story trending',
     time: '6h ago',
     articleUrl: 'https://www.bbc.co.uk/news/articles/c5yp2y8rdpro',
   },
   {
-    id: 'a5',
+    id: 'a8',
+    icon: 'newspaper-outline',
+    text: 'The Verge: EU repairability labels explained',
+    time: '8h ago',
+    articleUrl:
+      'https://www.theverge.com/news/655275/smartphone-tablet-labels-eu-energy-efficiency-battery-life-repairability',
+  },
+  {
+    id: 'a9',
     icon: 'megaphone-outline',
     text: 'Spotify Premium: 3 months free offer',
-    time: '1d ago',
+    time: '12h ago',
     landingUrl: 'https://www.spotify.com/premium/',
+  },
+  {
+    id: 'a10',
+    icon: 'megaphone-outline',
+    text: 'NordVPN: 2 years + 3 months free',
+    time: '1d ago',
+    landingUrl: 'https://nordvpn.com/special/',
+  },
+  {
+    id: 'a11',
+    icon: 'chatbubble-outline',
+    text: 'Sam K. mentioned you in a repair scores thread',
+    time: '1d ago',
+    person: {
+      name: 'Sam K.',
+      avatarUrl: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=200&q=80',
+      overlayVariant: 'news',
+    },
+  },
+  {
+    id: 'a12',
+    icon: 'arrow-up-outline',
+    text: 'Luca M. upvoted your pantry recipe comment',
+    time: '1d ago',
+    person: {
+      name: 'Luca M.',
+      avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80',
+    },
+  },
+  {
+    id: 'a13',
+    icon: 'newspaper-outline',
+    text: 'BBC Good Food: Speedy chorizo with chickpeas',
+    time: '2d ago',
+    articleUrl: 'https://www.bbcgoodfood.com/recipes/speedy-chorizo-chickpeas',
+  },
+  {
+    id: 'a14',
+    icon: 'person-add-outline',
+    text: 'Noor H. started following you',
+    time: '2d ago',
+    person: {
+      name: 'Noor H.',
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80',
+      overlayVariant: 'ad',
+      overlayText: 'AD',
+    },
+  },
+  {
+    id: 'a15',
+    icon: 'chatbubble-outline',
+    text: 'Dana W. replied on health-tech hiring',
+    time: '3d ago',
+    person: {
+      name: 'Dana W.',
+      avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&q=80',
+    },
   },
 ];

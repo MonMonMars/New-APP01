@@ -11,7 +11,10 @@ import { useTheme } from '../../context/ThemeContext';
 import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { showDemoToast } from '../../utils/demoFeedback';
-import { buildDisguisedProfileFeedItem } from '../../utils/disguiseProfileFeed';
+import {
+  buildDisguisedProfileFeedItem,
+  buildDisguisedProfileFeedItems,
+} from '../../utils/disguiseProfileFeed';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 
 export function DisguiseProfileScreen() {
@@ -28,7 +31,18 @@ export function DisguiseProfileScreen() {
     generatedAt: new Date().toISOString(),
   };
   const profileFeedItem = buildDisguisedProfileFeedItem(user, profileCreative);
-  const postCount = disguiseAdCreative ? 12 : 11;
+  const recentPosts = buildDisguisedProfileFeedItems().slice(0, 6);
+  const readingHistory = [
+    'Tech giants are spending big on AI in a bid to dominate the boom',
+    'New night routes and earlier starts for Bristol\'s buses',
+    'Speedy chorizo with chickpeas',
+    'Remote teams rethink async standups',
+    'Weekend brunch lists: 12 spots with walk-in tables',
+    'EU smartphone labels for repairability land in June',
+    'Health-tech hiring picks up after a quiet Q1',
+    'Night transit safety upgrades roll out at busy stops',
+  ];
+  const postCount = disguiseAdCreative ? 28 : 24;
   const followerCount = 180 + user.name.length * 7;
   const followingCount = 120 + user.photos.length * 18;
 
@@ -62,7 +76,25 @@ export function DisguiseProfileScreen() {
           </View>
         </View>
 
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Recent posts</Text>
+        {recentPosts.map((post) => (
+          <DisguisedProfileCard key={`profile-recent-${post.id}`} post={post} />
+        ))}
+
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Reading history</Text>
         <View style={[styles.menuSection, { backgroundColor: colors.surface }]}>
+          {readingHistory.map((title, index) => (
+            <MenuRow
+              key={`read-${index}`}
+              icon="newspaper-outline"
+              label={title}
+              colors={colors}
+              onPress={() => handleMenuPress(title)}
+            />
+          ))}
+        </View>
+
+        <View style={[styles.menuSection, { backgroundColor: colors.surface, marginTop: spacing.md }]}>
           <MenuRow icon="bookmark-outline" label="Saved posts" colors={colors} onPress={() => handleMenuPress('Saved posts')} />
           <MenuRow icon="time-outline" label="Reading history" colors={colors} onPress={() => handleMenuPress('Reading history')} />
           <MenuRow icon="settings-outline" label="Settings" colors={colors} onPress={() => handleMenuPress('Settings')} />
@@ -141,10 +173,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingBottom: spacing.xl,
+    paddingBottom: spacing.xl * 4,
+    paddingHorizontal: spacing.md,
+  },
+  sectionTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
   },
   hero: {
-    paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
     width: '100%',
   },
@@ -177,7 +215,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   menuSection: {
-    marginHorizontal: spacing.md,
     borderRadius: radii.card,
     overflow: 'hidden',
     marginBottom: spacing.md,
@@ -195,7 +232,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   privacyCard: {
-    marginHorizontal: spacing.md,
     borderRadius: radii.card,
     borderWidth: StyleSheet.hairlineWidth,
     padding: spacing.md,
@@ -224,7 +260,6 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   generatorCard: {
-    marginHorizontal: spacing.md,
     marginTop: spacing.sm,
     borderRadius: radii.card,
     borderWidth: StyleSheet.hairlineWidth,

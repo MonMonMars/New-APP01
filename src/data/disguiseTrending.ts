@@ -273,4 +273,34 @@ export const editorsPicks = [
     subtitle: 'Pulse Finance · morning brief',
     topic: '#MarketWatch',
   },
+  {
+    id: 'ep4',
+    title: 'Brunch walk-ins: editors\' 12-spot list',
+    subtitle: 'BBC Good Food · weekend',
+    topic: '#WeekendEats',
+  },
+  {
+    id: 'ep5',
+    title: 'EU repair labels: what changes in June',
+    subtitle: 'The Verge · policy brief',
+    topic: '#EURegulation',
+  },
+  {
+    id: 'ep6',
+    title: 'Health-tech hiring: roles worth watching',
+    subtitle: 'Pulse Careers · Q3',
+    topic: '#StartupJobs',
+  },
+  {
+    id: 'ep7',
+    title: 'Remote work async guide for hybrid teams',
+    subtitle: 'Pulse Work · 5 min',
+    topic: '#RemoteWork',
+  },
+  {
+    id: 'ep8',
+    title: 'AI investing: chip makers vs cloud',
+    subtitle: 'Pulse Finance · deep dive',
+    topic: '#AIInvesting',
+  },
 ];

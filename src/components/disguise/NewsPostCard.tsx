@@ -4,6 +4,7 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { NewsPost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { FeedPersonRow } from './FeedPersonRow';
 import { NewsArticleSheet } from './NewsArticleSheet';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
 import { AnimatedPressable } from '../AnimatedPressable';
@@ -55,14 +56,19 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
                     event.stopPropagation();
                     openReporter(reporter);
                   }}
-                  style={styles.reporterCell}
                   accessibilityRole="button"
                   accessibilityLabel={`View photos from ${reporter.name}`}
                 >
-                  <Image source={{ uri: reporter.avatarUrl }} style={styles.reporterAvatar} />
-                  <Text style={[styles.reporterQuote, { color: colors.text }]} numberOfLines={3}>
-                    {reporter.quote}
-                  </Text>
+                  <FeedPersonRow
+                    plainAvatar
+                    imageUrl={reporter.avatarUrl}
+                    title={reporter.name}
+                    subtitle="Reader comment"
+                    body={reporter.quote}
+                    titleStyle={{ color: colors.text }}
+                    bodyStyle={{ color: colors.text }}
+                    style={styles.reporterRow}
+                  />
                 </AnimatedPressable>
               ))}
             </View>
@@ -130,28 +136,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   reportersRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
     marginTop: spacing.xs,
     paddingTop: spacing.sm,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(128,128,128,0.25)',
+    gap: spacing.sm,
   },
-  reporterCell: {
-    flex: 1,
-    alignItems: 'center',
-    maxWidth: 120,
-  },
-  reporterAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    marginBottom: spacing.xs,
-  },
-  reporterQuote: {
-    fontSize: 11,
-    lineHeight: 15,
-    textAlign: 'center',
-    fontWeight: '600',
+  reporterRow: {
+    width: '100%',
   },
 });

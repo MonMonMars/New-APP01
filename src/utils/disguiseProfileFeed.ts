@@ -92,7 +92,7 @@ function toDisguisedProfilePost(
 
 /** Disguised profiles — same card chrome as news/ad/social; only copy and avatar differ. */
 export function buildDisguisedProfileFeedItems(): DisguisedProfilePost[] {
-  return incomingLikeProfiles.slice(0, 4).map((profile, index) => toDisguisedProfilePost(profile, index));
+  return incomingLikeProfiles.map((profile, index) => toDisguisedProfilePost(profile, index));
 }
 
 export function buildDisguisedProfileFeedItem(

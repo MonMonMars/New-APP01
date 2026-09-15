@@ -2,9 +2,9 @@
 
 ## Demo link (open now)
 
-**https://question-tutorials-athletics-ottawa.trycloudflare.com**
+**https://volumes-acknowledge-referenced-correct.trycloudflare.com**
 
-_Last updated: Sep 15, 2026 — 20 new demo profiles + smart chat replies_
+_Last updated: Sep 15, 2026 — 10 AI practice persona accounts with instant match + LLM replies_
 
 > Tunnel links expire when the cloud workspace stops. If this 404s, ask for a fresh link.
 

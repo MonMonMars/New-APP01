@@ -12,9 +12,16 @@
       "resizeMode": "contain",
       "backgroundColor": "#0F0F10"
     },
+    "scheme": "spark",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.spark.dating"
+      "bundleIdentifier": "com.spark.dating",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Spark uses your camera for profile photos and verification selfies.",
+        "NSPhotoLibraryUsageDescription": "Spark uses your photo library to add profile pictures.",
+        "NSFaceIDUsageDescription": "Spark uses Face ID to unlock private dating mode.",
+        "NSLocationWhenInUseUsageDescription": "Spark uses your location to show people nearby."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -24,6 +31,14 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "package": "com.spark.dating",
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "READ_MEDIA_IMAGES",
+        "ACCESS_COARSE_LOCATION",
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT"
+      ],
       "predictiveBackGestureEnabled": false
     },
     "web": {

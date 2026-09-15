@@ -24,7 +24,7 @@ export function SocialConnectRows({
   const handleInstagram = () => {
     if (!instagramConnected) {
       onToggleInstagram();
-      showDemoToast('Instagram connected', 'Your top photos will appear on your Spark profile in production.');
+      showDemoToast('Instagram connected', 'Your top photos will appear on your Spark profile.');
     } else {
       onToggleInstagram();
       showDemoToast('Instagram disconnected');
@@ -34,7 +34,7 @@ export function SocialConnectRows({
   const handleSpotify = () => {
     if (!spotifyConnected) {
       onToggleSpotify();
-      showDemoToast('Spotify connected', 'Your anthem and top artists will show on your profile in production.');
+      showDemoToast('Spotify connected', 'Your anthem and top artists will show on your profile.');
     } else {
       onToggleSpotify();
       showDemoToast('Spotify disconnected');

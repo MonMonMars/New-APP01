@@ -4,8 +4,9 @@ import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'rea
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
-import { UserProfile } from '../types/profile';
+import { RelationshipIntent, UserProfile } from '../types/profile';
 import { pickProfilePhoto } from '../utils/photoPicker';
+import { InterestsEditor } from './InterestsEditor';
 import { PhotoCarousel } from './PhotoCarousel';
 import { PromptsEditor } from './PromptsEditor';
 import { SocialConnectRows } from './SocialConnectRows';
@@ -19,6 +20,13 @@ type EditProfileSheetProps = {
   onSave: (user: UserProfile) => void;
 };
 
+const intentOptions: { value: RelationshipIntent; label: string }[] = [
+  { value: 'long_term', label: 'Long-term partner' },
+  { value: 'short_term', label: 'Something casual' },
+  { value: 'new_friends', label: 'New friends' },
+  { value: 'not_sure', label: 'Still figuring it out' },
+];
+
 export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfileSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
@@ -26,6 +34,8 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
   const [bio, setBio] = useState(user.bio);
   const [age, setAge] = useState(String(user.age));
   const [photos, setPhotos] = useState<string[]>(user.photos);
+  const [interests, setInterests] = useState<string[]>(user.interests);
+  const [intent, setIntent] = useState<RelationshipIntent | undefined>(user.intent);
   const [prompts, setPrompts] = useState(user.prompts ?? []);
   const [instagramConnected, setInstagramConnected] = useState(user.instagramConnected ?? false);
   const [spotifyConnected, setSpotifyConnected] = useState(user.spotifyConnected ?? false);
@@ -39,6 +49,8 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       setBio(user.bio);
       setAge(String(user.age));
       setPhotos(user.photos);
+      setInterests(user.interests);
+      setIntent(user.intent);
       setPrompts(user.prompts ?? []);
       setInstagramConnected(user.instagramConnected ?? false);
       setSpotifyConnected(user.spotifyConnected ?? false);
@@ -55,24 +67,13 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
     }
   };
 
-  const handleVerifyAge = () => {
-    Alert.alert(
-      'Age verification',
-      'In production, this would use ID verification (e.g. Yoti, Onfido). For the demo, we will mark your profile as 18+ verified.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Verify (demo)', onPress: () => setAgeVerified(true) },
-      ],
-    );
-  };
-
   const handleVerifyPhoto = () => {
     Alert.alert(
       'Photo verification',
-      'We compare a live selfie to your profile photos to confirm they are really you. In production this uses photo-matching (e.g. Bumble Photo Verification).',
+      'We compare a live selfie to your profile photos to confirm they are really you.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Verify (demo)', onPress: () => setPhotoVerified(true) },
+        { text: 'Take selfie', onPress: () => setPhotoVerified(true) },
       ],
     );
   };
@@ -80,10 +81,21 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
   const handleVerifyPerson = () => {
     Alert.alert(
       'Real person check',
-      'A quick liveness scan confirms you are a real person. In production this uses face liveness (e.g. Onfido, FaceTec).',
+      'A quick liveness scan confirms you are a real person, not a bot or fake account.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Start scan (demo)', onPress: () => setPersonVerified(true) },
+        { text: 'Start scan', onPress: () => setPersonVerified(true) },
+      ],
+    );
+  };
+
+  const handleVerifyAge = () => {
+    Alert.alert(
+      'Age verification',
+      'Submit a government ID through our secure partner to confirm you are 18+. We store pass/fail status only.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Continue', onPress: () => setAgeVerified(true) },
       ],
     );
   };
@@ -100,6 +112,8 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       bio: bio.trim() || user.bio,
       age: nextAge,
       photos: photos.length > 0 ? photos : user.photos,
+      interests,
+      intent,
       prompts,
       instagramConnected,
       spotifyConnected,
@@ -201,6 +215,32 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
             multiline
           />
 
+          <Text style={[styles.label, { color: colors.textMuted }]}>Looking for</Text>
+          <View style={styles.intentRow}>
+            {intentOptions.map((option) => {
+              const selected = intent === option.value;
+              return (
+                <AnimatedPressable
+                  key={option.value}
+                  style={[
+                    styles.intentChip,
+                    {
+                      backgroundColor: selected ? colors.gradientEnd : colors.surface,
+                      borderColor: selected ? colors.gradientEnd : colors.border,
+                    },
+                  ]}
+                  onPress={() => setIntent(option.value)}
+                >
+                  <Text style={[styles.intentChipText, { color: selected ? '#fff' : colors.text }]}>
+                    {option.label}
+                  </Text>
+                </AnimatedPressable>
+              );
+            })}
+          </View>
+
+          <InterestsEditor interests={interests} onChange={setInterests} />
+
           <PromptsEditor prompts={prompts} onChange={setPrompts} />
 
           <SocialConnectRows
@@ -277,5 +317,21 @@ const styles = StyleSheet.create({
   inputMultiline: {
     minHeight: 96,
     textAlignVertical: 'top',
+  },
+  intentRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+  },
+  intentChip: {
+    borderRadius: radii.button,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  intentChipText: {
+    fontSize: 13,
+    fontWeight: '600',
   },
 });

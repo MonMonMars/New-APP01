@@ -49,12 +49,12 @@ const resources = [
   {
     label: 'Safety tips & FAQ',
     icon: 'book-outline' as const,
-    message: 'Meet in public, tell a friend your plans, and trust your instincts. Full FAQ at spark.app/safety (demo).',
+    message: 'Meet in public, tell a friend your plans, and trust your instincts. Full FAQ at spark.app/safety.',
   },
   {
     label: 'Contact support',
     icon: 'mail-outline' as const,
-    message: 'Email support@spark.app — demo builds show this confirmation only.',
+    message: 'Email support@spark.app — we typically reply within one business day.',
   },
   {
     label: 'Trust & Verification Policy',

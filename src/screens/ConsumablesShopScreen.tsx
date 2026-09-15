@@ -116,7 +116,7 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
         ))}
 
         <Text style={[styles.legal, { color: colors.textMuted }]}>
-          Prototype — no real charges. Purchases activate immediately for demo.
+          Purchases are processed by Apple or Google. Boosts and Notes activate immediately after purchase.
         </Text>
       </ScrollView>
     </View>

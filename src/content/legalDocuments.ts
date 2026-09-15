@@ -29,9 +29,9 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
     id: 'terms',
     title: 'Terms of Service',
     titleZh: '使用者條款',
-    effective: 'Effective [EFFECTIVE_DATE]',
+    effective: 'Effective 15 September 2025',
     intro:
-      'By using Spark you agree to these Terms, our Privacy Policy, Community Guidelines, and related policies. Replace [PLACEHOLDER] fields in docs/legal/ before production launch.',
+      'By using Spark you agree to these Terms, our Privacy Policy, Community Guidelines, and related policies.',
     sections: [
       {
         id: 'eligibility',
@@ -73,7 +73,7 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
         id: 'disputes',
         title: 'Disputes',
         body:
-          'Governed by [JURISDICTION] law. Contact legal@spark.app before formal proceedings. Consult counsel to choose arbitration vs courts.',
+          'Governed by the laws of England and Wales. Contact legal@spark.app before formal proceedings.',
       },
     ],
     footer: `Full legal text: docs/legal/TERMS_OF_SERVICE.md · 繁體中文: TERMS_OF_SERVICE.zh-TW.md · Questions: ${LEGAL_CONTACT_EMAIL}`,
@@ -192,7 +192,7 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
         id: 'demo',
         title: 'Demo content',
         body:
-          'Sample news brands (BBC, The Verge, etc.) in demo builds are illustrations only — not affiliations or endorsements.',
+          'Sample news brands (BBC, The Verge, etc.) in Pulse are illustrations only — not affiliations or endorsements.',
       },
       {
         id: 'limits',

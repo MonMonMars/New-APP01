@@ -10,18 +10,40 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
-import { showDemoToast } from '../../utils/demoFeedback';
 import {
   buildDisguisedProfileFeedItem,
   buildDisguisedProfileFeedItems,
 } from '../../utils/disguiseProfileFeed';
+import { PulseDetailItem, PulseDetailSheet } from '../../components/disguise/PulseDetailSheet';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
+
+type DetailSheetKey = 'saved' | 'history' | 'settings' | 'help' | null;
+
+const SAVED_POSTS: PulseDetailItem[] = [
+  { id: 's1', title: 'EU smartphone labels for repairability land in June', subtitle: 'The Verge · 2d ago', icon: 'bookmark' },
+  { id: 's2', title: 'Weekend brunch lists: 12 spots with walk-in tables', subtitle: 'BBC Good Food · 4d ago', icon: 'bookmark' },
+  { id: 's3', title: 'Remote teams rethink async standups', subtitle: 'Pulse Community · 1w ago', icon: 'bookmark' },
+];
+
+const SETTINGS_ITEMS: PulseDetailItem[] = [
+  { id: 'st1', title: 'Notifications', subtitle: 'Matches, messages, and Pulse alerts', icon: 'notifications-outline' },
+  { id: 'st2', title: 'Appearance', subtitle: 'Light, dark, or system', icon: 'moon-outline' },
+  { id: 'st3', title: 'Region & language', subtitle: 'United Kingdom · English', icon: 'globe-outline' },
+  { id: 'st4', title: 'Data & privacy', subtitle: 'Download or delete your Pulse data', icon: 'shield-outline' },
+];
+
+const HELP_ITEMS: PulseDetailItem[] = [
+  { id: 'h1', title: 'How disguise mode works', subtitle: 'Switch between Pulse and Spark safely', icon: 'eye-off-outline' },
+  { id: 'h2', title: 'Report a post', subtitle: 'Flag misleading or harmful content', icon: 'flag-outline' },
+  { id: 'h3', title: 'Contact support', subtitle: 'support@spark.app', icon: 'mail-outline' },
+];
 
 export function DisguiseProfileScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { user, disguiseMode, setDisguiseMode, disguiseAdCreative } = useApp();
   const [showGenerator, setShowGenerator] = useState(false);
+  const [detailSheet, setDetailSheet] = useState<DetailSheetKey>(null);
   const profileCreative = disguiseAdCreative ?? {
     imageUrl: user.photos[0],
     overlayText: 'Weekend reads you should not miss',
@@ -48,13 +70,23 @@ export function DisguiseProfileScreen() {
     'Remote work async guide for hybrid teams',
     'EU repair labels: what changes in June',
   ];
-  const postCount = disguiseAdCreative ? 28 : 24;
-  const followerCount = 180 + user.name.length * 7;
-  const followingCount = 120 + user.photos.length * 18;
+  const postCount = recentPosts.length + 18;
+  const followerCount = 156;
+  const followingCount = 94;
 
-  const handleMenuPress = (label: string) => {
-    showDemoToast(label, 'Saved locally in this demo build.');
-  };
+  const historyItems: PulseDetailItem[] = readingHistory.map((title, index) => ({
+    id: `hist-${index}`,
+    title,
+    subtitle: `${index + 1}d ago`,
+    icon: 'newspaper-outline',
+  }));
+
+  const detailConfig = {
+    saved: { title: 'Saved posts', items: SAVED_POSTS },
+    history: { title: 'Reading history', items: historyItems },
+    settings: { title: 'Settings', items: SETTINGS_ITEMS },
+    help: { title: 'Help center', items: HELP_ITEMS },
+  } as const;
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
@@ -95,16 +127,16 @@ export function DisguiseProfileScreen() {
               icon="newspaper-outline"
               label={title}
               colors={colors}
-              onPress={() => handleMenuPress(title)}
+              onPress={() => setDetailSheet('history')}
             />
           ))}
         </View>
 
         <View style={[styles.menuSection, { backgroundColor: colors.surface, marginTop: spacing.md }]}>
-          <MenuRow icon="bookmark-outline" label="Saved posts" colors={colors} onPress={() => handleMenuPress('Saved posts')} />
-          <MenuRow icon="time-outline" label="Reading history" colors={colors} onPress={() => handleMenuPress('Reading history')} />
-          <MenuRow icon="settings-outline" label="Settings" colors={colors} onPress={() => handleMenuPress('Settings')} />
-          <MenuRow icon="help-circle-outline" label="Help center" colors={colors} onPress={() => handleMenuPress('Help center')} />
+          <MenuRow icon="bookmark-outline" label="Saved posts" colors={colors} onPress={() => setDetailSheet('saved')} />
+          <MenuRow icon="time-outline" label="Reading history" colors={colors} onPress={() => setDetailSheet('history')} />
+          <MenuRow icon="settings-outline" label="Settings" colors={colors} onPress={() => setDetailSheet('settings')} />
+          <MenuRow icon="help-circle-outline" label="Help center" colors={colors} onPress={() => setDetailSheet('help')} />
         </View>
 
         <View style={[styles.privacyCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -160,6 +192,14 @@ export function DisguiseProfileScreen() {
       </ScrollView>
 
       <DisguiseAdGeneratorSheet visible={showGenerator} onClose={() => setShowGenerator(false)} />
+      {detailSheet ? (
+        <PulseDetailSheet
+          visible
+          title={detailConfig[detailSheet].title}
+          items={detailConfig[detailSheet].items}
+          onClose={() => setDetailSheet(null)}
+        />
+      ) : null}
     </View>
   );
 }

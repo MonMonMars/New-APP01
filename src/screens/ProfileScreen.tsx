@@ -10,6 +10,7 @@ import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesShe
 import { EditProfileSheet } from '../components/EditProfileSheet';
 import { ProfileCompletionCard } from '../components/ProfileCompletionCard';
 import { ProfileTrustSection } from '../components/ProfileTrustSection';
+import { ReferralCard } from '../components/ReferralCard';
 import { VerificationBadges } from '../components/VerificationBadges';
 import { PhotoCarousel } from '../components/PhotoCarousel';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -32,6 +33,7 @@ const intentLabels: Record<RelationshipIntent, string> = {
 
 type SettingsRoute =
   | 'Safety'
+  | 'SecuritySettings'
   | 'SparkPlus'
   | 'DiscoverHub'
   | 'DiscoveryPreferences'
@@ -42,6 +44,7 @@ type SettingsRoute =
 const settingsRows: { icon: keyof typeof Ionicons.glyphMap; label: string; route: SettingsRoute }[] = [
   { icon: 'flame-outline', label: 'Discover tools', route: 'DiscoverHub' },
   { icon: 'options-outline', label: 'Discovery preferences', route: 'DiscoveryPreferences' },
+  { icon: 'lock-closed-outline', label: 'Security & app lock', route: 'SecuritySettings' },
   { icon: 'shield-checkmark-outline', label: 'Safety & privacy', route: 'Safety' },
   { icon: 'notifications-outline', label: 'Notifications', route: 'NotificationPreferences' },
   { icon: 'bag-outline', label: 'Shop — Boosts & Notes', route: 'ConsumablesShop' },
@@ -263,7 +266,7 @@ export function ProfileScreen() {
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>Matches</Text>
           </View>
           <View style={[styles.stat, { backgroundColor: colors.surface }]}>
-            <Text style={[styles.statValue, { color: colors.text }]}>78%</Text>
+            <Text style={[styles.statValue, { color: colors.text }]}>{profileCompletion.score}%</Text>
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>Profile score</Text>
           </View>
         </View>
@@ -294,6 +297,8 @@ export function ProfileScreen() {
             </View>
           )}
         </View>
+
+        <ReferralCard />
 
         <View style={styles.section}>
           {settingsRows.map((row) => (

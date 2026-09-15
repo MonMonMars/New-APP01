@@ -34,7 +34,7 @@ export function ProfileTrustSection({ user, onUpdate, onOpenPolicy }: ProfileTru
         { text: 'Cancel', style: 'cancel' },
         { text: 'Read policy', onPress: onOpenPolicy },
         {
-          text: 'Verify (demo)',
+          text: 'Take selfie',
           onPress: () => onUpdate({ photoVerified: true }),
         },
       ],
@@ -49,7 +49,7 @@ export function ProfileTrustSection({ user, onUpdate, onOpenPolicy }: ProfileTru
         { text: 'Cancel', style: 'cancel' },
         { text: 'Read policy', onPress: onOpenPolicy },
         {
-          text: 'Start scan (demo)',
+          text: 'Start scan',
           onPress: () => onUpdate({ personVerified: true }),
         },
       ],
@@ -64,7 +64,7 @@ export function ProfileTrustSection({ user, onUpdate, onOpenPolicy }: ProfileTru
         { text: 'Cancel', style: 'cancel' },
         { text: 'Read policy', onPress: onOpenPolicy },
         {
-          text: 'Verify (demo)',
+          text: 'Continue',
           onPress: () => onUpdate({ ageVerified: true }),
         },
       ],

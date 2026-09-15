@@ -83,6 +83,38 @@ export function NotificationPreferencesScreen({ onClose }: NotificationPreferenc
         value={notificationPreferences.likes}
         onToggle={toggle('likes')}
       />
+      <ToggleRow
+        icon="star-half"
+        label="Super Likes"
+        description="When someone sends a Super Like"
+        value={notificationPreferences.superLikes}
+        onToggle={toggle('superLikes')}
+      />
+      <ToggleRow
+        icon="flash"
+        label="Boosts"
+        description="When your Boost is active or ending soon"
+        value={notificationPreferences.boosts}
+        onToggle={toggle('boosts')}
+      />
+
+      <Text style={[styles.section, { color: colors.textMuted, marginTop: spacing.lg }]}>Pulse disguise</Text>
+      <ToggleRow
+        icon="eye-off-outline"
+        label="Neutral lock-screen copy"
+        description="Show Pulse-style alerts while in disguise mode"
+        value={notificationPreferences.disguiseSafe}
+        onToggle={toggle('disguiseSafe')}
+      />
+
+      <Text style={[styles.section, { color: colors.textMuted, marginTop: spacing.lg }]}>Marketing</Text>
+      <ToggleRow
+        icon="megaphone-outline"
+        label="Tips & offers"
+        description="Product updates, promos, and feature tips"
+        value={notificationPreferences.marketing}
+        onToggle={toggle('marketing')}
+      />
 
       <Text style={[styles.hint, { color: colors.textMuted }]}>
         On web, push notifications are limited. Use a real device for the full experience.

@@ -1,22 +1,27 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Alert, Share, StyleSheet, Text, View } from 'react-native';
 
+import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { radii, spacing } from '../theme';
+import { buildInviteLink, buildInviteMessage } from '../utils/inviteLink';
 import { AnimatedPressable } from './AnimatedPressable';
 
 export function ReferralCard() {
   const { colors } = useTheme();
+  const { user, userId } = useApp();
+  const inviteLink = buildInviteLink(userId);
 
   const handleInvite = async () => {
+    const message = buildInviteMessage(user.name, inviteLink);
     try {
       await Share.share({
-        message:
-          'Join me on Spark — dating with a private disguise mode when you need it. https://spark.app/invite',
+        message,
         title: 'Invite to Spark',
+        url: inviteLink,
       });
     } catch {
-      Alert.alert('Invite friends', 'Share your link: https://spark.app/invite');
+      Alert.alert('Invite friends', `Share your link:\n${inviteLink}`);
     }
   };
 

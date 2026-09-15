@@ -38,14 +38,14 @@ export function VideoPreviewSheet({ visible, profile, onClose }: VideoPreviewShe
             <View style={[styles.playButton, { backgroundColor: colors.overlay }]}>
               <Ionicons name="play" size={36} color={colors.text} />
             </View>
-            <Text style={[styles.demoLabel, { color: colors.text }]}>Demo preview</Text>
+            <Text style={[styles.playLabel, { color: colors.text }]}>Tap to play</Text>
           </View>
         </View>
 
         <View style={styles.meta}>
           <Text style={[styles.name, { color: colors.text }]}>{profile.name}, {profile.age}</Text>
           <Text style={[styles.bio, { color: colors.textMuted }]}>
-            {profile.bio || 'Short video intros help you stand out. Full recording ships in Spark v1.'}
+            {profile.bio || 'Short video intros help you stand out and start better conversations.'}
           </Text>
         </View>
       </View>
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'rgba(255,255,255,0.7)',
   },
-  demoLabel: {
+  playLabel: {
     marginTop: spacing.md,
     fontSize: 13,
     fontWeight: '600',

@@ -112,8 +112,7 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
 
         <Text style={styles.sectionTitle}>Legal & policies</Text>
         <Text style={styles.legalIntro}>
-          Read our terms, privacy policy, and disguise-mode rules. Full bilingual text is in docs/legal/
-          in the repository.
+          Read our terms, privacy policy, disguise-mode rules, and verification policy below.
         </Text>
         {legalDocumentLinks.map((item) => (
           <AnimatedPressable

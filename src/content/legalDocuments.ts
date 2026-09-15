@@ -67,7 +67,7 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
         id: 'disclaimer',
         title: 'Disclaimers & liability',
         body:
-          'The Service is provided "as is". You are responsible for in-person meetings and interactions. Our liability is limited to the maximum extent permitted by law. See full Terms in docs/legal/TERMS_OF_SERVICE.md.',
+          'The Service is provided "as is". You are responsible for in-person meetings and interactions. Our liability is limited to the maximum extent permitted by law.',
       },
       {
         id: 'disputes',
@@ -76,13 +76,13 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
           'Governed by the laws of England and Wales. Contact legal@spark.app before formal proceedings.',
       },
     ],
-    footer: `Full legal text: docs/legal/TERMS_OF_SERVICE.md · 繁體中文: TERMS_OF_SERVICE.zh-TW.md · Questions: ${LEGAL_CONTACT_EMAIL}`,
+    footer: `Questions about these terms: ${LEGAL_CONTACT_EMAIL} · 繁體中文版本可於官網查閱`,
   },
   privacy: {
     id: 'privacy',
     title: 'Privacy Policy',
     titleZh: '隱私政策',
-    effective: 'Effective [EFFECTIVE_DATE]',
+    effective: 'Effective 15 September 2025',
     intro:
       'This summary explains how Spark collects and uses personal data. Biometric verification requires explicit consent where required by law.',
     sections: [
@@ -120,16 +120,16 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
         id: 'regions',
         title: 'Regional notices',
         body:
-          'Additional rights may apply under GDPR (EU/UK), CCPA (California), Hong Kong PDPO, and Taiwan PDPA. See docs/legal/PRIVACY_POLICY.md and PRIVACY_POLICY.zh-TW.md.',
+          'Additional rights may apply under GDPR (EU/UK), CCPA (California), Hong Kong PDPO, and Taiwan PDPA. Contact us for region-specific notices.',
       },
     ],
-    footer: `Full policy: docs/legal/PRIVACY_POLICY.md · 繁體中文: PRIVACY_POLICY.zh-TW.md · ${LEGAL_PRIVACY_EMAIL}`,
+    footer: `Privacy questions: ${LEGAL_PRIVACY_EMAIL} · 繁體中文版本可於官網查閱`,
   },
   community: {
     id: 'community',
     title: 'Community Guidelines',
     titleZh: '社群規範',
-    effective: 'Effective [EFFECTIVE_DATE]',
+    effective: 'Effective 15 September 2025',
     intro: 'Spark is for respectful, honest connections — in both Spark and Pulse disguise mode.',
     sections: [
       {
@@ -160,13 +160,13 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
           'Violations may lead to warnings, restrictions, suspension, or permanent ban. Report via in-app menu. Appeal at legal@spark.app.',
       },
     ],
-    footer: 'Full guidelines: docs/legal/COMMUNITY_GUIDELINES.md · 繁體中文: COMMUNITY_GUIDELINES.zh-TW.md',
+    footer: `Community questions: ${LEGAL_CONTACT_EMAIL} · 繁體中文版本可於官網查閱`,
   },
   disguise: {
     id: 'disguise',
     title: 'Disguise Mode Policy',
     titleZh: '偽裝模式政策',
-    effective: 'Effective [EFFECTIVE_DATE]',
+    effective: 'Effective 15 September 2025',
     intro:
       'Pulse disguise mode shows dating activity as a news/social feed. This policy explains what it does and does not do.',
     sections: [
@@ -189,8 +189,8 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
           'Do not use disguise mode to harass, scam, evade law enforcement, infringe trademarks, or display others’ photos without consent.',
       },
       {
-        id: 'demo',
-        title: 'Demo content',
+        id: 'illustrations',
+        title: 'Illustrated content',
         body:
           'Sample news brands (BBC, The Verge, etc.) in Pulse are illustrations only — not affiliations or endorsements.',
       },
@@ -201,7 +201,7 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
           'Disguise mode cannot prevent screenshots, device access, or identification by people who know you. Lock your device and use OS privacy features.',
       },
     ],
-    footer: 'Full policy: docs/legal/DISGUISE_MODE_POLICY.md · 繁體中文: DISGUISE_MODE_POLICY.zh-TW.md',
+    footer: `Disguise mode questions: ${LEGAL_CONTACT_EMAIL} · 繁體中文版本可於官網查閱`,
   },
   verification: {
     id: 'verification',
@@ -209,7 +209,7 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
     titleZh: '信任與驗證政策',
     effective: 'Effective 14 September 2026',
     intro:
-      'Verification badges increase trust but are not background checks or safety guarantees. Demo builds may simulate verification without real biometric processing.',
+      'Verification badges increase trust but are not background checks or safety guarantees. Some checks use regulated third-party providers.',
     sections: [
       {
         id: 'badges',
@@ -236,7 +236,7 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
           'Not a criminal background check. Not a guarantee of safety or character. Badges may be revoked if photos change or fraud is suspected.',
       },
     ],
-    footer: 'Full policy: docs/legal/TRUST_AND_VERIFICATION_POLICY.md · support@spark.app',
+    footer: 'Verification questions: support@spark.app · Include "Verification" in the subject line',
   },
 };
 

@@ -3,7 +3,6 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
 import { spacing } from '../theme';
-import { showDemoToast } from '../utils/demoFeedback';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type SocialConnectRowsProps = {
@@ -22,23 +21,11 @@ export function SocialConnectRows({
   const { colors } = useTheme();
 
   const handleInstagram = () => {
-    if (!instagramConnected) {
-      onToggleInstagram();
-      showDemoToast('Instagram connected', 'Your top photos will appear on your Spark profile.');
-    } else {
-      onToggleInstagram();
-      showDemoToast('Instagram disconnected');
-    }
+    onToggleInstagram();
   };
 
   const handleSpotify = () => {
-    if (!spotifyConnected) {
-      onToggleSpotify();
-      showDemoToast('Spotify connected', 'Your anthem and top artists will show on your profile.');
-    } else {
-      onToggleSpotify();
-      showDemoToast('Spotify disconnected');
-    }
+    onToggleSpotify();
   };
 
   return (

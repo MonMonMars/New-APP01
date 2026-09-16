@@ -97,7 +97,9 @@ import {
   sanitizeReportReason,
 } from '../utils/securityGuards';
 import { clearVaultKey } from '../utils/secureStorage';
+import { disguiseWorldMeta } from '../utils/disguiseWorld';
 import { DisguisePolicyModal } from '../components/legal/DisguisePolicyModal';
+import { DisguiseUnlockConfirm } from '../components/disguise/DisguiseUnlockConfirm';
 import { SparkUnlockModal } from '../components/security/SparkUnlockModal';
 import {
   defaultLegalConsent,
@@ -452,6 +454,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [pulseSocial, setPulseSocial] = useState<PulseSocialState>(defaultPulseSocialState);
   const [dateCheckIns, setDateCheckIns] = useState<DateCheckIn[]>([]);
   const [unlockModalVisible, setUnlockModalVisible] = useState(false);
+  const [unlockConfirmVisible, setUnlockConfirmVisible] = useState(false);
   const [disguisePolicyModalVisible, setDisguisePolicyModalVisible] = useState(false);
   const [unlockError, setUnlockError] = useState<string | null>(null);
   const unlockResolverRef = useRef<((ok: boolean) => void) | null>(null);
@@ -2080,15 +2083,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setDisguiseModeState(true);
         return true;
       }
-      if (!legalConsent.disguisePolicyAcceptedAt) {
-        pendingDisguiseUnlockRef.current = true;
-        setDisguisePolicyModalVisible(true);
-        return false;
-      }
-      return proceedSparkUnlock();
+      setUnlockConfirmVisible(true);
+      return false;
     },
-    [legalConsent.disguisePolicyAcceptedAt, proceedSparkUnlock],
+    [],
   );
+
+  const confirmLeaveDisguise = useCallback(() => {
+    setUnlockConfirmVisible(false);
+    if (!legalConsent.disguisePolicyAcceptedAt) {
+      setLegalConsent((prev) => ({
+        ...prev,
+        disguisePolicyAcceptedAt: new Date().toISOString(),
+      }));
+    }
+    void proceedSparkUnlock();
+  }, [legalConsent.disguisePolicyAcceptedAt, proceedSparkUnlock]);
+
+  const cancelLeaveDisguise = useCallback(() => {
+    setUnlockConfirmVisible(false);
+  }, []);
 
   const updateSecuritySettings = useCallback((settings: SecuritySettings) => {
     setSecuritySettings(settings);
@@ -2516,6 +2530,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider value={value}>
       {children}
+      <DisguiseUnlockConfirm
+        visible={unlockConfirmVisible}
+        disguiseName={disguiseWorldMeta(preferences.sparkSection).name}
+        unlockLabel={disguiseWorldMeta(preferences.sparkSection).unlockLabel}
+        onConfirm={confirmLeaveDisguise}
+        onCancel={cancelLeaveDisguise}
+      />
       <DisguisePolicyModal
         visible={disguisePolicyModalVisible}
         onAccept={acceptDisguisePolicy}

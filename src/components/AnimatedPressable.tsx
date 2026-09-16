@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Platform, Pressable, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -16,7 +17,7 @@ type AnimatedPressableProps = PressableProps & {
   children?: ReactNode;
 };
 
-export const PRESS_SPRING = { damping: 15, stiffness: 420, mass: 0.55 };
+export const PRESS_SPRING = { damping: 12, stiffness: 480, mass: 0.5 };
 
 const PRESS_IN_MS = 110;
 const PRESS_OUT_MS = 180;
@@ -53,6 +54,9 @@ export function AnimatedPressable({
         if (!disabled) {
           scale.value = withSpring(scaleTo, PRESS_SPRING);
           pressOpacity.value = withTiming(opacityTo, { duration: PRESS_IN_MS });
+          if (Platform.OS !== 'web') {
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          }
         }
         onPressIn?.(event);
       }}

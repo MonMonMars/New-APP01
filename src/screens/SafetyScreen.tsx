@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -8,6 +9,7 @@ import { useApp } from '../context/AppContext';
 import { legalDocumentLinks, LegalDocumentId } from '../content/legalDocuments';
 import { colors, radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
+import { SafetyResourceSheet } from '../components/SafetyResourceSheet';
 
 type SafetyScreenProps = {
   onClose: () => void;
@@ -96,6 +98,7 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { blockedProfiles, unblockProfile } = useApp();
+  const [resourceSheet, setResourceSheet] = useState<{ title: string; body: string } | null>(null);
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
@@ -198,7 +201,7 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
                 return;
               }
               if ('message' in item && item.message) {
-                Alert.alert(item.label, item.message);
+                setResourceSheet({ title: item.label, body: item.message });
               }
             }}
           >
@@ -208,6 +211,13 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
           </AnimatedPressable>
         ))}
       </ScrollView>
+
+      <SafetyResourceSheet
+        visible={resourceSheet !== null}
+        title={resourceSheet?.title ?? ''}
+        body={resourceSheet?.body ?? ''}
+        onClose={() => setResourceSheet(null)}
+      />
     </View>
   );
 }

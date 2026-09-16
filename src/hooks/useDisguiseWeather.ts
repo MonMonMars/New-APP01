@@ -6,9 +6,7 @@ import {
   WeatherSnapshot,
   weatherFromWmoCode,
 } from '../data/disguiseWeather';
-
-const BRISTOL_LAT = 51.4545;
-const BRISTOL_LON = -2.5879;
+import { getPassportCoordinates } from '../utils/passportFilter';
 
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -49,9 +47,12 @@ function buildForecast(response: OpenMeteoResponse): WeatherDay[] {
   });
 }
 
-async function fetchLiveWeather(): Promise<WeatherSnapshot | null> {
+async function fetchLiveWeather(passportCity?: string): Promise<WeatherSnapshot | null> {
+  const { lat, lon, region } = getPassportCoordinates(passportCity);
+  const cityLabel = passportCity?.split(',')[0] ?? 'New York';
+
   const url =
-    `https://api.open-meteo.com/v1/forecast?latitude=${BRISTOL_LAT}&longitude=${BRISTOL_LON}` +
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
     '&current=temperature_2m,apparent_temperature,weather_code,relative_humidity_2m,wind_speed_10m' +
     '&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto&forecast_days=6';
 
@@ -68,8 +69,8 @@ async function fetchLiveWeather(): Promise<WeatherSnapshot | null> {
   const todayLow = forecast[0]?.lowC ?? defaultWeatherSnapshot.lowC;
 
   return {
-    city: 'Bristol',
-    region: 'South West · UK',
+    city: cityLabel,
+    region,
     tempC: Math.round(data.current?.temperature_2m ?? defaultWeatherSnapshot.tempC),
     feelsLikeC: Math.round(data.current?.apparent_temperature ?? defaultWeatherSnapshot.feelsLikeC),
     condition: mapped.condition,
@@ -84,14 +85,14 @@ async function fetchLiveWeather(): Promise<WeatherSnapshot | null> {
   };
 }
 
-export function useDisguiseWeather() {
+export function useDisguiseWeather(passportCity?: string) {
   const [weather, setWeather] = useState<WeatherSnapshot>(defaultWeatherSnapshot);
   const [isLive, setIsLive] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
-    void fetchLiveWeather()
+    void fetchLiveWeather(passportCity)
       .then((snapshot) => {
         if (!cancelled && snapshot) {
           setWeather(snapshot);
@@ -105,7 +106,7 @@ export function useDisguiseWeather() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [passportCity]);
 
   return { weather, isLive };
 }

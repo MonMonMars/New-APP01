@@ -60,7 +60,7 @@ export function VoiceNoteSheet({ visible, profileName, onClose, onSend }: VoiceN
         >
           <Text style={[styles.title, { color: colors.text }]}>Voice note</Text>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-            Record a quick message for {profileName}. Demo mode simulates recording in-browser.
+            Record a quick voice note for {profileName}. Tap record, then send when you are ready.
           </Text>
           <AnimatedPressable
             style={[styles.recordButton, { backgroundColor: recording ? colors.nope : colors.gradientEnd }]}

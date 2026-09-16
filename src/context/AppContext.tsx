@@ -33,6 +33,7 @@ import {
 import { uploadPhotosToCloud } from '../services/cloudStorage';
 import { generateDisguiseAdImage } from '../services/disguiseImageGeneration';
 import { registerCloudPushToken } from '../services/pushCloud';
+import { scheduleDateCheckInReminder } from '../utils/notifications';
 import type { ConversationRealtimeUpdate } from '../services/realtimeChat';
 import {
   deleteSupabaseAccount,
@@ -72,6 +73,7 @@ import {
   recordFailedUnlockAttempt,
 } from '../utils/unlockLockout';
 import { computeCompatibilityScore, pickDailyMostCompatible } from '../utils/compatibility';
+import { matchesPassportCity } from '../utils/passportFilter';
 import {
   requestNotificationPermission,
   scheduleMatchNotification,
@@ -182,7 +184,12 @@ function filterDiscoverProfiles(
   locationSharing = true,
 ): Profile[] {
   const filters = preferences.discoverFilters ?? [];
-  const maxDistance = locationSharing ? preferences.maxDistanceMiles : 9999;
+  const maxDistance =
+    preferences.travelMode && preferences.passportCity
+      ? 9999
+      : locationSharing
+        ? preferences.maxDistanceMiles
+        : 9999;
   return profiles.filter(
     (profile) =>
       !excludedIds.has(profile.id) &&
@@ -191,7 +198,10 @@ function filterDiscoverProfiles(
       profile.age <= preferences.maxAge &&
       matchesGenderFilter(profile, preferences.showMe) &&
       matchesDiscoverFilters(profile, filters) &&
-      matchesAdvancedFilters(profile, user, preferences.advancedFilters, isSparkPlus),
+      matchesAdvancedFilters(profile, user, preferences.advancedFilters, isSparkPlus) &&
+      (!preferences.travelMode ||
+        !preferences.passportCity ||
+        matchesPassportCity(profile.city, preferences.passportCity)),
   );
 }
 
@@ -1102,7 +1112,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const profileViewCount = profileViewers.length + 2;
+  const profileViewCount = profileViewers.length;
 
   const reactToMessage = useCallback(
     (conversationId: string, messageId: string, reaction: string) => {
@@ -1755,6 +1765,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         emergencyContact: payload.emergencyContact,
       };
       setDateCheckIns((prev) => [checkIn, ...prev.filter((item) => item.profileId !== profileId)]);
+      void scheduleDateCheckInReminder(profileName, payload.location, 60);
     },
     [],
   );

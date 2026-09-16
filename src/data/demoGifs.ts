@@ -46,4 +46,24 @@ export const DEMO_GIFS: DemoGif[] = [
     label: 'Shy',
     url: 'https://media.giphy.com/media/l3q2K5jinAlChoCLS/giphy.gif',
   },
+  {
+    id: 'wow',
+    label: 'Wow',
+    url: 'https://media.giphy.com/media/maqaW1dfg9dZi/giphy.gif',
+  },
+  {
+    id: 'clap',
+    label: 'Clap',
+    url: 'https://media.giphy.com/media/7rjPZNxWvKgHzQK3kU/giphy.gif',
+  },
+  {
+    id: 'coffee',
+    label: 'Coffee',
+    url: 'https://media.giphy.com/media/3o6Zt481isNVvbQI40/giphy.gif',
+  },
+  {
+    id: 'date',
+    label: 'Date night',
+    url: 'https://media.giphy.com/media/26u4cqiYI30juCOGY/giphy.gif',
+  },
 ];

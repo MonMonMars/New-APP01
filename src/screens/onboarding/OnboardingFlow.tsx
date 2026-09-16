@@ -243,7 +243,7 @@ export function OnboardingFlow() {
           <AnimatedPressable
             style={styles.primaryButton}
             onPress={() => {
-              updatePreferences({ ...preferences, passportCity: 'London, UK' });
+              updatePreferences({ ...preferences, passportCity: 'New York, NY' });
               setStep('intent');
             }}
           >

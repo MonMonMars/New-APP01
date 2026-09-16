@@ -41,13 +41,11 @@ export function DiscoverScreen() {
   const deckRef = useRef<SwipeDeckHandle>(null);
   const {
     discoverQueue,
-    discoverPoolTotal,
     hasMoreInPool,
     preferences,
     updatePreferences,
     setSparkSection,
     searchMorePeople,
-    expandSearchRadius,
     passProfile,
     likeProfile,
     superLikeProfile,
@@ -171,13 +169,6 @@ export function DiscoverScreen() {
     setMatchProfile(null);
     navigation.getParent()?.navigate('Chat', { conversationId });
   }, [getConversationIdForProfile, matchProfile, navigation]);
-
-  const handleWidenFilters = useCallback(() => {
-    const presets = [25, 50, 100, 250, 9999];
-    const current = preferences.maxDistanceMiles;
-    const next = presets.find((value) => value > current) ?? 9999;
-    expandSearchRadius(next);
-  }, [expandSearchRadius, preferences.maxDistanceMiles]);
 
   const openReportSheet = useCallback((profileId: string, name: string) => {
     setReportProfileId(profileId);
@@ -384,15 +375,10 @@ export function DiscoverScreen() {
             </Text>
             <AnimatedPressable
               style={[styles.primaryButton, { backgroundColor: colors.gradientEnd }]}
-              onPress={hasMoreInPool ? searchMorePeople : handleWidenFilters}
+              onPress={hasMoreInPool ? searchMorePeople : () => setShowExpandLocation(true)}
             >
               <Text style={[styles.primaryButtonText, { color: colors.text }]}>
-                {hasMoreInPool ? 'Search more people' : 'Expand location'}
-              </Text>
-            </AnimatedPressable>
-            <AnimatedPressable style={styles.secondaryButton} onPress={() => setShowExpandLocation(true)}>
-              <Text style={[styles.secondaryButtonText, { color: colors.textMuted }]}>
-                Widen search radius
+                {hasMoreInPool ? 'Search more people' : 'Expand search'}
               </Text>
             </AnimatedPressable>
             <AnimatedPressable style={styles.secondaryButton} onPress={openDiscoverHub}>
@@ -528,10 +514,7 @@ export function DiscoverScreen() {
 
       <ExpandLocationSheet
         visible={showExpandLocation}
-        currentRadius={preferences.maxDistanceMiles}
-        poolTotal={discoverPoolTotal}
         onClose={() => setShowExpandLocation(false)}
-        onSelectRadius={expandSearchRadius}
       />
     </View>
   );

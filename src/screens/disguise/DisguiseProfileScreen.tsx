@@ -203,17 +203,6 @@ export function DisguiseProfileScreen() {
           <Text style={[styles.hint, { color: colors.textMuted }]}>
             Turn off disguise here, or tap the {meta.name} logo in the header to unlock {meta.unlockLabel}.
           </Text>
-          {disguiseMode ? (
-            <AnimatedPressable
-              style={[styles.unlockButton, { backgroundColor: meta.accent }]}
-              onPress={() => void setDisguiseMode(false)}
-              accessibilityRole="button"
-              accessibilityLabel={`Unlock ${meta.unlockLabel}`}
-            >
-              <Ionicons name={meta.world === 'harbor' ? 'bonfire' : 'flame'} size={18} color="#fff" />
-              <Text style={styles.unlockButtonText}>Unlock {meta.unlockLabel}</Text>
-            </AnimatedPressable>
-          ) : null}
         </View>
 
         <AnimatedPressable
@@ -449,21 +438,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     lineHeight: 16,
     fontStyle: 'italic',
-  },
-  unlockButton: {
-    marginTop: spacing.md,
-    borderRadius: radii.button,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-  },
-  unlockButtonText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '700',
   },
   generatorCard: {
     marginTop: spacing.sm,

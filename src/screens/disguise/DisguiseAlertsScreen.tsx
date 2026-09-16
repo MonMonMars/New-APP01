@@ -6,7 +6,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActivityAlertSheet } from '../../components/disguise/ActivityAlertSheet';
 import { AdLandingSheet } from '../../components/disguise/AdLandingSheet';
-import { maskVariantToContentKind } from '../../components/disguise/ContentTypeIcon';
 import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
 import { FeedPersonThumbnail } from '../../components/disguise/FeedPersonThumbnail';
 import { NewsArticleSheet } from '../../components/disguise/NewsArticleSheet';
@@ -66,10 +65,6 @@ export function DisguiseAlertsScreen() {
                 ? () => openPersonPreview(item)
                 : () => setActivityAlert(item);
 
-          const personContentKind = item.person?.overlayVariant
-            ? maskVariantToContentKind(item.person.overlayVariant)
-            : 'alert';
-
           return (
             <AnimatedPressable
               accessibilityRole="button"
@@ -83,7 +78,7 @@ export function DisguiseAlertsScreen() {
                     overlayText={item.person.overlayText ?? 'LIVE'}
                     overlayVariant={item.person.overlayVariant ?? 'news'}
                     plainAvatar={!item.person.overlayVariant}
-                    contentKind={personContentKind}
+                    contentKind="profile"
                     showIconBadge={!item.person.overlayVariant}
                     onPress={() => openPersonPreview(item)}
                     accessibilityLabel={`View profile: ${item.person.name}`}

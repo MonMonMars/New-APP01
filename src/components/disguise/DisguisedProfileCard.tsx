@@ -6,7 +6,7 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { DisguisedProfilePost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
-import { ContentTypeIcon, maskVariantToContentKind, MediaWithContentBadge } from './ContentTypeIcon';
+import { ContentTypeIcon, MediaWithContentBadge } from './ContentTypeIcon';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { PROFILE_AVATAR_SIZE } from './DisguiseOverlayAvatar';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
@@ -61,7 +61,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
       imageUrl={post.avatarUrl}
       overlayText={maskSnippet}
       overlayVariant={maskVariant}
-      contentKind={maskVariantToContentKind(maskVariant)}
+      contentKind="profile"
       caption={post.overlayText}
       size={PROFILE_AVATAR_SIZE}
       onPress={openPreview}

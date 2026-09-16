@@ -7,7 +7,6 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
-import { maskVariantToContentKind } from './ContentTypeIcon';
 import { FeedPersonRow } from './FeedPersonRow';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -82,9 +81,7 @@ export function SocialCommentSheet({
               imageUrl={post.avatarUrl}
               overlayText={post.avatarMask?.text.split(' ').slice(0, 2).join(' ') ?? ''}
               overlayVariant={post.avatarMask?.variant ?? 'news'}
-              contentKind={
-                post.avatarMask ? maskVariantToContentKind(post.avatarMask.variant) : 'social'
-              }
+              contentKind="social"
               title={post.author}
               subtitle={`${post.handle} · ${post.timeAgo}`}
               body={post.body}

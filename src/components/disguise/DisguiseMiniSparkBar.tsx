@@ -30,7 +30,7 @@ export function DisguiseMiniSparkBar({
     <View style={styles.bar}>
       <View style={styles.slot}>
         <SparkIconButton
-          icon="close"
+          icon="trash-outline"
           iconSize={16}
           color={passed ? colors.nope : colors.textMuted}
           active={passed}
@@ -61,7 +61,7 @@ export function DisguiseMiniSparkBar({
 
       <View style={styles.slot}>
         <SparkIconButton
-          icon={liked ? 'heart' : 'heart-outline'}
+          icon={liked ? 'heart' : 'heart'}
           iconSize={16}
           color={liked ? '#fff' : colors.heartPink}
           active={liked}

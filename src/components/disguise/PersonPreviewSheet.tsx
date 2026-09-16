@@ -13,6 +13,7 @@ import { MatchToast } from '../MatchToast';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
 import { FadeSlideIn } from '../motion/FadeSlideIn';
 import { AnimatedPressable } from '../AnimatedPressable';
+import { ContentTypeIcon } from './ContentTypeIcon';
 import { DisguiseMiniPhotoPager } from './DisguiseMiniPhotoPager';
 import { DisguiseMiniSparkBar } from './DisguiseMiniSparkBar';
 
@@ -159,6 +160,9 @@ export function PersonPreviewSheet({
         >
           <FadeSlideIn replayKey={visible} index={0}>
             <View style={styles.header}>
+              <View style={styles.headerIcon}>
+                <ContentTypeIcon kind="profile" size={14} />
+              </View>
               <View style={styles.headerText}>
                 <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
                   {reporter.name}
@@ -269,6 +273,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.xs,
+  },
+  headerIcon: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(233,64,87,0.12)',
+    marginTop: 1,
   },
   headerText: {
     flex: 1,

@@ -7,7 +7,6 @@ import { useTheme } from '../../context/ThemeContext';
 import { radii, spacing } from '../../theme';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
 import { FadeSlideIn } from '../motion/FadeSlideIn';
-import { maskVariantToContentKind } from './ContentTypeIcon';
 import { FeedPersonRow } from './FeedPersonRow';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -58,11 +57,7 @@ export function ActivityAlertSheet({ visible, alert, onClose }: ActivityAlertShe
                 overlayText={alert.person.overlayText ?? 'LIVE'}
                 overlayVariant={alert.person.overlayVariant ?? 'news'}
                 plainAvatar={!alert.person.overlayVariant}
-                contentKind={
-                  alert.person.overlayVariant
-                    ? maskVariantToContentKind(alert.person.overlayVariant)
-                    : 'alert'
-                }
+                contentKind="profile"
                 title={alert.person.name}
                 body={alert.text}
                 titleStyle={{ color: colors.text }}

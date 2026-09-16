@@ -2,9 +2,9 @@
 
 ## Demo link (open now)
 
-**https://royalty-load-richardson-creativity.trycloudflare.com**
+**https://habitat-cultural-raises-joseph.trycloudflare.com**
 
-_Last updated: Sep 16, 2026 — Phase D: rewind, GIFs, profile views, message reactions_
+_Last updated: Sep 16, 2026 — Complete details: passport filter, intl profiles, safety sheets, GIF search_
 
 > Tunnel links expire when the cloud workspace stops. If this 404s, ask for a fresh link.
 
@@ -37,6 +37,7 @@ _Last updated: Sep 16, 2026 — Phase D: rewind, GIFs, profile views, message re
 - **Phase B** — Incognito (Spark+ · Privacy controls), voice prompts (profile + chat), date check-in (chat menu)
 - **Phase C** — Advanced filters (intent + shared interests, Spark+), AI profile coach, post-3rd-match Spark+ upsell, boost banner on Discover
 - **Phase D** — Rewind last pass (Discover, Spark+), GIF picker in chat, who viewed you (Profile), long-press message reactions, active-now badge in chat
+- **Details pass** — Passport/travel city filter on Discover, international profiles (London, Paris, LA, Miami, Tokyo, Sydney, Austin), weather by passport city, safety quick-action sheets, GIF search, date check-in reminders, auto-refill discover deck
 - **Discover** — clean home: emergency logo + card deck + rewind button + three bottom targets only
 - **Profile → Discover tools** — map, explore, filters, standouts, held profiles, etc.
 - Drag cards to heart/trash/star zones
@@ -58,7 +59,7 @@ _Last updated: Sep 16, 2026 — Phase D: rewind, GIFs, profile views, message re
 ```bash
 git clone https://github.com/MonMonMars/New-APP01.git
 cd New-APP01
-git checkout cursor/complete-app-details-7b60
+git checkout cursor/complete-all-details-7b60
 npm install
 npm run demo
 # → http://localhost:8090

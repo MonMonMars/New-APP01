@@ -2,9 +2,9 @@
 
 ## Demo link (open now)
 
-**https://habitat-cultural-raises-joseph.trycloudflare.com**
+**https://diversity-closing-pope-receptor.trycloudflare.com**
 
-_Last updated: Sep 16, 2026 — Complete details: passport filter, intl profiles, safety sheets, GIF search_
+_Last updated: Sep 16, 2026 — Fresh tunnel + tab navigation fix (Likes/Matches/Profile work on web)_
 
 > Tunnel links expire when the cloud workspace stops. If this 404s, ask for a fresh link.
 

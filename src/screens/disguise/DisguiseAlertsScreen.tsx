@@ -55,6 +55,7 @@ export function DisguiseAlertsScreen() {
                   overlayText={item.person.overlayText ?? 'LIVE'}
                   overlayVariant={item.person.overlayVariant ?? 'news'}
                   plainAvatar={!item.person.overlayVariant}
+                  contentKind={item.person.overlayVariant ? 'profile' : 'alert'}
                   title={item.person.name}
                   body={item.text}
                   titleStyle={{ color: colors.text }}

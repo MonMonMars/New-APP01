@@ -4,6 +4,7 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { NewsPost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { MediaWithContentBadge } from './ContentTypeIcon';
 import { FeedPersonRow } from './FeedPersonRow';
 import { NewsArticleSheet } from './NewsArticleSheet';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
@@ -34,7 +35,9 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
         onPress={() => setArticleOpen(true)}
         style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
       >
-        <Image source={{ uri: post.imageUrl }} style={styles.image} resizeMode="cover" />
+        <MediaWithContentBadge kind="news">
+          <Image source={{ uri: post.imageUrl }} style={styles.image} resizeMode="cover" />
+        </MediaWithContentBadge>
         <View style={styles.body}>
           <View style={styles.metaRow}>
             <Text style={[styles.source, { color: colors.gradientEnd }]}>{post.source}</Text>
@@ -61,6 +64,7 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
                 >
                   <FeedPersonRow
                     plainAvatar
+                    contentKind={reporter.profileId ? 'profile' : 'news'}
                     imageUrl={reporter.avatarUrl}
                     title={reporter.name}
                     subtitle="Reader comment"

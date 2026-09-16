@@ -5,6 +5,7 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { DisguisedProfilePost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { ContentTypeIcon, MediaWithContentBadge } from './ContentTypeIcon';
 import { FeedPersonRow } from './FeedPersonRow';
 import { PROFILE_AVATAR_SIZE } from './DisguiseOverlayAvatar';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
@@ -55,6 +56,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
       imageUrl={post.avatarUrl}
       overlayText={maskSnippet}
       overlayVariant={maskVariant}
+      contentKind="profile"
       body={post.overlayText}
       size={PROFILE_AVATAR_SIZE}
       bodyStyle={
@@ -76,6 +78,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
               imageUrl={post.avatarUrl}
               overlayText={maskSnippet}
               overlayVariant="news"
+              contentKind="profile"
               title={post.headline}
               subtitle={`${post.handle} · ${post.timeAgo}`}
               titleStyle={{ color: colors.text }}
@@ -113,9 +116,11 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
         >
           <View style={styles.sponsoredRow}>
             <Text style={styles.sponsored}>Sponsored</Text>
-            <Ionicons name="information-circle-outline" size={14} color="#888" />
+            <ContentTypeIcon kind="sponsored" />
           </View>
-          <Image source={{ uri: post.coverImageUrl }} style={styles.adImage} resizeMode="cover" />
+          <MediaWithContentBadge kind="ad">
+            <Image source={{ uri: post.coverImageUrl }} style={styles.adImage} resizeMode="cover" />
+          </MediaWithContentBadge>
           <View style={styles.body}>
             <Text style={styles.brand}>{post.headline}</Text>
             <Text style={styles.tagline}>{post.summary}</Text>
@@ -152,7 +157,9 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
         accessibilityRole="button"
         accessibilityLabel={`Profile disguised as news: ${post.headline}`}
       >
-        <Image source={{ uri: post.coverImageUrl }} style={styles.newsImage} resizeMode="cover" />
+        <MediaWithContentBadge kind="news">
+          <Image source={{ uri: post.coverImageUrl }} style={styles.newsImage} resizeMode="cover" />
+        </MediaWithContentBadge>
         <View style={styles.body}>
           <View style={styles.metaRow}>
             <Text style={[styles.source, { color: colors.gradientEnd }]}>{post.sourceLabel}</Text>

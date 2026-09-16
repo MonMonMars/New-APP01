@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { StyleSheet, Text, View, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
 
 import { spacing } from '../../theme';
+import { ContentTypeIcon, ContentTypeKind } from './ContentTypeIcon';
 import { DisguiseOverlayAvatar, DisguiseOverlayVariant, PROFILE_AVATAR_SIZE } from './DisguiseOverlayAvatar';
 import { FaceCenteredImage } from './FaceCenteredImage';
 
@@ -16,6 +17,8 @@ type FeedPersonRowProps = {
   overlayVariant?: DisguiseOverlayVariant;
   badgeOnly?: boolean;
   plainAvatar?: boolean;
+  /** Tiny colored icon beside the avatar (news, ad, profile, social, …). */
+  contentKind?: ContentTypeKind;
   size?: number;
   rightAccessory?: ReactNode;
   style?: StyleProp<ViewStyle>;
@@ -33,6 +36,7 @@ export function FeedPersonRow({
   overlayVariant = 'news',
   badgeOnly = true,
   plainAvatar = false,
+  contentKind,
   size = FEED_AVATAR_SIZE,
   rightAccessory,
   style,
@@ -56,7 +60,14 @@ export function FeedPersonRow({
 
   return (
     <View style={[styles.row, style]}>
-      {avatar}
+      <View style={styles.avatarCol}>
+        {avatar}
+        {contentKind ? (
+          <View style={styles.avatarBadge}>
+            <ContentTypeIcon kind={contentKind} />
+          </View>
+        ) : null}
+      </View>
       <View style={styles.textCol}>
         {title ? (
           <Text style={[styles.title, titleStyle]} numberOfLines={1}>
@@ -85,6 +96,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.sm,
+  },
+  avatarCol: {
+    position: 'relative',
+  },
+  avatarBadge: {
+    position: 'absolute',
+    right: -2,
+    bottom: -2,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(0,0,0,0.08)',
   },
   textCol: {
     flex: 1,

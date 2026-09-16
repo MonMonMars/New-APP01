@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCallback, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -19,6 +20,7 @@ import { StandoutsRow } from '../components/StandoutsRow';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { DiscoverFilter, formatSearchRadius, resolveSparkSection } from '../types/preferences';
+import { RootStackParamList } from '../types/navigation';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { ActionToast } from '../components/ActionToast';
@@ -30,7 +32,7 @@ type DiscoverHubScreenProps = {
 
 export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { colors } = useTheme();
   const {
     preferences,
@@ -67,11 +69,11 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
   const activeFilters = preferences.discoverFilters ?? [];
 
   const openMap = () => {
-    navigation.getParent()?.navigate('MapDiscover');
+    navigation.navigate('MapDiscover');
   };
 
   const openExplore = () => {
-    navigation.getParent()?.navigate('Explore');
+    navigation.navigate('Explore');
   };
 
   const handleSelectProfile = useCallback(
@@ -106,7 +108,9 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
     setShowMatch(false);
     setMatchProfile(null);
     onClose();
-    navigation.getParent()?.navigate('Chat', { conversationId });
+    if (conversationId) {
+      navigation.navigate('Chat', { conversationId });
+    }
   }, [getConversationIdForProfile, matchProfile, navigation, onClose]);
 
   return (
@@ -177,7 +181,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
           isSparkPlus={isSparkPlus}
           emberMode={resolveSparkSection(preferences.sparkSection) === 'ember'}
           onChange={(advancedFilters) => updatePreferences({ ...preferences, advancedFilters })}
-          onUpgrade={() => navigation.getParent()?.navigate('SparkPlus')}
+          onUpgrade={() => navigation.navigate('SparkPlus')}
         />
 
         {resolveSparkSection(preferences.sparkSection) === 'spark' ? (
@@ -241,7 +245,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
         {!canLike && !isSparkPlus && (
           <AnimatedPressable
             style={[styles.secondaryButton, { borderColor: colors.border }]}
-            onPress={() => navigation.getParent()?.navigate('SparkPlus')}
+            onPress={() => navigation.navigate('SparkPlus')}
           >
             <Text style={[styles.secondaryButtonText, { color: colors.gradientEnd }]}>
               Get unlimited likes with Spark+
@@ -306,6 +310,7 @@ function HubTile({
         { backgroundColor: colors.surface, borderColor: colors.border },
       ]}
       onPress={onPress}
+      accessibilityLabel={label}
     >
       <Ionicons name={icon} size={22} color={colors.text} />
       <Text style={[styles.hubTileLabel, { color: colors.text }]}>{label}</Text>

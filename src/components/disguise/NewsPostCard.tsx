@@ -5,7 +5,6 @@ import { useTheme } from '../../context/ThemeContext';
 import { NewsPost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { MediaWithContentBadge } from './ContentTypeIcon';
-import { resolveReporterSparkProfile } from '../../utils/resolveDisguiseProfile';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { NewsArticleSheet } from './NewsArticleSheet';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
@@ -57,13 +56,9 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
                 <FeedPersonThumbnail
                   key={reporter.id}
                   plainAvatar
-                  contentKind={resolveReporterSparkProfile(reporter) ? 'profile' : 'news'}
+                  contentKind="profile"
                   imageUrl={reporter.avatarUrl}
-                  caption={
-                    resolveReporterSparkProfile(reporter)
-                      ? reporter.quote
-                      : `${reporter.name} on this story`
-                  }
+                  caption={reporter.quote}
                   onPress={() => openReporter(reporter)}
                   accessibilityLabel={`View photos from ${reporter.name}`}
                   style={styles.reporterRow}

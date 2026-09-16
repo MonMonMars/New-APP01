@@ -1,10 +1,10 @@
+import { Image } from 'expo-image';
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
 import { spacing } from '../../theme';
 import { ContentTypeIcon, ContentTypeKind, ContentTypeLabel } from './ContentTypeIcon';
 import { DisguiseOverlayAvatar, DisguiseOverlayVariant, PROFILE_AVATAR_SIZE } from './DisguiseOverlayAvatar';
-import { FaceCenteredImage } from './FaceCenteredImage';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type FeedPersonThumbnailProps = {
@@ -41,7 +41,13 @@ export function FeedPersonThumbnail({
 
   const avatar = plainAvatar ? (
     <View style={[styles.plainWrap, { width: size, height: size, borderRadius: size / 2 }]}>
-      <FaceCenteredImage imageUrl={imageUrl} size={size} />
+      <Image
+        source={{ uri: imageUrl }}
+        style={[styles.plainImage, { borderRadius: size / 2 }]}
+        contentFit="cover"
+        contentPosition="center"
+        transition={120}
+      />
     </View>
   ) : (
     <DisguiseOverlayAvatar
@@ -101,6 +107,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(128,128,128,0.35)',
+  },
+  plainImage: {
+    width: '100%',
+    height: '100%',
   },
   captionCol: {
     flex: 1,

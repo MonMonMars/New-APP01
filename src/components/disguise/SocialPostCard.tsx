@@ -6,7 +6,7 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
-import { maskVariantToContentKind } from './ContentTypeIcon';
+import { resolveDisguiseProfile } from '../../utils/resolveDisguiseProfile';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
 import { DisguisePhotoLightbox } from './DisguisePhotoLightbox';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
@@ -37,12 +37,14 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
   const isSaved = pulseSocial.savedPostIds.includes(post.id);
   const likeCount = upvoted ? post.likes + 1 : post.likes;
 
+  const linkedProfile = resolveDisguiseProfile(`social-${post.id}`);
   const photoReporter = {
     id: `social-${post.id}`,
     name: post.author,
     avatarUrl: post.avatarUrl,
     quote: post.body,
-    photos: post.imageUrl ? [post.imageUrl, post.avatarUrl] : [post.avatarUrl],
+    photos: linkedProfile?.photos ?? (post.imageUrl ? [post.imageUrl, post.avatarUrl] : []),
+    profileId: linkedProfile?.id,
   };
 
   const maskSnippet = post.avatarMask?.text.split(' ').slice(0, 2).join(' ') ?? 'LIVE';
@@ -92,14 +94,16 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
               imageUrl={post.avatarUrl}
               overlayText={maskSnippet}
               overlayVariant={post.avatarMask.variant}
-              contentKind={maskVariantToContentKind(post.avatarMask.variant)}
+              contentKind="profile"
+              caption={post.body}
               onPress={() => setAuthorOpen(true)}
               accessibilityLabel={`View profile: ${post.author}`}
             />
           ) : (
             <FeedPersonThumbnail
               plainAvatar
-              contentKind="social"
+              contentKind="profile"
+              caption={post.body}
               imageUrl={post.avatarUrl}
               onPress={() => setAuthorOpen(true)}
               accessibilityLabel={`View profile: ${post.author}`}

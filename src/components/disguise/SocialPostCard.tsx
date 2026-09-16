@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Alert, Share, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -13,6 +13,7 @@ import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
 import { SocialCommentSheet } from './SocialCommentSheet';
 import { SavePostButton } from './SavePostButton';
+import { shareWithFallback } from '../../utils/shareWithFallback';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type SocialPostCardProps = {
@@ -159,7 +160,10 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
         <AnimatedPressable
           style={styles.action}
           onPress={() => {
-            void Share.share({ message: `${post.author}: ${post.body}`, title: 'Share post' });
+            void shareWithFallback({
+              message: `${post.author}: ${post.body}`,
+              title: 'Share post',
+            });
           }}
         >
           <Ionicons name="share-outline" size={18} color={colors.textMuted} />

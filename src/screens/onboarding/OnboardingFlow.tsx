@@ -60,6 +60,7 @@ export function OnboardingFlow() {
   const [orientation, setOrientation] = useState<Orientation>('straight');
   const [photos, setPhotos] = useState<string[]>(user.photos);
   const [authLoading, setAuthLoading] = useState(false);
+  const [showLocationInfo, setShowLocationInfo] = useState(false);
 
   const genderOptions: ProfileGender[] = ['woman', 'man', 'nonbinary'];
   const orientationOptions: Orientation[] = ['straight', 'gay', 'lesbian', 'bisexual', 'pansexual', 'queer', 'asexual', 'other'];
@@ -249,16 +250,13 @@ export function OnboardingFlow() {
           >
             <Text style={styles.primaryButtonText}>Use my location</Text>
           </AnimatedPressable>
-          <AnimatedPressable
-            onPress={() =>
-              Alert.alert(
-                'How location works',
-                'We use your region to surface local headlines and trending topics — never your exact GPS coordinates. You can change this anytime in Profile → Discovery preferences.',
-                [{ text: 'Got it' }],
-              )
-            }
-          >
-            <Text style={styles.link}>Tell me more</Text>
+          {showLocationInfo ? (
+            <Text style={styles.locationInfo}>
+              We use your region for local headlines — never exact GPS. Change anytime in Profile → Discovery preferences.
+            </Text>
+          ) : null}
+          <AnimatedPressable onPress={() => setShowLocationInfo((v) => !v)}>
+            <Text style={styles.link}>{showLocationInfo ? 'Hide details' : 'Tell me more'}</Text>
           </AnimatedPressable>
         </View>
       )}
@@ -455,6 +453,14 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     textAlign: 'center',
     fontSize: 15,
+  },
+  locationInfo: {
+    color: colors.textMuted,
+    textAlign: 'center',
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: spacing.sm,
+    paddingHorizontal: spacing.md,
   },
   ruleRow: {
     flexDirection: 'row',

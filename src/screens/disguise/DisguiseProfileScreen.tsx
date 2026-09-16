@@ -13,6 +13,7 @@ import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
 import { PASSPORT_CITIES } from '../../types/preferences';
 import { ThemeMode } from '../../types/settings';
 import { LEGAL_ENTITY } from '../../constants/legalEntity';
+import { openExternalUrl } from '../../utils/openExternalUrl';
 import { pulseBrand } from '../../theme/pulseBrand';
 import { radii, spacing } from '../../theme';
 import { buildDisguiseFeed } from '../../utils/buildDisguiseFeed';
@@ -280,21 +281,21 @@ export function DisguiseProfileScreen() {
               return;
             }
             if (item.id === 'h1') {
-              Alert.alert(
-                'Disguise mode',
-                'Pulse looks like a news app in public. Tap the Pulse logo to unlock Spark when it is safe.',
-              );
+              setDetailSheet(null);
+              navigation.getParent()?.navigate('LegalDocument', { documentId: 'disguise' });
               return;
             }
             if (item.id === 'h2') {
               Alert.alert(
                 'Report a post',
-                'Tap the ••• menu on any post, then choose Report. We review reports within 24 hours.',
+                'Tap the ••• menu on any post in your feed, then choose Report. We review reports within 24 hours.',
+                [{ text: 'Got it' }],
               );
               return;
             }
             if (item.id === 'h3') {
-              Alert.alert('Contact support', `Email ${LEGAL_ENTITY.supportEmail} — we typically reply within one business day.`);
+              setDetailSheet(null);
+              void openExternalUrl(`mailto:${LEGAL_ENTITY.supportEmail}?subject=Pulse%20support`, 'Email support');
             }
           }}
         />

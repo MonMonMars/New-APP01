@@ -2,9 +2,9 @@
 
 ## Demo link (open now)
 
-**https://kay-testimonials-harold-belongs.trycloudflare.com**
+**https://plays-johnny-contributed-fur.trycloudflare.com**
 
-_Last updated: Sep 15, 2026 — Phase C: advanced filters, AI profile coach, post-3rd-match upsell_
+_Last updated: Sep 16, 2026 — Phase D: rewind, GIFs, profile views, message reactions_
 
 > Tunnel links expire when the cloud workspace stops. If this 404s, ask for a fresh link.
 
@@ -36,12 +36,14 @@ _Last updated: Sep 15, 2026 — Phase C: advanced filters, AI profile coach, pos
 - **Smart demo replies** — matches respond with personality-aware messages (optional Groq LLM via `EXPO_PUBLIC_GROQ_API_KEY`)
 - **Phase B** — Incognito (Spark+ · Privacy controls), voice prompts (profile + chat), date check-in (chat menu)
 - **Phase C** — Advanced filters (intent + shared interests, Spark+), AI profile coach, post-3rd-match Spark+ upsell, boost banner on Discover
-- **Discover** — clean home: emergency logo + card deck + three bottom targets only
+- **Phase D** — Rewind last pass (Discover, Spark+), GIF picker in chat, who viewed you (Profile), long-press message reactions, active-now badge in chat
+- **Discover** — clean home: emergency logo + card deck + rewind button + three bottom targets only
 - **Profile → Discover tools** — map, explore, filters, standouts, held profiles, etc.
 - Drag cards to heart/trash/star zones
 - **Video** badge on profiles → preview sheet
 - **Likes** (Spark+) → tap card → Like/Pass → instant match-back
-- **Chat** → tap header for profile · vibe game in composer
+- **Chat** → tap header for profile · GIF in composer extras · long-press message to react · vibe game in composer
+- **Profile** → who viewed you card (Spark+ unlocks names)
 - **Map** → tap preview card for full profile
 - **Map**, **Explore**, **Matches**, **Profile**
 - Spark+, Shop, Safety, Notifications — eye-off returns to Pulse

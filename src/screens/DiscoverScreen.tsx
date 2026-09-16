@@ -15,6 +15,7 @@ import { MatchToast } from '../components/MatchToast';
 import { ModeToggleLogo } from '../components/disguise/ModeToggleLogo';
 import { PromptLikeSheet } from '../components/PromptLikeSheet';
 import { SuperLikeResultModal } from '../components/SuperLikeResultModal';
+import { SparkSectionToggle } from '../components/SparkSectionToggle';
 import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
 import { IncognitoBanner } from '../components/IncognitoBanner';
 import { SparkNoteSheet } from '../components/SparkNoteSheet';
@@ -24,6 +25,7 @@ import { WaitingForMatchModal } from '../components/WaitingForMatchModal';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Profile, ProfilePrompt } from '../types/profile';
+import { SPARK_SECTION_EMPTY } from '../types/preferences';
 import { spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 
@@ -43,6 +45,7 @@ export function DiscoverScreen() {
     hasMoreInPool,
     preferences,
     updatePreferences,
+    setSparkSection,
     searchMorePeople,
     expandSearchRadius,
     passProfile,
@@ -335,6 +338,12 @@ export function DiscoverScreen() {
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <View style={[styles.emergencyBar, { paddingTop: insets.top }]}>
         <ModeToggleLogo variant="spark" compact />
+        <View style={styles.sectionToggle}>
+          <SparkSectionToggle
+            section={preferences.sparkSection ?? 'dating'}
+            onChange={setSparkSection}
+          />
+        </View>
         <AnimatedPressable style={styles.hubButton} onPress={openDiscoverHub} accessibilityLabel="Discover tools">
           <Ionicons name="options-outline" size={22} color={colors.textMuted} />
         </AnimatedPressable>
@@ -366,9 +375,11 @@ export function DiscoverScreen() {
         ) : discoverQueue.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyEmoji}>🌍</Text>
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>No more people nearby</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>
+              {SPARK_SECTION_EMPTY[preferences.sparkSection ?? 'dating'].title}
+            </Text>
             <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-              Expand your search radius or load another batch to keep discovering.
+              {SPARK_SECTION_EMPTY[preferences.sparkSection ?? 'dating'].subtitle}
             </Text>
             <AnimatedPressable
               style={[styles.primaryButton, { backgroundColor: colors.gradientEnd }]}
@@ -543,6 +554,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  sectionToggle: {
+    flex: 1,
+    alignItems: 'center',
   },
   hubButton: {
     width: 40,

@@ -7,6 +7,7 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { EXPLORE_CATEGORY_MAP, mockProfiles } from '../data/profiles';
+import { matchesSparkSection, SparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -38,9 +39,16 @@ type ExploreScreenProps = {
   onClose: () => void;
 };
 
-function profilesForCategory(category: ExploreCategory, excluded: Set<string>): Profile[] {
+function profilesForCategory(
+  category: ExploreCategory,
+  excluded: Set<string>,
+  section: SparkSection,
+): Profile[] {
   return mockProfiles.filter((profile) => {
     if (excluded.has(profile.id)) {
+      return false;
+    }
+    if (!matchesSparkSection(profile, section)) {
       return false;
     }
     return EXPLORE_CATEGORY_MAP[profile.id] === category;
@@ -51,7 +59,7 @@ export function ExploreScreen({ onClose }: ExploreScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { colors } = useTheme();
-  const { passedIds, likedIds, blockedIds, prioritizeProfileInDeck } = useApp();
+  const { passedIds, likedIds, blockedIds, prioritizeProfileInDeck, preferences } = useApp();
 
   const excluded = new Set([...passedIds, ...likedIds, ...blockedIds]);
 
@@ -71,7 +79,11 @@ export function ExploreScreen({ onClose }: ExploreScreenProps) {
         </Text>
 
         {CATEGORIES.map((category) => {
-          const profiles = profilesForCategory(category.id, excluded);
+          const profiles = profilesForCategory(
+            category.id,
+            excluded,
+            preferences.sparkSection ?? 'dating',
+          );
           return (
             <View key={category.id} style={styles.section}>
               <View style={styles.sectionHeader}>

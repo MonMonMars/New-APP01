@@ -14,12 +14,12 @@ import { HeldProfilesRow } from '../components/HeldProfilesRow';
 import { MatchModal } from '../components/MatchModal';
 import { MostCompatibleBanner } from '../components/MostCompatibleBanner';
 import { RecentlyActiveStrip } from '../components/RecentlyActiveStrip';
+import { SparkSectionToggle } from '../components/SparkSectionToggle';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { StandoutsRow } from '../components/StandoutsRow';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { DiscoverFilter } from '../types/preferences';
-import { formatSearchRadius } from '../types/preferences';
+import { DiscoverFilter, formatSearchRadius, SPARK_SECTION_HINTS } from '../types/preferences';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { ActionToast } from '../components/ActionToast';
@@ -36,6 +36,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
   const {
     preferences,
     updatePreferences,
+    setSparkSection,
     toggleDiscoverFilter,
     discoverQueue,
     discoverPoolTotal,
@@ -169,6 +170,16 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
           )}
         </View>
 
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Spark section</Text>
+        <SparkSectionToggle
+          section={preferences.sparkSection ?? 'dating'}
+          onChange={setSparkSection}
+          wide
+        />
+        <Text style={[styles.metaSub, { color: colors.textMuted, marginTop: spacing.sm }]}>
+          {SPARK_SECTION_HINTS[preferences.sparkSection ?? 'dating']}
+        </Text>
+
         <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Filters</Text>
         <DiscoverFilterChips
           activeFilters={activeFilters}
@@ -182,7 +193,9 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
           onUpgrade={() => navigation.getParent()?.navigate('SparkPlus')}
         />
 
-        <AiPersonasRow onSelect={handleSelectAiPersona} />
+        {(preferences.sparkSection ?? 'dating') === 'dating' ? (
+          <AiPersonasRow onSelect={handleSelectAiPersona} />
+        ) : null}
 
         {dailyMostCompatible && (
           <>

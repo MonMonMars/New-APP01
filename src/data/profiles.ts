@@ -1,6 +1,6 @@
 import { aiPersonaProfiles, AI_PERSONA_IDS } from './aiPersonas';
 import { extraRawProfiles } from './extraProfiles';
-import { Profile, RelationshipIntent } from '../types/profile';
+import { Profile, RelationshipIntent, RelationshipStatus } from '../types/profile';
 
 const PROFILE_INTENTS: RelationshipIntent[] = ['long_term', 'short_term', 'new_friends', 'not_sure'];
 
@@ -16,6 +16,7 @@ export { AI_PERSONA_IDS };
  * MUTUAL_SUPER_LIKE_IDS (8) → Instant super-match on red star
  * STANDOUT_IDS (3)        → Top Picks / Standouts row on Discover
  * EXPLORE_CATEGORY_MAP    → Explore screen category assignments
+ * MARRIED_PROFILE_IDS     → Married / discreet Spark section
  * All other mockProfiles  → Unmatched discover queue
  */
 export const PRE_MATCHED_IDS = [
@@ -34,6 +35,11 @@ export const MUTUAL_MATCH_IDS = new Set([
 export const MUTUAL_SUPER_LIKE_IDS = new Set(['11', '29', '34', '36', '48', '59', '60', '68']);
 export const SUPER_PRE_MATCHED_IDS = new Set(['30', '33']);
 export const STANDOUT_IDS = ['15', '30', '36', '48', '52', '59', '68', '72', '81', '84'] as const;
+/** Married / discreet Spark Discover section */
+export const MARRIED_PROFILE_IDS = new Set([
+  '4', '11', '13', '16', '19', '23', '28', '32', '36', '40',
+  '44', '48', '52', '59', '60', '66', '68', '75', '79', '83', '87',
+]);
 /** Demo profile viewers for "Who viewed you" (Spark+ feature) */
 export const PROFILE_VIEWER_IDS = [
   '13', '17', '25', '33', '40', '50', '57', '66', '72', '81',
@@ -119,6 +125,14 @@ function withIntent(profile: Profile, seed: number): Profile {
     return profile;
   }
   return { ...profile, intent: PROFILE_INTENTS[seed % PROFILE_INTENTS.length] };
+}
+
+function withRelationshipStatus(profile: Profile): Profile {
+  if (profile.isAiPersona) {
+    return { ...profile, relationshipStatus: profile.relationshipStatus ?? 'single' };
+  }
+  const status: RelationshipStatus = MARRIED_PROFILE_IDS.has(profile.id) ? 'married' : 'single';
+  return { ...profile, relationshipStatus: profile.relationshipStatus ?? status };
 }
 
 const rawProfiles: Profile[] = [
@@ -1045,7 +1059,7 @@ function withVerification(profile: Profile): Profile {
 
 export const mockProfiles: Profile[] = rawProfiles.map((profile, index) => {
   const seed = Number(profile.id) || index + 1;
-  return withVerification(withIntent(withMap(profile, seed), seed));
+  return withRelationshipStatus(withVerification(withIntent(withMap(profile, seed), seed)));
 });
 
 function incomingFromMock(id: string): Profile {

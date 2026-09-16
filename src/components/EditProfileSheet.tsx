@@ -4,7 +4,7 @@ import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'rea
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
-import { RelationshipIntent, UserProfile, VoicePrompt } from '../types/profile';
+import { RelationshipIntent, RelationshipStatus, RELATIONSHIP_STATUS_LABELS, UserProfile, VoicePrompt } from '../types/profile';
 import { OPENING_MOVE_SUGGESTIONS } from '../utils/openingMove';
 import { pickProfilePhoto } from '../utils/photoPicker';
 import { ProfileCoachSheet } from './ProfileCoachSheet';
@@ -31,6 +31,11 @@ const intentOptions: { value: RelationshipIntent; label: string }[] = [
   { value: 'not_sure', label: 'Still figuring it out' },
 ];
 
+const statusOptions: { value: RelationshipStatus; label: string }[] = [
+  { value: 'single', label: RELATIONSHIP_STATUS_LABELS.single },
+  { value: 'married', label: RELATIONSHIP_STATUS_LABELS.married },
+];
+
 export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfileSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
@@ -40,6 +45,9 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
   const [photos, setPhotos] = useState<string[]>(user.photos);
   const [interests, setInterests] = useState<string[]>(user.interests);
   const [intent, setIntent] = useState<RelationshipIntent | undefined>(user.intent);
+  const [relationshipStatus, setRelationshipStatus] = useState<RelationshipStatus>(
+    user.relationshipStatus ?? 'single',
+  );
   const [prompts, setPrompts] = useState(user.prompts ?? []);
   const [instagramConnected, setInstagramConnected] = useState(user.instagramConnected ?? false);
   const [instagramHandle, setInstagramHandle] = useState(user.instagramHandle ?? '');
@@ -62,6 +70,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       setPhotos(user.photos);
       setInterests(user.interests);
       setIntent(user.intent);
+      setRelationshipStatus(user.relationshipStatus ?? 'single');
       setPrompts(user.prompts ?? []);
       setInstagramConnected(user.instagramConnected ?? false);
       setInstagramHandle(user.instagramHandle ?? '');
@@ -96,6 +105,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       photos: photos.length > 0 ? photos : user.photos,
       interests,
       intent,
+      relationshipStatus,
       prompts,
       instagramConnected,
       instagramHandle: instagramConnected ? instagramHandle.trim() || undefined : undefined,
@@ -205,6 +215,36 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
             placeholderTextColor={colors.textMuted}
             multiline
           />
+
+          <Text style={[styles.label, { color: colors.textMuted }]}>Status</Text>
+          <Text style={[styles.openingMoveHint, { color: colors.textMuted }]}>
+            Married profiles appear in the Married Discover section. Dating stays separate.
+          </Text>
+          <View style={styles.intentRow}>
+            {statusOptions.map((option) => {
+              const selected = relationshipStatus === option.value;
+              return (
+                <AnimatedPressable
+                  key={option.value}
+                  style={[
+                    styles.intentChip,
+                    {
+                      backgroundColor: selected ? colors.gradientEnd : colors.surface,
+                      borderColor: selected ? colors.gradientEnd : colors.border,
+                    },
+                  ]}
+                  onPress={() => setRelationshipStatus(option.value)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  accessibilityLabel={option.label}
+                >
+                  <Text style={[styles.intentChipText, { color: selected ? '#fff' : colors.text }]}>
+                    {option.label}
+                  </Text>
+                </AnimatedPressable>
+              );
+            })}
+          </View>
 
           <Text style={[styles.label, { color: colors.textMuted }]}>Looking for</Text>
           <View style={styles.intentRow}>
@@ -316,6 +356,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
           interests,
           openingMove,
           intent,
+          relationshipStatus,
         }}
         onClose={() => setShowProfileCoach(false)}
         onApplyBio={setBio}

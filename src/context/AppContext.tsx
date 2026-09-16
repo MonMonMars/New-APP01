@@ -50,7 +50,9 @@ import {
   DISCOVER_BATCH_SIZE,
   DiscoverFilter,
   DiscoveryPreferences,
+  matchesSparkSection,
   ShowMePreference,
+  SparkSection,
 } from '../types/preferences';
 import { DisguiseAdCreative, DisguiseOverlayVariant } from '../types/disguise';
 import { Profile, UserProfile } from '../types/profile';
@@ -190,6 +192,7 @@ function filterDiscoverProfiles(
       : locationSharing
         ? preferences.maxDistanceMiles
         : 9999;
+  const section = preferences.sparkSection ?? 'dating';
   return profiles.filter(
     (profile) =>
       !excludedIds.has(profile.id) &&
@@ -199,6 +202,7 @@ function filterDiscoverProfiles(
       matchesGenderFilter(profile, preferences.showMe) &&
       matchesDiscoverFilters(profile, filters) &&
       matchesAdvancedFilters(profile, user, preferences.advancedFilters, isSparkPlus) &&
+      matchesSparkSection(profile, section) &&
       (!preferences.travelMode ||
         !preferences.passportCity ||
         matchesPassportCity(profile.city, preferences.passportCity)),
@@ -292,6 +296,7 @@ type AppContextValue = {
     update: ConversationRealtimeUpdate,
   ) => void;
   updatePreferences: (preferences: DiscoveryPreferences) => void;
+  setSparkSection: (section: SparkSection) => void;
   toggleDiscoverFilter: (filter: DiscoverFilter) => void;
   searchMorePeople: () => void;
   expandSearchRadius: (miles: number) => void;
@@ -802,21 +807,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!privacyPreferences.personalisationEnabled) {
       return [];
     }
+    const section = preferences.sparkSection ?? 'dating';
     return STANDOUT_IDS.map((id) => getProfileById(id)).filter(
       (profile): profile is Profile =>
-        profile !== undefined && !excludedIds.has(profile.id),
+        profile !== undefined &&
+        !excludedIds.has(profile.id) &&
+        matchesSparkSection(profile, section),
     );
-  }, [excludedIds, privacyPreferences.personalisationEnabled]);
+  }, [excludedIds, preferences.sparkSection, privacyPreferences.personalisationEnabled]);
 
   const recentlyActiveProfiles = useMemo(() => {
     if (!privacyPreferences.showActiveStatus) {
       return [];
     }
+    const section = preferences.sparkSection ?? 'dating';
     return RECENTLY_ACTIVE_IDS.map((id) => getProfileById(id)).filter(
       (profile): profile is Profile =>
-        profile !== undefined && !excludedIds.has(profile.id),
+        profile !== undefined &&
+        !excludedIds.has(profile.id) &&
+        matchesSparkSection(profile, section),
     );
-  }, [excludedIds, privacyPreferences.showActiveStatus]);
+  }, [excludedIds, preferences.sparkSection, privacyPreferences.showActiveStatus]);
 
   const blockedProfiles = useMemo(
     () =>
@@ -1088,6 +1099,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const updatePreferences = useCallback((next: DiscoveryPreferences) => {
     setPreferences(next);
+  }, []);
+
+  const setSparkSection = useCallback((section: SparkSection) => {
+    setPreferences((prev) => {
+      if ((prev.sparkSection ?? 'dating') === section) {
+        return prev;
+      }
+      return { ...prev, sparkSection: section };
+    });
+    setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
+    setPriorityProfileId(null);
   }, []);
 
   const toggleDiscoverFilter = useCallback((filter: DiscoverFilter) => {
@@ -2131,6 +2153,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateUser,
       applyCloudConversationUpdate,
       updatePreferences,
+      setSparkSection,
       toggleDiscoverFilter,
       searchMorePeople,
       expandSearchRadius,
@@ -2250,6 +2273,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateUser,
       applyCloudConversationUpdate,
       updatePreferences,
+      setSparkSection,
       toggleDiscoverFilter,
       searchMorePeople,
       expandSearchRadius,

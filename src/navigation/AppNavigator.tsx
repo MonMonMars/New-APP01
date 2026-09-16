@@ -93,7 +93,11 @@ function MainTabs() {
         },
       })}
     >
-      <Tab.Screen name="Discover" component={DiscoverScreen} />
+      <Tab.Screen
+        name="Discover"
+        component={DiscoverScreen}
+        options={{ unmountOnBlur: true }}
+      />
       <Tab.Screen
         name="Likes"
         component={LikesScreen}

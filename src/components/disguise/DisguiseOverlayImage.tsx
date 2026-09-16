@@ -2,6 +2,7 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { radii } from '../../theme';
 import { DisguiseOverlayVariant } from './DisguiseOverlayAvatar';
+import { ContentTypeIcon, maskVariantToContentKind } from './ContentTypeIcon';
 
 type DisguiseOverlayImageProps = {
   imageUrl: string;
@@ -36,6 +37,9 @@ export function DisguiseOverlayImage({
           </Text>
         </View>
       )}
+      <View style={styles.typeBadge}>
+        <ContentTypeIcon kind={maskVariantToContentKind(variant)} />
+      </View>
     </View>
   );
 }
@@ -111,5 +115,16 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0,0,0,0.85)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,
+  },
+  typeBadge: {
+    position: 'absolute',
+    right: 6,
+    bottom: 6,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

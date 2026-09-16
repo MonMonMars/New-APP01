@@ -5,6 +5,7 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { AdPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { ContentTypeIcon, MediaWithContentBadge } from './ContentTypeIcon';
 import { FeedPersonRow } from './FeedPersonRow';
 import { AdLandingSheet } from './AdLandingSheet';
 import { AnimatedPressable } from '../AnimatedPressable';
@@ -46,14 +47,17 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
       >
         <View style={styles.sponsoredRow}>
           <Text style={styles.sponsored}>Sponsored</Text>
-          <Ionicons name="information-circle-outline" size={14} color="#888" />
+          <ContentTypeIcon kind="sponsored" />
         </View>
-        <Image source={{ uri: ad.imageUrl }} style={styles.image} resizeMode="cover" />
+        <MediaWithContentBadge kind="ad">
+          <Image source={{ uri: ad.imageUrl }} style={styles.image} resizeMode="cover" />
+        </MediaWithContentBadge>
         <View style={styles.body}>
           <Text style={styles.brand}>{ad.brand}</Text>
           <Text style={styles.tagline}>{ad.tagline}</Text>
           <FeedPersonRow
             plainAvatar
+            contentKind="profile"
             imageUrl={testimonial.avatarUrl}
             title={testimonial.name}
             subtitle="Verified reader"

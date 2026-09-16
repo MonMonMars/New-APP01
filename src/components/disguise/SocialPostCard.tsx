@@ -6,6 +6,7 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { maskVariantToContentKind } from './ContentTypeIcon';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
 import { DisguisePhotoLightbox } from './DisguisePhotoLightbox';
 import { FeedPersonRow } from './FeedPersonRow';
@@ -86,6 +87,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
               imageUrl={post.avatarUrl}
               overlayText={maskSnippet}
               overlayVariant={post.avatarMask.variant}
+              contentKind={maskVariantToContentKind(post.avatarMask.variant)}
               title={post.author}
               subtitle={`${post.handle} · ${post.timeAgo}`}
               titleStyle={{ color: colors.text }}
@@ -93,6 +95,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
           ) : (
             <FeedPersonRow
               plainAvatar
+              contentKind="social"
               imageUrl={post.avatarUrl}
               title={post.author}
               subtitle={`${post.handle} · ${post.timeAgo}`}

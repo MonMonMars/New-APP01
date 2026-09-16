@@ -4,6 +4,7 @@ import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { MediaWithContentBadge } from '../../components/disguise/ContentTypeIcon';
 import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
 import { DisguiseMarketsPanel } from '../../components/disguise/DisguiseMarketsPanel';
 import { DisguiseWeatherPanel } from '../../components/disguise/DisguiseWeatherPanel';
@@ -205,7 +206,9 @@ export function DisguiseTrendingScreen() {
               style={[styles.breakingCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => openTopic(card.topic)}
             >
-              <Image source={{ uri: card.imageUrl }} style={styles.breakingImage} resizeMode="cover" />
+              <MediaWithContentBadge kind="news">
+                <Image source={{ uri: card.imageUrl }} style={styles.breakingImage} resizeMode="cover" />
+              </MediaWithContentBadge>
               <View style={styles.breakingBody}>
                 <Text style={[styles.breakingSource, { color: colors.textMuted }]}>
                   {card.source} · {card.timeAgo}
@@ -227,7 +230,9 @@ export function DisguiseTrendingScreen() {
           >
             <Text style={[styles.rank, { color: colors.textMuted }]}>{index + 1}</Text>
             {item.imageUrl ? (
-              <Image source={{ uri: item.imageUrl }} style={styles.topicThumb} resizeMode="cover" />
+              <MediaWithContentBadge kind="trending">
+                <Image source={{ uri: item.imageUrl }} style={styles.topicThumb} resizeMode="cover" />
+              </MediaWithContentBadge>
             ) : (
               <View style={[styles.topicThumbPlaceholder, { backgroundColor: colors.surface }]}>
                 <Ionicons name="pricetag-outline" size={16} color={PULSE_BLUE} />

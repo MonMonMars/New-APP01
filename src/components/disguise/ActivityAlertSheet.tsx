@@ -54,6 +54,7 @@ export function ActivityAlertSheet({ visible, alert, onClose }: ActivityAlertShe
                 overlayText={alert.person.overlayText ?? 'LIVE'}
                 overlayVariant={alert.person.overlayVariant ?? 'news'}
                 plainAvatar={!alert.person.overlayVariant}
+                contentKind={alert.person.overlayVariant ? 'profile' : 'alert'}
                 title={alert.person.name}
                 body={alert.text}
                 titleStyle={{ color: colors.text }}

@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
 import { NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { MediaWithContentBadge } from './ContentTypeIcon';
 import { DisguisePhotoLightbox } from './DisguisePhotoLightbox';
 import { FeedPersonRow } from './FeedPersonRow';
 import { AnimatedPressable } from '../AnimatedPressable';
@@ -53,6 +54,7 @@ export function PersonPreviewSheet({ visible, reporter, onClose }: PersonPreview
             <View style={styles.header}>
               <FeedPersonRow
                 plainAvatar
+                contentKind={reporter.profileId ? 'profile' : 'news'}
                 imageUrl={reporter.avatarUrl}
                 title={reporter.name}
                 subtitle="Reader comment"
@@ -79,7 +81,9 @@ export function PersonPreviewSheet({ visible, reporter, onClose }: PersonPreview
                   accessibilityLabel={`Open photo ${index + 1} of ${reporter.photos.length}`}
                   scaleTo={0.97}
                 >
-                  <Image source={{ uri: photoUrl }} style={styles.photo} resizeMode="cover" />
+                  <MediaWithContentBadge kind={reporter.profileId ? 'profile' : 'news'}>
+                    <Image source={{ uri: photoUrl }} style={styles.photo} resizeMode="cover" />
+                  </MediaWithContentBadge>
                 </AnimatedPressable>
               ))}
             </ScrollView>

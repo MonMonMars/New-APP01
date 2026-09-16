@@ -4,7 +4,7 @@
 
 | Link | Durability | Notes |
 |------|------------|-------|
-| **https://temporary-swift-koto-pr4omjr.vercel.app** | ~60 min (claimable → permanent) | **Latest build — 8/8 verified.** No password. [Claim on Vercel](https://vercel.com/claim-deployment?code=cc711077-aee9-478c-b5d3-f1a3649d4a48) to keep forever. |
+| **https://temporary-swift-koto-pr4omjr.vercel.app** | ~60 min (claimable → permanent) | **Latest build (Sep 16) — swipe photos + profile captions.** [Claim on Vercel](https://vercel.com/claim-deployment?code=cc711077-aee9-478c-b5d3-f1a3649d4a48) to keep forever. |
 | **https://unrivaled-kulfi-8c1433.netlify.app** | ~60 min (claimable → permanent) | Password: `My-Drop-Site`. [Claim on Netlify](https://app.netlify.com/drop/unrivaled-kulfi-8c1433) after signing in. |
 
 **Best long-term fix:** connect Vercel or Netlify to GitHub once (see below) — auto-deploys on every push, stable URL, works with a private repo.

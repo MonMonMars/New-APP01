@@ -1,11 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../context/ThemeContext';
 import { NewsPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { openExternalUrl } from '../../utils/openExternalUrl';
+import { AnimatedOverlay } from '../motion/AnimatedOverlay';
+import { FadeSlideIn } from '../motion/FadeSlideIn';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type NewsArticleSheetProps = {
@@ -25,69 +27,61 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
   const paragraphs = post.articleBody.split('\n\n').filter(Boolean);
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.overlay}>
-        <AnimatedPressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Close article" />
-        <View
-          style={[
-            styles.sheet,
-            {
-              backgroundColor: colors.background,
-              borderColor: colors.border,
-              paddingBottom: insets.bottom + spacing.md,
-            },
-          ]}
-        >
+    <AnimatedOverlay visible={visible} onClose={onClose} variant="bottom">
+      <View
+        style={[
+          styles.sheet,
+          {
+            backgroundColor: colors.background,
+            borderColor: colors.border,
+            paddingBottom: insets.bottom + spacing.md,
+          },
+        ]}
+      >
+        <FadeSlideIn replayKey={visible} index={0}>
           <View style={[styles.toolbar, { borderBottomColor: colors.border }]}>
             <View style={styles.toolbarMeta}>
               <Text style={[styles.source, { color: colors.gradientEnd }]}>{post.source}</Text>
               <Text style={[styles.category, { color: colors.textMuted }]}>{post.category}</Text>
             </View>
-            <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel="Close">
+            <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel="Close" scaleTo={0.9}>
               <Ionicons name="close" size={24} color={colors.text} />
             </AnimatedPressable>
           </View>
+        </FadeSlideIn>
 
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.content}
-          >
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+          <FadeSlideIn replayKey={visible} index={1}>
             <Image source={{ uri: post.imageUrl }} style={styles.hero} resizeMode="cover" />
+          </FadeSlideIn>
+          <FadeSlideIn replayKey={visible} index={2}>
             <Text style={[styles.headline, { color: colors.text }]}>{post.headline}</Text>
             <Text style={[styles.time, { color: colors.textMuted }]}>{post.timeAgo}</Text>
-            {paragraphs.map((paragraph, index) => (
-              <Text
-                key={`${post.id}-p-${index}`}
-                style={[styles.paragraph, { color: colors.text }]}
-              >
-                {paragraph}
-              </Text>
-            ))}
+          </FadeSlideIn>
+          {paragraphs.map((paragraph, index) => (
+            <FadeSlideIn key={`${post.id}-p-${index}`} replayKey={visible} index={3 + index}>
+              <Text style={[styles.paragraph, { color: colors.text }]}>{paragraph}</Text>
+            </FadeSlideIn>
+          ))}
+          <FadeSlideIn replayKey={visible} index={3 + paragraphs.length}>
             <AnimatedPressable
               style={styles.readOriginal}
               onPress={() => {
                 void openExternalUrl(post.articleUrl, post.source);
               }}
+              scaleTo={0.97}
             >
               <Text style={styles.readOriginalText}>Read on {post.source}</Text>
               <Ionicons name="open-outline" size={16} color="#fff" />
             </AnimatedPressable>
-          </ScrollView>
-        </View>
+          </FadeSlideIn>
+        </ScrollView>
       </View>
-    </Modal>
+    </AnimatedOverlay>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
   sheet: {
     maxHeight: '78%',
     borderTopLeftRadius: radii.card + 4,

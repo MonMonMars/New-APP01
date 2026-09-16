@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Modal, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { FREE_DAILY_LIKE_LIMIT } from '../types/subscription';
 import { colors, radii, spacing } from '../theme';
+import { AnimatedOverlay } from './motion/AnimatedOverlay';
+import { FadeSlideIn } from './motion/FadeSlideIn';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type LikeLimitModalProps = {
@@ -13,35 +15,35 @@ type LikeLimitModalProps = {
 
 export function LikeLimitModal({ visible, onClose, onUpgrade }: LikeLimitModalProps) {
   return (
-    <Modal visible={visible} animationType="fade" transparent>
-      <View style={styles.overlay}>
-        <View style={styles.sheet}>
+    <AnimatedOverlay visible={visible} onClose={onClose} variant="center">
+      <View style={styles.sheet}>
+        <FadeSlideIn replayKey={visible} index={0}>
           <Ionicons name="heart-dislike" size={40} color={colors.gradientEnd} />
+        </FadeSlideIn>
+        <FadeSlideIn replayKey={visible} index={1}>
           <Text style={styles.title}>You&apos;re out of likes today</Text>
           <Text style={styles.subtitle}>
             Free members get {FREE_DAILY_LIKE_LIMIT} likes per day. Upgrade to Spark+ for unlimited
             likes, see who liked you, and more.
           </Text>
-          <AnimatedPressable style={styles.primaryButton} onPress={onUpgrade}>
+        </FadeSlideIn>
+        <FadeSlideIn replayKey={visible} index={2}>
+          <AnimatedPressable style={styles.primaryButton} onPress={onUpgrade} scaleTo={0.97}>
             <Text style={styles.primaryText}>Get Spark+</Text>
           </AnimatedPressable>
-          <AnimatedPressable style={styles.secondaryButton} onPress={onClose}>
+          <AnimatedPressable style={styles.secondaryButton} onPress={onClose} scaleTo={0.97}>
             <Text style={styles.secondaryText}>Come back tomorrow</Text>
           </AnimatedPressable>
-        </View>
+        </FadeSlideIn>
       </View>
-    </Modal>
+    </AnimatedOverlay>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    justifyContent: 'center',
-    padding: spacing.lg,
-  },
   sheet: {
+    width: '100%',
+    maxWidth: 340,
     backgroundColor: colors.surface,
     borderRadius: radii.card,
     padding: spacing.xl,

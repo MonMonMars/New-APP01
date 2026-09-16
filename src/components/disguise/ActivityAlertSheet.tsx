@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Modal, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseAlert } from '../../data/disguiseFeed';
 import { useTheme } from '../../context/ThemeContext';
 import { radii, spacing } from '../../theme';
+import { AnimatedOverlay } from '../motion/AnimatedOverlay';
+import { FadeSlideIn } from '../motion/FadeSlideIn';
 import { FeedPersonRow } from './FeedPersonRow';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -25,29 +27,30 @@ export function ActivityAlertSheet({ visible, alert, onClose }: ActivityAlertShe
   const isSponsored = alert.icon === 'megaphone-outline';
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.overlay}>
-        <AnimatedPressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Close" />
-        <View
-          style={[
-            styles.sheet,
-            {
-              backgroundColor: colors.background,
-              borderColor: colors.border,
-              paddingBottom: insets.bottom + spacing.md,
-            },
-          ]}
-        >
+    <AnimatedOverlay visible={visible} onClose={onClose} variant="bottom">
+      <View
+        style={[
+          styles.sheet,
+          {
+            backgroundColor: colors.background,
+            borderColor: colors.border,
+            paddingBottom: insets.bottom + spacing.md,
+          },
+        ]}
+      >
+        <FadeSlideIn replayKey={visible} index={0}>
           <View style={[styles.toolbar, { borderBottomColor: colors.border }]}>
             <Text style={[styles.badge, { color: colors.textMuted }]}>
               {isSponsored ? 'Sponsored' : 'Activity'}
             </Text>
-            <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel="Close">
+            <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel="Close" scaleTo={0.9}>
               <Ionicons name="close" size={24} color={colors.textMuted} />
             </AnimatedPressable>
           </View>
+        </FadeSlideIn>
 
-          <View style={styles.body}>
+        <View style={styles.body}>
+          <FadeSlideIn replayKey={visible} index={1}>
             {alert.person ? (
               <FeedPersonRow
                 imageUrl={alert.person.avatarUrl}
@@ -68,28 +71,24 @@ export function ActivityAlertSheet({ visible, alert, onClose }: ActivityAlertShe
                 <Text style={[styles.text, { color: colors.text }]}>{alert.text}</Text>
               </>
             )}
+          </FadeSlideIn>
+          <FadeSlideIn replayKey={visible} index={2}>
             <Text style={[styles.time, { color: colors.textMuted }]}>{alert.time}</Text>
+          </FadeSlideIn>
+          <FadeSlideIn replayKey={visible} index={3}>
             <Text style={[styles.hint, { color: colors.textMuted }]}>
               {isSponsored
                 ? 'Offers in Pulse are sponsored placements — tap through only if you recognise the brand.'
                 : 'Notifications from your Pulse feed. Dating actions stay private in Spark.'}
             </Text>
-          </View>
+          </FadeSlideIn>
         </View>
       </View>
-    </Modal>
+    </AnimatedOverlay>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-  },
   sheet: {
     borderTopLeftRadius: radii.card,
     borderTopRightRadius: radii.card,

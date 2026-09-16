@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Image, Modal, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, radii, spacing } from '../theme';
 import { Profile } from '../types/profile';
+import { AnimatedOverlay } from './motion/AnimatedOverlay';
+import { FadeSlideIn } from './motion/FadeSlideIn';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type SuperLikeResultModalProps = {
@@ -33,20 +35,22 @@ export function SuperLikeResultModal({
   const photos = profile.photos.length > 0 ? profile.photos : [userPhoto];
 
   return (
-    <Modal visible={visible} animationType="fade" transparent>
-      <View style={styles.backdrop}>
-        <LinearGradient
-          colors={
-            isMatch
-              ? [colors.heartRed, '#FF6B8A', '#FFD700']
-              : ['#1A1A2E', colors.heartRed, '#FF6B8A']
-          }
-          style={[styles.card, { paddingBottom: insets.bottom + spacing.lg }]}
-        >
+    <AnimatedOverlay visible={visible} onClose={onTalkLater} variant="center">
+      <LinearGradient
+        colors={
+          isMatch
+            ? [colors.heartRed, '#FF6B8A', '#FFD700']
+            : ['#1A1A2E', colors.heartRed, '#FF6B8A']
+        }
+        style={[styles.card, { paddingBottom: insets.bottom + spacing.lg }]}
+      >
+        <FadeSlideIn replayKey={visible} index={0}>
           <View style={styles.iconBadge}>
             <Ionicons name="star" size={40} color={colors.heartRed} />
           </View>
+        </FadeSlideIn>
 
+        <FadeSlideIn replayKey={visible} index={1}>
           <Text style={styles.kicker}>{isMatch ? "It's a" : 'Spark Star'}</Text>
           <Text style={styles.title}>{isMatch ? 'Super Match!' : 'Super Like sent!'}</Text>
           <Text style={styles.subtitle}>
@@ -54,7 +58,9 @@ export function SuperLikeResultModal({
               ? `You and ${profile.name} super-liked each other.`
               : `${profile.name} will see you first.`}
           </Text>
+        </FadeSlideIn>
 
+        <FadeSlideIn replayKey={visible} index={2}>
           {isMatch ? (
             <View style={styles.avatarRow}>
               <Image source={{ uri: userPhoto }} style={[styles.avatar, styles.avatarLeft]} />
@@ -68,31 +74,29 @@ export function SuperLikeResultModal({
               <Image source={{ uri: photos[0] }} style={styles.singlePhoto} />
             </View>
           )}
+        </FadeSlideIn>
 
+        <FadeSlideIn replayKey={visible} index={3}>
           <View style={styles.actions}>
-            <AnimatedPressable style={styles.primaryButton} onPress={onChatNow}>
+            <AnimatedPressable style={styles.primaryButton} onPress={onChatNow} scaleTo={0.97}>
               <Text style={styles.primaryButtonText}>
                 {isMatch ? 'Message' : 'Send a note'}
               </Text>
             </AnimatedPressable>
-            <AnimatedPressable style={styles.secondaryButton} onPress={onTalkLater}>
+            <AnimatedPressable style={styles.secondaryButton} onPress={onTalkLater} scaleTo={0.97}>
               <Text style={styles.secondaryButtonText}>Keep swiping</Text>
             </AnimatedPressable>
           </View>
-        </LinearGradient>
-      </View>
-    </Modal>
+        </FadeSlideIn>
+      </LinearGradient>
+    </AnimatedOverlay>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.65)',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
-  },
   card: {
+    width: '100%',
+    maxWidth: 360,
     borderRadius: radii.card + 8,
     paddingTop: spacing.xl,
     paddingHorizontal: spacing.lg,

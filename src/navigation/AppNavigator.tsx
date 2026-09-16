@@ -30,6 +30,7 @@ import { SecuritySettingsScreen } from '../screens/SecuritySettingsScreen';
 import { VerificationPolicyScreen } from '../screens/VerificationPolicyScreen';
 import { SparkPlusScreen } from '../screens/SparkPlusScreen';
 import { OnboardingFlow } from '../screens/onboarding/OnboardingFlow';
+import { CrossfadeSwitcher } from '../components/motion/CrossfadeSwitcher';
 import { TabBarButton } from '../components/TabBarButton';
 import { DisguiseNavigator } from './DisguiseNavigator';
 import { MainTabParamList, RootStackParamList } from '../types/navigation';
@@ -73,6 +74,7 @@ function MainTabs() {
       screenOptions={({ route }) => ({
         headerShown: false,
         lazy: true,
+        animation: 'fade',
         tabBarButton: (props) => <TabBarButton {...props} />,
         tabBarStyle: {
           backgroundColor: colors.background,
@@ -205,10 +207,13 @@ function DiscoverHubWrapper({
 
 function MainShell() {
   const { disguiseMode } = useApp();
-  if (disguiseMode) {
-    return <DisguiseNavigator />;
-  }
-  return <MainTabs />;
+  return (
+    <CrossfadeSwitcher
+      active={disguiseMode}
+      onPanel={<DisguiseNavigator />}
+      offPanel={<MainTabs />}
+    />
+  );
 }
 
 function RootNavigator() {

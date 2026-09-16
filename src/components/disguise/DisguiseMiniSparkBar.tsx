@@ -1,115 +1,115 @@
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
-import { radii, spacing } from '../../theme';
-import { AnimatedPressable } from '../AnimatedPressable';
+import { spacing } from '../../theme';
 
 type DisguiseMiniSparkBarProps = {
   liked: boolean;
+  superLiked: boolean;
   passed: boolean;
   sparkLinked: boolean;
   onLike: () => void;
   onUnlike: () => void;
+  onSuperLike: () => void;
   onPass: () => void;
 };
 
-/** Tiny Spark-style actions disguised as reader feedback on a photo. */
+/** Compact pass / like / super-like row — plain buttons, no animations. */
 export function DisguiseMiniSparkBar({
   liked,
+  superLiked,
   passed,
   sparkLinked,
   onLike,
   onUnlike,
+  onSuperLike,
   onPass,
 }: DisguiseMiniSparkBarProps) {
   const { colors } = useTheme();
 
-  return (
-    <View style={[styles.bar, { backgroundColor: 'rgba(0,0,0,0.62)', borderColor: colors.border }]}>
-      <Text style={styles.caption}>
-        {sparkLinked ? 'Private preview' : 'Reader feedback'}
-      </Text>
-      <View style={styles.actions}>
-        <AnimatedPressable
-          style={[
-            styles.action,
-            styles.passAction,
-            passed && { backgroundColor: 'rgba(239,68,68,0.22)', borderColor: colors.nope },
-          ]}
-          onPress={onPass}
-          scaleTo={0.92}
-          accessibilityRole="button"
-          accessibilityLabel={sparkLinked ? 'Pass profile' : 'Mark not helpful'}
-        >
-          <Ionicons name="close" size={16} color={passed ? colors.nope : '#fff'} />
-        </AnimatedPressable>
+  if (!sparkLinked) {
+    return null;
+  }
 
-        <AnimatedPressable
-          style={[
-            styles.action,
-            styles.likeAction,
-            liked && { backgroundColor: colors.heartRed, borderColor: colors.heartRed },
-          ]}
-          onPress={liked ? onUnlike : onLike}
-          scaleTo={0.92}
-          accessibilityRole="button"
-          accessibilityLabel={liked ? 'Unlike photo' : sparkLinked ? 'Like profile' : 'Mark helpful'}
-        >
-          <Ionicons
-            name={liked ? 'heart' : 'heart-outline'}
-            size={17}
-            color={liked ? '#fff' : colors.heartPink}
-          />
-        </AnimatedPressable>
-      </View>
-      <Text style={styles.hint}>
-        {liked ? 'Saved to your likes' : passed ? 'Hidden from feed' : 'Tap heart to like · X to pass'}
-      </Text>
+  return (
+    <View style={styles.bar}>
+      <Pressable
+        style={[styles.action, styles.passAction, passed && styles.passActive]}
+        onPress={onPass}
+        accessibilityRole="button"
+        accessibilityLabel="Pass profile"
+      >
+        <Ionicons name="close" size={15} color={passed ? colors.nope : colors.textMuted} />
+      </Pressable>
+
+      <Pressable
+        style={[styles.action, styles.likeAction, liked && styles.likeActive]}
+        onPress={liked ? onUnlike : onLike}
+        accessibilityRole="button"
+        accessibilityLabel={liked ? 'Unlike profile' : 'Like profile'}
+      >
+        <Ionicons
+          name={liked ? 'heart' : 'heart-outline'}
+          size={16}
+          color={liked ? '#fff' : colors.heartPink}
+        />
+      </Pressable>
+
+      <Pressable
+        style={[styles.action, styles.superAction, superLiked && styles.superActive]}
+        onPress={onSuperLike}
+        accessibilityRole="button"
+        accessibilityLabel="Super like profile"
+      >
+        <Ionicons
+          name="star"
+          size={15}
+          color={superLiked ? '#fff' : colors.superLike}
+        />
+      </Pressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   bar: {
-    borderRadius: radii.card,
-    borderWidth: StyleSheet.hairlineWidth,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    alignItems: 'center',
-    gap: 6,
-  },
-  caption: {
-    color: 'rgba(255,255,255,0.72)',
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
-  },
-  actions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
+    justifyContent: 'center',
+    gap: spacing.sm,
+    paddingTop: spacing.xs,
   },
   action: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
+    borderWidth: 1,
   },
   passAction: {
-    borderColor: 'rgba(255,255,255,0.35)',
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(128,128,128,0.35)',
+    backgroundColor: 'rgba(128,128,128,0.08)',
+  },
+  passActive: {
+    borderColor: '#ef4444',
+    backgroundColor: 'rgba(239,68,68,0.12)',
   },
   likeAction: {
-    borderColor: 'rgba(255,107,107,0.65)',
-    backgroundColor: 'rgba(255,107,107,0.15)',
+    borderColor: 'rgba(255,107,107,0.45)',
+    backgroundColor: 'rgba(255,107,107,0.08)',
   },
-  hint: {
-    color: 'rgba(255,255,255,0.55)',
-    fontSize: 10,
-    fontWeight: '500',
+  likeActive: {
+    borderColor: '#ff6b6b',
+    backgroundColor: '#ff6b6b',
+  },
+  superAction: {
+    borderColor: 'rgba(30,195,255,0.45)',
+    backgroundColor: 'rgba(30,195,255,0.08)',
+  },
+  superActive: {
+    borderColor: '#1EC3FF',
+    backgroundColor: '#1EC3FF',
   },
 });

@@ -199,11 +199,15 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
+    flexGrow: 1,
+    minWidth: 0,
     borderRadius: radii.button,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 2,
     fontSize: 15,
+    lineHeight: 20,
     minHeight: 40,
+    maxHeight: 120,
   },
   sendButton: {
     width: 40,

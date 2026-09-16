@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useMemo } from 'react';
-import { Modal, StyleSheet, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { LayoutChangeEvent, Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../context/AppContext';
@@ -30,6 +30,8 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const accent = section === 'ember' ? colors.ember : colors.gradientEnd;
   const currentRadius = preferences.maxDistanceMiles;
 
+  const [mapSize, setMapSize] = useState({ width: 0, height: 0 });
+
   const pins = useMemo(() => {
     const excluded = new Set([...passedIds, ...likedIds, ...blockedIds]);
     return mockProfiles.filter(
@@ -40,11 +42,24 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     );
   }, [blockedIds, currentRadius, likedIds, passedIds, section]);
 
-  const ring = ringMetrics(currentRadius);
+  const pinRadius = currentRadius >= 9999 ? 46 : Math.min(currentRadius / 250, 1) * 38 + 8;
+  const scale = Math.min(mapSize.width, mapSize.height);
+  const ringDiameter = (pinRadius / 50) * scale;
+
+  const onMapLayout = (event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    setMapSize((prev) =>
+      prev.width === width && prev.height === height ? prev : { width, height },
+    );
+  };
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
-      <LinearGradient colors={['#1a3a2f', '#0d2137', '#162447']} style={styles.map}>
+      <LinearGradient
+        colors={['#1a3a2f', '#0d2137', '#162447']}
+        style={styles.map}
+        onLayout={onMapLayout}
+      >
         <View style={styles.gridLines} pointerEvents="none">
           {Array.from({ length: 8 }).map((_, row) => (
             <View key={`row-${row}`} style={styles.gridRow}>
@@ -64,39 +79,47 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
           <View style={[styles.roadV, { left: '68%', backgroundColor: 'rgba(255,255,255,0.07)' }]} />
         </View>
 
-        <View
-          pointerEvents="none"
-          style={[
-            styles.radiusRing,
-            {
-              width: ring.size,
-              height: ring.size,
-              left: ring.offset,
-              top: ring.offset,
-              borderColor: accent,
-            },
-          ]}
-        />
+        {ringDiameter > 0 ? (
+          <View
+            pointerEvents="none"
+            style={[
+              styles.radiusRing,
+              {
+                width: ringDiameter,
+                height: ringDiameter,
+                left: mapSize.width / 2 - ringDiameter / 2,
+                top: mapSize.height / 2 - ringDiameter / 2,
+                borderColor: accent,
+              },
+            ]}
+          />
+        ) : null}
 
         <View style={styles.youMarker} pointerEvents="none">
           <View style={[styles.youDot, { backgroundColor: accent }]} />
           <Text style={styles.youLabel}>You</Text>
         </View>
 
-        {pins.slice(0, 24).map((profile) => (
-          <View
-            key={profile.id}
-            pointerEvents="none"
-            style={[
-              styles.pin,
-              {
-                left: `${profile.mapX ?? 50}%`,
-                top: `${profile.mapY ?? 50}%`,
-                backgroundColor: colors.heartRed,
-              },
-            ]}
-          />
-        ))}
+        {scale > 0
+          ? pins.slice(0, 24).map((profile) => {
+              const x = profile.mapX ?? 50;
+              const y = profile.mapY ?? 50;
+              return (
+                <View
+                  key={profile.id}
+                  pointerEvents="none"
+                  style={[
+                    styles.pin,
+                    {
+                      left: mapSize.width / 2 + ((x - 50) / 100) * scale,
+                      top: mapSize.height / 2 + ((y - 50) / 100) * scale,
+                      backgroundColor: colors.heartRed,
+                    },
+                  ]}
+                />
+              );
+            })
+          : null}
       </LinearGradient>
 
       <View style={[styles.topBar, { paddingTop: insets.top + spacing.sm }]}>
@@ -160,14 +183,6 @@ export function ExpandLocationSheet({ visible, onClose }: ExpandLocationSheetPro
       <ExpandSearchMap onClose={onClose} />
     </Modal>
   );
-}
-
-function ringMetrics(miles: number): { size: `${number}%`; offset: `${number}%` } {
-  const pinRadius = miles >= 9999 ? 46 : Math.min(miles / 250, 1) * 38 + 8;
-  return {
-    size: `${pinRadius * 2}%`,
-    offset: `${50 - pinRadius}%`,
-  };
 }
 
 const styles = StyleSheet.create({

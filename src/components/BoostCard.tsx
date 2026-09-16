@@ -2,13 +2,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { BOOST_DURATION_MS } from '../types/subscription';
 import { colors, radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type BoostCardProps = {
   boostActiveUntil: string | null;
   isSparkPlus: boolean;
+  bonusBoosts: number;
+  canUseFreeWeeklyBoost: boolean;
   onActivate: () => void;
 };
 
@@ -19,7 +20,13 @@ function formatRemaining(ms: number): string {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
-export function BoostCard({ boostActiveUntil, isSparkPlus, onActivate }: BoostCardProps) {
+export function BoostCard({
+  boostActiveUntil,
+  isSparkPlus,
+  bonusBoosts,
+  canUseFreeWeeklyBoost,
+  onActivate,
+}: BoostCardProps) {
   const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
@@ -33,6 +40,23 @@ export function BoostCard({ boostActiveUntil, isSparkPlus, onActivate }: BoostCa
   const activeUntil = boostActiveUntil ? new Date(boostActiveUntil).getTime() : 0;
   const isActive = activeUntil > now;
   const remaining = isActive ? activeUntil - now : 0;
+  const canActivate = canUseFreeWeeklyBoost || bonusBoosts > 0;
+
+  const subtitle = (() => {
+    if (isActive) {
+      return `Top profile for ${formatRemaining(remaining)} remaining`;
+    }
+    if (bonusBoosts > 0) {
+      return `${bonusBoosts} Boost${bonusBoosts === 1 ? '' : 's'} ready to use`;
+    }
+    if (isSparkPlus && canUseFreeWeeklyBoost) {
+      return '1 free Boost per week with Spark+';
+    }
+    if (isSparkPlus) {
+      return 'Free weekly Boost used — get more in Shop';
+    }
+    return 'Be seen by more people for 30 minutes';
+  })();
 
   return (
     <View style={styles.card}>
@@ -43,17 +67,14 @@ export function BoostCard({ boostActiveUntil, isSparkPlus, onActivate }: BoostCa
         <Text style={styles.title}>
           {isActive ? 'Boost active' : 'Boost your profile'}
         </Text>
-        <Text style={styles.subtitle}>
-          {isActive
-            ? `Top profile for ${formatRemaining(remaining)} remaining`
-            : isSparkPlus
-              ? '1 free Boost per week with Spark+'
-              : 'Be seen by more people for 30 minutes'}
-        </Text>
+        <Text style={styles.subtitle}>{subtitle}</Text>
       </View>
       {!isActive && (
-        <AnimatedPressable style={styles.button} onPress={onActivate}>
-          <Text style={styles.buttonText}>Boost</Text>
+        <AnimatedPressable
+          style={[styles.button, !canActivate && !isSparkPlus && styles.buttonMuted]}
+          onPress={onActivate}
+        >
+          <Text style={styles.buttonText}>{canActivate || !isSparkPlus ? 'Boost' : 'Shop'}</Text>
         </AnimatedPressable>
       )}
       {isActive && (
@@ -103,6 +124,9 @@ const styles = StyleSheet.create({
     borderRadius: radii.button,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
+  },
+  buttonMuted: {
+    opacity: 0.85,
   },
   buttonText: {
     color: colors.text,

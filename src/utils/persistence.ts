@@ -22,7 +22,7 @@ import { decryptLocalPayload, encryptLocalPayload } from './localEncryption';
 
 const STORAGE_KEY = '@spark/app_state';
 const SENSITIVE_VAULT_KEY = '@spark/sensitive_vault';
-const STORAGE_VERSION = 14;
+const STORAGE_VERSION = 15;
 
 type SensitiveVault = {
   conversations: Conversation[];
@@ -48,6 +48,8 @@ export type PersistedAppState = {
   isSparkPlus: boolean;
   sparkNotes: Record<string, string>;
   boostActiveUntil: string | null;
+  freeBoostWeekKey: string | null;
+  bonusBoosts: number;
   sparkNotesUsedToday: number;
   lastSparkNoteDate: string | null;
   bonusSparkNotes: number;
@@ -97,6 +99,8 @@ export function createDefaultPersistedState(): PersistedAppState {
     isSparkPlus: false,
     sparkNotes: {},
     boostActiveUntil: null,
+    freeBoostWeekKey: null,
+    bonusBoosts: 0,
     sparkNotesUsedToday: 0,
     lastSparkNoteDate: null,
     bonusSparkNotes: 0,
@@ -190,10 +194,13 @@ export async function loadPersistedState(): Promise<PersistedAppState | null> {
         ...defaultLegalConsent,
         ...parsed.legalConsent,
       },
+      freeBoostWeekKey: parsed.freeBoostWeekKey ?? null,
+      bonusBoosts: parsed.bonusBoosts ?? 0,
       pulseSocial: {
         ...defaultPulseSocialState,
         ...parsed.pulseSocial,
         postComments: parsed.pulseSocial?.postComments ?? {},
+        readingHistory: parsed.pulseSocial?.readingHistory ?? [],
       },
       dateCheckIns: parsed.dateCheckIns ?? [],
     };

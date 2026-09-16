@@ -5,12 +5,19 @@ export type PulseComment = {
   sentAt: string;
 };
 
+export type PulseReadingEntry = {
+  title: string;
+  source: string;
+  readAt: string;
+};
+
 export type PulseSocialState = {
   savedPostIds: string[];
   mutedAuthors: string[];
   reportedPostIds: string[];
   postComments: Record<string, PulseComment[]>;
   referralShareCount: number;
+  readingHistory: PulseReadingEntry[];
 };
 
 export const defaultPulseSocialState: PulseSocialState = {
@@ -19,4 +26,5 @@ export const defaultPulseSocialState: PulseSocialState = {
   reportedPostIds: [],
   postComments: {},
   referralShareCount: 0,
+  readingHistory: [],
 };

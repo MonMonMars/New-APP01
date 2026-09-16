@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../../context/AppContext';
@@ -31,6 +31,7 @@ export function PersonPreviewSheet({
   initialPhotoIndex = 0,
 }: PersonPreviewSheetProps) {
   const insets = useSafeAreaInsets();
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const { colors } = useTheme();
   const {
     likeProfile,
@@ -154,10 +155,17 @@ export function PersonPreviewSheet({
             {
               backgroundColor: colors.surface,
               borderColor: colors.border,
-              marginTop: insets.top * 0.15,
+              marginTop: insets.top * 0.1,
+              width: Math.min(360, windowWidth - 32),
+              maxHeight: windowHeight - insets.top - insets.bottom - 48,
             },
           ]}
         >
+          <ScrollView
+            bounces={false}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.cardInner}
+          >
           <FadeSlideIn replayKey={visible} index={0}>
             <View style={styles.header}>
               <View style={styles.headerIcon}>
@@ -247,6 +255,7 @@ export function PersonPreviewSheet({
               </Text>
             </FadeSlideIn>
           )}
+          </ScrollView>
         </View>
       </AnimatedOverlay>
 
@@ -262,12 +271,15 @@ export function PersonPreviewSheet({
 const styles = StyleSheet.create({
   card: {
     width: '100%',
-    maxWidth: 300,
+    maxWidth: 360,
     borderRadius: radii.card,
     borderWidth: StyleSheet.hairlineWidth,
-    padding: spacing.sm,
-    gap: spacing.xs,
+    overflow: 'hidden',
     zIndex: 2,
+  },
+  cardInner: {
+    padding: spacing.md,
+    gap: spacing.sm,
   },
   header: {
     flexDirection: 'row',

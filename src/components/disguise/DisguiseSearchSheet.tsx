@@ -3,10 +3,11 @@ import { useMemo, useState } from 'react';
 import { Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { disguiseTrendingTopics } from '../../data/disguiseTrending';
 import { radii, spacing } from '../../theme';
-import { pulseBrand } from '../../theme/pulseBrand';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { findFeedItemById } from '../../utils/findFeedItem';
 import { disguiseFeedItems, FeedItem } from '../../data/disguiseFeed';
 import { AnimatedPressable } from '../AnimatedPressable';
@@ -47,6 +48,8 @@ export function DisguiseSearchSheet({
 }: DisguiseSearchSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { preferences } = useApp();
+  const meta = disguiseWorldMeta(preferences.sparkSection);
   const [query, setQuery] = useState('');
 
   const results = useMemo((): SearchResult[] => {
@@ -96,7 +99,7 @@ export function DisguiseSearchSheet({
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={handleClose}>
       <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>Search Pulse</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{meta.searchTitle}</Text>
           <AnimatedPressable onPress={handleClose} hitSlop={12}>
             <Ionicons name="close" size={24} color={colors.textMuted} />
           </AnimatedPressable>
@@ -129,7 +132,7 @@ export function DisguiseSearchSheet({
                 <Ionicons
                   name={result.kind === 'topic' ? 'pricetag-outline' : 'newspaper-outline'}
                   size={18}
-                  color={pulseBrand.accent}
+                  color={meta.accent}
                 />
                 <View style={styles.rowText}>
                   <Text style={[styles.rowTitle, { color: colors.text }]} numberOfLines={2}>

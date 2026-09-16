@@ -73,18 +73,23 @@ export function DisguiseAlertsScreen() {
             >
               {item.person ? (
                 <View style={styles.personRow}>
-                  <FeedPersonThumbnail
-                    imageUrl={item.person.avatarUrl}
-                    overlayText={item.person.overlayText ?? 'LIVE'}
-                    overlayVariant={item.person.overlayVariant ?? 'news'}
-                    plainAvatar={!item.person.overlayVariant}
-                    contentKind="profile"
-                    showIconBadge={!item.person.overlayVariant}
-                    onPress={() => openPersonPreview(item)}
-                    accessibilityLabel={`View profile: ${item.person.name}`}
-                  />
+                  <View style={styles.avatarSlot}>
+                    <FeedPersonThumbnail
+                      imageUrl={item.person.avatarUrl}
+                      overlayText={item.person.overlayText ?? 'LIVE'}
+                      overlayVariant={item.person.overlayVariant ?? 'news'}
+                      plainAvatar={!item.person.overlayVariant}
+                      contentKind="profile"
+                      hideLabel
+                      showIconBadge
+                      onPress={() => openPersonPreview(item)}
+                      accessibilityLabel={`View profile: ${item.person.name}`}
+                    />
+                  </View>
                   <View style={styles.textWrap}>
-                    <Text style={[styles.text, { color: colors.text }]}>{item.text}</Text>
+                    <Text style={[styles.text, { color: colors.text }]} numberOfLines={3}>
+                      {item.text}
+                    </Text>
                     <Text style={[styles.time, { color: colors.textMuted }]}>{item.time}</Text>
                   </View>
                 </View>
@@ -94,7 +99,9 @@ export function DisguiseAlertsScreen() {
                     <Ionicons name={item.icon} size={20} color="#3b82f6" />
                   </View>
                   <View style={styles.textWrap}>
-                    <Text style={[styles.text, { color: colors.text }]}>{item.text}</Text>
+                    <Text style={[styles.text, { color: colors.text }]} numberOfLines={3}>
+                      {item.text}
+                    </Text>
                     <Text style={[styles.time, { color: colors.textMuted }]}>{item.time}</Text>
                   </View>
                 </>
@@ -133,15 +140,25 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl * 5,
   },
   row: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
     padding: spacing.md,
     borderRadius: radii.card,
     borderWidth: StyleSheet.hairlineWidth,
     marginBottom: spacing.sm,
+    minWidth: 0,
   },
   personRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.sm,
+    width: '100%',
+    minWidth: 0,
+  },
+  avatarSlot: {
+    width: 48,
+    flexShrink: 0,
   },
   iconWrap: {
     width: 44,
@@ -152,6 +169,7 @@ const styles = StyleSheet.create({
   },
   textWrap: {
     flex: 1,
+    minWidth: 0,
   },
   text: {
     fontSize: 14,

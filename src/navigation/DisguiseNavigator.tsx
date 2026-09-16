@@ -4,12 +4,12 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { TabBarButton } from '../components/TabBarButton';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { pulseBrand } from '../theme/pulseBrand';
 import { disguiseAlerts } from '../data/disguiseFeed';
 import { DisguiseAlertsScreen } from '../screens/disguise/DisguiseAlertsScreen';
 import { DisguiseFeedScreen } from '../screens/disguise/DisguiseFeedScreen';
 import { DisguiseProfileScreen } from '../screens/disguise/DisguiseProfileScreen';
 import { DisguiseTrendingScreen } from '../screens/disguise/DisguiseTrendingScreen';
+import { disguiseWorldMeta } from '../utils/disguiseWorld';
 
 export type DisguiseTabParamList = {
   Home: { topic?: string } | undefined;
@@ -22,7 +22,8 @@ const Tab = createBottomTabNavigator<DisguiseTabParamList>();
 
 export function DisguiseNavigator() {
   const { colors } = useTheme();
-  const { pulseSocial } = useApp();
+  const { pulseSocial, preferences } = useApp();
+  const meta = disguiseWorldMeta(preferences.sparkSection);
   const activityBadge =
     !pulseSocial.activityAlertsRead && disguiseAlerts.length > 0
       ? disguiseAlerts.length
@@ -40,7 +41,7 @@ export function DisguiseNavigator() {
           paddingTop: 6,
           height: 72,
         },
-        tabBarActiveTintColor: pulseBrand.accent,
+        tabBarActiveTintColor: meta.accent,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: {
           fontSize: 11,
@@ -48,8 +49,8 @@ export function DisguiseNavigator() {
         },
         tabBarIcon: ({ color, size }) => {
           const icons: Record<keyof DisguiseTabParamList, keyof typeof Ionicons.glyphMap> = {
-            Home: 'home',
-            Trending: 'trending-up',
+            Home: meta.world === 'harbor' ? 'briefcase' : 'home',
+            Trending: meta.world === 'harbor' ? 'bar-chart' : 'trending-up',
             Activity: 'notifications-outline',
             Profile: 'person-circle-outline',
           };
@@ -57,8 +58,8 @@ export function DisguiseNavigator() {
         },
       })}
     >
-      <Tab.Screen name="Home" component={DisguiseFeedScreen} options={{ title: 'Home' }} />
-      <Tab.Screen name="Trending" component={DisguiseTrendingScreen} />
+      <Tab.Screen name="Home" component={DisguiseFeedScreen} options={{ title: meta.homeTab }} />
+      <Tab.Screen name="Trending" component={DisguiseTrendingScreen} options={{ title: meta.trendingTab }} />
       <Tab.Screen
         name="Activity"
         component={DisguiseAlertsScreen}

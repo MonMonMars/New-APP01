@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
-import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type IconButtonProps = {
@@ -35,17 +35,18 @@ function ModeIconButton({
   );
 }
 
-/** Enter Pulse disguise mode from any Spark screen. */
+/** Enter Pulse or Harbor disguise from any Spark/Ember screen. */
 export function DisguiseModeButton() {
   const { colors } = useTheme();
-  const { setDisguiseMode } = useApp();
+  const { setDisguiseMode, preferences } = useApp();
+  const meta = disguiseWorldMeta(preferences.sparkSection);
 
   return (
     <ModeIconButton
       icon="eye-off-outline"
-      color={colors.textMuted}
+      color={meta.world === 'harbor' ? colors.ember : colors.textMuted}
       backgroundColor={colors.surface}
-      accessibilityLabel={`Switch to ${DISGUISE_APP_NAME} disguise mode`}
+      accessibilityLabel={`Switch to ${meta.name} disguise mode`}
       onPress={() => setDisguiseMode(true)}
     />
   );

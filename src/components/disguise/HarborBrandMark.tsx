@@ -1,9 +1,9 @@
 import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
-import { pulseBrand } from '../../theme/pulseBrand';
+import { harborBrand } from '../../theme/harborBrand';
 
-type PulseBrandMarkProps = {
+type HarborBrandMarkProps = {
   size?: 'sm' | 'md' | 'lg';
   style?: ViewStyle;
 };
@@ -13,8 +13,8 @@ const RADIUS = { sm: 7, md: 8, lg: 10 } as const;
 const LETTER = { sm: 16, md: 20, lg: 24 } as const;
 const PIP = { sm: 6, md: 7, lg: 8 } as const;
 
-/** Professional Pulse logomark — live news “P” tile. */
-export function PulseBrandMark({ size = 'md', style }: PulseBrandMarkProps) {
+/** Harbor logomark — Ember’s discreet markets/briefing cover. */
+export function HarborBrandMark({ size = 'md', style }: HarborBrandMarkProps) {
   const { resolvedMode } = useTheme();
   const isDark = resolvedMode === 'dark';
   const dimensions = SIZE_PX[size];
@@ -28,12 +28,12 @@ export function PulseBrandMark({ size = 'md', style }: PulseBrandMarkProps) {
           width: dimensions,
           height: dimensions,
           borderRadius: RADIUS[size],
-          backgroundColor: isDark ? pulseBrand.accentBright : pulseBrand.navy,
+          backgroundColor: isDark ? harborBrand.navyMuted : harborBrand.navy,
         },
         style,
       ]}
       accessibilityRole="image"
-      accessibilityLabel="Pulse"
+      accessibilityLabel="Harbor"
     >
       <Text
         style={[
@@ -44,7 +44,7 @@ export function PulseBrandMark({ size = 'md', style }: PulseBrandMarkProps) {
           },
         ]}
       >
-        P
+        H
       </Text>
       <View
         style={[
@@ -62,13 +62,12 @@ export function PulseBrandMark({ size = 'md', style }: PulseBrandMarkProps) {
   );
 }
 
-type PulseWordmarkProps = {
+type HarborWordmarkProps = {
   size?: 'sm' | 'md' | 'lg';
   showTagline?: boolean;
 };
 
-/** Masthead wordmark for Pulse disguise headers. */
-export function PulseWordmark({ size = 'md', showTagline = false }: PulseWordmarkProps) {
+export function HarborWordmark({ size = 'md', showTagline = false }: HarborWordmarkProps) {
   const { colors, resolvedMode } = useTheme();
   const isDark = resolvedMode === 'dark';
   const fontSize = size === 'sm' ? 19 : size === 'lg' ? 26 : 22;
@@ -81,31 +80,30 @@ export function PulseWordmark({ size = 'md', showTagline = false }: PulseWordmar
           {
             fontSize,
             lineHeight: fontSize + 4,
-            color: isDark ? colors.text : pulseBrand.navy,
+            color: isDark ? colors.text : harborBrand.navy,
           },
         ]}
       >
-        Pulse
+        Harbor
       </Text>
       {showTagline ? (
-        <Text style={[styles.tagline, { color: colors.textMuted }]}>World & Local News</Text>
+        <Text style={[styles.tagline, { color: colors.textMuted }]}>Markets & Briefing</Text>
       ) : null}
     </View>
   );
 }
 
-type PulseBrandProps = {
+type HarborBrandProps = {
   size?: 'sm' | 'md' | 'lg';
   showTagline?: boolean;
   style?: ViewStyle;
 };
 
-/** Combined logomark + wordmark for Pulse mastheads. */
-export function PulseBrand({ size = 'md', showTagline = false, style }: PulseBrandProps) {
+export function HarborBrand({ size = 'md', showTagline = false, style }: HarborBrandProps) {
   return (
     <View style={[styles.brandRow, style]}>
-      <PulseBrandMark size={size} />
-      <PulseWordmark size={size} showTagline={showTagline} />
+      <HarborBrandMark size={size} />
+      <HarborWordmark size={size} showTagline={showTagline} />
     </View>
   );
 }
@@ -120,11 +118,10 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '800',
     letterSpacing: -0.8,
-    marginLeft: -1,
   },
   pip: {
     position: 'absolute',
-    backgroundColor: pulseBrand.live,
+    backgroundColor: harborBrand.accentBright,
     borderWidth: 1.5,
     borderColor: '#FFFFFF',
   },

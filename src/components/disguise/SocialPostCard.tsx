@@ -41,9 +41,6 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
   const feedPhotoIndex = socialReporterPhotoIndex(photoReporter, post.imageUrl);
 
   const maskSnippet = post.avatarMask?.text.split(' ').slice(0, 2).join(' ') ?? 'LIVE';
-  const captionSnippet =
-    post.body.length > 72 ? `${post.body.slice(0, 72).trim()}…` : post.body;
-
   const handleSave = () => {
     if (isSaved) {
       unsavePulsePost(post.id);
@@ -84,29 +81,35 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={styles.header}>
         <View style={styles.headerMain}>
-          {post.maskAvatar !== false && post.avatarMask ? (
-            <FeedPersonThumbnail
-              imageUrl={post.avatarUrl}
-              overlayText={maskSnippet}
-              overlayVariant={post.avatarMask.variant}
-              contentKind="social"
-              caption={captionSnippet}
-              onPress={() => setAuthorOpen(true)}
-              accessibilityLabel={`View profile: ${post.author}`}
-            />
-          ) : (
-            <FeedPersonThumbnail
-              plainAvatar
-              contentKind="social"
-              caption={captionSnippet}
-              imageUrl={post.avatarUrl}
-              onPress={() => setAuthorOpen(true)}
-              accessibilityLabel={`View profile: ${post.author}`}
-            />
-          )}
+          <View style={styles.avatarSlot}>
+            {post.maskAvatar !== false && post.avatarMask ? (
+              <FeedPersonThumbnail
+                imageUrl={post.avatarUrl}
+                overlayText={maskSnippet}
+                overlayVariant={post.avatarMask.variant}
+                contentKind="social"
+                hideLabel
+                showIconBadge
+                onPress={() => setAuthorOpen(true)}
+                accessibilityLabel={`View profile: ${post.author}`}
+              />
+            ) : (
+              <FeedPersonThumbnail
+                plainAvatar
+                contentKind="social"
+                hideLabel
+                showIconBadge
+                imageUrl={post.avatarUrl}
+                onPress={() => setAuthorOpen(true)}
+                accessibilityLabel={`View profile: ${post.author}`}
+              />
+            )}
+          </View>
           <View style={styles.authorMeta}>
-            <Text style={[styles.authorName, { color: colors.text }]}>{post.author}</Text>
-            <Text style={[styles.authorHandle, { color: colors.textMuted }]}>
+            <Text style={[styles.authorName, { color: colors.text }]} numberOfLines={1}>
+              {post.author}
+            </Text>
+            <Text style={[styles.authorHandle, { color: colors.textMuted }]} numberOfLines={1}>
               {post.handle} · {post.timeAgo}
             </Text>
           </View>
@@ -212,9 +215,18 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     minWidth: 0,
   },
+  avatarSlot: {
+    width: 48,
+    flexShrink: 0,
+  },
   authorMeta: {
     flex: 1,
     minWidth: 0,
+  },
+  body: {
+    fontSize: 15,
+    lineHeight: 22,
+    marginBottom: spacing.sm,
   },
   authorName: {
     fontSize: 14,

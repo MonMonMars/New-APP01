@@ -28,6 +28,7 @@ import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
 import { pulseBrand } from '../../theme/pulseBrand';
 import { radii, spacing } from '../../theme';
 import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { briefToNewsPost, breakingToNewsPost, editorsPickToNewsPost } from '../../utils/disguiseTrendingArticles';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 
@@ -113,6 +114,8 @@ export function DisguiseTrendingScreen() {
   const { colors } = useTheme();
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
   const { preferences } = useApp();
+  const meta = disguiseWorldMeta(preferences.sparkSection);
+  const isHarbor = meta.world === 'harbor';
   const [articlePost, setArticlePost] = useState<NewsPost | null>(null);
   const weatherCity =
     preferences.travelMode && preferences.passportCity
@@ -134,12 +137,23 @@ export function DisguiseTrendingScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
-      <DisguiseHeader title="Trending" showSearch={false} />
+      <DisguiseHeader title={meta.trendingTab} showSearch={false} />
       <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
-        <Text style={[styles.pageTitle, { color: colors.text }]}>Trending & useful</Text>
-        <Text style={[styles.pageSubtitle, { color: colors.textMuted }]}>
-          Weather, markets, local radar, and topics worth your time today
+        <Text style={[styles.pageTitle, { color: colors.text }]}>
+          {isHarbor ? 'Markets & briefing' : 'Trending & useful'}
         </Text>
+        <Text style={[styles.pageSubtitle, { color: colors.textMuted }]}>
+          {isHarbor
+            ? 'Quotes first, then weather and a quiet local brief'
+            : 'Weather, markets, local radar, and topics worth your time today'}
+        </Text>
+
+        {isHarbor ? (
+          <>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Stock market</Text>
+            <DisguiseMarketsPanel onQuotePress={() => openTopic('#MarketWatch')} />
+          </>
+        ) : null}
 
         <AnimatedPressable
           style={[styles.briefCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
@@ -152,7 +166,7 @@ export function DisguiseTrendingScreen() {
             <View style={styles.briefMeta}>
               <View style={styles.livePill}>
                 <View style={styles.liveDot} />
-                <Text style={styles.liveText}>Pulse Brief</Text>
+                <Text style={styles.liveText}>{isHarbor ? 'Harbor Brief' : 'Pulse Brief'}</Text>
               </View>
               <Text style={[styles.briefSource, { color: colors.textMuted }]}>
                 {pulseBrief.source} · {pulseBrief.readMinutes} min
@@ -178,7 +192,7 @@ export function DisguiseTrendingScreen() {
               style={[styles.chip, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => openTopic(chip.topic)}
             >
-              <Ionicons name={chipIcon(chip.icon)} size={14} color={pulseBrand.accent} />
+              <Ionicons name={chipIcon(chip.icon)} size={14} color={meta.accent} />
               <Text style={[styles.chipLabel, { color: colors.text }]}>{chip.label}</Text>
             </AnimatedPressable>
           ))}
@@ -191,8 +205,12 @@ export function DisguiseTrendingScreen() {
           onPress={() => openTopic('#Weather')}
         />
 
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Stock market</Text>
-        <DisguiseMarketsPanel onQuotePress={() => openTopic('#MarketWatch')} />
+        {isHarbor ? null : (
+          <>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Stock market</Text>
+            <DisguiseMarketsPanel onQuotePress={() => openTopic('#MarketWatch')} />
+          </>
+        )}
 
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Local radar</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.radarRow}>
@@ -248,7 +266,7 @@ export function DisguiseTrendingScreen() {
               </MediaWithContentBadge>
             ) : (
               <View style={[styles.topicThumbPlaceholder, { backgroundColor: colors.surface }]}>
-                <Ionicons name="pricetag-outline" size={16} color={pulseBrand.accent} />
+                <Ionicons name="pricetag-outline" size={16} color={meta.accent} />
               </View>
             )}
             <View style={styles.topicText}>
@@ -285,7 +303,7 @@ export function DisguiseTrendingScreen() {
             style={[styles.pickRow, { backgroundColor: colors.surface, borderColor: colors.border }]}
             onPress={() => setArticlePost(editorsPickToNewsPost(pick))}
           >
-            <Ionicons name="bookmark-outline" size={18} color={pulseBrand.accent} />
+            <Ionicons name="bookmark-outline" size={18} color={meta.accent} />
             <View style={styles.pickText}>
               <Text style={[styles.pickTitle, { color: colors.text }]}>{pick.title}</Text>
               <Text style={[styles.pickSubtitle, { color: colors.textMuted }]}>{pick.subtitle}</Text>

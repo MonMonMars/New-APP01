@@ -4,7 +4,7 @@
 
 | Link | Durability | Notes |
 |------|------------|-------|
-| **https://temporary-quick-flurry-6vwxi1i.vercel.app** | ~60 min (claimable → permanent) | **Latest** — Ember discretion (Open/Careful/Hidden, private photos, fuzzy location). [Claim on Vercel](https://vercel.com/claim-deployment?code=60901ea6-2f89-456a-8ae4-ce9e696885b9) to keep forever. |
+| **https://temporary-rushing-savanna-mj6rm81.vercel.app** | ~60 min (claimable → permanent) | **Latest** — Ember discretion (Open/Careful/Hidden, private photos, fuzzy location). [Claim on Vercel](https://vercel.com/claim-deployment?code=c0977a36-bcfb-453d-ba2d-ea74ad24de73) to keep forever. |
 | **https://posts-dolls-adventure-supposed.trycloudflare.com** | Hours while workspace is awake | Same latest build, no login. Hard-refresh if stale. |
 | **https://bright-queijadas-033295.netlify.app** | ~60 min | Password: `My-Drop-Site`. [Claim on Netlify](https://app.netlify.com/drop/bright-queijadas-033295). |
 
@@ -67,14 +67,16 @@ Latest verified tunnel: **https://most-psychiatry-slim-colony.trycloudflare.com*
 3. Complete onboarding (defaults are fine)
 4. You land in **Pulse** disguise mode
 5. **Tap the Pulse logo** in the header to unlock Spark
+6. Switch the Discover title to **Ember**, then disguise again — that cover is **Harbor** (markets), not Pulse
 
 ---
 
 ## What to try
 
-### Pulse disguise mode
+### Pulse / Harbor disguise
+- Spark → **Pulse** news cover. Ember → **Harbor** markets cover. One logo in the header.
 - News cards + in-app article reader
-- Trending topics · social feed · activity alerts
+- Trending / markets · social feed · activity alerts
 - Profile → disguise ad generator
 
 ### Spark safe mode
@@ -83,7 +85,7 @@ Latest verified tunnel: **https://most-psychiatry-slim-colony.trycloudflare.com*
 - Swipe deck · likes · instant matches · AI demo replies
 - Rewind (Spark+) · GIF picker · message reactions · who viewed you
 - Passport/travel filter · international profiles · date check-in
-- Emergency logo → instant Pulse disguise
+- Emergency logo → Pulse (Spark) or Harbor (Ember) disguise
 
 ---
 

@@ -4,15 +4,16 @@ import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { FeedItem } from '../../data/disguiseFeed';
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
 import { spacing } from '../../theme';
 import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { DisguiseSearchSheet } from './DisguiseSearchSheet';
-import { ModeToggleLogo } from './ModeToggleLogo';
+import { DisguiseBrand } from './DisguiseBrand';
 import { PulseFeedItemViewer } from './PulseFeedItemViewer';
-import { PulseBrand } from './PulseBrandMark';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type DisguiseHeaderProps = {
@@ -22,6 +23,8 @@ type DisguiseHeaderProps = {
 
 export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps) {
   const { colors } = useTheme();
+  const { preferences, setDisguiseMode } = useApp();
+  const meta = disguiseWorldMeta(preferences.sparkSection);
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchItemId, setSearchItemId] = useState<string | null>(null);
@@ -34,22 +37,28 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
     <>
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <View style={styles.leading}>
-          <ModeToggleLogo variant="pulse" />
-          <View style={styles.brandBlock}>
-            <PulseBrand size="sm" />
-            {title ? (
-              <Text style={[styles.sectionTitle, { color: colors.textMuted }]} numberOfLines={1}>
-                {title}
-              </Text>
-            ) : null}
-          </View>
+          <AnimatedPressable
+            onPress={() => void setDisguiseMode(false)}
+            accessibilityRole="button"
+            accessibilityLabel={`Tap ${meta.name} logo to unlock ${meta.unlockLabel}`}
+            accessibilityHint={`Returns to ${meta.unlockLabel}`}
+            scaleTo={0.96}
+            style={styles.brandTap}
+          >
+            <DisguiseBrand size="sm" />
+          </AnimatedPressable>
+          {title ? (
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]} numberOfLines={1}>
+              {title}
+            </Text>
+          ) : null}
         </View>
         <View style={styles.actions}>
           {showSearch && (
             <>
               <AnimatedPressable
                 style={styles.iconBtn}
-                accessibilityLabel="Search Pulse"
+                accessibilityLabel={meta.searchTitle}
                 onPress={() => setSearchOpen(true)}
               >
                 <Ionicons name="search-outline" size={22} color={colors.text} />
@@ -95,9 +104,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
     minWidth: 0,
+    marginRight: spacing.sm,
   },
-  brandBlock: {
-    flex: 1,
+  brandTap: {
+    flexShrink: 1,
     minWidth: 0,
   },
   sectionTitle: {
@@ -105,11 +115,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginTop: 1,
+    flexShrink: 0,
   },
   actions: {
     flexDirection: 'row',
     gap: spacing.xs,
+    flexShrink: 0,
   },
   iconBtn: {
     padding: spacing.xs,

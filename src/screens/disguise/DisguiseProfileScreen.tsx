@@ -9,7 +9,7 @@ import { DisguiseAdGeneratorSheet } from '../../components/disguise/DisguiseAdGe
 import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
-import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { PASSPORT_CITIES } from '../../types/preferences';
 import { ThemeMode } from '../../types/settings';
 import { LEGAL_ENTITY } from '../../constants/legalEntity';
@@ -68,6 +68,7 @@ export function DisguiseProfileScreen() {
     preferences,
     pulseSocial,
   } = useApp();
+  const meta = disguiseWorldMeta(preferences.sparkSection);
   const [showGenerator, setShowGenerator] = useState(false);
   const [detailSheet, setDetailSheet] = useState<DetailSheetKey>(null);
   const [viewerItemId, setViewerItemId] = useState<string | null>(null);
@@ -183,11 +184,11 @@ export function DisguiseProfileScreen() {
 
         <View style={[styles.privacyCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={styles.privacyRow}>
-            <Ionicons name="eye-off-outline" size={22} color={pulseBrand.accent} />
+            <Ionicons name="eye-off-outline" size={22} color={meta.accent} />
             <View style={styles.privacyText}>
               <Text style={[styles.privacyTitle, { color: colors.text }]}>Disguise mode</Text>
               <Text style={[styles.privacyDesc, { color: colors.textMuted }]}>
-                Show {DISGUISE_APP_NAME} instead of Spark in public
+                Show {meta.name} instead of {meta.unlockLabel} in public
               </Text>
             </View>
             <Switch
@@ -195,22 +196,22 @@ export function DisguiseProfileScreen() {
               onValueChange={(value) => {
                 void setDisguiseMode(value);
               }}
-              trackColor={{ false: colors.border, true: pulseBrand.accent }}
+              trackColor={{ false: colors.border, true: meta.accent }}
               thumbColor={colors.text}
             />
           </View>
           <Text style={[styles.hint, { color: colors.textMuted }]}>
-            Turn off disguise here, or tap the Pulse logo in the header to unlock Spark.
+            Turn off disguise here, or tap the {meta.name} logo in the header to unlock {meta.unlockLabel}.
           </Text>
           {disguiseMode ? (
             <AnimatedPressable
-              style={[styles.unlockButton, { backgroundColor: pulseBrand.accent }]}
+              style={[styles.unlockButton, { backgroundColor: meta.accent }]}
               onPress={() => void setDisguiseMode(false)}
               accessibilityRole="button"
-              accessibilityLabel="Unlock Spark"
+              accessibilityLabel={`Unlock ${meta.unlockLabel}`}
             >
-              <Ionicons name="flame" size={18} color="#fff" />
-              <Text style={styles.unlockButtonText}>Unlock Spark</Text>
+              <Ionicons name={meta.world === 'harbor' ? 'bonfire' : 'flame'} size={18} color="#fff" />
+              <Text style={styles.unlockButtonText}>Unlock {meta.unlockLabel}</Text>
             </AnimatedPressable>
           ) : null}
         </View>

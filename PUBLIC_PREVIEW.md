@@ -2,7 +2,7 @@
 
 ## Demo link (open now)
 
-**https://ireland-represented-columns-header.trycloudflare.com**
+**https://most-psychiatry-slim-colony.trycloudflare.com**
 
 _Verified Sep 16, 2026 — 8/8 automated checks pass (onboarding → Pulse trending → Spark unlock → discover). Expires when the cloud workspace sleeps; see permanent options below._
 
@@ -52,7 +52,7 @@ npm run deploy:pages
 
 Cloudflare quick tunnels expire when the workspace stops. Do not rely on these for stakeholders.
 
-Latest verified tunnel: **https://ireland-represented-columns-header.trycloudflare.com**
+Latest verified tunnel: **https://most-psychiatry-slim-colony.trycloudflare.com**
 
 ---
 

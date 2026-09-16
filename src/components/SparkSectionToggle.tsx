@@ -28,10 +28,8 @@ const SECTION_ICONS: Record<SparkSection, keyof typeof Ionicons.glyphMap> = {
   ember: 'bonfire',
 };
 
-const EMBER_ACCENT = '#FF7A45';
-
 function sectionAccent(section: SparkSection, colors: ColorPalette): string {
-  return section === 'ember' ? EMBER_ACCENT : colors.gradientEnd;
+  return section === 'ember' ? colors.ember : colors.gradientEnd;
 }
 
 function WorldRow({
@@ -160,14 +158,20 @@ function WorldTrigger({
           accessibilityRole="button"
           accessibilityLabel={`${SPARK_SECTION_LABELS[section]}. Switch world`}
           accessibilityHint="Opens Spark and Ember. Anyone can join Ember."
-          style={[styles.chipTrigger, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          style={[
+            styles.chipTrigger,
+            {
+              backgroundColor: colors.surface,
+              borderColor: section === 'ember' ? colors.ember : colors.border,
+            },
+          ]}
           scaleTo={0.97}
         >
           <Ionicons name={SECTION_ICONS[section]} size={14} color={accent} />
-          <Text style={[styles.chipLabel, { color: colors.text }]}>
+          <Text style={[styles.chipLabel, { color: section === 'ember' ? colors.ember : colors.text }]}>
             {SPARK_SECTION_LABELS[section]}
           </Text>
-          <Ionicons name="chevron-down" size={14} color={colors.textMuted} />
+          <Ionicons name="chevron-down" size={14} color={section === 'ember' ? colors.ember : colors.textMuted} />
         </AnimatedPressable>
       );
     case 'title':
@@ -181,10 +185,10 @@ function WorldTrigger({
           scaleTo={0.97}
         >
           <Ionicons name={SECTION_ICONS[section]} size={20} color={accent} />
-          <Text style={[styles.titleLabel, { color: colors.text }]}>
+          <Text style={[styles.titleLabel, { color: section === 'ember' ? colors.ember : colors.text }]}>
             {SPARK_SECTION_LABELS[section]}
           </Text>
-          <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
+          <Ionicons name="chevron-down" size={18} color={section === 'ember' ? colors.ember : colors.textMuted} />
         </AnimatedPressable>
       );
     default: {

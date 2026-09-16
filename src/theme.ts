@@ -19,6 +19,8 @@ export type ColorPalette = {
   stampLike: string;
   stampNope: string;
   border: string;
+  /** Ember world accent — amber, distinct from Spark pink */
+  ember: string;
 };
 
 export const darkColors: ColorPalette = {
@@ -42,6 +44,7 @@ export const darkColors: ColorPalette = {
   stampLike: 'rgba(33, 208, 122, 0.9)',
   stampNope: 'rgba(255, 68, 88, 0.9)',
   border: '#2A2A2E',
+  ember: '#FFB020',
 };
 
 export const lightColors: ColorPalette = {
@@ -65,6 +68,7 @@ export const lightColors: ColorPalette = {
   stampLike: 'rgba(33, 208, 122, 0.9)',
   stampNope: 'rgba(255, 68, 88, 0.9)',
   border: '#E0E0E4',
+  ember: '#D97706',
 };
 
 /** Default export for backward compatibility — dark palette */

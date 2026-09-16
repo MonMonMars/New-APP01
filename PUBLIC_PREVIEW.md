@@ -2,7 +2,7 @@
 
 ## Demo link (open now)
 
-**https://plays-johnny-contributed-fur.trycloudflare.com**
+**https://template-vertex-sponsored-erp.trycloudflare.com**
 
 _Last updated: Sep 16, 2026 — Phase D: rewind, GIFs, profile views, message reactions_
 

@@ -2,7 +2,7 @@
 
 ## Demo link (open now)
 
-**https://template-vertex-sponsored-erp.trycloudflare.com**
+**https://grammar-korea-natural-married.trycloudflare.com**
 
 _Last updated: Sep 16, 2026 — Phase D: rewind, GIFs, profile views, message reactions_
 

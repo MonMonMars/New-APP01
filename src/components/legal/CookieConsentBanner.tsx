@@ -7,9 +7,11 @@ import { AnimatedPressable } from '../AnimatedPressable';
 
 export function CookieConsentBanner() {
   const { colors } = useTheme();
-  const { legalConsent, acceptCookieConsent, updatePrivacyPreferences, privacyPreferences } = useApp();
+  const { legalConsent, acceptCookieConsent, updatePrivacyPreferences, privacyPreferences, hasOnboarded } =
+    useApp();
 
-  if (Platform.OS !== 'web' || legalConsent.cookieConsentAt) {
+  // Cookie banner overlaps onboarding CTAs on web — show after onboarding completes.
+  if (Platform.OS !== 'web' || legalConsent.cookieConsentAt || !hasOnboarded) {
     return null;
   }
 
@@ -58,7 +60,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: spacing.md,
     right: spacing.md,
-    bottom: spacing.md,
+    // Sit above the 72px bottom tab bar so tabs stay tappable on web.
+    bottom: 88,
     borderRadius: radii.card,
     borderWidth: StyleSheet.hairlineWidth,
     padding: spacing.md,

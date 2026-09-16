@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -13,21 +13,18 @@ import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
 import { PASSPORT_CITIES } from '../../types/preferences';
 import { ThemeMode } from '../../types/settings';
 import { LEGAL_ENTITY } from '../../constants/legalEntity';
+import { pulseBrand } from '../../theme/pulseBrand';
 import { radii, spacing } from '../../theme';
+import { buildDisguiseFeed } from '../../utils/buildDisguiseFeed';
 import {
   buildDisguisedProfileFeedItem,
   buildDisguisedProfileFeedItems,
 } from '../../utils/disguiseProfileFeed';
+import { resolveSavedPulsePosts } from '../../utils/pulseSavedPosts';
 import { PulseDetailItem, PulseDetailSheet } from '../../components/disguise/PulseDetailSheet';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 
 type DetailSheetKey = 'saved' | 'history' | 'settings' | 'help' | null;
-
-const SAVED_POSTS: PulseDetailItem[] = [
-  { id: 's1', title: 'EU smartphone labels for repairability land in June', subtitle: 'The Verge · 2d ago', icon: 'bookmark' },
-  { id: 's2', title: 'Weekend brunch lists: 12 spots with walk-in tables', subtitle: 'BBC Good Food · 4d ago', icon: 'bookmark' },
-  { id: 's3', title: 'Remote teams rethink async standups', subtitle: 'Pulse Community · 1w ago', icon: 'bookmark' },
-];
 
 const SETTINGS_ITEMS: PulseDetailItem[] = [
   { id: 'st1', title: 'Notifications', subtitle: 'Matches, messages, and Pulse alerts', icon: 'notifications-outline' },
@@ -42,6 +39,17 @@ const HELP_ITEMS: PulseDetailItem[] = [
   { id: 'h3', title: 'Contact support', subtitle: 'support@spark.app', icon: 'mail-outline' },
 ];
 
+function formatReadAge(iso: string): string {
+  const days = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86400000));
+  if (days === 0) {
+    return 'Today';
+  }
+  if (days === 1) {
+    return 'Yesterday';
+  }
+  return `${days}d ago`;
+}
+
 export function DisguiseProfileScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
@@ -55,6 +63,7 @@ export function DisguiseProfileScreen() {
     setThemeMode,
     updatePreferences,
     preferences,
+    pulseSocial,
   } = useApp();
   const [showGenerator, setShowGenerator] = useState(false);
   const [detailSheet, setDetailSheet] = useState<DetailSheetKey>(null);
@@ -68,36 +77,39 @@ export function DisguiseProfileScreen() {
   };
   const profileFeedItem = buildDisguisedProfileFeedItem(user, profileCreative);
   const recentPosts = buildDisguisedProfileFeedItems();
-  const readingHistory = [
-    'Tech giants are spending big on AI in a bid to dominate the boom',
-    'New night routes and earlier starts for Bristol\'s buses',
-    'Speedy chorizo with chickpeas',
-    'Remote teams rethink async standups',
-    'Weekend brunch lists: 12 spots with walk-in tables',
-    'EU smartphone labels for repairability land in June',
-    'Health-tech hiring picks up after a quiet Q1',
-    'Night transit safety upgrades roll out at busy stops',
-    'How to spot reliable sources in your feed',
-    'Markets open: what moved overnight',
-    'Brunch walk-ins: editors\' 12-spot list',
-    'AI investing: chip makers vs cloud',
-    'Remote work async guide for hybrid teams',
-    'EU repair labels: what changes in June',
-  ];
-  const postCount = recentPosts.length + 18;
-  const followerCount = 156;
-  const followingCount = 94;
-
-  const historyItems: PulseDetailItem[] = readingHistory.map((title, index) => ({
+  const feedItems = useMemo(
+    () => buildDisguiseFeed(user, disguiseAdCreative),
+    [user, disguiseAdCreative],
+  );
+  const savedPosts = useMemo(
+    () => resolveSavedPulsePosts(pulseSocial.savedPostIds, feedItems),
+    [pulseSocial.savedPostIds, feedItems],
+  );
+  const historyItems: PulseDetailItem[] = pulseSocial.readingHistory.map((entry, index) => ({
     id: `hist-${index}`,
-    title,
-    subtitle: `${index + 1}d ago`,
+    title: entry.title,
+    subtitle: `${entry.source} · ${formatReadAge(entry.readAt)}`,
     icon: 'newspaper-outline',
   }));
+  const postCount = recentPosts.length + pulseSocial.readingHistory.length;
+  const followerCount = 120 + pulseSocial.savedPostIds.length * 3;
+  const followingCount = 80 + Math.min(pulseSocial.referralShareCount * 5, 40);
 
   const detailConfig = {
-    saved: { title: 'Saved posts', items: SAVED_POSTS },
-    history: { title: 'Reading history', items: historyItems },
+    saved: {
+      title: 'Saved posts',
+      items:
+        savedPosts.length > 0
+          ? savedPosts
+          : [{ id: 'empty-saved', title: 'No saved posts yet', subtitle: 'Tap bookmark on any post in your feed', icon: 'bookmark-outline' }],
+    },
+    history: {
+      title: 'Reading history',
+      items:
+        historyItems.length > 0
+          ? historyItems
+          : [{ id: 'empty-history', title: 'No reading history yet', subtitle: 'Open articles from your feed to track them here', icon: 'newspaper-outline' }],
+    },
     settings: { title: 'Settings', items: SETTINGS_ITEMS },
     help: { title: 'Help center', items: HELP_ITEMS },
   } as const;
@@ -133,21 +145,30 @@ export function DisguiseProfileScreen() {
           <DisguisedProfileCard key={`profile-recent-${post.id}`} post={post} />
         ))}
 
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Reading history</Text>
-        <View style={[styles.menuSection, { backgroundColor: colors.surface }]}>
-          {readingHistory.map((title, index) => (
-            <MenuRow
-              key={`read-${index}`}
-              icon="newspaper-outline"
-              label={title}
-              colors={colors}
-              onPress={() => setDetailSheet('history')}
-            />
-          ))}
-        </View>
+        {historyItems.length > 0 ? (
+          <>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Reading history</Text>
+            <View style={[styles.menuSection, { backgroundColor: colors.surface }]}>
+              {historyItems.slice(0, 5).map((item) => (
+                <MenuRow
+                  key={item.id}
+                  icon="newspaper-outline"
+                  label={item.title}
+                  colors={colors}
+                  onPress={() => setDetailSheet('history')}
+                />
+              ))}
+            </View>
+          </>
+        ) : null}
 
         <View style={[styles.menuSection, { backgroundColor: colors.surface, marginTop: spacing.md }]}>
-          <MenuRow icon="bookmark-outline" label="Saved posts" colors={colors} onPress={() => setDetailSheet('saved')} />
+          <MenuRow
+            icon="bookmark-outline"
+            label={`Saved posts${savedPosts.length > 0 ? ` (${savedPosts.length})` : ''}`}
+            colors={colors}
+            onPress={() => setDetailSheet('saved')}
+          />
           <MenuRow icon="time-outline" label="Reading history" colors={colors} onPress={() => setDetailSheet('history')} />
           <MenuRow icon="settings-outline" label="Settings" colors={colors} onPress={() => setDetailSheet('settings')} />
           <MenuRow icon="help-circle-outline" label="Help center" colors={colors} onPress={() => setDetailSheet('help')} />
@@ -155,7 +176,7 @@ export function DisguiseProfileScreen() {
 
         <View style={[styles.privacyCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={styles.privacyRow}>
-            <Ionicons name="eye-off-outline" size={22} color={colors.gradientEnd} />
+            <Ionicons name="eye-off-outline" size={22} color={pulseBrand.accent} />
             <View style={styles.privacyText}>
               <Text style={[styles.privacyTitle, { color: colors.text }]}>Disguise mode</Text>
               <Text style={[styles.privacyDesc, { color: colors.textMuted }]}>
@@ -167,16 +188,16 @@ export function DisguiseProfileScreen() {
               onValueChange={(value) => {
                 void setDisguiseMode(value);
               }}
-              trackColor={{ false: colors.border, true: colors.gradientEnd }}
+              trackColor={{ false: colors.border, true: pulseBrand.accent }}
               thumbColor={colors.text}
             />
           </View>
           <Text style={[styles.hint, { color: colors.textMuted }]}>
-            Turn off disguise here, or use the Pulse logo in the header to unlock Spark.
+            Turn off disguise here, or tap the Pulse logo in the header to unlock Spark.
           </Text>
           {disguiseMode ? (
             <AnimatedPressable
-              style={[styles.unlockButton, { backgroundColor: colors.gradientEnd }]}
+              style={[styles.unlockButton, { backgroundColor: pulseBrand.accent }]}
               onPress={() => void setDisguiseMode(false)}
               accessibilityRole="button"
               accessibilityLabel="Unlock Spark"
@@ -191,7 +212,7 @@ export function DisguiseProfileScreen() {
           style={[styles.generatorCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
           onPress={() => setShowGenerator(true)}
         >
-          <Ionicons name="sparkles" size={22} color={colors.gradientEnd} />
+          <Ionicons name="sparkles" size={22} color={pulseBrand.accent} />
           <View style={styles.generatorText}>
             <Text style={[styles.generatorTitle, { color: colors.text }]}>AI disguise ad image</Text>
             <Text style={[styles.generatorDesc, { color: colors.textMuted }]}>
@@ -245,7 +266,7 @@ export function DisguiseProfileScreen() {
             if (item.id === 'h1') {
               Alert.alert(
                 'Disguise mode',
-                'Pulse looks like a news app in public. Tap the Pulse logo and enter your PIN to unlock Spark when it is safe.',
+                'Pulse looks like a news app in public. Tap the Pulse logo to unlock Spark when it is safe.',
               );
               return;
             }
@@ -320,6 +341,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.xl,
     marginTop: spacing.lg,
+    justifyContent: 'center',
   },
   stat: {
     alignItems: 'center',

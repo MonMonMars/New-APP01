@@ -61,8 +61,8 @@ import {
   ThemeMode,
 } from '../types/settings';
 import { defaultSecuritySettings, SecuritySettings } from '../types/security';
-import { FREE_DAILY_LIKE_LIMIT, FREE_DAILY_SPARK_NOTES } from '../types/subscription';
-import { BOOST_DURATION_MS } from '../types/subscription';
+import { BoostActivationResult, getIsoWeekKey } from '../utils/boostQuota';
+import { FREE_DAILY_LIKE_LIMIT, FREE_DAILY_SPARK_NOTES, BOOST_DURATION_MS } from '../types/subscription';
 import { logSecurityEvent, submitSecurityReport } from '../services/securityReports';
 import { unlockSpark } from '../utils/appLock';
 import { isAllowedImageUrl } from '../utils/urlSafety';
@@ -254,6 +254,8 @@ type AppContextValue = {
   isSparkPlus: boolean;
   isBoosted: boolean;
   boostActiveUntil: string | null;
+  bonusBoosts: number;
+  canUseFreeWeeklyBoost: boolean;
   notificationsEnabled: boolean;
   notificationPreferences: NotificationPreferences;
   isPaused: boolean;
@@ -307,7 +309,9 @@ type AppContextValue = {
   recordReferralShare: () => number;
   activateSparkPlus: () => void;
   restorePurchases: () => Promise<boolean>;
-  activateBoost: () => void;
+  activateBoost: (options?: { purchased?: boolean }) => BoostActivationResult;
+  addBonusBoosts: (count: number) => void;
+  recordPulseReading: (title: string, source: string) => void;
   purchaseSparkNotes: (count: number) => void;
   rewindLastPass: () => void;
   profileViewers: Profile[];
@@ -366,6 +370,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [showMomentumUpsell, setShowMomentumUpsell] = useState(false);
   const [momentumUpsellDismissed, setMomentumUpsellDismissed] = useState(false);
   const [boostActiveUntil, setBoostActiveUntil] = useState<string | null>(null);
+  const [freeBoostWeekKey, setFreeBoostWeekKey] = useState<string | null>(null);
+  const [bonusBoosts, setBonusBoosts] = useState(0);
   const [sparkNotesUsedToday, setSparkNotesUsedToday] = useState(0);
   const [lastSparkNoteDate, setLastSparkNoteDate] = useState<string | null>(null);
   const [bonusSparkNotes, setBonusSparkNotes] = useState(0);
@@ -441,6 +447,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setDailyLikesUsed(saved.dailyLikesUsed);
         setIsSparkPlus(saved.isSparkPlus);
         setBoostActiveUntil(saved.boostActiveUntil);
+        setFreeBoostWeekKey(saved.freeBoostWeekKey ?? null);
+        setBonusBoosts(saved.bonusBoosts ?? 0);
         setSparkNotesUsedToday(saved.sparkNotesUsedToday);
         setLastSparkNoteDate(saved.lastSparkNoteDate);
         setBonusSparkNotes(saved.bonusSparkNotes);
@@ -543,6 +551,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       isSparkPlus,
       sparkNotes,
       boostActiveUntil,
+      freeBoostWeekKey,
+      bonusBoosts,
       sparkNotesUsedToday,
       lastSparkNoteDate,
       bonusSparkNotes,
@@ -581,6 +591,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     isSparkPlus,
     sparkNotes,
     boostActiveUntil,
+    freeBoostWeekKey,
+    bonusBoosts,
     sparkNotesUsedToday,
     lastSparkNoteDate,
     bonusSparkNotes,
@@ -1569,20 +1581,74 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return true;
   }, []);
 
-  const activateBoost = useCallback(() => {
-    const until = new Date(Date.now() + BOOST_DURATION_MS).toISOString();
-    setBoostActiveUntil(until);
-    if (notificationsEnabled && notificationPreferences.boosts) {
-      void scheduleMatchNotification('You', {
-        disguiseSafe: disguiseMode && securitySettings.disguiseSafeNotifications,
-      });
+  const canUseFreeWeeklyBoost = useMemo(() => {
+    if (!isSparkPlus) {
+      return false;
     }
-  }, [
-    disguiseMode,
-    notificationPreferences.boosts,
-    notificationsEnabled,
-    securitySettings.disguiseSafeNotifications,
-  ]);
+    return freeBoostWeekKey !== getIsoWeekKey();
+  }, [freeBoostWeekKey, isSparkPlus]);
+
+  const activateBoost = useCallback(
+    (options?: { purchased?: boolean }): BoostActivationResult => {
+      const activeUntil = boostActiveUntil ? new Date(boostActiveUntil).getTime() : 0;
+      if (activeUntil > Date.now()) {
+        return { ok: false, reason: 'already_active' };
+      }
+
+      const weekKey = getIsoWeekKey();
+      let source: 'free_weekly' | 'bonus' | 'purchased';
+
+      if (options?.purchased) {
+        source = 'purchased';
+      } else if (bonusBoosts > 0) {
+        setBonusBoosts((prev) => prev - 1);
+        source = 'bonus';
+      } else if (isSparkPlus && freeBoostWeekKey !== weekKey) {
+        setFreeBoostWeekKey(weekKey);
+        source = 'free_weekly';
+      } else {
+        return { ok: false, reason: 'quota_exhausted' };
+      }
+
+      const until = new Date(Date.now() + BOOST_DURATION_MS).toISOString();
+      setBoostActiveUntil(until);
+      if (notificationsEnabled && notificationPreferences.boosts) {
+        void scheduleMatchNotification('You', {
+          disguiseSafe: disguiseMode && securitySettings.disguiseSafeNotifications,
+        });
+      }
+      return { ok: true, source };
+    },
+    [
+      boostActiveUntil,
+      bonusBoosts,
+      disguiseMode,
+      freeBoostWeekKey,
+      isSparkPlus,
+      notificationPreferences.boosts,
+      notificationsEnabled,
+      securitySettings.disguiseSafeNotifications,
+    ],
+  );
+
+  const addBonusBoosts = useCallback((count: number) => {
+    setBonusBoosts((prev) => prev + count);
+  }, []);
+
+  const recordPulseReading = useCallback((title: string, source: string) => {
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) {
+      return;
+    }
+    setPulseSocial((prev) => {
+      const withoutDuplicate = prev.readingHistory.filter((entry) => entry.title !== trimmedTitle);
+      const next = [
+        { title: trimmedTitle, source, readAt: new Date().toISOString() },
+        ...withoutDuplicate,
+      ].slice(0, 20);
+      return { ...prev, readingHistory: next };
+    });
+  }, []);
 
   const savePulsePost = useCallback((postId: string) => {
     setPulseSocial((prev) => ({
@@ -1944,6 +2010,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       isSparkPlus,
       isBoosted,
       boostActiveUntil,
+      bonusBoosts,
+      canUseFreeWeeklyBoost,
       notificationsEnabled,
       notificationPreferences,
       isPaused,
@@ -1998,6 +2066,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       activateSparkPlus,
       restorePurchases,
       activateBoost,
+      addBonusBoosts,
+      recordPulseReading,
       purchaseSparkNotes,
       rewindLastPass,
       enableNotifications,
@@ -2057,6 +2127,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       isSparkPlus,
       isBoosted,
       boostActiveUntil,
+      bonusBoosts,
+      canUseFreeWeeklyBoost,
       notificationsEnabled,
       notificationPreferences,
       isPaused,
@@ -2110,6 +2182,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       activateSparkPlus,
       restorePurchases,
       activateBoost,
+      addBonusBoosts,
+      recordPulseReading,
       purchaseSparkNotes,
       rewindLastPass,
       enableNotifications,

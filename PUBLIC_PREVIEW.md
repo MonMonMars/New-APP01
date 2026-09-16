@@ -62,7 +62,7 @@ Latest verified tunnel: **https://retro-specifies-catalyst-tree.trycloudflare.co
 2. Tap **Continue without account**
 3. Complete onboarding (defaults are fine)
 4. You land in **Pulse** disguise mode
-5. **Hold the Pulse logo and drag right** to unlock Spark
+5. **Tap the Pulse logo** in the header to unlock Spark
 
 ---
 

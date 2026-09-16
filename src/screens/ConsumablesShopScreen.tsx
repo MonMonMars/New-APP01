@@ -65,12 +65,27 @@ const PACKS: Pack[] = [
 export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { activateBoost, purchaseSparkNotes } = useApp();
+  const { activateBoost, addBonusBoosts, purchaseSparkNotes } = useApp();
 
   const handlePurchase = (pack: Pack) => {
     if (pack.id.startsWith('boost')) {
-      activateBoost();
-      Alert.alert('Boost activated!', `You purchased ${pack.quantity}. Boost is now active for 30 minutes.`);
+      const totalBoosts = pack.id === 'boost-3' ? 3 : 1;
+      const result = activateBoost({ purchased: true });
+      if (!result.ok) {
+        addBonusBoosts(totalBoosts);
+        Alert.alert('Boost added!', `${pack.quantity} saved to your account. Activate from Profile when ready.`);
+        return;
+      }
+      const saved = totalBoosts - 1;
+      if (saved > 0) {
+        addBonusBoosts(saved);
+      }
+      Alert.alert(
+        'Boost activated!',
+        saved > 0
+          ? `Boost is live for 30 minutes. ${saved} more saved for later.`
+          : `You purchased ${pack.quantity}. Boost is now active for 30 minutes.`,
+      );
     } else {
       const count = pack.id === 'notes-5' ? 5 : 1;
       purchaseSparkNotes(count);

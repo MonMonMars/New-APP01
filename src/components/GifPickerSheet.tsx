@@ -24,7 +24,11 @@ export function GifPickerSheet({ visible, onClose, onSelect }: GifPickerSheetPro
     if (!q) {
       return DEMO_GIFS;
     }
-    return DEMO_GIFS.filter((gif) => gif.label.toLowerCase().includes(q));
+    return DEMO_GIFS.filter(
+      (gif) =>
+        gif.label.toLowerCase().includes(q) ||
+        gif.tags.some((tag) => tag.includes(q)),
+    );
   }, [query]);
 
   return (

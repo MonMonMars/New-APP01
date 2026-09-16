@@ -138,6 +138,20 @@ async function main() {
     await completeOnboarding(page);
     pass('Onboarding', 'completed');
 
+    const trendingTab = page.getByText(/^trending$/i).first();
+    if (await trendingTab.isVisible({ timeout: 4000 }).catch(() => false)) {
+      await trendingTab.click();
+      await page.waitForTimeout(900);
+      const trendingText = await page.locator('body').innerText();
+      if (/trending.*useful|weather|stock market/i.test(trendingText)) {
+        pass('Pulse trending', 'explore screen visible');
+      } else {
+        fail('Pulse trending', 'explore content not visible');
+      }
+    } else {
+      fail('Pulse trending', 'tab not found');
+    }
+
     await unlockSpark(page);
     await dismissCookies(page);
 

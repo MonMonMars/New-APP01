@@ -68,6 +68,8 @@ export function ProfileScreen() {
     updateUser,
     isSparkPlus,
     boostActiveUntil,
+    bonusBoosts,
+    canUseFreeWeeklyBoost,
     activateBoost,
     notificationsEnabled,
     isPaused,
@@ -98,8 +100,22 @@ export function ProfileScreen() {
   };
 
   const handleActivateBoost = () => {
-    activateBoost();
-    Alert.alert('Boost activated!', 'You are now a top profile for 30 minutes.');
+    const result = activateBoost();
+    if (!result.ok) {
+      if (result.reason === 'already_active') {
+        Alert.alert('Boost already active', 'Your Boost is still running.');
+        return;
+      }
+      navigation.getParent()?.navigate('ConsumablesShop');
+      return;
+    }
+    const message =
+      result.source === 'free_weekly'
+        ? 'Your free weekly Spark+ Boost is now active for 30 minutes.'
+        : result.source === 'bonus'
+          ? `Boost activated! ${Math.max(0, bonusBoosts - 1)} remaining in your inventory.`
+          : 'You are now a top profile for 30 minutes.';
+    Alert.alert('Boost activated!', message);
   };
 
   const handleDeleteAccount = () => {
@@ -204,6 +220,8 @@ export function ProfileScreen() {
         <BoostCard
           boostActiveUntil={boostActiveUntil}
           isSparkPlus={isSparkPlus}
+          bonusBoosts={bonusBoosts}
+          canUseFreeWeeklyBoost={canUseFreeWeeklyBoost}
           onActivate={handleActivateBoost}
         />
 

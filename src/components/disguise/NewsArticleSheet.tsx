@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useEffect } from 'react';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { NewsPost } from '../../data/disguiseFeed';
 import { pulseBrand } from '../../theme/pulseBrand';
@@ -20,6 +22,13 @@ type NewsArticleSheetProps = {
 export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { recordPulseReading } = useApp();
+
+  useEffect(() => {
+    if (visible && post) {
+      recordPulseReading(post.headline, post.source);
+    }
+  }, [visible, post, recordPulseReading]);
 
   if (!post) {
     return null;

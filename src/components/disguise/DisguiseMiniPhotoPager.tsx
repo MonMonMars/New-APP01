@@ -1,14 +1,17 @@
+import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useEffect, useRef, useState } from 'react';
 import {
-  Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  Platform,
   ScrollView,
   StyleSheet,
   View,
 } from 'react-native';
 
-import { radii } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
+import { radii, spacing } from '../../theme';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type DisguiseMiniPhotoPagerProps = {
@@ -23,88 +26,122 @@ export function DisguiseMiniPhotoPager({
   photos,
   index,
   onIndexChange,
-  height = 120,
+  height = 156,
 }: DisguiseMiniPhotoPagerProps) {
+  const { colors } = useTheme();
   const scrollRef = useRef<ScrollView>(null);
-  const [width, setWidth] = useState(0);
+  const [laneWidth, setLaneWidth] = useState(0);
   const safeIndex = photos.length > 0 ? Math.min(index, photos.length - 1) : 0;
+  const multiPhoto = photos.length > 1;
 
   useEffect(() => {
-    if (width <= 0 || photos.length <= 1) {
+    if (laneWidth <= 0 || !multiPhoto) {
       return;
     }
-    scrollRef.current?.scrollTo({ x: safeIndex * width, animated: false });
-  }, [photos.length, safeIndex, width]);
+    scrollRef.current?.scrollTo({ x: safeIndex * laneWidth, animated: false });
+  }, [laneWidth, multiPhoto, photos.length, safeIndex]);
 
-  const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    if (width <= 0) {
+  const syncIndexFromOffset = (offsetX: number) => {
+    if (laneWidth <= 0) {
       return;
     }
-    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / width);
+    const nextIndex = Math.round(offsetX / laneWidth);
     const clamped = Math.max(0, Math.min(nextIndex, photos.length - 1));
     if (clamped !== safeIndex) {
       onIndexChange(clamped);
     }
   };
 
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    syncIndexFromOffset(event.nativeEvent.contentOffset.x);
+  };
+
+  const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    syncIndexFromOffset(event.nativeEvent.contentOffset.x);
+  };
+
   const goPrev = () => {
-    if (photos.length <= 1) {
+    if (!multiPhoto) {
       return;
     }
     onIndexChange((safeIndex - 1 + photos.length) % photos.length);
   };
 
   const goNext = () => {
-    if (photos.length <= 1) {
+    if (!multiPhoto) {
       return;
     }
     onIndexChange((safeIndex + 1) % photos.length);
   };
 
   if (photos.length === 0) {
-    return null;
+    return (
+      <View style={[styles.empty, { height, backgroundColor: colors.surface }]}>
+        <Ionicons name="image-outline" size={28} color={colors.textMuted} />
+      </View>
+    );
   }
 
   return (
-    <View
-      style={[styles.container, { height }]}
-      onLayout={(event) => {
-        const nextWidth = event.nativeEvent.layout.width;
-        if (nextWidth > 0 && nextWidth !== width) {
-          setWidth(nextWidth);
-        }
-      }}
-    >
-      {photos.length === 1 ? (
-        <Image source={{ uri: photos[0] }} style={styles.image} resizeMode="cover" />
-      ) : width > 0 ? (
-        <>
+    <View style={[styles.row, { height }]}>
+      {multiPhoto ? (
+        <AnimatedPressable
+          onPress={goPrev}
+          style={styles.navButton}
+          accessibilityLabel="Previous photo"
+          scaleTo={0.9}
+        >
+          <Ionicons name="chevron-back" size={20} color={colors.textMuted} />
+        </AnimatedPressable>
+      ) : null}
+
+      <View
+        style={styles.lane}
+        onLayout={(event) => {
+          const nextWidth = event.nativeEvent.layout.width;
+          if (nextWidth > 0 && nextWidth !== laneWidth) {
+            setLaneWidth(nextWidth);
+          }
+        }}
+      >
+        {multiPhoto && laneWidth > 0 ? (
           <ScrollView
             ref={scrollRef}
             horizontal
             pagingEnabled
+            scrollEnabled
             showsHorizontalScrollIndicator={false}
             decelerationRate="fast"
             scrollEventThrottle={16}
+            onScroll={handleScroll}
             onMomentumScrollEnd={handleScrollEnd}
+            {...(Platform.OS === 'web' ? { onScrollEndDrag: handleScrollEnd } : {})}
             style={styles.scroll}
+            contentContainerStyle={styles.scrollContent}
           >
             {photos.map((uri, photoIdx) => (
-              <View key={`${uri}-${photoIdx}`} style={[styles.page, { width }]}>
-                <Image source={{ uri }} style={styles.image} resizeMode="cover" />
+              <View key={`${uri}-${photoIdx}`} style={[styles.page, { width: laneWidth, height }]}>
+                <Image
+                  source={{ uri }}
+                  style={styles.image}
+                  contentFit="contain"
+                  transition={120}
+                  accessibilityLabel={`Photo ${photoIdx + 1} of ${photos.length}`}
+                />
               </View>
             ))}
           </ScrollView>
-          <AnimatedPressable
-            style={styles.tapLeft}
-            onPress={goPrev}
-            accessibilityLabel="Previous photo"
+        ) : (
+          <Image
+            source={{ uri: photos[safeIndex] }}
+            style={styles.image}
+            contentFit="contain"
+            transition={120}
+            accessibilityLabel="Profile photo"
           />
-          <AnimatedPressable
-            style={styles.tapRight}
-            onPress={goNext}
-            accessibilityLabel="Next photo"
-          />
+        )}
+
+        {multiPhoto ? (
           <View style={styles.dots} pointerEvents="none">
             {photos.map((_, dotIndex) => (
               <View
@@ -113,45 +150,57 @@ export function DisguiseMiniPhotoPager({
               />
             ))}
           </View>
-        </>
-      ) : (
-        <Image source={{ uri: photos[safeIndex] }} style={styles.image} resizeMode="cover" />
-      )}
+        ) : null}
+      </View>
+
+      {multiPhoto ? (
+        <AnimatedPressable
+          onPress={goNext}
+          style={styles.navButton}
+          accessibilityLabel="Next photo"
+          scaleTo={0.9}
+        >
+          <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+        </AnimatedPressable>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginTop: spacing.xs,
+  },
+  navButton: {
+    width: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.sm,
+  },
+  lane: {
     flex: 1,
     borderRadius: radii.card - 2,
     overflow: 'hidden',
     backgroundColor: '#111',
     position: 'relative',
+    minWidth: 0,
   },
   scroll: {
     flex: 1,
   },
+  scrollContent: {
+    alignItems: 'stretch',
+  },
   page: {
-    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   image: {
     width: '100%',
     height: '100%',
-  },
-  tapLeft: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: '32%',
-  },
-  tapRight: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    bottom: 0,
-    width: '32%',
   },
   dots: {
     position: 'absolute',
@@ -171,5 +220,12 @@ const styles = StyleSheet.create({
   dotActive: {
     width: 14,
     backgroundColor: '#fff',
+  },
+  empty: {
+    flex: 1,
+    borderRadius: radii.card - 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.xs,
   },
 });

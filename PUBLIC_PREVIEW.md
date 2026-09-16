@@ -4,7 +4,7 @@
 
 | Link | Durability | Notes |
 |------|------------|-------|
-| **https://temporary-rapid-perseus-razxhxk.vercel.app** | ~60 min (claimable → permanent) | **Use this one** — verified Sep 16 (8/8 + reporter captions). [Claim on Vercel](https://vercel.com/claim-deployment?code=8d5360f6-b556-4d8e-9c63-2681546a0c2c) to keep forever. |
+| **https://temporary-snappy-sycamore-p1i8ekq.vercel.app** | ~60 min (claimable → permanent) | **Latest** — swipeable photos, profile captions, full photo gallery. [Claim on Vercel](https://vercel.com/claim-deployment?code=507f1cdd-9861-472a-b3c7-92d85dc84f7a) to keep forever. |
 | **https://posts-dolls-adventure-supposed.trycloudflare.com** | Hours while workspace is awake | Same latest build, no login. Hard-refresh if stale. |
 | **https://bright-queijadas-033295.netlify.app** | ~60 min | Password: `My-Drop-Site`. [Claim on Netlify](https://app.netlify.com/drop/bright-queijadas-033295). |
 

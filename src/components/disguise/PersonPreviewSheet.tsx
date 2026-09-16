@@ -7,6 +7,7 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { buildReporterPhotoUrls } from '../../utils/disguiseReporterPhotos';
 import { resolveReporterSparkProfile } from '../../utils/resolveDisguiseProfile';
 import { MatchToast } from '../MatchToast';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
@@ -57,18 +58,7 @@ export function PersonPreviewSheet({
     if (!reporter) {
       return [];
     }
-    const reporterPhotos =
-      reporter.photos.length > 0 ? reporter.photos : [reporter.avatarUrl];
-    if (!linkedProfile || linkedProfile.photos.length === 0) {
-      return reporterPhotos;
-    }
-    const merged = [...reporterPhotos];
-    for (const url of linkedProfile.photos) {
-      if (!merged.includes(url)) {
-        merged.push(url);
-      }
-    }
-    return merged;
+    return buildReporterPhotoUrls(reporter, linkedProfile);
   }, [linkedProfile, reporter]);
 
   useEffect(() => {
@@ -186,7 +176,7 @@ export function PersonPreviewSheet({
             </FadeSlideIn>
           ) : null}
 
-          <FadeSlideIn replayKey={`${visible}-${photoIndex}`} index={3}>
+          <FadeSlideIn replayKey={visible} index={3}>
             <DisguiseMiniPhotoPager
               photos={displayPhotos}
               index={photoIndex}

@@ -137,21 +137,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   testimonialRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
     marginBottom: spacing.md,
     paddingTop: spacing.sm,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(255,255,255,0.12)',
-  },
-  testimonialQuote: {
-    flex: 1,
-    color: '#ccc',
-    fontSize: 13,
-    fontStyle: 'italic',
-    fontWeight: '500',
-    lineHeight: 18,
   },
   cta: {
     flexDirection: 'row',

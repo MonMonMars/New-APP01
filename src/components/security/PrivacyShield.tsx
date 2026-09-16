@@ -1,10 +1,9 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { AppState, type AppStateStatus, StyleSheet, Text, View } from 'react-native';
 
+import { PulseBrand } from '../disguise/PulseBrandMark';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
-import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
 import { useSparkScreenProtection } from '../../hooks/useSparkScreenProtection';
 
 /** Hides Spark UI in the app switcher and blocks screenshots when enabled. */
@@ -36,8 +35,9 @@ export function PrivacyShield() {
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
     >
-      <Ionicons name="pulse" size={48} color="#3b82f6" />
-      <Text style={[styles.title, { color: colors.text }]}>{DISGUISE_APP_NAME}</Text>
+      <View style={styles.brandWrap}>
+        <PulseBrand size="lg" showTagline />
+      </View>
       <Text style={[styles.subtitle, { color: colors.textMuted }]}>Content hidden for your privacy</Text>
     </View>
   );
@@ -51,10 +51,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: '800',
-    marginTop: 12,
+  brandWrap: {
+    marginBottom: 8,
   },
   subtitle: {
     fontSize: 14,

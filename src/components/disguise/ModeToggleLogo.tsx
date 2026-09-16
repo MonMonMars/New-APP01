@@ -1,11 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback } from 'react';
+import { ReactNode, useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
+import { pulseBrand } from '../../theme/pulseBrand';
 import { AnimatedPressable } from '../AnimatedPressable';
+import { PulseBrandMark } from './PulseBrandMark';
 
 type ModeToggleLogoProps = {
   variant: 'pulse' | 'spark';
@@ -14,26 +16,24 @@ type ModeToggleLogoProps = {
 };
 
 type LogoButtonProps = {
-  icon: keyof typeof Ionicons.glyphMap;
-  iconColor: string;
-  iconBg: string;
-  borderColor: string;
   compact?: boolean;
   onPress: () => void;
   accessibilityLabel: string;
   accessibilityHint: string;
+  children: ReactNode;
+  borderColor: string;
+  backgroundColor: string;
 };
 
 /** Bordered logo button — clear tap target for Spark ↔ Pulse mode switching. */
 function LogoButton({
-  icon,
-  iconColor,
-  iconBg,
-  borderColor,
   compact = false,
   onPress,
   accessibilityLabel,
   accessibilityHint,
+  children,
+  borderColor,
+  backgroundColor,
 }: LogoButtonProps) {
   const size = compact ? 40 : 44;
 
@@ -51,12 +51,12 @@ function LogoButton({
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor: iconBg,
+          backgroundColor,
           borderColor,
         },
       ]}
     >
-      <Ionicons name={icon} size={compact ? 18 : 20} color={iconColor} />
+      {children}
     </AnimatedPressable>
   );
 }
@@ -67,10 +67,9 @@ export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps
   const { disguiseMode, setDisguiseMode } = useApp();
 
   const isPulse = variant === 'pulse';
-  const icon = isPulse ? 'pulse' : 'flame';
-  const iconColor = isPulse ? '#3b82f6' : colors.gradientEnd;
-  const iconBg = isPulse ? 'rgba(59,130,246,0.14)' : 'rgba(255,107,107,0.14)';
-  const borderColor = isPulse ? 'rgba(59,130,246,0.55)' : `${colors.gradientEnd}88`;
+  const iconColor = isPulse ? pulseBrand.accent : colors.gradientEnd;
+  const iconBg = isPulse ? pulseBrand.accentSoft : 'rgba(255,107,107,0.14)';
+  const borderColor = isPulse ? pulseBrand.accentBorder : `${colors.gradientEnd}88`;
 
   const enterDisguise = useCallback(() => {
     void setDisguiseMode(true);
@@ -87,15 +86,15 @@ export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps
 
     return (
       <LogoButton
-        icon={icon}
-        iconColor={iconColor}
-        iconBg={iconBg}
-        borderColor={borderColor}
         compact={compact}
         onPress={enterDisguise}
+        borderColor={borderColor}
+        backgroundColor={iconBg}
         accessibilityLabel={`Emergency — switch to ${DISGUISE_APP_NAME} disguise mode`}
         accessibilityHint="Tap to hide Spark"
-      />
+      >
+        <Ionicons name="flame" size={compact ? 18 : 20} color={iconColor} />
+      </LogoButton>
     );
   }
 
@@ -105,15 +104,15 @@ export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps
 
   return (
     <LogoButton
-      icon={icon}
-      iconColor={iconColor}
-      iconBg={iconBg}
-      borderColor={borderColor}
       compact={compact}
       onPress={exitDisguise}
+      borderColor={borderColor}
+      backgroundColor={iconBg}
       accessibilityLabel="Tap to unlock Spark"
       accessibilityHint="Returns to Spark dating mode"
-    />
+    >
+      <PulseBrandMark size={compact ? 'sm' : 'md'} />
+    </LogoButton>
   );
 }
 

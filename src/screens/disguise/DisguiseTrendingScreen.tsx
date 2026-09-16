@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -8,8 +9,10 @@ import { MediaWithContentBadge } from '../../components/disguise/ContentTypeIcon
 import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
 import { DisguiseMarketsPanel } from '../../components/disguise/DisguiseMarketsPanel';
 import { DisguiseWeatherPanel } from '../../components/disguise/DisguiseWeatherPanel';
+import { NewsArticleSheet } from '../../components/disguise/NewsArticleSheet';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
+import { NewsPost } from '../../data/disguiseFeed';
 import {
   breakingNowCards,
   disguiseTrendingTopics,
@@ -22,10 +25,11 @@ import {
 } from '../../data/disguiseTrending';
 import { useDisguiseWeather } from '../../hooks/useDisguiseWeather';
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
+import { pulseBrand } from '../../theme/pulseBrand';
 import { radii, spacing } from '../../theme';
+import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
+import { briefToNewsPost, breakingToNewsPost } from '../../utils/disguiseTrendingArticles';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
-
-const PULSE_BLUE = '#3b82f6';
 
 function trendIcon(direction: TrendDirection): keyof typeof Ionicons.glyphMap {
   switch (direction) {
@@ -54,7 +58,7 @@ function trendColor(direction: TrendDirection): string {
     case 'down':
       return '#ef4444';
     case 'new':
-      return PULSE_BLUE;
+      return pulseBrand.accent;
     case 'stable':
       return '#94a3b8';
     default: {
@@ -109,6 +113,7 @@ export function DisguiseTrendingScreen() {
   const { colors } = useTheme();
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
   const { preferences } = useApp();
+  const [articlePost, setArticlePost] = useState<NewsPost | null>(null);
   const weatherCity =
     preferences.travelMode && preferences.passportCity
       ? preferences.passportCity
@@ -116,7 +121,15 @@ export function DisguiseTrendingScreen() {
   const { weather, isLive } = useDisguiseWeather(weatherCity);
 
   const openTopic = (topic?: string) => {
-    navigation.navigate('Home', topic ? { topic } : {});
+    navigateDisguiseFeedTopic(navigation, topic);
+  };
+
+  const openBrief = () => {
+    setArticlePost(briefToNewsPost(pulseBrief));
+  };
+
+  const openBreaking = (card: (typeof breakingNowCards)[number]) => {
+    setArticlePost(breakingToNewsPost(card));
   };
 
   return (
@@ -130,7 +143,7 @@ export function DisguiseTrendingScreen() {
 
         <AnimatedPressable
           style={[styles.briefCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
-          onPress={() => openTopic(pulseBrief.topic)}
+          onPress={openBrief}
           accessibilityRole="button"
           accessibilityLabel={`Read brief: ${pulseBrief.headline}`}
         >
@@ -165,7 +178,7 @@ export function DisguiseTrendingScreen() {
               style={[styles.chip, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => openTopic(chip.topic)}
             >
-              <Ionicons name={chipIcon(chip.icon)} size={14} color={PULSE_BLUE} />
+              <Ionicons name={chipIcon(chip.icon)} size={14} color={pulseBrand.accent} />
               <Text style={[styles.chipLabel, { color: colors.text }]}>{chip.label}</Text>
             </AnimatedPressable>
           ))}
@@ -175,11 +188,11 @@ export function DisguiseTrendingScreen() {
         <DisguiseWeatherPanel
           weather={weather}
           isLive={isLive}
-          onPress={() => openTopic('#WeekendPlans')}
+          onPress={() => openTopic('#Weather')}
         />
 
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Stock market</Text>
-        <DisguiseMarketsPanel onQuotePress={(symbol) => openTopic(`#${symbol}`)} />
+        <DisguiseMarketsPanel onQuotePress={() => openTopic('#MarketWatch')} />
 
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Local radar</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.radarRow}>
@@ -204,7 +217,7 @@ export function DisguiseTrendingScreen() {
             <AnimatedPressable
               key={card.id}
               style={[styles.breakingCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
-              onPress={() => openTopic(card.topic)}
+              onPress={() => openBreaking(card)}
             >
               <MediaWithContentBadge kind="news">
                 <Image source={{ uri: card.imageUrl }} style={styles.breakingImage} resizeMode="cover" />
@@ -235,7 +248,7 @@ export function DisguiseTrendingScreen() {
               </MediaWithContentBadge>
             ) : (
               <View style={[styles.topicThumbPlaceholder, { backgroundColor: colors.surface }]}>
-                <Ionicons name="pricetag-outline" size={16} color={PULSE_BLUE} />
+                <Ionicons name="pricetag-outline" size={16} color={pulseBrand.accent} />
               </View>
             )}
             <View style={styles.topicText}>
@@ -272,7 +285,7 @@ export function DisguiseTrendingScreen() {
             style={[styles.pickRow, { backgroundColor: colors.surface, borderColor: colors.border }]}
             onPress={() => openTopic(pick.topic)}
           >
-            <Ionicons name="bookmark-outline" size={18} color={PULSE_BLUE} />
+            <Ionicons name="bookmark-outline" size={18} color={pulseBrand.accent} />
             <View style={styles.pickText}>
               <Text style={[styles.pickTitle, { color: colors.text }]}>{pick.title}</Text>
               <Text style={[styles.pickSubtitle, { color: colors.textMuted }]}>{pick.subtitle}</Text>
@@ -281,6 +294,12 @@ export function DisguiseTrendingScreen() {
           </AnimatedPressable>
         ))}
       </ScrollView>
+
+      <NewsArticleSheet
+        visible={articlePost !== null}
+        post={articlePost}
+        onClose={() => setArticlePost(null)}
+      />
     </View>
   );
 }
@@ -327,7 +346,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(59,130,246,0.15)',
+    backgroundColor: pulseBrand.accentSoft,
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
     borderRadius: radii.button,
@@ -336,10 +355,10 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: PULSE_BLUE,
+    backgroundColor: pulseBrand.accent,
   },
   liveText: {
-    color: PULSE_BLUE,
+    color: pulseBrand.accent,
     fontSize: 11,
     fontWeight: '800',
     textTransform: 'uppercase',

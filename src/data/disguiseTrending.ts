@@ -67,7 +67,7 @@ export const pulseBrief: TrendingBrief = {
 
 export const trendingCategoryChips: TrendingCategoryChip[] = [
   { id: 'c0', label: 'For you', icon: 'flash' },
-  { id: 'c1', label: 'Weather', icon: 'cloud', topic: '#WeekendPlans' },
+  { id: 'c1', label: 'Weather', icon: 'cloud', topic: '#Weather' },
   { id: 'c2', label: 'Markets', icon: 'trending-up', topic: '#MarketWatch' },
   { id: 'c3', label: 'Tech', icon: 'business', topic: '#TechNews' },
   { id: 'c4', label: 'Local', icon: 'location', topic: '#CityLife' },

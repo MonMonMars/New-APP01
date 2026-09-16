@@ -7,6 +7,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
 import { spacing } from '../../theme';
 import { ModeToggleLogo } from './ModeToggleLogo';
+import { PulseBrand } from './PulseBrandMark';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type DisguiseHeaderProps = {
@@ -22,11 +23,14 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
     <View style={[styles.header, { borderBottomColor: colors.border }]}>
       <View style={styles.leading}>
         <ModeToggleLogo variant="pulse" />
-        {title ? (
-          <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
-            {title}
-          </Text>
-        ) : null}
+        <View style={styles.brandBlock}>
+          <PulseBrand size="sm" />
+          {title ? (
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]} numberOfLines={1}>
+              {title}
+            </Text>
+          ) : null}
+        </View>
       </View>
       <View style={styles.actions}>
         {showSearch && (
@@ -68,10 +72,16 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     minWidth: 0,
   },
-  title: {
-    fontSize: 17,
-    fontWeight: '800',
-    flexShrink: 1,
+  brandBlock: {
+    flex: 1,
+    minWidth: 0,
+  },
+  sectionTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginTop: 1,
   },
   actions: {
     flexDirection: 'row',

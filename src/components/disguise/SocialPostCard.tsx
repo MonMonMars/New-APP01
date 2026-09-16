@@ -7,7 +7,6 @@ import { useTheme } from '../../context/ThemeContext';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { buildSocialReporter, socialReporterPhotoIndex } from '../../utils/disguiseReporterPhotos';
-import { maskVariantToContentKind } from './ContentTypeIcon';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
 import { DisguisePhotoLightbox } from './DisguisePhotoLightbox';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
@@ -42,9 +41,6 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
   const feedPhotoIndex = socialReporterPhotoIndex(photoReporter, post.imageUrl);
 
   const maskSnippet = post.avatarMask?.text.split(' ').slice(0, 2).join(' ') ?? 'LIVE';
-  const avatarContentKind = post.avatarMask
-    ? maskVariantToContentKind(post.avatarMask.variant)
-    : 'social';
   const captionSnippet =
     post.body.length > 72 ? `${post.body.slice(0, 72).trim()}…` : post.body;
 
@@ -93,7 +89,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
               imageUrl={post.avatarUrl}
               overlayText={maskSnippet}
               overlayVariant={post.avatarMask.variant}
-              contentKind={avatarContentKind}
+              contentKind="social"
               caption={captionSnippet}
               onPress={() => setAuthorOpen(true)}
               accessibilityLabel={`View profile: ${post.author}`}

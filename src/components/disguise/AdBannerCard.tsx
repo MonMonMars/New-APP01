@@ -72,7 +72,7 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
           >
             <FeedPersonThumbnail
               plainAvatar
-              contentKind="profile"
+              contentKind="ad"
               imageUrl={testimonial.avatarUrl}
               caption={testimonial.quote}
               accessibilityLabel={`${testimonial.name} profile photo`}

@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { ReactNode, useEffect } from 'react';
 import { Platform, Pressable, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -45,7 +46,10 @@ export function ScalePressable({
       onPress={onPress}
       hitSlop={8}
       onPressIn={() => {
-        pressScale.value = withSpring(scaleTo, MOTION.spring.press);
+        pressScale.value = withSpring(scaleTo, MOTION.spring.bounce);
+        if (Platform.OS !== 'web') {
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
       }}
       onPressOut={() => {
         pressScale.value = withSpring(1, MOTION.spring.press);

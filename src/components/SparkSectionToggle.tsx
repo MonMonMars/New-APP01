@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
 import {
@@ -11,6 +10,7 @@ import {
 } from '../types/preferences';
 import { ColorPalette, radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
+import { FadeSlideIn } from './motion/FadeSlideIn';
 
 type SparkSectionToggleVariant = 'title' | 'chip' | 'list';
 
@@ -89,8 +89,6 @@ function WorldPickerSheet({
   onClose: () => void;
   onSelect: (section: SparkSection) => void;
 }) {
-  const insets = useSafeAreaInsets();
-
   return (
     <Modal
       visible={visible}
@@ -105,33 +103,34 @@ function WorldPickerSheet({
           accessibilityRole="button"
           accessibilityLabel="Close world picker"
         />
-        <View
-          style={[
-            styles.sheet,
-            {
-              backgroundColor: colors.background,
-              borderColor: colors.border,
-              paddingBottom: Math.max(insets.bottom, spacing.md) + spacing.sm,
-            },
-          ]}
-        >
-          <View style={[styles.handle, { backgroundColor: colors.border }]} />
-          <Text style={[styles.sheetTitle, { color: colors.text }]}>Choose a world</Text>
-          <Text style={[styles.sheetSubtitle, { color: colors.textMuted }]}>
-            Anyone can join either section. Likes, matches, and chats stay in the world you pick.
-          </Text>
-          <View style={styles.listWrap}>
-            {SECTIONS.map((item) => (
-              <WorldRow
-                key={item}
-                item={item}
-                selected={section === item}
-                colors={colors}
-                onPress={() => onSelect(item)}
-              />
-            ))}
+        <FadeSlideIn replayKey={visible} distance={22} style={styles.sheetMotion}>
+          <View
+            style={[
+              styles.sheet,
+              {
+                backgroundColor: colors.background,
+                borderColor: colors.border,
+              },
+            ]}
+          >
+            <Text style={[styles.sheetTitle, { color: colors.text }]}>Choose a world</Text>
+            <Text style={[styles.sheetSubtitle, { color: colors.textMuted }]}>
+              Anyone can join either section. Likes, matches, and chats stay in the world you pick.
+            </Text>
+            <View style={styles.listWrap}>
+              {SECTIONS.map((item, index) => (
+                <FadeSlideIn key={item} replayKey={visible} index={index} distance={12}>
+                  <WorldRow
+                    item={item}
+                    selected={section === item}
+                    colors={colors}
+                    onPress={() => onSelect(item)}
+                  />
+                </FadeSlideIn>
+              ))}
+            </View>
           </View>
-        </View>
+        </FadeSlideIn>
       </View>
     </Modal>
   );
@@ -283,35 +282,38 @@ const styles = StyleSheet.create({
   },
   modalRoot: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+  },
+  sheetMotion: {
+    width: '100%',
+    maxWidth: 360,
   },
   backdrop: {
     ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(0,0,0,0.55)',
   },
   sheet: {
-    borderTopLeftRadius: 22,
-    borderTopRightRadius: 22,
-    borderTopWidth: StyleSheet.hairlineWidth,
+    width: '100%',
+    maxWidth: 360,
+    borderRadius: 22,
+    borderWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-  },
-  handle: {
-    alignSelf: 'center',
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    marginBottom: spacing.md,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.lg,
   },
   sheetTitle: {
     fontSize: 20,
     fontWeight: '800',
+    textAlign: 'center',
   },
   sheetSubtitle: {
     fontSize: 14,
     lineHeight: 20,
     marginTop: 4,
     marginBottom: spacing.md,
+    textAlign: 'center',
   },
   listWrap: {
     gap: spacing.sm,

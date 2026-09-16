@@ -4,7 +4,7 @@
 
 | Link | Durability | Notes |
 |------|------------|-------|
-| **https://temporary-instant-poplar-n7jtg6v.vercel.app** | ~60 min (claimable → permanent) | **Latest** — Spark Dating vs Married decks. [Claim on Vercel](https://vercel.com/claim-deployment?code=9d915e13-e20a-426d-aa2b-7e894070644c) to keep forever. |
+| **https://temporary-turbo-thunder-1l1sc3x.vercel.app** | ~60 min (claimable → permanent) | **Latest** — Spark vs Ember isolated worlds. [Claim on Vercel](https://vercel.com/claim-deployment?code=b4a2efd7-12e1-42fc-b6cd-ef2263ebed04) to keep forever. |
 | **https://posts-dolls-adventure-supposed.trycloudflare.com** | Hours while workspace is awake | Same latest build, no login. Hard-refresh if stale. |
 | **https://bright-queijadas-033295.netlify.app** | ~60 min | Password: `My-Drop-Site`. [Claim on Netlify](https://app.netlify.com/drop/bright-queijadas-033295). |
 

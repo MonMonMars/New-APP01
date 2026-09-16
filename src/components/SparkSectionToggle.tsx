@@ -1,86 +1,343 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
-import { SparkSection, SPARK_SECTION_LABELS } from '../types/preferences';
-import { radii, spacing } from '../theme';
+import {
+  SparkSection,
+  SPARK_SECTION_HINTS,
+  SPARK_SECTION_LABELS,
+} from '../types/preferences';
+import { ColorPalette, radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
+
+type SparkSectionToggleVariant = 'title' | 'chip' | 'list';
 
 type SparkSectionToggleProps = {
   section: SparkSection;
   onChange: (section: SparkSection) => void;
-  wide?: boolean;
+  /** title = Discover header; chip = Likes/Matches; list = Hub world cards */
+  variant?: SparkSectionToggleVariant;
 };
 
 const SECTIONS: SparkSection[] = ['spark', 'ember'];
 
-/** Spark vs Ember — two isolated dating worlds. */
-export function SparkSectionToggle({ section, onChange, wide = false }: SparkSectionToggleProps) {
-  const { colors } = useTheme();
+const SECTION_ICONS: Record<SparkSection, keyof typeof Ionicons.glyphMap> = {
+  spark: 'flame',
+  ember: 'bonfire',
+};
+
+const EMBER_ACCENT = '#FF7A45';
+
+function sectionAccent(section: SparkSection, colors: ColorPalette): string {
+  return section === 'ember' ? EMBER_ACCENT : colors.gradientEnd;
+}
+
+function WorldRow({
+  item,
+  selected,
+  colors,
+  onPress,
+}: {
+  item: SparkSection;
+  selected: boolean;
+  colors: ColorPalette;
+  onPress: () => void;
+}) {
+  const accent = sectionAccent(item, colors);
 
   return (
-    <View
+    <AnimatedPressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      accessibilityLabel={`${SPARK_SECTION_LABELS[item]}. ${SPARK_SECTION_HINTS[item]}`}
       style={[
-        styles.wrap,
-        { backgroundColor: colors.surface, borderColor: colors.border },
-        wide && styles.wrapWide,
+        styles.row,
+        {
+          backgroundColor: selected ? `${accent}14` : colors.surface,
+          borderColor: selected ? accent : colors.border,
+        },
       ]}
+      scaleTo={0.98}
     >
-      {SECTIONS.map((item) => {
-        const active = section === item;
-        return (
-          <AnimatedPressable
-            key={item}
-            onPress={() => onChange(item)}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: active }}
-            accessibilityLabel={SPARK_SECTION_LABELS[item]}
-            style={[
-              styles.tab,
-              active && { backgroundColor: colors.gradientEnd },
-            ]}
-            scaleTo={0.97}
-          >
-            <Text
-              style={[
-                styles.label,
-                { color: active ? '#fff' : colors.textMuted },
-              ]}
-            >
-              {SPARK_SECTION_LABELS[item]}
-            </Text>
-          </AnimatedPressable>
-        );
-      })}
-    </View>
+      <View style={[styles.rowIcon, { backgroundColor: `${accent}22` }]}>
+        <Ionicons name={SECTION_ICONS[item]} size={20} color={accent} />
+      </View>
+      <View style={styles.rowText}>
+        <Text style={[styles.rowTitle, { color: colors.text }]}>
+          {SPARK_SECTION_LABELS[item]}
+        </Text>
+        <Text style={[styles.rowHint, { color: colors.textMuted }]}>
+          {SPARK_SECTION_HINTS[item]}
+        </Text>
+      </View>
+      {selected ? <Ionicons name="checkmark-circle" size={22} color={accent} /> : null}
+    </AnimatedPressable>
   );
 }
 
+function WorldPickerSheet({
+  visible,
+  section,
+  colors,
+  onClose,
+  onSelect,
+}: {
+  visible: boolean;
+  section: SparkSection;
+  colors: ColorPalette;
+  onClose: () => void;
+  onSelect: (section: SparkSection) => void;
+}) {
+  const insets = useSafeAreaInsets();
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalRoot}>
+        <Pressable
+          style={styles.backdrop}
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel="Close world picker"
+        />
+        <View
+          style={[
+            styles.sheet,
+            {
+              backgroundColor: colors.background,
+              borderColor: colors.border,
+              paddingBottom: Math.max(insets.bottom, spacing.md) + spacing.sm,
+            },
+          ]}
+        >
+          <View style={[styles.handle, { backgroundColor: colors.border }]} />
+          <Text style={[styles.sheetTitle, { color: colors.text }]}>Choose a world</Text>
+          <Text style={[styles.sheetSubtitle, { color: colors.textMuted }]}>
+            Anyone can join either section. Likes, matches, and chats stay in the world you pick.
+          </Text>
+          <View style={styles.listWrap}>
+            {SECTIONS.map((item) => (
+              <WorldRow
+                key={item}
+                item={item}
+                selected={section === item}
+                colors={colors}
+                onPress={() => onSelect(item)}
+              />
+            ))}
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+function WorldTrigger({
+  section,
+  colors,
+  variant,
+  onPress,
+}: {
+  section: SparkSection;
+  colors: ColorPalette;
+  variant: 'title' | 'chip';
+  onPress: () => void;
+}) {
+  const accent = sectionAccent(section, colors);
+
+  switch (variant) {
+    case 'chip':
+      return (
+        <AnimatedPressable
+          onPress={onPress}
+          accessibilityRole="button"
+          accessibilityLabel={`${SPARK_SECTION_LABELS[section]}. Switch world`}
+          accessibilityHint="Opens Spark and Ember. Anyone can join Ember."
+          style={[styles.chipTrigger, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          scaleTo={0.97}
+        >
+          <Ionicons name={SECTION_ICONS[section]} size={14} color={accent} />
+          <Text style={[styles.chipLabel, { color: colors.text }]}>
+            {SPARK_SECTION_LABELS[section]}
+          </Text>
+          <Ionicons name="chevron-down" size={14} color={colors.textMuted} />
+        </AnimatedPressable>
+      );
+    case 'title':
+      return (
+        <AnimatedPressable
+          onPress={onPress}
+          accessibilityRole="button"
+          accessibilityLabel={`${SPARK_SECTION_LABELS[section]}. Switch world`}
+          accessibilityHint="Opens Spark and Ember. Anyone can join Ember."
+          style={styles.titleTrigger}
+          scaleTo={0.97}
+        >
+          <Ionicons name={SECTION_ICONS[section]} size={20} color={accent} />
+          <Text style={[styles.titleLabel, { color: colors.text }]}>
+            {SPARK_SECTION_LABELS[section]}
+          </Text>
+          <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
+        </AnimatedPressable>
+      );
+    default: {
+      const _exhaustive: never = variant;
+      return _exhaustive;
+    }
+  }
+}
+
+/** Spark vs Ember switcher — Tinder-style title tap. Ember is open to everyone. */
+export function SparkSectionToggle({
+  section,
+  onChange,
+  variant = 'title',
+}: SparkSectionToggleProps) {
+  const { colors } = useTheme();
+  const [open, setOpen] = useState(false);
+
+  const select = (next: SparkSection) => {
+    onChange(next);
+    setOpen(false);
+  };
+
+  switch (variant) {
+    case 'list':
+      return (
+        <View style={styles.listWrap}>
+          {SECTIONS.map((item) => (
+            <WorldRow
+              key={item}
+              item={item}
+              selected={section === item}
+              colors={colors}
+              onPress={() => onChange(item)}
+            />
+          ))}
+        </View>
+      );
+    case 'chip':
+    case 'title':
+      return (
+        <>
+          <WorldTrigger
+            section={section}
+            colors={colors}
+            variant={variant}
+            onPress={() => setOpen(true)}
+          />
+          <WorldPickerSheet
+            visible={open}
+            section={section}
+            colors={colors}
+            onClose={() => setOpen(false)}
+            onSelect={select}
+          />
+        </>
+      );
+    default: {
+      const _exhaustive: never = variant;
+      return _exhaustive;
+    }
+  }
+}
+
 const styles = StyleSheet.create({
-  wrap: {
+  titleTrigger: {
     flexDirection: 'row',
-    borderRadius: radii.button,
-    borderWidth: StyleSheet.hairlineWidth,
-    padding: 3,
-    gap: 3,
-    flex: 1,
-    maxWidth: 220,
-  },
-  wrapWide: {
-    flexGrow: 0,
-    width: '100%',
-    maxWidth: '100%',
-    alignSelf: 'stretch',
-  },
-  tab: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: radii.button - 2,
-    paddingVertical: 8,
+    gap: 6,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
   },
-  label: {
-    fontSize: 13,
+  titleLabel: {
+    fontSize: 22,
     fontWeight: '800',
     letterSpacing: 0.2,
+  },
+  chipTrigger: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'center',
+    gap: 6,
+    borderRadius: radii.button,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 7,
+  },
+  chipLabel: {
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  modalRoot: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+  },
+  sheet: {
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+  },
+  handle: {
+    alignSelf: 'center',
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    marginBottom: spacing.md,
+  },
+  sheetTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+  },
+  sheetSubtitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 4,
+    marginBottom: spacing.md,
+  },
+  listWrap: {
+    gap: spacing.sm,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderRadius: radii.card,
+    borderWidth: 1,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+  },
+  rowIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rowText: {
+    flex: 1,
+  },
+  rowTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  rowHint: {
+    fontSize: 13,
+    marginTop: 2,
+    lineHeight: 18,
   },
 });

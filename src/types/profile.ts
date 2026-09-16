@@ -96,7 +96,7 @@ export type Profile = {
   aiPersonaId?: string;
   /** Relationship intent — used for Spark+ advanced filters */
   intent?: RelationshipIntent;
-  /** Dating vs married section on Spark Discover */
+  /** Optional bio status — does not lock Spark or Ember */
   relationshipStatus?: RelationshipStatus;
   /** City label for map / discovery */
   city?: string;
@@ -116,8 +116,8 @@ export type RelationshipIntent =
 export type RelationshipStatus = 'single' | 'married';
 
 export const RELATIONSHIP_STATUS_LABELS: Record<RelationshipStatus, string> = {
-  single: 'Spark',
-  married: 'Ember',
+  single: 'Single',
+  married: 'Married',
 };
 
 export type UserProfile = {

@@ -342,6 +342,7 @@ export function DiscoverScreen() {
           <SparkSectionToggle
             section={resolveSparkSection(preferences.sparkSection)}
             onChange={setSparkSection}
+            variant="title"
           />
         </View>
         <AnimatedPressable style={styles.hubButton} onPress={openDiscoverHub} accessibilityLabel="Discover tools">

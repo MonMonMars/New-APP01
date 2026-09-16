@@ -110,7 +110,7 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
         <SparkSectionToggle
           section={resolveSparkSection(preferences.sparkSection)}
           onChange={setSparkSection}
-          wide
+          variant="chip"
         />
       </View>
 
@@ -181,6 +181,7 @@ const styles = StyleSheet.create({
   worldBar: {
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.sm,
+    alignItems: 'center',
   },
   content: {
     paddingBottom: spacing.xl,

@@ -19,7 +19,7 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { StandoutsRow } from '../components/StandoutsRow';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { DiscoverFilter, formatSearchRadius, resolveSparkSection, SPARK_SECTION_HINTS } from '../types/preferences';
+import { DiscoverFilter, formatSearchRadius, resolveSparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { ActionToast } from '../components/ActionToast';
@@ -174,10 +174,10 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
         <SparkSectionToggle
           section={resolveSparkSection(preferences.sparkSection)}
           onChange={setSparkSection}
-          wide
+          variant="list"
         />
-        <Text style={[styles.metaSub, { color: colors.textMuted, marginTop: spacing.sm }]}>
-          {SPARK_SECTION_HINTS[resolveSparkSection(preferences.sparkSection)]}
+        <Text style={[styles.metaSub, { color: colors.textMuted }]}>
+          Likes, matches, and chats stay in the section you pick. Anyone can join Ember.
         </Text>
 
         <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Filters</Text>

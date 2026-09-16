@@ -47,7 +47,7 @@ export const SPARK_SECTION_LABELS: Record<SparkSection, string> = {
 
 export const SPARK_SECTION_HINTS: Record<SparkSection, string> = {
   spark: 'Open dating',
-  ember: 'Private circle — separate likes, matches, and chats',
+  ember: 'Married group · anyone can join',
 };
 
 export const SPARK_SECTION_EMPTY: Record<SparkSection, { title: string; subtitle: string }> = {
@@ -57,7 +57,7 @@ export const SPARK_SECTION_EMPTY: Record<SparkSection, { title: string; subtitle
   },
   ember: {
     title: 'No more people nearby',
-    subtitle: 'Ember is a private clone of Spark. Expand search to keep discovering.',
+    subtitle: 'Ember is a separate married group — anyone can join. Expand search to keep discovering.',
   },
 };
 
@@ -94,7 +94,7 @@ export type DiscoveryPreferences = {
   travelMode?: boolean;
   discoverFilters?: DiscoverFilter[];
   advancedFilters?: AdvancedDiscoverFilters;
-  /** Spark (open dating) vs Ember (private married-group clone) */
+  /** Spark (open dating) vs Ember (married group). Anyone can switch — not locked to profile status. */
   sparkSection?: SparkSection;
 };
 

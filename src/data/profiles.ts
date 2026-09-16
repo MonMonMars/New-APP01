@@ -16,7 +16,7 @@ export { AI_PERSONA_IDS };
  * MUTUAL_SUPER_LIKE_IDS (8) → Instant super-match on red star
  * STANDOUT_IDS (3)        → Top Picks / Standouts row on Discover
  * EXPLORE_CATEGORY_MAP    → Explore screen category assignments
- * MARRIED_PROFILE_IDS     → Ember (private married-group clone of Spark)
+ * MARRIED_PROFILE_IDS     → Ember (married-group deck; anyone can join, data stays separate)
  * All other mockProfiles  → Unmatched discover queue
  */
 export const PRE_MATCHED_IDS = [

@@ -11,9 +11,9 @@ type SparkSectionToggleProps = {
   wide?: boolean;
 };
 
-const SECTIONS: SparkSection[] = ['dating', 'married'];
+const SECTIONS: SparkSection[] = ['spark', 'ember'];
 
-/** Dating vs Married decks on Spark Discover. */
+/** Spark vs Ember — two isolated dating worlds. */
 export function SparkSectionToggle({ section, onChange, wide = false }: SparkSectionToggleProps) {
   const { colors } = useTheme();
 

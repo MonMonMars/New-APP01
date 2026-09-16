@@ -7,7 +7,7 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { EXPLORE_CATEGORY_MAP, mockProfiles } from '../data/profiles';
-import { matchesSparkSection, SparkSection } from '../types/preferences';
+import { matchesSparkSection, resolveSparkSection, SparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -82,7 +82,7 @@ export function ExploreScreen({ onClose }: ExploreScreenProps) {
           const profiles = profilesForCategory(
             category.id,
             excluded,
-            preferences.sparkSection ?? 'dating',
+            resolveSparkSection(preferences.sparkSection),
           );
           return (
             <View key={category.id} style={styles.section}>

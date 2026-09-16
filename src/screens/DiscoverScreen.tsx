@@ -25,7 +25,7 @@ import { WaitingForMatchModal } from '../components/WaitingForMatchModal';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Profile, ProfilePrompt } from '../types/profile';
-import { SPARK_SECTION_EMPTY } from '../types/preferences';
+import { resolveSparkSection, SPARK_SECTION_EMPTY } from '../types/preferences';
 import { spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 
@@ -340,7 +340,7 @@ export function DiscoverScreen() {
         <ModeToggleLogo variant="spark" compact />
         <View style={styles.sectionToggle}>
           <SparkSectionToggle
-            section={preferences.sparkSection ?? 'dating'}
+            section={resolveSparkSection(preferences.sparkSection)}
             onChange={setSparkSection}
           />
         </View>
@@ -376,10 +376,10 @@ export function DiscoverScreen() {
           <View style={styles.emptyState}>
             <Text style={styles.emptyEmoji}>🌍</Text>
             <Text style={[styles.emptyTitle, { color: colors.text }]}>
-              {SPARK_SECTION_EMPTY[preferences.sparkSection ?? 'dating'].title}
+              {SPARK_SECTION_EMPTY[resolveSparkSection(preferences.sparkSection)].title}
             </Text>
             <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-              {SPARK_SECTION_EMPTY[preferences.sparkSection ?? 'dating'].subtitle}
+              {SPARK_SECTION_EMPTY[resolveSparkSection(preferences.sparkSection)].subtitle}
             </Text>
             <AnimatedPressable
               style={[styles.primaryButton, { backgroundColor: colors.gradientEnd }]}

@@ -6,6 +6,9 @@ import {
   PENDING_LIKE_IDS,
   PRE_MATCHED_IDS,
   SUPER_PRE_MATCHED_IDS,
+  EMBER_PENDING_LIKE_IDS,
+  EMBER_PRE_MATCHED_IDS,
+  EMBER_PASSED_IDS,
 } from './profiles';
 
 function buildMatch(profileId: string, isSuperMatch = false): Match | null {
@@ -333,7 +336,7 @@ export type SeedSwipeState = {
 export function buildSeedSwipeState(): SeedSwipeState {
   const likedIds = new Set<string>([...PRE_MATCHED_IDS, ...PENDING_LIKE_IDS]);
   const pendingLikeIds = new Set<string>([...PENDING_LIKE_IDS]);
-  const passedIds = new Set<string>(['4', '19', '35', '52', '55', '56']);
+  const passedIds = new Set<string>(['35', '55', '56']);
 
   return {
     likedIds: Array.from(likedIds),
@@ -349,4 +352,114 @@ export function isMutualSuperLike(profileId: string): boolean {
 
 export function isMutualMatch(profileId: string): boolean {
   return MUTUAL_MATCH_IDS.has(profileId);
+}
+
+/** Ember clone — separate matches from Spark */
+export function buildEmberSeedMatches(): Match[] {
+  const matches: Match[] = [];
+  for (const id of EMBER_PRE_MATCHED_IDS) {
+    const match = buildMatch(id, id === '11');
+    if (match) {
+      matches.push(match);
+    }
+  }
+  return matches;
+}
+
+export function buildEmberSeedConversations(matches: Match[]): Conversation[] {
+  const conversations: Conversation[] = [];
+
+  const priya = findMatch(matches, '11');
+  if (priya) {
+    conversations.push({
+      id: 'conv-11',
+      match: priya,
+      messages: [
+        {
+          id: 'e11-1',
+          text: 'Evenings after 8 work better for me.',
+          sentAt: new Date(Date.now() - 5400000).toISOString(),
+          isMine: false,
+        },
+        {
+          id: 'e11-2',
+          text: 'Same here — quieter is easier.',
+          sentAt: new Date(Date.now() - 4800000).toISOString(),
+          isMine: true,
+        },
+      ],
+      lastMessage: 'Same here — quieter is easier.',
+      lastMessageAt: new Date(Date.now() - 4800000).toISOString(),
+      yourTurn: false,
+      unread: false,
+    });
+  }
+
+  const elena = findMatch(matches, '13');
+  if (elena) {
+    conversations.push({
+      id: 'conv-13',
+      match: elena,
+      messages: [
+        {
+          id: 'e13-1',
+          text: 'That gallery you mentioned — still on this week?',
+          sentAt: new Date(Date.now() - 2400000).toISOString(),
+          isMine: false,
+        },
+      ],
+      lastMessage: 'That gallery you mentioned — still on this week?',
+      lastMessageAt: new Date(Date.now() - 2400000).toISOString(),
+      yourTurn: true,
+      unread: true,
+    });
+  }
+
+  const diego = findMatch(matches, '16');
+  if (diego) {
+    conversations.push({
+      id: 'conv-16',
+      match: diego,
+      messages: [
+        {
+          id: 'e16-1',
+          text: 'Coffee near the office is easier than dinner.',
+          sentAt: new Date(Date.now() - 7200000).toISOString(),
+          isMine: true,
+        },
+        {
+          id: 'e16-2',
+          text: 'Agreed. There is a quiet spot on 12th.',
+          sentAt: new Date(Date.now() - 6600000).toISOString(),
+          isMine: false,
+        },
+      ],
+      lastMessage: 'Agreed. There is a quiet spot on 12th.',
+      lastMessageAt: new Date(Date.now() - 6600000).toISOString(),
+      yourTurn: false,
+      unread: false,
+    });
+  }
+
+  const sam = findMatch(matches, '40');
+  if (sam) {
+    conversations.push({
+      id: 'conv-40',
+      match: sam,
+      messages: [],
+      yourTurn: true,
+      unread: false,
+    });
+  }
+
+  return conversations;
+}
+
+export function buildEmberSeedSwipeState(): SeedSwipeState {
+  return {
+    likedIds: [...EMBER_PRE_MATCHED_IDS, ...EMBER_PENDING_LIKE_IDS],
+    pendingLikeIds: [...EMBER_PENDING_LIKE_IDS],
+    passedIds: [...EMBER_PASSED_IDS],
+    superLikedIds: [],
+  };
 }

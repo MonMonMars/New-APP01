@@ -18,6 +18,10 @@ import {
   incomingLikeProfiles,
   INCOMING_LIKE_IDS,
   INCOMING_LIKE_IDS_SET,
+  EMBER_INCOMING_LIKE_IDS,
+  EMBER_INCOMING_LIKE_IDS_SET,
+  EMBER_PROFILE_VIEWER_IDS,
+  EMBER_RECENTLY_ACTIVE_IDS,
   mockProfiles,
   MUTUAL_MATCH_IDS,
   MUTUAL_SUPER_LIKE_IDS,
@@ -26,6 +30,9 @@ import {
   STANDOUT_IDS,
 } from '../data/profiles';
 import {
+  buildEmberSeedConversations,
+  buildEmberSeedMatches,
+  buildEmberSeedSwipeState,
   buildSeedConversations,
   buildSeedMatches,
   buildSeedSwipeState,
@@ -51,6 +58,7 @@ import {
   DiscoverFilter,
   DiscoveryPreferences,
   matchesSparkSection,
+  resolveSparkSection,
   ShowMePreference,
   SparkSection,
 } from '../types/preferences';
@@ -192,7 +200,7 @@ function filterDiscoverProfiles(
       : locationSharing
         ? preferences.maxDistanceMiles
         : 9999;
-  const section = preferences.sparkSection ?? 'dating';
+  const section = resolveSparkSection(preferences.sparkSection);
   return profiles.filter(
     (profile) =>
       !excludedIds.has(profile.id) &&
@@ -398,6 +406,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     defaultNotificationPreferences,
   );
   const [lastPassedProfileId, setLastPassedProfileId] = useState<string | null>(null);
+  const [emberDailyLikesUsed, setEmberDailyLikesUsed] = useState(0);
+  const [emberLastPassedProfileId, setEmberLastPassedProfileId] = useState<string | null>(null);
+  const [emberSparkNotesUsedToday, setEmberSparkNotesUsedToday] = useState(0);
+  const [emberLastSparkNoteDate, setEmberLastSparkNoteDate] = useState<string | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [themeMode, setThemeModeState] = useState<ThemeMode>('dark');
   const [disguiseMode, setDisguiseModeState] = useState(true);
@@ -466,6 +478,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setConversations(
           saved.conversations.length > 0 ? saved.conversations : seedConversations,
         );
+        const hasEmberData = saved.matches.some((match) =>
+          matchesSparkSection(match.profile, 'ember'),
+        );
+        if (!hasEmberData) {
+          const emberMatches = buildEmberSeedMatches();
+          const emberSwipe = buildEmberSeedSwipeState();
+          setMatches([...saved.matches, ...emberMatches]);
+          setConversations([
+            ...(saved.conversations.length > 0 ? saved.conversations : seedConversations),
+            ...buildEmberSeedConversations(emberMatches),
+          ]);
+          setLikedIds(arrayToSet([...(saved.likedIds ?? []), ...emberSwipe.likedIds]));
+          setPendingLikeIds(
+            arrayToSet([...(saved.pendingLikeIds ?? []), ...emberSwipe.pendingLikeIds]),
+          );
+          setPassedIds(arrayToSet([...(saved.passedIds ?? []), ...emberSwipe.passedIds]));
+        }
         setSparkNotes(saved.sparkNotes);
         setDailyLikesUsed(saved.dailyLikesUsed);
         setIsSparkPlus(saved.isSparkPlus);
@@ -478,6 +507,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setNotificationsEnabled(saved.notificationsEnabled);
         setNotificationPreferences(saved.notificationPreferences);
         setLastPassedProfileId(saved.lastPassedProfileId);
+        setEmberDailyLikesUsed(saved.emberDailyLikesUsed ?? 0);
+        setEmberLastPassedProfileId(saved.emberLastPassedProfileId ?? null);
+        setEmberSparkNotesUsedToday(saved.emberSparkNotesUsedToday ?? 0);
+        setEmberLastSparkNoteDate(saved.emberLastSparkNoteDate ?? null);
         setIsPaused(saved.isPaused);
         setThemeModeState(saved.themeMode);
         setDisguiseModeState(saved.disguiseMode ?? true);
@@ -533,13 +566,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       } else {
         const seedMatches = buildSeedMatches();
+        const emberMatches = buildEmberSeedMatches();
         const seedSwipe = buildSeedSwipeState();
-        setMatches(seedMatches);
-        setConversations(buildSeedConversations(seedMatches));
-        setLikedIds(arrayToSet(seedSwipe.likedIds));
-        setPendingLikeIds(arrayToSet(seedSwipe.pendingLikeIds));
-        setPassedIds(arrayToSet(seedSwipe.passedIds));
-        setSuperLikedIds(arrayToSet(seedSwipe.superLikedIds));
+        const emberSwipe = buildEmberSeedSwipeState();
+        setMatches([...seedMatches, ...emberMatches]);
+        setConversations([
+          ...buildSeedConversations(seedMatches),
+          ...buildEmberSeedConversations(emberMatches),
+        ]);
+        setLikedIds(arrayToSet([...seedSwipe.likedIds, ...emberSwipe.likedIds]));
+        setPendingLikeIds(arrayToSet([...seedSwipe.pendingLikeIds, ...emberSwipe.pendingLikeIds]));
+        setPassedIds(arrayToSet([...seedSwipe.passedIds, ...emberSwipe.passedIds]));
+        setSuperLikedIds(arrayToSet([...seedSwipe.superLikedIds, ...emberSwipe.superLikedIds]));
       }
 
       finishHydration();
@@ -583,6 +621,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       notificationsEnabled,
       notificationPreferences,
       lastPassedProfileId,
+      emberDailyLikesUsed,
+      emberLastPassedProfileId,
+      emberSparkNotesUsedToday,
+      emberLastSparkNoteDate,
       isPaused,
       themeMode,
       disguiseMode,
@@ -624,6 +666,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     notificationsEnabled,
     notificationPreferences,
     lastPassedProfileId,
+    emberDailyLikesUsed,
+    emberLastPassedProfileId,
+    emberSparkNotesUsedToday,
+    emberLastSparkNoteDate,
     isPaused,
     themeMode,
     disguiseMode,
@@ -796,18 +842,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [blockedIds, heldIds, likedIds, passedIds]);
 
   const heldProfiles = useMemo(
-    () =>
-      Array.from(heldIds)
+    () => {
+      const section = resolveSparkSection(preferences.sparkSection);
+      return Array.from(heldIds)
         .map((id) => getProfileById(id))
-        .filter((profile): profile is Profile => profile !== undefined),
-    [heldIds],
+        .filter((profile): profile is Profile =>
+          profile !== undefined && matchesSparkSection(profile, section),
+        );
+    },
+    [heldIds, preferences.sparkSection],
   );
 
   const standoutsProfiles = useMemo(() => {
     if (!privacyPreferences.personalisationEnabled) {
       return [];
     }
-    const section = preferences.sparkSection ?? 'dating';
+    const section = resolveSparkSection(preferences.sparkSection);
     return STANDOUT_IDS.map((id) => getProfileById(id)).filter(
       (profile): profile is Profile =>
         profile !== undefined &&
@@ -820,8 +870,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!privacyPreferences.showActiveStatus) {
       return [];
     }
-    const section = preferences.sparkSection ?? 'dating';
-    return RECENTLY_ACTIVE_IDS.map((id) => getProfileById(id)).filter(
+    const section = resolveSparkSection(preferences.sparkSection);
+    const ids = section === 'ember' ? EMBER_RECENTLY_ACTIVE_IDS : RECENTLY_ACTIVE_IDS;
+    return ids.map((id) => getProfileById(id)).filter(
       (profile): profile is Profile =>
         profile !== undefined &&
         !excludedIds.has(profile.id) &&
@@ -853,7 +904,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (isPaused) {
       return [];
     }
-    const incomingExcluded = new Set<string>(INCOMING_LIKE_IDS);
+    const section = resolveSparkSection(preferences.sparkSection);
+    const incomingExcluded =
+      section === 'ember' ? EMBER_INCOMING_LIKE_IDS_SET : INCOMING_LIKE_IDS_SET;
     const pool = mockProfiles.filter((p) => !incomingExcluded.has(p.id));
     let filtered = filterDiscoverProfiles(
       pool,
@@ -867,7 +920,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (incognitoActive) {
       filtered = filtered.filter(
         (profile) =>
-          INCOMING_LIKE_IDS_SET.has(profile.id) ||
+          incomingExcluded.has(profile.id) ||
           likedIds.has(profile.id) ||
           pendingLikeIds.has(profile.id) ||
           stableIncognitoVisible(profile.id),
@@ -893,9 +946,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     let unlocked = [...discoverPool.slice(0, discoverUnlockedCount)];
 
     if (isBoosted) {
+      const incomingBoost =
+        resolveSparkSection(preferences.sparkSection) === 'ember'
+          ? EMBER_INCOMING_LIKE_IDS_SET
+          : INCOMING_LIKE_IDS_SET;
       unlocked.sort((a, b) => {
-        const aIncoming = INCOMING_LIKE_IDS_SET.has(a.id) ? 1 : 0;
-        const bIncoming = INCOMING_LIKE_IDS_SET.has(b.id) ? 1 : 0;
+        const aIncoming = incomingBoost.has(a.id) ? 1 : 0;
+        const bIncoming = incomingBoost.has(b.id) ? 1 : 0;
         return bIncoming - aIncoming;
       });
     } else if (privacyPreferences.personalisationEnabled) {
@@ -924,6 +981,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     priorityProfileId,
     privacyPreferences.personalisationEnabled,
     user,
+    preferences.sparkSection,
   ]);
 
   const discoverPoolTotal = discoverPool.length;
@@ -937,17 +995,33 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [discoverPool, privacyPreferences.personalisationEnabled, user],
   );
 
+  const activeSection = resolveSparkSection(preferences.sparkSection);
+  const isEmberWorld = activeSection === 'ember';
+
   const remainingLikes = isSparkPlus
     ? Infinity
-    : Math.max(0, FREE_DAILY_LIKE_LIMIT - dailyLikesUsed);
-  const canLike = isSparkPlus || dailyLikesUsed < FREE_DAILY_LIKE_LIMIT;
+    : Math.max(
+        0,
+        FREE_DAILY_LIKE_LIMIT - (isEmberWorld ? emberDailyLikesUsed : dailyLikesUsed),
+      );
+  const canLike =
+    isSparkPlus ||
+    (isEmberWorld ? emberDailyLikesUsed : dailyLikesUsed) < FREE_DAILY_LIKE_LIMIT;
 
   const sparkNotesUsedForToday = useMemo(() => {
-    if (lastSparkNoteDate !== todayKey()) {
+    const usedDate = isEmberWorld ? emberLastSparkNoteDate : lastSparkNoteDate;
+    const usedCount = isEmberWorld ? emberSparkNotesUsedToday : sparkNotesUsedToday;
+    if (usedDate !== todayKey()) {
       return 0;
     }
-    return sparkNotesUsedToday;
-  }, [lastSparkNoteDate, sparkNotesUsedToday]);
+    return usedCount;
+  }, [
+    emberLastSparkNoteDate,
+    emberSparkNotesUsedToday,
+    isEmberWorld,
+    lastSparkNoteDate,
+    sparkNotesUsedToday,
+  ]);
 
   const dailyNoteLimit = isSparkPlus ? Infinity : FREE_DAILY_SPARK_NOTES;
   const remainingSparkNotes = isSparkPlus
@@ -958,32 +1032,75 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const incomingLikes = useMemo(() => {
     const actioned = new Set([...likedIds, ...passedIds, ...blockedIds]);
-    return incomingLikeProfiles.filter(
+    const source =
+      activeSection === 'ember'
+        ? EMBER_INCOMING_LIKE_IDS.map((id) => getProfileById(id)).filter(
+            (profile): profile is Profile => profile !== undefined,
+          )
+        : incomingLikeProfiles;
+    return source.filter(
       (profile) =>
         !actioned.has(profile.id) &&
-        !matches.some((match) => match.profile.id === profile.id),
+        !matches.some((match) => match.profile.id === profile.id) &&
+        matchesSparkSection(profile, activeSection),
     );
-  }, [likedIds, passedIds, blockedIds, matches]);
+  }, [activeSection, likedIds, passedIds, blockedIds, matches]);
+
+  const worldMatches = useMemo(
+    () => matches.filter((match) => matchesSparkSection(match.profile, activeSection)),
+    [activeSection, matches],
+  );
+
+  const worldConversations = useMemo(
+    () =>
+      conversations.filter((conversation) =>
+        matchesSparkSection(conversation.match.profile, activeSection),
+      ),
+    [activeSection, conversations],
+  );
+
+  const worldPendingLikeIds = useMemo(() => {
+    const next = new Set<string>();
+    pendingLikeIds.forEach((id) => {
+      const profile = getProfileById(id);
+      if (profile && matchesSparkSection(profile, activeSection)) {
+        next.add(id);
+      }
+    });
+    return next;
+  }, [activeSection, pendingLikeIds]);
+
+  const worldSuperLikedIds = useMemo(() => {
+    const next = new Set<string>();
+    superLikedIds.forEach((id) => {
+      const profile = getProfileById(id);
+      if (profile && matchesSparkSection(profile, activeSection)) {
+        next.add(id);
+      }
+    });
+    return next;
+  }, [activeSection, superLikedIds]);
 
   const likesTabBadge = isSparkPlus ? 0 : incomingLikes.length;
 
   const matchesTabBadge = useMemo(() => {
-    const newMatchCount = matches.filter(
+    const newMatchCount = worldMatches.filter(
       (match) =>
-        !conversations.some(
+        !worldConversations.some(
           (conversation) =>
             conversation.match.id === match.id && conversation.messages.length > 0,
         ),
     ).length;
-    const unreadCount = conversations.filter((conversation) => conversation.unread).length;
-    const yourTurnCount = conversations.filter(
+    const unreadCount = worldConversations.filter((conversation) => conversation.unread).length;
+    const yourTurnCount = worldConversations.filter(
       (conversation) => conversation.yourTurn && !conversation.unread,
     ).length;
     return newMatchCount + unreadCount + yourTurnCount;
-  }, [conversations, matches]);
+  }, [worldConversations, worldMatches]);
 
-  const canRewind = isSparkPlus && lastPassedProfileId !== null;
-  const hasRewindablePass = lastPassedProfileId !== null;
+  const worldLastPassedProfileId = isEmberWorld ? emberLastPassedProfileId : lastPassedProfileId;
+  const canRewind = isSparkPlus && worldLastPassedProfileId !== null;
+  const hasRewindablePass = worldLastPassedProfileId !== null;
 
   const isIncognitoActive = isSparkPlus && privacyPreferences.incognitoMode;
 
@@ -1103,7 +1220,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const setSparkSection = useCallback((section: SparkSection) => {
     setPreferences((prev) => {
-      if ((prev.sparkSection ?? 'dating') === section) {
+      if (resolveSparkSection(prev.sparkSection) === section) {
         return prev;
       }
       return { ...prev, sparkSection: section };
@@ -1168,31 +1285,47 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const passProfile = useCallback((profile: Profile) => {
     setPassedIds((prev) => new Set(prev).add(profile.id));
-    setLastPassedProfileId(profile.id);
+    if (matchesSparkSection(profile, 'ember')) {
+      setEmberLastPassedProfileId(profile.id);
+    } else {
+      setLastPassedProfileId(profile.id);
+    }
     maybeRecordViewer(profile.id, 0.25);
   }, [maybeRecordViewer]);
 
   const rewindLastPass = useCallback(() => {
-    if (!isSparkPlus || !lastPassedProfileId) {
+    const profileId = isEmberWorld ? emberLastPassedProfileId : lastPassedProfileId;
+    if (!isSparkPlus || !profileId) {
       return;
     }
-    const profileId = lastPassedProfileId;
     setPassedIds((prev) => {
       const next = new Set(prev);
       next.delete(profileId);
       return next;
     });
-    setLastPassedProfileId(null);
+    if (isEmberWorld) {
+      setEmberLastPassedProfileId(null);
+    } else {
+      setLastPassedProfileId(null);
+    }
     prioritizeProfileInDeck(profileId);
     setRewindKey((k) => k + 1);
-  }, [isSparkPlus, lastPassedProfileId, prioritizeProfileInDeck]);
+  }, [emberLastPassedProfileId, isEmberWorld, isSparkPlus, lastPassedProfileId, prioritizeProfileInDeck]);
 
   const profileViewers = useMemo(() => {
-    const merged = new Set([...PROFILE_VIEWER_IDS, ...profileViewerIds, ...INCOMING_LIKE_IDS]);
+    const section = resolveSparkSection(preferences.sparkSection);
+    const seedViewers =
+      section === 'ember' ? EMBER_PROFILE_VIEWER_IDS : PROFILE_VIEWER_IDS;
+    const incoming =
+      section === 'ember' ? EMBER_INCOMING_LIKE_IDS : INCOMING_LIKE_IDS;
+    const merged = new Set([...seedViewers, ...profileViewerIds, ...incoming]);
     return Array.from(merged)
       .map((id) => getProfileById(id))
-      .filter((profile): profile is Profile => profile !== undefined);
-  }, [profileViewerIds]);
+      .filter(
+        (profile): profile is Profile =>
+          profile !== undefined && matchesSparkSection(profile, section),
+      );
+  }, [preferences.sparkSection, profileViewerIds]);
 
   const profileViewCount = profileViewers.length;
 
@@ -1305,13 +1438,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       setLikedIds((prev) => new Set(prev).add(profile.id));
       if (!isSparkPlus) {
-        setDailyLikesUsed((count) => count + 1);
+        if (matchesSparkSection(profile, 'ember')) {
+          setEmberDailyLikesUsed((count) => count + 1);
+        } else {
+          setDailyLikesUsed((count) => count + 1);
+        }
       }
 
       if (sparkNote) {
         setSparkNotes((prev) => ({ ...prev, [profile.id]: sparkNote }));
         const today = todayKey();
-        if (lastSparkNoteDate !== today) {
+        if (matchesSparkSection(profile, 'ember')) {
+          if (emberLastSparkNoteDate !== today) {
+            setEmberLastSparkNoteDate(today);
+            setEmberSparkNotesUsedToday(1);
+          } else {
+            setEmberSparkNotesUsedToday((count) => count + 1);
+          }
+        } else if (lastSparkNoteDate !== today) {
           setLastSparkNoteDate(today);
           setSparkNotesUsedToday(1);
         } else {
@@ -1325,6 +1469,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const isInstantMatch =
         MUTUAL_MATCH_IDS.has(profile.id) ||
         INCOMING_LIKE_IDS_SET.has(profile.id) ||
+        EMBER_INCOMING_LIKE_IDS_SET.has(profile.id) ||
         AI_PERSONA_IDS.has(profile.id);
 
       if (!isInstantMatch) {
@@ -1398,6 +1543,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       isSparkPlus,
       momentumUpsellDismissed,
       lastSparkNoteDate,
+      emberLastSparkNoteDate,
       notificationsEnabled,
       notificationPreferences.matches,
       bonusSparkNotes,
@@ -1468,7 +1614,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setLikedIds((prev) => new Set(prev).add(profile.id));
       setSuperLikedIds((prev) => new Set(prev).add(profile.id));
       if (!isSparkPlus) {
-        setDailyLikesUsed((count) => count + 1);
+        if (matchesSparkSection(profile, 'ember')) {
+          setEmberDailyLikesUsed((count) => count + 1);
+        } else {
+          setDailyLikesUsed((count) => count + 1);
+        }
       }
 
       const isMutual =
@@ -2062,6 +2212,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setConversations(seedConversations);
     setSparkNotes({});
     setDailyLikesUsed(0);
+    setEmberDailyLikesUsed(0);
+    setEmberSparkNotesUsedToday(0);
+    setEmberLastSparkNoteDate(null);
+    setEmberLastPassedProfileId(null);
     setIsSparkPlus(false);
     setBoostActiveUntil(null);
     setIsPaused(false);
@@ -2099,8 +2253,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       hasMoreInPool,
       passedIds,
       likedIds,
-      pendingLikeIds,
-      superLikedIds,
+      pendingLikeIds: worldPendingLikeIds,
+      superLikedIds: worldSuperLikedIds,
       blockedIds,
       blockedProfiles,
       heldIds,
@@ -2110,8 +2264,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       recentlyActiveProfiles,
       dailyMostCompatible,
       getCompatibilityScore,
-      matches,
-      conversations,
+      matches: worldMatches,
+      conversations: worldConversations,
       incomingLikes,
       sparkNotes,
       dailyLikesUsed,
@@ -2220,8 +2374,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       hasMoreInPool,
       passedIds,
       likedIds,
-      pendingLikeIds,
-      superLikedIds,
+      worldPendingLikeIds,
+      worldSuperLikedIds,
       blockedIds,
       blockedProfiles,
       heldIds,
@@ -2231,8 +2385,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       recentlyActiveProfiles,
       dailyMostCompatible,
       getCompatibilityScore,
-      matches,
-      conversations,
+      worldMatches,
+      worldConversations,
       incomingLikes,
       sparkNotes,
       dailyLikesUsed,

@@ -8,7 +8,6 @@ import { ProfileVerificationDisplay } from './ProfileVerificationDisplay';
 import { VerificationBadges } from './VerificationBadges';
 import { isAiPersonaProfile } from '../data/aiPersonas';
 import { RELATIONSHIP_INTENT_LABELS } from '../types/preferences';
-import { RELATIONSHIP_STATUS_LABELS } from '../types/profile';
 import { colors, radii, spacing } from '../theme';
 import { Profile, ProfilePrompt } from '../types/profile';
 import { ProfileSocialLinks } from './ProfileSocialLinks';
@@ -94,9 +93,7 @@ export function ProfileDetailSheet({
             {profile.job && <Text style={styles.meta}>{profile.job}</Text>}
             {profile.school && <Text style={styles.meta}>{profile.school}</Text>}
             {profile.relationshipStatus === 'married' ? (
-              <Text style={styles.intentMeta}>
-                {RELATIONSHIP_STATUS_LABELS.married} · Discreet
-              </Text>
+              <Text style={styles.intentMeta}>Ember</Text>
             ) : null}
             {profile.intent && (
               <Text style={styles.intentMeta}>{RELATIONSHIP_INTENT_LABELS[profile.intent]}</Text>

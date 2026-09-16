@@ -19,7 +19,7 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { StandoutsRow } from '../components/StandoutsRow';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { DiscoverFilter, formatSearchRadius, SPARK_SECTION_HINTS } from '../types/preferences';
+import { DiscoverFilter, formatSearchRadius, resolveSparkSection, SPARK_SECTION_HINTS } from '../types/preferences';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { ActionToast } from '../components/ActionToast';
@@ -170,14 +170,14 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
           )}
         </View>
 
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Spark section</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>World</Text>
         <SparkSectionToggle
-          section={preferences.sparkSection ?? 'dating'}
+          section={resolveSparkSection(preferences.sparkSection)}
           onChange={setSparkSection}
           wide
         />
         <Text style={[styles.metaSub, { color: colors.textMuted, marginTop: spacing.sm }]}>
-          {SPARK_SECTION_HINTS[preferences.sparkSection ?? 'dating']}
+          {SPARK_SECTION_HINTS[resolveSparkSection(preferences.sparkSection)]}
         </Text>
 
         <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Filters</Text>
@@ -193,7 +193,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
           onUpgrade={() => navigation.getParent()?.navigate('SparkPlus')}
         />
 
-        {(preferences.sparkSection ?? 'dating') === 'dating' ? (
+        {resolveSparkSection(preferences.sparkSection) === 'spark' ? (
           <AiPersonasRow onSelect={handleSelectAiPersona} />
         ) : null}
 

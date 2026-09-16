@@ -190,7 +190,7 @@ export function ProfileCard({
           />
           {profile.relationshipStatus === 'married' ? (
             <View style={styles.discreetChip}>
-              <Text style={styles.discreetChipText}>Discreet</Text>
+              <Text style={styles.discreetChipText}>Ember</Text>
             </View>
           ) : null}
         </View>

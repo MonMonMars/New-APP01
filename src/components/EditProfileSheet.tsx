@@ -216,9 +216,9 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
             multiline
           />
 
-          <Text style={[styles.label, { color: colors.textMuted }]}>Status</Text>
+          <Text style={[styles.label, { color: colors.textMuted }]}>World</Text>
           <Text style={[styles.openingMoveHint, { color: colors.textMuted }]}>
-            Married profiles appear in the Married Discover section. Dating stays separate.
+            Ember is a private clone of Spark for married groups. Likes, matches, and chats stay separate.
           </Text>
           <View style={styles.intentRow}>
             {statusOptions.map((option) => {

@@ -8,8 +8,10 @@ import { MatchModal } from '../components/MatchModal';
 import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
 import { SparkNoteSheet } from '../components/SparkNoteSheet';
 import { ScreenHeader } from '../components/ScreenHeader';
+import { SparkSectionToggle } from '../components/SparkSectionToggle';
 import { useApp } from '../context/AppContext';
 import { getProfileById } from '../data/profiles';
+import { resolveSparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
 import { colors, radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -30,6 +32,8 @@ export function LikesScreen() {
     getConversationIdForProfile,
     remainingSparkNotes,
     canSendSparkNote,
+    preferences,
+    setSparkSection,
   } = useApp();
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
@@ -107,6 +111,13 @@ export function LikesScreen() {
         rightIcon="diamond-outline"
         onRightPress={openPaywall}
       />
+      <View style={styles.worldBar}>
+        <SparkSectionToggle
+          section={resolveSparkSection(preferences.sparkSection)}
+          onChange={setSparkSection}
+          wide
+        />
+      </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.banner}>
@@ -262,6 +273,10 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  worldBar: {
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.sm,
   },
   scrollContent: {
     paddingBottom: spacing.xl,

@@ -5,6 +5,7 @@ import Animated, {
   SharedValue,
   useAnimatedStyle,
   useSharedValue,
+  withSequence,
   withSpring,
 } from 'react-native-reanimated';
 
@@ -86,10 +87,13 @@ function TargetButton({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       onPressIn={() => {
-        pressScale.value = withSpring(0.92, PRESS_SPRING);
+        pressScale.value = withSpring(0.88, PRESS_SPRING);
       }}
       onPressOut={() => {
-        pressScale.value = withSpring(1, PRESS_SPRING);
+        pressScale.value = withSequence(
+          withSpring(1.08, PRESS_SPRING),
+          withSpring(1, PRESS_SPRING),
+        );
       }}
     >
       <Animated.View

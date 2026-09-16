@@ -8,8 +8,8 @@ export const MOTION = {
     exit: 200,
   },
   spring: {
-    press: { damping: 14, stiffness: 420, mass: 0.55 },
-    pop: { damping: 16, stiffness: 340, mass: 0.72 },
+    press: { damping: 12, stiffness: 480, mass: 0.48 },
+    pop: { damping: 12, stiffness: 380, mass: 0.58 },
     sheet: { damping: 22, stiffness: 280, mass: 0.85 },
     gentle: { damping: 20, stiffness: 260, mass: 0.7 },
     bounce: { damping: 11, stiffness: 380, mass: 0.55 },

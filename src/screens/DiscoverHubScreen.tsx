@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCallback, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DailyBatchIndicator } from '../components/DailyBatchIndicator';
@@ -131,6 +131,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
             colors={colors}
             onPress={openMap}
             featured
+            mapPreview
           />
           <HubTile icon="compass-outline" label="Explore" colors={colors} onPress={openExplore} />
           <HubTile
@@ -294,6 +295,7 @@ function HubTile({
   colors,
   onPress,
   featured,
+  mapPreview,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
@@ -301,6 +303,7 @@ function HubTile({
   colors: { surface: string; text: string; textMuted: string; border: string };
   onPress: () => void;
   featured?: boolean;
+  mapPreview?: boolean;
 }) {
   return (
     <AnimatedPressable
@@ -312,9 +315,25 @@ function HubTile({
       onPress={onPress}
       accessibilityLabel={label}
     >
-      <Ionicons name={icon} size={22} color={colors.text} />
-      <Text style={[styles.hubTileLabel, { color: colors.text }]}>{label}</Text>
-      {hint ? <Text style={[styles.hubTileHint, { color: colors.textMuted }]}>{hint}</Text> : null}
+      {mapPreview ? (
+        <>
+          <Image
+            source={{
+              uri: 'https://a.basemaps.cartocdn.com/rastertiles/voyager/12/1206/1539@2x.png',
+            }}
+            style={styles.hubMapPreview}
+          />
+          <View style={styles.hubMapScrim} />
+        </>
+      ) : (
+        <Ionicons name={icon} size={22} color={colors.text} />
+      )}
+      <Text style={[styles.hubTileLabel, { color: mapPreview ? '#fff' : colors.text }]}>{label}</Text>
+      {hint ? (
+        <Text style={[styles.hubTileHint, { color: mapPreview ? 'rgba(255,255,255,0.9)' : colors.textMuted }]}>
+          {hint}
+        </Text>
+      ) : null}
     </AnimatedPressable>
   );
 }
@@ -348,18 +367,30 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     alignItems: 'center',
     gap: spacing.xs,
+    overflow: 'hidden',
   },
   hubTileFeatured: {
     width: '100%',
+    minHeight: 132,
     paddingVertical: spacing.lg,
+    justifyContent: 'flex-end',
+  },
+  hubMapPreview: {
+    ...StyleSheet.absoluteFill,
+  },
+  hubMapScrim: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: 'rgba(15,15,16,0.38)',
   },
   hubTileLabel: {
     fontSize: 13,
     fontWeight: '700',
+    zIndex: 1,
   },
   hubTileHint: {
     fontSize: 12,
     fontWeight: '600',
+    zIndex: 1,
   },
   metaCard: {
     borderRadius: radii.card,

@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActivityAlertSheet } from '../../components/disguise/ActivityAlertSheet';
 import { AdLandingSheet } from '../../components/disguise/AdLandingSheet';
 import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
-import { FeedPersonRow } from '../../components/disguise/FeedPersonRow';
+import { FeedPersonThumbnail } from '../../components/disguise/FeedPersonThumbnail';
 import { NewsArticleSheet } from '../../components/disguise/NewsArticleSheet';
 import { useTheme } from '../../context/ThemeContext';
 import {
@@ -50,20 +50,16 @@ export function DisguiseAlertsScreen() {
               style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.border }]}
             >
               {item.person ? (
-                <FeedPersonRow
-                  imageUrl={item.person.avatarUrl}
-                  overlayText={item.person.overlayText ?? 'LIVE'}
-                  overlayVariant={item.person.overlayVariant ?? 'news'}
-                  plainAvatar={!item.person.overlayVariant}
-                  contentKind={item.person.overlayVariant ? 'profile' : 'alert'}
-                  title={item.person.name}
-                  body={item.text}
-                  titleStyle={{ color: colors.text }}
-                  bodyStyle={{ color: colors.textMuted, fontWeight: '500' }}
-                  rightAccessory={
-                    <Text style={[styles.time, { color: colors.textMuted }]}>{item.time}</Text>
-                  }
-                />
+                <View style={styles.personRow}>
+                  <FeedPersonThumbnail
+                    imageUrl={item.person.avatarUrl}
+                    overlayText={item.person.overlayText ?? 'LIVE'}
+                    overlayVariant={item.person.overlayVariant ?? 'news'}
+                    plainAvatar={!item.person.overlayVariant}
+                    contentKind={item.person.overlayVariant ? 'profile' : 'alert'}
+                  />
+                  <Text style={[styles.time, { color: colors.textMuted }]}>{item.time}</Text>
+                </View>
               ) : (
                 <>
                   <View style={[styles.iconWrap, { backgroundColor: 'rgba(59,130,246,0.12)' }]}>
@@ -108,6 +104,12 @@ const styles = StyleSheet.create({
     borderRadius: radii.card,
     borderWidth: StyleSheet.hairlineWidth,
     marginBottom: spacing.sm,
+  },
+  personRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
   },
   iconWrap: {
     width: 44,

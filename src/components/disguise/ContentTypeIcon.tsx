@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { ReactNode } from 'react';
-import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 /** Visual category for Pulse / disguise feed media — matches sponsor “i” icon scale (14px). */
 export type ContentTypeKind = 'news' | 'ad' | 'sponsored' | 'social' | 'profile' | 'trending' | 'alert';
@@ -25,6 +25,10 @@ type ContentTypeIconProps = {
   size?: number;
 };
 
+export function contentTypeLabel(kind: ContentTypeKind): string {
+  return KIND_META[kind].label;
+}
+
 export function ContentTypeIcon({ kind, size = ICON_SIZE }: ContentTypeIconProps) {
   const meta = KIND_META[kind];
   return (
@@ -34,6 +38,17 @@ export function ContentTypeIcon({ kind, size = ICON_SIZE }: ContentTypeIconProps
       color={meta.color}
       accessibilityLabel={meta.label}
     />
+  );
+}
+
+/** Word + icon row — same pattern as “Sponsored ⓘ”. */
+export function ContentTypeLabel({ kind }: { kind: ContentTypeKind }) {
+  const meta = KIND_META[kind];
+  return (
+    <View style={styles.labelRow}>
+      <Text style={[styles.labelText, { color: meta.color }]}>{meta.label}</Text>
+      <ContentTypeIcon kind={kind} />
+    </View>
   );
 }
 
@@ -76,6 +91,17 @@ export function MediaWithContentBadge({
 const BADGE_SIZE = 20;
 
 const styles = StyleSheet.create({
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  labelText: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
   cornerWrap: {
     position: 'relative',
   },

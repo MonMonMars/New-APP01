@@ -6,7 +6,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { DisguisedProfilePost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { ContentTypeIcon, MediaWithContentBadge } from './ContentTypeIcon';
-import { FeedPersonRow } from './FeedPersonRow';
+import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { PROFILE_AVATAR_SIZE } from './DisguiseOverlayAvatar';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
 import { profileIdFromPostId } from '../../utils/resolveDisguiseProfile';
@@ -52,20 +52,14 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   );
 
   const avatarRow = (
-    <FeedPersonRow
+    <FeedPersonThumbnail
       imageUrl={post.avatarUrl}
       overlayText={maskSnippet}
       overlayVariant={maskVariant}
       contentKind="profile"
-      body={post.overlayText}
       size={PROFILE_AVATAR_SIZE}
-      bodyStyle={
-        post.variant === 'ad'
-          ? styles.quoteAd
-          : post.variant === 'social'
-            ? { color: colors.text }
-            : { color: colors.text }
-      }
+      onPress={openPreview}
+      accessibilityLabel={`View profile: ${post.name}`}
     />
   );
 
@@ -73,18 +67,15 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
     return (
       <>
         <View style={[styles.socialCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <AnimatedPressable onPress={openPreview} accessibilityRole="button">
-            <FeedPersonRow
-              imageUrl={post.avatarUrl}
-              overlayText={maskSnippet}
-              overlayVariant="news"
-              contentKind="profile"
-              title={post.headline}
-              subtitle={`${post.handle} · ${post.timeAgo}`}
-              titleStyle={{ color: colors.text }}
-              size={PROFILE_AVATAR_SIZE}
-            />
-          </AnimatedPressable>
+          <FeedPersonThumbnail
+            imageUrl={post.avatarUrl}
+            overlayText={maskSnippet}
+            overlayVariant="news"
+            contentKind="profile"
+            size={PROFILE_AVATAR_SIZE}
+            onPress={openPreview}
+            accessibilityLabel={`View profile: ${post.name}`}
+          />
           <AnimatedPressable onPress={openPreview}>
             <Text style={[styles.socialBody, { color: colors.text }]}>{post.summary}</Text>
           </AnimatedPressable>
@@ -124,16 +115,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
           <View style={styles.body}>
             <Text style={styles.brand}>{post.headline}</Text>
             <Text style={styles.tagline}>{post.summary}</Text>
-            <AnimatedPressable
-              onPress={(event) => {
-                event.stopPropagation();
-                openPreview();
-              }}
-              accessibilityRole="button"
-              accessibilityLabel="View profile photo"
-            >
-              {avatarRow}
-            </AnimatedPressable>
+            {avatarRow}
             <Text style={styles.spotlightHint} numberOfLines={2}>
               Reader spotlight — verified comment from a Pulse member.
             </Text>
@@ -172,18 +154,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
             {post.summary}
           </Text>
 
-          <View style={styles.reportersRow}>
-            <AnimatedPressable
-              onPress={(event) => {
-                event.stopPropagation();
-                openPreview();
-              }}
-              accessibilityRole="button"
-              accessibilityLabel="View profile — masked BREAKING avatar"
-            >
-              {avatarRow}
-            </AnimatedPressable>
-          </View>
+          <View style={styles.reportersRow}>{avatarRow}</View>
           <OwnerHint label={post.hintLabel} color={colors.gradientEnd} />
         </View>
       </AnimatedPressable>

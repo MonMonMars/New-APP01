@@ -5,7 +5,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { NewsPost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { MediaWithContentBadge } from './ContentTypeIcon';
-import { FeedPersonRow } from './FeedPersonRow';
+import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { NewsArticleSheet } from './NewsArticleSheet';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
 import { AnimatedPressable } from '../AnimatedPressable';
@@ -53,27 +53,15 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
           {post.reporters.length > 0 && (
             <View style={styles.reportersRow}>
               {post.reporters.map((reporter) => (
-                <AnimatedPressable
+                <FeedPersonThumbnail
                   key={reporter.id}
-                  onPress={(event) => {
-                    event.stopPropagation();
-                    openReporter(reporter);
-                  }}
-                  accessibilityRole="button"
+                  plainAvatar
+                  contentKind={reporter.profileId ? 'profile' : 'news'}
+                  imageUrl={reporter.avatarUrl}
+                  onPress={() => openReporter(reporter)}
                   accessibilityLabel={`View photos from ${reporter.name}`}
-                >
-                  <FeedPersonRow
-                    plainAvatar
-                    contentKind={reporter.profileId ? 'profile' : 'news'}
-                    imageUrl={reporter.avatarUrl}
-                    title={reporter.name}
-                    subtitle="Reader comment"
-                    body={reporter.quote}
-                    titleStyle={{ color: colors.text }}
-                    bodyStyle={{ color: colors.text }}
-                    style={styles.reporterRow}
-                  />
-                </AnimatedPressable>
+                  style={styles.reporterRow}
+                />
               ))}
             </View>
           )}

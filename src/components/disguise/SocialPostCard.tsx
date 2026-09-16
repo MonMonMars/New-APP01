@@ -9,7 +9,8 @@ import { radii, spacing } from '../../theme';
 import { maskVariantToContentKind } from './ContentTypeIcon';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
 import { DisguisePhotoLightbox } from './DisguisePhotoLightbox';
-import { FeedPersonRow } from './FeedPersonRow';
+import { FeedPersonThumbnail } from './FeedPersonThumbnail';
+import { PersonPreviewSheet } from './PersonPreviewSheet';
 import { SocialCommentSheet } from './SocialCommentSheet';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -29,6 +30,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
   const [upvoted, setUpvoted] = useState(false);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [authorOpen, setAuthorOpen] = useState(false);
   const isSaved = pulseSocial.savedPostIds.includes(post.id);
   const likeCount = upvoted ? post.likes + 1 : post.likes;
 
@@ -83,23 +85,21 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
       <View style={styles.header}>
         <View style={styles.headerMain}>
           {post.maskAvatar !== false && post.avatarMask ? (
-            <FeedPersonRow
+            <FeedPersonThumbnail
               imageUrl={post.avatarUrl}
               overlayText={maskSnippet}
               overlayVariant={post.avatarMask.variant}
               contentKind={maskVariantToContentKind(post.avatarMask.variant)}
-              title={post.author}
-              subtitle={`${post.handle} · ${post.timeAgo}`}
-              titleStyle={{ color: colors.text }}
+              onPress={() => setAuthorOpen(true)}
+              accessibilityLabel={`View profile: ${post.author}`}
             />
           ) : (
-            <FeedPersonRow
+            <FeedPersonThumbnail
               plainAvatar
               contentKind="social"
               imageUrl={post.avatarUrl}
-              title={post.author}
-              subtitle={`${post.handle} · ${post.timeAgo}`}
-              titleStyle={{ color: colors.text }}
+              onPress={() => setAuthorOpen(true)}
+              accessibilityLabel={`View profile: ${post.author}`}
             />
           )}
         </View>
@@ -171,6 +171,11 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
         onClose={() => setPhotoOpen(false)}
       />
       <SocialCommentSheet visible={commentsOpen} post={post} onClose={() => setCommentsOpen(false)} />
+      <PersonPreviewSheet
+        visible={authorOpen}
+        reporter={photoReporter}
+        onClose={() => setAuthorOpen(false)}
+      />
     </View>
   );
 }

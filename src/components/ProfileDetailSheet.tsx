@@ -9,7 +9,7 @@ import { VerificationBadges } from './VerificationBadges';
 import { isAiPersonaProfile } from '../data/aiPersonas';
 import { RELATIONSHIP_INTENT_LABELS } from '../types/preferences';
 import { colors, radii, spacing } from '../theme';
-import { Profile, ProfilePrompt } from '../types/profile';
+import { emberRelationshipLabel, Profile, ProfilePrompt } from '../types/profile';
 import { ProfileSocialLinks } from './ProfileSocialLinks';
 import { AnimatedPressable } from './AnimatedPressable';
 
@@ -47,6 +47,8 @@ export function ProfileDetailSheet({
   if (!profile) {
     return null;
   }
+
+  const emberStatus = emberRelationshipLabel(profile.relationshipStatus);
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
@@ -92,8 +94,8 @@ export function ProfileDetailSheet({
             )}
             {profile.job && <Text style={styles.meta}>{profile.job}</Text>}
             {profile.school && <Text style={styles.meta}>{profile.school}</Text>}
-            {profile.relationshipStatus === 'married' ? (
-              <Text style={[styles.intentMeta, { color: colors.ember }]}>Ember</Text>
+            {emberStatus ? (
+              <Text style={[styles.intentMeta, { color: colors.ember }]}>{emberStatus}</Text>
             ) : null}
             {profile.intent && (
               <Text style={styles.intentMeta}>{RELATIONSHIP_INTENT_LABELS[profile.intent]}</Text>

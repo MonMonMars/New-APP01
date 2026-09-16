@@ -113,12 +113,46 @@ export type RelationshipIntent =
   | 'new_friends'
   | 'not_sure';
 
-export type RelationshipStatus = 'single' | 'married';
+export type RelationshipStatus = 'single' | 'married' | 'divorced';
 
 export const RELATIONSHIP_STATUS_LABELS: Record<RelationshipStatus, string> = {
   single: 'Single',
   married: 'Married',
+  divorced: 'Divorced',
 };
+
+export function isEmberRelationshipStatus(status?: RelationshipStatus | null): boolean {
+  switch (status) {
+    case 'married':
+    case 'divorced':
+      return true;
+    case 'single':
+    case undefined:
+    case null:
+      return false;
+    default: {
+      const _exhaustive: never = status;
+      return _exhaustive;
+    }
+  }
+}
+
+/** Married / Divorced labels for Ember cards. Spark hides relationship status. */
+export function emberRelationshipLabel(status?: RelationshipStatus | null): string | null {
+  switch (status) {
+    case 'married':
+    case 'divorced':
+      return RELATIONSHIP_STATUS_LABELS[status];
+    case 'single':
+    case undefined:
+    case null:
+      return null;
+    default: {
+      const _exhaustive: never = status;
+      return _exhaustive;
+    }
+  }
+}
 
 export type UserProfile = {
   name: string;

@@ -17,7 +17,7 @@ import { AiPersonaBadge } from './AiPersonaBadge';
 import { VideoProfileOverlay } from './VideoProfileOverlay';
 import { VerificationBadges } from './VerificationBadges';
 import { colors, radii, spacing } from '../theme';
-import { Profile } from '../types/profile';
+import { emberRelationshipLabel, Profile } from '../types/profile';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type ProfileCardProps = {
@@ -48,6 +48,7 @@ export function ProfileCard({
   const isTop = index === activeIndex;
   const [photoIndex, setPhotoIndex] = useState(0);
   const photoCount = profile.photos.length;
+  const emberStatus = emberRelationshipLabel(profile.relationshipStatus);
   const spotlightPulse = useSharedValue(0);
 
   useEffect(() => {
@@ -188,9 +189,9 @@ export function ProfileCard({
             personVerified={profile.personVerified ?? profile.verified}
             size="sm"
           />
-          {profile.relationshipStatus === 'married' ? (
+          {emberStatus ? (
             <View style={styles.discreetChip}>
-              <Text style={styles.discreetChipText}>Ember</Text>
+              <Text style={styles.discreetChipText}>{emberStatus}</Text>
             </View>
           ) : null}
         </View>

@@ -31,10 +31,9 @@ const intentOptions: { value: RelationshipIntent; label: string }[] = [
   { value: 'not_sure', label: 'Still figuring it out' },
 ];
 
-const statusOptions: { value: RelationshipStatus; label: string }[] = [
-  { value: 'single', label: RELATIONSHIP_STATUS_LABELS.single },
-  { value: 'married', label: RELATIONSHIP_STATUS_LABELS.married },
-];
+const statusOptions: { value: RelationshipStatus; label: string }[] = (
+  ['single', 'married', 'divorced'] as const
+).map((value) => ({ value, label: RELATIONSHIP_STATUS_LABELS[value] }));
 
 export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfileSheetProps) {
   const insets = useSafeAreaInsets();
@@ -218,7 +217,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
 
           <Text style={[styles.label, { color: colors.textMuted }]}>Status</Text>
           <Text style={[styles.openingMoveHint, { color: colors.textMuted }]}>
-            Optional — this doesn't lock Spark or Ember. Switch worlds from the title on Discover. Anyone can join Ember.
+            Optional — shown as Married or Divorced on Ember only. Hidden on Spark. Does not lock which world you can join.
           </Text>
           <View style={styles.intentRow}>
             {statusOptions.map((option) => {

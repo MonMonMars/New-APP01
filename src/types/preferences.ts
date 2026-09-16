@@ -1,6 +1,6 @@
 export type ShowMePreference = 'women' | 'men' | 'everyone';
 
-import { RelationshipIntent } from './profile';
+import { RelationshipIntent, RelationshipStatus, isEmberRelationshipStatus } from './profile';
 
 export type DiscoverFilter = 'active_today' | 'new_here' | 'has_bio' | 'verified';
 
@@ -69,15 +69,15 @@ export function resolveSparkSection(section?: string | null): SparkSection {
 }
 
 export function matchesSparkSection(
-  profile: { relationshipStatus?: 'single' | 'married' },
+  profile: { relationshipStatus?: RelationshipStatus },
   section: SparkSection,
 ): boolean {
   const status = profile.relationshipStatus ?? 'single';
   switch (section) {
     case 'ember':
-      return status === 'married';
+      return isEmberRelationshipStatus(status);
     case 'spark':
-      return status !== 'married';
+      return !isEmberRelationshipStatus(status);
     default: {
       const _exhaustive: never = section;
       return _exhaustive;

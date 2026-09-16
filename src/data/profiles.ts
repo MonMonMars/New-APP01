@@ -41,6 +41,8 @@ export const MARRIED_PROFILE_IDS = new Set([
   '4', '11', '13', '16', '19', '23', '28', '32', '36', '40',
   '44', '48', '52', '59', '60', '66', '68', '75', '79', '83', '87',
 ]);
+/** Subset of Ember deck shown as Divorced instead of Married */
+export const DIVORCED_PROFILE_IDS = new Set(['16', '28', '40', '60', '68', '79', '87']);
 export const EMBER_PRE_MATCHED_IDS = ['11', '13', '16', '40'] as const;
 export const EMBER_PENDING_LIKE_IDS = ['23', '28', '32'] as const;
 export const EMBER_INCOMING_LIKE_IDS = ['36', '44', '48', '59', '75', '79'] as const;
@@ -139,7 +141,12 @@ function withRelationshipStatus(profile: Profile): Profile {
   if (profile.isAiPersona) {
     return { ...profile, relationshipStatus: profile.relationshipStatus ?? 'single' };
   }
-  const status: RelationshipStatus = MARRIED_PROFILE_IDS.has(profile.id) ? 'married' : 'single';
+  let status: RelationshipStatus = 'single';
+  if (DIVORCED_PROFILE_IDS.has(profile.id)) {
+    status = 'divorced';
+  } else if (MARRIED_PROFILE_IDS.has(profile.id)) {
+    status = 'married';
+  }
   return { ...profile, relationshipStatus: profile.relationshipStatus ?? status };
 }
 

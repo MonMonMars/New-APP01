@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
-import { Alert, Image, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../../context/AppContext';
@@ -12,6 +12,7 @@ import { MatchToast } from '../MatchToast';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
 import { FadeSlideIn } from '../motion/FadeSlideIn';
 import { AnimatedPressable } from '../AnimatedPressable';
+import { DisguiseMiniPhotoPager } from './DisguiseMiniPhotoPager';
 import { DisguiseMiniSparkBar } from './DisguiseMiniSparkBar';
 
 type PersonPreviewSheetProps = {
@@ -50,19 +51,43 @@ export function PersonPreviewSheet({
     }
   }, [visible, initialPhotoIndex, reporter?.id]);
 
+  const linkedProfile = reporter ? resolveReporterSparkProfile(reporter) : null;
+
+  const displayPhotos = useMemo(() => {
+    if (!reporter) {
+      return [];
+    }
+    const reporterPhotos =
+      reporter.photos.length > 0 ? reporter.photos : [reporter.avatarUrl];
+    if (!linkedProfile || linkedProfile.photos.length === 0) {
+      return reporterPhotos;
+    }
+    const merged = [...reporterPhotos];
+    for (const url of linkedProfile.photos) {
+      if (!merged.includes(url)) {
+        merged.push(url);
+      }
+    }
+    return merged;
+  }, [linkedProfile, reporter]);
+
+  useEffect(() => {
+    if (photoIndex >= displayPhotos.length && displayPhotos.length > 0) {
+      setPhotoIndex(0);
+    }
+  }, [displayPhotos.length, photoIndex]);
+
   if (!reporter) {
     return null;
   }
 
-  const linkedProfile = resolveReporterSparkProfile(reporter);
   const sparkActionsEnabled = linkedProfile !== null;
   const profileId = linkedProfile?.id;
   const liked = profileId ? likedIds.has(profileId) : false;
   const superLiked = profileId ? superLikedIds.has(profileId) : false;
   const passed = profileId ? passedIds.has(profileId) : false;
 
-  const photoCount = reporter.photos.length;
-  const photoUrl = reporter.photos[photoIndex] ?? reporter.avatarUrl;
+  const photoCount = displayPhotos.length;
 
   const guardLikeLimit = (): boolean => {
     if (!canLike) {
@@ -114,20 +139,6 @@ export function PersonPreviewSheet({
     onClose();
   };
 
-  const showPrevPhoto = () => {
-    if (photoCount <= 1) {
-      return;
-    }
-    setPhotoIndex((index) => (index - 1 + photoCount) % photoCount);
-  };
-
-  const showNextPhoto = () => {
-    if (photoCount <= 1) {
-      return;
-    }
-    setPhotoIndex((index) => (index + 1) % photoCount);
-  };
-
   return (
     <>
       <AnimatedOverlay visible={visible} onClose={onClose} variant="center">
@@ -176,31 +187,11 @@ export function PersonPreviewSheet({
           ) : null}
 
           <FadeSlideIn replayKey={`${visible}-${photoIndex}`} index={3}>
-            <View style={styles.photoRow}>
-              {photoCount > 1 ? (
-                <AnimatedPressable
-                  onPress={showPrevPhoto}
-                  style={styles.photoNav}
-                  accessibilityLabel="Previous photo"
-                  scaleTo={0.9}
-                >
-                  <Ionicons name="chevron-back" size={18} color={colors.textMuted} />
-                </AnimatedPressable>
-              ) : null}
-
-              <Image source={{ uri: photoUrl }} style={styles.photo} resizeMode="cover" />
-
-              {photoCount > 1 ? (
-                <AnimatedPressable
-                  onPress={showNextPhoto}
-                  style={styles.photoNav}
-                  accessibilityLabel="Next photo"
-                  scaleTo={0.9}
-                >
-                  <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-                </AnimatedPressable>
-              ) : null}
-            </View>
+            <DisguiseMiniPhotoPager
+              photos={displayPhotos}
+              index={photoIndex}
+              onIndexChange={setPhotoIndex}
+            />
           </FadeSlideIn>
 
           {photoCount > 1 ? (
@@ -282,22 +273,8 @@ const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 15,
   },
-  photoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    marginTop: spacing.xs,
-  },
-  photoNav: {
-    padding: 2,
-  },
-  photo: {
-    flex: 1,
-    height: 120,
-    borderRadius: radii.card - 2,
-    backgroundColor: '#111',
-  },
   photoMeta: {
+    marginTop: spacing.xs,
     fontSize: 10,
     fontWeight: '600',
     textAlign: 'center',

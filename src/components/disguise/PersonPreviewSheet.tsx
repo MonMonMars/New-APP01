@@ -7,7 +7,8 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
-import { resolveDisguiseProfile } from '../../utils/resolveDisguiseProfile';
+import { resolveReporterSparkProfile } from '../../utils/resolveDisguiseProfile';
+import { MatchToast } from '../MatchToast';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
 import { FadeSlideIn } from '../motion/FadeSlideIn';
 import { AnimatedPressable } from '../AnimatedPressable';
@@ -40,10 +41,12 @@ export function PersonPreviewSheet({
   } = useApp();
 
   const [photoIndex, setPhotoIndex] = useState(initialPhotoIndex);
+  const [matchToastName, setMatchToastName] = useState<string | null>(null);
 
   useEffect(() => {
     if (visible) {
       setPhotoIndex(initialPhotoIndex);
+      setMatchToastName(null);
     }
   }, [visible, initialPhotoIndex, reporter?.id]);
 
@@ -51,8 +54,8 @@ export function PersonPreviewSheet({
     return null;
   }
 
-  const linkedProfile = resolveDisguiseProfile(reporter.id, reporter.profileId);
-  const sparkLinked = linkedProfile !== null;
+  const linkedProfile = resolveReporterSparkProfile(reporter);
+  const sparkActionsEnabled = linkedProfile !== null;
   const profileId = linkedProfile?.id;
   const liked = profileId ? likedIds.has(profileId) : false;
   const superLiked = profileId ? superLikedIds.has(profileId) : false;
@@ -69,11 +72,18 @@ export function PersonPreviewSheet({
     return true;
   };
 
+  const notifyMatch = (name: string) => {
+    setMatchToastName(name);
+  };
+
   const handleLike = () => {
     if (!linkedProfile || !guardLikeLimit()) {
       return;
     }
-    likeProfile(linkedProfile);
+    const match = likeProfile(linkedProfile);
+    if (match) {
+      notifyMatch(linkedProfile.name);
+    }
   };
 
   const handleUnlike = () => {
@@ -87,7 +97,10 @@ export function PersonPreviewSheet({
     if (!linkedProfile || !guardLikeLimit() || superLiked) {
       return;
     }
-    superLikeProfile(linkedProfile);
+    const match = superLikeProfile(linkedProfile);
+    if (match) {
+      notifyMatch(linkedProfile.name);
+    }
   };
 
   const handlePass = () => {
@@ -116,109 +129,119 @@ export function PersonPreviewSheet({
   };
 
   return (
-    <AnimatedOverlay visible={visible} onClose={onClose} variant="center">
-      <View
-        style={[
-          styles.card,
-          {
-            backgroundColor: colors.surface,
-            borderColor: colors.border,
-            marginTop: insets.top * 0.15,
-          },
-        ]}
-      >
-        <FadeSlideIn replayKey={visible} index={0}>
-          <View style={styles.header}>
-            <View style={styles.headerText}>
-              <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
-                {reporter.name}
-                {linkedProfile ? `, ${linkedProfile.age}` : ''}
-              </Text>
-              {linkedProfile ? (
-                <Text style={[styles.meta, { color: colors.textMuted }]} numberOfLines={1}>
-                  {linkedProfile.distanceMiles} mi away
-                  {linkedProfile.job ? ` · ${linkedProfile.job}` : ''}
+    <>
+      <AnimatedOverlay visible={visible} onClose={onClose} variant="center">
+        <View
+          style={[
+            styles.card,
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.border,
+              marginTop: insets.top * 0.15,
+            },
+          ]}
+        >
+          <FadeSlideIn replayKey={visible} index={0}>
+            <View style={styles.header}>
+              <View style={styles.headerText}>
+                <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
+                  {reporter.name}
+                  {linkedProfile ? `, ${linkedProfile.age}` : ''}
                 </Text>
+                {linkedProfile ? (
+                  <Text style={[styles.meta, { color: colors.textMuted }]} numberOfLines={1}>
+                    {linkedProfile.distanceMiles} mi away
+                    {linkedProfile.job ? ` · ${linkedProfile.job}` : ''}
+                  </Text>
+                ) : null}
+              </View>
+              <AnimatedPressable onPress={onClose} hitSlop={10} accessibilityLabel="Close" scaleTo={0.88}>
+                <Ionicons name="close" size={20} color={colors.textMuted} />
+              </AnimatedPressable>
+            </View>
+          </FadeSlideIn>
+
+          <FadeSlideIn replayKey={visible} index={1}>
+            <Text style={[styles.quote, { color: colors.text }]} numberOfLines={3}>
+              &ldquo;{reporter.quote}&rdquo;
+            </Text>
+          </FadeSlideIn>
+
+          {linkedProfile?.bio ? (
+            <FadeSlideIn replayKey={visible} index={2}>
+              <Text style={[styles.bio, { color: colors.textMuted }]} numberOfLines={2}>
+                {linkedProfile.bio}
+              </Text>
+            </FadeSlideIn>
+          ) : null}
+
+          <FadeSlideIn replayKey={`${visible}-${photoIndex}`} index={3}>
+            <View style={styles.photoRow}>
+              {photoCount > 1 ? (
+                <AnimatedPressable
+                  onPress={showPrevPhoto}
+                  style={styles.photoNav}
+                  accessibilityLabel="Previous photo"
+                  scaleTo={0.9}
+                >
+                  <Ionicons name="chevron-back" size={18} color={colors.textMuted} />
+                </AnimatedPressable>
+              ) : null}
+
+              <Image source={{ uri: photoUrl }} style={styles.photo} resizeMode="cover" />
+
+              {photoCount > 1 ? (
+                <AnimatedPressable
+                  onPress={showNextPhoto}
+                  style={styles.photoNav}
+                  accessibilityLabel="Next photo"
+                  scaleTo={0.9}
+                >
+                  <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+                </AnimatedPressable>
               ) : null}
             </View>
-            <AnimatedPressable onPress={onClose} hitSlop={10} accessibilityLabel="Close" scaleTo={0.88}>
-              <Ionicons name="close" size={20} color={colors.textMuted} />
-            </AnimatedPressable>
-          </View>
-        </FadeSlideIn>
-
-        <FadeSlideIn replayKey={visible} index={1}>
-          <Text style={[styles.quote, { color: colors.text }]} numberOfLines={3}>
-            &ldquo;{reporter.quote}&rdquo;
-          </Text>
-        </FadeSlideIn>
-
-        {linkedProfile?.bio ? (
-          <FadeSlideIn replayKey={visible} index={2}>
-            <Text style={[styles.bio, { color: colors.textMuted }]} numberOfLines={2}>
-              {linkedProfile.bio}
-            </Text>
           </FadeSlideIn>
-        ) : null}
 
-        <FadeSlideIn replayKey={`${visible}-${photoIndex}`} index={3}>
-          <View style={styles.photoRow}>
-            {photoCount > 1 ? (
-              <AnimatedPressable
-                onPress={showPrevPhoto}
-                style={styles.photoNav}
-                accessibilityLabel="Previous photo"
-                scaleTo={0.9}
-              >
-                <Ionicons name="chevron-back" size={18} color={colors.textMuted} />
-              </AnimatedPressable>
-            ) : null}
+          {photoCount > 1 ? (
+            <FadeSlideIn replayKey={visible} index={4}>
+              <Text style={[styles.photoMeta, { color: colors.textMuted }]}>
+                Photo {photoIndex + 1} of {photoCount}
+              </Text>
+            </FadeSlideIn>
+          ) : null}
 
-            <Image source={{ uri: photoUrl }} style={styles.photo} resizeMode="cover" />
+          {sparkActionsEnabled ? (
+            <FadeSlideIn replayKey={visible} index={5}>
+              <DisguiseMiniSparkBar
+                liked={liked}
+                superLiked={superLiked}
+                passed={passed}
+                onLike={handleLike}
+                onUnlike={handleUnlike}
+                onSuperLike={handleSuperLike}
+                onPass={handlePass}
+              />
+              <Text style={[styles.hint, { color: colors.textMuted }]}>
+                {liked ? 'Saved to Likes' : passed ? 'Passed — hidden from deck' : 'Like syncs to Spark · tap ♥ to unlike'}
+              </Text>
+            </FadeSlideIn>
+          ) : (
+            <FadeSlideIn replayKey={visible} index={5}>
+              <Text style={[styles.hint, { color: colors.textMuted }]}>
+                This is your sponsored profile preview.
+              </Text>
+            </FadeSlideIn>
+          )}
+        </View>
+      </AnimatedOverlay>
 
-            {photoCount > 1 ? (
-              <AnimatedPressable
-                onPress={showNextPhoto}
-                style={styles.photoNav}
-                accessibilityLabel="Next photo"
-                scaleTo={0.9}
-              >
-                <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-              </AnimatedPressable>
-            ) : null}
-          </View>
-        </FadeSlideIn>
-
-        {photoCount > 1 ? (
-          <FadeSlideIn replayKey={visible} index={4}>
-            <Text style={[styles.photoMeta, { color: colors.textMuted }]}>
-              Photo {photoIndex + 1} of {photoCount}
-            </Text>
-          </FadeSlideIn>
-        ) : null}
-
-        <FadeSlideIn replayKey={visible} index={5}>
-          <DisguiseMiniSparkBar
-            liked={liked}
-            superLiked={superLiked}
-            passed={passed}
-            sparkLinked={sparkLinked}
-            onLike={handleLike}
-            onUnlike={handleUnlike}
-            onSuperLike={handleSuperLike}
-            onPass={handlePass}
-          />
-        </FadeSlideIn>
-
-        {!sparkLinked ? (
-          <FadeSlideIn replayKey={visible} index={6}>
-            <Text style={[styles.hint, { color: colors.textMuted }]}>
-              Reader comment — no linked profile
-            </Text>
-          </FadeSlideIn>
-        ) : null}
-      </View>
-    </AnimatedOverlay>
+      <MatchToast
+        visible={matchToastName !== null}
+        profileName={matchToastName}
+        onDismiss={() => setMatchToastName(null)}
+      />
+    </>
   );
 }
 

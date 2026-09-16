@@ -8,7 +8,6 @@ type DisguiseMiniSparkBarProps = {
   liked: boolean;
   superLiked: boolean;
   passed: boolean;
-  sparkLinked: boolean;
   onLike: () => void;
   onUnlike: () => void;
   onSuperLike: () => void;
@@ -20,17 +19,12 @@ export function DisguiseMiniSparkBar({
   liked,
   superLiked,
   passed,
-  sparkLinked,
   onLike,
   onUnlike,
   onSuperLike,
   onPass,
 }: DisguiseMiniSparkBarProps) {
   const { colors } = useTheme();
-
-  if (!sparkLinked) {
-    return null;
-  }
 
   return (
     <View style={styles.bar}>

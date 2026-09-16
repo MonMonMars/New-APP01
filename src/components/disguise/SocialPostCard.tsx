@@ -39,7 +39,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
     name: post.author,
     avatarUrl: post.avatarUrl,
     quote: post.body,
-    photos: post.imageUrl ? [post.imageUrl] : [post.avatarUrl],
+    photos: post.imageUrl ? [post.imageUrl, post.avatarUrl] : [post.avatarUrl],
   };
 
   const maskSnippet = post.avatarMask?.text.split(' ').slice(0, 2).join(' ') ?? 'LIVE';

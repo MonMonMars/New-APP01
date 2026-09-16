@@ -47,6 +47,7 @@
     "build:web:pages": "EXPO_PUBLIC_BASE_PATH=/New-APP01 expo export -p web",
     "demo": "npm run build:web && cp dist/index.html dist/404.html && npx --yes serve dist -s -l 8090",
     "demo:tunnel": "bash scripts/start-demo-tunnel.sh",
+    "deploy:pages": "bash scripts/deploy-gh-pages.sh",
     "verify:demo": "node scripts/verify-demo-link.mjs"
   },
   "private": true

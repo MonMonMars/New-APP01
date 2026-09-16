@@ -1,56 +1,73 @@
 # Spark — Live Demo
 
-## Demo link (open now)
+## Permanent demo (recommended — does not expire)
 
-**https://diversity-closing-pope-receptor.trycloudflare.com**
+Pick **one** of these. Tunnels die when the cloud workspace sleeps; these stay up.
 
-_Last updated: Sep 16, 2026 — Fresh tunnel + tab navigation fix (Likes/Matches/Profile work on web)_
+### Option A — Vercel (best for private repos)
 
-> Tunnel links expire when the cloud workspace stops. If this 404s, ask for a fresh link.
+1. Go to [vercel.com/new](https://vercel.com/new) → **Import** `MonMonMars/New-APP01`
+2. Branch: `cursor/debug-tab-bleed-7b60` (or `main`)
+3. Framework: **Other** · Build: `npm run build:web` · Output: `dist`
+4. Deploy → you get a stable URL like `https://new-app01.vercel.app`
+
+`vercel.json` is already in the repo. Free tier, works with private GitHub repos.
+
+### Option B — Netlify
+
+1. [app.netlify.com/start](https://app.netlify.com/start) → Import from GitHub
+2. Build: `npm run build:web` · Publish: `dist`
+3. `netlify.toml` is already configured (SPA redirects included)
+
+### Option C — GitHub Pages
+
+**URL:** `https://monmonmars.github.io/New-APP01/`
+
+The `gh-pages` branch is auto-deployed on push (see `.github/workflows/deploy-web.yml`).
+
+**One-time enable** (repo owner):
+
+1. [github.com/MonMonMars/New-APP01/settings/pages](https://github.com/MonMonMars/New-APP01/settings/pages)
+2. Source → **Deploy from a branch** → `gh-pages` → `/ (root)` → Save
+
+> **Note:** GitHub Pages on **private** repos requires GitHub Pro/Team, or make the repo **public** (free Pages). Use Vercel/Netlify if you want to keep the repo private.
+
+Manual deploy from your machine:
+
+```bash
+npm run deploy:pages
+```
 
 ---
 
-## Quick start
+## Temporary tunnel (dev / agent previews only)
 
-1. Open the link in **Chrome or Safari**
-2. Tap **Skip sign-in (demo mode)** if prompted
-3. Complete onboarding (or accept defaults)
-4. You land in **Pulse** disguise mode (news & social feed) — the default
-5. In Spark, tap the **Emergency** logo (top left, semi-transparent) → instant Pulse disguise
-6. To return: **hold the Pulse logo and drag right** to unlock Spark
+Cloudflare quick tunnels expire when the workspace stops. Do not rely on these for stakeholders.
+
+---
+
+## Quick start (any host)
+
+1. Open the demo URL in **Chrome or Safari**
+2. Tap **Continue without account**
+3. Complete onboarding (defaults are fine)
+4. You land in **Pulse** disguise mode
+5. **Hold the Pulse logo and drag right** to unlock Spark
 
 ---
 
 ## What to try
 
-### Pulse disguise mode — default
-- News cards: reporter avatars + in-app article reader (BBC, Verge — free)
-- Sponsored ads open **in-app** landing sheets (optional external CTA)
-- **Trending** → tap a topic → filtered home feed
-- Social: upvote, comment, share · Activity alerts open in-app
-- **Profile** → AI disguise ad image · menu rows respond
-- Header search → Trending · bell → Activity
+### Pulse disguise mode
+- News cards + in-app article reader
+- Trending topics · social feed · activity alerts
+- Profile → disguise ad generator
 
 ### Spark safe mode
-- **20 new profiles** (Riley, Marcus, Priya, Felix, Zoe…) — swipe deck + likes + instant matches
-- **Smart demo replies** — matches respond with personality-aware messages (optional Groq LLM via `EXPO_PUBLIC_GROQ_API_KEY`)
-- **Phase B** — Incognito (Spark+ · Privacy controls), voice prompts (profile + chat), date check-in (chat menu)
-- **Phase C** — Advanced filters (intent + shared interests, Spark+), AI profile coach, post-3rd-match Spark+ upsell, boost banner on Discover
-- **Phase D** — Rewind last pass (Discover, Spark+), GIF picker in chat, who viewed you (Profile), long-press message reactions, active-now badge in chat
-- **Details pass** — Passport/travel city filter on Discover, international profiles (London, Paris, LA, Miami, Tokyo, Sydney, Austin), weather by passport city, safety quick-action sheets, GIF search, date check-in reminders, auto-refill discover deck
-- **Discover** — clean home: emergency logo + card deck + rewind button + three bottom targets only
-- **Profile → Discover tools** — map, explore, filters, standouts, held profiles, etc.
-- Drag cards to heart/trash/star zones
-- **Video** badge on profiles → preview sheet
-- **Likes** (Spark+) → tap card → Like/Pass → instant match-back
-- **Chat** → tap header for profile · GIF in composer extras · long-press message to react · vibe game in composer
-- **Profile** → who viewed you card (Spark+ unlocks names)
-- **Map** → tap preview card for full profile
-- **Map**, **Explore**, **Matches**, **Profile**
-- Spark+, Shop, Safety, Notifications — eye-off returns to Pulse
-
-### Sound
-- Click anywhere on the page first (browser autoplay), then like/pass/rose for sound
+- Swipe deck · likes · instant matches · AI demo replies
+- Rewind (Spark+) · GIF picker · message reactions · who viewed you
+- Passport/travel filter · international profiles · date check-in
+- Emergency logo → instant Pulse disguise
 
 ---
 
@@ -59,24 +76,11 @@ _Last updated: Sep 16, 2026 — Fresh tunnel + tab navigation fix (Likes/Matches
 ```bash
 git clone https://github.com/MonMonMars/New-APP01.git
 cd New-APP01
-git checkout cursor/complete-all-details-7b60
+git checkout cursor/debug-tab-bleed-7b60
 npm install
-npm run demo
-# → http://localhost:8090
-
-# Public URL from your machine:
-npm run demo:tunnel
+npm run demo          # http://localhost:8090
+npm run demo:tunnel   # temporary public URL
+npm run deploy:pages  # push build to gh-pages branch
 ```
 
 Phone (best UX): `npm start` → Expo Go
-
----
-
-## Permanent hosting (GitHub Pages)
-
-**https://monmonmars.github.io/New-APP01/** — enable Pages in repo settings:
-
-1. https://github.com/MonMonMars/New-APP01/settings/pages
-2. Source → **Deploy from a branch** → branch **`gh-pages`** → **`/ (root)`** → Save
-
-_Note: private repos need GitHub Pro/Team for Pages, or make the repo public._

@@ -1,136 +1,269 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
-import { Image, Modal, ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Alert, Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
-import { MediaWithContentBadge } from './ContentTypeIcon';
-import { DisguisePhotoLightbox } from './DisguisePhotoLightbox';
-import { FeedPersonRow } from './FeedPersonRow';
-import { AnimatedPressable } from '../AnimatedPressable';
+import { resolveDisguiseProfile } from '../../utils/resolveDisguiseProfile';
+import { DisguiseMiniSparkBar } from './DisguiseMiniSparkBar';
 
 type PersonPreviewSheetProps = {
   visible: boolean;
   reporter: NewsReporter | null;
   onClose: () => void;
+  initialPhotoIndex?: number;
 };
 
-export function PersonPreviewSheet({ visible, reporter, onClose }: PersonPreviewSheetProps) {
+export function PersonPreviewSheet({
+  visible,
+  reporter,
+  onClose,
+  initialPhotoIndex = 0,
+}: PersonPreviewSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
+  const {
+    likeProfile,
+    passProfile,
+    unlikeProfile,
+    superLikeProfile,
+    likedIds,
+    superLikedIds,
+    passedIds,
+    canLike,
+  } = useApp();
 
-  const closeLightbox = () => setSelectedPhotoIndex(null);
+  const [photoIndex, setPhotoIndex] = useState(initialPhotoIndex);
 
-  const handleClose = () => {
-    setSelectedPhotoIndex(null);
-    onClose();
-  };
+  useEffect(() => {
+    if (visible) {
+      setPhotoIndex(initialPhotoIndex);
+    }
+  }, [visible, initialPhotoIndex, reporter?.id]);
 
   if (!reporter) {
     return null;
   }
 
-  const selectedPhoto =
-    selectedPhotoIndex !== null ? reporter.photos[selectedPhotoIndex] ?? null : null;
+  const linkedProfile = resolveDisguiseProfile(reporter.id, reporter.profileId);
+  const sparkLinked = linkedProfile !== null;
+  const profileId = linkedProfile?.id;
+  const liked = profileId ? likedIds.has(profileId) : false;
+  const superLiked = profileId ? superLikedIds.has(profileId) : false;
+  const passed = profileId ? passedIds.has(profileId) : false;
+
+  const photoCount = reporter.photos.length;
+  const photoUrl = reporter.photos[photoIndex] ?? reporter.avatarUrl;
+
+  const guardLikeLimit = (): boolean => {
+    if (!canLike) {
+      Alert.alert('Daily limit', 'You have used all your likes for today.');
+      return false;
+    }
+    return true;
+  };
+
+  const handleLike = () => {
+    if (!linkedProfile || !guardLikeLimit()) {
+      return;
+    }
+    likeProfile(linkedProfile);
+  };
+
+  const handleUnlike = () => {
+    if (!linkedProfile) {
+      return;
+    }
+    unlikeProfile(linkedProfile.id);
+  };
+
+  const handleSuperLike = () => {
+    if (!linkedProfile || !guardLikeLimit() || superLiked) {
+      return;
+    }
+    superLikeProfile(linkedProfile);
+  };
+
+  const handlePass = () => {
+    if (!linkedProfile) {
+      return;
+    }
+    if (liked || superLiked) {
+      unlikeProfile(linkedProfile.id);
+    }
+    passProfile(linkedProfile);
+    onClose();
+  };
+
+  const showPrevPhoto = () => {
+    if (photoCount <= 1) {
+      return;
+    }
+    setPhotoIndex((index) => (index - 1 + photoCount) % photoCount);
+  };
+
+  const showNextPhoto = () => {
+    if (photoCount <= 1) {
+      return;
+    }
+    setPhotoIndex((index) => (index + 1) % photoCount);
+  };
 
   return (
-    <>
-      <Modal visible={visible} animationType="fade" transparent onRequestClose={handleClose}>
-        <AnimatedPressable style={styles.backdrop} onPress={handleClose}>
-          <AnimatedPressable
-            style={[
-              styles.sheet,
-              {
-                backgroundColor: colors.surface,
-                borderColor: colors.border,
-                marginBottom: insets.bottom + spacing.md,
-              },
-            ]}
-            onPress={(event) => event.stopPropagation()}
-          >
-            <View style={styles.header}>
-              <FeedPersonRow
-                plainAvatar
-                contentKind={reporter.profileId ? 'profile' : 'news'}
-                imageUrl={reporter.avatarUrl}
-                title={reporter.name}
-                subtitle="Reader comment"
-                body={`"${reporter.quote}"`}
-                titleStyle={{ color: colors.text }}
-                bodyStyle={{ color: colors.textMuted, fontStyle: 'italic', fontWeight: '500' }}
-                style={styles.headerRow}
-              />
-              <AnimatedPressable onPress={handleClose} hitSlop={12} accessibilityLabel="Close">
-                <Ionicons name="close" size={22} color={colors.textMuted} />
-              </AnimatedPressable>
+    <Modal visible={visible} animationType="none" transparent onRequestClose={onClose}>
+      <Pressable style={styles.backdrop} onPress={onClose}>
+        <Pressable
+          style={[
+            styles.card,
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.border,
+              marginTop: insets.top + spacing.lg,
+            },
+          ]}
+          onPress={(event) => event.stopPropagation()}
+        >
+          <View style={styles.header}>
+            <View style={styles.headerText}>
+              <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
+                {reporter.name}
+                {linkedProfile ? `, ${linkedProfile.age}` : ''}
+              </Text>
+              {linkedProfile ? (
+                <Text style={[styles.meta, { color: colors.textMuted }]} numberOfLines={1}>
+                  {linkedProfile.distanceMiles} mi away
+                  {linkedProfile.job ? ` · ${linkedProfile.job}` : ''}
+                </Text>
+              ) : null}
             </View>
+            <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Close">
+              <Ionicons name="close" size={20} color={colors.textMuted} />
+            </Pressable>
+          </View>
 
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.photoRow}
-            >
-              {reporter.photos.map((photoUrl, index) => (
-                <AnimatedPressable
-                  key={`${reporter.id}-photo-${index}`}
-                  onPress={() => setSelectedPhotoIndex(index)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Open photo ${index + 1} of ${reporter.photos.length}`}
-                  scaleTo={0.97}
-                >
-                  <MediaWithContentBadge kind={reporter.profileId ? 'profile' : 'news'}>
-                    <Image source={{ uri: photoUrl }} style={styles.photo} resizeMode="cover" />
-                  </MediaWithContentBadge>
-                </AnimatedPressable>
-              ))}
-            </ScrollView>
-          </AnimatedPressable>
-        </AnimatedPressable>
-      </Modal>
+          <Text style={[styles.quote, { color: colors.text }]} numberOfLines={3}>
+            &ldquo;{reporter.quote}&rdquo;
+          </Text>
 
-      <DisguisePhotoLightbox
-        visible={visible && selectedPhotoIndex !== null}
-        reporter={reporter}
-        photoUrl={selectedPhoto}
-        photoIndex={selectedPhotoIndex ?? 0}
-        onClose={closeLightbox}
-      />
-    </>
+          {linkedProfile?.bio ? (
+            <Text style={[styles.bio, { color: colors.textMuted }]} numberOfLines={2}>
+              {linkedProfile.bio}
+            </Text>
+          ) : null}
+
+          <View style={styles.photoRow}>
+            {photoCount > 1 ? (
+              <Pressable onPress={showPrevPhoto} style={styles.photoNav} accessibilityLabel="Previous photo">
+                <Ionicons name="chevron-back" size={18} color={colors.textMuted} />
+              </Pressable>
+            ) : null}
+
+            <Image source={{ uri: photoUrl }} style={styles.photo} resizeMode="cover" />
+
+            {photoCount > 1 ? (
+              <Pressable onPress={showNextPhoto} style={styles.photoNav} accessibilityLabel="Next photo">
+                <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+              </Pressable>
+            ) : null}
+          </View>
+
+          {photoCount > 1 ? (
+            <Text style={[styles.photoMeta, { color: colors.textMuted }]}>
+              Photo {photoIndex + 1} of {photoCount}
+            </Text>
+          ) : null}
+
+          <DisguiseMiniSparkBar
+            liked={liked}
+            superLiked={superLiked}
+            passed={passed}
+            sparkLinked={sparkLinked}
+            onLike={handleLike}
+            onUnlike={handleUnlike}
+            onSuperLike={handleSuperLike}
+            onPass={handlePass}
+          />
+
+          {!sparkLinked ? (
+            <Text style={[styles.hint, { color: colors.textMuted }]}>
+              Reader comment — no linked profile
+            </Text>
+          ) : null}
+        </Pressable>
+      </Pressable>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    justifyContent: 'flex-end',
-    paddingHorizontal: spacing.md,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
   },
-  sheet: {
+  card: {
+    width: '100%',
+    maxWidth: 300,
     borderRadius: radii.card,
     borderWidth: StyleSheet.hairlineWidth,
-    padding: spacing.md,
-    maxHeight: '55%',
+    padding: spacing.sm,
+    gap: spacing.xs,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: spacing.sm,
-    marginBottom: spacing.md,
+    gap: spacing.xs,
   },
-  headerRow: {
+  headerText: {
     flex: 1,
+    minWidth: 0,
+  },
+  name: {
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  meta: {
+    fontSize: 11,
+    fontWeight: '500',
+    marginTop: 1,
+  },
+  quote: {
+    fontSize: 12,
+    lineHeight: 17,
+    fontStyle: 'italic',
+    fontWeight: '500',
+  },
+  bio: {
+    fontSize: 11,
+    lineHeight: 15,
   },
   photoRow: {
-    gap: spacing.sm,
-    paddingBottom: spacing.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginTop: spacing.xs,
+  },
+  photoNav: {
+    padding: 2,
   },
   photo: {
-    width: 120,
-    height: 160,
-    borderRadius: radii.card,
+    flex: 1,
+    height: 120,
+    borderRadius: radii.card - 2,
+    backgroundColor: '#111',
+  },
+  photoMeta: {
+    fontSize: 10,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  hint: {
+    fontSize: 10,
+    textAlign: 'center',
+    marginTop: 2,
   },
 });

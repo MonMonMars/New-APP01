@@ -4,7 +4,7 @@
 
 | Link | Durability | Notes |
 |------|------------|-------|
-| **https://temporary-turbo-thunder-1l1sc3x.vercel.app** | ~60 min (claimable → permanent) | **Latest** — Spark vs Ember isolated worlds. [Claim on Vercel](https://vercel.com/claim-deployment?code=b4a2efd7-12e1-42fc-b6cd-ef2263ebed04) to keep forever. |
+| **https://temporary-flying-garnet-4aki9md.vercel.app** | ~60 min (claimable → permanent) | **Latest** — tap Spark ▾ to switch worlds. Ember is open to everyone. [Claim on Vercel](https://vercel.com/claim-deployment?code=73222245-1b9d-4cd2-84e0-6d24571560de) to keep forever. |
 | **https://posts-dolls-adventure-supposed.trycloudflare.com** | Hours while workspace is awake | Same latest build, no login. Hard-refresh if stale. |
 | **https://bright-queijadas-033295.netlify.app** | ~60 min | Password: `My-Drop-Site`. [Claim on Netlify](https://app.netlify.com/drop/bright-queijadas-033295). |
 
@@ -78,6 +78,7 @@ Latest verified tunnel: **https://most-psychiatry-slim-colony.trycloudflare.com*
 - Profile → disguise ad generator
 
 ### Spark safe mode
+- Tap the **Spark ▾** title to switch worlds. Ember is a married group **anyone can join** — likes and chats stay separate.
 - Swipe deck · likes · instant matches · AI demo replies
 - Rewind (Spark+) · GIF picker · message reactions · who viewed you
 - Passport/travel filter · international profiles · date check-in

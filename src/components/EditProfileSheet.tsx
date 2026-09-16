@@ -218,7 +218,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
 
           <Text style={[styles.label, { color: colors.textMuted }]}>Status</Text>
           <Text style={[styles.openingMoveHint, { color: colors.textMuted }]}>
-            Optional — this doesn’t lock Spark or Ember. Switch worlds from the title on Discover. Anyone can join Ember.
+            Optional — this doesn't lock Spark or Ember. Switch worlds from the title on Discover. Anyone can join Ember.
           </Text>
           <View style={styles.intentRow}>
             {statusOptions.map((option) => {

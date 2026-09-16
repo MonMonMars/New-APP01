@@ -8,14 +8,18 @@ type PulseBrandMarkProps = {
   style?: ViewStyle;
 };
 
-/** Geometric logomark — stacked news lines in a rounded tile (BBC / Reuters style). */
+const SIZE_PX = { sm: 28, md: 34, lg: 40 } as const;
+const RADIUS = { sm: 8, md: 9, lg: 11 } as const;
+
+/** Professional Pulse logomark — concentric signal rings in a navy tile. */
 export function PulseBrandMark({ size = 'md', style }: PulseBrandMarkProps) {
   const { resolvedMode } = useTheme();
   const isDark = resolvedMode === 'dark';
-  const dimensions = size === 'sm' ? 28 : size === 'lg' ? 40 : 34;
-  const barHeight = size === 'sm' ? 2 : 2.5;
-  const barGap = size === 'sm' ? 3 : 4;
-  const barWidths = size === 'sm' ? [14, 11, 8] : size === 'lg' ? [20, 16, 11] : [17, 13, 9];
+  const dimensions = SIZE_PX[size];
+  const ringGap = size === 'sm' ? 3.5 : size === 'lg' ? 5 : 4.25;
+  const stroke = size === 'sm' ? 1.6 : 1.8;
+  const core = size === 'sm' ? 4.5 : size === 'lg' ? 6.5 : 5.5;
+  const rings = [ringGap * 2, ringGap * 3.15];
 
   return (
     <View
@@ -24,25 +28,37 @@ export function PulseBrandMark({ size = 'md', style }: PulseBrandMarkProps) {
         {
           width: dimensions,
           height: dimensions,
-          borderRadius: size === 'lg' ? 9 : 7,
+          borderRadius: RADIUS[size],
           backgroundColor: isDark ? pulseBrand.accentBright : pulseBrand.navy,
         },
         style,
       ]}
+      accessibilityRole="image"
+      accessibilityLabel="Pulse"
     >
-      {barWidths.map((width, index) => (
+      {rings.map((diameter) => (
         <View
-          key={index}
-          style={{
-            width,
-            height: barHeight,
-            borderRadius: barHeight / 2,
-            backgroundColor: '#FFFFFF',
-            marginBottom: index < barWidths.length - 1 ? barGap : 0,
-            opacity: 1 - index * 0.12,
-          }}
+          key={diameter}
+          style={[
+            styles.ring,
+            {
+              width: diameter,
+              height: diameter,
+              borderRadius: diameter / 2,
+              borderWidth: stroke,
+              borderColor: 'rgba(255,255,255,0.92)',
+            },
+          ]}
         />
       ))}
+      <View
+        style={{
+          width: core,
+          height: core,
+          borderRadius: core / 2,
+          backgroundColor: '#FFFFFF',
+        }}
+      />
     </View>
   );
 }
@@ -56,7 +72,7 @@ type PulseWordmarkProps = {
 export function PulseWordmark({ size = 'md', showTagline = false }: PulseWordmarkProps) {
   const { colors, resolvedMode } = useTheme();
   const isDark = resolvedMode === 'dark';
-  const fontSize = size === 'sm' ? 18 : size === 'lg' ? 26 : 22;
+  const fontSize = size === 'sm' ? 19 : size === 'lg' ? 26 : 22;
 
   return (
     <View style={styles.wordmarkWrap}>
@@ -65,6 +81,7 @@ export function PulseWordmark({ size = 'md', showTagline = false }: PulseWordmar
           styles.wordmark,
           {
             fontSize,
+            lineHeight: fontSize + 4,
             color: isDark ? colors.text : pulseBrand.navy,
           },
         ]}
@@ -96,17 +113,19 @@ export function PulseBrand({ size = 'md', showTagline = false, style }: PulseBra
 
 const styles = StyleSheet.create({
   mark: {
-    alignItems: 'flex-start',
+    alignItems: 'center',
     justifyContent: 'center',
-    paddingLeft: 7,
+    overflow: 'hidden',
+  },
+  ring: {
+    position: 'absolute',
   },
   wordmarkWrap: {
     justifyContent: 'center',
   },
   wordmark: {
     fontWeight: '800',
-    letterSpacing: -0.6,
-    lineHeight: 24,
+    letterSpacing: -0.7,
   },
   tagline: {
     fontSize: 10,

@@ -1,13 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { useEffect, useRef, useState } from 'react';
-import {
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
 import { radii, spacing } from '../../theme';
@@ -20,7 +13,7 @@ type DisguiseMiniPhotoPagerProps = {
   height?: number;
 };
 
-/** Swipeable photo strip for the disguise mini-window preview. */
+/** Mini-window photos — chevron taps only, no drag or swipe. */
 export function DisguiseMiniPhotoPager({
   photos,
   index,
@@ -28,38 +21,9 @@ export function DisguiseMiniPhotoPager({
   height = 156,
 }: DisguiseMiniPhotoPagerProps) {
   const { colors } = useTheme();
-  const scrollRef = useRef<ScrollView>(null);
-  const scrollSourceRef = useRef<'external' | 'gesture'>('external');
-  const [laneWidth, setLaneWidth] = useState(0);
   const safeIndex = photos.length > 0 ? Math.min(index, photos.length - 1) : 0;
   const multiPhoto = photos.length > 1;
-
-  useEffect(() => {
-    if (laneWidth <= 0 || !multiPhoto) {
-      return;
-    }
-    if (scrollSourceRef.current === 'gesture') {
-      scrollSourceRef.current = 'external';
-      return;
-    }
-    scrollRef.current?.scrollTo({ x: safeIndex * laneWidth, animated: false });
-  }, [laneWidth, multiPhoto, photos.length, safeIndex]);
-
-  const syncIndexFromOffset = (offsetX: number) => {
-    if (laneWidth <= 0) {
-      return;
-    }
-    const nextIndex = Math.round(offsetX / laneWidth);
-    const clamped = Math.max(0, Math.min(nextIndex, photos.length - 1));
-    if (clamped !== safeIndex) {
-      scrollSourceRef.current = 'gesture';
-      onIndexChange(clamped);
-    }
-  };
-
-  const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    syncIndexFromOffset(event.nativeEvent.contentOffset.x);
-  };
+  const currentUri = photos[safeIndex];
 
   const goPrev = () => {
     if (!multiPhoto) {
@@ -75,7 +39,7 @@ export function DisguiseMiniPhotoPager({
     onIndexChange((safeIndex + 1) % photos.length);
   };
 
-  if (photos.length === 0) {
+  if (photos.length === 0 || !currentUri) {
     return (
       <View style={[styles.empty, { height, backgroundColor: colors.surface }]}>
         <Ionicons name="image-outline" size={28} color={colors.textMuted} />
@@ -96,53 +60,18 @@ export function DisguiseMiniPhotoPager({
         </AnimatedPressable>
       ) : null}
 
-      <View
-        style={styles.lane}
-        onLayout={(event) => {
-          const nextWidth = event.nativeEvent.layout.width;
-          if (nextWidth > 0 && nextWidth !== laneWidth) {
-            setLaneWidth(nextWidth);
+      <View style={styles.lane}>
+        <Image
+          source={{ uri: currentUri }}
+          style={styles.image}
+          contentFit="contain"
+          transition={120}
+          accessibilityLabel={
+            multiPhoto ? `Photo ${safeIndex + 1} of ${photos.length}` : 'Profile photo'
           }
-        }}
-      >
-        {multiPhoto && laneWidth > 0 ? (
-          <ScrollView
-            ref={scrollRef}
-            horizontal
-            pagingEnabled
-            scrollEnabled
-            showsHorizontalScrollIndicator={false}
-            decelerationRate="fast"
-            onMomentumScrollEnd={handleScrollEnd}
-            onScrollEndDrag={handleScrollEnd}
-            style={styles.scroll}
-            contentContainerStyle={styles.scrollContent}
-          >
-            {photos.map((uri, photoIdx) => (
-              <View key={`${uri}-${photoIdx}`} style={[styles.page, { width: laneWidth, height }]}>
-                <Image
-                  source={{ uri }}
-                  style={styles.image}
-                  contentFit="contain"
-                  transition={120}
-                  accessibilityLabel={`Photo ${photoIdx + 1} of ${photos.length}`}
-                />
-              </View>
-            ))}
-          </ScrollView>
-        ) : multiPhoto ? (
-          <View style={[styles.page, { height, opacity: 0.35 }]} />
-        ) : (
-          <Image
-            source={{ uri: photos[safeIndex] }}
-            style={styles.image}
-            contentFit="contain"
-            transition={120}
-            accessibilityLabel="Profile photo"
-          />
-        )}
+        />
 
-        {multiPhoto && laneWidth > 0 ? (
+        {multiPhoto ? (
           <View style={styles.dots} pointerEvents="none">
             {photos.map((_, dotIndex) => (
               <View
@@ -188,16 +117,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#111',
     position: 'relative',
     minWidth: 0,
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    alignItems: 'stretch',
-  },
-  page: {
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   image: {
     width: '100%',

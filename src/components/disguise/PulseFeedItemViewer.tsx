@@ -4,6 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { FeedItem } from '../../data/disguiseFeed';
 import { buildDisguiseFeed } from '../../utils/buildDisguiseFeed';
 import { findFeedItemById, findNewsPostByHeadline } from '../../utils/findFeedItem';
+import { profileIdFromPostId } from '../../utils/resolveDisguiseProfile';
 import { AdLandingSheet } from './AdLandingSheet';
 import { NewsArticleSheet } from './NewsArticleSheet';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
@@ -86,7 +87,7 @@ export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItem
             avatarUrl: feedItem.avatarUrl,
             quote: feedItem.summary,
             photos: feedItem.photos,
-            profileId: feedItem.id,
+            profileId: profileIdFromPostId(feedItem.id),
           }}
           onClose={onClose}
         />

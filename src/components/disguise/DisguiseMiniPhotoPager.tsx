@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
-  Platform,
   ScrollView,
   StyleSheet,
   View,
@@ -115,7 +114,7 @@ export function DisguiseMiniPhotoPager({
             scrollEventThrottle={16}
             onScroll={handleScroll}
             onMomentumScrollEnd={handleScrollEnd}
-            {...(Platform.OS === 'web' ? { onScrollEndDrag: handleScrollEnd } : {})}
+            onScrollEndDrag={handleScrollEnd}
             style={styles.scroll}
             contentContainerStyle={styles.scrollContent}
           >

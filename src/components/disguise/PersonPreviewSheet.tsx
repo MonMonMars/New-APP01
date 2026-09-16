@@ -78,6 +78,11 @@ export function PersonPreviewSheet({
   const passed = profileId ? passedIds.has(profileId) : false;
 
   const photoCount = displayPhotos.length;
+  const trimmedQuote = reporter.quote.trim();
+  const showQuote =
+    trimmedQuote.length > 0 &&
+    trimmedQuote !== linkedProfile?.bio?.trim() &&
+    !(trimmedQuote.length > 120 && linkedProfile?.bio);
 
   const guardLikeLimit = (): boolean => {
     if (!canLike) {
@@ -162,16 +167,24 @@ export function PersonPreviewSheet({
             </View>
           </FadeSlideIn>
 
-          <FadeSlideIn replayKey={visible} index={1}>
-            <Text style={[styles.quote, { color: colors.text }]} numberOfLines={3}>
-              &ldquo;{reporter.quote}&rdquo;
-            </Text>
-          </FadeSlideIn>
+          {showQuote ? (
+            <FadeSlideIn replayKey={visible} index={1}>
+              <Text style={[styles.quote, { color: colors.text }]} numberOfLines={3}>
+                &ldquo;{trimmedQuote}&rdquo;
+              </Text>
+            </FadeSlideIn>
+          ) : null}
 
           {linkedProfile?.bio ? (
             <FadeSlideIn replayKey={visible} index={2}>
               <Text style={[styles.bio, { color: colors.textMuted }]} numberOfLines={2}>
                 {linkedProfile.bio}
+              </Text>
+            </FadeSlideIn>
+          ) : !showQuote && trimmedQuote ? (
+            <FadeSlideIn replayKey={visible} index={2}>
+              <Text style={[styles.bio, { color: colors.textMuted }]} numberOfLines={3}>
+                {trimmedQuote}
               </Text>
             </FadeSlideIn>
           ) : null}

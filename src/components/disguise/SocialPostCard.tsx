@@ -6,7 +6,8 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
-import { resolveDisguiseProfile } from '../../utils/resolveDisguiseProfile';
+import { buildSocialReporter, socialReporterPhotoIndex } from '../../utils/disguiseReporterPhotos';
+import { maskVariantToContentKind } from './ContentTypeIcon';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
 import { DisguisePhotoLightbox } from './DisguisePhotoLightbox';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
@@ -37,17 +38,13 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
   const isSaved = pulseSocial.savedPostIds.includes(post.id);
   const likeCount = upvoted ? post.likes + 1 : post.likes;
 
-  const linkedProfile = resolveDisguiseProfile(`social-${post.id}`);
-  const photoReporter = {
-    id: `social-${post.id}`,
-    name: post.author,
-    avatarUrl: post.avatarUrl,
-    quote: post.body,
-    photos: linkedProfile?.photos ?? (post.imageUrl ? [post.imageUrl, post.avatarUrl] : []),
-    profileId: linkedProfile?.id,
-  };
+  const photoReporter = buildSocialReporter(post);
+  const feedPhotoIndex = socialReporterPhotoIndex(photoReporter, post.imageUrl);
 
   const maskSnippet = post.avatarMask?.text.split(' ').slice(0, 2).join(' ') ?? 'LIVE';
+  const avatarContentKind = post.avatarMask
+    ? maskVariantToContentKind(post.avatarMask.variant)
+    : 'social';
 
   const handleSave = () => {
     if (isSaved) {
@@ -94,7 +91,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
               imageUrl={post.avatarUrl}
               overlayText={maskSnippet}
               overlayVariant={post.avatarMask.variant}
-              contentKind="profile"
+              contentKind={avatarContentKind}
               caption={post.body}
               onPress={() => setAuthorOpen(true)}
               accessibilityLabel={`View profile: ${post.author}`}
@@ -102,7 +99,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
           ) : (
             <FeedPersonThumbnail
               plainAvatar
-              contentKind="profile"
+              contentKind="social"
               caption={post.body}
               imageUrl={post.avatarUrl}
               onPress={() => setAuthorOpen(true)}
@@ -131,7 +128,6 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
           <Ionicons name="ellipsis-horizontal" size={18} color={colors.textMuted} />
         </AnimatedPressable>
       </View>
-      <Text style={[styles.body, { color: colors.text }]}>{post.body}</Text>
       {post.imageUrl && post.imageMask ? (
         <AnimatedPressable
           style={styles.postImageWrap}
@@ -184,7 +180,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
         visible={photoOpen}
         reporter={photoReporter}
         photoUrl={post.imageUrl ?? post.avatarUrl}
-        photoIndex={0}
+        photoIndex={feedPhotoIndex}
         onClose={() => setPhotoOpen(false)}
       />
       <SocialCommentSheet visible={commentsOpen} post={post} onClose={() => setCommentsOpen(false)} />
@@ -231,11 +227,6 @@ const styles = StyleSheet.create({
   },
   moreButton: {
     paddingTop: 4,
-  },
-  body: {
-    fontSize: 15,
-    lineHeight: 22,
-    marginBottom: spacing.sm,
   },
   postImageWrap: {
     marginBottom: spacing.sm,

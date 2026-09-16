@@ -8,7 +8,6 @@ import { DailyBatchIndicator } from '../components/DailyBatchIndicator';
 import { AdvancedFiltersSection } from '../components/AdvancedFiltersSection';
 import { DiscoverFilterChips } from '../components/DiscoverFilterChips';
 import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesSheet';
-import { ExpandLocationSheet } from '../components/ExpandLocationSheet';
 import { AiPersonasRow } from '../components/AiPersonasRow';
 import { HeldProfilesRow } from '../components/HeldProfilesRow';
 import { MatchModal } from '../components/MatchModal';
@@ -42,7 +41,6 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
     discoverPoolTotal,
     hasMoreInPool,
     searchMorePeople,
-    expandSearchRadius,
     isPaused,
     isBoosted,
     isSparkPlus,
@@ -61,7 +59,6 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
   } = useApp();
 
   const [showPreferences, setShowPreferences] = useState(false);
-  const [showExpandLocation, setShowExpandLocation] = useState(false);
   const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
   const [showMatch, setShowMatch] = useState(false);
   const [deckToast, setDeckToast] = useState<string | null>(null);
@@ -112,16 +109,6 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
     navigation.getParent()?.navigate('Chat', { conversationId });
   }, [getConversationIdForProfile, matchProfile, navigation, onClose]);
 
-  const handleWidenFilters = () => {
-    if (preferences.maxDistanceMiles >= 9999) {
-      setShowPreferences(true);
-      return;
-    }
-    const presets = [25, 50, 100, 250, 9999];
-    const next = presets.find((value) => value > preferences.maxDistanceMiles) ?? 9999;
-    expandSearchRadius(next);
-  };
-
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <ScreenHeader
@@ -133,7 +120,14 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.quickGrid}>
-          <HubTile icon="map-outline" label="Map" colors={colors} onPress={openMap} />
+          <HubTile
+            icon="map-outline"
+            label="Map"
+            hint={formatSearchRadius(preferences.maxDistanceMiles)}
+            colors={colors}
+            onPress={openMap}
+            featured
+          />
           <HubTile icon="compass-outline" label="Explore" colors={colors} onPress={openExplore} />
           <HubTile
             icon="options-outline"
@@ -141,34 +135,26 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
             colors={colors}
             onPress={() => setShowPreferences(true)}
           />
-          <HubTile
-            icon="expand-outline"
-            label="Radius"
-            colors={colors}
-            onPress={() => setShowExpandLocation(true)}
-          />
         </View>
 
-        <View style={[styles.metaCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Text style={[styles.metaLabel, { color: colors.textMuted }]}>Search area</Text>
-          <Text style={[styles.metaValue, { color: colors.text }]}>
-            {formatSearchRadius(preferences.maxDistanceMiles)}
-          </Text>
-          {!isSparkPlus && (
-            <Text style={[styles.metaSub, { color: colors.gradientEnd }]}>
-              {remainingLikes} likes left today
-            </Text>
-          )}
-          {(isPaused || isBoosted || (preferences.travelMode && preferences.passportCity)) && (
-            <View style={styles.statusRow}>
-              {isPaused && <StatusPill label="Paused" color={colors.rewind} />}
-              {isBoosted && <StatusPill label="Boost active" color="#FFD700" />}
-              {preferences.travelMode && preferences.passportCity && (
-                <StatusPill label={preferences.passportCity} color={colors.superLike} />
-              )}
-            </View>
-          )}
-        </View>
+        {(!isSparkPlus || isPaused || isBoosted || (preferences.travelMode && preferences.passportCity)) && (
+          <View style={[styles.metaCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            {!isSparkPlus && (
+              <Text style={[styles.metaSub, { color: colors.gradientEnd }]}>
+                {remainingLikes} likes left today
+              </Text>
+            )}
+            {(isPaused || isBoosted || (preferences.travelMode && preferences.passportCity)) && (
+              <View style={styles.statusRow}>
+                {isPaused && <StatusPill label="Paused" color={colors.rewind} />}
+                {isBoosted && <StatusPill label="Boost active" color="#FFD700" />}
+                {preferences.travelMode && preferences.passportCity && (
+                  <StatusPill label={preferences.passportCity} color={colors.superLike} />
+                )}
+              </View>
+            )}
+          </View>
+        )}
 
         <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>World</Text>
         <SparkSectionToggle
@@ -241,7 +227,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
               if (hasMoreInPool) {
                 searchMorePeople();
               } else {
-                handleWidenFilters();
+                openMap();
               }
             }}
           >
@@ -269,14 +255,6 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
         preferences={preferences}
         onClose={() => setShowPreferences(false)}
         onChange={updatePreferences}
-      />
-
-      <ExpandLocationSheet
-        visible={showExpandLocation}
-        currentRadius={preferences.maxDistanceMiles}
-        poolTotal={discoverPoolTotal}
-        onClose={() => setShowExpandLocation(false)}
-        onSelectRadius={expandSearchRadius}
       />
 
       <MatchModal
@@ -308,21 +286,30 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
 function HubTile({
   icon,
   label,
+  hint,
   colors,
   onPress,
+  featured,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
+  hint?: string;
   colors: { surface: string; text: string; textMuted: string; border: string };
   onPress: () => void;
+  featured?: boolean;
 }) {
   return (
     <AnimatedPressable
-      style={[styles.hubTile, { backgroundColor: colors.surface, borderColor: colors.border }]}
+      style={[
+        styles.hubTile,
+        featured ? styles.hubTileFeatured : null,
+        { backgroundColor: colors.surface, borderColor: colors.border },
+      ]}
       onPress={onPress}
     >
       <Ionicons name={icon} size={22} color={colors.text} />
       <Text style={[styles.hubTileLabel, { color: colors.text }]}>{label}</Text>
+      {hint ? <Text style={[styles.hubTileHint, { color: colors.textMuted }]}>{hint}</Text> : null}
     </AnimatedPressable>
   );
 }
@@ -357,25 +344,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.xs,
   },
+  hubTileFeatured: {
+    width: '100%',
+    paddingVertical: spacing.lg,
+  },
   hubTileLabel: {
     fontSize: 13,
     fontWeight: '700',
+  },
+  hubTileHint: {
+    fontSize: 12,
+    fontWeight: '600',
   },
   metaCard: {
     borderRadius: radii.card,
     borderWidth: StyleSheet.hairlineWidth,
     padding: spacing.md,
     gap: 4,
-  },
-  metaLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-  },
-  metaValue: {
-    fontSize: 20,
-    fontWeight: '800',
   },
   metaSub: {
     fontSize: 13,

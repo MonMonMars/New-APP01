@@ -81,8 +81,8 @@ export function AnimatedOverlay({
 
   return (
     <Modal visible transparent animationType="none" onRequestClose={onClose}>
-      <View style={styles.root}>
-        <Animated.View style={[styles.backdrop, backdropStyle]} pointerEvents="box-none">
+      <View style={styles.root} pointerEvents="box-none">
+        <Animated.View style={[styles.backdrop, backdropStyle]} pointerEvents="auto">
           <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
         </Animated.View>
 
@@ -94,7 +94,12 @@ export function AnimatedOverlay({
           ]}
           pointerEvents="box-none"
         >
-          {children}
+          <View
+            pointerEvents="auto"
+            style={variant === 'center' ? styles.centerChildren : styles.bottomChildren}
+          >
+            {children}
+          </View>
         </Animated.View>
       </View>
     </Modal>
@@ -117,6 +122,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   bottomPanel: {
+    width: '100%',
+  },
+  centerChildren: {
+    alignItems: 'center',
+  },
+  bottomChildren: {
     width: '100%',
   },
 });

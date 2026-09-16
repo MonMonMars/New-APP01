@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { ReactNode, useEffect } from 'react';
-import { Pressable, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
+import { Platform, Pressable, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -43,6 +43,7 @@ export function ScalePressable({
   return (
     <AnimatedPressableBase
       onPress={onPress}
+      hitSlop={8}
       onPressIn={() => {
         pressScale.value = withSpring(scaleTo, MOTION.spring.press);
       }}
@@ -51,7 +52,11 @@ export function ScalePressable({
       }}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
-      style={[style, animatedStyle]}
+      style={[
+        style,
+        animatedStyle,
+        Platform.OS === 'web' ? { cursor: 'pointer' } : null,
+      ]}
     >
       {children}
     </AnimatedPressableBase>
@@ -69,6 +74,7 @@ type SparkIconButtonProps = {
   idleBorder: string;
   onPress: () => void;
   accessibilityLabel: string;
+  size?: number;
 };
 
 export function SparkIconButton({
@@ -82,6 +88,7 @@ export function SparkIconButton({
   idleBorder,
   onPress,
   accessibilityLabel,
+  size = 40,
 }: SparkIconButtonProps) {
   return (
     <ScalePressable
@@ -91,6 +98,9 @@ export function SparkIconButton({
       style={[
         styles.iconBtn,
         {
+          width: size,
+          height: size,
+          borderRadius: size / 2,
           backgroundColor: active ? activeBackground : idleBackground,
           borderColor: active ? activeBorder : idleBorder,
         },
@@ -103,11 +113,9 @@ export function SparkIconButton({
 
 const styles = StyleSheet.create({
   iconBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
+    zIndex: 5,
   },
 });

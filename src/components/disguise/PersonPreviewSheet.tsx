@@ -97,7 +97,10 @@ export function PersonPreviewSheet({
   };
 
   const handleLike = () => {
-    if (!linkedProfile || !guardLikeLimit()) {
+    if (!linkedProfile || liked) {
+      return;
+    }
+    if (!guardLikeLimit()) {
       return;
     }
     const match = likeProfile(linkedProfile);
@@ -114,7 +117,14 @@ export function PersonPreviewSheet({
   };
 
   const handleSuperLike = () => {
-    if (!linkedProfile || !guardLikeLimit() || superLiked) {
+    if (!linkedProfile) {
+      return;
+    }
+    if (superLiked) {
+      unlikeProfile(linkedProfile.id);
+      return;
+    }
+    if (!guardLikeLimit()) {
       return;
     }
     const match = superLikeProfile(linkedProfile);
@@ -217,7 +227,13 @@ export function PersonPreviewSheet({
                 onPass={handlePass}
               />
               <Text style={[styles.hint, { color: colors.textMuted }]}>
-                {liked ? 'Saved to Likes' : passed ? 'Passed — hidden from deck' : 'Like syncs to Spark · tap ♥ to unlike'}
+                {superLiked
+                  ? 'Super liked — saved to Spark'
+                  : liked
+                    ? 'Saved to Likes'
+                    : passed
+                      ? 'Passed — hidden from deck'
+                      : 'Actions sync to Spark'}
               </Text>
             </FadeSlideIn>
           ) : (
@@ -247,6 +263,7 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     padding: spacing.sm,
     gap: spacing.xs,
+    zIndex: 2,
   },
   header: {
     flexDirection: 'row',

@@ -18,6 +18,9 @@ export type Message = {
   isMine: boolean;
   imageUrl?: string;
   status?: MessageStatus;
+  /** Emoji reaction on message bubble */
+  reaction?: string;
+  isGif?: boolean;
 };
 
 export type Conversation = {

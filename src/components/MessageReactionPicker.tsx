@@ -1,0 +1,62 @@
+import { StyleSheet, Text, View } from 'react-native';
+
+import { useTheme } from '../context/ThemeContext';
+import { radii, spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
+
+const REACTIONS = ['❤️', '😂', '🔥', '👍', '😮', '🙏'];
+
+type MessageReactionPickerProps = {
+  visible: boolean;
+  onSelect: (emoji: string) => void;
+  onClose: () => void;
+};
+
+export function MessageReactionPicker({ visible, onSelect, onClose }: MessageReactionPickerProps) {
+  const { colors } = useTheme();
+
+  if (!visible) {
+    return null;
+  }
+
+  return (
+    <View style={[styles.wrap, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      {REACTIONS.map((emoji) => (
+        <AnimatedPressable
+          key={emoji}
+          style={styles.emojiButton}
+          onPress={() => {
+            onSelect(emoji);
+            onClose();
+          }}
+        >
+          <Text style={styles.emoji}>{emoji}</Text>
+        </AnimatedPressable>
+      ))}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  wrap: {
+    flexDirection: 'row',
+    alignSelf: 'center',
+    borderRadius: radii.card,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    gap: spacing.xs,
+    marginBottom: spacing.sm,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
+  emojiButton: {
+    padding: spacing.xs,
+  },
+  emoji: {
+    fontSize: 22,
+  },
+});

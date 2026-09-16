@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesSheet';
 import { ExpandLocationSheet } from '../components/ExpandLocationSheet';
 import { BoostBanner } from '../components/BoostBanner';
+import { RewindButton } from '../components/RewindButton';
 import { LikeLimitModal } from '../components/LikeLimitModal';
 import { PostMatchMomentumModal } from '../components/PostMatchMomentumModal';
 import { MatchModal } from '../components/MatchModal';
@@ -62,6 +63,10 @@ export function DiscoverScreen() {
     isBoosted,
     showMomentumUpsell,
     dismissMomentumUpsell,
+    canRewind,
+    hasRewindablePass,
+    rewindLastPass,
+    isSparkPlus,
   } = useApp();
 
   const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
@@ -319,6 +324,12 @@ export function DiscoverScreen() {
       </View>
       {isIncognitoActive && <IncognitoBanner />}
       <BoostBanner visible={isBoosted} />
+      <RewindButton
+        visible={hasRewindablePass && !isPaused}
+        isSparkPlus={isSparkPlus}
+        onPress={rewindLastPass}
+        onUpgrade={() => navigation.getParent()?.navigate('SparkPlus')}
+      />
       <View
         style={[
           styles.deckContainer,

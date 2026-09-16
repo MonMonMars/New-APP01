@@ -21,6 +21,7 @@ import {
   mockProfiles,
   MUTUAL_MATCH_IDS,
   MUTUAL_SUPER_LIKE_IDS,
+  PROFILE_VIEWER_IDS,
   RECENTLY_ACTIVE_IDS,
   STANDOUT_IDS,
 } from '../data/profiles';
@@ -256,6 +257,7 @@ type AppContextValue = {
   legalConsent: LegalConsentRecord;
   dateCheckIns: DateCheckIn[];
   canRewind: boolean;
+  hasRewindablePass: boolean;
   rewindKey: number;
   showMomentumUpsell: boolean;
   dismissMomentumUpsell: () => void;
@@ -278,7 +280,7 @@ type AppContextValue = {
   passProfile: (profile: Profile) => void;
   likeProfile: (profile: Profile, sparkNote?: string) => Match | null;
   superLikeProfile: (profile: Profile) => Match | null;
-  sendMessage: (conversationId: string, text: string, imageUrl?: string) => void;
+  sendMessage: (conversationId: string, text: string, imageUrl?: string, isGif?: boolean) => void;
   getConversationIdForProfile: (profileId: string) => string | null;
   blockProfile: (profileId: string) => void;
   unblockProfile: (profileId: string) => void;
@@ -298,6 +300,9 @@ type AppContextValue = {
   activateBoost: () => void;
   purchaseSparkNotes: (count: number) => void;
   rewindLastPass: () => void;
+  profileViewers: Profile[];
+  profileViewCount: number;
+  reactToMessage: (conversationId: string, messageId: string, reaction: string) => void;
   enableNotifications: () => Promise<boolean>;
   updateNotificationPreferences: (prefs: NotificationPreferences) => void;
   setThemeMode: (mode: ThemeMode) => void;
@@ -904,6 +909,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [conversations, matches]);
 
   const canRewind = isSparkPlus && lastPassedProfileId !== null;
+  const hasRewindablePass = lastPassedProfileId !== null;
 
   const isIncognitoActive = isSparkPlus && privacyPreferences.incognitoMode;
 
@@ -1077,14 +1083,45 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!isSparkPlus || !lastPassedProfileId) {
       return;
     }
+    const profileId = lastPassedProfileId;
     setPassedIds((prev) => {
       const next = new Set(prev);
-      next.delete(lastPassedProfileId);
+      next.delete(profileId);
       return next;
     });
     setLastPassedProfileId(null);
+    prioritizeProfileInDeck(profileId);
     setRewindKey((k) => k + 1);
-  }, [isSparkPlus, lastPassedProfileId]);
+  }, [isSparkPlus, lastPassedProfileId, prioritizeProfileInDeck]);
+
+  const profileViewers = useMemo(
+    () =>
+      PROFILE_VIEWER_IDS
+        .map((id) => getProfileById(id))
+        .filter((profile): profile is Profile => profile !== undefined),
+    [],
+  );
+
+  const profileViewCount = profileViewers.length + 2;
+
+  const reactToMessage = useCallback(
+    (conversationId: string, messageId: string, reaction: string) => {
+      setConversations((prev) =>
+        prev.map((conversation) => {
+          if (conversation.id !== conversationId) {
+            return conversation;
+          }
+          return {
+            ...conversation,
+            messages: conversation.messages.map((message) =>
+              message.id === messageId ? { ...message, reaction } : message,
+            ),
+          };
+        }),
+      );
+    },
+    [],
+  );
 
   const blockProfile = useCallback((profileId: string) => {
     setBlockedIds((prev) => new Set(prev).add(profileId));
@@ -1360,7 +1397,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const sendMessage = useCallback(
-    (conversationId: string, text: string, imageUrl?: string) => {
+    (conversationId: string, text: string, imageUrl?: string, isGif = false) => {
       if (!checkClientRateLimit(`message:${conversationId}`, 30, 60_000)) {
         return;
       }
@@ -1374,10 +1411,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       const message: Message = {
         id: `msg-${Date.now()}`,
-        text: trimmed || '📷 Photo',
+        text: trimmed || (isGif ? 'GIF' : '📷 Photo'),
         sentAt: new Date().toISOString(),
         isMine: true,
         imageUrl,
+        isGif,
         status: 'sent',
       };
 
@@ -1908,7 +1946,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       legalConsent,
       dateCheckIns,
       canRewind,
+      hasRewindablePass,
       rewindKey,
+      profileViewers,
+      profileViewCount,
+      reactToMessage,
       showMomentumUpsell,
       dismissMomentumUpsell,
       isSupabaseEnabled: isSupabaseConfigured(),
@@ -2017,7 +2059,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       legalConsent,
       dateCheckIns,
       canRewind,
+      hasRewindablePass,
       rewindKey,
+      profileViewers,
+      profileViewCount,
+      reactToMessage,
       showMomentumUpsell,
       dismissMomentumUpsell,
       completeOnboarding,

@@ -62,6 +62,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
       overlayText={maskSnippet}
       overlayVariant={maskVariant}
       contentKind="profile"
+      caption={post.overlayText}
       size={PROFILE_AVATAR_SIZE}
       onPress={openPreview}
       accessibilityLabel={`View profile: ${post.name}`}
@@ -77,6 +78,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
             overlayText={maskSnippet}
             overlayVariant="news"
             contentKind="profile"
+            caption={post.summary}
             size={PROFILE_AVATAR_SIZE}
             onPress={openPreview}
             accessibilityLabel={`View profile: ${post.name}`}

@@ -74,11 +74,9 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
               plainAvatar
               contentKind="profile"
               imageUrl={testimonial.avatarUrl}
+              caption={testimonial.quote}
               accessibilityLabel={`${testimonial.name} profile photo`}
             />
-            <Text style={styles.testimonialQuote} numberOfLines={2}>
-              “{testimonial.quote}”
-            </Text>
           </AnimatedPressable>
           <View style={styles.cta}>
             <Text style={styles.ctaText}>{ad.cta}</Text>

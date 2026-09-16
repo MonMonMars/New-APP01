@@ -1,7 +1,8 @@
-import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
+import { useTheme } from '../../context/ThemeContext';
 import { spacing } from '../../theme';
-import { ContentTypeKind, ContentTypeLabel } from './ContentTypeIcon';
+import { ContentTypeIcon, ContentTypeKind, ContentTypeLabel } from './ContentTypeIcon';
 import { DisguiseOverlayAvatar, DisguiseOverlayVariant, PROFILE_AVATAR_SIZE } from './DisguiseOverlayAvatar';
 import { FaceCenteredImage } from './FaceCenteredImage';
 import { AnimatedPressable } from '../AnimatedPressable';
@@ -15,6 +16,10 @@ type FeedPersonThumbnailProps = {
   size?: number;
   onPress?: () => void;
   accessibilityLabel?: string;
+  /** Descriptive line beside the avatar (replaces generic type labels like “Profile”). */
+  caption?: string;
+  /** Hide the type label when descriptive text is shown elsewhere (e.g. activity rows). */
+  hideLabel?: boolean;
   style?: StyleProp<ViewStyle>;
 };
 
@@ -28,8 +33,12 @@ export function FeedPersonThumbnail({
   size = PROFILE_AVATAR_SIZE,
   onPress,
   accessibilityLabel,
+  caption,
+  hideLabel = false,
   style,
 }: FeedPersonThumbnailProps) {
+  const { colors } = useTheme();
+
   const avatar = plainAvatar ? (
     <View style={[styles.plainWrap, { width: size, height: size, borderRadius: size / 2 }]}>
       <FaceCenteredImage imageUrl={imageUrl} size={size} />
@@ -44,10 +53,23 @@ export function FeedPersonThumbnail({
     />
   );
 
+  const trimmedCaption = caption?.trim();
+  const showCaption = Boolean(trimmedCaption);
+  const showTypeLabel = !hideLabel && !showCaption;
+
   const content = (
     <View style={[styles.row, style]}>
       {avatar}
-      <ContentTypeLabel kind={contentKind} />
+      {showCaption ? (
+        <View style={styles.captionCol}>
+          <ContentTypeIcon kind={contentKind} size={12} />
+          <Text style={[styles.caption, { color: colors.text }]} numberOfLines={2}>
+            {trimmedCaption}
+          </Text>
+        </View>
+      ) : showTypeLabel ? (
+        <ContentTypeLabel kind={contentKind} />
+      ) : null}
     </View>
   );
 
@@ -79,5 +101,20 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(128,128,128,0.35)',
+  },
+  captionCol: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 5,
+    minWidth: 0,
+    paddingTop: 2,
+  },
+  caption: {
+    flex: 1,
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '600',
+    fontStyle: 'italic',
   },
 });

@@ -66,6 +66,7 @@ export function DisguiseAlertsScreen() {
                     overlayVariant={item.person.overlayVariant ?? 'news'}
                     plainAvatar={!item.person.overlayVariant}
                     contentKind={item.person.overlayVariant ? 'profile' : 'alert'}
+                    hideLabel
                   />
                   <View style={styles.textWrap}>
                     <Text style={[styles.text, { color: colors.text }]}>{item.text}</Text>

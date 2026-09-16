@@ -22,7 +22,7 @@ import { decryptLocalPayload, encryptLocalPayload } from './localEncryption';
 
 const STORAGE_KEY = '@spark/app_state';
 const SENSITIVE_VAULT_KEY = '@spark/sensitive_vault';
-const STORAGE_VERSION = 15;
+const STORAGE_VERSION = 16;
 
 type SensitiveVault = {
   conversations: Conversation[];
@@ -42,6 +42,7 @@ export type PersistedAppState = {
   superLikedIds: string[];
   blockedIds: string[];
   heldIds: string[];
+  profileViewerIds: string[];
   matches: Match[];
   conversations: Conversation[];
   dailyLikesUsed: number;
@@ -93,6 +94,7 @@ export function createDefaultPersistedState(): PersistedAppState {
     superLikedIds: [],
     blockedIds: [],
     heldIds: [],
+    profileViewerIds: [],
     matches: [],
     conversations: [],
     dailyLikesUsed: 0,
@@ -181,6 +183,7 @@ export async function loadPersistedState(): Promise<PersistedAppState | null> {
       disguiseMode: parsed.disguiseMode ?? true,
       disguiseAdCreative: parsed.disguiseAdCreative ?? null,
       heldIds: parsed.heldIds ?? [],
+      profileViewerIds: parsed.profileViewerIds ?? [],
       userId: parsed.userId ?? null,
       securitySettings: {
         ...defaultSecuritySettings,

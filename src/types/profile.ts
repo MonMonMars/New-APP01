@@ -101,6 +101,8 @@ export type Profile = {
   /** Fake map pin position (0–100 % of map viewport) */
   mapX?: number;
   mapY?: number;
+  instagramHandle?: string;
+  spotifyHandle?: string;
 };
 
 export type RelationshipIntent =

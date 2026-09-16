@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
+import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { DisguisedProfilePost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
@@ -9,6 +10,7 @@ import { ContentTypeIcon, MediaWithContentBadge } from './ContentTypeIcon';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { PROFILE_AVATAR_SIZE } from './DisguiseOverlayAvatar';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
+import { SocialCommentSheet } from './SocialCommentSheet';
 import { profileIdFromPostId } from '../../utils/resolveDisguiseProfile';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -27,7 +29,10 @@ function OwnerHint({ label, color }: { label: string; color: string }) {
 
 export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   const { colors } = useTheme();
+  const { pulseSocial, togglePulseLike } = useApp();
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const upvoted = pulseSocial.likedPostIds.includes(post.id);
 
   const reporter: NewsReporter = {
     id: post.id,
@@ -80,18 +85,40 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
             <Text style={[styles.socialBody, { color: colors.text }]}>{post.summary}</Text>
           </AnimatedPressable>
           <View style={styles.socialActions}>
-            <View style={styles.socialAction}>
-              <Ionicons name="arrow-up-outline" size={18} color={colors.textMuted} />
-              <Text style={[styles.socialActionText, { color: colors.textMuted }]}>24</Text>
-            </View>
-            <View style={styles.socialAction}>
+            <AnimatedPressable style={styles.socialAction} onPress={() => togglePulseLike(post.id)}>
+              <Ionicons
+                name={upvoted ? 'arrow-up' : 'arrow-up-outline'}
+                size={18}
+                color={upvoted ? colors.like : colors.textMuted}
+              />
+              <Text style={[styles.socialActionText, { color: upvoted ? colors.like : colors.textMuted }]}>
+                {upvoted ? 25 : 24}
+              </Text>
+            </AnimatedPressable>
+            <AnimatedPressable style={styles.socialAction} onPress={() => setCommentsOpen(true)}>
               <Ionicons name="chatbubble-outline" size={18} color={colors.textMuted} />
               <Text style={[styles.socialActionText, { color: colors.textMuted }]}>3</Text>
-            </View>
+            </AnimatedPressable>
           </View>
           <OwnerHint label={post.hintLabel} color={colors.gradientEnd} />
         </View>
         {previewSheet}
+        <SocialCommentSheet
+          visible={commentsOpen}
+          post={{
+            id: post.id,
+            type: 'social',
+            author: post.name,
+            handle: post.name.toLowerCase().replace(/\s+/g, ''),
+            body: post.summary,
+            avatarUrl: post.avatarUrl,
+            timeAgo: post.timeAgo,
+            likes: 24,
+            comments: 3,
+            avatarMask: { text: post.overlayText, variant: 'news' },
+          }}
+          onClose={() => setCommentsOpen(false)}
+        />
       </>
     );
   }

@@ -23,6 +23,7 @@ import {
 import { resolveSavedPulsePosts } from '../../utils/pulseSavedPosts';
 import { PulseDetailItem, PulseDetailSheet } from '../../components/disguise/PulseDetailSheet';
 import { PulseFeedItemViewer } from '../../components/disguise/PulseFeedItemViewer';
+import { PulseListPickerSheet } from '../../components/disguise/PulseListPickerSheet';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 
 type DetailSheetKey = 'saved' | 'history' | 'settings' | 'help' | null;
@@ -70,6 +71,8 @@ export function DisguiseProfileScreen() {
   const [detailSheet, setDetailSheet] = useState<DetailSheetKey>(null);
   const [viewerItemId, setViewerItemId] = useState<string | null>(null);
   const [viewerHeadline, setViewerHeadline] = useState<string | null>(null);
+  const [themePickerOpen, setThemePickerOpen] = useState(false);
+  const [regionPickerOpen, setRegionPickerOpen] = useState(false);
   const profileCreative = disguiseAdCreative ?? {
     imageUrl: user.photos[0],
     overlayText: 'Weekend reads you should not miss',
@@ -264,23 +267,11 @@ export function DisguiseProfileScreen() {
               return;
             }
             if (item.id === 'st2') {
-              const next: ThemeMode =
-                themeMode === 'dark' ? 'light' : themeMode === 'light' ? 'system' : 'dark';
-              setThemeMode(next);
-              Alert.alert('Appearance updated', `Theme set to ${next}.`);
+              setThemePickerOpen(true);
               return;
             }
             if (item.id === 'st3') {
-              Alert.alert('Region & language', 'Choose your region', [
-                ...PASSPORT_CITIES.slice(0, 5).map((city) => ({
-                  text: city,
-                  onPress: () => {
-                    updatePreferences({ ...preferences, passportCity: city });
-                    Alert.alert('Region updated', `Showing content for ${city}.`);
-                  },
-                })),
-                { text: 'Cancel', style: 'cancel' },
-              ]);
+              setRegionPickerOpen(true);
               return;
             }
             if (item.id === 'st4') {
@@ -315,6 +306,31 @@ export function DisguiseProfileScreen() {
           setViewerItemId(null);
           setViewerHeadline(null);
         }}
+      />
+
+      <PulseListPickerSheet
+        visible={themePickerOpen}
+        title="Appearance"
+        items={[
+          { id: 'light', label: 'Light', selected: themeMode === 'light' },
+          { id: 'dark', label: 'Dark', selected: themeMode === 'dark' },
+          { id: 'system', label: 'System default', selected: themeMode === 'system' },
+        ]}
+        onClose={() => setThemePickerOpen(false)}
+        onSelect={(id) => setThemeMode(id as ThemeMode)}
+      />
+
+      <PulseListPickerSheet
+        visible={regionPickerOpen}
+        title="Region & language"
+        items={PASSPORT_CITIES.map((city) => ({
+          id: city,
+          label: city,
+          subtitle: 'English',
+          selected: preferences.passportCity === city,
+        }))}
+        onClose={() => setRegionPickerOpen(false)}
+        onSelect={(city) => updatePreferences({ ...preferences, passportCity: city })}
       />
     </View>
   );

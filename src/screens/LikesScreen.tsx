@@ -40,6 +40,11 @@ export function LikesScreen() {
     .map((id) => getProfileById(id))
     .filter((profile) => profile !== undefined);
 
+  const sentLikes = Array.from(pendingLikeIds)
+    .filter((id) => !superLikedIds.has(id))
+    .map((id) => getProfileById(id))
+    .filter((profile): profile is Profile => profile !== undefined);
+
   const openPaywall = () => {
     navigation.getParent()?.navigate('SparkPlus');
   };
@@ -122,6 +127,29 @@ export function LikesScreen() {
             </AnimatedPressable>
           )}
         </View>
+
+        {sentLikes.length > 0 && (
+          <View style={styles.superSection}>
+            <View style={styles.superHeader}>
+              <Ionicons name="heart-outline" size={18} color={colors.heartPink} />
+              <Text style={styles.superTitle}>Likes you sent</Text>
+              <Text style={styles.superCount}>{sentLikes.length}</Text>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.superRow}>
+              {sentLikes.map((profile) => (
+                <AnimatedPressable
+                  key={profile.id}
+                  style={styles.superCard}
+                  onPress={() => setSelectedProfile(profile)}
+                >
+                  <Image source={{ uri: profile.photos[0] }} style={styles.superPhoto} />
+                  <Text style={styles.superName}>{profile.name}</Text>
+                  <Text style={styles.superStatus}>Waiting for match</Text>
+                </AnimatedPressable>
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
         {superLikesSent.length > 0 && (
           <View style={styles.superSection}>

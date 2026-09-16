@@ -161,7 +161,36 @@ function matchesAdvancedFilters(
   advanced: DiscoveryPreferences['advancedFilters'],
   isSparkPlus: boolean,
 ): boolean {
-  if (!isSparkPlus || !advanced) {
+  if (!advanced) {
+    return true;
+  }
+
+  const emberStatuses = advanced.emberStatuses ?? [];
+  if (emberStatuses.length > 0) {
+    const status = profile.relationshipStatus;
+    if (status !== 'married' && status !== 'divorced') {
+      return false;
+    }
+    if (!emberStatuses.includes(status)) {
+      return false;
+    }
+  }
+
+  const emberDiscretion = advanced.emberDiscretion ?? [];
+  if (emberDiscretion.length > 0) {
+    if (!profile.emberDiscretion || !emberDiscretion.includes(profile.emberDiscretion)) {
+      return false;
+    }
+  }
+
+  const emberSeeking = advanced.emberSeeking ?? [];
+  if (emberSeeking.length > 0) {
+    if (!profile.emberSeeking || !emberSeeking.includes(profile.emberSeeking)) {
+      return false;
+    }
+  }
+
+  if (!isSparkPlus) {
     return true;
   }
 

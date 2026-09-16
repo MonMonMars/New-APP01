@@ -98,6 +98,12 @@ export type Profile = {
   intent?: RelationshipIntent;
   /** Optional bio status — does not lock Spark or Ember */
   relationshipStatus?: RelationshipStatus;
+  /** Ember-only: how private this profile is */
+  emberDiscretion?: EmberDiscretion;
+  /** Ember-only: what they want */
+  emberSeeking?: EmberSeeking;
+  /** Ember-only: when they can talk */
+  emberAvailability?: EmberAvailability;
   /** City label for map / discovery */
   city?: string;
   /** Fake map pin position (0–100 % of map viewport) */
@@ -154,6 +160,100 @@ export function emberRelationshipLabel(status?: RelationshipStatus | null): stri
   }
 }
 
+/** Ashley Madison–style discretion preference. Shown only in Ember. */
+export type EmberDiscretion = 'open' | 'careful' | 'hidden';
+
+/** What someone wants in Ember — more specific than Spark intent. */
+export type EmberSeeking = 'online' | 'travel' | 'ongoing' | 'light';
+
+export type EmberAvailability = 'evenings' | 'weekends' | 'flexible';
+
+export const EMBER_DISCRETION_LABELS: Record<EmberDiscretion, string> = {
+  open: 'Open',
+  careful: 'Careful',
+  hidden: 'Hidden',
+};
+
+export const EMBER_DISCRETION_HINTS: Record<EmberDiscretion, string> = {
+  open: 'Photos and city stay visible',
+  careful: 'Extra photos stay private until a match',
+  hidden: 'City hidden · extra photos private',
+};
+
+export const EMBER_SEEKING_LABELS: Record<EmberSeeking, string> = {
+  online: 'Online only',
+  travel: 'When traveling',
+  ongoing: 'Ongoing',
+  light: 'Keep it light',
+};
+
+export const EMBER_AVAILABILITY_LABELS: Record<EmberAvailability, string> = {
+  evenings: 'Evenings',
+  weekends: 'Weekends',
+  flexible: 'Flexible',
+};
+
+export const EMBER_PROMPT_OPTIONS = [
+  'I value discretion because',
+  'The best time to talk is',
+  'What this is (and isn’t)',
+  'I’m looking for',
+] as const;
+
+export function emberLocksExtraPhotos(discretion?: EmberDiscretion | null): boolean {
+  switch (discretion) {
+    case 'careful':
+    case 'hidden':
+      return true;
+    case 'open':
+    case undefined:
+    case null:
+      return false;
+    default: {
+      const _exhaustive: never = discretion;
+      return _exhaustive;
+    }
+  }
+}
+
+export function emberHidesCity(discretion?: EmberDiscretion | null): boolean {
+  switch (discretion) {
+    case 'hidden':
+      return true;
+    case 'open':
+    case 'careful':
+    case undefined:
+    case null:
+      return false;
+    default: {
+      const _exhaustive: never = discretion;
+      return _exhaustive;
+    }
+  }
+}
+
+export function emberLocationLine(profile: {
+  city?: string;
+  distanceMiles: number;
+  emberDiscretion?: EmberDiscretion;
+}): string {
+  if (emberHidesCity(profile.emberDiscretion)) {
+    return 'Nearby';
+  }
+  const miles = `${profile.distanceMiles} mi`;
+  if (profile.emberDiscretion === 'careful') {
+    return miles;
+  }
+  return profile.city ? `${profile.city} · ${miles}` : miles;
+}
+
+export function emberVisiblePhotoCount(photoCount: number, discretion?: EmberDiscretion | null, unlocked = false): number {
+  if (unlocked || !emberLocksExtraPhotos(discretion) || photoCount === 0) {
+    return photoCount;
+  }
+  return 1;
+}
+
 export type UserProfile = {
   name: string;
   age: number;
@@ -162,6 +262,9 @@ export type UserProfile = {
   interests: string[];
   intent?: RelationshipIntent;
   relationshipStatus?: RelationshipStatus;
+  emberDiscretion?: EmberDiscretion;
+  emberSeeking?: EmberSeeking;
+  emberAvailability?: EmberAvailability;
   gender?: ProfileGender;
   orientation?: Orientation;
   prompts?: ProfilePrompt[];

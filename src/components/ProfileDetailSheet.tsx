@@ -9,7 +9,17 @@ import { VerificationBadges } from './VerificationBadges';
 import { isAiPersonaProfile } from '../data/aiPersonas';
 import { RELATIONSHIP_INTENT_LABELS } from '../types/preferences';
 import { colors, radii, spacing } from '../theme';
-import { emberRelationshipLabel, Profile, ProfilePrompt } from '../types/profile';
+import {
+  emberLocationLine,
+  emberRelationshipLabel,
+  emberVisiblePhotoCount,
+  EMBER_AVAILABILITY_LABELS,
+  EMBER_DISCRETION_HINTS,
+  EMBER_DISCRETION_LABELS,
+  EMBER_SEEKING_LABELS,
+  Profile,
+  ProfilePrompt,
+} from '../types/profile';
 import { ProfileSocialLinks } from './ProfileSocialLinks';
 import { AnimatedPressable } from './AnimatedPressable';
 
@@ -26,6 +36,8 @@ type ProfileDetailSheetProps = {
   onLike?: () => void;
   onPass?: () => void;
   onSparkNote?: () => void;
+  /** True after a match — Ember private photos unlock */
+  photosUnlocked?: boolean;
 };
 
 export function ProfileDetailSheet({
@@ -41,6 +53,7 @@ export function ProfileDetailSheet({
   onLike,
   onPass,
   onSparkNote,
+  photosUnlocked = false,
 }: ProfileDetailSheetProps) {
   const insets = useSafeAreaInsets();
 
@@ -49,6 +62,9 @@ export function ProfileDetailSheet({
   }
 
   const emberStatus = emberRelationshipLabel(profile.relationshipStatus);
+  const visiblePhotoCount = emberStatus
+    ? emberVisiblePhotoCount(profile.photos.length, profile.emberDiscretion, photosUnlocked)
+    : profile.photos.length;
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
@@ -66,13 +82,24 @@ export function ProfileDetailSheet({
         </View>
 
         <ScrollView contentContainerStyle={styles.content}>
-          {profile.photos.map((photo, photoIndex) => (
-            <Image
-              key={`${profile.id}-photo-${photoIndex}`}
-              source={{ uri: photo }}
-              style={styles.hero}
-            />
-          ))}
+          {profile.photos.map((photo, photoIndex) => {
+            const locked = photoIndex >= visiblePhotoCount;
+            return (
+              <View key={`${profile.id}-photo-${photoIndex}`} style={styles.heroWrap}>
+                <Image
+                  source={{ uri: photo }}
+                  style={styles.hero}
+                  blurRadius={locked ? 28 : 0}
+                />
+                {locked ? (
+                  <View style={styles.privatePhotoMask}>
+                    <Ionicons name="lock-closed" size={22} color={colors.ember} />
+                    <Text style={styles.privatePhotoText}>Private until you match</Text>
+                  </View>
+                ) : null}
+              </View>
+            );
+          })}
 
           <View style={styles.section}>
             <View style={styles.nameRow}>
@@ -97,10 +124,25 @@ export function ProfileDetailSheet({
             {emberStatus ? (
               <Text style={[styles.intentMeta, { color: colors.ember }]}>{emberStatus}</Text>
             ) : null}
-            {profile.intent && (
+            {emberStatus && profile.emberDiscretion ? (
+              <Text style={[styles.intentMeta, { color: colors.ember }]}>
+                {EMBER_DISCRETION_LABELS[profile.emberDiscretion]}
+                {' · '}
+                {EMBER_DISCRETION_HINTS[profile.emberDiscretion]}
+              </Text>
+            ) : null}
+            {emberStatus && profile.emberSeeking ? (
+              <Text style={styles.intentMeta}>{EMBER_SEEKING_LABELS[profile.emberSeeking]}</Text>
+            ) : null}
+            {emberStatus && profile.emberAvailability ? (
+              <Text style={styles.meta}>{EMBER_AVAILABILITY_LABELS[profile.emberAvailability]}</Text>
+            ) : null}
+            {profile.intent && !emberStatus ? (
               <Text style={styles.intentMeta}>{RELATIONSHIP_INTENT_LABELS[profile.intent]}</Text>
-            )}
-            <Text style={styles.distance}>{profile.distanceMiles} miles away</Text>
+            ) : null}
+            <Text style={styles.distance}>
+              {emberStatus ? emberLocationLine(profile) : `${profile.distanceMiles} miles away`}
+            </Text>
             {profile.openingMove ? (
               <View style={styles.openingMove}>
                 <Ionicons name="chatbubble-ellipses-outline" size={14} color={colors.gradientEnd} />
@@ -109,7 +151,7 @@ export function ProfileDetailSheet({
             ) : null}
           </View>
 
-          {(profile.instagramHandle || profile.spotifyHandle) && (
+          {(profile.instagramHandle || profile.spotifyHandle) && (!emberStatus || photosUnlocked) && (
             <View style={styles.section}>
               <ProfileSocialLinks
                 user={{
@@ -242,10 +284,25 @@ const styles = StyleSheet.create({
   content: {
     paddingBottom: spacing.xl,
   },
+  heroWrap: {
+    position: 'relative',
+  },
   hero: {
     width: '100%',
     height: 420,
     resizeMode: 'cover',
+  },
+  privatePhotoMask: {
+    ...StyleSheet.absoluteFill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(15, 15, 16, 0.35)',
+    gap: spacing.sm,
+  },
+  privatePhotoText: {
+    color: colors.ember,
+    fontSize: 13,
+    fontWeight: '800',
   },
   section: {
     paddingHorizontal: spacing.lg,

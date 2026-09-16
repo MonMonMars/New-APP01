@@ -1,6 +1,15 @@
 import { aiPersonaProfiles, AI_PERSONA_IDS } from './aiPersonas';
 import { extraRawProfiles } from './extraProfiles';
-import { Profile, RelationshipIntent, RelationshipStatus } from '../types/profile';
+import {
+  EmberAvailability,
+  EmberDiscretion,
+  EmberSeeking,
+  EMBER_PROMPT_OPTIONS,
+  Profile,
+  RelationshipIntent,
+  RelationshipStatus,
+  isEmberRelationshipStatus,
+} from '../types/profile';
 
 const PROFILE_INTENTS: RelationshipIntent[] = ['long_term', 'short_term', 'new_friends', 'not_sure'];
 
@@ -148,6 +157,42 @@ function withRelationshipStatus(profile: Profile): Profile {
     status = 'married';
   }
   return { ...profile, relationshipStatus: profile.relationshipStatus ?? status };
+}
+
+const EMBER_DISCRETION_CYCLE: EmberDiscretion[] = ['open', 'careful', 'hidden'];
+const EMBER_SEEKING_CYCLE: EmberSeeking[] = ['online', 'travel', 'ongoing', 'light'];
+const EMBER_AVAILABILITY_CYCLE: EmberAvailability[] = ['evenings', 'weekends', 'flexible'];
+const EMBER_PROMPT_ANSWERS = [
+  'I keep my circles separate. Trust is earned, not assumed.',
+  'After the kids are asleep — or a quiet lunch if the week allows.',
+  'A private connection. Not a performance, not a broadcast.',
+  'Someone who understands timing, and doesn’t need to be in my public life.',
+];
+
+function withEmberFields(profile: Profile, seed: number): Profile {
+  if (!isEmberRelationshipStatus(profile.relationshipStatus)) {
+    return profile;
+  }
+  const discretion = profile.emberDiscretion ?? EMBER_DISCRETION_CYCLE[seed % EMBER_DISCRETION_CYCLE.length];
+  const seeking = profile.emberSeeking ?? EMBER_SEEKING_CYCLE[seed % EMBER_SEEKING_CYCLE.length];
+  const availability =
+    profile.emberAvailability ?? EMBER_AVAILABILITY_CYCLE[seed % EMBER_AVAILABILITY_CYCLE.length];
+  const prompts =
+    profile.prompts && profile.prompts.length > 0
+      ? profile.prompts
+      : [
+          {
+            question: EMBER_PROMPT_OPTIONS[seed % EMBER_PROMPT_OPTIONS.length],
+            answer: EMBER_PROMPT_ANSWERS[seed % EMBER_PROMPT_ANSWERS.length],
+          },
+        ];
+  return {
+    ...profile,
+    emberDiscretion: discretion,
+    emberSeeking: seeking,
+    emberAvailability: availability,
+    prompts,
+  };
 }
 
 const rawProfiles: Profile[] = [
@@ -1074,7 +1119,10 @@ function withVerification(profile: Profile): Profile {
 
 export const mockProfiles: Profile[] = rawProfiles.map((profile, index) => {
   const seed = Number(profile.id) || index + 1;
-  return withRelationshipStatus(withVerification(withIntent(withMap(profile, seed), seed)));
+  return withEmberFields(
+    withRelationshipStatus(withVerification(withIntent(withMap(profile, seed), seed))),
+    seed,
+  );
 });
 
 function incomingFromMock(id: string): Profile {
@@ -1083,7 +1131,7 @@ function incomingFromMock(id: string): Profile {
     throw new Error(`Missing incoming-like profile id ${id}`);
   }
   const { mapX, mapY } = mapPin(profile.distanceMiles, Number(id));
-  return withRelationshipStatus(withVerification({ ...profile, mapX, mapY }));
+  return withEmberFields(withRelationshipStatus(withVerification({ ...profile, mapX, mapY })), Number(id));
 }
 
 /** Profiles that liked you — excluded from discover deck; see INCOMING_LIKE_IDS */

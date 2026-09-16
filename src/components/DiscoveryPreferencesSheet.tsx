@@ -12,6 +12,7 @@ import {
   PASSPORT_CITIES,
   SHOW_ME_LABELS,
   ShowMePreference,
+  resolveSparkSection,
 } from '../types/preferences';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -193,6 +194,7 @@ export function DiscoveryPreferencesSheet({
           <AdvancedFiltersSection
             filters={preferences.advancedFilters ?? {}}
             isSparkPlus={isSparkPlus}
+            emberMode={resolveSparkSection(preferences.sparkSection) === 'ember'}
             onChange={(advancedFilters) => onChange({ ...preferences, advancedFilters })}
             onUpgrade={openSparkPlus}
           />

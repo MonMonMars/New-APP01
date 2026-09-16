@@ -240,6 +240,7 @@ export function LikesScreen() {
         visible={showSparkNote}
         profile={selectedProfile}
         remainingNotes={remainingSparkNotes}
+        variant={resolveSparkSection(preferences.sparkSection)}
         onClose={() => setShowSparkNote(false)}
         onSend={(note) => {
           if (selectedProfile) {

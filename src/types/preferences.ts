@@ -1,6 +1,12 @@
 export type ShowMePreference = 'women' | 'men' | 'everyone';
 
-import { RelationshipIntent, RelationshipStatus, isEmberRelationshipStatus } from './profile';
+import {
+  EmberDiscretion,
+  EmberSeeking,
+  RelationshipIntent,
+  RelationshipStatus,
+  isEmberRelationshipStatus,
+} from './profile';
 
 export type DiscoverFilter = 'active_today' | 'new_here' | 'has_bio' | 'verified';
 
@@ -9,6 +15,10 @@ export type AdvancedDiscoverFilters = {
   intents?: RelationshipIntent[];
   /** Only show profiles sharing at least one interest with you (Spark+) */
   sharedInterestsOnly?: boolean;
+  /** Ember: Married and/or Divorced */
+  emberStatuses?: Array<Extract<RelationshipStatus, 'married' | 'divorced'>>;
+  emberDiscretion?: EmberDiscretion[];
+  emberSeeking?: EmberSeeking[];
 };
 
 export const RELATIONSHIP_INTENT_LABELS: Record<RelationshipIntent, string> = {
@@ -47,7 +57,7 @@ export const SPARK_SECTION_LABELS: Record<SparkSection, string> = {
 
 export const SPARK_SECTION_HINTS: Record<SparkSection, string> = {
   spark: 'Open dating',
-  ember: 'Married group · anyone can join',
+  ember: 'Married group · discretion first',
 };
 
 export const SPARK_SECTION_EMPTY: Record<SparkSection, { title: string; subtitle: string }> = {

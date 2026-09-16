@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LegalPreviewSheet } from '../../components/legal/LegalPreviewSheet';
@@ -173,7 +173,12 @@ export function OnboardingFlow() {
       )}
 
       {step === 'rules' && (
-        <View style={styles.step}>
+        <ScrollView
+          style={styles.stepScroll}
+          contentContainerStyle={styles.stepScrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           <Text style={styles.title}>Community guidelines</Text>
           <Text style={styles.subtitle}>A few rules before you join the feed.</Text>
           {rules.map((rule) => (
@@ -222,7 +227,7 @@ export function OnboardingFlow() {
           >
             <Text style={styles.primaryButtonText}>Continue — I am 18+</Text>
           </AnimatedPressable>
-        </View>
+        </ScrollView>
       )}
 
       {step === 'location' && (
@@ -401,6 +406,14 @@ const styles = StyleSheet.create({
   step: {
     flex: 1,
     justifyContent: 'center',
+  },
+  stepScroll: {
+    flex: 1,
+  },
+  stepScrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingBottom: spacing.xl,
   },
   badge: {
     width: 72,

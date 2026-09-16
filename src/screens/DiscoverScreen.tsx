@@ -314,6 +314,10 @@ export function DiscoverScreen() {
     setShowWaiting(true);
   }, [dismissSuperLikeResult, getConversationIdForProfile, navigation, superLikeIsMatch, superLikeProfileState]);
 
+  if (!isFocused) {
+    return <View style={[styles.screen, { backgroundColor: colors.background }]} />;
+  }
+
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <View style={[styles.emergencyBar, { paddingTop: insets.top }]}>
@@ -372,7 +376,7 @@ export function DiscoverScreen() {
               </Text>
             </AnimatedPressable>
           </View>
-        ) : isFocused ? (
+        ) : (
           <SwipeDeck
             key={`deck-${rewindKey}`}
             ref={deckRef}
@@ -385,7 +389,7 @@ export function DiscoverScreen() {
             onLikeBlocked={() => setShowLikeLimit(true)}
             compact
           />
-        ) : null}
+        )}
 
       </View>
 

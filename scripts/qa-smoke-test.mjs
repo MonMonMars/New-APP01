@@ -40,41 +40,49 @@ async function skipOnboarding(page) {
     await page.waitForTimeout(800);
   }
 
-  for (let step = 0; step < 12; step++) {
-    const policyRow = page.getByText(/i have read and agree/i).first();
-    if (await policyRow.isVisible().catch(() => false)) {
-      await policyRow.click();
+  for (let step = 0; step < 15; step++) {
+    const body = await page.locator('body').innerText().catch(() => '');
+
+    if (/community guidelines/i.test(body)) {
+      await page.getByText(/i have read and agree/i).first().click();
       await page.waitForTimeout(400);
-    }
-
-    const continue18 = page.getByRole('button', { name: /continue.*18|i am 18/i }).first();
-    if (await continue18.isEnabled().catch(() => false)) {
-      await continue18.click();
+      await page.getByText(/continue.*18/i).first().click();
       await page.waitForTimeout(800);
       continue;
     }
 
-    const continueBtn = page.getByRole('button', { name: /continue|next|open pulse|get started|done|finish|save|looks good/i }).first();
-    if (await continueBtn.isEnabled().catch(() => false)) {
-      await continueBtn.click();
+    if (/choose your region/i.test(body)) {
+      await page.getByText(/use my location/i).first().click();
       await page.waitForTimeout(800);
       continue;
     }
 
-    if (await bodyIncludes(page, 'open pulse')) {
-      await page.getByRole('button', { name: /open pulse/i }).click().catch(() => {});
-      await page.waitForTimeout(1000);
+    const openPulse = page.getByText(/open pulse/i).first();
+    if (await openPulse.isVisible().catch(() => false)) {
+      await openPulse.click();
+      await page.waitForTimeout(1200);
+      break;
+    }
+
+    const cont = page.getByText(/^continue$/i).first();
+    if (await cont.isVisible().catch(() => false)) {
+      await cont.click();
+      await page.waitForTimeout(800);
+      continue;
+    }
+
+    if (/tap to unlock|for you|trending/i.test(body)) {
       break;
     }
   }
 }
 
 async function unlockSpark(page) {
-  const unlock = page.getByText(/tap to unlock|unlock spark/i).first();
+  const unlock = page.getByText(/tap to unlock/i).first();
   if (await unlock.isVisible({ timeout: 5000 }).catch(() => false)) {
     await unlock.click();
     await page.waitForTimeout(800);
-    const confirm = page.getByRole('button', { name: /unlock spark|i understand/i }).first();
+    const confirm = page.getByText(/i understand.*unlock spark|unlock spark/i).first();
     if (await confirm.isVisible().catch(() => false)) {
       await confirm.click();
       await page.waitForTimeout(1200);
@@ -82,7 +90,16 @@ async function unlockSpark(page) {
   }
 }
 
+async function dismissCookies(page) {
+  const essential = page.getByText(/essential only/i).first();
+  if (await essential.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await essential.click();
+    await page.waitForTimeout(500);
+  }
+}
+
 async function clickTab(page, label) {
+  await dismissCookies(page);
   const tab = page.getByText(label, { exact: true }).last();
   await tab.waitFor({ state: 'visible', timeout: 10000 });
   await tab.click();

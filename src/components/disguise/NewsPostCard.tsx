@@ -59,6 +59,11 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
                   plainAvatar
                   contentKind={resolveReporterSparkProfile(reporter) ? 'profile' : 'news'}
                   imageUrl={reporter.avatarUrl}
+                  caption={
+                    resolveReporterSparkProfile(reporter)
+                      ? reporter.quote
+                      : `${reporter.name} on this story`
+                  }
                   onPress={() => openReporter(reporter)}
                   accessibilityLabel={`View photos from ${reporter.name}`}
                   style={styles.reporterRow}

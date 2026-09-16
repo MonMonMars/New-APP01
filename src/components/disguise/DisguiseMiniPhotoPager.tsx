@@ -29,12 +29,17 @@ export function DisguiseMiniPhotoPager({
 }: DisguiseMiniPhotoPagerProps) {
   const { colors } = useTheme();
   const scrollRef = useRef<ScrollView>(null);
+  const scrollSourceRef = useRef<'external' | 'gesture'>('external');
   const [laneWidth, setLaneWidth] = useState(0);
   const safeIndex = photos.length > 0 ? Math.min(index, photos.length - 1) : 0;
   const multiPhoto = photos.length > 1;
 
   useEffect(() => {
     if (laneWidth <= 0 || !multiPhoto) {
+      return;
+    }
+    if (scrollSourceRef.current === 'gesture') {
+      scrollSourceRef.current = 'external';
       return;
     }
     scrollRef.current?.scrollTo({ x: safeIndex * laneWidth, animated: false });
@@ -47,12 +52,9 @@ export function DisguiseMiniPhotoPager({
     const nextIndex = Math.round(offsetX / laneWidth);
     const clamped = Math.max(0, Math.min(nextIndex, photos.length - 1));
     if (clamped !== safeIndex) {
+      scrollSourceRef.current = 'gesture';
       onIndexChange(clamped);
     }
-  };
-
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    syncIndexFromOffset(event.nativeEvent.contentOffset.x);
   };
 
   const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -111,8 +113,6 @@ export function DisguiseMiniPhotoPager({
             scrollEnabled
             showsHorizontalScrollIndicator={false}
             decelerationRate="fast"
-            scrollEventThrottle={16}
-            onScroll={handleScroll}
             onMomentumScrollEnd={handleScrollEnd}
             onScrollEndDrag={handleScrollEnd}
             style={styles.scroll}
@@ -130,6 +130,8 @@ export function DisguiseMiniPhotoPager({
               </View>
             ))}
           </ScrollView>
+        ) : multiPhoto ? (
+          <View style={[styles.page, { height, opacity: 0.35 }]} />
         ) : (
           <Image
             source={{ uri: photos[safeIndex] }}
@@ -140,7 +142,7 @@ export function DisguiseMiniPhotoPager({
           />
         )}
 
-        {multiPhoto ? (
+        {multiPhoto && laneWidth > 0 ? (
           <View style={styles.dots} pointerEvents="none">
             {photos.map((_, dotIndex) => (
               <View

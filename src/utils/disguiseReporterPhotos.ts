@@ -1,4 +1,5 @@
-import { NewsReporter, SocialPost } from '../data/disguiseFeed';
+import { DisguiseAlertPerson, NewsReporter, SocialPost } from '../data/disguiseFeed';
+import { disguiseSocialPosts } from '../data/disguiseSocialPosts';
 import { Profile } from '../types/profile';
 import { resolveDisguiseProfile } from './resolveDisguiseProfile';
 
@@ -50,4 +51,27 @@ export function socialReporterPhotoIndex(reporter: NewsReporter, targetUrl?: str
   const urls = buildReporterPhotoUrls(reporter, linkedProfile);
   const index = urls.indexOf(targetUrl.trim());
   return index >= 0 ? index : 0;
+}
+
+/** Match an activity-alert persona to a seeded social post (by name or avatar). */
+export function findSocialPostForAlertPerson(person: DisguiseAlertPerson): SocialPost | undefined {
+  return disguiseSocialPosts.find(
+    (post) => post.author === person.name || post.avatarUrl === person.avatarUrl,
+  );
+}
+
+/** Build a mini-window reporter for activity alerts — links to real Spark profile when possible. */
+export function buildAlertReporter(person: DisguiseAlertPerson): NewsReporter {
+  const social = findSocialPostForAlertPerson(person);
+  if (social) {
+    return buildSocialReporter(social);
+  }
+
+  return {
+    id: `alert-${person.name.replace(/\s+/g, '-').toLowerCase()}`,
+    name: person.name,
+    avatarUrl: person.avatarUrl,
+    quote: '',
+    photos: [],
+  };
 }

@@ -42,26 +42,32 @@ export function PulseDetailSheet({
           <View style={styles.headerSpacer} />
         </View>
         <ScrollView contentContainerStyle={styles.list}>
-          {items.map((item) => (
-            <AnimatedPressable
-              key={item.id}
-              style={[styles.row, { borderBottomColor: colors.border }]}
-              onPress={() => onItemPress?.(item)}
-            >
-              {item.icon ? (
-                <Ionicons name={item.icon} size={20} color={colors.textMuted} />
-              ) : (
-                <View style={[styles.dot, { backgroundColor: colors.gradientEnd }]} />
-              )}
-              <View style={styles.rowText}>
-                <Text style={[styles.rowTitle, { color: colors.text }]}>{item.title}</Text>
-                {item.subtitle ? (
-                  <Text style={[styles.rowSubtitle, { color: colors.textMuted }]}>{item.subtitle}</Text>
+          {items.map((item) => {
+            const isPlaceholder = item.id.startsWith('empty-');
+            return (
+              <AnimatedPressable
+                key={item.id}
+                style={[styles.row, { borderBottomColor: colors.border }]}
+                onPress={isPlaceholder ? undefined : () => onItemPress?.(item)}
+                disabled={isPlaceholder}
+              >
+                {item.icon ? (
+                  <Ionicons name={item.icon} size={20} color={colors.textMuted} />
+                ) : (
+                  <View style={[styles.dot, { backgroundColor: colors.gradientEnd }]} />
+                )}
+                <View style={styles.rowText}>
+                  <Text style={[styles.rowTitle, { color: colors.text }]}>{item.title}</Text>
+                  {item.subtitle ? (
+                    <Text style={[styles.rowSubtitle, { color: colors.textMuted }]}>{item.subtitle}</Text>
+                  ) : null}
+                </View>
+                {!isPlaceholder ? (
+                  <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
                 ) : null}
-              </View>
-              <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-            </AnimatedPressable>
-          ))}
+              </AnimatedPressable>
+            );
+          })}
         </ScrollView>
       </View>
     </Modal>

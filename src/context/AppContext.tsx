@@ -323,6 +323,7 @@ type AppContextValue = {
   activateBoost: (options?: { purchased?: boolean }) => BoostActivationResult;
   addBonusBoosts: (count: number) => void;
   recordPulseReading: (title: string, source: string) => void;
+  markActivityAlertsRead: () => void;
   purchaseSparkNotes: (count: number) => void;
   rewindLastPass: () => void;
   profileViewers: Profile[];
@@ -1726,6 +1727,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const markActivityAlertsRead = useCallback(() => {
+    setPulseSocial((prev) =>
+      prev.activityAlertsRead ? prev : { ...prev, activityAlertsRead: true },
+    );
+  }, []);
+
   const savePulsePost = useCallback((postId: string) => {
     setPulseSocial((prev) => ({
       ...prev,
@@ -2155,6 +2162,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       activateBoost,
       addBonusBoosts,
       recordPulseReading,
+      markActivityAlertsRead,
       purchaseSparkNotes,
       rewindLastPass,
       enableNotifications,
@@ -2273,6 +2281,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       activateBoost,
       addBonusBoosts,
       recordPulseReading,
+      markActivityAlertsRead,
       purchaseSparkNotes,
       rewindLastPass,
       enableNotifications,

@@ -19,6 +19,7 @@ export type PulseSocialState = {
   postComments: Record<string, PulseComment[]>;
   referralShareCount: number;
   readingHistory: PulseReadingEntry[];
+  activityAlertsRead: boolean;
 };
 
 export const defaultPulseSocialState: PulseSocialState = {
@@ -29,4 +30,5 @@ export const defaultPulseSocialState: PulseSocialState = {
   postComments: {},
   referralShareCount: 0,
   readingHistory: [],
+  activityAlertsRead: false,
 };

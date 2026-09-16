@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -18,11 +19,19 @@ import {
   NewsPost,
 } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { useApp } from '../../context/AppContext';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 
 export function DisguiseAlertsScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { markActivityAlertsRead } = useApp();
+
+  useFocusEffect(
+    useCallback(() => {
+      markActivityAlertsRead();
+    }, [markActivityAlertsRead]),
+  );
   const [articlePost, setArticlePost] = useState<NewsPost | null>(null);
   const [adPost, setAdPost] = useState<AdPost | null>(null);
   const [activityAlert, setActivityAlert] = useState<DisguiseAlert | null>(null);
@@ -58,7 +67,10 @@ export function DisguiseAlertsScreen() {
                     plainAvatar={!item.person.overlayVariant}
                     contentKind={item.person.overlayVariant ? 'profile' : 'alert'}
                   />
-                  <Text style={[styles.time, { color: colors.textMuted }]}>{item.time}</Text>
+                  <View style={styles.textWrap}>
+                    <Text style={[styles.text, { color: colors.text }]}>{item.text}</Text>
+                    <Text style={[styles.time, { color: colors.textMuted }]}>{item.time}</Text>
+                  </View>
                 </View>
               ) : (
                 <>
@@ -107,8 +119,7 @@ const styles = StyleSheet.create({
   },
   personRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     gap: spacing.sm,
   },
   iconWrap: {

@@ -1,7 +1,13 @@
 import { disguiseClientAds } from '../data/disguiseClientAds';
+import { breakingNowCards, editorsPicks, pulseBrief } from '../data/disguiseTrending';
 import { disguiseNewsExtra } from '../data/disguiseNewsExtra';
 import { disguiseSocialPosts } from '../data/disguiseSocialPosts';
 import { disguiseFeedItems, FeedItem, NewsPost } from '../data/disguiseFeed';
+import {
+  briefToNewsPost,
+  breakingToNewsPost,
+  editorsPickToNewsPost,
+} from './disguiseTrendingArticles';
 
 const catalogById = new Map<string, FeedItem>();
 
@@ -32,6 +38,13 @@ for (const item of disguiseClientAds.map((campaign) => ({
 }
 for (const item of disguiseNewsExtra) {
   registerItem(item);
+}
+registerItem(briefToNewsPost(pulseBrief));
+for (const card of breakingNowCards) {
+  registerItem(breakingToNewsPost(card));
+}
+for (const pick of editorsPicks) {
+  registerItem(editorsPickToNewsPost(pick));
 }
 
 /** Look up a static feed item by id (news, social, ad). */

@@ -4,9 +4,8 @@
 
 | Link | Durability | Notes |
 |------|------------|-------|
-| **https://temporary-zippy-oxygen-cugkori.vercel.app** | ~60 min (claimable → permanent) | No password. [Claim on Vercel](https://vercel.com/claim-deployment?code=15d53131-f102-4175-8612-2256fc9d3a23) to keep forever. |
-| **https://gorgeous-cat-b0d513.netlify.app** | ~60 min (claimable → permanent) | Password: `My-Drop-Site`. [Claim on Netlify](https://app.netlify.com/drop/gorgeous-cat-b0d513) after signing in. |
-| **https://most-psychiatry-slim-colony.trycloudflare.com** | Hours (workspace must stay awake) | 8/8 verified Sep 16, 2026. Dies when cloud agent sleeps. |
+| **https://temporary-swift-koto-pr4omjr.vercel.app** | ~60 min (claimable → permanent) | **Latest build — 8/8 verified.** No password. [Claim on Vercel](https://vercel.com/claim-deployment?code=cc711077-aee9-478c-b5d3-f1a3649d4a48) to keep forever. |
+| **https://unrivaled-kulfi-8c1433.netlify.app** | ~60 min (claimable → permanent) | Password: `My-Drop-Site`. [Claim on Netlify](https://app.netlify.com/drop/unrivaled-kulfi-8c1433) after signing in. |
 
 **Best long-term fix:** connect Vercel or Netlify to GitHub once (see below) — auto-deploys on every push, stable URL, works with a private repo.
 

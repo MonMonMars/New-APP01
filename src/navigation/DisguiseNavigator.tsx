@@ -25,6 +25,7 @@ export function DisguiseNavigator() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
+        animation: 'fade',
         tabBarButton: (props) => <TabBarButton {...props} />,
         tabBarStyle: {
           backgroundColor: colors.background,

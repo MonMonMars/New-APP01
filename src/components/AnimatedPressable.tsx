@@ -39,8 +39,11 @@ export function AnimatedPressable({
   const pressOpacity = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    opacity: disabled ? 0.45 : pressOpacity.value,
+    transform: [
+      { scale: scale.value },
+      { translateY: (1 - pressOpacity.value) * 2 },
+    ],
+    opacity: disabled ? 0.45 : 0.72 + pressOpacity.value * 0.28,
   }));
 
   return (

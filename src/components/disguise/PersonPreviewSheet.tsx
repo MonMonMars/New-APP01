@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import { Alert, Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../../context/AppContext';
@@ -8,6 +8,9 @@ import { useTheme } from '../../context/ThemeContext';
 import { NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { resolveDisguiseProfile } from '../../utils/resolveDisguiseProfile';
+import { AnimatedOverlay } from '../motion/AnimatedOverlay';
+import { FadeSlideIn } from '../motion/FadeSlideIn';
+import { AnimatedPressable } from '../AnimatedPressable';
 import { DisguiseMiniSparkBar } from './DisguiseMiniSparkBar';
 
 type PersonPreviewSheetProps = {
@@ -113,19 +116,18 @@ export function PersonPreviewSheet({
   };
 
   return (
-    <Modal visible={visible} animationType="none" transparent onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose}>
-        <Pressable
-          style={[
-            styles.card,
-            {
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
-              marginTop: insets.top + spacing.lg,
-            },
-          ]}
-          onPress={(event) => event.stopPropagation()}
-        >
+    <AnimatedOverlay visible={visible} onClose={onClose} variant="center">
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+            marginTop: insets.top * 0.15,
+          },
+        ]}
+      >
+        <FadeSlideIn replayKey={visible} index={0}>
           <View style={styles.header}>
             <View style={styles.headerText}>
               <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
@@ -139,43 +141,63 @@ export function PersonPreviewSheet({
                 </Text>
               ) : null}
             </View>
-            <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Close">
+            <AnimatedPressable onPress={onClose} hitSlop={10} accessibilityLabel="Close" scaleTo={0.88}>
               <Ionicons name="close" size={20} color={colors.textMuted} />
-            </Pressable>
+            </AnimatedPressable>
           </View>
+        </FadeSlideIn>
 
+        <FadeSlideIn replayKey={visible} index={1}>
           <Text style={[styles.quote, { color: colors.text }]} numberOfLines={3}>
             &ldquo;{reporter.quote}&rdquo;
           </Text>
+        </FadeSlideIn>
 
-          {linkedProfile?.bio ? (
+        {linkedProfile?.bio ? (
+          <FadeSlideIn replayKey={visible} index={2}>
             <Text style={[styles.bio, { color: colors.textMuted }]} numberOfLines={2}>
               {linkedProfile.bio}
             </Text>
-          ) : null}
+          </FadeSlideIn>
+        ) : null}
 
+        <FadeSlideIn replayKey={`${visible}-${photoIndex}`} index={3}>
           <View style={styles.photoRow}>
             {photoCount > 1 ? (
-              <Pressable onPress={showPrevPhoto} style={styles.photoNav} accessibilityLabel="Previous photo">
+              <AnimatedPressable
+                onPress={showPrevPhoto}
+                style={styles.photoNav}
+                accessibilityLabel="Previous photo"
+                scaleTo={0.9}
+              >
                 <Ionicons name="chevron-back" size={18} color={colors.textMuted} />
-              </Pressable>
+              </AnimatedPressable>
             ) : null}
 
             <Image source={{ uri: photoUrl }} style={styles.photo} resizeMode="cover" />
 
             {photoCount > 1 ? (
-              <Pressable onPress={showNextPhoto} style={styles.photoNav} accessibilityLabel="Next photo">
+              <AnimatedPressable
+                onPress={showNextPhoto}
+                style={styles.photoNav}
+                accessibilityLabel="Next photo"
+                scaleTo={0.9}
+              >
                 <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-              </Pressable>
+              </AnimatedPressable>
             ) : null}
           </View>
+        </FadeSlideIn>
 
-          {photoCount > 1 ? (
+        {photoCount > 1 ? (
+          <FadeSlideIn replayKey={visible} index={4}>
             <Text style={[styles.photoMeta, { color: colors.textMuted }]}>
               Photo {photoIndex + 1} of {photoCount}
             </Text>
-          ) : null}
+          </FadeSlideIn>
+        ) : null}
 
+        <FadeSlideIn replayKey={visible} index={5}>
           <DisguiseMiniSparkBar
             liked={liked}
             superLiked={superLiked}
@@ -186,25 +208,21 @@ export function PersonPreviewSheet({
             onSuperLike={handleSuperLike}
             onPass={handlePass}
           />
+        </FadeSlideIn>
 
-          {!sparkLinked ? (
+        {!sparkLinked ? (
+          <FadeSlideIn replayKey={visible} index={6}>
             <Text style={[styles.hint, { color: colors.textMuted }]}>
               Reader comment — no linked profile
             </Text>
-          ) : null}
-        </Pressable>
-      </Pressable>
-    </Modal>
+          </FadeSlideIn>
+        ) : null}
+      </View>
+    </AnimatedOverlay>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-  },
   card: {
     width: '100%',
     maxWidth: 300,

@@ -1,11 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../context/ThemeContext';
 import { AdPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { openExternalUrl } from '../../utils/openExternalUrl';
+import { AnimatedOverlay } from '../motion/AnimatedOverlay';
+import { FadeSlideIn } from '../motion/FadeSlideIn';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type AdLandingSheetProps = {
@@ -29,58 +31,52 @@ export function AdLandingSheet({ visible, ad, onClose }: AdLandingSheetProps) {
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.overlay}>
-        <AnimatedPressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Close ad" />
-        <View
-          style={[
-            styles.sheet,
-            {
-              backgroundColor: colors.background,
-              borderColor: colors.border,
-              paddingBottom: insets.bottom + spacing.md,
-            },
-          ]}
-        >
+    <AnimatedOverlay visible={visible} onClose={onClose} variant="bottom">
+      <View
+        style={[
+          styles.sheet,
+          {
+            backgroundColor: colors.background,
+            borderColor: colors.border,
+            paddingBottom: insets.bottom + spacing.md,
+          },
+        ]}
+      >
+        <FadeSlideIn replayKey={visible} index={0}>
           <View style={[styles.toolbar, { borderBottomColor: colors.border }]}>
             <Text style={styles.sponsored}>Sponsored</Text>
-            <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel="Close">
+            <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel="Close" scaleTo={0.9}>
               <Ionicons name="close" size={24} color={colors.text} />
             </AnimatedPressable>
           </View>
+        </FadeSlideIn>
 
-          <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          <FadeSlideIn replayKey={visible} index={1}>
             <Image source={{ uri: ad.imageUrl }} style={styles.hero} resizeMode="cover" />
+          </FadeSlideIn>
+          <FadeSlideIn replayKey={visible} index={2}>
             <Text style={[styles.brand, { color: colors.text }]}>{ad.brand}</Text>
             <Text style={[styles.tagline, { color: colors.textMuted }]}>{ad.tagline}</Text>
-            {paragraphs.map((paragraph, index) => (
-              <Text
-                key={`${ad.id}-ad-p-${index}`}
-                style={[styles.paragraph, { color: colors.text }]}
-              >
-                {paragraph}
-              </Text>
-            ))}
-            <AnimatedPressable style={styles.cta} onPress={handleVisit}>
+          </FadeSlideIn>
+          {paragraphs.map((paragraph, index) => (
+            <FadeSlideIn key={`${ad.id}-ad-p-${index}`} replayKey={visible} index={3 + index}>
+              <Text style={[styles.paragraph, { color: colors.text }]}>{paragraph}</Text>
+            </FadeSlideIn>
+          ))}
+          <FadeSlideIn replayKey={visible} index={3 + paragraphs.length}>
+            <AnimatedPressable style={styles.cta} onPress={handleVisit} scaleTo={0.97}>
               <Text style={styles.ctaText}>{ad.cta}</Text>
               <Ionicons name="open-outline" size={16} color="#fff" />
             </AnimatedPressable>
-          </ScrollView>
-        </View>
+          </FadeSlideIn>
+        </ScrollView>
       </View>
-    </Modal>
+    </AnimatedOverlay>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
   sheet: {
     maxHeight: '78%',
     borderTopLeftRadius: radii.card + 4,

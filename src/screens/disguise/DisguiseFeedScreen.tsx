@@ -17,22 +17,31 @@ import { buildDisguiseFeed } from '../../utils/buildDisguiseFeed';
 import { filterDisguiseFeed, topicFilterLabel } from '../../utils/disguiseFeedFilter';
 import { spacing } from '../../theme';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
+import { FadeSlideIn } from '../../components/motion/FadeSlideIn';
 
-function renderFeedItem({ item }: { item: FeedItem }) {
-  switch (item.type) {
-    case 'news':
-      return <NewsPostCard post={item} />;
-    case 'ad':
-      return <AdBannerCard ad={item} />;
-    case 'social':
-      return <SocialPostCard post={item} />;
-    case 'disguised_profile':
-      return <DisguisedProfileCard post={item} />;
-    default: {
-      const _exhaustive: never = item;
-      return _exhaustive;
+function renderFeedItem({ item, index }: { item: FeedItem; index: number }) {
+  const card = (() => {
+    switch (item.type) {
+      case 'news':
+        return <NewsPostCard post={item} />;
+      case 'ad':
+        return <AdBannerCard ad={item} />;
+      case 'social':
+        return <SocialPostCard post={item} />;
+      case 'disguised_profile':
+        return <DisguisedProfileCard post={item} />;
+      default: {
+        const _exhaustive: never = item;
+        return _exhaustive;
+      }
     }
-  }
+  })();
+
+  return (
+    <FadeSlideIn index={index % 10} distance={18}>
+      {card}
+    </FadeSlideIn>
+  );
 }
 
 export function DisguiseFeedScreen() {
@@ -66,7 +75,7 @@ export function DisguiseFeedScreen() {
       <FlatList
         data={feedItems}
         keyExtractor={(item) => item.id}
-        renderItem={renderFeedItem}
+        renderItem={({ item, index }) => renderFeedItem({ item, index })}
         contentContainerStyle={[styles.list, { paddingBottom: spacing.xl * 4 }]}
         ListHeaderComponent={
           <View style={styles.headerRow}>

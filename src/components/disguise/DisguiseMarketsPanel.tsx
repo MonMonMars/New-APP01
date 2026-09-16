@@ -10,6 +10,7 @@ import {
   marketTopMovers,
   MarketQuote,
 } from '../../data/disguiseMarkets';
+import { pulseBrand } from '../../theme/pulseBrand';
 import { radii, spacing } from '../../theme';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -43,7 +44,7 @@ export function DisguiseMarketsPanel({ onQuotePress }: DisguiseMarketsPanelProps
   return (
     <View style={styles.wrap}>
       <View style={[styles.sessionBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Ionicons name="pulse-outline" size={14} color="#3b82f6" />
+        <Ionicons name="newspaper-outline" size={14} color={pulseBrand.accent} />
         <Text style={[styles.sessionText, { color: colors.textMuted }]}>{marketSessionLabel}</Text>
       </View>
 

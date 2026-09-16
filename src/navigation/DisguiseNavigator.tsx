@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import { TabBarButton } from '../components/TabBarButton';
 import { useTheme } from '../context/ThemeContext';
+import { pulseBrand } from '../theme/pulseBrand';
 import { disguiseAlerts } from '../data/disguiseFeed';
 import { DisguiseAlertsScreen } from '../screens/disguise/DisguiseAlertsScreen';
 import { DisguiseFeedScreen } from '../screens/disguise/DisguiseFeedScreen';
@@ -33,7 +34,7 @@ export function DisguiseNavigator() {
           paddingTop: 6,
           height: 72,
         },
-        tabBarActiveTintColor: '#3b82f6',
+        tabBarActiveTintColor: pulseBrand.accent,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: {
           fontSize: 11,

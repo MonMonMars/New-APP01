@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../context/ThemeContext';
 import { NewsPost } from '../../data/disguiseFeed';
+import { pulseBrand } from '../../theme/pulseBrand';
 import { radii, spacing } from '../../theme';
 import { openExternalUrl } from '../../utils/openExternalUrl';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
@@ -41,7 +42,7 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
         <FadeSlideIn replayKey={visible} index={0}>
           <View style={[styles.toolbar, { borderBottomColor: colors.border }]}>
             <View style={styles.toolbarMeta}>
-              <Text style={[styles.source, { color: colors.gradientEnd }]}>{post.source}</Text>
+              <Text style={[styles.source, { color: pulseBrand.accent }]}>{post.source}</Text>
               <Text style={[styles.category, { color: colors.textMuted }]}>{post.category}</Text>
             </View>
             <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel="Close" scaleTo={0.9}>

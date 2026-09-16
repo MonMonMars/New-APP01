@@ -15,6 +15,8 @@ import { FeedItem } from '../../data/disguiseFeed';
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
 import { buildDisguiseFeed } from '../../utils/buildDisguiseFeed';
 import { filterDisguiseFeed, topicFilterLabel } from '../../utils/disguiseFeedFilter';
+import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
+import { pulseBrand } from '../../theme/pulseBrand';
 import { spacing } from '../../theme';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { FadeSlideIn } from '../../components/motion/FadeSlideIn';
@@ -82,10 +84,10 @@ export function DisguiseFeedScreen() {
             <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>{sectionLabel}</Text>
             {topic ? (
               <AnimatedPressable
-                onPress={() => navigation.navigate('Home', {})}
+                onPress={() => navigateDisguiseFeedTopic(navigation)}
                 accessibilityLabel="Clear topic filter"
               >
-                <Text style={[styles.clearFilter, { color: colors.gradientEnd }]}>Clear</Text>
+                <Text style={[styles.clearFilter, { color: pulseBrand.accent }]}>Clear</Text>
               </AnimatedPressable>
             ) : null}
           </View>

@@ -90,7 +90,7 @@ export function VoicePromptSheet({
           <View style={styles.handle} />
           <Text style={[styles.title, { color: colors.text }]}>Voice prompt</Text>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-            Record a short intro — like Hinge voice prompts. Demo mode simulates recording in-browser.
+            Record a short intro — like Hinge voice prompts. Tap record, then save to your profile.
           </Text>
 
           <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>Choose a prompt</Text>

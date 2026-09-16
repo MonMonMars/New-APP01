@@ -384,7 +384,11 @@ export function DiscoverScreen() {
             onSwipe={handleSwipe}
             onSuperLike={handleSuperLikeEffectComplete}
             onOpenProfile={setDetailProfile}
-            onEmpty={() => undefined}
+            onEmpty={() => {
+              if (hasMoreInPool) {
+                searchMorePeople();
+              }
+            }}
             canLike={canLike}
             onLikeBlocked={() => setShowLikeLimit(true)}
             compact

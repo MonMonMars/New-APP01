@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
 import { DisguiseMarketsPanel } from '../../components/disguise/DisguiseMarketsPanel';
 import { DisguiseWeatherPanel } from '../../components/disguise/DisguiseWeatherPanel';
+import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import {
   breakingNowCards,
@@ -106,7 +107,12 @@ export function DisguiseTrendingScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
-  const { weather, isLive } = useDisguiseWeather();
+  const { preferences } = useApp();
+  const weatherCity =
+    preferences.travelMode && preferences.passportCity
+      ? preferences.passportCity
+      : preferences.passportCity ?? 'New York, NY';
+  const { weather, isLive } = useDisguiseWeather(weatherCity);
 
   const openTopic = (topic?: string) => {
     navigation.navigate('Home', topic ? { topic } : {});

@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Image, Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DEMO_GIFS, DemoGif } from '../data/demoGifs';
@@ -16,6 +17,15 @@ type GifPickerSheetProps = {
 export function GifPickerSheet({ visible, onClose, onSelect }: GifPickerSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const [query, setQuery] = useState('');
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) {
+      return DEMO_GIFS;
+    }
+    return DEMO_GIFS.filter((gif) => gif.label.toLowerCase().includes(q));
+  }, [query]);
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
@@ -26,23 +36,34 @@ export function GifPickerSheet({ visible, onClose, onSelect }: GifPickerSheetPro
             <Ionicons name="close" size={28} color={colors.text} />
           </AnimatedPressable>
         </View>
-        <Text style={[styles.hint, { color: colors.textMuted }]}>
-          Tinder-style reactions — tap to send in chat.
-        </Text>
+        <TextInput
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Search GIFs..."
+          placeholderTextColor={colors.textMuted}
+          style={[styles.search, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
         <ScrollView contentContainerStyle={styles.grid}>
-          {DEMO_GIFS.map((gif) => (
-            <AnimatedPressable
-              key={gif.id}
-              style={[styles.cell, { backgroundColor: colors.surface, borderColor: colors.border }]}
-              onPress={() => {
-                onSelect(gif);
-                onClose();
-              }}
-            >
-              <Image source={{ uri: gif.url }} style={styles.gif} resizeMode="cover" />
-              <Text style={[styles.label, { color: colors.textMuted }]}>{gif.label}</Text>
-            </AnimatedPressable>
-          ))}
+          {filtered.length === 0 ? (
+            <Text style={[styles.empty, { color: colors.textMuted }]}>No GIFs match “{query}”</Text>
+          ) : (
+            filtered.map((gif) => (
+              <AnimatedPressable
+                key={gif.id}
+                style={[styles.cell, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                onPress={() => {
+                  onSelect(gif);
+                  onClose();
+                  setQuery('');
+                }}
+              >
+                <Image source={{ uri: gif.url }} style={styles.gif} resizeMode="cover" />
+                <Text style={[styles.label, { color: colors.textMuted }]}>{gif.label}</Text>
+              </AnimatedPressable>
+            ))
+          )}
         </ScrollView>
       </View>
     </Modal>
@@ -64,8 +85,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '800',
   },
-  hint: {
-    fontSize: 13,
+  search: {
+    borderRadius: radii.button,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
+    fontSize: 15,
     marginBottom: spacing.md,
   },
   grid: {
@@ -73,6 +98,12 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: spacing.sm,
     paddingBottom: spacing.xl,
+  },
+  empty: {
+    width: '100%',
+    textAlign: 'center',
+    fontSize: 14,
+    paddingVertical: spacing.xl,
   },
   cell: {
     width: '47%',

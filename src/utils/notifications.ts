@@ -50,6 +50,27 @@ export async function scheduleMatchNotification(
   });
 }
 
+export async function scheduleDateCheckInReminder(
+  profileName: string,
+  location: string,
+  minutesFromNow = 60,
+): Promise<void> {
+  if (Platform.OS === 'web') {
+    return;
+  }
+
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: 'Date check-in reminder',
+      body: `Time to check in at ${location} with ${profileName}.`,
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+      seconds: Math.max(60, minutesFromNow * 60),
+    },
+  });
+}
+
 export async function scheduleMessageNotification(
   profileName: string,
   preview: string,

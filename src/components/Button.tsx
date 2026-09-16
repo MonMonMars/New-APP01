@@ -83,7 +83,7 @@ export function Button({
       <AnimatedPressable
         onPress={onPress}
         disabled={isDisabled}
-        scaleTo={0.97}
+        scaleTo={0.94}
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel ?? label}
         style={[fullWidth && styles.fullWidth, style]}
@@ -108,7 +108,7 @@ export function Button({
     <AnimatedPressable
       onPress={onPress}
       disabled={isDisabled}
-      scaleTo={0.97}
+      scaleTo={0.94}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
       style={pressableStyle}
@@ -145,7 +145,7 @@ export function IconButton({
     <AnimatedPressable
       onPress={onPress}
       disabled={disabled}
-      scaleTo={0.92}
+      scaleTo={0.88}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       style={[

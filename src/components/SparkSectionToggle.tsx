@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Platform, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
 import {
@@ -26,6 +26,49 @@ const SECTION_ICONS: Record<SparkSection, keyof typeof Ionicons.glyphMap> = {
   spark: 'flame',
   ember: 'bonfire',
 };
+
+const WEB_FILL = (
+  Platform.OS === 'web'
+    ? {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+      }
+    : {}
+) as ViewStyle;
+
+const WEB_SHEET_IN = (
+  Platform.OS === 'web'
+    ? {
+        animationDuration: '380ms',
+        animationTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+        animationFillMode: 'both',
+        animationKeyframes: {
+          '0%': { opacity: 0, transform: 'scale(0.86) translateY(28px)' },
+          '62%': { opacity: 1, transform: 'scale(1.035) translateY(-6px)' },
+          '100%': { opacity: 1, transform: 'scale(1) translateY(0px)' },
+        },
+      }
+    : {}
+) as ViewStyle;
+
+const WEB_BACKDROP_IN = (
+  Platform.OS === 'web'
+    ? {
+        animationDuration: '240ms',
+        animationTimingFunction: 'ease-out',
+        animationFillMode: 'both',
+        animationKeyframes: {
+          '0%': { opacity: 0 },
+          '100%': { opacity: 1 },
+        },
+      }
+    : {}
+) as ViewStyle;
 
 function sectionAccent(section: SparkSection, colors: ColorPalette): string {
   return section === 'ember' ? colors.ember : colors.gradientEnd;
@@ -57,7 +100,7 @@ function WorldRow({
           borderColor: selected ? accent : colors.border,
         },
       ]}
-      scaleTo={0.98}
+      scaleTo={0.96}
     >
       <View style={[styles.rowIcon, { backgroundColor: `${accent}22` }]}>
         <Ionicons name={SECTION_ICONS[item]} size={20} color={accent} />
@@ -93,12 +136,18 @@ function WorldPickerSheet({
       visible={visible}
       transparent
       animationType="fade"
+      presentationStyle={Platform.OS === 'ios' ? 'overFullScreen' : undefined}
+      statusBarTranslucent
       onRequestClose={onClose}
     >
-      <View style={styles.modalRoot}>
-        <Pressable
-          style={styles.backdrop}
+      <View style={[styles.modalRoot, WEB_FILL]} pointerEvents="box-none">
+        <AnimatedPressable
+          style={[styles.backdrop, WEB_BACKDROP_IN]}
           onPress={onClose}
+          scaleTo={1}
+          opacityTo={1}
+          popOnRelease={false}
+          flash={false}
           accessibilityRole="button"
           accessibilityLabel="Close world picker"
         />
@@ -109,6 +158,7 @@ function WorldPickerSheet({
               backgroundColor: colors.background,
               borderColor: colors.border,
             },
+            WEB_SHEET_IN,
           ]}
         >
           <Text style={[styles.sheetTitle, { color: colors.text }]}>Choose a world</Text>
@@ -160,7 +210,7 @@ function WorldTrigger({
               borderColor: section === 'ember' ? colors.ember : colors.border,
             },
           ]}
-          scaleTo={0.97}
+          scaleTo={0.94}
         >
           <Ionicons name={SECTION_ICONS[section]} size={14} color={accent} />
           <Text style={[styles.chipLabel, { color: section === 'ember' ? colors.ember : colors.text }]}>
@@ -177,7 +227,7 @@ function WorldTrigger({
           accessibilityLabel={`${SPARK_SECTION_LABELS[section]}. Switch world`}
           accessibilityHint="Opens Spark and Ember. Anyone can join Ember."
           style={styles.titleTrigger}
-          scaleTo={0.97}
+          scaleTo={0.94}
         >
           <Ionicons name={SECTION_ICONS[section]} size={20} color={accent} />
           <Text style={[styles.titleLabel, { color: section === 'ember' ? colors.ember : colors.text }]}>
@@ -204,7 +254,7 @@ export function SparkSectionToggle({
 
   const select = (next: SparkSection) => {
     onChange(next);
-    setOpen(false);
+    setTimeout(() => setOpen(false), 160);
   };
 
   switch (variant) {
@@ -277,16 +327,18 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   modalRoot: {
-    flex: 1,
+    ...StyleSheet.absoluteFill,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
+    zIndex: 99999,
   },
   backdrop: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(0,0,0,0.55)',
+    backgroundColor: 'rgba(0,0,0,0.58)',
   },
   sheet: {
+    zIndex: 2,
     width: '100%',
     maxWidth: 360,
     borderRadius: 22,
@@ -294,6 +346,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.lg,
     paddingBottom: spacing.lg,
+    shadowColor: '#000',
+    shadowOpacity: 0.35,
+    shadowRadius: 28,
+    shadowOffset: { width: 0, height: 18 },
+    elevation: 24,
   },
   sheetTitle: {
     fontSize: 20,

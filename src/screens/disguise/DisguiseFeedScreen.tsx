@@ -16,8 +16,8 @@ import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
 import { buildDisguiseFeed } from '../../utils/buildDisguiseFeed';
 import { filterDisguiseFeed, topicFilterLabel } from '../../utils/disguiseFeedFilter';
 import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
-import { pulseBrand } from '../../theme/pulseBrand';
 import { spacing } from '../../theme';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { FadeSlideIn } from '../../components/motion/FadeSlideIn';
 
@@ -49,7 +49,8 @@ function renderFeedItem({ item, index }: { item: FeedItem; index: number }) {
 export function DisguiseFeedScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { user, disguiseAdCreative, pulseSocial } = useApp();
+  const { user, disguiseAdCreative, pulseSocial, preferences } = useApp();
+  const meta = disguiseWorldMeta(preferences.sparkSection);
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
   const route = useRoute<RouteProp<DisguiseTabParamList, 'Home'>>();
   const topic = route.params?.topic;
@@ -69,7 +70,7 @@ export function DisguiseFeedScreen() {
     });
   }, [user, disguiseAdCreative, topic, pulseSocial.mutedAuthors, pulseSocial.reportedPostIds]);
 
-  const sectionLabel = topicFilterLabel(topic);
+  const sectionLabel = topic ? topicFilterLabel(topic) : meta.feedLabel;
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
@@ -87,7 +88,7 @@ export function DisguiseFeedScreen() {
                 onPress={() => navigateDisguiseFeedTopic(navigation)}
                 accessibilityLabel="Clear topic filter"
               >
-                <Text style={[styles.clearFilter, { color: pulseBrand.accent }]}>Clear</Text>
+                <Text style={[styles.clearFilter, { color: meta.accent }]}>Clear</Text>
               </AnimatedPressable>
             ) : null}
           </View>
@@ -105,17 +106,19 @@ export function DisguiseFeedScreen() {
             </Text>
             {topic ? (
               <AnimatedPressable
-                style={[styles.emptyButton, { borderColor: pulseBrand.accent }]}
+                style={[styles.emptyButton, { borderColor: meta.accent }]}
                 onPress={() => navigateDisguiseFeedTopic(navigation)}
               >
-                <Text style={[styles.emptyButtonText, { color: pulseBrand.accent }]}>Clear filter</Text>
+                <Text style={[styles.emptyButtonText, { color: meta.accent }]}>Clear filter</Text>
               </AnimatedPressable>
             ) : (
               <AnimatedPressable
-                style={[styles.emptyButton, { borderColor: pulseBrand.accent }]}
+                style={[styles.emptyButton, { borderColor: meta.accent }]}
                 onPress={() => navigation.navigate('Trending')}
               >
-                <Text style={[styles.emptyButtonText, { color: pulseBrand.accent }]}>Explore Trending</Text>
+                <Text style={[styles.emptyButtonText, { color: meta.accent }]}>
+                  Explore {meta.trendingTab}
+                </Text>
               </AnimatedPressable>
             )}
           </View>

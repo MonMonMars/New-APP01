@@ -13,12 +13,12 @@ type DisguiseMiniPhotoPagerProps = {
   height?: number;
 };
 
-/** Mini-window photos — chevron taps only, no drag or swipe. */
+/** Mini-window photos — chevron taps on the image, no drag. */
 export function DisguiseMiniPhotoPager({
   photos,
   index,
   onIndexChange,
-  height = 156,
+  height = 220,
 }: DisguiseMiniPhotoPagerProps) {
   const { colors } = useTheme();
   const safeIndex = photos.length > 0 ? Math.min(index, photos.length - 1) : 0;
@@ -48,30 +48,35 @@ export function DisguiseMiniPhotoPager({
   }
 
   return (
-    <View style={[styles.row, { height }]}>
+    <View style={[styles.lane, { height }]}>
+      <Image
+        source={{ uri: currentUri }}
+        style={styles.image}
+        contentFit="cover"
+        transition={120}
+        accessibilityLabel={
+          multiPhoto ? `Photo ${safeIndex + 1} of ${photos.length}` : 'Profile photo'
+        }
+      />
+
       {multiPhoto ? (
-        <AnimatedPressable
-          onPress={goPrev}
-          style={styles.navButton}
-          accessibilityLabel="Previous photo"
-          scaleTo={0.9}
-        >
-          <Ionicons name="chevron-back" size={20} color={colors.textMuted} />
-        </AnimatedPressable>
-      ) : null}
-
-      <View style={styles.lane}>
-        <Image
-          source={{ uri: currentUri }}
-          style={styles.image}
-          contentFit="contain"
-          transition={120}
-          accessibilityLabel={
-            multiPhoto ? `Photo ${safeIndex + 1} of ${photos.length}` : 'Profile photo'
-          }
-        />
-
-        {multiPhoto ? (
+        <>
+          <AnimatedPressable
+            onPress={goPrev}
+            style={[styles.navButton, styles.navLeft]}
+            accessibilityLabel="Previous photo"
+            scaleTo={0.9}
+          >
+            <Ionicons name="chevron-back" size={20} color="#fff" />
+          </AnimatedPressable>
+          <AnimatedPressable
+            onPress={goNext}
+            style={[styles.navButton, styles.navRight]}
+            accessibilityLabel="Next photo"
+            scaleTo={0.9}
+          >
+            <Ionicons name="chevron-forward" size={20} color="#fff" />
+          </AnimatedPressable>
           <View style={styles.dots} pointerEvents="none">
             {photos.map((_, dotIndex) => (
               <View
@@ -80,51 +85,45 @@ export function DisguiseMiniPhotoPager({
               />
             ))}
           </View>
-        ) : null}
-      </View>
-
-      {multiPhoto ? (
-        <AnimatedPressable
-          onPress={goNext}
-          style={styles.navButton}
-          accessibilityLabel="Next photo"
-          scaleTo={0.9}
-        >
-          <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-        </AnimatedPressable>
+        </>
       ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    marginTop: spacing.xs,
-  },
-  navButton: {
-    width: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.sm,
-  },
   lane: {
-    flex: 1,
+    width: '100%',
     borderRadius: radii.card - 2,
     overflow: 'hidden',
     backgroundColor: '#111',
     position: 'relative',
-    minWidth: 0,
+    marginTop: spacing.xs,
   },
   image: {
     width: '100%',
     height: '100%',
   },
+  navButton: {
+    position: 'absolute',
+    top: '50%',
+    marginTop: -18,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.45)',
+  },
+  navLeft: {
+    left: 8,
+  },
+  navRight: {
+    right: 8,
+  },
   dots: {
     position: 'absolute',
-    bottom: 6,
+    bottom: 8,
     left: 0,
     right: 0,
     flexDirection: 'row',
@@ -142,7 +141,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   empty: {
-    flex: 1,
+    width: '100%',
     borderRadius: radii.card - 2,
     alignItems: 'center',
     justifyContent: 'center',

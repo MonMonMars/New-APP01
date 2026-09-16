@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AppState, type AppStateStatus, StyleSheet, Text, View } from 'react-native';
 
-import { PulseBrand } from '../disguise/PulseBrandMark';
+import { DisguiseBrand } from '../disguise/DisguiseBrand';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useSparkScreenProtection } from '../../hooks/useSparkScreenProtection';
@@ -36,7 +36,7 @@ export function PrivacyShield() {
       importantForAccessibility="no-hide-descendants"
     >
       <View style={styles.brandWrap}>
-        <PulseBrand size="lg" showTagline />
+        <DisguiseBrand size="lg" showTagline />
       </View>
       <Text style={[styles.subtitle, { color: colors.textMuted }]}>Content hidden for your privacy</Text>
     </View>

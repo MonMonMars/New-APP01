@@ -61,18 +61,20 @@ export function FeedPersonThumbnail({
   const showTypeLabel = !hideLabel && !showCaption && !showIconBadge;
 
   const content = (
-    <View style={[styles.row, style]}>
+    <View style={[styles.row, onPress ? undefined : style]}>
       <View style={styles.avatarCol}>
         {avatar}
         {showIconBadge ? (
           <View style={styles.iconBadge}>
-            <ContentTypeIcon kind={contentKind} size={11} />
+            <ContentTypeIcon kind={contentKind} size={12} />
           </View>
         ) : null}
       </View>
       {showCaption ? (
         <View style={styles.captionCol}>
-          <ContentTypeIcon kind={contentKind} size={12} />
+          <View style={styles.captionIcon}>
+            <ContentTypeIcon kind={contentKind} size={13} />
+          </View>
           <Text style={[styles.caption, { color: colors.text }]} numberOfLines={2}>
             {trimmedCaption}
           </Text>
@@ -95,6 +97,7 @@ export function FeedPersonThumbnail({
       }}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? `View ${contentKind}`}
+      style={[styles.pressable, style]}
     >
       {content}
     </AnimatedPressable>
@@ -102,22 +105,32 @@ export function FeedPersonThumbnail({
 }
 
 const styles = StyleSheet.create({
+  pressable: {
+    width: '100%',
+    maxWidth: '100%',
+    alignSelf: 'stretch',
+    minWidth: 0,
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
+    width: '100%',
+    maxWidth: '100%',
+    minWidth: 0,
   },
   avatarCol: {
     position: 'relative',
+    flexShrink: 0,
   },
   iconBadge: {
     position: 'absolute',
-    right: -2,
-    bottom: -2,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255,255,255,0.95)',
+    right: 0,
+    bottom: 0,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.96)',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: StyleSheet.hairlineWidth,
@@ -132,12 +145,17 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 5,
+    gap: 6,
     minWidth: 0,
     paddingTop: 2,
   },
+  captionIcon: {
+    marginTop: 1,
+    flexShrink: 0,
+  },
   caption: {
     flex: 1,
+    minWidth: 0,
     fontSize: 12,
     lineHeight: 16,
     fontWeight: '600',

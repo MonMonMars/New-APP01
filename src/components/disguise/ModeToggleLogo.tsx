@@ -4,10 +4,8 @@ import { StyleSheet, View } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
-import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
-import { pulseBrand } from '../../theme/pulseBrand';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { AnimatedPressable } from '../AnimatedPressable';
-import { PulseBrandMark } from './PulseBrandMark';
 
 type ModeToggleLogoProps = {
   variant: 'pulse' | 'spark';
@@ -25,7 +23,7 @@ type LogoButtonProps = {
   backgroundColor: string;
 };
 
-/** Bordered logo button — clear tap target for Spark ↔ Pulse mode switching. */
+/** Bordered logo button — clear tap target for Spark/Ember ↔ disguise switching. */
 function LogoButton({
   compact = false,
   onPress,
@@ -61,57 +59,35 @@ function LogoButton({
   );
 }
 
-/** Spark: tap logo to enter disguise. Pulse: tap logo to unlock Spark. */
+/** Spark/Ember: tap logo to enter that world’s disguise. Pulse header uses DisguiseBrand instead. */
 export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps) {
   const { colors } = useTheme();
-  const { disguiseMode, setDisguiseMode } = useApp();
+  const { disguiseMode, setDisguiseMode, preferences } = useApp();
+  const meta = disguiseWorldMeta(preferences.sparkSection);
+  const isEmber = meta.world === 'harbor';
 
-  const isPulse = variant === 'pulse';
-  const iconColor = isPulse ? pulseBrand.accent : colors.gradientEnd;
-  const iconBg = isPulse ? pulseBrand.accentSoft : 'rgba(255,107,107,0.14)';
-  const borderColor = isPulse ? pulseBrand.accentBorder : `${colors.gradientEnd}88`;
+  const iconColor = isEmber ? colors.ember : colors.gradientEnd;
+  const iconBg = isEmber ? 'rgba(255,176,32,0.16)' : 'rgba(255,107,107,0.14)';
+  const borderColor = isEmber ? `${colors.ember}88` : `${colors.gradientEnd}88`;
 
   const enterDisguise = useCallback(() => {
     void setDisguiseMode(true);
   }, [setDisguiseMode]);
 
-  const exitDisguise = useCallback(() => {
-    void setDisguiseMode(false);
-  }, [setDisguiseMode]);
-
-  if (!disguiseMode) {
-    if (variant !== 'spark') {
-      return <View style={[styles.placeholder, compact && styles.placeholderCompact]} />;
-    }
-
-    return (
-      <LogoButton
-        compact={compact}
-        onPress={enterDisguise}
-        borderColor={borderColor}
-        backgroundColor={iconBg}
-        accessibilityLabel={`Emergency — switch to ${DISGUISE_APP_NAME} disguise mode`}
-        accessibilityHint="Tap to hide Spark"
-      >
-        <Ionicons name="flame" size={compact ? 18 : 20} color={iconColor} />
-      </LogoButton>
-    );
-  }
-
-  if (variant !== 'pulse') {
+  if (disguiseMode || variant !== 'spark') {
     return <View style={[styles.placeholder, compact && styles.placeholderCompact]} />;
   }
 
   return (
     <LogoButton
       compact={compact}
-      onPress={exitDisguise}
+      onPress={enterDisguise}
       borderColor={borderColor}
       backgroundColor={iconBg}
-      accessibilityLabel="Tap to unlock Spark"
-      accessibilityHint="Returns to Spark dating mode"
+      accessibilityLabel={`Emergency — switch to ${meta.name} disguise mode`}
+      accessibilityHint={`Tap to hide ${meta.unlockLabel} behind ${meta.name}`}
     >
-      <PulseBrandMark size={compact ? 'sm' : 'md'} />
+      <Ionicons name={isEmber ? 'bonfire' : 'flame'} size={compact ? 18 : 20} color={iconColor} />
     </LogoButton>
   );
 }

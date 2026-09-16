@@ -4,8 +4,9 @@
 
 | Link | Durability | Notes |
 |------|------------|-------|
-| **https://temporary-swift-koto-pr4omjr.vercel.app** | ~60 min (claimable → permanent) | **Latest build (Sep 16) — swipe photos + profile captions.** [Claim on Vercel](https://vercel.com/claim-deployment?code=cc711077-aee9-478c-b5d3-f1a3649d4a48) to keep forever. |
-| **https://unrivaled-kulfi-8c1433.netlify.app** | ~60 min (claimable → permanent) | Password: `My-Drop-Site`. [Claim on Netlify](https://app.netlify.com/drop/unrivaled-kulfi-8c1433) after signing in. |
+| **https://temporary-rapid-perseus-razxhxk.vercel.app** | ~60 min (claimable → permanent) | **Use this one** — verified Sep 16 (8/8 + reporter captions). [Claim on Vercel](https://vercel.com/claim-deployment?code=8d5360f6-b556-4d8e-9c63-2681546a0c2c) to keep forever. |
+| **https://posts-dolls-adventure-supposed.trycloudflare.com** | Hours while workspace is awake | Same latest build, no login. Hard-refresh if stale. |
+| **https://bright-queijadas-033295.netlify.app** | ~60 min | Password: `My-Drop-Site`. [Claim on Netlify](https://app.netlify.com/drop/bright-queijadas-033295). |
 
 **Best long-term fix:** connect Vercel or Netlify to GitHub once (see below) — auto-deploys on every push, stable URL, works with a private repo.
 

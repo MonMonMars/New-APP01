@@ -137,35 +137,39 @@ async function main() {
     if (!hasCards) issue('discover', 'No profile cards visible after unlock');
     else log('Discover cards OK');
 
-    // Tab bleed check
+    // Tab bleed check — discover deck must not overlay other tabs
     const tabs = ['Likes', 'Matches', 'Profile'];
     for (const tab of tabs) {
-      await page.getByText(tab, { exact: true }).last().click({ timeout: 8000 });
-      await page.waitForTimeout(1000);
-      const t = await bodyText(page);
-      const bleed = /miles away/i.test(t) && tab !== 'Discover';
-      if (bleed) issue('tab-bleed', `${tab} tab shows discover deck content`);
+      await page.getByRole('tab', { name: new RegExp(tab, 'i') }).click({ timeout: 8000 });
+      await page.waitForTimeout(1200);
+      const passBtn = page.getByRole('button', { name: /^pass$/i }).first();
+      const bleed = await passBtn.isVisible().catch(() => false);
+      if (bleed) issue('tab-bleed', `${tab} tab shows discover pass button (deck bleed)`);
       else log(`${tab} tab OK`);
       await snap(page, `03-tab-${tab.toLowerCase()}`);
     }
 
-    // Profile views card
-    await page.getByText('Profile', { exact: true }).last().click();
+    // Profile views card (scroll — card sits below hero)
+    await page.getByRole('tab', { name: /profile/i }).click();
     await page.waitForTimeout(1000);
+    await page.evaluate(() => window.scrollTo(0, 400));
+    await page.waitForTimeout(500);
     const profileText = await bodyText(page);
     if (/who viewed you/i.test(profileText)) log('Profile views card OK');
     else issue('phase-d', 'Who viewed you card not visible on Profile');
 
     // Discover rewind
-    await page.getByText('Discover', { exact: true }).last().click();
+    await page.getByRole('tab', { name: /discover/i }).click();
     await page.waitForTimeout(1000);
 
     // Pass a card if possible
-    const passZone = page.locator('[aria-label*="pass" i], [aria-label*="nope" i]').first();
+    const passZone = page.getByRole('button', { name: /^pass$/i }).first();
     if (await passZone.isVisible().catch(() => false)) {
       await passZone.click();
-      await page.waitForTimeout(800);
+      await page.waitForTimeout(1000);
       log('Passed a card');
+    } else {
+      issue('discover', 'Pass button not found on Discover');
     }
 
     const rewind = page.getByText(/rewind/i).first();
@@ -195,14 +199,15 @@ async function main() {
           if (/active now/i.test(chatText)) log('Active now badge OK');
           if (/ai practice/i.test(chatText)) log('AI chat banner OK');
 
-          const extras = page.locator('[aria-label*="more" i], [aria-label*="attach" i]').first();
-          const plusBtn = page.getByText('+').first();
-          if (await plusBtn.isVisible().catch(() => false)) {
-            await plusBtn.click();
+          const extrasBtn = page.getByRole('button', { name: /more actions/i }).first();
+          if (await extrasBtn.isVisible().catch(() => false)) {
+            await extrasBtn.click();
             await page.waitForTimeout(500);
             const gif = page.getByText('GIF', { exact: true }).first();
             if (await gif.isVisible().catch(() => false)) log('GIF picker entry OK');
             else issue('phase-d', 'GIF option not in chat composer extras');
+          } else {
+            log('Chat extras button not found (skipped)');
           }
         }
       }
@@ -211,8 +216,13 @@ async function main() {
     if (consoleErrors.length) {
       issue('console', consoleErrors.slice(0, 5).join(' | '));
     }
-    if (networkFails.length) {
-      issue('network', networkFails.slice(0, 5).join(' | '));
+    const criticalNetworkFails = networkFails.filter(
+      (entry) => !/ERR_BLOCKED_BY_ORB|images\.unsplash\.com/i.test(entry),
+    );
+    if (criticalNetworkFails.length) {
+      issue('network', criticalNetworkFails.slice(0, 5).join(' | '));
+    } else if (networkFails.length) {
+      log(`Network: ${networkFails.length} non-critical ORB/image warnings (unsplash)`);
     }
 
     writeFileSync(join(OUT_DIR, 'report.json'), JSON.stringify({ url: DEMO_URL, issues, consoleErrors, networkFails }, null, 2));

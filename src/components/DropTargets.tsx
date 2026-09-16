@@ -45,6 +45,7 @@ type TargetButtonProps = {
   active: SharedValue<number>;
   targetRef: RefObject<View | null>;
   size?: number;
+  accessibilityLabel?: string;
   onLayout: (event: LayoutChangeEvent) => void;
   onPress?: () => void;
 };
@@ -57,6 +58,7 @@ function TargetButton({
   active,
   targetRef,
   size = TARGET_SIZE,
+  accessibilityLabel,
   onLayout,
   onPress,
 }: TargetButtonProps) {
@@ -81,6 +83,8 @@ function TargetButton({
     <Pressable
       onPress={onPress}
       hitSlop={16}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
       onPressIn={() => {
         pressScale.value = withSpring(0.92, PRESS_SPRING);
       }}
@@ -170,6 +174,7 @@ export function DropTargets({
         active={trashActive}
         targetRef={trashRef}
         size={targetSize}
+        accessibilityLabel="Pass"
         onLayout={reportTrashZone}
         onPress={onTrashPress}
       />
@@ -185,6 +190,7 @@ export function DropTargets({
             active={starActiveValue}
             targetRef={starRef}
             size={starSize}
+            accessibilityLabel="Super like"
             onLayout={reportStarZone}
             onPress={onStarPress}
           />
@@ -199,6 +205,7 @@ export function DropTargets({
         active={heartActive}
         targetRef={heartRef}
         size={targetSize}
+        accessibilityLabel="Like"
         onLayout={reportHeartZone}
         onPress={onHeartPress}
       />

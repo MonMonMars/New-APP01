@@ -56,6 +56,8 @@ export function DiscoverScreen() {
     blockProfile,
     reportProfile,
     heldIds,
+    holdProfile,
+    unholdProfile,
     getCompatibilityScore,
     remainingSparkNotes,
     canSendSparkNote,
@@ -279,6 +281,17 @@ export function DiscoverScreen() {
     openSparkNote(detailProfile);
   }, [canSendSparkNote, detailProfile, openSparkNote]);
 
+  const handleDetailHold = useCallback(() => {
+    if (!detailProfile) {
+      return;
+    }
+    if (heldIds.has(detailProfile.id)) {
+      unholdProfile(detailProfile.id);
+      return;
+    }
+    holdProfile(detailProfile.id);
+  }, [detailProfile, heldIds, holdProfile, unholdProfile]);
+
   const handlePromptLikeSend = useCallback(
     (comment: string) => {
       if (!promptLikeTarget) {
@@ -452,6 +465,7 @@ export function DiscoverScreen() {
         onClose={() => setDetailProfile(null)}
         onBlock={handleBlockDetail}
         onLikePrompt={handleLikePrompt}
+        onHold={handleDetailHold}
         onLike={handleDetailLike}
         onPass={handleDetailPass}
         onSparkNote={canSendSparkNote ? handleDetailSparkNote : undefined}

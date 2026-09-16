@@ -7,8 +7,8 @@ import { useTheme } from '../context/ThemeContext';
 import { RelationshipIntent, UserProfile, VoicePrompt } from '../types/profile';
 import { OPENING_MOVE_SUGGESTIONS } from '../utils/openingMove';
 import { pickProfilePhoto } from '../utils/photoPicker';
-import { runVerificationFlow } from '../utils/verificationFlow';
 import { ProfileCoachSheet } from './ProfileCoachSheet';
+import { VerificationSheet } from './VerificationSheet';
 import { VoicePromptSheet } from './VoicePromptSheet';
 import { InterestsEditor } from './InterestsEditor';
 import { PhotoCarousel } from './PhotoCarousel';
@@ -52,6 +52,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
   const [voicePrompt, setVoicePrompt] = useState<VoicePrompt | undefined>(user.voicePrompt);
   const [showVoicePrompt, setShowVoicePrompt] = useState(false);
   const [showProfileCoach, setShowProfileCoach] = useState(false);
+  const [activeVerification, setActiveVerification] = useState<'photo' | 'person' | 'age' | null>(null);
 
   useEffect(() => {
     if (visible) {
@@ -79,18 +80,6 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
     if (uri) {
       setPhotos((prev) => [...prev, uri]);
     }
-  };
-
-  const handleVerifyPhoto = () => {
-    runVerificationFlow('photo', () => setPhotoVerified(true));
-  };
-
-  const handleVerifyPerson = () => {
-    runVerificationFlow('person', () => setPersonVerified(true));
-  };
-
-  const handleVerifyAge = () => {
-    runVerificationFlow('age', () => setAgeVerified(true));
   };
 
   const handleSave = () => {
@@ -149,7 +138,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
 
           <AnimatedPressable
             style={[styles.verifyRow, { backgroundColor: colors.surface }]}
-            onPress={photoVerified ? undefined : handleVerifyPhoto}
+            onPress={photoVerified ? undefined : () => setActiveVerification('photo')}
             disabled={photoVerified}
           >
             <Ionicons name="camera" size={20} color={photoVerified ? colors.like : colors.textMuted} />
@@ -161,7 +150,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
 
           <AnimatedPressable
             style={[styles.verifyRow, { backgroundColor: colors.surface }]}
-            onPress={personVerified ? undefined : handleVerifyPerson}
+            onPress={personVerified ? undefined : () => setActiveVerification('person')}
             disabled={personVerified}
           >
             <Ionicons name="person" size={20} color={personVerified ? colors.like : colors.textMuted} />
@@ -173,7 +162,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
 
           <AnimatedPressable
             style={[styles.verifyRow, { backgroundColor: colors.surface }]}
-            onPress={ageVerified ? undefined : handleVerifyAge}
+            onPress={ageVerified ? undefined : () => setActiveVerification('age')}
             disabled={ageVerified}
           >
             <Ionicons name="shield-checkmark" size={20} color={ageVerified ? colors.like : colors.textMuted} />
@@ -339,6 +328,22 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
         onClose={() => setShowVoicePrompt(false)}
         onSave={(prompt) => setVoicePrompt(prompt)}
         onRemove={() => setVoicePrompt(undefined)}
+      />
+
+      <VerificationSheet
+        visible={activeVerification !== null}
+        kind={activeVerification ?? 'photo'}
+        photoUri={photos[0]}
+        onClose={() => setActiveVerification(null)}
+        onComplete={() => {
+          if (activeVerification === 'photo') {
+            setPhotoVerified(true);
+          } else if (activeVerification === 'person') {
+            setPersonVerified(true);
+          } else if (activeVerification === 'age') {
+            setAgeVerified(true);
+          }
+        }}
       />
     </Modal>
   );

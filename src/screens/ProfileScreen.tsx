@@ -10,6 +10,7 @@ import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesShe
 import { EditProfileSheet } from '../components/EditProfileSheet';
 import { ProfileCompletionCard } from '../components/ProfileCompletionCard';
 import { ProfileViewsCard } from '../components/ProfileViewsCard';
+import { ProfileSocialLinks } from '../components/ProfileSocialLinks';
 import { ProfileTrustSection } from '../components/ProfileTrustSection';
 import { ReferralCard } from '../components/ReferralCard';
 import { VerificationBadges } from '../components/VerificationBadges';
@@ -174,6 +175,12 @@ export function ProfileScreen() {
               <Text style={[styles.intent, { color: colors.gradientEnd }]}>{intentLabels[user.intent]}</Text>
             )}
             <Text style={[styles.bio, { color: colors.textMuted }]}>{user.bio}</Text>
+            {user.openingMove ? (
+              <Text style={[styles.openingMove, { color: colors.gradientEnd }]}>
+                Opening move: {user.openingMove}
+              </Text>
+            ) : null}
+            <ProfileSocialLinks user={user} compact />
             <AnimatedPressable style={[styles.editButton, { borderColor: colors.gradientEnd }]} onPress={() => setShowEdit(true)}>
               <Text style={[styles.editButtonText, { color: colors.gradientEnd }]}>Edit profile</Text>
             </AnimatedPressable>
@@ -431,6 +438,13 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
     lineHeight: 20,
     textAlign: 'center',
+  },
+  openingMove: {
+    fontSize: 13,
+    fontWeight: '600',
+    marginTop: spacing.sm,
+    textAlign: 'center',
+    lineHeight: 18,
   },
   editButton: {
     marginTop: spacing.md,

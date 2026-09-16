@@ -10,6 +10,7 @@ import { isAiPersonaProfile } from '../data/aiPersonas';
 import { RELATIONSHIP_INTENT_LABELS } from '../types/preferences';
 import { colors, radii, spacing } from '../theme';
 import { Profile, ProfilePrompt } from '../types/profile';
+import { ProfileSocialLinks } from './ProfileSocialLinks';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type ProfileDetailSheetProps = {
@@ -95,7 +96,26 @@ export function ProfileDetailSheet({
               <Text style={styles.intentMeta}>{RELATIONSHIP_INTENT_LABELS[profile.intent]}</Text>
             )}
             <Text style={styles.distance}>{profile.distanceMiles} miles away</Text>
+            {profile.openingMove ? (
+              <View style={styles.openingMove}>
+                <Ionicons name="chatbubble-ellipses-outline" size={14} color={colors.gradientEnd} />
+                <Text style={styles.openingMoveText}>{profile.openingMove}</Text>
+              </View>
+            ) : null}
           </View>
+
+          {(profile.instagramHandle || profile.spotifyHandle) && (
+            <View style={styles.section}>
+              <ProfileSocialLinks
+                user={{
+                  instagramConnected: Boolean(profile.instagramHandle),
+                  instagramHandle: profile.instagramHandle,
+                  spotifyConnected: Boolean(profile.spotifyHandle),
+                  spotifyHandle: profile.spotifyHandle,
+                }}
+              />
+            </View>
+          )}
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>About</Text>
@@ -267,6 +287,22 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: 14,
     marginTop: spacing.sm,
+  },
+  openingMove: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.xs,
+    marginTop: spacing.md,
+    backgroundColor: 'rgba(30,195,255,0.1)',
+    borderRadius: radii.button,
+    padding: spacing.sm,
+  },
+  openingMoveText: {
+    flex: 1,
+    color: colors.text,
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '600',
   },
   sectionTitle: {
     color: colors.textMuted,

@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useMemo, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
@@ -12,6 +13,8 @@ import { mockProfiles } from '../data/profiles';
 import { formatSearchRadius } from '../types/preferences';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
+import { MatchModal } from '../components/MatchModal';
+import { SparkNoteSheet } from '../components/SparkNoteSheet';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 
 type MapDiscoverScreenProps = {
@@ -61,6 +64,7 @@ function MapPin({ profile, selected, onPress }: MapPinProps) {
 
 export function MapDiscoverScreen({ onClose }: MapDiscoverScreenProps) {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
   const { colors } = useTheme();
   const {
     preferences,
@@ -70,10 +74,20 @@ export function MapDiscoverScreen({ onClose }: MapDiscoverScreenProps) {
     expandSearchRadius,
     searchMorePeople,
     prioritizeProfileInDeck,
+    likeProfile,
+    passProfile,
+    canLike,
+    canSendSparkNote,
+    remainingSparkNotes,
+    getConversationIdForProfile,
+    user,
   } = useApp();
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showProfileSheet, setShowProfileSheet] = useState(false);
+  const [showSparkNote, setShowSparkNote] = useState(false);
+  const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
+  const [showMatch, setShowMatch] = useState(false);
 
   const visibleProfiles = useMemo(() => {
     const excluded = new Set([...passedIds, ...likedIds, ...blockedIds]);
@@ -94,6 +108,32 @@ export function MapDiscoverScreen({ onClose }: MapDiscoverScreenProps) {
     }
     onClose();
   }, [onClose, prioritizeProfileInDeck, searchMorePeople, selectedProfile]);
+
+  const handleLike = useCallback(
+    (profile: Profile, sparkNote?: string) => {
+      if (!canLike) {
+        Alert.alert('Like limit reached', 'Come back tomorrow or upgrade to Spark+ for unlimited likes.');
+        return;
+      }
+      const match = likeProfile(profile, sparkNote);
+      setShowProfileSheet(false);
+      setShowSparkNote(false);
+      if (match) {
+        setMatchProfile(profile);
+        setShowMatch(true);
+      }
+    },
+    [canLike, likeProfile],
+  );
+
+  const handlePass = useCallback(
+    (profile: Profile) => {
+      passProfile(profile);
+      setShowProfileSheet(false);
+      setSelectedId(null);
+    },
+    [passProfile],
+  );
 
   const widenRadius = useCallback(() => {
     const presets = [25, 50, 100, 250, 9999];
@@ -227,6 +267,52 @@ export function MapDiscoverScreen({ onClose }: MapDiscoverScreenProps) {
         profile={selectedProfile}
         visible={showProfileSheet}
         onClose={() => setShowProfileSheet(false)}
+        onLike={selectedProfile ? () => handleLike(selectedProfile) : undefined}
+        onPass={selectedProfile ? () => handlePass(selectedProfile) : undefined}
+        onSparkNote={
+          selectedProfile && canSendSparkNote
+            ? () => setShowSparkNote(true)
+            : undefined
+        }
+      />
+
+      <SparkNoteSheet
+        visible={showSparkNote}
+        profile={selectedProfile}
+        remainingNotes={remainingSparkNotes}
+        onClose={() => setShowSparkNote(false)}
+        onSend={(note) => {
+          if (selectedProfile) {
+            handleLike(selectedProfile, note);
+          }
+        }}
+        onSkip={() => {
+          if (selectedProfile) {
+            handleLike(selectedProfile);
+          }
+        }}
+      />
+
+      <MatchModal
+        visible={showMatch}
+        profile={matchProfile}
+        userPhoto={user.photos[0] ?? ''}
+        onClose={() => {
+          setShowMatch(false);
+          setMatchProfile(null);
+        }}
+        onMessage={() => {
+          if (!matchProfile) {
+            return;
+          }
+          const conversationId = getConversationIdForProfile(matchProfile.id);
+          setShowMatch(false);
+          setMatchProfile(null);
+          onClose();
+          if (conversationId) {
+            navigation.getParent()?.navigate('Chat', { conversationId });
+          }
+        }}
       />
     </View>
   );

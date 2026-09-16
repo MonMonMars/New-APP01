@@ -213,6 +213,15 @@ function setToArray(set: Set<string>): string[] {
   return Array.from(set);
 }
 
+/** Stable pseudo-random visibility for incognito mode (~40% of profiles stay discoverable). */
+function stableIncognitoVisible(profileId: string): boolean {
+  let hash = 0;
+  for (let i = 0; i < profileId.length; i++) {
+    hash = (hash + profileId.charCodeAt(i)) % 5;
+  }
+  return hash < 2;
+}
+
 function todayKey(): string {
   return new Date().toISOString().slice(0, 10);
 }
@@ -364,6 +373,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [superLikedIds, setSuperLikedIds] = useState<Set<string>>(new Set());
   const [blockedIds, setBlockedIds] = useState<Set<string>>(new Set());
   const [heldIds, setHeldIds] = useState<Set<string>>(new Set());
+  const [profileViewerIds, setProfileViewerIds] = useState<string[]>([...PROFILE_VIEWER_IDS]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>(seedConversations);
   const [sparkNotes, setSparkNotes] = useState<Record<string, string>>({});
@@ -441,6 +451,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setSuperLikedIds(arrayToSet(saved.superLikedIds ?? []));
         setBlockedIds(arrayToSet(saved.blockedIds));
         setHeldIds(arrayToSet(saved.heldIds ?? []));
+        setProfileViewerIds(
+          saved.profileViewerIds?.length
+            ? saved.profileViewerIds
+            : [...PROFILE_VIEWER_IDS],
+        );
         setMatches(saved.matches);
         setConversations(
           saved.conversations.length > 0 ? saved.conversations : seedConversations,
@@ -547,6 +562,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       superLikedIds: setToArray(superLikedIds),
       blockedIds: setToArray(blockedIds),
       heldIds: setToArray(heldIds),
+      profileViewerIds,
       matches,
       conversations,
       dailyLikesUsed,
@@ -583,6 +599,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     superLikedIds,
     blockedIds,
     heldIds,
+    profileViewerIds,
     matches,
     conversations,
     privacyPreferences,
@@ -826,7 +843,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     const incomingExcluded = new Set<string>(INCOMING_LIKE_IDS);
     const pool = mockProfiles.filter((p) => !incomingExcluded.has(p.id));
-    return filterDiscoverProfiles(
+    let filtered = filterDiscoverProfiles(
       pool,
       preferences,
       excludedIds,
@@ -834,7 +851,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
       isSparkPlus,
       privacyPreferences.locationSharing,
     );
-  }, [excludedIds, isPaused, isSparkPlus, preferences, privacyPreferences.locationSharing, user]);
+    const incognitoActive = isSparkPlus && privacyPreferences.incognitoMode;
+    if (incognitoActive) {
+      filtered = filtered.filter(
+        (profile) =>
+          INCOMING_LIKE_IDS_SET.has(profile.id) ||
+          likedIds.has(profile.id) ||
+          pendingLikeIds.has(profile.id) ||
+          stableIncognitoVisible(profile.id),
+      );
+    }
+    return filtered;
+  }, [
+    excludedIds,
+    isPaused,
+    isSparkPlus,
+    likedIds,
+    pendingLikeIds,
+    preferences,
+    privacyPreferences.incognitoMode,
+    privacyPreferences.locationSharing,
+    user,
+  ]);
 
   const discoverQueue = useMemo(() => {
     if (isPaused) {
@@ -1098,10 +1136,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const maybeRecordViewer = useCallback((profileId: string, chance: number) => {
+    if (Math.random() >= chance) {
+      return;
+    }
+    setProfileViewerIds((prev) => (prev.includes(profileId) ? prev : [...prev, profileId]));
+  }, []);
+
   const passProfile = useCallback((profile: Profile) => {
     setPassedIds((prev) => new Set(prev).add(profile.id));
     setLastPassedProfileId(profile.id);
-  }, []);
+    maybeRecordViewer(profile.id, 0.25);
+  }, [maybeRecordViewer]);
 
   const rewindLastPass = useCallback(() => {
     if (!isSparkPlus || !lastPassedProfileId) {
@@ -1118,13 +1164,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setRewindKey((k) => k + 1);
   }, [isSparkPlus, lastPassedProfileId, prioritizeProfileInDeck]);
 
-  const profileViewers = useMemo(
-    () =>
-      PROFILE_VIEWER_IDS
-        .map((id) => getProfileById(id))
-        .filter((profile): profile is Profile => profile !== undefined),
-    [],
-  );
+  const profileViewers = useMemo(() => {
+    const merged = new Set([...PROFILE_VIEWER_IDS, ...profileViewerIds, ...INCOMING_LIKE_IDS]);
+    return Array.from(merged)
+      .map((id) => getProfileById(id))
+      .filter((profile): profile is Profile => profile !== undefined);
+  }, [profileViewerIds]);
 
   const profileViewCount = profileViewers.length;
 
@@ -1261,6 +1306,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       if (!isInstantMatch) {
         setPendingLikeIds((prev) => new Set(prev).add(profile.id));
+        maybeRecordViewer(profile.id, 0.4);
         return null;
       }
 
@@ -1334,6 +1380,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       bonusSparkNotes,
       disguiseMode,
       securitySettings.disguiseSafeNotifications,
+      maybeRecordViewer,
     ],
   );
 

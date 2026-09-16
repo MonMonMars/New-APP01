@@ -42,7 +42,7 @@ export function ReferralCard() {
       <View style={styles.text}>
         <Text style={[styles.title, { color: colors.text }]}>Invite friends</Text>
         <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-          Share Spark and unlock a free Boost when 3 friends join
+          Share Spark three times to unlock a free 30-minute Boost
           {pulseSocial.referralShareCount > 0
             ? ` (${pulseSocial.referralShareCount}/3 shares)`
             : ''}.

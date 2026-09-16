@@ -15,7 +15,17 @@ export function RecentlyActiveStrip({ profiles, onSelect }: RecentlyActiveStripP
   const { colors } = useTheme();
 
   if (profiles.length === 0) {
-    return null;
+    return (
+      <View style={styles.section}>
+        <View style={styles.header}>
+          <View style={styles.liveDot} />
+          <Text style={[styles.title, { color: colors.text }]}>Recently active</Text>
+        </View>
+        <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+          No one active nearby right now — check back later today.
+        </Text>
+      </View>
+    );
   }
 
   return (
@@ -85,5 +95,10 @@ const styles = StyleSheet.create({
     marginTop: 4,
     maxWidth: 64,
     textAlign: 'center',
+  },
+  emptyText: {
+    fontSize: 13,
+    lineHeight: 18,
+    paddingHorizontal: spacing.md,
   },
 });

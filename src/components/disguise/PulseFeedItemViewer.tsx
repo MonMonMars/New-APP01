@@ -7,6 +7,7 @@ import { findFeedItemById, findNewsPostByHeadline } from '../../utils/findFeedIt
 import { AdLandingSheet } from './AdLandingSheet';
 import { NewsArticleSheet } from './NewsArticleSheet';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
+import { PulseUnavailableSheet } from './PulseUnavailableSheet';
 import { SocialCommentSheet } from './SocialCommentSheet';
 
 type PulseFeedItemViewerProps = {
@@ -47,7 +48,12 @@ export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItem
   }
 
   if (!feedItem) {
-    return null;
+    return (
+      <PulseUnavailableSheet
+        visible={visible}
+        onClose={onClose}
+      />
+    );
   }
 
   switch (feedItem.type) {

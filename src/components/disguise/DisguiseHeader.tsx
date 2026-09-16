@@ -11,7 +11,7 @@ import { spacing } from '../../theme';
 import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
 import { DisguiseSearchSheet } from './DisguiseSearchSheet';
 import { ModeToggleLogo } from './ModeToggleLogo';
-import { NewsArticleSheet } from './NewsArticleSheet';
+import { PulseFeedItemViewer } from './PulseFeedItemViewer';
 import { PulseBrand } from './PulseBrandMark';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -24,15 +24,10 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
   const { colors } = useTheme();
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
   const [searchOpen, setSearchOpen] = useState(false);
-  const [searchArticle, setSearchArticle] = useState<FeedItem | null>(null);
+  const [searchItemId, setSearchItemId] = useState<string | null>(null);
 
   const handleSearchArticle = (item: FeedItem) => {
-    if (item.type === 'news') {
-      setSearchArticle(item);
-      return;
-    }
-    navigateDisguiseFeedTopic(navigation, undefined);
-    navigation.navigate('Home');
+    setSearchItemId(item.id);
   };
 
   return (
@@ -77,10 +72,9 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
         onSelectTopic={(topic) => navigateDisguiseFeedTopic(navigation, topic)}
         onSelectArticle={handleSearchArticle}
       />
-      <NewsArticleSheet
-        visible={searchArticle?.type === 'news'}
-        post={searchArticle?.type === 'news' ? searchArticle : null}
-        onClose={() => setSearchArticle(null)}
+      <PulseFeedItemViewer
+        itemId={searchItemId}
+        onClose={() => setSearchItemId(null)}
       />
     </>
   );

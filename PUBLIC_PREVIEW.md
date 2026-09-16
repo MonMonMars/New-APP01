@@ -4,7 +4,7 @@
 
 | Link | Durability | Notes |
 |------|------------|-------|
-| **https://temporary-flying-garnet-4aki9md.vercel.app** | ~60 min (claimable → permanent) | **Latest** — tap Spark ▾ to switch worlds. Ember is open to everyone. [Claim on Vercel](https://vercel.com/claim-deployment?code=73222245-1b9d-4cd2-84e0-6d24571560de) to keep forever. |
+| **https://temporary-quick-flurry-6vwxi1i.vercel.app** | ~60 min (claimable → permanent) | **Latest** — Ember discretion (Open/Careful/Hidden, private photos, fuzzy location). [Claim on Vercel](https://vercel.com/claim-deployment?code=60901ea6-2f89-456a-8ae4-ce9e696885b9) to keep forever. |
 | **https://posts-dolls-adventure-supposed.trycloudflare.com** | Hours while workspace is awake | Same latest build, no login. Hard-refresh if stale. |
 | **https://bright-queijadas-033295.netlify.app** | ~60 min | Password: `My-Drop-Site`. [Claim on Netlify](https://app.netlify.com/drop/bright-queijadas-033295). |
 
@@ -78,7 +78,8 @@ Latest verified tunnel: **https://most-psychiatry-slim-colony.trycloudflare.com*
 - Profile → disguise ad generator
 
 ### Spark safe mode
-- Tap the **Spark ▾** title to switch worlds. Ember is a married group **anyone can join** — likes and chats stay separate.
+- Tap the **Spark ▾** title to switch worlds. Ember is a married group **anyone can join**.
+- Ember: **Married / Divorced**, Open / Careful / Hidden discretion, private extra photos until a match, city hidden when Hidden.
 - Swipe deck · likes · instant matches · AI demo replies
 - Rewind (Spark+) · GIF picker · message reactions · who viewed you
 - Passport/travel filter · international profiles · date check-in

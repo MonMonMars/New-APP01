@@ -111,7 +111,7 @@ async function main() {
     }
 
     const html = await fetch(DEMO_URL).then((r) => r.text());
-    const jsMatch = html.match(/(\/_expo\/static\/js\/web\/index-[^"]+\.js)/);
+    const jsMatch = html.match(/((?:\/[^"\/]+)?\/_expo\/static\/js\/web\/index-[^"]+\.js)/);
     if (!jsMatch) {
       fail('JS bundle', 'script tag not found in HTML');
     } else {

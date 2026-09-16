@@ -1,15 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useRef, useState } from 'react';
-import { PanResponder, Platform, StyleSheet, Text, View } from 'react-native';
+import { useCallback } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
 import { AnimatedPressable } from '../AnimatedPressable';
-
-const UNLOCK_RATIO = 0.82;
-const TRACK_PADDING = 4;
-const TRACK_WIDTH = 132;
 
 type ModeToggleLogoProps = {
   variant: 'pulse' | 'spark';
@@ -17,227 +13,122 @@ type ModeToggleLogoProps = {
   compact?: boolean;
 };
 
-type LogoBubbleProps = {
+type LogoButtonProps = {
   icon: keyof typeof Ionicons.glyphMap;
   iconColor: string;
   iconBg: string;
+  borderColor: string;
   compact?: boolean;
+  onPress: () => void;
+  accessibilityLabel: string;
+  accessibilityHint: string;
 };
 
-/** Single bubble — icon fill + matching outline, no nested frames or extra marks. */
-function LogoBubble({ icon, iconColor, iconBg, compact = false }: LogoBubbleProps) {
+/** Bordered logo button — clear tap target for Spark ↔ Pulse mode switching. */
+function LogoButton({
+  icon,
+  iconColor,
+  iconBg,
+  borderColor,
+  compact = false,
+  onPress,
+  accessibilityLabel,
+  accessibilityHint,
+}: LogoButtonProps) {
   const size = compact ? 40 : 44;
 
   return (
-    <View
+    <AnimatedPressable
+      onPress={onPress}
+      scaleTo={0.94}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint={accessibilityHint}
+      hitSlop={6}
       style={[
-        styles.bubble,
+        styles.button,
         {
           width: size,
           height: size,
           borderRadius: size / 2,
           backgroundColor: iconBg,
-          borderColor: `${iconColor}66`,
+          borderColor,
         },
       ]}
     >
       <Ionicons name={icon} size={compact ? 18 : 20} color={iconColor} />
-    </View>
+    </AnimatedPressable>
   );
 }
 
-/** Spark: tap logo for instant disguise. Pulse: drag logo right along track to unlock Spark. */
+/** Spark: tap logo to enter disguise. Pulse: tap logo to unlock Spark. */
 export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps) {
   const { colors } = useTheme();
   const { disguiseMode, setDisguiseMode } = useApp();
-  const [dragX, setDragX] = useState(0);
-  const bubbleSize = compact ? 40 : 44;
-  const maxDrag = Math.max(0, TRACK_WIDTH - bubbleSize - TRACK_PADDING * 2);
 
   const isPulse = variant === 'pulse';
   const icon = isPulse ? 'pulse' : 'flame';
   const iconColor = isPulse ? '#3b82f6' : colors.gradientEnd;
-  const iconBg = isPulse ? 'rgba(59,130,246,0.22)' : 'rgba(255,107,107,0.2)';
+  const iconBg = isPulse ? 'rgba(59,130,246,0.14)' : 'rgba(255,107,107,0.14)';
+  const borderColor = isPulse ? 'rgba(59,130,246,0.55)' : `${colors.gradientEnd}88`;
 
   const enterDisguise = useCallback(() => {
     void setDisguiseMode(true);
   }, [setDisguiseMode]);
 
   const exitDisguise = useCallback(() => {
-    void setDisguiseMode(false).then((unlocked) => {
-      if (unlocked) {
-        setDragX(0);
-      } else {
-        dragXRef.current = 0;
-        setDragX(0);
-      }
-    });
+    void setDisguiseMode(false);
   }, [setDisguiseMode]);
 
-  const dragXRef = useRef(0);
-  const maxDragRef = useRef(maxDrag);
-
-  dragXRef.current = dragX;
-  maxDragRef.current = maxDrag;
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > 2,
-      onPanResponderMove: (_, gesture) => {
-        const next = Math.max(0, Math.min(gesture.dx, maxDragRef.current));
-        dragXRef.current = next;
-        setDragX(next);
-      },
-      onPanResponderRelease: () => {
-        const threshold = maxDragRef.current * UNLOCK_RATIO;
-        if (dragXRef.current >= threshold) {
-          exitDisguise();
-          return;
-        }
-        dragXRef.current = 0;
-        setDragX(0);
-      },
-      onPanResponderTerminate: () => {
-        dragXRef.current = 0;
-        setDragX(0);
-      },
-    }),
-  ).current;
-
-  const bubble = <LogoBubble icon={icon} iconColor={iconColor} iconBg={iconBg} compact={compact} />;
-
   if (!disguiseMode) {
+    if (variant !== 'spark') {
+      return <View style={[styles.placeholder, compact && styles.placeholderCompact]} />;
+    }
+
     return (
-      <AnimatedPressable
+      <LogoButton
+        icon={icon}
+        iconColor={iconColor}
+        iconBg={iconBg}
+        borderColor={borderColor}
+        compact={compact}
         onPress={enterDisguise}
-        scaleTo={0.94}
-        accessibilityRole="button"
         accessibilityLabel={`Emergency — switch to ${DISGUISE_APP_NAME} disguise mode`}
-        accessibilityHint="Tap instantly to hide Spark"
-      >
-        {bubble}
-      </AnimatedPressable>
+        accessibilityHint="Tap to hide Spark"
+      />
     );
   }
 
-  const fillWidth = dragX + bubbleSize * 0.55;
-  const trackHeight = bubbleSize + TRACK_PADDING * 2;
-
-  if (Platform.OS === 'web') {
-    return (
-      <AnimatedPressable
-        onPress={exitDisguise}
-        scaleTo={0.98}
-        style={[
-          styles.track,
-          styles.webTrack,
-          {
-            width: TRACK_WIDTH,
-            height: trackHeight,
-            borderRadius: trackHeight / 2,
-            backgroundColor: colors.surface,
-            borderColor: `${iconColor}44`,
-          },
-        ]}
-        accessibilityRole="button"
-        accessibilityLabel="Tap to unlock Spark"
-        accessibilityHint="Returns to Spark dating mode"
-      >
-        <View
-          style={[
-            styles.trackFill,
-            {
-              width: TRACK_WIDTH * 0.42,
-              backgroundColor: iconColor,
-              borderRadius: trackHeight / 2,
-            },
-          ]}
-          pointerEvents="none"
-        />
-        <View style={styles.webThumb}>{bubble}</View>
-        <Text style={[styles.webHint, { color: colors.textMuted }]}>Tap to unlock</Text>
-      </AnimatedPressable>
-    );
+  if (variant !== 'pulse') {
+    return <View style={[styles.placeholder, compact && styles.placeholderCompact]} />;
   }
 
   return (
-    <View
-      style={[
-        styles.track,
-        {
-          width: TRACK_WIDTH,
-          height: trackHeight,
-          borderRadius: trackHeight / 2,
-          backgroundColor: colors.surface,
-        },
-      ]}
-      accessibilityRole="adjustable"
-      accessibilityLabel="Drag right to unlock Spark"
-    >
-      <View
-        style={[
-          styles.trackFill,
-          {
-            width: fillWidth,
-            backgroundColor: iconColor,
-            borderRadius: trackHeight / 2,
-          },
-        ]}
-        pointerEvents="none"
-      />
-      <View
-        style={[
-          styles.thumb,
-          {
-            transform: [{ translateX: dragX }],
-          },
-        ]}
-        {...panResponder.panHandlers}
-      >
-        {bubble}
-      </View>
-    </View>
+    <LogoButton
+      icon={icon}
+      iconColor={iconColor}
+      iconBg={iconBg}
+      borderColor={borderColor}
+      compact={compact}
+      onPress={exitDisguise}
+      accessibilityLabel="Tap to unlock Spark"
+      accessibilityHint="Returns to Spark dating mode"
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  bubble: {
+  button: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
+    borderWidth: 1.5,
   },
-  track: {
-    justifyContent: 'center',
-    overflow: 'hidden',
+  placeholder: {
+    width: 44,
+    height: 44,
   },
-  trackFill: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    opacity: 0.2,
-  },
-  thumb: {
-    position: 'absolute',
-    left: TRACK_PADDING,
-    zIndex: 2,
-  },
-  webTrack: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    paddingRight: TRACK_PADDING,
-    gap: 6,
-  },
-  webThumb: {
-    marginLeft: TRACK_PADDING,
-    zIndex: 2,
-  },
-  webHint: {
-    flex: 1,
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.2,
+  placeholderCompact: {
+    width: 40,
+    height: 40,
   },
 });

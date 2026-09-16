@@ -162,7 +162,7 @@ export function DisguiseProfileScreen() {
                   icon="newspaper-outline"
                   label={item.title}
                   colors={colors}
-                  onPress={() => setDetailSheet('history')}
+                  onPress={() => setViewerHeadline(item.title)}
                 />
               ))}
             </View>

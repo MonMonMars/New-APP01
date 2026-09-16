@@ -134,7 +134,7 @@ export function DisguiseTrendingScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
-      <DisguiseHeader title="Explore" showSearch={false} />
+      <DisguiseHeader title="Trending" showSearch={false} />
       <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
         <Text style={[styles.pageTitle, { color: colors.text }]}>Trending & useful</Text>
         <Text style={[styles.pageSubtitle, { color: colors.textMuted }]}>

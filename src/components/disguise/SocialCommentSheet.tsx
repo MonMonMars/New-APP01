@@ -14,6 +14,8 @@ type SocialCommentSheetProps = {
   visible: boolean;
   post: SocialPost | null;
   onClose: () => void;
+  /** "Post" when opening a saved item; default is the comment thread. */
+  sheetTitle?: string;
 };
 
 const SEED_REPLIES = [
@@ -35,7 +37,12 @@ function formatTimeAgo(iso: string): string {
   return `${Math.floor(hours / 24)}d`;
 }
 
-export function SocialCommentSheet({ visible, post, onClose }: SocialCommentSheetProps) {
+export function SocialCommentSheet({
+  visible,
+  post,
+  onClose,
+  sheetTitle = 'Comments',
+}: SocialCommentSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { addPulseComment, getPulseComments } = useApp();
@@ -61,7 +68,7 @@ export function SocialCommentSheet({ visible, post, onClose }: SocialCommentShee
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>Comments</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{sheetTitle}</Text>
           <AnimatedPressable onPress={onClose} hitSlop={12}>
             <Ionicons name="close" size={24} color={colors.textMuted} />
           </AnimatedPressable>

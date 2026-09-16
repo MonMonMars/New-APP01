@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import { TabBarButton } from '../components/TabBarButton';
+import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { pulseBrand } from '../theme/pulseBrand';
 import { disguiseAlerts } from '../data/disguiseFeed';
@@ -21,6 +22,11 @@ const Tab = createBottomTabNavigator<DisguiseTabParamList>();
 
 export function DisguiseNavigator() {
   const { colors } = useTheme();
+  const { pulseSocial } = useApp();
+  const activityBadge =
+    !pulseSocial.activityAlertsRead && disguiseAlerts.length > 0
+      ? disguiseAlerts.length
+      : undefined;
 
   return (
     <Tab.Navigator
@@ -56,7 +62,7 @@ export function DisguiseNavigator() {
       <Tab.Screen
         name="Activity"
         component={DisguiseAlertsScreen}
-        options={{ tabBarBadge: disguiseAlerts.length > 0 ? disguiseAlerts.length : undefined }}
+        options={{ tabBarBadge: activityBadge }}
       />
       <Tab.Screen name="Profile" component={DisguiseProfileScreen} />
     </Tab.Navigator>

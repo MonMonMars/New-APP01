@@ -205,6 +205,7 @@ export async function loadPersistedState(): Promise<PersistedAppState | null> {
         postComments: parsed.pulseSocial?.postComments ?? {},
         readingHistory: parsed.pulseSocial?.readingHistory ?? [],
         likedPostIds: parsed.pulseSocial?.likedPostIds ?? [],
+        activityAlertsRead: parsed.pulseSocial?.activityAlertsRead ?? false,
       },
       dateCheckIns: parsed.dateCheckIns ?? [],
     };

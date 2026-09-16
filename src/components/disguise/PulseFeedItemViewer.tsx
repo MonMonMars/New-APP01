@@ -66,7 +66,14 @@ export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItem
         />
       );
     case 'social':
-      return <SocialCommentSheet visible post={feedItem} onClose={onClose} />;
+      return (
+        <SocialCommentSheet
+          visible
+          post={feedItem}
+          onClose={onClose}
+          sheetTitle={itemId ? 'Post' : 'Comments'}
+        />
+      );
     case 'ad':
       return <AdLandingSheet visible ad={feedItem} onClose={onClose} />;
     case 'disguised_profile':

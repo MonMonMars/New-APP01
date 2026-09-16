@@ -64,14 +64,22 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
         <View style={styles.body}>
           <Text style={styles.brand}>{ad.brand}</Text>
           <Text style={styles.tagline}>{ad.tagline}</Text>
-          <FeedPersonThumbnail
-            plainAvatar
-            contentKind="profile"
-            imageUrl={testimonial.avatarUrl}
+          <AnimatedPressable
             onPress={() => setTestimonialOpen(true)}
+            accessibilityRole="button"
             accessibilityLabel={`View reader comment from ${testimonial.name}`}
             style={styles.testimonialRow}
-          />
+          >
+            <FeedPersonThumbnail
+              plainAvatar
+              contentKind="profile"
+              imageUrl={testimonial.avatarUrl}
+              accessibilityLabel={`${testimonial.name} profile photo`}
+            />
+            <Text style={styles.testimonialQuote} numberOfLines={2}>
+              “{testimonial.quote}”
+            </Text>
+          </AnimatedPressable>
           <View style={styles.cta}>
             <Text style={styles.ctaText}>{ad.cta}</Text>
             <Ionicons name="chevron-forward" size={14} color="#fff" />
@@ -131,15 +139,21 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   testimonialRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
     marginBottom: spacing.md,
     paddingTop: spacing.sm,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(255,255,255,0.12)',
   },
   testimonialQuote: {
+    flex: 1,
     color: '#ccc',
+    fontSize: 13,
     fontStyle: 'italic',
     fontWeight: '500',
+    lineHeight: 18,
   },
   cta: {
     flexDirection: 'row',

@@ -105,6 +105,12 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
               accessibilityLabel={`View profile: ${post.author}`}
             />
           )}
+          <View style={styles.authorMeta}>
+            <Text style={[styles.authorName, { color: colors.text }]}>{post.author}</Text>
+            <Text style={[styles.authorHandle, { color: colors.textMuted }]}>
+              {post.handle} · {post.timeAgo}
+            </Text>
+          </View>
         </View>
         <SavePostButton postId={post.id} />
         <AnimatedPressable
@@ -202,7 +208,22 @@ const styles = StyleSheet.create({
   },
   headerMain: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
     minWidth: 0,
+  },
+  authorMeta: {
+    flex: 1,
+    minWidth: 0,
+  },
+  authorName: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  authorHandle: {
+    fontSize: 12,
+    marginTop: 1,
   },
   moreButton: {
     paddingTop: 4,

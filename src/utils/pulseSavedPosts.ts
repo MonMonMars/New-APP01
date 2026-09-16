@@ -1,5 +1,6 @@
 import { FeedItem } from '../data/disguiseFeed';
 import { PulseDetailItem } from '../components/disguise/PulseDetailSheet';
+import { findFeedItemById } from './findFeedItem';
 
 function feedItemToDetail(item: FeedItem): PulseDetailItem | null {
   switch (item.type) {
@@ -47,7 +48,7 @@ export function resolveSavedPulsePosts(savedIds: string[], feed: FeedItem[]): Pu
   const resolved: PulseDetailItem[] = [];
 
   for (const id of savedIds) {
-    const item = byId.get(id);
+    const item = byId.get(id) ?? findFeedItemById(id);
     if (!item) {
       continue;
     }

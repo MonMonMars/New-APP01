@@ -3,18 +3,20 @@ name: Deploy Web to GitHub Pages
 on:
   push:
     branches:
-      [
-        main,
-        cursor/red-star-superlike-7b60,
-        cursor/cloud-complete-7b60,
-        cursor/competitor-features-7b60,
-        cursor/disguise-mode-7b60,
-        cursor/complete-app-details-7b60,
-        cursor/button-press-effects-7b60,
-        cursor/disguise-trending-7b60,
-        cursor/quiet-no-sfx-7b60,
-        cursor/legal-privacy-security-7b60,
-      ]
+      - main
+      - cursor/tinder-style-dating-app-7b60
+      - cursor/phase-d-features-7b60
+      - cursor/complete-all-details-7b60
+      - cursor/debug-tab-bleed-7b60
+      - cursor/legal-privacy-security-7b60
+      - cursor/disguise-trending-7b60
+      - cursor/quiet-no-sfx-7b60
+      - cursor/button-press-effects-7b60
+      - cursor/complete-app-details-7b60
+      - cursor/disguise-mode-7b60
+      - cursor/competitor-features-7b60
+      - cursor/cloud-complete-7b60
+      - cursor/red-star-superlike-7b60
   workflow_dispatch:
 
 permissions:
@@ -38,7 +40,9 @@ jobs:
       - run: npm ci
       - run: npm run build:web:pages
       - name: Add SPA fallback for GitHub Pages
-        run: cp dist/index.html dist/404.html
+        run: |
+          cp dist/index.html dist/404.html
+          touch dist/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

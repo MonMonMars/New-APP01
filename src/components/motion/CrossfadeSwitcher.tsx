@@ -56,6 +56,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   panel: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
 });

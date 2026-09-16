@@ -28,7 +28,7 @@ import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
 import { pulseBrand } from '../../theme/pulseBrand';
 import { radii, spacing } from '../../theme';
 import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
-import { briefToNewsPost, breakingToNewsPost } from '../../utils/disguiseTrendingArticles';
+import { briefToNewsPost, breakingToNewsPost, editorsPickToNewsPost } from '../../utils/disguiseTrendingArticles';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 
 function trendIcon(direction: TrendDirection): keyof typeof Ionicons.glyphMap {
@@ -283,7 +283,7 @@ export function DisguiseTrendingScreen() {
           <AnimatedPressable
             key={pick.id}
             style={[styles.pickRow, { backgroundColor: colors.surface, borderColor: colors.border }]}
-            onPress={() => openTopic(pick.topic)}
+            onPress={() => setArticlePost(editorsPickToNewsPost(pick))}
           >
             <Ionicons name="bookmark-outline" size={18} color={pulseBrand.accent} />
             <View style={styles.pickText}>

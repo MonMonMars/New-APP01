@@ -1,12 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { verificationHowItWorksSteps } from '../content/verificationPolicy';
-import { runVerificationFlow } from '../utils/verificationFlow';
 import { useTheme } from '../context/ThemeContext';
 import { UserProfile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { VerificationBadges } from './VerificationBadges';
+import { VerificationSheet } from './VerificationSheet';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type ProfileTrustSectionProps = {
@@ -21,23 +22,11 @@ type TrustItem = {
   title: string;
   description: string;
   done: boolean;
-  onVerify: () => void;
 };
 
 export function ProfileTrustSection({ user, onUpdate, onOpenPolicy }: ProfileTrustSectionProps) {
   const { colors } = useTheme();
-
-  const verifyPhoto = () => {
-    runVerificationFlow('photo', () => onUpdate({ photoVerified: true }), onOpenPolicy);
-  };
-
-  const verifyPerson = () => {
-    runVerificationFlow('person', () => onUpdate({ personVerified: true }), onOpenPolicy);
-  };
-
-  const verifyAge = () => {
-    runVerificationFlow('age', () => onUpdate({ ageVerified: true }), onOpenPolicy);
-  };
+  const [activeKind, setActiveKind] = useState<'photo' | 'person' | 'age' | null>(null);
 
   const items: TrustItem[] = [
     {
@@ -46,7 +35,6 @@ export function ProfileTrustSection({ user, onUpdate, onOpenPolicy }: ProfileTru
       title: 'Photo verified',
       description: 'Live selfie matches your profile photos',
       done: user.photoVerified === true,
-      onVerify: verifyPhoto,
     },
     {
       id: 'person',
@@ -54,7 +42,6 @@ export function ProfileTrustSection({ user, onUpdate, onOpenPolicy }: ProfileTru
       title: 'Real person',
       description: 'Liveness scan — confirms a real human',
       done: user.personVerified === true,
-      onVerify: verifyPerson,
     },
     {
       id: 'age',
@@ -62,11 +49,22 @@ export function ProfileTrustSection({ user, onUpdate, onOpenPolicy }: ProfileTru
       title: 'Age 18+',
       description: 'Government ID confirms you are an adult',
       done: user.ageVerified === true,
-      onVerify: verifyAge,
     },
   ];
 
   const completed = items.filter((item) => item.done).length;
+
+  const handleComplete = (kind: 'photo' | 'person' | 'age') => {
+    if (kind === 'photo') {
+      onUpdate({ photoVerified: true });
+      return;
+    }
+    if (kind === 'person') {
+      onUpdate({ personVerified: true });
+      return;
+    }
+    onUpdate({ ageVerified: true });
+  };
 
   return (
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -83,95 +81,93 @@ export function ProfileTrustSection({ user, onUpdate, onOpenPolicy }: ProfileTru
             size="sm"
           />
         </View>
-      </View>
-
-      <View style={[styles.howBox, { backgroundColor: colors.background }]}>
-        <Text style={[styles.howTitle, { color: colors.text }]}>How it works</Text>
-        {verificationHowItWorksSteps.slice(0, 3).map((step) => (
-          <Text key={step.step} style={[styles.howLine, { color: colors.textMuted }]}>
-            {step.step}. {step.title} — {step.body}
-          </Text>
-        ))}
+        {onOpenPolicy ? (
+          <AnimatedPressable onPress={onOpenPolicy} hitSlop={8}>
+            <Ionicons name="information-circle-outline" size={20} color={colors.textMuted} />
+          </AnimatedPressable>
+        ) : null}
       </View>
 
       {items.map((item) => (
         <AnimatedPressable
           key={item.id}
           style={[styles.row, { borderTopColor: colors.border }]}
-          onPress={item.done ? undefined : item.onVerify}
+          onPress={() => {
+            if (!item.done) {
+              setActiveKind(item.id);
+            }
+          }}
           disabled={item.done}
         >
-          <View style={[styles.iconWrap, { backgroundColor: item.done ? `${colors.like}22` : colors.background }]}>
-            <Ionicons
-              name={item.done ? 'checkmark-circle' : item.icon}
-              size={20}
-              color={item.done ? colors.like : colors.textMuted}
-            />
+          <View style={[styles.iconWrap, { backgroundColor: colors.background }]}>
+            <Ionicons name={item.icon} size={18} color={item.done ? colors.like : colors.gradientEnd} />
           </View>
           <View style={styles.rowText}>
             <Text style={[styles.rowTitle, { color: colors.text }]}>{item.title}</Text>
             <Text style={[styles.rowDesc, { color: colors.textMuted }]}>{item.description}</Text>
           </View>
-          {!item.done && <Text style={[styles.cta, { color: colors.gradientEnd }]}>Verify</Text>}
+          {item.done ? (
+            <Ionicons name="checkmark-circle" size={22} color={colors.like} />
+          ) : (
+            <Text style={[styles.verifyCta, { color: colors.gradientEnd }]}>Verify</Text>
+          )}
         </AnimatedPressable>
       ))}
 
-      {onOpenPolicy && (
-        <AnimatedPressable style={[styles.policyLink, { borderTopColor: colors.border }]} onPress={onOpenPolicy}>
-          <Ionicons name="document-text-outline" size={18} color={colors.gradientEnd} />
-          <Text style={[styles.policyLinkText, { color: colors.gradientEnd }]}>
-            Read Trust & Verification Policy
+      <View style={[styles.stepsBox, { backgroundColor: colors.background }]}>
+        <Text style={[styles.stepsTitle, { color: colors.textMuted }]}>How it works</Text>
+        {verificationHowItWorksSteps.slice(0, 2).map((step) => (
+          <Text key={step.step} style={[styles.stepLine, { color: colors.textMuted }]}>
+            {step.step}. {step.title} — {step.body}
           </Text>
-          <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-        </AnimatedPressable>
-      )}
+        ))}
+      </View>
+
+      <VerificationSheet
+        visible={activeKind !== null}
+        kind={activeKind ?? 'photo'}
+        photoUri={user.photos[0]}
+        onClose={() => setActiveKind(null)}
+        onComplete={() => {
+          if (activeKind) {
+            handleComplete(activeKind);
+          }
+        }}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
     borderRadius: radii.card,
     borderWidth: StyleSheet.hairlineWidth,
-    marginBottom: spacing.md,
-    overflow: 'hidden',
-  },
-  header: {
     padding: spacing.md,
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+  },
   headerText: {
-    gap: spacing.xs,
+    flex: 1,
+    gap: 4,
   },
   title: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '800',
   },
   subtitle: {
     fontSize: 13,
-    lineHeight: 18,
-  },
-  howBox: {
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.sm,
-    borderRadius: radii.button,
-    padding: spacing.sm + 2,
-    gap: 4,
-  },
-  howTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    marginBottom: 2,
-  },
-  howLine: {
-    fontSize: 12,
-    lineHeight: 17,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
+    gap: spacing.md,
+    paddingVertical: spacing.md,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   iconWrap: {
@@ -190,24 +186,27 @@ const styles = StyleSheet.create({
   },
   rowDesc: {
     fontSize: 12,
-    lineHeight: 16,
     marginTop: 2,
+    lineHeight: 16,
   },
-  cta: {
-    fontSize: 13,
+  verifyCta: {
+    fontSize: 14,
     fontWeight: '800',
   },
-  policyLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    borderTopWidth: StyleSheet.hairlineWidth,
+  stepsBox: {
+    marginTop: spacing.sm,
+    borderRadius: radii.button,
+    padding: spacing.sm,
   },
-  policyLinkText: {
-    flex: 1,
-    fontSize: 14,
+  stepsTitle: {
+    fontSize: 11,
     fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+    marginBottom: 4,
+  },
+  stepLine: {
+    fontSize: 12,
+    lineHeight: 17,
   },
 });

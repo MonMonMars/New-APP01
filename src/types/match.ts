@@ -21,6 +21,8 @@ export type Message = {
   /** Emoji reaction on message bubble */
   reaction?: string;
   isGif?: boolean;
+  isVoiceNote?: boolean;
+  voiceDurationSeconds?: number;
 };
 
 export type Conversation = {

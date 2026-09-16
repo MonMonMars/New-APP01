@@ -42,7 +42,9 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
   const [intent, setIntent] = useState<RelationshipIntent | undefined>(user.intent);
   const [prompts, setPrompts] = useState(user.prompts ?? []);
   const [instagramConnected, setInstagramConnected] = useState(user.instagramConnected ?? false);
+  const [instagramHandle, setInstagramHandle] = useState(user.instagramHandle ?? '');
   const [spotifyConnected, setSpotifyConnected] = useState(user.spotifyConnected ?? false);
+  const [spotifyHandle, setSpotifyHandle] = useState(user.spotifyHandle ?? '');
   const [ageVerified, setAgeVerified] = useState(user.ageVerified ?? false);
   const [photoVerified, setPhotoVerified] = useState(user.photoVerified ?? false);
   const [personVerified, setPersonVerified] = useState(user.personVerified ?? false);
@@ -61,7 +63,9 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       setIntent(user.intent);
       setPrompts(user.prompts ?? []);
       setInstagramConnected(user.instagramConnected ?? false);
+      setInstagramHandle(user.instagramHandle ?? '');
       setSpotifyConnected(user.spotifyConnected ?? false);
+      setSpotifyHandle(user.spotifyHandle ?? '');
       setAgeVerified(user.ageVerified ?? false);
       setPhotoVerified(user.photoVerified ?? false);
       setPersonVerified(user.personVerified ?? false);
@@ -105,7 +109,9 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       intent,
       prompts,
       instagramConnected,
+      instagramHandle: instagramConnected ? instagramHandle.trim() || undefined : undefined,
       spotifyConnected,
+      spotifyHandle: spotifyConnected ? spotifyHandle.trim() || undefined : undefined,
       ageVerified,
       photoVerified,
       personVerified,
@@ -288,9 +294,25 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
 
           <SocialConnectRows
             instagramConnected={instagramConnected}
+            instagramHandle={instagramHandle}
             spotifyConnected={spotifyConnected}
-            onToggleInstagram={() => setInstagramConnected((v) => !v)}
-            onToggleSpotify={() => setSpotifyConnected((v) => !v)}
+            spotifyHandle={spotifyHandle}
+            onConnectInstagram={(handle) => {
+              setInstagramConnected(true);
+              setInstagramHandle(handle);
+            }}
+            onDisconnectInstagram={() => {
+              setInstagramConnected(false);
+              setInstagramHandle('');
+            }}
+            onConnectSpotify={(handle) => {
+              setSpotifyConnected(true);
+              setSpotifyHandle(handle);
+            }}
+            onDisconnectSpotify={() => {
+              setSpotifyConnected(false);
+              setSpotifyHandle('');
+            }}
           />
         </ScrollView>
       </View>

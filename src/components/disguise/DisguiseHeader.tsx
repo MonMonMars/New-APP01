@@ -1,12 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
+import { FeedItem } from '../../data/disguiseFeed';
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
 import { spacing } from '../../theme';
+import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
+import { DisguiseSearchSheet } from './DisguiseSearchSheet';
 import { ModeToggleLogo } from './ModeToggleLogo';
+import { NewsArticleSheet } from './NewsArticleSheet';
 import { PulseBrand } from './PulseBrandMark';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -18,41 +23,66 @@ type DisguiseHeaderProps = {
 export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps) {
   const { colors } = useTheme();
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchArticle, setSearchArticle] = useState<FeedItem | null>(null);
+
+  const handleSearchArticle = (item: FeedItem) => {
+    if (item.type === 'news') {
+      setSearchArticle(item);
+      return;
+    }
+    navigateDisguiseFeedTopic(navigation, undefined);
+    navigation.navigate('Home');
+  };
 
   return (
-    <View style={[styles.header, { borderBottomColor: colors.border }]}>
-      <View style={styles.leading}>
-        <ModeToggleLogo variant="pulse" />
-        <View style={styles.brandBlock}>
-          <PulseBrand size="sm" />
-          {title ? (
-            <Text style={[styles.sectionTitle, { color: colors.textMuted }]} numberOfLines={1}>
-              {title}
-            </Text>
-          ) : null}
+    <>
+      <View style={[styles.header, { borderBottomColor: colors.border }]}>
+        <View style={styles.leading}>
+          <ModeToggleLogo variant="pulse" />
+          <View style={styles.brandBlock}>
+            <PulseBrand size="sm" />
+            {title ? (
+              <Text style={[styles.sectionTitle, { color: colors.textMuted }]} numberOfLines={1}>
+                {title}
+              </Text>
+            ) : null}
+          </View>
+        </View>
+        <View style={styles.actions}>
+          {showSearch && (
+            <>
+              <AnimatedPressable
+                style={styles.iconBtn}
+                accessibilityLabel="Search Pulse"
+                onPress={() => setSearchOpen(true)}
+              >
+                <Ionicons name="search-outline" size={22} color={colors.text} />
+              </AnimatedPressable>
+              <AnimatedPressable
+                style={styles.iconBtn}
+                accessibilityLabel="Open activity"
+                onPress={() => navigation.navigate('Activity')}
+              >
+                <Ionicons name="notifications-outline" size={22} color={colors.text} />
+              </AnimatedPressable>
+            </>
+          )}
         </View>
       </View>
-      <View style={styles.actions}>
-        {showSearch && (
-          <>
-            <AnimatedPressable
-              style={styles.iconBtn}
-              accessibilityLabel="Search trending topics"
-              onPress={() => navigation.navigate('Trending')}
-            >
-              <Ionicons name="search-outline" size={22} color={colors.text} />
-            </AnimatedPressable>
-            <AnimatedPressable
-              style={styles.iconBtn}
-              accessibilityLabel="Open activity"
-              onPress={() => navigation.navigate('Activity')}
-            >
-              <Ionicons name="notifications-outline" size={22} color={colors.text} />
-            </AnimatedPressable>
-          </>
-        )}
-      </View>
-    </View>
+
+      <DisguiseSearchSheet
+        visible={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onSelectTopic={(topic) => navigateDisguiseFeedTopic(navigation, topic)}
+        onSelectArticle={handleSearchArticle}
+      />
+      <NewsArticleSheet
+        visible={searchArticle?.type === 'news'}
+        post={searchArticle?.type === 'news' ? searchArticle : null}
+        onClose={() => setSearchArticle(null)}
+      />
+    </>
   );
 }
 

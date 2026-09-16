@@ -19,6 +19,7 @@ import { ReportReasonSheet, type ReportReason } from '../components/ReportReason
 import { SafetyActionSheet } from '../components/SafetyActionSheet';
 import { DateCheckInSheet } from '../components/DateCheckInSheet';
 import { SuggestDateSheet } from '../components/SuggestDateSheet';
+import { VoiceMessageBubble } from '../components/VoiceMessageBubble';
 import { VoiceNoteSheet } from '../components/VoiceNoteSheet';
 import { TypingIndicator } from '../components/TypingIndicator';
 import { VibeGameSheet } from '../components/VibeGameSheet';
@@ -43,6 +44,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const {
     conversations,
     sendMessage,
+    sendVoiceNote,
     blockProfile,
     reportProfile,
     unmatchProfile,
@@ -171,7 +173,10 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
               resizeMode="cover"
             />
           )}
-          {item.text && item.text !== '📷 Photo' && item.text !== 'GIF' && (
+          {item.isVoiceNote && item.voiceDurationSeconds ? (
+            <VoiceMessageBubble durationSeconds={item.voiceDurationSeconds} isMine={item.isMine} />
+          ) : null}
+          {item.text && item.text !== '📷 Photo' && item.text !== 'GIF' && !item.isVoiceNote && (
             <Text style={[styles.bubbleText, { color: colors.text }]}>{item.text}</Text>
           )}
           {item.isMine && (
@@ -407,7 +412,10 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         visible={showVoiceNote}
         profileName={profile.name}
         onClose={() => setShowVoiceNote(false)}
-        onSend={handleSend}
+        onSend={(duration) => {
+          sendVoiceNote(conversation.id, duration);
+          setShowVoiceNote(false);
+        }}
       />
 
       <ReportReasonSheet

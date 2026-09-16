@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
@@ -8,6 +9,7 @@ import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
+import { PurchaseConfirmSheet } from '../components/PurchaseConfirmSheet';
 
 type ConsumablesShopScreenProps = {
   onClose: () => void;
@@ -66,6 +68,7 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { activateBoost, addBonusBoosts, purchaseSparkNotes } = useApp();
+  const [pendingPack, setPendingPack] = useState<Pack | null>(null);
 
   const handlePurchase = (pack: Pack) => {
     if (pack.id.startsWith('boost')) {
@@ -116,7 +119,7 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
           <AnimatedPressable
             key={pack.id}
             style={[styles.packCard, { backgroundColor: colors.surface }]}
-            onPress={() => handlePurchase(pack)}
+            onPress={() => setPendingPack(pack)}
           >
             <View style={[styles.packIcon, { backgroundColor: `${pack.color}22` }]}>
               <Ionicons name={pack.icon} size={24} color={pack.color} />
@@ -134,6 +137,22 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
           Purchases are processed by Apple or Google. Boosts and Notes activate immediately after purchase.
         </Text>
       </ScrollView>
+
+      <PurchaseConfirmSheet
+        visible={pendingPack !== null}
+        title={pendingPack?.title ?? ''}
+        description={pendingPack?.description ?? ''}
+        price={pendingPack?.price ?? ''}
+        quantity={pendingPack?.quantity}
+        icon={pendingPack?.icon}
+        iconColor={pendingPack?.color}
+        onClose={() => setPendingPack(null)}
+        onConfirm={() => {
+          if (pendingPack) {
+            handlePurchase(pendingPack);
+          }
+        }}
+      />
     </View>
   );
 }

@@ -45,7 +45,7 @@ export function PrivacyShield() {
 
 const styles = StyleSheet.create({
   shield: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     zIndex: 9999,
     alignItems: 'center',
     justifyContent: 'center',

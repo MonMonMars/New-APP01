@@ -124,7 +124,9 @@ export type UserProfile = {
   /** Hinge-style voice prompt — optional audio intro */
   voicePrompt?: VoicePrompt;
   instagramConnected?: boolean;
+  instagramHandle?: string;
   spotifyConnected?: boolean;
+  spotifyHandle?: string;
   ageVerified?: boolean;
   photoVerified?: boolean;
   personVerified?: boolean;

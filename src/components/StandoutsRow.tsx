@@ -15,7 +15,17 @@ export function StandoutsRow({ profiles, onSelect }: StandoutsRowProps) {
   const { colors } = useTheme();
 
   if (profiles.length === 0) {
-    return null;
+    return (
+      <View style={styles.section}>
+        <View style={styles.header}>
+          <Ionicons name="star" size={16} color="#FFD700" />
+          <Text style={[styles.title, { color: colors.text }]}>Standouts</Text>
+        </View>
+        <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+          Top Picks refresh daily — check back tomorrow for curated standouts.
+        </Text>
+      </View>
+    );
   }
 
   return (
@@ -65,6 +75,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     marginLeft: spacing.xs,
+  },
+  emptyText: {
+    fontSize: 13,
+    lineHeight: 18,
+    paddingHorizontal: spacing.md,
   },
   row: {
     paddingHorizontal: spacing.md,

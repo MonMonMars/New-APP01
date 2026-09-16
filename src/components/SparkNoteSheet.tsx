@@ -7,10 +7,32 @@ import { colors, radii, spacing } from '../theme';
 import { Profile } from '../types/profile';
 import { AnimatedPressable } from './AnimatedPressable';
 
+type SparkNoteVariant = 'spark' | 'ember';
+
+function noteCopy(variant: SparkNoteVariant, name: string): { title: string; subtitle: string } {
+  switch (variant) {
+    case 'ember':
+      return {
+        title: 'Discreet note',
+        subtitle: `A private note only ${name} sees — it won't appear in notifications.`,
+      };
+    case 'spark':
+      return {
+        title: 'Spark Note',
+        subtitle: `Send ${name} a message with your like — like a comment on Hinge.`,
+      };
+    default: {
+      const _exhaustive: never = variant;
+      return _exhaustive;
+    }
+  }
+}
+
 type SparkNoteSheetProps = {
   visible: boolean;
   profile: Profile | null;
   remainingNotes: number;
+  variant?: 'spark' | 'ember';
   onClose: () => void;
   onSend: (note: string) => void;
   onSkip: () => void;
@@ -20,6 +42,7 @@ export function SparkNoteSheet({
   visible,
   profile,
   remainingNotes,
+  variant = 'spark',
   onClose,
   onSend,
   onSkip,
@@ -37,6 +60,7 @@ export function SparkNoteSheet({
     return null;
   }
 
+  const copy = noteCopy(variant, profile.name);
   const canSend = note.trim().length > 0 && remainingNotes > 0;
 
   return (
@@ -48,12 +72,10 @@ export function SparkNoteSheet({
         >
           <View style={styles.handle} />
           <View style={styles.header}>
-            <Ionicons name="chatbubble-ellipses" size={24} color={colors.gradientEnd} />
-            <Text style={styles.title}>Spark Note</Text>
+            <Ionicons name="chatbubble-ellipses" size={24} color={variant === 'ember' ? colors.ember : colors.gradientEnd} />
+            <Text style={styles.title}>{copy.title}</Text>
           </View>
-          <Text style={styles.subtitle}>
-            Send {profile.name} a message with your like — like a comment on Hinge.
-          </Text>
+          <Text style={styles.subtitle}>{copy.subtitle}</Text>
           <Text style={styles.quota}>
             {remainingNotes > 0
               ? `${remainingNotes} note${remainingNotes === 1 ? '' : 's'} left today`

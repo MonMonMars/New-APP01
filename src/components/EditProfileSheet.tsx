@@ -4,7 +4,20 @@ import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'rea
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
-import { RelationshipIntent, RelationshipStatus, RELATIONSHIP_STATUS_LABELS, UserProfile, VoicePrompt } from '../types/profile';
+import {
+  EmberAvailability,
+  EmberDiscretion,
+  EmberSeeking,
+  EMBER_AVAILABILITY_LABELS,
+  EMBER_DISCRETION_HINTS,
+  EMBER_DISCRETION_LABELS,
+  EMBER_SEEKING_LABELS,
+  RelationshipIntent,
+  RelationshipStatus,
+  RELATIONSHIP_STATUS_LABELS,
+  UserProfile,
+  VoicePrompt,
+} from '../types/profile';
 import { OPENING_MOVE_SUGGESTIONS } from '../utils/openingMove';
 import { pickProfilePhoto } from '../utils/photoPicker';
 import { ProfileCoachSheet } from './ProfileCoachSheet';
@@ -34,6 +47,9 @@ const intentOptions: { value: RelationshipIntent; label: string }[] = [
 const statusOptions: { value: RelationshipStatus; label: string }[] = (
   ['single', 'married', 'divorced'] as const
 ).map((value) => ({ value, label: RELATIONSHIP_STATUS_LABELS[value] }));
+const discretionOptions: EmberDiscretion[] = ['open', 'careful', 'hidden'];
+const seekingOptions: EmberSeeking[] = ['online', 'travel', 'ongoing', 'light'];
+const availabilityOptions: EmberAvailability[] = ['evenings', 'weekends', 'flexible'];
 
 export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfileSheetProps) {
   const insets = useSafeAreaInsets();
@@ -46,6 +62,11 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
   const [intent, setIntent] = useState<RelationshipIntent | undefined>(user.intent);
   const [relationshipStatus, setRelationshipStatus] = useState<RelationshipStatus>(
     user.relationshipStatus ?? 'single',
+  );
+  const [emberDiscretion, setEmberDiscretion] = useState<EmberDiscretion>(user.emberDiscretion ?? 'careful');
+  const [emberSeeking, setEmberSeeking] = useState<EmberSeeking>(user.emberSeeking ?? 'ongoing');
+  const [emberAvailability, setEmberAvailability] = useState<EmberAvailability>(
+    user.emberAvailability ?? 'flexible',
   );
   const [prompts, setPrompts] = useState(user.prompts ?? []);
   const [instagramConnected, setInstagramConnected] = useState(user.instagramConnected ?? false);
@@ -70,6 +91,9 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       setInterests(user.interests);
       setIntent(user.intent);
       setRelationshipStatus(user.relationshipStatus ?? 'single');
+      setEmberDiscretion(user.emberDiscretion ?? 'careful');
+      setEmberSeeking(user.emberSeeking ?? 'ongoing');
+      setEmberAvailability(user.emberAvailability ?? 'flexible');
       setPrompts(user.prompts ?? []);
       setInstagramConnected(user.instagramConnected ?? false);
       setInstagramHandle(user.instagramHandle ?? '');
@@ -105,6 +129,9 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       interests,
       intent,
       relationshipStatus,
+      emberDiscretion,
+      emberSeeking,
+      emberAvailability,
       prompts,
       instagramConnected,
       instagramHandle: instagramConnected ? instagramHandle.trim() || undefined : undefined,
@@ -239,6 +266,93 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
                 >
                   <Text style={[styles.intentChipText, { color: selected ? '#fff' : colors.text }]}>
                     {option.label}
+                  </Text>
+                </AnimatedPressable>
+              );
+            })}
+          </View>
+
+          <Text style={[styles.label, { color: colors.ember }]}>Ember — discretion</Text>
+          <Text style={[styles.openingMoveHint, { color: colors.textMuted }]}>
+            Learned from discreet dating apps: you choose how visible you are. Spark never shows this.
+          </Text>
+          <View style={styles.intentRow}>
+            {discretionOptions.map((value) => {
+              const selected = emberDiscretion === value;
+              return (
+                <AnimatedPressable
+                  key={value}
+                  style={[
+                    styles.intentChip,
+                    {
+                      backgroundColor: selected ? colors.ember : colors.surface,
+                      borderColor: selected ? colors.ember : colors.border,
+                    },
+                  ]}
+                  onPress={() => setEmberDiscretion(value)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  accessibilityLabel={EMBER_DISCRETION_LABELS[value]}
+                >
+                  <Text style={[styles.intentChipText, { color: selected ? '#111' : colors.text }]}>
+                    {EMBER_DISCRETION_LABELS[value]}
+                  </Text>
+                </AnimatedPressable>
+              );
+            })}
+          </View>
+          <Text style={[styles.openingMoveHint, { color: colors.textMuted }]}>
+            {EMBER_DISCRETION_HINTS[emberDiscretion]}
+          </Text>
+
+          <Text style={[styles.label, { color: colors.ember }]}>Ember — looking for</Text>
+          <View style={styles.intentRow}>
+            {seekingOptions.map((value) => {
+              const selected = emberSeeking === value;
+              return (
+                <AnimatedPressable
+                  key={value}
+                  style={[
+                    styles.intentChip,
+                    {
+                      backgroundColor: selected ? colors.ember : colors.surface,
+                      borderColor: selected ? colors.ember : colors.border,
+                    },
+                  ]}
+                  onPress={() => setEmberSeeking(value)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  accessibilityLabel={EMBER_SEEKING_LABELS[value]}
+                >
+                  <Text style={[styles.intentChipText, { color: selected ? '#111' : colors.text }]}>
+                    {EMBER_SEEKING_LABELS[value]}
+                  </Text>
+                </AnimatedPressable>
+              );
+            })}
+          </View>
+
+          <Text style={[styles.label, { color: colors.ember }]}>Ember — availability</Text>
+          <View style={styles.intentRow}>
+            {availabilityOptions.map((value) => {
+              const selected = emberAvailability === value;
+              return (
+                <AnimatedPressable
+                  key={value}
+                  style={[
+                    styles.intentChip,
+                    {
+                      backgroundColor: selected ? colors.ember : colors.surface,
+                      borderColor: selected ? colors.ember : colors.border,
+                    },
+                  ]}
+                  onPress={() => setEmberAvailability(value)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  accessibilityLabel={EMBER_AVAILABILITY_LABELS[value]}
+                >
+                  <Text style={[styles.intentChipText, { color: selected ? '#111' : colors.text }]}>
+                    {EMBER_AVAILABILITY_LABELS[value]}
                   </Text>
                 </AnimatedPressable>
               );

@@ -442,6 +442,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
       <ProfileDetailSheet
         profile={profile}
         visible={showProfile}
+        photosUnlocked
         onClose={() => setShowProfile(false)}
       />
     </KeyboardAvoidingView>

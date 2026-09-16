@@ -17,7 +17,15 @@ import { AiPersonaBadge } from './AiPersonaBadge';
 import { VideoProfileOverlay } from './VideoProfileOverlay';
 import { VerificationBadges } from './VerificationBadges';
 import { colors, radii, spacing } from '../theme';
-import { emberRelationshipLabel, Profile } from '../types/profile';
+import {
+  emberLocationLine,
+  emberRelationshipLabel,
+  emberVisiblePhotoCount,
+  EMBER_AVAILABILITY_LABELS,
+  EMBER_DISCRETION_LABELS,
+  EMBER_SEEKING_LABELS,
+  Profile,
+} from '../types/profile';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type ProfileCardProps = {
@@ -49,6 +57,16 @@ export function ProfileCard({
   const [photoIndex, setPhotoIndex] = useState(0);
   const photoCount = profile.photos.length;
   const emberStatus = emberRelationshipLabel(profile.relationshipStatus);
+  const visiblePhotoCount = emberStatus
+    ? emberVisiblePhotoCount(photoCount, profile.emberDiscretion)
+    : photoCount;
+  const emberMeta = emberStatus
+    ? [
+        profile.emberDiscretion ? EMBER_DISCRETION_LABELS[profile.emberDiscretion] : null,
+        profile.emberSeeking ? EMBER_SEEKING_LABELS[profile.emberSeeking] : null,
+        profile.emberAvailability ? EMBER_AVAILABILITY_LABELS[profile.emberAvailability] : null,
+      ].filter((item): item is string => item !== null)
+    : [];
   const spotlightPulse = useSharedValue(0);
 
   useEffect(() => {
@@ -110,14 +128,14 @@ export function ProfileCard({
   });
 
   const goToPhoto = (side: 'left' | 'right') => {
-    if (photoCount <= 1) {
+    if (visiblePhotoCount <= 1) {
       return;
     }
     setPhotoIndex((current) => {
       if (side === 'left') {
-        return current === 0 ? photoCount - 1 : current - 1;
+        return current === 0 ? visiblePhotoCount - 1 : current - 1;
       }
-      return current === photoCount - 1 ? 0 : current + 1;
+      return current === visiblePhotoCount - 1 ? 0 : current + 1;
     });
     onPhotoTap?.(side);
   };
@@ -164,13 +182,26 @@ export function ProfileCard({
       {isTop && photoCount > 1 && (
         <>
           <View style={styles.dots}>
-            {profile.photos.map((_, dotIndex) => (
-              <View
-                key={`${profile.id}-dot-${dotIndex}`}
-                style={[styles.dot, dotIndex === photoIndex && styles.dotActive]}
-              />
-            ))}
+            {profile.photos.map((_, dotIndex) => {
+              const locked = dotIndex >= visiblePhotoCount;
+              return (
+                <View
+                  key={`${profile.id}-dot-${dotIndex}`}
+                  style={[
+                    styles.dot,
+                    dotIndex === photoIndex && styles.dotActive,
+                    locked && styles.dotLocked,
+                  ]}
+                />
+              );
+            })}
           </View>
+          {visiblePhotoCount < photoCount ? (
+            <View style={styles.privateBadge}>
+              <Ionicons name="lock-closed" size={11} color={colors.ember} />
+              <Text style={styles.privateBadgeText}>Private photos</Text>
+            </View>
+          ) : null}
           <View style={styles.tapZones}>
             <AnimatedPressable style={styles.tapZone} onPress={() => goToPhoto('left')} />
             <AnimatedPressable style={styles.tapZone} onPress={() => goToPhoto('right')} />
@@ -194,10 +225,17 @@ export function ProfileCard({
               <Text style={styles.discreetChipText}>{emberStatus}</Text>
             </View>
           ) : null}
+          {emberMeta.map((label) => (
+            <View key={label} style={styles.discreetChip}>
+              <Text style={styles.discreetChipText}>{label}</Text>
+            </View>
+          ))}
         </View>
         {profile.job && <Text style={[styles.job, compact && styles.jobCompact]}>{profile.job}</Text>}
         <Text style={[styles.distance, compact && styles.distanceCompact]}>
-          {profile.city ? `${profile.city} · ` : ''}{profile.distanceMiles} mi
+          {emberStatus
+            ? emberLocationLine(profile)
+            : `${profile.city ? `${profile.city} · ` : ''}${profile.distanceMiles} mi`}
         </Text>
         {!compact && (
           <>
@@ -296,6 +334,29 @@ const styles = StyleSheet.create({
   },
   dotActive: {
     backgroundColor: colors.text,
+  },
+  dotLocked: {
+    backgroundColor: 'rgba(255, 176, 32, 0.55)',
+  },
+  privateBadge: {
+    position: 'absolute',
+    top: spacing.md + 14,
+    left: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(15, 15, 16, 0.72)',
+    borderRadius: radii.button,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+    zIndex: 6,
+  },
+  privateBadgeText: {
+    color: colors.ember,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
   },
   tapZones: {
     ...StyleSheet.absoluteFill,

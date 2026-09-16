@@ -6,17 +6,28 @@ import {
   AdvancedDiscoverFilters,
   RELATIONSHIP_INTENT_LABELS,
 } from '../types/preferences';
-import { RelationshipIntent } from '../types/profile';
+import {
+  EmberDiscretion,
+  EmberSeeking,
+  EMBER_DISCRETION_LABELS,
+  EMBER_SEEKING_LABELS,
+  RelationshipIntent,
+  RELATIONSHIP_STATUS_LABELS,
+} from '../types/profile';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
 
 const INTENT_OPTIONS: RelationshipIntent[] = ['long_term', 'short_term', 'new_friends', 'not_sure'];
+const EMBER_STATUS_OPTIONS = ['married', 'divorced'] as const;
+const EMBER_DISCRETION_OPTIONS: EmberDiscretion[] = ['open', 'careful', 'hidden'];
+const EMBER_SEEKING_OPTIONS: EmberSeeking[] = ['online', 'travel', 'ongoing', 'light'];
 
 type AdvancedFiltersSectionProps = {
   filters: AdvancedDiscoverFilters;
   isSparkPlus: boolean;
   onChange: (filters: AdvancedDiscoverFilters) => void;
   onUpgrade: () => void;
+  emberMode?: boolean;
 };
 
 export function AdvancedFiltersSection({
@@ -24,8 +35,10 @@ export function AdvancedFiltersSection({
   isSparkPlus,
   onChange,
   onUpgrade,
+  emberMode = false,
 }: AdvancedFiltersSectionProps) {
   const { colors } = useTheme();
+  const accent = emberMode ? colors.ember : colors.gradientEnd;
 
   const toggleIntent = (intent: RelationshipIntent) => {
     if (!isSparkPlus) {
@@ -47,11 +60,37 @@ export function AdvancedFiltersSection({
     onChange({ ...filters, sharedInterestsOnly: enabled });
   };
 
+  const toggleEmberStatus = (status: (typeof EMBER_STATUS_OPTIONS)[number]) => {
+    const current = filters.emberStatuses ?? [];
+    const next = current.includes(status)
+      ? current.filter((item) => item !== status)
+      : [...current, status];
+    onChange({ ...filters, emberStatuses: next });
+  };
+
+  const toggleEmberDiscretion = (value: EmberDiscretion) => {
+    const current = filters.emberDiscretion ?? [];
+    const next = current.includes(value)
+      ? current.filter((item) => item !== value)
+      : [...current, value];
+    onChange({ ...filters, emberDiscretion: next });
+  };
+
+  const toggleEmberSeeking = (value: EmberSeeking) => {
+    const current = filters.emberSeeking ?? [];
+    const next = current.includes(value)
+      ? current.filter((item) => item !== value)
+      : [...current, value];
+    onChange({ ...filters, emberSeeking: next });
+  };
+
   return (
     <View style={styles.wrap}>
       <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.textMuted }]}>Advanced filters</Text>
-        {!isSparkPlus && (
+        <Text style={[styles.title, { color: colors.textMuted }]}>
+          {emberMode ? 'Ember filters' : 'Advanced filters'}
+        </Text>
+        {!emberMode && !isSparkPlus && (
           <View style={[styles.plusBadge, { backgroundColor: colors.gradientEnd }]}>
             <Ionicons name="diamond" size={10} color={colors.text} />
             <Text style={[styles.plusText, { color: colors.text }]}>Spark+</Text>
@@ -59,30 +98,104 @@ export function AdvancedFiltersSection({
         )}
       </View>
       <Text style={[styles.hint, { color: colors.textMuted }]}>
-        Hinge-style intent matching and shared-interest discovery.
+        {emberMode
+          ? 'Match on status, discretion, and what they want — the same ideas as Gleeden, Victoria Milan, and Ashley Madison.'
+          : 'Hinge-style intent matching and shared-interest discovery.'}
       </Text>
 
-      <Text style={[styles.subLabel, { color: colors.textMuted }]}>Relationship intent</Text>
-      <View style={styles.chipRow}>
-        {INTENT_OPTIONS.map((intent) => {
-          const selected = filters.intents?.includes(intent) ?? false;
-          return (
-            <AnimatedPressable
-              key={intent}
-              style={[
-                styles.chip,
-                { backgroundColor: colors.surface, borderColor: selected ? colors.gradientEnd : colors.border },
-                selected && styles.chipSelected,
-              ]}
-              onPress={() => toggleIntent(intent)}
-            >
-              <Text style={[styles.chipText, { color: selected ? colors.text : colors.textMuted }]}>
-                {RELATIONSHIP_INTENT_LABELS[intent]}
-              </Text>
-            </AnimatedPressable>
-          );
-        })}
-      </View>
+      {emberMode ? (
+        <>
+          <Text style={[styles.subLabel, { color: colors.textMuted }]}>Status</Text>
+          <View style={styles.chipRow}>
+            {EMBER_STATUS_OPTIONS.map((status) => {
+              const selected = filters.emberStatuses?.includes(status) ?? false;
+              return (
+                <AnimatedPressable
+                  key={status}
+                  style={[
+                    styles.chip,
+                    { backgroundColor: colors.surface, borderColor: selected ? accent : colors.border },
+                    selected && styles.chipSelected,
+                  ]}
+                  onPress={() => toggleEmberStatus(status)}
+                >
+                  <Text style={[styles.chipText, { color: selected ? colors.text : colors.textMuted }]}>
+                    {RELATIONSHIP_STATUS_LABELS[status]}
+                  </Text>
+                </AnimatedPressable>
+              );
+            })}
+          </View>
+
+          <Text style={[styles.subLabel, { color: colors.textMuted }]}>Discretion</Text>
+          <View style={styles.chipRow}>
+            {EMBER_DISCRETION_OPTIONS.map((value) => {
+              const selected = filters.emberDiscretion?.includes(value) ?? false;
+              return (
+                <AnimatedPressable
+                  key={value}
+                  style={[
+                    styles.chip,
+                    { backgroundColor: colors.surface, borderColor: selected ? accent : colors.border },
+                    selected && styles.chipSelected,
+                  ]}
+                  onPress={() => toggleEmberDiscretion(value)}
+                >
+                  <Text style={[styles.chipText, { color: selected ? colors.text : colors.textMuted }]}>
+                    {EMBER_DISCRETION_LABELS[value]}
+                  </Text>
+                </AnimatedPressable>
+              );
+            })}
+          </View>
+
+          <Text style={[styles.subLabel, { color: colors.textMuted }]}>Looking for</Text>
+          <View style={styles.chipRow}>
+            {EMBER_SEEKING_OPTIONS.map((value) => {
+              const selected = filters.emberSeeking?.includes(value) ?? false;
+              return (
+                <AnimatedPressable
+                  key={value}
+                  style={[
+                    styles.chip,
+                    { backgroundColor: colors.surface, borderColor: selected ? accent : colors.border },
+                    selected && styles.chipSelected,
+                  ]}
+                  onPress={() => toggleEmberSeeking(value)}
+                >
+                  <Text style={[styles.chipText, { color: selected ? colors.text : colors.textMuted }]}>
+                    {EMBER_SEEKING_LABELS[value]}
+                  </Text>
+                </AnimatedPressable>
+              );
+            })}
+          </View>
+        </>
+      ) : (
+        <>
+          <Text style={[styles.subLabel, { color: colors.textMuted }]}>Relationship intent</Text>
+          <View style={styles.chipRow}>
+            {INTENT_OPTIONS.map((intent) => {
+              const selected = filters.intents?.includes(intent) ?? false;
+              return (
+                <AnimatedPressable
+                  key={intent}
+                  style={[
+                    styles.chip,
+                    { backgroundColor: colors.surface, borderColor: selected ? accent : colors.border },
+                    selected && styles.chipSelected,
+                  ]}
+                  onPress={() => toggleIntent(intent)}
+                >
+                  <Text style={[styles.chipText, { color: selected ? colors.text : colors.textMuted }]}>
+                    {RELATIONSHIP_INTENT_LABELS[intent]}
+                  </Text>
+                </AnimatedPressable>
+              );
+            })}
+          </View>
+        </>
+      )}
 
       <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <View style={styles.rowText}>
@@ -94,7 +207,7 @@ export function AdvancedFiltersSection({
         <Switch
           value={filters.sharedInterestsOnly ?? false}
           onValueChange={toggleSharedInterests}
-          trackColor={{ false: colors.border, true: colors.gradientEnd }}
+          trackColor={{ false: colors.border, true: accent }}
         />
       </View>
     </View>

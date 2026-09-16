@@ -492,6 +492,7 @@ export function DiscoverScreen() {
         visible={showSparkNote}
         profile={sparkNoteTarget}
         remainingNotes={remainingSparkNotes}
+        variant={resolveSparkSection(preferences.sparkSection)}
         onClose={() => {
           setShowSparkNote(false);
           setSparkNoteTarget(null);

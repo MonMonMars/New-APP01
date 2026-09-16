@@ -177,7 +177,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
           variant="list"
         />
         <Text style={[styles.metaSub, { color: colors.textMuted }]}>
-          Likes, matches, and chats stay in the section you pick. Anyone can join Ember.
+          Likes, matches, and chats stay in the section you pick. Ember keeps photos and city private until you match.
         </Text>
 
         <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Filters</Text>
@@ -189,6 +189,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
         <AdvancedFiltersSection
           filters={preferences.advancedFilters ?? {}}
           isSparkPlus={isSparkPlus}
+          emberMode={resolveSparkSection(preferences.sparkSection) === 'ember'}
           onChange={(advancedFilters) => updatePreferences({ ...preferences, advancedFilters })}
           onUpgrade={() => navigation.getParent()?.navigate('SparkPlus')}
         />

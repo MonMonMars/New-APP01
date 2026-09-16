@@ -43,6 +43,7 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
             accessibilityLabel={`Tap ${meta.name} logo to unlock ${meta.unlockLabel}`}
             accessibilityHint={`Returns to ${meta.unlockLabel}`}
             scaleTo={0.96}
+            hitSlop={8}
             style={styles.brandTap}
           >
             <DisguiseBrand size="sm" />
@@ -109,6 +110,7 @@ const styles = StyleSheet.create({
   brandTap: {
     flexShrink: 1,
     minWidth: 0,
+    zIndex: 2,
   },
   sectionTitle: {
     fontSize: 11,

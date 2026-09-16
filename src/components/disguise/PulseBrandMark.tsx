@@ -34,6 +34,7 @@ export function PulseBrandMark({ size = 'md', style }: PulseBrandMarkProps) {
       ]}
       accessibilityRole="image"
       accessibilityLabel="Pulse"
+      pointerEvents="none"
     >
       <Text
         style={[
@@ -103,7 +104,7 @@ type PulseBrandProps = {
 /** Combined logomark + wordmark for Pulse mastheads. */
 export function PulseBrand({ size = 'md', showTagline = false, style }: PulseBrandProps) {
   return (
-    <View style={[styles.brandRow, style]}>
+    <View style={[styles.brandRow, style]} pointerEvents="none">
       <PulseBrandMark size={size} />
       <PulseWordmark size={size} showTagline={showTagline} />
     </View>

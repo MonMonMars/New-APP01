@@ -10,7 +10,6 @@ import {
 } from '../types/preferences';
 import { ColorPalette, radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
-import { FadeSlideIn } from './motion/FadeSlideIn';
 
 type SparkSectionToggleVariant = 'title' | 'chip' | 'list';
 
@@ -103,34 +102,31 @@ function WorldPickerSheet({
           accessibilityRole="button"
           accessibilityLabel="Close world picker"
         />
-        <FadeSlideIn replayKey={visible} distance={22} style={styles.sheetMotion}>
-          <View
-            style={[
-              styles.sheet,
-              {
-                backgroundColor: colors.background,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            <Text style={[styles.sheetTitle, { color: colors.text }]}>Choose a world</Text>
-            <Text style={[styles.sheetSubtitle, { color: colors.textMuted }]}>
-              Anyone can join either section. Likes, matches, and chats stay in the world you pick.
-            </Text>
-            <View style={styles.listWrap}>
-              {SECTIONS.map((item, index) => (
-                <FadeSlideIn key={item} replayKey={visible} index={index} distance={12}>
-                  <WorldRow
-                    item={item}
-                    selected={section === item}
-                    colors={colors}
-                    onPress={() => onSelect(item)}
-                  />
-                </FadeSlideIn>
-              ))}
-            </View>
+        <View
+          style={[
+            styles.sheet,
+            {
+              backgroundColor: colors.background,
+              borderColor: colors.border,
+            },
+          ]}
+        >
+          <Text style={[styles.sheetTitle, { color: colors.text }]}>Choose a world</Text>
+          <Text style={[styles.sheetSubtitle, { color: colors.textMuted }]}>
+            Anyone can join either section. Likes, matches, and chats stay in the world you pick.
+          </Text>
+          <View style={styles.listWrap}>
+            {SECTIONS.map((item) => (
+              <WorldRow
+                key={item}
+                item={item}
+                selected={section === item}
+                colors={colors}
+                onPress={() => onSelect(item)}
+              />
+            ))}
           </View>
-        </FadeSlideIn>
+        </View>
       </View>
     </Modal>
   );
@@ -285,10 +281,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
-  },
-  sheetMotion: {
-    width: '100%',
-    maxWidth: 360,
   },
   backdrop: {
     ...StyleSheet.absoluteFill,

@@ -1,10 +1,14 @@
 # Spark — Live Demo
 
-## Demo link (open now)
+## Demo links (open now)
 
-**https://most-psychiatry-slim-colony.trycloudflare.com**
+| Link | Durability | Notes |
+|------|------------|-------|
+| **https://temporary-zippy-oxygen-cugkori.vercel.app** | ~60 min (claimable → permanent) | No password. [Claim on Vercel](https://vercel.com/claim-deployment?code=15d53131-f102-4175-8612-2256fc9d3a23) to keep forever. |
+| **https://gorgeous-cat-b0d513.netlify.app** | ~60 min (claimable → permanent) | Password: `My-Drop-Site`. [Claim on Netlify](https://app.netlify.com/drop/gorgeous-cat-b0d513) after signing in. |
+| **https://most-psychiatry-slim-colony.trycloudflare.com** | Hours (workspace must stay awake) | 8/8 verified Sep 16, 2026. Dies when cloud agent sleeps. |
 
-_Verified Sep 16, 2026 — 8/8 automated checks pass (onboarding → Pulse trending → Spark unlock → discover). Expires when the cloud workspace sleeps; see permanent options below._
+**Best long-term fix:** connect Vercel or Netlify to GitHub once (see below) — auto-deploys on every push, stable URL, works with a private repo.
 
 ---
 
@@ -52,7 +56,7 @@ npm run deploy:pages
 
 Cloudflare quick tunnels expire when the workspace stops. Do not rely on these for stakeholders.
 
-Latest verified tunnel: **https://most-psychiatry-slim-colony.trycloudflare.com**
+Latest verified tunnel: **https://most-psychiatry-slim-colony.trycloudflare.com** (temporary only)
 
 ---
 

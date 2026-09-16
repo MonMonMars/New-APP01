@@ -4,7 +4,6 @@ import { Modal, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { radii, spacing } from '../../theme';
 import { AnimatedPressable } from '../AnimatedPressable';
-import { FadeSlideIn } from '../motion/FadeSlideIn';
 
 type DisguiseUnlockConfirmProps = {
   visible: boolean;
@@ -27,8 +26,7 @@ export function DisguiseUnlockConfirm({
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <View style={styles.overlay}>
-        <FadeSlideIn replayKey={visible} distance={18}>
-          <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={[styles.iconWrap, { backgroundColor: `${colors.gradientEnd}18` }]}>
               <Ionicons name="lock-open-outline" size={22} color={colors.gradientEnd} />
             </View>
@@ -52,8 +50,7 @@ export function DisguiseUnlockConfirm({
                 <Text style={styles.unlockText}>Unlock {unlockLabel}</Text>
               </AnimatedPressable>
             </View>
-          </View>
-        </FadeSlideIn>
+        </View>
       </View>
     </Modal>
   );

@@ -34,6 +34,7 @@ export function HarborBrandMark({ size = 'md', style }: HarborBrandMarkProps) {
       ]}
       accessibilityRole="image"
       accessibilityLabel="Harbor"
+      pointerEvents="none"
     >
       <Text
         style={[
@@ -101,7 +102,7 @@ type HarborBrandProps = {
 
 export function HarborBrand({ size = 'md', showTagline = false, style }: HarborBrandProps) {
   return (
-    <View style={[styles.brandRow, style]}>
+    <View style={[styles.brandRow, style]} pointerEvents="none">
       <HarborBrandMark size={size} />
       <HarborWordmark size={size} showTagline={showTagline} />
     </View>

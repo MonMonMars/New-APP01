@@ -96,6 +96,8 @@ export type Profile = {
   aiPersonaId?: string;
   /** Relationship intent — used for Spark+ advanced filters */
   intent?: RelationshipIntent;
+  /** Dating vs married section on Spark Discover */
+  relationshipStatus?: RelationshipStatus;
   /** City label for map / discovery */
   city?: string;
   /** Fake map pin position (0–100 % of map viewport) */
@@ -111,6 +113,13 @@ export type RelationshipIntent =
   | 'new_friends'
   | 'not_sure';
 
+export type RelationshipStatus = 'single' | 'married';
+
+export const RELATIONSHIP_STATUS_LABELS: Record<RelationshipStatus, string> = {
+  single: 'Single',
+  married: 'Married',
+};
+
 export type UserProfile = {
   name: string;
   age: number;
@@ -118,6 +127,7 @@ export type UserProfile = {
   photos: string[];
   interests: string[];
   intent?: RelationshipIntent;
+  relationshipStatus?: RelationshipStatus;
   gender?: ProfileGender;
   orientation?: Orientation;
   prompts?: ProfilePrompt[];

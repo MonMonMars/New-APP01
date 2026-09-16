@@ -188,6 +188,11 @@ export function ProfileCard({
             personVerified={profile.personVerified ?? profile.verified}
             size="sm"
           />
+          {profile.relationshipStatus === 'married' ? (
+            <View style={styles.discreetChip}>
+              <Text style={styles.discreetChipText}>Discreet</Text>
+            </View>
+          ) : null}
         </View>
         {profile.job && <Text style={[styles.job, compact && styles.jobCompact]}>{profile.job}</Text>}
         <Text style={[styles.distance, compact && styles.distanceCompact]}>
@@ -334,6 +339,19 @@ const styles = StyleSheet.create({
   },
   nameCompact: {
     fontSize: 24,
+  },
+  discreetChip: {
+    backgroundColor: 'rgba(245, 179, 0, 0.22)',
+    borderRadius: radii.button,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+  },
+  discreetChipText: {
+    color: colors.rewind,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
   },
   job: {
     color: colors.text,

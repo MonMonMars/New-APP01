@@ -80,6 +80,7 @@ export function createDefaultPersistedState(): PersistedAppState {
       bio: 'Designer exploring the city.',
       photos: ['https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&q=80'],
       interests: ['Design', 'Coffee', 'Travel'],
+      relationshipStatus: 'single',
       prompts: [],
       instagramConnected: false,
       spotifyConnected: false,

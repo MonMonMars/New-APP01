@@ -38,6 +38,46 @@ export const PASSPORT_CITIES = [
   'Sydney, Australia',
 ] as const;
 
+export type SparkSection = 'dating' | 'married';
+
+export const SPARK_SECTION_LABELS: Record<SparkSection, string> = {
+  dating: 'Dating',
+  married: 'Married',
+};
+
+export const SPARK_SECTION_HINTS: Record<SparkSection, string> = {
+  dating: 'Single and dating',
+  married: 'Discreet connections',
+};
+
+export const SPARK_SECTION_EMPTY: Record<SparkSection, { title: string; subtitle: string }> = {
+  dating: {
+    title: 'No more people nearby',
+    subtitle: 'Expand your search radius or load another batch to keep discovering.',
+  },
+  married: {
+    title: 'No more discreet connections nearby',
+    subtitle: 'Expand your search to keep discovering discreet connections.',
+  },
+};
+
+export function matchesSparkSection(
+  profile: { relationshipStatus?: 'single' | 'married' },
+  section: SparkSection,
+): boolean {
+  const status = profile.relationshipStatus ?? 'single';
+  switch (section) {
+    case 'married':
+      return status === 'married';
+    case 'dating':
+      return status !== 'married';
+    default: {
+      const _exhaustive: never = section;
+      return _exhaustive;
+    }
+  }
+}
+
 export type DiscoveryPreferences = {
   maxDistanceMiles: number;
   minAge: number;
@@ -47,6 +87,8 @@ export type DiscoveryPreferences = {
   travelMode?: boolean;
   discoverFilters?: DiscoverFilter[];
   advancedFilters?: AdvancedDiscoverFilters;
+  /** Dating (single) vs Married (discreet) Spark deck */
+  sparkSection?: SparkSection;
 };
 
 export const SEARCH_RADIUS_PRESETS = [
@@ -77,6 +119,7 @@ export const defaultPreferences: DiscoveryPreferences = {
   travelMode: false,
   discoverFilters: [],
   advancedFilters: {},
+  sparkSection: 'dating',
 };
 
 export const SHOW_ME_LABELS: Record<ShowMePreference, string> = {

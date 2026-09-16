@@ -98,7 +98,6 @@ import {
 } from '../utils/securityGuards';
 import { clearVaultKey } from '../utils/secureStorage';
 import { disguiseWorldMeta } from '../utils/disguiseWorld';
-import { DisguisePolicyModal } from '../components/legal/DisguisePolicyModal';
 import { DisguiseUnlockConfirm } from '../components/disguise/DisguiseUnlockConfirm';
 import { SparkUnlockModal } from '../components/security/SparkUnlockModal';
 import {
@@ -455,10 +454,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [dateCheckIns, setDateCheckIns] = useState<DateCheckIn[]>([]);
   const [unlockModalVisible, setUnlockModalVisible] = useState(false);
   const [unlockConfirmVisible, setUnlockConfirmVisible] = useState(false);
-  const [disguisePolicyModalVisible, setDisguisePolicyModalVisible] = useState(false);
   const [unlockError, setUnlockError] = useState<string | null>(null);
   const unlockResolverRef = useRef<((ok: boolean) => void) | null>(null);
-  const pendingDisguiseUnlockRef = useRef(false);
   const lastUnlockAtRef = useRef<number>(Date.now());
   const backgroundedAtRef = useRef<number | null>(null);
   const [rewindKey, setRewindKey] = useState(0);
@@ -2069,25 +2066,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setThemeModeState(mode);
   }, []);
 
-  const proceedSparkUnlock = useCallback(async (): Promise<boolean> => {
-    const unlocked = await runSparkUnlockFlow();
-    if (unlocked) {
-      setDisguiseModeState(false);
+  const setDisguiseMode = useCallback(async (enabled: boolean): Promise<boolean> => {
+    if (enabled) {
+      setDisguiseModeState(true);
+      return true;
     }
-    return unlocked;
-  }, [runSparkUnlockFlow]);
-
-  const setDisguiseMode = useCallback(
-    async (enabled: boolean): Promise<boolean> => {
-      if (enabled) {
-        setDisguiseModeState(true);
-        return true;
-      }
-      setUnlockConfirmVisible(true);
-      return false;
-    },
-    [],
-  );
+    setUnlockConfirmVisible(true);
+    return false;
+  }, []);
 
   const confirmLeaveDisguise = useCallback(() => {
     setUnlockConfirmVisible(false);
@@ -2097,8 +2083,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         disguisePolicyAcceptedAt: new Date().toISOString(),
       }));
     }
-    void proceedSparkUnlock();
-  }, [legalConsent.disguisePolicyAcceptedAt, proceedSparkUnlock]);
+    setDisguiseModeState(false);
+  }, [legalConsent.disguisePolicyAcceptedAt]);
 
   const cancelLeaveDisguise = useCallback(() => {
     setUnlockConfirmVisible(false);
@@ -2173,14 +2159,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const acceptDisguisePolicy = useCallback(() => {
-    const now = new Date().toISOString();
-    setLegalConsent((prev) => ({ ...prev, disguisePolicyAcceptedAt: now }));
-    setDisguisePolicyModalVisible(false);
-    if (pendingDisguiseUnlockRef.current) {
-      pendingDisguiseUnlockRef.current = false;
-      void proceedSparkUnlock();
-    }
-  }, [proceedSparkUnlock]);
+    setLegalConsent((prev) => ({
+      ...prev,
+      disguisePolicyAcceptedAt: prev.disguisePolicyAcceptedAt ?? new Date().toISOString(),
+    }));
+  }, []);
 
   const acceptCookieConsent = useCallback(() => {
     setLegalConsent((prev) => ({ ...prev, cookieConsentAt: new Date().toISOString() }));
@@ -2195,11 +2178,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return false;
     }
   }, [buildPersistedState]);
-
-  const cancelDisguisePolicy = useCallback(() => {
-    pendingDisguiseUnlockRef.current = false;
-    setDisguisePolicyModalVisible(false);
-  }, []);
 
   const generateDisguiseAd = useCallback(
     async (overlayText: string, variant: DisguiseOverlayVariant) => {
@@ -2534,13 +2512,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
         visible={unlockConfirmVisible}
         disguiseName={disguiseWorldMeta(preferences.sparkSection).name}
         unlockLabel={disguiseWorldMeta(preferences.sparkSection).unlockLabel}
+        accent={
+          disguiseWorldMeta(preferences.sparkSection).world === 'harbor'
+            ? '#FFB020'
+            : '#FF2D55'
+        }
         onConfirm={confirmLeaveDisguise}
         onCancel={cancelLeaveDisguise}
-      />
-      <DisguisePolicyModal
-        visible={disguisePolicyModalVisible}
-        onAccept={acceptDisguisePolicy}
-        onCancel={cancelDisguisePolicy}
       />
       <SparkUnlockModal
         visible={unlockModalVisible}

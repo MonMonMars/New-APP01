@@ -38,7 +38,7 @@ function LogoButton({
   return (
     <AnimatedPressable
       onPress={onPress}
-      scaleTo={0.94}
+      scaleTo={0.97}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}
@@ -71,7 +71,7 @@ export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps
   const borderColor = isEmber ? `${colors.ember}88` : `${colors.gradientEnd}88`;
 
   const enterDisguise = useCallback(() => {
-    void setDisguiseMode(true);
+    setDisguiseMode(true);
   }, [setDisguiseMode]);
 
   if (disguiseMode || variant !== 'spark') {

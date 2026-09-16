@@ -27,7 +27,7 @@ function ModeIconButton({
       accessibilityLabel={accessibilityLabel}
       onPress={onPress}
       hitSlop={8}
-      scaleTo={0.92}
+      scaleTo={0.97}
       style={[styles.button, { backgroundColor }]}
     >
       <Ionicons name={icon} size={20} color={color} />
@@ -47,7 +47,9 @@ export function DisguiseModeButton() {
       color={meta.world === 'harbor' ? colors.ember : colors.textMuted}
       backgroundColor={colors.surface}
       accessibilityLabel={`Switch to ${meta.name} disguise mode`}
-      onPress={() => setDisguiseMode(true)}
+      onPress={() => {
+        setDisguiseMode(true);
+      }}
     />
   );
 }

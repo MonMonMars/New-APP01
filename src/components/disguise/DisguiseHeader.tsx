@@ -38,7 +38,9 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <View style={styles.leading}>
           <AnimatedPressable
-            onPress={() => void setDisguiseMode(false)}
+            onPress={() => {
+              setDisguiseMode(false);
+            }}
             accessibilityRole="button"
             accessibilityLabel={`Tap ${meta.name} logo to unlock ${meta.unlockLabel}`}
             accessibilityHint={`Returns to ${meta.unlockLabel}`}

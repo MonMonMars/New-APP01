@@ -6,9 +6,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ActivityAlertSheet } from '../../components/disguise/ActivityAlertSheet';
 import { AdLandingSheet } from '../../components/disguise/AdLandingSheet';
+import { maskVariantToContentKind } from '../../components/disguise/ContentTypeIcon';
 import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
 import { FeedPersonThumbnail } from '../../components/disguise/FeedPersonThumbnail';
 import { NewsArticleSheet } from '../../components/disguise/NewsArticleSheet';
+import { PersonPreviewSheet } from '../../components/disguise/PersonPreviewSheet';
 import { useTheme } from '../../context/ThemeContext';
 import {
   AdPost,
@@ -17,6 +19,7 @@ import {
   findAdPostByLandingUrl,
   findNewsPostByArticleUrl,
   NewsPost,
+  NewsReporter,
 } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { useApp } from '../../context/AppContext';
@@ -35,6 +38,20 @@ export function DisguiseAlertsScreen() {
   const [articlePost, setArticlePost] = useState<NewsPost | null>(null);
   const [adPost, setAdPost] = useState<AdPost | null>(null);
   const [activityAlert, setActivityAlert] = useState<DisguiseAlert | null>(null);
+  const [previewReporter, setPreviewReporter] = useState<NewsReporter | null>(null);
+
+  const openPersonPreview = (alert: DisguiseAlert) => {
+    if (!alert.person) {
+      return;
+    }
+    setPreviewReporter({
+      id: `alert-${alert.id}`,
+      name: alert.person.name,
+      avatarUrl: alert.person.avatarUrl,
+      quote: alert.text,
+      photos: [],
+    });
+  };
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
@@ -50,7 +67,13 @@ export function DisguiseAlertsScreen() {
             ? () => setArticlePost(newsPost)
             : item.landingUrl && ad
               ? () => setAdPost(ad)
-              : () => setActivityAlert(item);
+              : item.person
+                ? () => openPersonPreview(item)
+                : () => setActivityAlert(item);
+
+          const personContentKind = item.person?.overlayVariant
+            ? maskVariantToContentKind(item.person.overlayVariant)
+            : 'alert';
 
           return (
             <AnimatedPressable
@@ -65,8 +88,10 @@ export function DisguiseAlertsScreen() {
                     overlayText={item.person.overlayText ?? 'LIVE'}
                     overlayVariant={item.person.overlayVariant ?? 'news'}
                     plainAvatar={!item.person.overlayVariant}
-                    contentKind={item.person.overlayVariant ? 'profile' : 'alert'}
-                    hideLabel
+                    contentKind={personContentKind}
+                    showIconBadge
+                    onPress={() => openPersonPreview(item)}
+                    accessibilityLabel={`View profile: ${item.person.name}`}
                   />
                   <View style={styles.textWrap}>
                     <Text style={[styles.text, { color: colors.text }]}>{item.text}</Text>
@@ -99,6 +124,11 @@ export function DisguiseAlertsScreen() {
         visible={activityAlert !== null}
         alert={activityAlert}
         onClose={() => setActivityAlert(null)}
+      />
+      <PersonPreviewSheet
+        visible={previewReporter !== null}
+        reporter={previewReporter}
+        onClose={() => setPreviewReporter(null)}
       />
     </View>
   );

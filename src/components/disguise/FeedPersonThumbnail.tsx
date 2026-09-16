@@ -1,10 +1,10 @@
-import { Image } from 'expo-image';
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
 import { spacing } from '../../theme';
 import { ContentTypeIcon, ContentTypeKind, ContentTypeLabel } from './ContentTypeIcon';
 import { DisguiseOverlayAvatar, DisguiseOverlayVariant, PROFILE_AVATAR_SIZE } from './DisguiseOverlayAvatar';
+import { FaceCenteredImage } from './FaceCenteredImage';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type FeedPersonThumbnailProps = {
@@ -20,6 +20,8 @@ type FeedPersonThumbnailProps = {
   caption?: string;
   /** Hide the type label when descriptive text is shown elsewhere (e.g. activity rows). */
   hideLabel?: boolean;
+  /** Show a small type icon badge on the avatar (e.g. activity rows with external text). */
+  showIconBadge?: boolean;
   style?: StyleProp<ViewStyle>;
 };
 
@@ -35,19 +37,14 @@ export function FeedPersonThumbnail({
   accessibilityLabel,
   caption,
   hideLabel = false,
+  showIconBadge = false,
   style,
 }: FeedPersonThumbnailProps) {
   const { colors } = useTheme();
 
   const avatar = plainAvatar ? (
     <View style={[styles.plainWrap, { width: size, height: size, borderRadius: size / 2 }]}>
-      <Image
-        source={{ uri: imageUrl }}
-        style={[styles.plainImage, { borderRadius: size / 2 }]}
-        contentFit="cover"
-        contentPosition="center"
-        transition={120}
-      />
+      <FaceCenteredImage imageUrl={imageUrl} size={size} />
     </View>
   ) : (
     <DisguiseOverlayAvatar
@@ -61,11 +58,18 @@ export function FeedPersonThumbnail({
 
   const trimmedCaption = caption?.trim();
   const showCaption = Boolean(trimmedCaption);
-  const showTypeLabel = !hideLabel && !showCaption;
+  const showTypeLabel = !hideLabel && !showCaption && !showIconBadge;
 
   const content = (
     <View style={[styles.row, style]}>
-      {avatar}
+      <View style={styles.avatarCol}>
+        {avatar}
+        {showIconBadge ? (
+          <View style={styles.iconBadge}>
+            <ContentTypeIcon kind={contentKind} size={11} />
+          </View>
+        ) : null}
+      </View>
       {showCaption ? (
         <View style={styles.captionCol}>
           <ContentTypeIcon kind={contentKind} size={12} />
@@ -103,14 +107,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
   },
+  avatarCol: {
+    position: 'relative',
+  },
+  iconBadge: {
+    position: 'absolute',
+    right: -2,
+    bottom: -2,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(0,0,0,0.08)',
+  },
   plainWrap: {
     overflow: 'hidden',
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(128,128,128,0.35)',
-  },
-  plainImage: {
-    width: '100%',
-    height: '100%',
   },
   captionCol: {
     flex: 1,

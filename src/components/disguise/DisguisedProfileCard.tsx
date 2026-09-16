@@ -6,7 +6,7 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { DisguisedProfilePost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
-import { ContentTypeIcon, MediaWithContentBadge } from './ContentTypeIcon';
+import { ContentTypeIcon, maskVariantToContentKind, MediaWithContentBadge } from './ContentTypeIcon';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { PROFILE_AVATAR_SIZE } from './DisguiseOverlayAvatar';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
@@ -61,7 +61,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
       imageUrl={post.avatarUrl}
       overlayText={maskSnippet}
       overlayVariant={maskVariant}
-      contentKind="profile"
+      contentKind={maskVariantToContentKind(maskVariant)}
       caption={post.overlayText}
       size={PROFILE_AVATAR_SIZE}
       onPress={openPreview}
@@ -76,16 +76,13 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
           <FeedPersonThumbnail
             imageUrl={post.avatarUrl}
             overlayText={maskSnippet}
-            overlayVariant="news"
-            contentKind="profile"
+            overlayVariant={maskVariant}
+            contentKind="social"
             caption={post.summary}
             size={PROFILE_AVATAR_SIZE}
             onPress={openPreview}
             accessibilityLabel={`View profile: ${post.name}`}
           />
-          <AnimatedPressable onPress={openPreview}>
-            <Text style={[styles.socialBody, { color: colors.text }]}>{post.summary}</Text>
-          </AnimatedPressable>
           <View style={styles.socialActions}>
             <AnimatedPressable style={styles.socialAction} onPress={() => togglePulseLike(post.id)}>
               <Ionicons

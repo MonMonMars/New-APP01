@@ -1,5 +1,13 @@
 # Spark — Live Demo
 
+## Demo link (open now)
+
+**https://retro-specifies-catalyst-tree.trycloudflare.com**
+
+_Verified Sep 16, 2026 — 7/7 checks pass. Expires when the cloud workspace sleeps; see permanent options below._
+
+---
+
 ## Permanent demo (recommended — does not expire)
 
 Pick **one** of these. Tunnels die when the cloud workspace sleeps; these stay up.
@@ -43,6 +51,8 @@ npm run deploy:pages
 ## Temporary tunnel (dev / agent previews only)
 
 Cloudflare quick tunnels expire when the workspace stops. Do not rely on these for stakeholders.
+
+Latest verified tunnel: **https://retro-specifies-catalyst-tree.trycloudflare.com**
 
 ---
 

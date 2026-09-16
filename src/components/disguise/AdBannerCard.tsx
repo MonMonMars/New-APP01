@@ -6,8 +6,9 @@ import { useTheme } from '../../context/ThemeContext';
 import { AdPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { ContentTypeIcon, MediaWithContentBadge } from './ContentTypeIcon';
-import { FeedPersonRow } from './FeedPersonRow';
+import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { AdLandingSheet } from './AdLandingSheet';
+import { PersonPreviewSheet } from './PersonPreviewSheet';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 const AD_TESTIMONIALS = [
@@ -35,7 +36,15 @@ type AdBannerCardProps = {
 export function AdBannerCard({ ad }: AdBannerCardProps) {
   const { colors } = useTheme();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [testimonialOpen, setTestimonialOpen] = useState(false);
   const testimonial = AD_TESTIMONIALS[ad.id.length % AD_TESTIMONIALS.length];
+  const testimonialReporter = {
+    id: `ad-testimonial-${ad.id}`,
+    name: testimonial.name,
+    avatarUrl: testimonial.avatarUrl,
+    quote: testimonial.quote,
+    photos: [testimonial.avatarUrl],
+  };
 
   return (
     <>
@@ -55,14 +64,12 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
         <View style={styles.body}>
           <Text style={styles.brand}>{ad.brand}</Text>
           <Text style={styles.tagline}>{ad.tagline}</Text>
-          <FeedPersonRow
+          <FeedPersonThumbnail
             plainAvatar
             contentKind="profile"
             imageUrl={testimonial.avatarUrl}
-            title={testimonial.name}
-            subtitle="Verified reader"
-            body={`"${testimonial.quote}"`}
-            bodyStyle={styles.testimonialQuote}
+            onPress={() => setTestimonialOpen(true)}
+            accessibilityLabel={`View reader comment from ${testimonial.name}`}
             style={styles.testimonialRow}
           />
           <View style={styles.cta}>
@@ -73,6 +80,11 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
       </AnimatedPressable>
 
       <AdLandingSheet visible={sheetOpen} ad={ad} onClose={() => setSheetOpen(false)} />
+      <PersonPreviewSheet
+        visible={testimonialOpen}
+        reporter={testimonialReporter}
+        onClose={() => setTestimonialOpen(false)}
+      />
     </>
   );
 }

@@ -93,7 +93,7 @@ export function ProfileDetailSheet({
             {profile.job && <Text style={styles.meta}>{profile.job}</Text>}
             {profile.school && <Text style={styles.meta}>{profile.school}</Text>}
             {profile.relationshipStatus === 'married' ? (
-              <Text style={styles.intentMeta}>Ember</Text>
+              <Text style={[styles.intentMeta, { color: colors.ember }]}>Ember</Text>
             ) : null}
             {profile.intent && (
               <Text style={styles.intentMeta}>{RELATIONSHIP_INTENT_LABELS[profile.intent]}</Text>

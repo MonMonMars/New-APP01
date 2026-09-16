@@ -341,13 +341,13 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   discreetChip: {
-    backgroundColor: 'rgba(245, 179, 0, 0.22)',
+    backgroundColor: 'rgba(255, 176, 32, 0.22)',
     borderRadius: radii.button,
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
   },
   discreetChipText: {
-    color: colors.rewind,
+    color: colors.ember,
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 0.4,

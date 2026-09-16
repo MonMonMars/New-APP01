@@ -10,7 +10,7 @@ import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { mockProfiles } from '../data/profiles';
-import { formatSearchRadius, matchesSparkSection } from '../types/preferences';
+import { formatSearchRadius, matchesSparkSection, resolveSparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { MatchModal } from '../components/MatchModal';
@@ -91,7 +91,7 @@ export function MapDiscoverScreen({ onClose }: MapDiscoverScreenProps) {
 
   const visibleProfiles = useMemo(() => {
     const excluded = new Set([...passedIds, ...likedIds, ...blockedIds]);
-    const section = preferences.sparkSection ?? 'dating';
+    const section = resolveSparkSection(preferences.sparkSection);
     return mockProfiles.filter(
       (profile) =>
         !excluded.has(profile.id) &&

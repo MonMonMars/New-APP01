@@ -16,7 +16,7 @@ export { AI_PERSONA_IDS };
  * MUTUAL_SUPER_LIKE_IDS (8) → Instant super-match on red star
  * STANDOUT_IDS (3)        → Top Picks / Standouts row on Discover
  * EXPLORE_CATEGORY_MAP    → Explore screen category assignments
- * MARRIED_PROFILE_IDS     → Married / discreet Spark section
+ * MARRIED_PROFILE_IDS     → Ember (private married-group clone of Spark)
  * All other mockProfiles  → Unmatched discover queue
  */
 export const PRE_MATCHED_IDS = [
@@ -31,15 +31,23 @@ export const INCOMING_LIKE_IDS_SET = new Set<string>(INCOMING_LIKE_IDS);
 export const MUTUAL_MATCH_IDS = new Set([
   '2', '3', '25', '41', '45', '50', '53', '57', '58', '67',
   '69', '70', '74', '77', '82', '86',
+  '44', '75',
 ]);
 export const MUTUAL_SUPER_LIKE_IDS = new Set(['11', '29', '34', '36', '48', '59', '60', '68']);
 export const SUPER_PRE_MATCHED_IDS = new Set(['30', '33']);
 export const STANDOUT_IDS = ['15', '30', '36', '48', '52', '59', '68', '72', '81', '84'] as const;
-/** Married / discreet Spark Discover section */
+/** Ember world — married-group clone of Spark. Data never mixes with Spark. */
 export const MARRIED_PROFILE_IDS = new Set([
   '4', '11', '13', '16', '19', '23', '28', '32', '36', '40',
   '44', '48', '52', '59', '60', '66', '68', '75', '79', '83', '87',
 ]);
+export const EMBER_PRE_MATCHED_IDS = ['11', '13', '16', '40'] as const;
+export const EMBER_PENDING_LIKE_IDS = ['23', '28', '32'] as const;
+export const EMBER_INCOMING_LIKE_IDS = ['36', '44', '48', '59', '75', '79'] as const;
+export const EMBER_INCOMING_LIKE_IDS_SET = new Set<string>(EMBER_INCOMING_LIKE_IDS);
+export const EMBER_PASSED_IDS = ['19', '52'] as const;
+export const EMBER_PROFILE_VIEWER_IDS = ['13', '40', '66', '83'] as const;
+export const EMBER_RECENTLY_ACTIVE_IDS = ['13', '40', '66', '83', '68', '60'] as const;
 /** Demo profile viewers for "Who viewed you" (Spark+ feature) */
 export const PROFILE_VIEWER_IDS = [
   '13', '17', '25', '33', '40', '50', '57', '66', '72', '81',
@@ -1068,7 +1076,7 @@ function incomingFromMock(id: string): Profile {
     throw new Error(`Missing incoming-like profile id ${id}`);
   }
   const { mapX, mapY } = mapPin(profile.distanceMiles, Number(id));
-  return withVerification({ ...profile, mapX, mapY });
+  return withRelationshipStatus(withVerification({ ...profile, mapX, mapY }));
 }
 
 /** Profiles that liked you — excluded from discover deck; see INCOMING_LIKE_IDS */

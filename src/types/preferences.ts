@@ -38,28 +38,35 @@ export const PASSPORT_CITIES = [
   'Sydney, Australia',
 ] as const;
 
-export type SparkSection = 'dating' | 'married';
+export type SparkSection = 'spark' | 'ember';
 
 export const SPARK_SECTION_LABELS: Record<SparkSection, string> = {
-  dating: 'Dating',
-  married: 'Married',
+  spark: 'Spark',
+  ember: 'Ember',
 };
 
 export const SPARK_SECTION_HINTS: Record<SparkSection, string> = {
-  dating: 'Single and dating',
-  married: 'Discreet connections',
+  spark: 'Open dating',
+  ember: 'Private circle — separate likes, matches, and chats',
 };
 
 export const SPARK_SECTION_EMPTY: Record<SparkSection, { title: string; subtitle: string }> = {
-  dating: {
+  spark: {
     title: 'No more people nearby',
     subtitle: 'Expand your search radius or load another batch to keep discovering.',
   },
-  married: {
-    title: 'No more discreet connections nearby',
-    subtitle: 'Expand your search to keep discovering discreet connections.',
+  ember: {
+    title: 'No more people nearby',
+    subtitle: 'Ember is a private clone of Spark. Expand search to keep discovering.',
   },
 };
+
+export function resolveSparkSection(section?: string | null): SparkSection {
+  if (section === 'ember' || section === 'married') {
+    return 'ember';
+  }
+  return 'spark';
+}
 
 export function matchesSparkSection(
   profile: { relationshipStatus?: 'single' | 'married' },
@@ -67,9 +74,9 @@ export function matchesSparkSection(
 ): boolean {
   const status = profile.relationshipStatus ?? 'single';
   switch (section) {
-    case 'married':
+    case 'ember':
       return status === 'married';
-    case 'dating':
+    case 'spark':
       return status !== 'married';
     default: {
       const _exhaustive: never = section;
@@ -87,7 +94,7 @@ export type DiscoveryPreferences = {
   travelMode?: boolean;
   discoverFilters?: DiscoverFilter[];
   advancedFilters?: AdvancedDiscoverFilters;
-  /** Dating (single) vs Married (discreet) Spark deck */
+  /** Spark (open dating) vs Ember (private married-group clone) */
   sparkSection?: SparkSection;
 };
 
@@ -119,7 +126,7 @@ export const defaultPreferences: DiscoveryPreferences = {
   travelMode: false,
   discoverFilters: [],
   advancedFilters: {},
-  sparkSection: 'dating',
+  sparkSection: 'spark',
 };
 
 export const SHOW_ME_LABELS: Record<ShowMePreference, string> = {

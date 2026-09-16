@@ -116,8 +116,8 @@ export type RelationshipIntent =
 export type RelationshipStatus = 'single' | 'married';
 
 export const RELATIONSHIP_STATUS_LABELS: Record<RelationshipStatus, string> = {
-  single: 'Single',
-  married: 'Married',
+  single: 'Spark',
+  married: 'Ember',
 };
 
 export type UserProfile = {

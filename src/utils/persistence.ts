@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { Conversation, Match } from '../types/match';
-import { defaultPreferences, DiscoveryPreferences } from '../types/preferences';
+import { defaultPreferences, DiscoveryPreferences, resolveSparkSection } from '../types/preferences';
 import { UserProfile } from '../types/profile';
 import { DisguiseAdCreative } from '../types/disguise';
 import {
@@ -22,7 +22,7 @@ import { decryptLocalPayload, encryptLocalPayload } from './localEncryption';
 
 const STORAGE_KEY = '@spark/app_state';
 const SENSITIVE_VAULT_KEY = '@spark/sensitive_vault';
-const STORAGE_VERSION = 16;
+const STORAGE_VERSION = 17;
 
 type SensitiveVault = {
   conversations: Conversation[];
@@ -57,6 +57,10 @@ export type PersistedAppState = {
   notificationsEnabled: boolean;
   notificationPreferences: NotificationPreferences;
   lastPassedProfileId: string | null;
+  emberDailyLikesUsed?: number;
+  emberLastPassedProfileId?: string | null;
+  emberSparkNotesUsedToday?: number;
+  emberLastSparkNoteDate?: string | null;
   isPaused: boolean;
   themeMode: ThemeMode;
   disguiseMode: boolean;
@@ -109,7 +113,11 @@ export function createDefaultPersistedState(): PersistedAppState {
     bonusSparkNotes: 0,
     notificationsEnabled: false,
     notificationPreferences: defaultNotificationPreferences,
-    lastPassedProfileId: null,
+      lastPassedProfileId: null,
+      emberDailyLikesUsed: 0,
+      emberLastPassedProfileId: null,
+      emberSparkNotesUsedToday: 0,
+      emberLastSparkNoteDate: null,
     isPaused: false,
     themeMode: 'dark',
     disguiseMode: true,
@@ -165,7 +173,11 @@ export async function loadPersistedState(): Promise<PersistedAppState | null> {
       ...parsed,
       version: STORAGE_VERSION,
       user: { ...defaults.user, ...parsed.user },
-      preferences: { ...defaultPreferences, ...parsed.preferences },
+      preferences: {
+        ...defaultPreferences,
+        ...parsed.preferences,
+        sparkSection: resolveSparkSection(parsed.preferences?.sparkSection),
+      },
       passedIds: parsed.passedIds ?? [],
       likedIds: parsed.likedIds ?? [],
       pendingLikeIds: parsed.pendingLikeIds ?? [],

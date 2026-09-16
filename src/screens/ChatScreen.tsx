@@ -159,6 +159,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const renderMessage = ({ item }: { item: Message }) => (
     <View style={[styles.bubbleRow, item.isMine ? styles.bubbleRowMine : styles.bubbleRowTheirs]}>
       <AnimatedPressable
+        style={item.isMine ? styles.bubbleWrapMine : styles.bubbleWrapTheirs}
         onLongPress={() => setReactionMessageId(item.id)}
         delayLongPress={320}
       >
@@ -646,8 +647,15 @@ const styles = StyleSheet.create({
   bubbleRowTheirs: {
     alignItems: 'flex-start',
   },
-  bubble: {
+  bubbleWrapMine: {
+    alignSelf: 'flex-end',
     maxWidth: '78%',
+  },
+  bubbleWrapTheirs: {
+    alignSelf: 'flex-start',
+    maxWidth: '78%',
+  },
+  bubble: {
     borderRadius: 18,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 2,
@@ -678,6 +686,7 @@ const styles = StyleSheet.create({
   bubbleText: {
     fontSize: 15,
     lineHeight: 21,
+    flexShrink: 1,
   },
   statusRow: {
     flexDirection: 'row',

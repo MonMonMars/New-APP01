@@ -34,6 +34,11 @@ export const MUTUAL_MATCH_IDS = new Set([
 export const MUTUAL_SUPER_LIKE_IDS = new Set(['11', '29', '34', '36', '48', '59', '60', '68']);
 export const SUPER_PRE_MATCHED_IDS = new Set(['30', '33']);
 export const STANDOUT_IDS = ['15', '30', '36', '48', '52', '59', '68', '72', '81', '84'] as const;
+/** Demo profile viewers for "Who viewed you" (Spark+ feature) */
+export const PROFILE_VIEWER_IDS = [
+  '13', '17', '25', '33', '40', '50', '57', '66', '72', '81',
+] as const;
+
 export const RECENTLY_ACTIVE_IDS = [
   '2', '13', '17', '25', '33', '40', '50', '57', '66', '67',
   '69', '71', '73', '77', '83', '88',

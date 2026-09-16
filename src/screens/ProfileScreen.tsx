@@ -9,6 +9,7 @@ import { BoostCard } from '../components/BoostCard';
 import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesSheet';
 import { EditProfileSheet } from '../components/EditProfileSheet';
 import { ProfileCompletionCard } from '../components/ProfileCompletionCard';
+import { ProfileViewsCard } from '../components/ProfileViewsCard';
 import { ProfileTrustSection } from '../components/ProfileTrustSection';
 import { ReferralCard } from '../components/ReferralCard';
 import { VerificationBadges } from '../components/VerificationBadges';
@@ -78,6 +79,8 @@ export function ProfileScreen() {
     disguiseMode,
     setDisguiseMode,
     disguiseAdCreative,
+    profileViewers,
+    profileViewCount,
   } = useApp();
   const [showEdit, setShowEdit] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
@@ -165,6 +168,13 @@ export function ProfileScreen() {
           score={profileCompletion.score}
           tips={profileCompletion.tips}
           onEditPress={() => setShowEdit(true)}
+        />
+
+        <ProfileViewsCard
+          viewers={profileViewers}
+          totalCount={profileViewCount}
+          isSparkPlus={isSparkPlus}
+          onUpgrade={() => navigation.getParent()?.navigate('SparkPlus')}
         />
 
         <ProfileTrustSection

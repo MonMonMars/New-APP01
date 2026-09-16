@@ -20,6 +20,7 @@ type ChatComposerProps = {
   onSuggestDate: () => void;
   onVibeGame: () => void;
   onVoiceNote?: () => void;
+  onPickGif?: () => void;
   paddingBottom: number;
 };
 
@@ -38,6 +39,7 @@ export function ChatComposer({
   onSuggestDate,
   onVibeGame,
   onVoiceNote,
+  onPickGif,
   paddingBottom,
 }: ChatComposerProps) {
   const { colors } = useTheme();
@@ -73,6 +75,9 @@ export function ChatComposer({
 
   const extras: ExtraAction[] = [
     { id: 'photo', icon: 'images-outline', label: 'Photo', onPress: onPickImage },
+    ...(onPickGif
+      ? [{ id: 'gif', icon: 'happy-outline' as keyof typeof Ionicons.glyphMap, label: 'GIF', onPress: onPickGif }]
+      : []),
     { id: 'date', icon: 'calendar-outline', label: 'Date', onPress: onSuggestDate },
     { id: 'vibe', icon: 'color-wand-outline', label: 'Vibe', onPress: onVibeGame },
     {

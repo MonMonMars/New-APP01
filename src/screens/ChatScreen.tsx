@@ -9,6 +9,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AiPersonaBadge } from '../components/AiPersonaBadge';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { ChatComposer } from '../components/ChatComposer';
+import { GifPickerSheet } from '../components/GifPickerSheet';
+import { MessageReactionPicker } from '../components/MessageReactionPicker';
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { VerificationBadges } from '../components/VerificationBadges';
 import { MessageStatusIcon } from '../components/MessageStatusIcon';
@@ -50,8 +52,11 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
     startDateCheckIn,
     checkInDateNow,
     completeDateCheckIn,
+    reactToMessage,
   } = useApp();
   const [draft, setDraft] = useState('');
+  const [showGifPicker, setShowGifPicker] = useState(false);
+  const [reactionMessageId, setReactionMessageId] = useState<string | null>(null);
   const [showSafety, setShowSafety] = useState(false);
   const [showReport, setShowReport] = useState(false);
   const [showSuggestDate, setShowSuggestDate] = useState(false);
@@ -88,8 +93,8 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
       ? 'Waiting for reply'
       : null;
 
-  const handleSend = (text: string, imageUrl?: string) => {
-    sendMessage(conversationId, text, imageUrl);
+  const handleSend = (text: string, imageUrl?: string, isGif = false) => {
+    sendMessage(conversationId, text, imageUrl, isGif);
     setDraft('');
   };
 
@@ -153,19 +158,33 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
 
   const renderMessage = ({ item }: { item: Message }) => (
     <View style={[styles.bubbleRow, item.isMine ? styles.bubbleRowMine : styles.bubbleRowTheirs]}>
-      <View style={[styles.bubble, item.isMine ? { backgroundColor: colors.gradientEnd } : { backgroundColor: colors.surface }]}>
-        {item.imageUrl && (
-          <Image source={{ uri: item.imageUrl }} style={styles.messageImage} resizeMode="cover" />
-        )}
-        {item.text && item.text !== '📷 Photo' && (
-          <Text style={[styles.bubbleText, { color: colors.text }]}>{item.text}</Text>
-        )}
-        {item.isMine && (
-          <View style={styles.statusRow}>
-            <MessageStatusIcon status={displayStatus(item.status)} size={13} />
+      <AnimatedPressable
+        onLongPress={() => setReactionMessageId(item.id)}
+        delayLongPress={320}
+      >
+        <View style={[styles.bubble, item.isMine ? { backgroundColor: colors.gradientEnd } : { backgroundColor: colors.surface }]}>
+          {item.imageUrl && (
+            <Image
+              source={{ uri: item.imageUrl }}
+              style={[styles.messageImage, item.isGif && styles.gifImage]}
+              resizeMode="cover"
+            />
+          )}
+          {item.text && item.text !== '📷 Photo' && item.text !== 'GIF' && (
+            <Text style={[styles.bubbleText, { color: colors.text }]}>{item.text}</Text>
+          )}
+          {item.isMine && (
+            <View style={styles.statusRow}>
+              <MessageStatusIcon status={displayStatus(item.status)} size={13} />
+            </View>
+          )}
+        </View>
+        {item.reaction && (
+          <View style={[styles.reactionBadge, { backgroundColor: colors.background, borderColor: colors.border }]}>
+            <Text style={styles.reactionEmoji}>{item.reaction}</Text>
           </View>
         )}
-      </View>
+      </AnimatedPressable>
     </View>
   );
 
@@ -191,6 +210,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
               />
             </View>
             <Text style={[styles.headerMeta, { color: colors.textMuted }]}>
+              {profile.activeToday ? 'Active now · ' : ''}
               {expiryLabel ?? 'Matched recently'}
             </Text>
           </View>
@@ -327,15 +347,32 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         />
       )}
 
+      <MessageReactionPicker
+        visible={reactionMessageId !== null}
+        onSelect={(emoji) => {
+          if (reactionMessageId) {
+            reactToMessage(conversationId, reactionMessageId, emoji);
+          }
+        }}
+        onClose={() => setReactionMessageId(null)}
+      />
+
       <ChatComposer
         draft={draft}
         onChangeDraft={setDraft}
         onSend={handleSend}
         onPickImage={handlePickImage}
+        onPickGif={() => setShowGifPicker(true)}
         onSuggestDate={() => setShowSuggestDate(true)}
         onVibeGame={() => setShowVibeGame(true)}
         onVoiceNote={() => setShowVoiceNote(true)}
         paddingBottom={insets.bottom + spacing.sm}
+      />
+
+      <GifPickerSheet
+        visible={showGifPicker}
+        onClose={() => setShowGifPicker(false)}
+        onSelect={(gif) => handleSend('', gif.url, true)}
       />
 
       <SafetyActionSheet
@@ -601,6 +638,7 @@ const styles = StyleSheet.create({
   },
   bubbleRow: {
     marginBottom: spacing.sm,
+    position: 'relative',
   },
   bubbleRowMine: {
     alignItems: 'flex-end',
@@ -620,6 +658,22 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 12,
     marginBottom: spacing.xs,
+  },
+  gifImage: {
+    width: 220,
+    height: 165,
+  },
+  reactionBadge: {
+    position: 'absolute',
+    bottom: -4,
+    right: 8,
+    borderRadius: 12,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  reactionEmoji: {
+    fontSize: 14,
   },
   bubbleText: {
     fontSize: 15,

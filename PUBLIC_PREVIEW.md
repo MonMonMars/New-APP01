@@ -2,9 +2,9 @@
 
 ## Demo link (open now)
 
-**https://retro-specifies-catalyst-tree.trycloudflare.com**
+**https://ireland-represented-columns-header.trycloudflare.com**
 
-_Verified Sep 16, 2026 — 7/7 checks pass. Expires when the cloud workspace sleeps; see permanent options below._
+_Verified Sep 16, 2026 — 8/8 automated checks pass (onboarding → Pulse trending → Spark unlock → discover). Expires when the cloud workspace sleeps; see permanent options below._
 
 ---
 

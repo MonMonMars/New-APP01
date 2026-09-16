@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Alert, Share, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { radii, spacing } from '../theme';
 import { buildInviteLink, buildInviteMessage } from '../utils/inviteLink';
+import { shareWithFallback } from '../utils/shareWithFallback';
 import { AnimatedPressable } from './AnimatedPressable';
 
 export function ReferralCard() {
@@ -14,20 +15,16 @@ export function ReferralCard() {
 
   const handleInvite = async () => {
     const message = buildInviteMessage(user.name, inviteLink);
-    try {
-      const result = await Share.share({
-        message,
-        title: 'Invite to Spark',
-        url: inviteLink,
-      });
-      if (result.action !== Share.dismissedAction) {
-        const count = recordReferralShare();
-        if (count >= 3 && count % 3 === 0) {
-          Alert.alert('Boost unlocked!', 'Three friends invited — enjoy a free 30-minute Boost.');
-        }
+    const shared = await shareWithFallback({
+      message,
+      title: 'Invite to Spark',
+      url: inviteLink,
+    });
+    if (shared) {
+      const count = recordReferralShare();
+      if (count >= 3 && count % 3 === 0) {
+        Alert.alert('Boost unlocked!', 'Three shares completed — enjoy a free 30-minute Boost.');
       }
-    } catch {
-      Alert.alert('Invite friends', `Share your link:\n${inviteLink}`);
     }
   };
 

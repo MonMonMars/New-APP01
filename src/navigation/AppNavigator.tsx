@@ -30,7 +30,6 @@ import { SecuritySettingsScreen } from '../screens/SecuritySettingsScreen';
 import { VerificationPolicyScreen } from '../screens/VerificationPolicyScreen';
 import { SparkPlusScreen } from '../screens/SparkPlusScreen';
 import { OnboardingFlow } from '../screens/onboarding/OnboardingFlow';
-import { CrossfadeSwitcher } from '../components/motion/CrossfadeSwitcher';
 import { TabBarButton } from '../components/TabBarButton';
 import { DisguiseNavigator } from './DisguiseNavigator';
 import { MainTabParamList, RootStackParamList } from '../types/navigation';
@@ -203,13 +202,9 @@ function DiscoverHubWrapper({
 
 function MainShell() {
   const { disguiseMode } = useApp();
-  return (
-    <CrossfadeSwitcher
-      active={disguiseMode}
-      onPanel={<DisguiseNavigator />}
-      offPanel={<MainTabs />}
-    />
-  );
+  // Mount only one tab navigator at a time — React Navigation rejects two Tab.Navigators
+  // in the same NavigationContainer (crashes after onboarding on fresh sessions).
+  return disguiseMode ? <DisguiseNavigator /> : <MainTabs />;
 }
 
 function RootNavigator() {

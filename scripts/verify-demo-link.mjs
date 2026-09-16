@@ -55,10 +55,21 @@ async function completeOnboarding(page) {
       await page.waitForTimeout(700);
       continue;
     }
-    if (await page.getByText(/open pulse/i).first().isVisible().catch(() => false)) {
-      await page.getByText(/open pulse/i).first().click();
-      await page.waitForTimeout(1200);
-      return;
+    if (/your public profile/i.test(text)) {
+      const cont = page.getByText(/^continue$/i).first();
+      if (await cont.isVisible().catch(() => false)) {
+        await cont.click();
+        await page.waitForTimeout(700);
+      }
+      continue;
+    }
+    if (/create your profile/i.test(text)) {
+      const openPulse = page.getByText(/open pulse/i).first();
+      if (await openPulse.isVisible().catch(() => false)) {
+        await openPulse.click();
+        await page.waitForTimeout(1500);
+        return;
+      }
     }
     const cont = page.getByText(/^continue$/i).first();
     if (await cont.isVisible().catch(() => false)) {
@@ -66,7 +77,9 @@ async function completeOnboarding(page) {
       await page.waitForTimeout(700);
       continue;
     }
-    if (/tap to unlock|for you|trending/i.test(text)) {
+    const unlockVisible = await page.getByLabel(/tap to unlock spark/i).first().isVisible().catch(() => false);
+    const trendingTab = await page.getByText(/^trending$/i).first().isVisible().catch(() => false);
+    if (unlockVisible || trendingTab) {
       return;
     }
   }
@@ -76,7 +89,7 @@ async function unlockSpark(page) {
   await dismissCookies(page);
   const unlock = page.getByLabel(/tap to unlock spark/i).first();
   await unlock.waitFor({ state: 'visible', timeout: 8000 });
-  await unlock.click();
+  await unlock.click({ force: true });
   await page.waitForTimeout(600);
 
   const policy = page.getByText(/i understand — unlock spark/i).first();
@@ -152,6 +165,7 @@ async function main() {
       fail('Pulse trending', 'tab not found');
     }
 
+    await dismissCookies(page);
     await unlockSpark(page);
     await dismissCookies(page);
 

@@ -29,6 +29,14 @@ async function bodyText(page) {
   return page.locator('body').innerText().catch(() => '');
 }
 
+async function dismissCookies(page) {
+  const btn = page.getByText(/essential only/i).first();
+  if (await btn.isVisible({ timeout: 1500 }).catch(() => false)) {
+    await btn.click();
+    await page.waitForTimeout(400);
+  }
+}
+
 async function main() {
   log(`Starting debug on ${DEMO_URL}`);
   const browser = await chromium.launch({ headless: true });
@@ -110,13 +118,14 @@ async function main() {
 
     await snap(page, '01-after-onboarding');
 
-    const unlock = page.getByText(/tap to unlock|unlock spark/i).first();
+    await dismissCookies(page);
+    const unlock = page.getByLabel(/tap to unlock spark/i).first();
     if (await unlock.isVisible({ timeout: 4000 }).catch(() => false)) {
       await unlock.click();
       await page.waitForTimeout(600);
-      const confirm = page.getByRole('button', { name: /unlock spark|i understand/i }).first();
-      if (await confirm.isVisible().catch(() => false)) {
-        await confirm.click();
+      const policy = page.getByText(/i understand — unlock spark/i).first();
+      if (await policy.isVisible().catch(() => false)) {
+        await policy.click();
         await page.waitForTimeout(1200);
       }
       log('Unlocked Spark');

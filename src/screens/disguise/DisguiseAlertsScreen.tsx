@@ -21,6 +21,7 @@ import {
   NewsPost,
   NewsReporter,
 } from '../../data/disguiseFeed';
+import { buildAlertReporter } from '../../utils/disguiseReporterPhotos';
 import { radii, spacing } from '../../theme';
 import { useApp } from '../../context/AppContext';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
@@ -44,13 +45,7 @@ export function DisguiseAlertsScreen() {
     if (!alert.person) {
       return;
     }
-    setPreviewReporter({
-      id: `alert-${alert.id}`,
-      name: alert.person.name,
-      avatarUrl: alert.person.avatarUrl,
-      quote: alert.text,
-      photos: [],
-    });
+    setPreviewReporter(buildAlertReporter(alert.person));
   };
 
   return (
@@ -89,7 +84,7 @@ export function DisguiseAlertsScreen() {
                     overlayVariant={item.person.overlayVariant ?? 'news'}
                     plainAvatar={!item.person.overlayVariant}
                     contentKind={personContentKind}
-                    showIconBadge
+                    showIconBadge={!item.person.overlayVariant}
                     onPress={() => openPersonPreview(item)}
                     accessibilityLabel={`View profile: ${item.person.name}`}
                   />

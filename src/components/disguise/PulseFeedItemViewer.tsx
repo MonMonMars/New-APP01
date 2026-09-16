@@ -78,6 +78,27 @@ export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItem
     case 'ad':
       return <AdLandingSheet visible ad={feedItem} onClose={onClose} />;
     case 'disguised_profile':
+      if (feedItem.variant === 'social') {
+        return (
+          <SocialCommentSheet
+            visible
+            post={{
+              id: feedItem.id,
+              type: 'social',
+              author: feedItem.name,
+              handle: feedItem.handle ?? feedItem.name.toLowerCase().replace(/\s+/g, ''),
+              body: feedItem.summary,
+              avatarUrl: feedItem.avatarUrl,
+              timeAgo: feedItem.timeAgo,
+              likes: 24,
+              comments: 3,
+              avatarMask: { text: feedItem.overlayText, variant: 'news' },
+            }}
+            onClose={onClose}
+            sheetTitle="Post"
+          />
+        );
+      }
       return (
         <PersonPreviewSheet
           visible
@@ -85,7 +106,7 @@ export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItem
             id: feedItem.id,
             name: feedItem.name,
             avatarUrl: feedItem.avatarUrl,
-            quote: feedItem.summary,
+            quote: feedItem.overlayText,
             photos: feedItem.photos,
             profileId: profileIdFromPostId(feedItem.id),
           }}

@@ -45,6 +45,8 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
   const avatarContentKind = post.avatarMask
     ? maskVariantToContentKind(post.avatarMask.variant)
     : 'social';
+  const captionSnippet =
+    post.body.length > 72 ? `${post.body.slice(0, 72).trim()}…` : post.body;
 
   const handleSave = () => {
     if (isSaved) {
@@ -92,7 +94,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
               overlayText={maskSnippet}
               overlayVariant={post.avatarMask.variant}
               contentKind={avatarContentKind}
-              caption={post.body}
+              caption={captionSnippet}
               onPress={() => setAuthorOpen(true)}
               accessibilityLabel={`View profile: ${post.author}`}
             />
@@ -100,7 +102,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
             <FeedPersonThumbnail
               plainAvatar
               contentKind="social"
-              caption={post.body}
+              caption={captionSnippet}
               imageUrl={post.avatarUrl}
               onPress={() => setAuthorOpen(true)}
               accessibilityLabel={`View profile: ${post.author}`}
@@ -128,6 +130,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
           <Ionicons name="ellipsis-horizontal" size={18} color={colors.textMuted} />
         </AnimatedPressable>
       </View>
+      <Text style={[styles.body, { color: colors.text }]}>{post.body}</Text>
       {post.imageUrl && post.imageMask ? (
         <AnimatedPressable
           style={styles.postImageWrap}

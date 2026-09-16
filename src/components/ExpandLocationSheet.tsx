@@ -160,7 +160,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
             {formatSearchRadius(currentRadius)} · {pins.length} people
           </Text>
         </View>
-        <View style={styles.closeButton} />
+        <View style={styles.closeSlot} />
       </View>
 
       <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
@@ -182,7 +182,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
             );
           })}
         </View>
-        <Text style={styles.attrib}>© OpenStreetMap</Text>
+        <Text style={styles.attrib}>© Esri</Text>
       </View>
     </View>
   );
@@ -254,7 +254,7 @@ function buildTiles(
       const wrappedX = ((x % n) + n) % n;
       tiles.push({
         key: `${zoom}-${wrappedX}-${y}-${x}`,
-        uri: `https://a.basemaps.cartocdn.com/rastertiles/voyager/${zoom}/${wrappedX}/${y}@2x.png`,
+        uri: `https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/${zoom}/${y}/${wrappedX}`,
         left: (x - cx) * TILE_PX + width / 2,
         top: (y - cy) * TILE_PX + height / 2,
       });
@@ -266,7 +266,7 @@ function buildTiles(
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#d5e0d0',
+    backgroundColor: '#e6eed8',
   },
   map: {
     ...StyleSheet.absoluteFill,
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   },
   mapFill: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: '#d5e0d0',
+    backgroundColor: '#e6eed8',
   },
   tile: {
     position: 'absolute',
@@ -330,6 +330,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.92)',
+  },
+  closeSlot: {
+    width: 40,
+    height: 40,
   },
   metaPill: {
     flex: 1,

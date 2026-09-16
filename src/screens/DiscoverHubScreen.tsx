@@ -319,7 +319,7 @@ function HubTile({
         <>
           <Image
             source={{
-              uri: 'https://a.basemaps.cartocdn.com/rastertiles/voyager/12/1206/1539@2x.png',
+              uri: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/12/1539/1206',
             }}
             style={styles.hubMapPreview}
           />

@@ -22,6 +22,7 @@ import { DiscoverFilter } from '../types/preferences';
 import { formatSearchRadius } from '../types/preferences';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
+import { ActionToast } from '../components/ActionToast';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 
 type DiscoverHubScreenProps = {
@@ -62,6 +63,8 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
   const [showExpandLocation, setShowExpandLocation] = useState(false);
   const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
   const [showMatch, setShowMatch] = useState(false);
+  const [deckToast, setDeckToast] = useState<string | null>(null);
+  const [closeAfterToast, setCloseAfterToast] = useState(false);
 
   const activeFilters = preferences.discoverFilters ?? [];
 
@@ -76,13 +79,10 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
   const handleSelectProfile = useCallback(
     (profile: Profile) => {
       prioritizeProfileInDeck(profile.id);
-      Alert.alert(
-        'Added to deck',
-        `${profile.name} will appear next in Discover.`,
-        [{ text: 'OK', onPress: onClose }],
-      );
+      setDeckToast(`${profile.name} added to your deck`);
+      setCloseAfterToast(true);
     },
-    [onClose, prioritizeProfileInDeck],
+    [prioritizeProfileInDeck],
   );
 
   const handleSelectAiPersona = useCallback(
@@ -274,6 +274,18 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
           setMatchProfile(null);
         }}
         onMessage={handleOpenChat}
+      />
+
+      <ActionToast
+        visible={deckToast !== null}
+        message={deckToast ?? ''}
+        onDismiss={() => {
+          setDeckToast(null);
+          if (closeAfterToast) {
+            setCloseAfterToast(false);
+            onClose();
+          }
+        }}
       />
     </View>
   );

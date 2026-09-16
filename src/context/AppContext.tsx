@@ -293,6 +293,7 @@ type AppContextValue = {
   likeProfile: (profile: Profile, sparkNote?: string) => Match | null;
   superLikeProfile: (profile: Profile) => Match | null;
   sendMessage: (conversationId: string, text: string, imageUrl?: string, isGif?: boolean) => void;
+  sendVoiceNote: (conversationId: string, durationSeconds: number) => void;
   getConversationIdForProfile: (profileId: string) => string | null;
   blockProfile: (profileId: string) => void;
   unblockProfile: (profileId: string) => void;
@@ -301,6 +302,7 @@ type AppContextValue = {
   unmatchProfile: (profileId: string) => void;
   savePulsePost: (postId: string) => void;
   unsavePulsePost: (postId: string) => void;
+  togglePulseLike: (postId: string) => void;
   mutePulseAuthor: (handle: string) => void;
   unmutePulseAuthor: (handle: string) => void;
   reportPulsePost: (postId: string, reason?: string) => void;
@@ -1571,6 +1573,33 @@ export function AppProvider({ children }: { children: ReactNode }) {
     ],
   );
 
+  const sendVoiceNote = useCallback(
+    (conversationId: string, durationSeconds: number) => {
+      const seconds = Math.max(1, Math.min(30, Math.round(durationSeconds)));
+      sendMessage(conversationId, `Voice note (${seconds}s)`, undefined, false);
+      setConversations((prev) =>
+        prev.map((conversation) => {
+          if (conversation.id !== conversationId) {
+            return conversation;
+          }
+          const messages = [...conversation.messages];
+          const last = messages[messages.length - 1];
+          if (!last || !last.isMine) {
+            return conversation;
+          }
+          messages[messages.length - 1] = {
+            ...last,
+            text: '',
+            isVoiceNote: true,
+            voiceDurationSeconds: seconds,
+          };
+          return { ...conversation, messages, lastMessage: `Voice note (${seconds}s)` };
+        }),
+      );
+    },
+    [sendMessage],
+  );
+
   const activateSparkPlus = useCallback(() => {
     setIsSparkPlus(true);
   }, []);
@@ -1663,6 +1692,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPulseSocial((prev) => ({
       ...prev,
       savedPostIds: prev.savedPostIds.filter((id) => id !== postId),
+    }));
+  }, []);
+
+  const togglePulseLike = useCallback((postId: string) => {
+    setPulseSocial((prev) => ({
+      ...prev,
+      likedPostIds: prev.likedPostIds.includes(postId)
+        ? prev.likedPostIds.filter((id) => id !== postId)
+        : [...prev.likedPostIds, postId],
     }));
   }, []);
 
@@ -2049,6 +2087,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       likeProfile,
       superLikeProfile,
       sendMessage,
+      sendVoiceNote,
       getConversationIdForProfile,
       blockProfile,
       unblockProfile,
@@ -2057,6 +2096,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       unmatchProfile,
       savePulsePost,
       unsavePulsePost,
+      togglePulseLike,
       mutePulseAuthor,
       unmutePulseAuthor,
       reportPulsePost,
@@ -2165,6 +2205,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       likeProfile,
       superLikeProfile,
       sendMessage,
+      sendVoiceNote,
       getConversationIdForProfile,
       blockProfile,
       unblockProfile,
@@ -2173,6 +2214,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       unmatchProfile,
       savePulsePost,
       unsavePulsePost,
+      togglePulseLike,
       mutePulseAuthor,
       unmutePulseAuthor,
       reportPulsePost,

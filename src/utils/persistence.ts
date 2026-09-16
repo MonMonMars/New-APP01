@@ -201,6 +201,7 @@ export async function loadPersistedState(): Promise<PersistedAppState | null> {
         ...parsed.pulseSocial,
         postComments: parsed.pulseSocial?.postComments ?? {},
         readingHistory: parsed.pulseSocial?.readingHistory ?? [],
+        likedPostIds: parsed.pulseSocial?.likedPostIds ?? [],
       },
       dateCheckIns: parsed.dateCheckIns ?? [],
     };
@@ -229,7 +230,10 @@ export async function savePersistedState(state: PersistedAppState): Promise<void
 
 export async function clearPersistedState(): Promise<void> {
   try {
-    await AsyncStorage.multiRemove([STORAGE_KEY, SENSITIVE_VAULT_KEY]);
+    await Promise.all([
+      AsyncStorage.removeItem(STORAGE_KEY),
+      AsyncStorage.removeItem(SENSITIVE_VAULT_KEY),
+    ]);
   } catch {
     // Ignore storage errors in prototype.
   }

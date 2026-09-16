@@ -15,6 +15,7 @@ import {
 } from '../types/subscription';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
+import { PurchaseConfirmSheet } from '../components/PurchaseConfirmSheet';
 
 type SparkPlusScreenProps = {
   onClose: () => void;
@@ -26,6 +27,7 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
   const { activateSparkPlus, restorePurchases } = useApp();
   const [selectedPlan, setSelectedPlan] = useState<SparkPlusPlan>('annual');
   const [restoring, setRestoring] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleSubscribe = () => {
     activateSparkPlus();
@@ -109,7 +111,10 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
           );
         })}
 
-        <AnimatedPressable style={[styles.subscribeButton, { backgroundColor: colors.gradientEnd }]} onPress={handleSubscribe}>
+        <AnimatedPressable
+          style={[styles.subscribeButton, { backgroundColor: colors.gradientEnd }]}
+          onPress={() => setShowConfirm(true)}
+        >
           <Text style={[styles.subscribeText, { color: colors.text }]}>
             Continue — {SPARK_PLUS_PRICING[selectedPlan].price}
           </Text>
@@ -127,6 +132,17 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
           Recurring billing. Cancel anytime in your App Store or Google Play subscription settings.
         </Text>
       </ScrollView>
+
+      <PurchaseConfirmSheet
+        visible={showConfirm}
+        title={`Spark+ ${SPARK_PLUS_PRICING[selectedPlan].label}`}
+        description="Unlimited likes, rewinds, read receipts, incognito mode, and more."
+        price={SPARK_PLUS_PRICING[selectedPlan].price}
+        quantity={SPARK_PLUS_PRICING[selectedPlan].perMonth !== '—' ? SPARK_PLUS_PRICING[selectedPlan].perMonth : undefined}
+        icon="diamond"
+        onClose={() => setShowConfirm(false)}
+        onConfirm={handleSubscribe}
+      />
     </View>
   );
 }

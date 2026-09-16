@@ -22,6 +22,7 @@ import {
 } from '../../utils/disguiseProfileFeed';
 import { resolveSavedPulsePosts } from '../../utils/pulseSavedPosts';
 import { PulseDetailItem, PulseDetailSheet } from '../../components/disguise/PulseDetailSheet';
+import { PulseFeedItemViewer } from '../../components/disguise/PulseFeedItemViewer';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 
 type DetailSheetKey = 'saved' | 'history' | 'settings' | 'help' | null;
@@ -67,6 +68,8 @@ export function DisguiseProfileScreen() {
   } = useApp();
   const [showGenerator, setShowGenerator] = useState(false);
   const [detailSheet, setDetailSheet] = useState<DetailSheetKey>(null);
+  const [viewerItemId, setViewerItemId] = useState<string | null>(null);
+  const [viewerHeadline, setViewerHeadline] = useState<string | null>(null);
   const profileCreative = disguiseAdCreative ?? {
     imageUrl: user.photos[0],
     overlayText: 'Weekend reads you should not miss',
@@ -101,14 +104,14 @@ export function DisguiseProfileScreen() {
       items:
         savedPosts.length > 0
           ? savedPosts
-          : [{ id: 'empty-saved', title: 'No saved posts yet', subtitle: 'Tap bookmark on any post in your feed', icon: 'bookmark-outline' }],
+          : [{ id: 'empty-saved', title: 'No saved posts yet', subtitle: 'Tap bookmark on any post in your feed', icon: 'bookmark-outline' as const }],
     },
     history: {
       title: 'Reading history',
       items:
         historyItems.length > 0
           ? historyItems
-          : [{ id: 'empty-history', title: 'No reading history yet', subtitle: 'Open articles from your feed to track them here', icon: 'newspaper-outline' }],
+          : [{ id: 'empty-history', title: 'No reading history yet', subtitle: 'Open articles from your feed to track them here', icon: 'newspaper-outline' as const }],
     },
     settings: { title: 'Settings', items: SETTINGS_ITEMS },
     help: { title: 'Help center', items: HELP_ITEMS },
@@ -233,6 +236,28 @@ export function DisguiseProfileScreen() {
           items={detailConfig[detailSheet].items}
           onClose={() => setDetailSheet(null)}
           onItemPress={(item) => {
+            if (detailSheet === 'saved' && !item.id.startsWith('empty-')) {
+              setDetailSheet(null);
+              setViewerItemId(item.id);
+              setViewerHeadline(null);
+              return;
+            }
+            if (detailSheet === 'history' && !item.id.startsWith('empty-') && !item.id.startsWith('hist-')) {
+              setDetailSheet(null);
+              setViewerItemId(item.id);
+              setViewerHeadline(null);
+              return;
+            }
+            if (detailSheet === 'history' && item.id.startsWith('hist-')) {
+              const index = Number.parseInt(item.id.replace('hist-', ''), 10);
+              const entry = pulseSocial.readingHistory[index];
+              if (entry) {
+                setDetailSheet(null);
+                setViewerItemId(null);
+                setViewerHeadline(entry.title);
+              }
+              return;
+            }
             if (item.id === 'st1') {
               setDetailSheet(null);
               navigation.getParent()?.navigate('NotificationPreferences');
@@ -283,6 +308,14 @@ export function DisguiseProfileScreen() {
           }}
         />
       ) : null}
+      <PulseFeedItemViewer
+        itemId={viewerItemId}
+        headline={viewerHeadline}
+        onClose={() => {
+          setViewerItemId(null);
+          setViewerHeadline(null);
+        }}
+      />
     </View>
   );
 }

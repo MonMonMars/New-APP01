@@ -12,6 +12,7 @@ import { DisguisePhotoLightbox } from './DisguisePhotoLightbox';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
 import { SocialCommentSheet } from './SocialCommentSheet';
+import { SavePostButton } from './SavePostButton';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type SocialPostCardProps = {
@@ -24,10 +25,11 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
     pulseSocial,
     savePulsePost,
     unsavePulsePost,
+    togglePulseLike,
     mutePulseAuthor,
     reportPulsePost,
   } = useApp();
-  const [upvoted, setUpvoted] = useState(false);
+  const upvoted = pulseSocial.likedPostIds.includes(post.id);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [authorOpen, setAuthorOpen] = useState(false);
@@ -103,6 +105,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
             />
           )}
         </View>
+        <SavePostButton postId={post.id} />
         <AnimatedPressable
           style={styles.moreButton}
           onPress={() => {
@@ -135,7 +138,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
       <View style={styles.actions}>
         <AnimatedPressable
           style={styles.action}
-          onPress={() => setUpvoted((value) => !value)}
+          onPress={() => togglePulseLike(post.id)}
         >
           <Ionicons
             name={upvoted ? 'arrow-up' : 'arrow-up-outline'}

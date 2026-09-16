@@ -1,52 +1,72 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
 import { spacing } from '../theme';
+import { SocialConnectSheet } from './SocialConnectSheet';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type SocialConnectRowsProps = {
   instagramConnected: boolean;
+  instagramHandle?: string;
   spotifyConnected: boolean;
-  onToggleInstagram: () => void;
-  onToggleSpotify: () => void;
+  spotifyHandle?: string;
+  onConnectInstagram: (handle: string) => void;
+  onDisconnectInstagram: () => void;
+  onConnectSpotify: (handle: string) => void;
+  onDisconnectSpotify: () => void;
 };
 
 export function SocialConnectRows({
   instagramConnected,
+  instagramHandle,
   spotifyConnected,
-  onToggleInstagram,
-  onToggleSpotify,
+  spotifyHandle,
+  onConnectInstagram,
+  onDisconnectInstagram,
+  onConnectSpotify,
+  onDisconnectSpotify,
 }: SocialConnectRowsProps) {
   const { colors } = useTheme();
-
-  const handleInstagram = () => {
-    onToggleInstagram();
-  };
-
-  const handleSpotify = () => {
-    onToggleSpotify();
-  };
+  const [sheet, setSheet] = useState<'instagram' | 'spotify' | null>(null);
 
   return (
     <View style={styles.container}>
       <Text style={[styles.title, { color: colors.textMuted }]}>Connected accounts</Text>
-      <AnimatedPressable style={[styles.row, { borderBottomColor: colors.border }]} onPress={handleInstagram}>
+      <AnimatedPressable style={[styles.row, { borderBottomColor: colors.border }]} onPress={() => setSheet('instagram')}>
         <Ionicons name="logo-instagram" size={22} color="#E1306C" />
         <Text style={[styles.label, { color: colors.text }]}>Instagram</Text>
         <Text style={[styles.status, { color: instagramConnected ? colors.like : colors.textMuted }]}>
-          {instagramConnected ? 'Connected' : 'Connect'}
+          {instagramConnected ? (instagramHandle ? `@${instagramHandle}` : 'Connected') : 'Connect'}
         </Text>
         <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
       </AnimatedPressable>
-      <AnimatedPressable style={[styles.row, { borderBottomColor: colors.border }]} onPress={handleSpotify}>
+      <AnimatedPressable style={[styles.row, { borderBottomColor: colors.border }]} onPress={() => setSheet('spotify')}>
         <Ionicons name="musical-notes" size={22} color="#1DB954" />
         <Text style={[styles.label, { color: colors.text }]}>Spotify</Text>
         <Text style={[styles.status, { color: spotifyConnected ? colors.like : colors.textMuted }]}>
-          {spotifyConnected ? 'Connected' : 'Connect'}
+          {spotifyConnected ? (spotifyHandle ?? 'Connected') : 'Connect'}
         </Text>
         <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
       </AnimatedPressable>
+
+      <SocialConnectSheet
+        visible={sheet === 'instagram'}
+        platform="instagram"
+        connected={instagramConnected}
+        onClose={() => setSheet(null)}
+        onConnect={onConnectInstagram}
+        onDisconnect={onDisconnectInstagram}
+      />
+      <SocialConnectSheet
+        visible={sheet === 'spotify'}
+        platform="spotify"
+        connected={spotifyConnected}
+        onClose={() => setSheet(null)}
+        onConnect={onConnectSpotify}
+        onDisconnect={onDisconnectSpotify}
+      />
     </View>
   );
 }

@@ -93,6 +93,33 @@ export function DisguiseFeedScreen() {
           </View>
         }
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <View style={styles.empty}>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>
+              {topic ? `No posts for ${sectionLabel}` : 'Nothing in your feed'}
+            </Text>
+            <Text style={[styles.emptyBody, { color: colors.textMuted }]}>
+              {topic
+                ? 'Try another topic or clear the filter to see everything.'
+                : 'Check back soon — or explore Trending for more stories.'}
+            </Text>
+            {topic ? (
+              <AnimatedPressable
+                style={[styles.emptyButton, { borderColor: pulseBrand.accent }]}
+                onPress={() => navigateDisguiseFeedTopic(navigation)}
+              >
+                <Text style={[styles.emptyButtonText, { color: pulseBrand.accent }]}>Clear filter</Text>
+              </AnimatedPressable>
+            ) : (
+              <AnimatedPressable
+                style={[styles.emptyButton, { borderColor: pulseBrand.accent }]}
+                onPress={() => navigation.navigate('Trending')}
+              >
+                <Text style={[styles.emptyButtonText, { color: pulseBrand.accent }]}>Explore Trending</Text>
+              </AnimatedPressable>
+            )}
+          </View>
+        }
       />
     </View>
   );
@@ -120,6 +147,33 @@ const styles = StyleSheet.create({
   },
   clearFilter: {
     fontSize: 13,
+    fontWeight: '700',
+  },
+  empty: {
+    alignItems: 'center',
+    paddingVertical: spacing.xl * 2,
+    paddingHorizontal: spacing.lg,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+  },
+  emptyBody: {
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
+    marginBottom: spacing.lg,
+  },
+  emptyButton: {
+    borderWidth: 1.5,
+    borderRadius: 999,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+  },
+  emptyButtonText: {
+    fontSize: 14,
     fontWeight: '700',
   },
 });

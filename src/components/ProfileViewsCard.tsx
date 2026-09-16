@@ -22,7 +22,17 @@ export function ProfileViewsCard({
   const { colors } = useTheme();
 
   if (totalCount === 0) {
-    return null;
+    return (
+      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={styles.header}>
+          <Ionicons name="eye-outline" size={20} color={colors.gradientEnd} />
+          <Text style={[styles.title, { color: colors.text }]}>Who viewed you</Text>
+        </View>
+        <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+          Keep swiping and updating your profile — views show up here as people discover you.
+        </Text>
+      </View>
+    );
   }
 
   return (
@@ -129,7 +139,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   blurFallback: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(0,0,0,0.55)',
     borderRadius: 32,
   },

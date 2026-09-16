@@ -11,6 +11,7 @@ import { radii, spacing } from '../../theme';
 import { openExternalUrl } from '../../utils/openExternalUrl';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
 import { FadeSlideIn } from '../motion/FadeSlideIn';
+import { SavePostButton } from './SavePostButton';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type NewsArticleSheetProps = {
@@ -54,9 +55,12 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
               <Text style={[styles.source, { color: pulseBrand.accent }]}>{post.source}</Text>
               <Text style={[styles.category, { color: colors.textMuted }]}>{post.category}</Text>
             </View>
-            <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel="Close" scaleTo={0.9}>
-              <Ionicons name="close" size={24} color={colors.text} />
-            </AnimatedPressable>
+            <View style={styles.toolbarActions}>
+              <SavePostButton postId={post.id} />
+              <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel="Close" scaleTo={0.9}>
+                <Ionicons name="close" size={24} color={colors.text} />
+              </AnimatedPressable>
+            </View>
           </View>
         </FadeSlideIn>
 
@@ -111,6 +115,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
+    flex: 1,
+  },
+  toolbarActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
   },
   source: {
     fontSize: 12,

@@ -13,6 +13,7 @@ export type PulseReadingEntry = {
 
 export type PulseSocialState = {
   savedPostIds: string[];
+  likedPostIds: string[];
   mutedAuthors: string[];
   reportedPostIds: string[];
   postComments: Record<string, PulseComment[]>;
@@ -22,6 +23,7 @@ export type PulseSocialState = {
 
 export const defaultPulseSocialState: PulseSocialState = {
   savedPostIds: [],
+  likedPostIds: [],
   mutedAuthors: [],
   reportedPostIds: [],
   postComments: {},

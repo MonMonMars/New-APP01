@@ -11,7 +11,7 @@ type VoiceNoteSheetProps = {
   visible: boolean;
   profileName: string;
   onClose: () => void;
-  onSend: (note: string) => void;
+  onSend: (durationSeconds: number) => void;
 };
 
 export function VoiceNoteSheet({ visible, profileName, onClose, onSend }: VoiceNoteSheetProps) {
@@ -47,7 +47,7 @@ export function VoiceNoteSheet({ visible, profileName, onClose, onSend }: VoiceN
     if (elapsed < 1) {
       return;
     }
-    onSend(`🎤 Voice note (${elapsed}s): Hey ${profileName}!`);
+    onSend(elapsed);
     onClose();
   };
 

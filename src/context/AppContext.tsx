@@ -97,8 +97,6 @@ import {
   sanitizeReportReason,
 } from '../utils/securityGuards';
 import { clearVaultKey } from '../utils/secureStorage';
-import { harborBrand } from '../theme/harborBrand';
-import { sparkBrand } from '../theme/sparkBrand';
 import { disguiseWorldMeta } from '../utils/disguiseWorld';
 import { DisguiseUnlockConfirm } from '../components/disguise/DisguiseUnlockConfirm';
 import { SparkUnlockModal } from '../components/security/SparkUnlockModal';
@@ -2512,11 +2510,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         visible={unlockConfirmVisible}
         disguiseName={disguiseWorldMeta(preferences.sparkSection).name}
         unlockLabel={disguiseWorldMeta(preferences.sparkSection).unlockLabel}
-        accent={
-          disguiseWorldMeta(preferences.sparkSection).world === 'harbor'
-            ? harborBrand.accent
-            : sparkBrand.accent
-        }
+        accent={disguiseWorldMeta(preferences.sparkSection).accent}
         onConfirm={confirmLeaveDisguise}
         onCancel={cancelLeaveDisguise}
       />

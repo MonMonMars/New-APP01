@@ -93,6 +93,9 @@ const legalDocIconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
   'people-outline': 'people-outline',
   'eye-off-outline': 'eye-off-outline',
   'shield-checkmark-outline': 'shield-checkmark-outline',
+  'nutrition-outline': 'nutrition-outline',
+  'card-outline': 'card-outline',
+  'medkit-outline': 'medkit-outline',
 };
 
 export function SafetyScreen({ onClose }: SafetyScreenProps) {
@@ -134,7 +137,7 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
 
         <Text style={styles.sectionTitle}>Legal & policies</Text>
         <Text style={styles.legalIntro}>
-          Read our terms, privacy policy, disguise-mode rules, and verification policy below.
+          Read our terms, privacy policy, subscription terms, safety disclaimer, and all related policies below.
         </Text>
         {legalDocumentLinks.map((item) => (
           <AnimatedPressable

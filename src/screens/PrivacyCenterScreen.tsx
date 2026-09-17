@@ -213,8 +213,12 @@ export function PrivacyCenterScreen({ onClose }: PrivacyCenterScreenProps) {
         {(
           [
             ['privacy', 'Privacy Policy', 'lock-closed-outline'],
+            ['cookies', 'Cookie Policy', 'nutrition-outline'],
             ['terms', 'Terms of Service', 'document-text-outline'],
+            ['community', 'Community Guidelines', 'people-outline'],
             ['disguise', 'Disguise Mode Policy', 'eye-off-outline'],
+            ['subscription', 'Subscription Terms', 'card-outline'],
+            ['safety', 'Safety Disclaimer', 'medkit-outline'],
           ] as const
         ).map(([id, label, icon]) => (
           <AnimatedPressable

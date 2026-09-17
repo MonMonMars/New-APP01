@@ -11,6 +11,7 @@ import { type ReactNode, useEffect, useRef } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { BrandMark } from '../components/brand/BrandMark';
+import { CookieConsentBanner } from '../components/legal/CookieConsentBanner';
 import { useApp } from '../context/AppContext';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { ChatScreen } from '../screens/ChatScreen';
@@ -349,6 +350,13 @@ function ThemedNavigator() {
         <HydrationGate>
           <RootNavigator />
         </HydrationGate>
+        <CookieConsentBanner
+          onOpenLegal={(documentId) => {
+            if (navigationRef.isReady()) {
+              navigationRef.navigate('LegalDocument', { documentId });
+            }
+          }}
+        />
       </NavigationContainer>
     </ThemeProvider>
   );

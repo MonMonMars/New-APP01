@@ -17,6 +17,7 @@ type PurchaseConfirmSheetProps = {
   iconColor?: string;
   onConfirm: () => void;
   onClose: () => void;
+  onOpenSubscriptionTerms?: () => void;
 };
 
 export function PurchaseConfirmSheet({
@@ -29,6 +30,7 @@ export function PurchaseConfirmSheet({
   iconColor,
   onConfirm,
   onClose,
+  onOpenSubscriptionTerms,
 }: PurchaseConfirmSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
@@ -48,7 +50,16 @@ export function PurchaseConfirmSheet({
           ) : null}
           <Text style={[styles.price, { color: colors.text }]}>{price}</Text>
           <Text style={[styles.legal, { color: colors.textMuted }]}>
-            Demo purchase — no real charge. In production this uses Apple or Google billing.
+            Demo purchase — no real charge. In production this uses Apple or Google billing. Subscriptions
+            auto-renew until cancelled in your store settings.
+            {onOpenSubscriptionTerms ? (
+              <>
+                {' '}
+                <Text style={[styles.legalLink, { color: accent }]} onPress={onOpenSubscriptionTerms}>
+                  Subscription Terms
+                </Text>
+              </>
+            ) : null}
           </Text>
           <AnimatedPressable
             style={[styles.confirmButton, { backgroundColor: colors.gradientEnd }]}
@@ -92,35 +103,40 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '800',
     textAlign: 'center',
+    marginBottom: spacing.xs,
   },
   description: {
     fontSize: 14,
-    textAlign: 'center',
-    marginTop: spacing.sm,
     lineHeight: 20,
+    textAlign: 'center',
+    marginBottom: spacing.sm,
   },
   quantity: {
     fontSize: 13,
     fontWeight: '700',
-    marginTop: spacing.sm,
+    marginBottom: spacing.xs,
   },
   price: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: '800',
-    marginTop: spacing.md,
+    marginBottom: spacing.md,
   },
   legal: {
     fontSize: 11,
-    textAlign: 'center',
-    marginTop: spacing.sm,
     lineHeight: 16,
+    textAlign: 'center',
+    marginBottom: spacing.lg,
+  },
+  legalLink: {
+    fontWeight: '700',
+    textDecorationLine: 'underline',
   },
   confirmButton: {
     width: '100%',
     borderRadius: radii.button,
     paddingVertical: spacing.md,
     alignItems: 'center',
-    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
   },
   confirmText: {
     color: '#fff',
@@ -128,11 +144,10 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   cancelButton: {
-    paddingVertical: spacing.md,
-    marginTop: spacing.xs,
+    paddingVertical: spacing.sm,
   },
   cancelText: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
   },
 });

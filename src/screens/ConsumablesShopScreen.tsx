@@ -1,4 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useState } from 'react';
@@ -6,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { useApp } from '../context/AppContext';
+import { RootStackParamList } from '../types/navigation';
 import { useTheme } from '../context/ThemeContext';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -61,6 +64,7 @@ const PACKS: Pack[] = [
 
 export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { colors } = useTheme();
   const { activateBoost, addBonusBoosts, purchaseSparkNotes } = useApp();
   const [pendingPack, setPendingPack] = useState<Pack | null>(null);
@@ -132,7 +136,13 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
         })}
 
         <Text style={[styles.legal, { color: colors.textMuted }]}>
-          Purchases are processed by Apple or Google. Boosts and Notes activate immediately after purchase.
+          Purchases are processed by Apple or Google. Boosts and Notes activate immediately after purchase.{' '}
+          <Text
+            style={[styles.legalLink, { color: colors.gradientEnd }]}
+            onPress={() => navigation.navigate('LegalDocument', { documentId: 'subscription' })}
+          >
+            Subscription Terms
+          </Text>
         </Text>
       </ScrollView>
 
@@ -150,6 +160,7 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
             handlePurchase(pendingPack);
           }
         }}
+        onOpenSubscriptionTerms={() => navigation.navigate('LegalDocument', { documentId: 'subscription' })}
       />
     </View>
   );
@@ -231,5 +242,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: spacing.lg,
     lineHeight: 16,
+  },
+  legalLink: {
+    fontWeight: '700',
+    textDecorationLine: 'underline',
   },
 });

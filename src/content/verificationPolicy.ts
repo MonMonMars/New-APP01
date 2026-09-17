@@ -1,3 +1,5 @@
+import { LEGAL_ENTITY } from '../constants/legalEntity';
+
 export type PolicySection = {
   id: string;
   title: string;
@@ -5,7 +7,7 @@ export type PolicySection = {
 };
 
 export const VERIFICATION_POLICY_TITLE = 'Trust & Verification Policy';
-export const VERIFICATION_POLICY_EFFECTIVE = 'Effective 14 September 2026';
+export const VERIFICATION_POLICY_EFFECTIVE = `Effective ${LEGAL_ENTITY.effectiveDate} · Updated ${LEGAL_ENTITY.lastUpdated}`;
 
 export const verificationPolicySections: PolicySection[] = [
   {

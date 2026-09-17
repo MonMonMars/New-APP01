@@ -127,6 +127,7 @@ export function ProfileTrustSection({ user, onUpdate, onOpenPolicy }: ProfileTru
         visible={activeKind !== null}
         kind={activeKind ?? 'photo'}
         photoUri={user.photos[0]}
+        onOpenPolicy={onOpenPolicy}
         onClose={() => setActiveKind(null)}
         onComplete={() => {
           if (activeKind) {

@@ -1,4 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -8,6 +10,7 @@ import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { SparkPlusComparisonTable } from '../components/SparkPlusComparisonTable';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
+import { RootStackParamList } from '../types/navigation';
 import { SPARK_PLUS_PRICING, SparkPlusPlan } from '../types/subscription';
 import { sparkPlusFeatureDescriptions } from '../utils/genderAccountPerks';
 import { radii, spacing } from '../theme';
@@ -20,6 +23,7 @@ type SparkPlusScreenProps = {
 
 export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { colors } = useTheme();
   const { activateSparkPlus, restorePurchases, user } = useApp();
   const features = sparkPlusFeatureDescriptions(user.gender);
@@ -127,7 +131,13 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
         </AnimatedPressable>
 
         <Text style={[styles.legal, { color: colors.textMuted }]}>
-          Recurring billing. Cancel anytime in your App Store or Google Play subscription settings.
+          Recurring billing. Cancel anytime in your App Store or Google Play subscription settings.{' '}
+          <Text
+            style={[styles.legalLink, { color: colors.gradientEnd }]}
+            onPress={() => navigation.navigate('LegalDocument', { documentId: 'subscription' })}
+          >
+            Subscription Terms
+          </Text>
         </Text>
       </ScrollView>
 
@@ -140,6 +150,7 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
         icon="diamond"
         onClose={() => setShowConfirm(false)}
         onConfirm={handleSubscribe}
+        onOpenSubscriptionTerms={() => navigation.navigate('LegalDocument', { documentId: 'subscription' })}
       />
     </View>
   );
@@ -267,5 +278,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: spacing.md,
     lineHeight: 16,
+  },
+  legalLink: {
+    fontWeight: '700',
+    textDecorationLine: 'underline',
   },
 });

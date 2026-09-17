@@ -25,7 +25,9 @@ export const defaultPrivacyPreferences: PrivacyPreferences = {
 export type LegalConsentRecord = {
   termsAcceptedAt: string | null;
   privacyAcceptedAt: string | null;
+  communityAcceptedAt: string | null;
   disguisePolicyAcceptedAt: string | null;
+  safetyAcknowledgedAt: string | null;
   verificationPolicyAcknowledgedAt: string | null;
   cookieConsentAt: string | null;
 };
@@ -33,7 +35,9 @@ export type LegalConsentRecord = {
 export const defaultLegalConsent: LegalConsentRecord = {
   termsAcceptedAt: null,
   privacyAcceptedAt: null,
+  communityAcceptedAt: null,
   disguisePolicyAcceptedAt: null,
+  safetyAcknowledgedAt: null,
   verificationPolicyAcknowledgedAt: null,
   cookieConsentAt: null,
 };

@@ -89,6 +89,7 @@ export function paletteForSection(
       heartRed: '#D97706',
       heartPink: '#F59E0B',
       nope: '#B45309',
+      superLike: '#D97706',
       stampNope: 'rgba(217, 119, 6, 0.9)',
     };
   }
@@ -100,6 +101,7 @@ export function paletteForSection(
     heartRed: '#FFB020',
     heartPink: '#FFC85A',
     nope: '#E8A317',
+    superLike: '#FFB020',
     stampNope: 'rgba(255, 176, 32, 0.9)',
   };
 }

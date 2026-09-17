@@ -2,6 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { ReactNode } from 'react';
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
+import { useTheme } from '../../context/ThemeContext';
+
 /** Visual category for Pulse / Harbor feed media. */
 export type ContentTypeKind = 'news' | 'ad' | 'sponsored' | 'social' | 'profile' | 'trending' | 'alert';
 
@@ -30,12 +32,14 @@ export function contentTypeLabel(kind: ContentTypeKind): string {
 }
 
 export function ContentTypeIcon({ kind, size = ICON_SIZE }: ContentTypeIconProps) {
+  const { colors } = useTheme();
   const meta = KIND_META[kind];
+  const color = kind === 'profile' ? colors.heartRed : meta.color;
   return (
     <Ionicons
       name={meta.icon}
       size={size}
-      color={meta.color}
+      color={color}
       accessibilityLabel={meta.label}
     />
   );
@@ -43,10 +47,12 @@ export function ContentTypeIcon({ kind, size = ICON_SIZE }: ContentTypeIconProps
 
 /** Word + icon row — same pattern as “Sponsored ⓘ”. */
 export function ContentTypeLabel({ kind }: { kind: ContentTypeKind }) {
+  const { colors } = useTheme();
   const meta = KIND_META[kind];
+  const color = kind === 'profile' ? colors.heartRed : meta.color;
   return (
     <View style={styles.labelRow}>
-      <Text style={[styles.labelText, { color: meta.color }]}>{meta.label}</Text>
+      <Text style={[styles.labelText, { color }]}>{meta.label}</Text>
       <ContentTypeIcon kind={kind} />
     </View>
   );

@@ -1,6 +1,7 @@
 import { Modal, Platform, StyleSheet, Text, View } from 'react-native';
 
 import { radii, spacing } from '../../theme';
+import { modalFill } from '../../theme/modalFill';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type DisguiseUnlockConfirmProps = {
@@ -29,7 +30,7 @@ export function DisguiseUnlockConfirm({
       presentationStyle={Platform.OS === 'ios' ? 'overFullScreen' : undefined}
       onRequestClose={onCancel}
     >
-      <View style={styles.overlay}>
+      <View style={[styles.overlay, modalFill]}>
         <View style={styles.card}>
           <Text style={styles.title}>Leave {disguiseName}?</Text>
           <Text style={styles.body}>Opens {unlockLabel}. Stay if someone can see your screen.</Text>

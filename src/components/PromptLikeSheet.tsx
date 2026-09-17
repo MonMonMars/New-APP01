@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { Profile, ProfilePrompt } from '../types/profile';
 import { radii, spacing } from '../theme';
+import { modalFill } from '../theme/modalFill';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type PromptLikeSheetProps = {
@@ -28,7 +29,7 @@ export function PromptLikeSheet({ visible, profile, prompt, onClose, onSend }: P
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={styles.backdrop}>
+      <View style={[styles.backdrop, modalFill]}>
         <View style={[styles.sheet, { backgroundColor: colors.background, paddingBottom: insets.bottom + spacing.md }]}>
           <View style={styles.handleRow}>
             <Text style={[styles.title, { color: colors.text }]}>Like {profile.name}&apos;s answer</Text>

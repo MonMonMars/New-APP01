@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react';
-import { Modal, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Modal, Platform, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
   runOnJS,
   useAnimatedStyle,
@@ -9,6 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { MOTION } from '../../motion/presets';
+import { modalFill } from '../../theme/modalFill';
 
 type OverlayVariant = 'center' | 'bottom';
 
@@ -79,9 +80,43 @@ export function AnimatedOverlay({
     return null;
   }
 
+  // RN-web Modals collapse `flex: 1`, and Reanimated springs can stick at 0 —
+  // both made centered sheets (mini windows, like limit) invisible / untappable.
+  if (Platform.OS === 'web') {
+    if (!visible) {
+      return null;
+    }
+
+    return (
+      <Modal visible transparent animationType="none" onRequestClose={onClose}>
+        <View style={[styles.root, modalFill]} pointerEvents="box-none">
+          <Pressable
+            style={[styles.backdrop, { opacity: 0.52 }]}
+            onPress={onClose}
+            accessibilityLabel="Close"
+          />
+          <View
+            style={[
+              variant === 'center' ? styles.centerPanel : styles.bottomPanel,
+              contentStyle,
+            ]}
+            pointerEvents="box-none"
+          >
+            <View
+              pointerEvents="auto"
+              style={variant === 'center' ? styles.centerChildren : styles.bottomChildren}
+            >
+              {children}
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  }
+
   return (
     <Modal visible transparent animationType="none" onRequestClose={onClose}>
-      <View style={styles.root} pointerEvents="box-none">
+      <View style={[styles.root, modalFill]} pointerEvents="box-none">
         <Animated.View style={[styles.backdrop, backdropStyle]} pointerEvents="auto">
           <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
         </Animated.View>

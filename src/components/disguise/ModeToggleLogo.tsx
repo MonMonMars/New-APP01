@@ -67,8 +67,8 @@ export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps
   const isEmber = meta.world === 'harbor';
 
   const iconColor = isEmber ? colors.ember : colors.gradientEnd;
-  const iconBg = isEmber ? 'rgba(255,176,32,0.16)' : 'rgba(255,107,107,0.14)';
-  const borderColor = isEmber ? `${colors.ember}88` : `${colors.gradientEnd}88`;
+  const iconBg = `${iconColor}24`;
+  const borderColor = `${iconColor}88`;
 
   const enterDisguise = useCallback(() => {
     setDisguiseMode(true);

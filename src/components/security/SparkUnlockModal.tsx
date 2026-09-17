@@ -4,6 +4,7 @@ import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
 import { radii, spacing } from '../../theme';
+import { modalFill } from '../../theme/modalFill';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type SparkUnlockModalProps = {
@@ -34,7 +35,7 @@ export function SparkUnlockModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
-      <View style={styles.overlay}>
+      <View style={[styles.overlay, modalFill]}>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <Ionicons name="lock-closed" size={32} color={colors.gradientEnd} />
           <Text style={[styles.title, { color: colors.text }]}>Unlock Spark</Text>

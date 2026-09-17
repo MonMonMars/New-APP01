@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
 import { radii, spacing } from '../theme';
+import { modalFill } from '../theme/modalFill';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type PurchaseConfirmSheetProps = {
@@ -35,7 +36,7 @@ export function PurchaseConfirmSheet({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.backdrop}>
+      <View style={[styles.backdrop, modalFill]}>
         <View style={[styles.sheet, { backgroundColor: colors.surface, paddingBottom: insets.bottom + spacing.lg }]}>
           <View style={[styles.iconWrap, { backgroundColor: `${accent}22` }]}>
             <Ionicons name={icon} size={28} color={accent} />

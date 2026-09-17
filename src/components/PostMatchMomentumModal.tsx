@@ -3,6 +3,7 @@ import { Modal, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
 import { radii, spacing } from '../theme';
+import { modalFill } from '../theme/modalFill';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type PostMatchMomentumModalProps = {
@@ -20,7 +21,7 @@ export function PostMatchMomentumModal({
 
   return (
     <Modal visible={visible} animationType="fade" transparent>
-      <View style={styles.overlay}>
+      <View style={[styles.overlay, modalFill]}>
         <View style={[styles.sheet, { backgroundColor: colors.surface }]}>
           <Ionicons name="trending-up" size={40} color={colors.gradientEnd} />
           <Text style={[styles.title, { color: colors.text }]}>You&apos;re on a roll!</Text>

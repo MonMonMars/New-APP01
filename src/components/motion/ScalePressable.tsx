@@ -36,7 +36,6 @@ export function ScalePressable({
   const pressScale = useSharedValue(1);
   const activePop = useSharedValue(1);
   const highlight = useSharedValue(0);
-  const burst = useSharedValue(0);
 
   useEffect(() => {
     activePop.value = withSpring(active ? 1.08 : 1, MOTION.spring.bounce);
@@ -50,11 +49,6 @@ export function ScalePressable({
     opacity: highlight.value * 0.22,
   }));
 
-  const burstStyle = useAnimatedStyle(() => ({
-    opacity: (1 - burst.value) * 0.5,
-    transform: [{ scale: 0.72 + burst.value * 0.55 }],
-  }));
-
   return (
     <AnimatedPressableBase
       onPress={onPress}
@@ -62,8 +56,6 @@ export function ScalePressable({
       onPressIn={() => {
         pressScale.value = withSpring(scaleTo, MOTION.spring.bounce);
         highlight.value = withTiming(1, { duration: 70 });
-        burst.value = 0;
-        burst.value = withTiming(1, { duration: 280 });
         if (Platform.OS !== 'web') {
           void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         }
@@ -86,7 +78,6 @@ export function ScalePressable({
       {...webClass('spark-press')}
     >
       {children}
-      <Animated.View pointerEvents="none" style={[styles.burst, burstStyle]} />
       <Animated.View pointerEvents="none" style={[styles.highlight, highlightStyle]} />
     </AnimatedPressableBase>
   );
@@ -171,6 +162,7 @@ export function SparkIconButton({
         {
           backgroundColor: active ? activeBackground : idleBackground,
           borderColor: active ? activeBorder : idleBorder,
+          borderWidth: shape === 'diamond' || shape === 'hex' ? 0 : 1,
         },
       ]}
     >
@@ -191,12 +183,6 @@ const styles = StyleSheet.create({
   highlight: {
     ...StyleSheet.absoluteFill,
     backgroundColor: '#fff',
-  },
-  burst: {
-    ...StyleSheet.absoluteFill,
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.7)',
-    borderRadius: 999,
   },
   iconBtn: {
     alignItems: 'center',

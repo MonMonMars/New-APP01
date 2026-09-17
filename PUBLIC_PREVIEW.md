@@ -4,9 +4,9 @@
 
 | Link | Durability | Notes |
 |------|------------|-------|
-| **https://temporary-rushing-savanna-mj6rm81.vercel.app** | ~60 min (claimable → permanent) | **Latest** — Ember discretion (Open/Careful/Hidden, private photos, fuzzy location). [Claim on Vercel](https://vercel.com/claim-deployment?code=c0977a36-bcfb-453d-ba2d-ea74ad24de73) to keep forever. |
-| **https://posts-dolls-adventure-supposed.trycloudflare.com** | Hours while workspace is awake | Same latest build, no login. Hard-refresh if stale. |
-| **https://bright-queijadas-033295.netlify.app** | ~60 min | Password: `My-Drop-Site`. [Claim on Netlify](https://app.netlify.com/drop/bright-queijadas-033295). |
+| **https://divided-minimum-eva-therapy.trycloudflare.com** | Hours while workspace is awake | **Latest** — smaller Pulse mini-window, hex/diamond/pill actions (no hearts), press + page transitions. Hard-refresh if stale. |
+| **https://monmonmars.github.io/New-APP01/** | Permanent (GitHub Pages) | Same compact mini-window build after `gh-pages` deploy. |
+| **https://temporary-rushing-savanna-mj6rm81.vercel.app** | ~60 min (claimable → permanent) | Previous Ember discretion build. [Claim on Vercel](https://vercel.com/claim-deployment?code=c0977a36-bcfb-453d-ba2d-ea74ad24de73) to keep forever. |
 
 **Best long-term fix:** connect Vercel or Netlify to GitHub once (see below) — auto-deploys on every push, stable URL, works with a private repo.
 
@@ -56,7 +56,7 @@ npm run deploy:pages
 
 Cloudflare quick tunnels expire when the workspace stops. Do not rely on these for stakeholders.
 
-Latest verified tunnel: **https://most-psychiatry-slim-colony.trycloudflare.com** (temporary only)
+Latest verified tunnel: **https://divided-minimum-eva-therapy.trycloudflare.com** (temporary only)
 
 ---
 

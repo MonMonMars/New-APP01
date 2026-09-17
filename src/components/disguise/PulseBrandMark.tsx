@@ -18,10 +18,11 @@ export function PulseBrandMark({ size = 'md', muted = false, style }: PulseBrand
 type PulseWordmarkProps = {
   size?: 'sm' | 'md' | 'lg';
   showTagline?: boolean;
+  tagline?: string;
 };
 
 /** Masthead wordmark for Pulse disguise headers. */
-export function PulseWordmark({ size = 'md', showTagline = false }: PulseWordmarkProps) {
+export function PulseWordmark({ size = 'md', showTagline = false, tagline = 'World & Local News' }: PulseWordmarkProps) {
   const { colors, resolvedMode } = useTheme();
   const isDark = resolvedMode === 'dark';
   const fontSize = size === 'sm' ? 19 : size === 'lg' ? 26 : 22;
@@ -41,7 +42,7 @@ export function PulseWordmark({ size = 'md', showTagline = false }: PulseWordmar
         Pulse
       </Text>
       {showTagline ? (
-        <Text style={[styles.tagline, { color: colors.textMuted }]}>World & Local News</Text>
+        <Text style={[styles.tagline, { color: colors.textMuted }]}>{tagline}</Text>
       ) : null}
     </View>
   );
@@ -50,15 +51,16 @@ export function PulseWordmark({ size = 'md', showTagline = false }: PulseWordmar
 type PulseBrandProps = {
   size?: 'sm' | 'md' | 'lg';
   showTagline?: boolean;
+  tagline?: string;
   style?: ViewStyle;
 };
 
 /** Combined logomark + wordmark for Pulse mastheads. */
-export function PulseBrand({ size = 'md', showTagline = false, style }: PulseBrandProps) {
+export function PulseBrand({ size = 'md', showTagline = false, tagline, style }: PulseBrandProps) {
   return (
     <View style={[styles.brandRow, style]} pointerEvents="none">
       <PulseBrandMark size={size} />
-      <PulseWordmark size={size} showTagline={showTagline} />
+      <PulseWordmark size={size} showTagline={showTagline} tagline={tagline} />
     </View>
   );
 }

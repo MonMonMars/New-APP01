@@ -1,25 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
+import { freeTierComparisonRows } from '../utils/genderAccountPerks';
 import { radii, spacing } from '../theme';
-
-type ComparisonRow = {
-  feature: string;
-  free: string | boolean;
-  plus: string | boolean;
-};
-
-const ROWS: ComparisonRow[] = [
-  { feature: 'Daily likes', free: '10', plus: 'Unlimited' },
-  { feature: 'See who likes you', free: false, plus: true },
-  { feature: 'Rewind passes', free: false, plus: true },
-  { feature: 'Spark Notes', free: '1/day', plus: 'Unlimited' },
-  { feature: 'Boost', free: false, plus: '1/week' },
-  { feature: 'Advanced filters', free: false, plus: true },
-  { feature: 'Read receipts', free: false, plus: true },
-  { feature: 'Passport mode', free: false, plus: true },
-];
 
 function CellValue({ value }: { value: string | boolean }) {
   const { colors } = useTheme();
@@ -38,6 +23,8 @@ function CellValue({ value }: { value: string | boolean }) {
 
 export function SparkPlusComparisonTable() {
   const { colors } = useTheme();
+  const { user } = useApp();
+  const rows = freeTierComparisonRows(user.gender);
 
   return (
     <View style={[styles.table, { backgroundColor: colors.surface }]}>
@@ -46,7 +33,7 @@ export function SparkPlusComparisonTable() {
         <Text style={[styles.headerCol, { color: colors.textMuted }]}>Free</Text>
         <Text style={[styles.headerCol, { color: colors.gradientEnd }]}>Spark+</Text>
       </View>
-      {ROWS.map((row) => (
+      {rows.map((row) => (
         <View key={row.feature} style={[styles.row, { borderBottomColor: colors.border }]}>
           <Text style={[styles.featureName, { color: colors.text }]}>{row.feature}</Text>
           <View style={styles.cell}>

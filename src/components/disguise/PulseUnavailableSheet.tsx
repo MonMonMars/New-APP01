@@ -6,7 +6,7 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { radii, spacing } from '../../theme';
 import { modalFill } from '../../theme/modalFill';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type PulseUnavailableSheetProps = {
@@ -25,7 +25,7 @@ export function PulseUnavailableSheet({
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { preferences } = useApp();
-  const accent = disguiseWorldMeta(preferences.sparkSection).accent;
+  const accent = useDisguiseWorld().accent;
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>

@@ -9,7 +9,7 @@ import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { SecuritySettings } from '../types/security';
 import { isBiometricAvailable } from '../utils/appLock';
-import { disguiseWorldMeta } from '../utils/disguiseWorld';
+import { useDisguiseWorld } from '../hooks/useDisguiseWorld';
 import { hashPin, setStoredPinHash, clearStoredPinHash } from '../utils/secureStorage';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -53,7 +53,7 @@ export function SecuritySettingsScreen({ onClose }: SecuritySettingsScreenProps)
   const navigation = useNavigation();
   const { colors } = useTheme();
   const { securitySettings, updateSecuritySettings, preferences } = useApp();
-  const world = disguiseWorldMeta(preferences.sparkSection);
+  const world = useDisguiseWorld();
   const [pinDraft, setPinDraft] = useState('');
   const [biometricAvailable, setBiometricAvailable] = useState(false);
 

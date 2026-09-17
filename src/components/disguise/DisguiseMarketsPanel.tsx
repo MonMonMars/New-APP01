@@ -12,7 +12,7 @@ import {
   MarketQuote,
 } from '../../data/disguiseMarkets';
 import { radii, spacing } from '../../theme';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type DisguiseMarketsPanelProps = {
@@ -42,7 +42,7 @@ function QuoteRow({ quote, colors, onPress }: { quote: MarketQuote; colors: { te
 export function DisguiseMarketsPanel({ onQuotePress }: DisguiseMarketsPanelProps) {
   const { colors } = useTheme();
   const { preferences } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection);
+  const meta = useDisguiseWorld();
 
   return (
     <View style={styles.wrap}>

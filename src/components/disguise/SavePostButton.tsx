@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type SavePostButtonProps = {
@@ -13,7 +13,7 @@ type SavePostButtonProps = {
 export function SavePostButton({ postId, size = 22 }: SavePostButtonProps) {
   const { pulseSocial, savePulsePost, unsavePulsePost, preferences } = useApp();
   const isSaved = pulseSocial.savedPostIds.includes(postId);
-  const accent = disguiseWorldMeta(preferences.sparkSection).accent;
+  const accent = useDisguiseWorld().accent;
 
   return (
     <AnimatedPressable

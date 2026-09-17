@@ -8,7 +8,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { isDisguiseAiConfigured } from '../../services/disguiseImageGeneration';
 import { DisguiseOverlayVariant } from '../../types/disguise';
 import { radii, spacing } from '../../theme';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -33,7 +33,7 @@ export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGenerat
     clearDisguiseAd,
     preferences,
   } = useApp();
-  const accent = disguiseWorldMeta(preferences.sparkSection).accent;
+  const accent = useDisguiseWorld().accent;
 
   const [overlayText, setOverlayText] = useState(disguiseAdCreative?.overlayText ?? 'Weekend sale — 50% off');
   const [variant, setVariant] = useState<DisguiseOverlayVariant>(disguiseAdCreative?.variant ?? 'ad');

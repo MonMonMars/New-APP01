@@ -9,7 +9,7 @@ import { NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { emberLocationLine, emberRelationshipLabel } from '../../types/profile';
 import { buildReporterPhotoUrls } from '../../utils/disguiseReporterPhotos';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { webClass } from '../../motion/webMotion';
 import { resolveReporterSparkProfile } from '../../utils/resolveDisguiseProfile';
 import { MatchToast } from '../MatchToast';
@@ -83,7 +83,7 @@ export function PersonPreviewSheet({
   const liked = profileId ? likedIds.has(profileId) : false;
   const superLiked = profileId ? superLikedIds.has(profileId) : false;
   const passed = profileId ? passedIds.has(profileId) : false;
-  const worldMeta = disguiseWorldMeta(preferences.sparkSection);
+  const worldMeta = useDisguiseWorld();
   const worldName = worldMeta.unlockLabel;
   const emberStatus = linkedProfile ? emberRelationshipLabel(linkedProfile.relationshipStatus) : null;
 

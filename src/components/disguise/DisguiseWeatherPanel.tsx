@@ -5,7 +5,7 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { WeatherIcon, WeatherSnapshot } from '../../data/disguiseWeather';
 import { radii, spacing } from '../../theme';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type DisguiseWeatherPanelProps = {
@@ -38,7 +38,7 @@ function weatherIconName(icon: WeatherIcon): keyof typeof Ionicons.glyphMap {
 export function DisguiseWeatherPanel({ weather, isLive = false, onPress }: DisguiseWeatherPanelProps) {
   const { colors } = useTheme();
   const { preferences } = useApp();
-  const accent = disguiseWorldMeta(preferences.sparkSection).accent;
+  const accent = useDisguiseWorld().accent;
 
   return (
     <AnimatedPressable

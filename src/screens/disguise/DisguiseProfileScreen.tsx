@@ -9,7 +9,7 @@ import { DisguiseAdGeneratorSheet } from '../../components/disguise/DisguiseAdGe
 import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { PASSPORT_CITIES } from '../../types/preferences';
 import { ThemeMode } from '../../types/settings';
 import { LEGAL_ENTITY } from '../../constants/legalEntity';
@@ -54,7 +54,7 @@ export function DisguiseProfileScreen() {
     preferences,
     pulseSocial,
   } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection);
+  const meta = useDisguiseWorld();
   const [showGenerator, setShowGenerator] = useState(false);
   const [detailSheet, setDetailSheet] = useState<DetailSheetKey>(null);
   const [viewerItemId, setViewerItemId] = useState<string | null>(null);

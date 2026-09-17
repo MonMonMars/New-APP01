@@ -2,8 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ReactNode } from 'react';
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { useApp } from '../../context/AppContext';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 
 /** Visual category for Pulse / Harbor feed media. */
 export type ContentTypeKind = 'news' | 'ad' | 'sponsored' | 'social' | 'profile' | 'trending' | 'alert';
@@ -33,8 +32,7 @@ export function contentTypeLabel(kind: ContentTypeKind): string {
 }
 
 function useDisguiseIconColor(): string {
-  const { preferences } = useApp();
-  return disguiseWorldMeta(preferences.sparkSection).accent;
+  return useDisguiseWorld().accent;
 }
 
 export function ContentTypeIcon({ kind, size = ICON_SIZE }: ContentTypeIconProps) {

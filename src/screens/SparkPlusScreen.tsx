@@ -8,11 +8,8 @@ import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { SparkPlusComparisonTable } from '../components/SparkPlusComparisonTable';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import {
-  SPARK_PLUS_FEATURES,
-  SPARK_PLUS_PRICING,
-  SparkPlusPlan,
-} from '../types/subscription';
+import { SPARK_PLUS_PRICING, SparkPlusPlan } from '../types/subscription';
+import { sparkPlusFeatureDescriptions } from '../utils/genderAccountPerks';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { PurchaseConfirmSheet } from '../components/PurchaseConfirmSheet';
@@ -24,7 +21,8 @@ type SparkPlusScreenProps = {
 export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { activateSparkPlus, restorePurchases } = useApp();
+  const { activateSparkPlus, restorePurchases, user } = useApp();
+  const features = sparkPlusFeatureDescriptions(user.gender);
   const [selectedPlan, setSelectedPlan] = useState<SparkPlusPlan>('annual');
   const [restoring, setRestoring] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -65,7 +63,7 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
       <ScrollView contentContainerStyle={styles.content}>
         <SparkPlusComparisonTable />
 
-        {SPARK_PLUS_FEATURES.map((feature) => (
+        {features.map((feature) => (
           <View key={feature.title} style={styles.featureRow}>
             <View style={[styles.featureIcon, { backgroundColor: colors.surface }]}>
               <Ionicons

@@ -2,7 +2,7 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { radii } from '../../theme';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { DisguiseOverlayVariant } from './DisguiseOverlayAvatar';
 import { ContentTypeIcon, maskVariantToContentKind } from './ContentTypeIcon';
 
@@ -21,7 +21,7 @@ export function DisguiseOverlayImage({
   height = 200,
 }: DisguiseOverlayImageProps) {
   const { preferences } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection);
+  const meta = useDisguiseWorld();
 
   return (
     <View style={[styles.wrap, { height }]}>

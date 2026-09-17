@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type IconButtonProps = {
@@ -39,7 +39,7 @@ function ModeIconButton({
 export function DisguiseModeButton() {
   const { colors } = useTheme();
   const { setDisguiseMode, preferences } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection);
+  const meta = useDisguiseWorld();
 
   return (
     <ModeIconButton

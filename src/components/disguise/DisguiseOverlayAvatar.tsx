@@ -2,7 +2,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
-import { disguiseWorldMeta, hexToRgba } from '../../utils/disguiseWorld';
+import { hexToRgba } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { FaceCenteredImage } from './FaceCenteredImage';
 
 export type DisguiseOverlayVariant = 'news' | 'ad';
@@ -26,7 +27,7 @@ export function DisguiseOverlayAvatar({
   badgeOnly = false,
 }: DisguiseOverlayAvatarProps) {
   const { preferences } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection);
+  const meta = useDisguiseWorld();
   const radius = size / 2;
   const isNews = variant === 'news';
   const navyScrim = hexToRgba(meta.navy, 0.78);

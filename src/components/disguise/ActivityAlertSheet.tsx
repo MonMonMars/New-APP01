@@ -6,7 +6,7 @@ import { DisguiseAlert } from '../../data/disguiseFeed';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { radii, spacing } from '../../theme';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
 import { FadeSlideIn } from '../motion/FadeSlideIn';
 import { FeedPersonRow } from './FeedPersonRow';
@@ -22,7 +22,7 @@ export function ActivityAlertSheet({ visible, alert, onClose }: ActivityAlertShe
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { preferences } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection);
+  const meta = useDisguiseWorld();
 
   if (!alert) {
     return null;

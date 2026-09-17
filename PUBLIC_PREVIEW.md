@@ -1,91 +1,53 @@
 # Spark — Live Demo
 
-## Demo links (open now)
+## Demo link (verified working)
 
-| Link | Durability | Notes |
-|------|------------|-------|
-| **https://cold-keys-pick.loca.lt** | Hours (tunnel) | **Latest** — Full app i18n (EN + 繁體中文). Hard-refresh if stale. |
-| **https://monmonmars.github.io/New-APP01/** | Permanent (GitHub Pages) | Deployed 2026-09-17 — i18n build on `gh-pages`. Enable Pages in repo settings if 404. |
-| **https://temporary-rushing-savanna-mj6rm81.vercel.app** | ~60 min (claimable → permanent) | Previous Ember discretion build. [Claim on Vercel](https://vercel.com/claim-deployment?code=c0977a36-bcfb-453d-ba2d-ea74ad24de73) to keep forever. |
+**https://chicago-van-enclosed-protection.trycloudflare.com**
 
-**Best long-term fix:** connect Vercel or Netlify to GitHub once (see below) — auto-deploys on every push, stable URL, works with a private repo.
+- **Build:** i18n (English + 繁體中文), root-hosted web export
+- **Verified:** 2026-09-17 — HTTP 200, JS bundle loads, onboarding + Spark discover work
+- **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps. Hard-refresh (Cmd/Ctrl+Shift+R) if stale.
+
+### Quick start
+
+1. Open the link in **Chrome or Safari**
+2. Tap **Continue without account**
+3. Complete onboarding (defaults are fine)
+4. Tap the **Pulse logo** → **Leave Spark** to enter dating mode
+5. **Profile → Privacy controls → Language** to switch 繁體中文
 
 ---
 
-## Permanent demo (recommended — does not expire)
+## Why previous links failed
 
-Pick **one** of these. Tunnels die when the cloud workspace sleeps; these stay up.
+| Link | Problem |
+|------|---------|
+| `loca.lt` tunnels | Time out / unreliable from this environment |
+| `monmonmars.github.io/New-APP01/` | Repo is **private** — GitHub Pages needs Pro or a public repo (returns 404) |
+| Old Cloudflare URLs | Were serving a **GitHub Pages build** (`/New-APP01/` paths) at the tunnel root → blank white screen |
 
-### Option A — Vercel (best for private repos)
+**Fix applied:** tunnel demos now use `npm run build:web` (root paths), not `build:web:pages`.
 
-1. Go to [vercel.com/new](https://vercel.com/new) → **Import** `MonMonMars/New-APP01`
-2. Branch: `cursor/debug-tab-bleed-7b60` (or `main`)
-3. Framework: **Other** · Build: `npm run build:web` · Output: `dist`
-4. Deploy → you get a stable URL like `https://new-app01.vercel.app`
+---
 
-`vercel.json` is already in the repo. Free tier, works with private GitHub repos.
+## Permanent demo (recommended)
 
-### Option B — Netlify
+Private repo → use **Vercel** or **Netlify** (free, stable URL, auto-deploy on push).
 
-1. [app.netlify.com/start](https://app.netlify.com/start) → Import from GitHub
-2. Build: `npm run build:web` · Publish: `dist`
-3. `netlify.toml` is already configured (SPA redirects included)
+### Vercel
 
-### Option C — GitHub Pages
+1. [vercel.com/new](https://vercel.com/new) → Import `MonMonMars/New-APP01`
+2. Branch: `cursor/app-i18n-7b60` (or `main`)
+3. Build: `npm run build:web` · Output: `dist`
+4. Deploy → stable URL like `https://new-app01.vercel.app`
+
+`vercel.json` is already in the repo.
+
+### GitHub Pages (public repo or GitHub Pro only)
 
 **URL:** `https://monmonmars.github.io/New-APP01/`
 
-The `gh-pages` branch is auto-deployed on push (see `.github/workflows/deploy-web.yml`).
-
-**One-time enable** (repo owner):
-
-1. [github.com/MonMonMars/New-APP01/settings/pages](https://github.com/MonMonMars/New-APP01/settings/pages)
-2. Source → **Deploy from a branch** → `gh-pages` → `/ (root)` → Save
-
-> **Note:** GitHub Pages on **private** repos requires GitHub Pro/Team, or make the repo **public** (free Pages). Use Vercel/Netlify if you want to keep the repo private.
-
-Manual deploy from your machine:
-
-```bash
-npm run deploy:pages
-```
-
----
-
-## Temporary tunnel (dev / agent previews only)
-
-Cloudflare quick tunnels expire when the workspace stops. Do not rely on these for stakeholders.
-
-Latest verified tunnel: **https://combines-rely-occupational-witness.trycloudflare.com** (temporary only)
-
----
-
-## Quick start (any host)
-
-1. Open the demo URL in **Chrome or Safari**
-2. Tap **Continue without account**
-3. Complete onboarding (defaults are fine)
-4. You land in **Pulse** disguise mode
-5. **Tap the Pulse logo** in the header, then **Leave Spark**
-6. Switch the Discover title to **Ember**, then disguise again — that cover is **Harbor** (markets), not Pulse
-
----
-
-## What to try
-
-### Pulse / Harbor disguise
-- Spark → **Pulse** news cover. Ember → **Harbor** markets cover. One logo in the header.
-- News cards + in-app article reader
-- Trending / markets · social feed · activity alerts
-- Profile → disguise ad generator
-
-### Spark safe mode
-- Tap the **Spark ▾** title to switch worlds. Ember is a married group **anyone can join**.
-- Ember: **Married / Divorced**, Open / Careful / Hidden discretion, private extra photos until a match, city hidden when Hidden.
-- Swipe deck · likes · instant matches · AI demo replies
-- Rewind (Spark+) · GIF picker · message reactions · who viewed you
-- Passport/travel filter · international profiles · date check-in
-- Emergency logo → Pulse (Spark) or Harbor (Ember) disguise
+Uses `npm run build:web:pages` (base path `/New-APP01`). Enable at [repo Pages settings](https://github.com/MonMonMars/New-APP01/settings/pages) → `gh-pages` branch.
 
 ---
 
@@ -94,11 +56,10 @@ Latest verified tunnel: **https://combines-rely-occupational-witness.trycloudfla
 ```bash
 git clone https://github.com/MonMonMars/New-APP01.git
 cd New-APP01
-git checkout cursor/debug-tab-bleed-7b60
+git checkout cursor/app-i18n-7b60
 npm install
 npm run demo          # http://localhost:8090
-npm run demo:tunnel   # temporary public URL
-npm run deploy:pages  # push build to gh-pages branch
+npm run demo:tunnel   # Cloudflare public URL (install cloudflared)
 ```
 
 Phone (best UX): `npm start` → Expo Go

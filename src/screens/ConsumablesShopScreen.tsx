@@ -3,13 +3,13 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { useApp } from '../context/AppContext';
 import { getLegalUiStrings } from '../content/legal';
-import { useAppLocale } from '../hooks/useAppLocale';
+import { useTranslation } from '../i18n';
 import { RootStackParamList } from '../types/navigation';
 import { useTheme } from '../context/ThemeContext';
 import { radii, spacing } from '../theme';
@@ -29,49 +29,52 @@ type Pack = {
   quantity: string;
 };
 
-const PACKS: Pack[] = [
-  {
-    id: 'boost-3',
-    icon: 'flash',
-    title: 'Boost Pack',
-    description: 'Be a top profile for 30 minutes each',
-    price: '$9.99',
-    quantity: '3 Boosts',
-  },
-  {
-    id: 'boost-1',
-    icon: 'flash',
-    title: 'Single Boost',
-    description: 'One 30-minute visibility boost',
-    price: '$3.99',
-    quantity: '1 Boost',
-  },
-  {
-    id: 'notes-5',
-    icon: 'chatbubble-ellipses',
-    title: 'Spark Notes Pack',
-    description: 'Send a message before you match',
-    price: '$4.99',
-    quantity: '5 Notes',
-  },
-  {
-    id: 'notes-1',
-    icon: 'chatbubble-ellipses',
-    title: 'Single Spark Note',
-    description: 'One pre-match message',
-    price: '$1.99',
-    quantity: '1 Note',
-  },
-];
-
 export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { colors } = useTheme();
   const { activateBoost, addBonusBoosts, purchaseSparkNotes } = useApp();
-  const { locale } = useAppLocale();
+  const { t, locale } = useTranslation();
   const legalUi = getLegalUiStrings(locale);
   const [pendingPack, setPendingPack] = useState<Pack | null>(null);
+
+  const packs: Pack[] = useMemo(
+    () => [
+      {
+        id: 'boost-3',
+        icon: 'flash',
+        title: t('shop.boostPack'),
+        description: t('shop.boostPackDesc'),
+        price: '$9.99',
+        quantity: t('shop.boostPackQty'),
+      },
+      {
+        id: 'boost-1',
+        icon: 'flash',
+        title: t('shop.singleBoost'),
+        description: t('shop.singleBoostDesc'),
+        price: '$3.99',
+        quantity: t('shop.singleBoostQty'),
+      },
+      {
+        id: 'notes-5',
+        icon: 'chatbubble-ellipses',
+        title: t('shop.notesPack'),
+        description: t('shop.notesPackDesc'),
+        price: '$4.99',
+        quantity: t('shop.notesPackQty'),
+      },
+      {
+        id: 'notes-1',
+        icon: 'chatbubble-ellipses',
+        title: t('shop.singleNote'),
+        description: t('shop.singleNoteDesc'),
+        price: '$1.99',
+        quantity: t('shop.singleNoteQty'),
+      },
+    ],
+    [t],
+  );
 
   const handlePurchase = (pack: Pack) => {
     if (pack.id.startsWith('boost')) {
@@ -105,7 +108,7 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
         <AnimatedPressable onPress={onClose}>
           <Ionicons name="close" size={28} color={colors.text} />
         </AnimatedPressable>
-        <Text style={[styles.title, { color: colors.text }]}>Shop</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('shop.title')}</Text>
         <DisguiseModeButton />
       </View>
 
@@ -114,11 +117,11 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
           colors={[colors.gradientStart, colors.gradientEnd]}
           style={styles.hero}
         >
-          <Text style={styles.heroTitle}>Power up your dating</Text>
-          <Text style={styles.heroSubtitle}>Boost visibility or send Spark Notes</Text>
+          <Text style={styles.heroTitle}>{t('shop.heroTitle')}</Text>
+          <Text style={styles.heroSubtitle}>{t('shop.heroSubtitle')}</Text>
         </LinearGradient>
 
-        {PACKS.map((pack) => {
+        {packs.map((pack) => {
           const packAccent = colors.gradientEnd;
           return (
           <AnimatedPressable
@@ -140,9 +143,7 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
         })}
 
         <Text style={[styles.legal, { color: colors.textMuted }]}>
-          {locale === 'zh-TW'
-            ? '購買由 Apple 或 Google 處理。Boost 與 Note 購買後立即生效。'
-            : 'Purchases are processed by Apple or Google. Boosts and Notes activate immediately after purchase.'}{' '}
+          {t('shop.purchaseNote')}{' '}
           <Text
             style={[styles.legalLink, { color: colors.gradientEnd }]}
             onPress={() => navigation.navigate('LegalDocument', { documentId: 'subscription' })}

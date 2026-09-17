@@ -72,7 +72,7 @@ export const zhTw = {
     namePlaceholder: '你的名字',
     agePlaceholder: '18+',
     bioPlaceholder: '一句話介紹自己',
-    openApp: '開啟 Pulse',
+    openApp: '開啟 {appName}',
   },
   profile: {
     title: '個人檔案',
@@ -255,6 +255,11 @@ export const zhTw = {
     securitySettings: '安全設定',
     privacyControls: '隱私控制',
     securityProtocols: '安全協議',
+    verificationPolicy: '信任與驗證政策',
+    reportProfileBody: '開啟任何個人檔案或聊天，點選選單並選擇「檢舉」。我們會在 24 小時內審查每則檢舉。',
+    blockSomeoneBody: '封鎖會立即將對方從你的推薦列表與聊天中移除。已封鎖的個人檔案會保持隱藏，直到你在設定中解除封鎖。',
+    safetyFaqBody: '在公共場所見面、告訴朋友你的計畫，並相信直覺。完整常見問題請見 spark.app/safety。',
+    contactSupportBody: '寄信至 support@spark.app — 我們通常在一個工作天內回覆。',
   },
   report: {
     title: '檢舉 {name}',

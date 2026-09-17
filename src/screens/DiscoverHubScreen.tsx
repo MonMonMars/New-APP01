@@ -19,7 +19,9 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { StandoutsRow } from '../components/StandoutsRow';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { DiscoverFilter, formatSearchRadius, resolveSparkSection } from '../types/preferences';
+import { useTranslation } from '../i18n';
+import { formatSearchRadiusLocalized } from '../i18n/labels';
+import { DiscoverFilter, resolveSparkSection } from '../types/preferences';
 import { RootStackParamList } from '../types/navigation';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
@@ -34,6 +36,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { colors } = useTheme();
+  const { t, locale } = useTranslation();
   const {
     preferences,
     updatePreferences,
@@ -79,16 +82,16 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
   const handleSelectProfile = useCallback(
     (profile: Profile) => {
       prioritizeProfileInDeck(profile.id);
-      setDeckToast(`${profile.name} added to your deck`);
+      setDeckToast(t('discoverHub.addedToDeck', { name: profile.name }));
       setCloseAfterToast(true);
     },
-    [prioritizeProfileInDeck],
+    [prioritizeProfileInDeck, t],
   );
 
   const handleSelectAiPersona = useCallback(
     (profile: Profile) => {
       if (!canLike) {
-        Alert.alert('Like limit reached', 'Come back tomorrow or upgrade to Spark+ for unlimited likes.');
+        Alert.alert(t('discoverHub.likeLimitTitle'), t('discoverHub.likeLimitBody'));
         return;
       }
       const match = likeProfile(profile);
@@ -97,7 +100,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
         setShowMatch(true);
       }
     },
-    [canLike, likeProfile],
+    [canLike, likeProfile, t],
   );
 
   const handleOpenChat = useCallback(() => {
@@ -116,7 +119,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <ScreenHeader
-        title="Discover tools"
+        title={t('discoverHub.title')}
         leftIcon="chevron-back"
         onLeftPress={onClose}
         showDisguiseButton
@@ -126,17 +129,17 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
         <View style={styles.quickGrid}>
           <HubTile
             icon="map-outline"
-            label="Map"
-            hint={formatSearchRadius(preferences.maxDistanceMiles)}
+            label={t('discoverHub.map')}
+            hint={formatSearchRadiusLocalized(locale, preferences.maxDistanceMiles)}
             colors={colors}
             onPress={openMap}
             featured
             mapPreview
           />
-          <HubTile icon="compass-outline" label="Explore" colors={colors} onPress={openExplore} />
+          <HubTile icon="compass-outline" label={t('discoverHub.explore')} colors={colors} onPress={openExplore} />
           <HubTile
             icon="options-outline"
-            label="Preferences"
+            label={t('discoverHub.preferences')}
             colors={colors}
             onPress={() => setShowPreferences(true)}
           />
@@ -146,13 +149,13 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
           <View style={[styles.metaCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             {!isSparkPlus && (
               <Text style={[styles.metaSub, { color: colors.gradientEnd }]}>
-                {remainingLikes} likes left today
+                {t('discoverHub.likesLeft', { n: remainingLikes })}
               </Text>
             )}
             {(isPaused || isBoosted || (preferences.travelMode && preferences.passportCity)) && (
               <View style={styles.statusRow}>
-                {isPaused && <StatusPill label="Paused" color={colors.rewind} />}
-                {isBoosted && <StatusPill label="Boost active" color={colors.boost} />}
+                {isPaused && <StatusPill label={t('discoverHub.paused')} color={colors.rewind} />}
+                {isBoosted && <StatusPill label={t('discoverHub.boostActive')} color={colors.boost} />}
                 {preferences.travelMode && preferences.passportCity && (
                   <StatusPill label={preferences.passportCity} color={colors.superLike} />
                 )}
@@ -161,17 +164,17 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
           </View>
         )}
 
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>World</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('discoverHub.world')}</Text>
         <SparkSectionToggle
           section={resolveSparkSection(preferences.sparkSection)}
           onChange={setSparkSection}
           variant="list"
         />
         <Text style={[styles.metaSub, { color: colors.textMuted }]}>
-          Likes, matches, and chats stay in the section you pick. Ember keeps photos and city private until you match.
+          {t('discoverHub.emberHint')}
         </Text>
 
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Filters</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('discoverHub.filters')}</Text>
         <DiscoverFilterChips
           activeFilters={activeFilters}
           onToggle={(filter: DiscoverFilter) => toggleDiscoverFilter(filter)}
@@ -191,7 +194,9 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
 
         {dailyMostCompatible && (
           <>
-            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Most compatible today</Text>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
+              {t('discoverHub.mostCompatible')}
+            </Text>
             <MostCompatibleBanner
               profile={dailyMostCompatible}
               score={getCompatibilityScore(dailyMostCompatible)}
@@ -200,13 +205,15 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
           </>
         )}
 
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Standouts</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('discoverHub.standouts')}</Text>
         <StandoutsRow
           profiles={standoutsProfiles.slice(0, 6)}
           onSelect={handleSelectProfile}
         />
 
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Recently active</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
+          {t('discoverHub.recentlyActive')}
+        </Text>
         <RecentlyActiveStrip
           profiles={recentlyActiveProfiles.slice(0, 8)}
           onSelect={handleSelectProfile}
@@ -214,7 +221,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
 
         {heldProfiles.length > 0 && (
           <>
-            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>On hold</Text>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('discoverHub.onHold')}</Text>
             <HeldProfilesRow
               profiles={heldProfiles}
               onSelect={handleSelectProfile}
@@ -238,7 +245,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
           >
             <Ionicons name="people-outline" size={18} color={colors.text} />
             <Text style={[styles.primaryButtonText, { color: colors.text }]}>
-              {hasMoreInPool ? 'Search more people' : 'Expand search area'}
+              {hasMoreInPool ? t('discover.searchMore') : t('discover.expandSearch')}
             </Text>
           </AnimatedPressable>
         )}
@@ -249,7 +256,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
             onPress={() => navigation.navigate('SparkPlus')}
           >
             <Text style={[styles.secondaryButtonText, { color: colors.gradientEnd }]}>
-              Get unlimited likes with Spark+
+              {t('discoverHub.getUnlimited')}
             </Text>
           </AnimatedPressable>
         )}

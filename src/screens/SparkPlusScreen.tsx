@@ -11,7 +11,7 @@ import { SparkPlusComparisonTable } from '../components/SparkPlusComparisonTable
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { getLegalUiStrings } from '../content/legal';
-import { useAppLocale } from '../hooks/useAppLocale';
+import { useTranslation } from '../i18n';
 import { RootStackParamList } from '../types/navigation';
 import { SPARK_PLUS_PRICING, SparkPlusPlan } from '../types/subscription';
 import { sparkPlusFeatureDescriptions } from '../utils/genderAccountPerks';
@@ -28,7 +28,7 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { colors } = useTheme();
   const { activateSparkPlus, restorePurchases, user } = useApp();
-  const { locale } = useAppLocale();
+  const { t, locale } = useTranslation();
   const legalUi = getLegalUiStrings(locale);
   const features = sparkPlusFeatureDescriptions(user.gender);
   const [selectedPlan, setSelectedPlan] = useState<SparkPlusPlan>('annual');
@@ -45,10 +45,10 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
     const restored = await restorePurchases();
     setRestoring(false);
     if (restored) {
-      Alert.alert('Purchases restored', 'Your Spark+ subscription has been restored.');
+      Alert.alert(t('sparkPlus.restored'), t('sparkPlus.restoredBody'));
       onClose();
     } else {
-      Alert.alert('No purchases found', 'We could not find any previous Spark+ subscriptions.');
+      Alert.alert(t('sparkPlus.noneFound'), t('sparkPlus.noneFoundBody'));
     }
   };
 
@@ -62,9 +62,9 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
           <DisguiseModeButton />
         </View>
         <Ionicons name="diamond" size={48} color={colors.text} />
-        <Text style={styles.heroTitle}>Spark+</Text>
+        <Text style={styles.heroTitle}>{t('sparkPlus.title')}</Text>
         <Text style={styles.heroSubtitle}>
-          See who likes you. Unlimited likes. Match faster.
+          {t('sparkPlus.hero')}
         </Text>
       </LinearGradient>
 
@@ -87,7 +87,7 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
           </View>
         ))}
 
-        <Text style={[styles.planTitle, { color: colors.text }]}>Choose your plan</Text>
+        <Text style={[styles.planTitle, { color: colors.text }]}>{t('sparkPlus.choosePlan')}</Text>
         {(Object.keys(SPARK_PLUS_PRICING) as SparkPlusPlan[]).map((plan) => {
           const pricing = SPARK_PLUS_PRICING[plan];
           const isSelected = selectedPlan === plan;
@@ -104,7 +104,9 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
               <View>
                 <Text style={[styles.planLabel, { color: colors.text }]}>{pricing.label}</Text>
                 {plan === 'annual' && (
-                  <Text style={[styles.planBadge, { color: colors.gradientEnd }]}>Best value</Text>
+                  <Text style={[styles.planBadge, { color: colors.gradientEnd }]}>
+                    {t('sparkPlus.bestValue')}
+                  </Text>
                 )}
               </View>
               <View style={styles.planPriceCol}>
@@ -122,7 +124,7 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
           onPress={() => setShowConfirm(true)}
         >
           <Text style={[styles.subscribeText, { color: colors.text }]}>
-            Continue — {SPARK_PLUS_PRICING[selectedPlan].price}
+            {t('sparkPlus.continuePrice', { price: SPARK_PLUS_PRICING[selectedPlan].price })}
           </Text>
         </AnimatedPressable>
 
@@ -130,14 +132,14 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
           {restoring ? (
             <ActivityIndicator color={colors.textMuted} />
           ) : (
-            <Text style={[styles.restoreText, { color: colors.textMuted }]}>Restore purchases</Text>
+            <Text style={[styles.restoreText, { color: colors.textMuted }]}>
+              {t('sparkPlus.restorePurchases')}
+            </Text>
           )}
         </AnimatedPressable>
 
         <Text style={[styles.legal, { color: colors.textMuted }]}>
-          {locale === 'zh-TW'
-            ? '定期計費。可隨時在 App Store 或 Google Play 訂閱設定中取消。'
-            : 'Recurring billing. Cancel anytime in your App Store or Google Play subscription settings.'}{' '}
+          {t('sparkPlus.billingNote')}{' '}
           <Text
             style={[styles.legalLink, { color: colors.gradientEnd }]}
             onPress={() => navigation.navigate('LegalDocument', { documentId: 'subscription' })}
@@ -150,7 +152,7 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
       <PurchaseConfirmSheet
         visible={showConfirm}
         title={`Spark+ ${SPARK_PLUS_PRICING[selectedPlan].label}`}
-        description="Unlimited likes, rewinds, read receipts, incognito mode, and more."
+        description={t('sparkPlus.confirmDesc')}
         price={SPARK_PLUS_PRICING[selectedPlan].price}
         quantity={SPARK_PLUS_PRICING[selectedPlan].perMonth !== '—' ? SPARK_PLUS_PRICING[selectedPlan].perMonth : undefined}
         icon="diamond"

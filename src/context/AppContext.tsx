@@ -14,8 +14,8 @@ import { seedConversations } from '../data/conversations';
 import { getAiPersonaConfig } from '../data/aiPersonas';
 import {
   AI_PERSONA_IDS,
+  getIncomingLikeProfilesForSection,
   getProfileById,
-  incomingLikeProfiles,
   INCOMING_LIKE_IDS,
   INCOMING_LIKE_IDS_SET,
   EMBER_INCOMING_LIKE_IDS,
@@ -1061,12 +1061,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const incomingLikes = useMemo(() => {
     const actioned = new Set([...likedIds, ...passedIds, ...blockedIds]);
-    const source =
-      activeSection === 'ember'
-        ? EMBER_INCOMING_LIKE_IDS.map((id) => getProfileById(id)).filter(
-            (profile): profile is Profile => profile !== undefined,
-          )
-        : incomingLikeProfiles;
+    const source = getIncomingLikeProfilesForSection(activeSection);
     return source.filter(
       (profile) =>
         !actioned.has(profile.id) &&
@@ -1465,8 +1460,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return null;
       }
 
+      const alreadyLiked = likedIds.has(profile.id);
       setLikedIds((prev) => new Set(prev).add(profile.id));
-      if (!isSparkPlus) {
+      if (!isSparkPlus && !alreadyLiked) {
         if (matchesSparkSection(profile, 'ember')) {
           setEmberDailyLikesUsed((count) => count + 1);
         } else {
@@ -1579,6 +1575,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       disguiseMode,
       securitySettings.disguiseSafeNotifications,
       maybeRecordViewer,
+      likedIds,
     ],
   );
 
@@ -1636,13 +1633,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const superLikeProfile = useCallback(
     (profile: Profile): Match | null => {
-      if (!canLike) {
+      const alreadyCounted = likedIds.has(profile.id) || superLikedIds.has(profile.id);
+      if (!canLike && !alreadyCounted) {
         return null;
       }
 
       setLikedIds((prev) => new Set(prev).add(profile.id));
       setSuperLikedIds((prev) => new Set(prev).add(profile.id));
-      if (!isSparkPlus) {
+      if (!isSparkPlus && !alreadyCounted) {
         if (matchesSparkSection(profile, 'ember')) {
           setEmberDailyLikesUsed((count) => count + 1);
         } else {
@@ -1666,7 +1664,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       return createMatchFromLike(profile, MUTUAL_SUPER_LIKE_IDS.has(profile.id));
     },
-    [canLike, createMatchFromLike, isSparkPlus],
+    [canLike, createMatchFromLike, isSparkPlus, likedIds, superLikedIds],
   );
 
   const sendMessage = useCallback(

@@ -3,8 +3,10 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseAlert } from '../../data/disguiseFeed';
+import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { radii, spacing } from '../../theme';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
 import { FadeSlideIn } from '../motion/FadeSlideIn';
 import { FeedPersonRow } from './FeedPersonRow';
@@ -19,6 +21,8 @@ type ActivityAlertSheetProps = {
 export function ActivityAlertSheet({ visible, alert, onClose }: ActivityAlertSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { preferences } = useApp();
+  const meta = disguiseWorldMeta(preferences.sparkSection);
 
   if (!alert) {
     return null;
@@ -78,8 +82,8 @@ export function ActivityAlertSheet({ visible, alert, onClose }: ActivityAlertShe
           <FadeSlideIn replayKey={visible} index={3}>
             <Text style={[styles.hint, { color: colors.textMuted }]}>
               {isSponsored
-                ? 'Offers in Pulse are sponsored placements — tap through only if you recognise the brand.'
-                : 'Notifications from your Pulse feed. Dating actions stay private in Spark.'}
+                ? `Offers in ${meta.name} are sponsored placements — tap through only if you recognise the brand.`
+                : `Notifications from your ${meta.name} feed. Dating actions stay private in ${meta.unlockLabel}.`}
             </Text>
           </FadeSlideIn>
         </View>

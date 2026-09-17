@@ -28,7 +28,7 @@ import { AnimatedPressable } from '../../components/AnimatedPressable';
 export function DisguiseAlertsScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { markActivityAlertsRead } = useApp();
+  const { markActivityAlertsRead, preferences } = useApp();
 
   useFocusEffect(
     useCallback(() => {
@@ -44,7 +44,7 @@ export function DisguiseAlertsScreen() {
     if (!alert.person) {
       return;
     }
-    setPreviewReporter(buildAlertReporter(alert.person));
+    setPreviewReporter(buildAlertReporter(alert.person, preferences.sparkSection));
   };
 
   return (

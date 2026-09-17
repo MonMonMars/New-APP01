@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import {
   EmberAvailability,
@@ -22,6 +23,7 @@ import {
 } from '../types/profile';
 import { OPENING_MOVE_SUGGESTIONS } from '../utils/openingMove';
 import { pickProfilePhoto } from '../utils/photoPicker';
+import { resolveSparkSection } from '../types/preferences';
 import { ProfileCoachSheet } from './ProfileCoachSheet';
 import { VerificationSheet } from './VerificationSheet';
 import { VoicePromptSheet } from './VoicePromptSheet';
@@ -56,6 +58,8 @@ const availabilityOptions: EmberAvailability[] = ['evenings', 'weekends', 'flexi
 export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfileSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { preferences } = useApp();
+  const isEmber = resolveSparkSection(preferences.sparkSection) === 'ember';
   const [name, setName] = useState(user.name);
   const [bio, setBio] = useState(user.bio);
   const [age, setAge] = useState(String(user.age));
@@ -361,6 +365,8 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
             })}
           </View>
 
+          {!isEmber ? (
+            <>
           <Text style={[styles.label, { color: colors.textMuted }]}>Looking for</Text>
           <View style={styles.intentRow}>
             {intentOptions.map((option) => {
@@ -384,13 +390,15 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
               );
             })}
           </View>
+            </>
+          ) : null}
 
           <InterestsEditor interests={interests} onChange={setInterests} />
 
           <PromptsEditor
             prompts={prompts}
             onChange={setPrompts}
-            questionOptions={[...EMBER_PROMPT_OPTIONS, ...HINGE_PROMPT_OPTIONS]}
+            questionOptions={isEmber ? [...EMBER_PROMPT_OPTIONS, ...HINGE_PROMPT_OPTIONS] : [...HINGE_PROMPT_OPTIONS, ...EMBER_PROMPT_OPTIONS]}
           />
 
           <Text style={[styles.label, { color: colors.textMuted }]}>Opening Move</Text>

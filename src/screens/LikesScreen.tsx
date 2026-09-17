@@ -137,31 +137,31 @@ export function LikesScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.banner}>
+        <View style={[styles.banner, { backgroundColor: colors.surface }]}>
           <View style={[styles.bannerBadge, { backgroundColor: colors.gradientEnd }]}>
-            <Text style={styles.bannerCount}>{incomingLikes.length}</Text>
+            <Text style={[styles.bannerCount, { color: colors.text }]}>{incomingLikes.length}</Text>
           </View>
-          <Text style={styles.bannerTitle}>
+          <Text style={[styles.bannerTitle, { color: colors.text }]}>
             {incomingLikes.length} {incomingLikes.length === 1 ? 'person' : 'people'} liked you
           </Text>
-          <Text style={styles.bannerSubtitle}>
+          <Text style={[styles.bannerSubtitle, { color: colors.textMuted }]}>
             {isSparkPlus
               ? 'Spark+ unlocked — like back to match instantly.'
               : 'Upgrade to Spark+ to see who they are and match instantly.'}
           </Text>
           {!isSparkPlus && (
             <AnimatedPressable style={[styles.upgradeButton, { backgroundColor: colors.gradientEnd }]} onPress={openPaywall}>
-              <Text style={styles.upgradeButtonText}>See who likes you</Text>
+              <Text style={[styles.upgradeButtonText, { color: colors.text }]}>See who likes you</Text>
             </AnimatedPressable>
           )}
         </View>
 
         {sentLikes.length > 0 && (
-          <View style={styles.superSection}>
+          <View style={[styles.superSection, { backgroundColor: colors.surface, borderColor: `${colors.heartPink}40` }]}>
             <View style={styles.superHeader}>
               <Ionicons name="heart-outline" size={18} color={colors.heartPink} />
-              <Text style={styles.superTitle}>Likes you sent</Text>
-              <Text style={styles.superCount}>{sentLikes.length}</Text>
+              <Text style={[styles.superTitle, { color: colors.text }]}>Likes you sent</Text>
+              <Text style={[styles.superCount, { color: colors.heartPink }]}>{sentLikes.length}</Text>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.superRow}>
               {sentLikes.map((profile) => (
@@ -174,8 +174,8 @@ export function LikesScreen() {
                     source={{ uri: profile.photos[0] }}
                     style={[styles.superPhoto, { borderColor: colors.heartPink, backgroundColor: colors.surface }]}
                   />
-                  <Text style={styles.superName}>{profile.name}</Text>
-                  <Text style={[styles.superStatus, emberRelationshipLabel(profile.relationshipStatus) ? { color: colors.ember } : null]}>
+                  <Text style={[styles.superName, { color: colors.text }]}>{profile.name}</Text>
+                  <Text style={[styles.superStatus, emberRelationshipLabel(profile.relationshipStatus) ? { color: colors.ember } : { color: colors.textMuted }]}>
                     {emberRelationshipLabel(profile.relationshipStatus) ?? 'Waiting for match'}
                   </Text>
                 </AnimatedPressable>
@@ -185,11 +185,11 @@ export function LikesScreen() {
         )}
 
         {superLikesSent.length > 0 && (
-          <View style={styles.superSection}>
+          <View style={[styles.superSection, { backgroundColor: colors.surface, borderColor: `${colors.superLike}40` }]}>
             <View style={styles.superHeader}>
               <Ionicons name="rose" size={18} color={colors.superLike} />
-              <Text style={styles.superTitle}>Super Likes sent</Text>
-              <Text style={styles.superCount}>{superLikesSent.length}</Text>
+              <Text style={[styles.superTitle, { color: colors.text }]}>Super Likes sent</Text>
+              <Text style={[styles.superCount, { color: colors.superLike }]}>{superLikesSent.length}</Text>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.superRow}>
               {superLikesSent.map((profile) => (
@@ -202,8 +202,8 @@ export function LikesScreen() {
                     source={{ uri: profile.photos[0] }}
                     style={[styles.superPhoto, { borderColor: colors.superLike, backgroundColor: colors.surface }]}
                   />
-                  <Text style={styles.superName}>{profile.name}</Text>
-                  <Text style={[styles.superStatus, emberRelationshipLabel(profile.relationshipStatus) ? { color: colors.ember } : null]}>
+                  <Text style={[styles.superName, { color: colors.text }]}>{profile.name}</Text>
+                  <Text style={[styles.superStatus, emberRelationshipLabel(profile.relationshipStatus) ? { color: colors.ember } : { color: colors.textMuted }]}>
                     {emberRelationshipLabel(profile.relationshipStatus) ??
                       (pendingLikeIds.has(profile.id) ? 'Pending' : 'Matched')}
                   </Text>
@@ -217,12 +217,12 @@ export function LikesScreen() {
           {incomingLikes.length === 0 ? (
             <View style={styles.empty}>
               <Text style={styles.emptyEmoji}>💫</Text>
-              <Text style={styles.emptyTitle}>No likes yet</Text>
-              <Text style={styles.emptySubtitle}>
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>No likes yet</Text>
+              <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
                 Keep discovering — when someone likes you, they&apos;ll show up here.
               </Text>
               <AnimatedPressable style={[styles.discoverButton, { backgroundColor: colors.gradientEnd }]} onPress={openDiscover}>
-                <Text style={styles.discoverButtonText}>Start discovering</Text>
+                <Text style={[styles.discoverButtonText, { color: colors.text }]}>Start discovering</Text>
               </AnimatedPressable>
             </View>
           ) : (
@@ -234,7 +234,7 @@ export function LikesScreen() {
               >
                 <Image
                   source={{ uri: profile.photos[0] }}
-                  style={styles.photo}
+                  style={[styles.photo, { backgroundColor: colors.surface }]}
                   blurRadius={isSparkPlus ? 0 : 18}
                 />
                 <View style={[styles.cardOverlay, isSparkPlus && styles.cardOverlayRevealed]}>

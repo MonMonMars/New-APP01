@@ -116,7 +116,7 @@ export function ProfileDetailSheet({
               />
             </View>
             {compatibilityScore !== undefined && (
-              <View style={styles.compatBadge}>
+              <View style={[styles.compatBadge, { backgroundColor: `${colors.gradientEnd}1f` }]}>
                 <Ionicons name="sparkles" size={14} color={colors.gradientEnd} />
                 <Text style={[styles.compatText, { color: colors.gradientEnd }]}>{compatibilityScore}% compatible</Text>
               </View>
@@ -142,7 +142,7 @@ export function ProfileDetailSheet({
               {emberStatus ? emberLocationLine(profile) : `${profile.distanceMiles} miles away`}
             </Text>
             {profile.openingMove ? (
-              <View style={styles.openingMove}>
+              <View style={[styles.openingMove, { backgroundColor: `${colors.gradientEnd}1a` }]}>
                 <Ionicons name="chatbubble-ellipses-outline" size={14} color={colors.gradientEnd} />
                 <Text style={[styles.openingMoveText, { color: colors.text }]}>{profile.openingMove}</Text>
               </View>

@@ -11,6 +11,7 @@ import { matchesSparkSection, resolveSparkSection, SparkSection } from '../types
 import { emberLocationLine, emberRelationshipLabel, Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
+import { EmberStatusChips } from '../components/EmberStatusChips';
 
 type ExploreCategory = 'serious' | 'new' | 'nearby';
 
@@ -120,15 +121,20 @@ export function ExploreScreen({ onClose }: ExploreScreenProps) {
                     >
                       <Image source={{ uri: profile.photos[0] }} style={styles.photo} />
                       <Text style={[styles.name, { color: colors.text }]}>{profile.name}, {profile.age}</Text>
-                      <Text
-                        style={[
-                          styles.distance,
-                          { color: emberRelationshipLabel(profile.relationshipStatus) ? colors.ember : colors.textMuted },
-                        ]}
-                      >
-                        {emberRelationshipLabel(profile.relationshipStatus) ??
-                          (isEmber ? emberLocationLine(profile) : `${profile.distanceMiles} mi`)}
-                      </Text>
+                      {emberRelationshipLabel(profile.relationshipStatus) ? (
+                        <>
+                          <View style={styles.chips}>
+                            <EmberStatusChips profile={profile} compact />
+                          </View>
+                          <Text style={[styles.distance, { color: colors.textMuted }]}>
+                            {emberLocationLine(profile)}
+                          </Text>
+                        </>
+                      ) : (
+                        <Text style={[styles.distance, { color: colors.textMuted }]}>
+                          {`${profile.distanceMiles} mi`}
+                        </Text>
+                      )}
                     </AnimatedPressable>
                   ))}
                 </ScrollView>
@@ -194,6 +200,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     paddingHorizontal: spacing.sm,
     fontWeight: '600',
+  },
+  chips: {
+    paddingHorizontal: spacing.sm,
+    marginTop: 4,
   },
   empty: {
     fontSize: 13,

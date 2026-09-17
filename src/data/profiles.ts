@@ -1,6 +1,11 @@
 import { aiPersonaProfiles, AI_PERSONA_IDS } from './aiPersonas';
 import { extraRawProfiles } from './extraProfiles';
 import {
+  matchesSparkSection,
+  resolveSparkSection,
+  SparkSection,
+} from '../types/preferences';
+import {
   EmberAvailability,
   EmberDiscretion,
   EmberSeeking,
@@ -1273,6 +1278,19 @@ export function getAllProfiles(): Profile[] {
 
 export function getProfileById(id: string): Profile | undefined {
   return getAllProfiles().find((p) => p.id === id);
+}
+
+/** Incoming likes for the active world — Spark and Ember never share this pool. */
+export function getIncomingLikeProfilesForSection(
+  section?: SparkSection | string | null,
+): Profile[] {
+  const resolved = resolveSparkSection(section);
+  if (resolved === 'ember') {
+    return EMBER_INCOMING_LIKE_IDS.map((id) => getProfileById(id)).filter(
+      (profile): profile is Profile => profile !== undefined,
+    );
+  }
+  return incomingLikeProfiles.filter((profile) => matchesSparkSection(profile, 'spark'));
 }
 
 export function getProfilesWithinRadius(

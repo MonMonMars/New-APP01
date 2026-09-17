@@ -14,7 +14,6 @@ import { PASSPORT_CITIES } from '../../types/preferences';
 import { ThemeMode } from '../../types/settings';
 import { LEGAL_ENTITY } from '../../constants/legalEntity';
 import { openExternalUrl } from '../../utils/openExternalUrl';
-import { pulseBrand } from '../../theme/pulseBrand';
 import { radii, spacing } from '../../theme';
 import { buildDisguiseFeed } from '../../utils/buildDisguiseFeed';
 import {
@@ -71,10 +70,10 @@ export function DisguiseProfileScreen() {
     generatedAt: new Date().toISOString(),
   };
   const profileFeedItem = buildDisguisedProfileFeedItem(user, profileCreative);
-  const recentPosts = buildDisguisedProfileFeedItems();
+  const recentPosts = buildDisguisedProfileFeedItems(preferences.sparkSection);
   const feedItems = useMemo(
-    () => buildDisguiseFeed(user, disguiseAdCreative),
-    [user, disguiseAdCreative],
+    () => buildDisguiseFeed(user, disguiseAdCreative, preferences.sparkSection),
+    [user, disguiseAdCreative, preferences.sparkSection],
   );
   const savedPosts = useMemo(
     () => resolveSavedPulsePosts(pulseSocial.savedPostIds, feedItems),
@@ -216,7 +215,7 @@ export function DisguiseProfileScreen() {
           style={[styles.generatorCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
           onPress={() => setShowGenerator(true)}
         >
-          <Ionicons name="sparkles" size={22} color={pulseBrand.accent} />
+          <Ionicons name="sparkles" size={22} color={meta.accent} />
           <View style={styles.generatorText}>
             <Text style={[styles.generatorTitle, { color: colors.text }]}>AI disguise ad image</Text>
             <Text style={[styles.generatorDesc, { color: colors.textMuted }]}>
@@ -292,7 +291,7 @@ export function DisguiseProfileScreen() {
             }
             if (item.id === 'h3') {
               setDetailSheet(null);
-              void openExternalUrl(`mailto:${LEGAL_ENTITY.supportEmail}?subject=Pulse%20support`, 'Email support');
+              void openExternalUrl(`mailto:${LEGAL_ENTITY.supportEmail}?subject=${encodeURIComponent(`${meta.name} support`)}`, 'Email support');
             }
           }}
         />

@@ -84,6 +84,11 @@ function MainTabs() {
         },
         tabBarActiveTintColor: colors.gradientEnd,
         tabBarInactiveTintColor: colors.textMuted,
+        tabBarBadgeStyle: {
+          backgroundColor: colors.gradientEnd,
+          color: '#111111',
+          fontSize: 11,
+        },
         tabBarIcon: ({ color, size }) => {
           const icons: Record<keyof MainTabParamList, keyof typeof Ionicons.glyphMap> = {
             Discover: 'flame',

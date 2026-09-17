@@ -50,7 +50,7 @@ export function AnimatedPressable({
   const scale = useSharedValue(1);
   const pressOpacity = useSharedValue(1);
   const highlight = useSharedValue(0);
-  const burst = useSharedValue(0);
+  const burst = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [

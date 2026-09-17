@@ -20,6 +20,9 @@ on:
       - cursor/compact-mini-window-7b60
       - cursor/mini-xsl-buttons-7b60
       - cursor/pulse-icons-blue-7b60
+      - cursor/app-i18n-7b60
+      - cursor/legal-docs-complete-7b60
+      - cursor/finish-app-perks-7b60
   workflow_dispatch:
 
 permissions:

@@ -1,13 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { useApp } from '../context/AppContext';
 import { getLegalDocumentLinks, getLegalUiStrings, LegalDocumentId } from '../content/legal';
-import { useAppLocale } from '../hooks/useAppLocale';
+import { useTranslation } from '../i18n';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -16,77 +16,6 @@ import { SafetyResourceSheet } from '../components/SafetyResourceSheet';
 type SafetyScreenProps = {
   onClose: () => void;
 };
-
-const tips = [
-  {
-    icon: 'location' as const,
-    title: 'Meet in public',
-    body: 'First dates should be in busy, public places. Tell a friend where you are going.',
-  },
-  {
-    icon: 'shield-checkmark' as const,
-    title: 'Trust your instincts',
-    body: 'If something feels off, leave. You can unmatch and report anytime.',
-  },
-  {
-    icon: 'lock-closed' as const,
-    title: 'Protect personal info',
-    body: 'Don\'t share your address, workplace, or financial details in early chats.',
-  },
-  {
-    icon: 'videocam' as const,
-    title: 'Video chat first',
-    body: 'A quick video call before meeting helps verify who you\'re talking to.',
-  },
-  {
-    icon: 'calendar' as const,
-    title: 'Date check-in',
-    body: 'In chat, open the menu → Date check-in to share where you\'re meeting and tap Check in when you arrive.',
-  },
-];
-
-const resources = [
-  {
-    label: 'Report a profile',
-    icon: 'flag-outline' as const,
-    message: 'Open any profile or chat, tap the menu, and choose Report. We review every report within 24 hours.',
-  },
-  {
-    label: 'Block someone',
-    icon: 'hand-left-outline' as const,
-    message: 'Blocking removes them from your deck and chats immediately. Blocked profiles stay hidden until you unblock them in Settings.',
-  },
-  {
-    label: 'Safety tips & FAQ',
-    icon: 'book-outline' as const,
-    message: 'Meet in public, tell a friend your plans, and trust your instincts. Full FAQ at spark.app/safety.',
-  },
-  {
-    label: 'Contact support',
-    icon: 'mail-outline' as const,
-    message: 'Email support@spark.app — we typically reply within one business day.',
-  },
-  {
-    label: 'Trust & Verification Policy',
-    icon: 'shield-checkmark-outline' as const,
-    action: 'verification-policy' as const,
-  },
-  {
-    label: 'Security settings',
-    icon: 'lock-closed-outline' as const,
-    action: 'security-settings' as const,
-  },
-  {
-    label: 'Privacy controls',
-    icon: 'hand-left-outline' as const,
-    action: 'privacy-center' as const,
-  },
-  {
-    label: 'Security protocols',
-    icon: 'shield-half-outline' as const,
-    action: 'security-protocols' as const,
-  },
-];
 
 const legalDocIconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
   'document-text-outline': 'document-text-outline',
@@ -104,10 +33,95 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { blockedProfiles, unblockProfile } = useApp();
-  const { locale } = useAppLocale();
+  const { t, locale } = useTranslation();
   const ui = getLegalUiStrings(locale);
   const legalLinks = getLegalDocumentLinks(locale);
   const [resourceSheet, setResourceSheet] = useState<{ title: string; body: string } | null>(null);
+
+  const tips = useMemo(
+    () => [
+      {
+        icon: 'location' as const,
+        title: t('safety.meetPublic'),
+        body: t('safety.meetPublicBody'),
+      },
+      {
+        icon: 'shield-checkmark' as const,
+        title: t('safety.trustInstincts'),
+        body: t('safety.trustInstinctsBody'),
+      },
+      {
+        icon: 'lock-closed' as const,
+        title: t('safety.protectInfo'),
+        body: t('safety.protectInfoBody'),
+      },
+      {
+        icon: 'videocam' as const,
+        title: t('safety.videoFirst'),
+        body: t('safety.videoFirstBody'),
+      },
+      {
+        icon: 'calendar' as const,
+        title: t('safety.dateCheckIn'),
+        body: t('safety.dateCheckInBody'),
+      },
+    ],
+    [t],
+  );
+
+  const resources = useMemo(
+    () => [
+      {
+        id: 'report-profile',
+        label: t('safety.reportProfile'),
+        icon: 'flag-outline' as const,
+        message: t('safety.reportProfileBody'),
+      },
+      {
+        id: 'block-someone',
+        label: t('safety.blockSomeone'),
+        icon: 'hand-left-outline' as const,
+        message: t('safety.blockSomeoneBody'),
+      },
+      {
+        id: 'safety-faq',
+        label: t('safety.safetyFaq'),
+        icon: 'book-outline' as const,
+        message: t('safety.safetyFaqBody'),
+      },
+      {
+        id: 'contact-support',
+        label: t('safety.contactSupport'),
+        icon: 'mail-outline' as const,
+        message: t('safety.contactSupportBody'),
+      },
+      {
+        id: 'verification-policy',
+        label: t('safety.verificationPolicy'),
+        icon: 'shield-checkmark-outline' as const,
+        action: 'verification-policy' as const,
+      },
+      {
+        id: 'security-settings',
+        label: t('safety.securitySettings'),
+        icon: 'lock-closed-outline' as const,
+        action: 'security-settings' as const,
+      },
+      {
+        id: 'privacy-center',
+        label: t('safety.privacyControls'),
+        icon: 'hand-left-outline' as const,
+        action: 'privacy-center' as const,
+      },
+      {
+        id: 'security-protocols',
+        label: t('safety.securityProtocols'),
+        icon: 'shield-half-outline' as const,
+        action: 'security-protocols' as const,
+      },
+    ],
+    [t],
+  );
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
@@ -115,20 +129,20 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
         <AnimatedPressable onPress={onClose} style={styles.back}>
           <Ionicons name="chevron-back" size={28} color={colors.text} />
         </AnimatedPressable>
-        <Text style={styles.title}>Safety Center</Text>
+        <Text style={styles.title}>{t('safety.title')}</Text>
         <DisguiseModeButton />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.banner}>
           <Ionicons name="shield-checkmark" size={32} color={colors.like} />
-          <Text style={styles.bannerTitle}>Your safety matters</Text>
+          <Text style={styles.bannerTitle}>{t('safety.bannerTitle')}</Text>
           <Text style={styles.bannerBody}>
-            Spark is built with safety in mind. Review these tips before your first date.
+            {t('safety.bannerBody')}
           </Text>
         </View>
 
-        <Text style={styles.sectionTitle}>Safety tips</Text>
+        <Text style={styles.sectionTitle}>{t('safety.tipsTitle')}</Text>
         {tips.map((tip) => (
           <View key={tip.title} style={styles.tipCard}>
             <Ionicons name={tip.icon} size={24} color={colors.gradientEnd} />
@@ -165,27 +179,32 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
 
         {blockedProfiles.length > 0 ? (
           <>
-            <Text style={styles.sectionTitle}>Blocked users</Text>
+            <Text style={styles.sectionTitle}>{t('safety.blockedUsers')}</Text>
             {blockedProfiles.map((profile) => (
               <View key={profile.id} style={styles.blockedRow}>
                 <Text style={styles.blockedName}>{profile.name}</Text>
                 <AnimatedPressable
                   onPress={() => {
                     unblockProfile(profile.id);
-                    Alert.alert('Unblocked', `${profile.name} can appear in your deck again.`);
+                    Alert.alert(
+                      t('safety.unblocked'),
+                      t('safety.unblockedBody', { name: profile.name }),
+                    );
                   }}
                 >
-                  <Text style={[styles.unblockText, { color: colors.gradientEnd }]}>Unblock</Text>
+                  <Text style={[styles.unblockText, { color: colors.gradientEnd }]}>
+                    {t('common.unblock')}
+                  </Text>
                 </AnimatedPressable>
               </View>
             ))}
           </>
         ) : null}
 
-        <Text style={styles.sectionTitle}>Quick actions</Text>
+        <Text style={styles.sectionTitle}>{t('safety.quickActions')}</Text>
         {resources.map((item) => (
           <AnimatedPressable
-            key={item.label}
+            key={item.id}
             style={styles.resourceRow}
             onPress={() => {
               if ('action' in item && item.action === 'verification-policy') {

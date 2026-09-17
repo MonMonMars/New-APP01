@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { NotificationPreferences } from '../types/settings';
 import { spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -44,6 +45,7 @@ function ToggleRow({ icon, label, description, value, onToggle }: ToggleRowProps
 export function NotificationPreferencesScreen({ onClose }: NotificationPreferencesScreenProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const { notificationPreferences, updateNotificationPreferences, enableNotifications, notificationsEnabled } =
     useApp();
 
@@ -60,68 +62,72 @@ export function NotificationPreferencesScreen({ onClose }: NotificationPreferenc
         <AnimatedPressable onPress={onClose} style={styles.back}>
           <Ionicons name="chevron-back" size={28} color={colors.text} />
         </AnimatedPressable>
-        <Text style={[styles.title, { color: colors.text }]}>Notifications</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('notifications.title')}</Text>
         <DisguiseModeButton />
       </View>
 
-      <Text style={[styles.section, { color: colors.textMuted }]}>Push notifications</Text>
+      <Text style={[styles.section, { color: colors.textMuted }]}>{t('notifications.pushSection')}</Text>
 
       <ToggleRow
         icon="heart"
-        label="New matches"
-        description="When someone likes you back"
+        label={t('notifications.newMatches')}
+        description={t('notifications.newMatchesHint')}
         value={notificationPreferences.matches}
         onToggle={toggle('matches')}
       />
       <ToggleRow
         icon="chatbubble"
-        label="Messages"
-        description="When you receive a new message"
+        label={t('notifications.messages')}
+        description={t('notifications.messagesHint')}
         value={notificationPreferences.messages}
         onToggle={toggle('messages')}
       />
       <ToggleRow
         icon="star"
-        label="Likes"
-        description="When someone likes your profile"
+        label={t('notifications.likes')}
+        description={t('notifications.likesHint')}
         value={notificationPreferences.likes}
         onToggle={toggle('likes')}
       />
       <ToggleRow
         icon="star-half"
-        label="Super Likes"
-        description="When someone sends a Super Like"
+        label={t('notifications.superLikes')}
+        description={t('notifications.superLikesHint')}
         value={notificationPreferences.superLikes}
         onToggle={toggle('superLikes')}
       />
       <ToggleRow
         icon="flash"
-        label="Boosts"
-        description="When your Boost is active or ending soon"
+        label={t('notifications.boosts')}
+        description={t('notifications.boostsHint')}
         value={notificationPreferences.boosts}
         onToggle={toggle('boosts')}
       />
 
-      <Text style={[styles.section, { color: colors.textMuted, marginTop: spacing.lg }]}>Pulse disguise</Text>
+      <Text style={[styles.section, { color: colors.textMuted, marginTop: spacing.lg }]}>
+        {t('notifications.disguiseSection')}
+      </Text>
       <ToggleRow
         icon="eye-off-outline"
-        label="Neutral lock-screen copy"
-        description="Show Pulse-style alerts while in disguise mode"
+        label={t('notifications.neutralLockScreen')}
+        description={t('notifications.neutralLockScreenHint')}
         value={notificationPreferences.disguiseSafe}
         onToggle={toggle('disguiseSafe')}
       />
 
-      <Text style={[styles.section, { color: colors.textMuted, marginTop: spacing.lg }]}>Marketing</Text>
+      <Text style={[styles.section, { color: colors.textMuted, marginTop: spacing.lg }]}>
+        {t('notifications.marketingSection')}
+      </Text>
       <ToggleRow
         icon="megaphone-outline"
-        label="Tips & offers"
-        description="Product updates, promos, and feature tips"
+        label={t('notifications.tipsOffers')}
+        description={t('notifications.tipsOffersHint')}
         value={notificationPreferences.marketing}
         onToggle={toggle('marketing')}
       />
 
       <Text style={[styles.hint, { color: colors.textMuted }]}>
-        On web, push notifications are limited. Use a real device for the full experience.
+        {t('notifications.webLimit')}
       </Text>
     </View>
   );

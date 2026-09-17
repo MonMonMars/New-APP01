@@ -1,18 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LegalPreviewSheet } from '../../components/legal/LegalPreviewSheet';
 import { PhotoCarousel } from '../../components/PhotoCarousel';
 import { getLegalUiStrings, LegalDocumentId } from '../../content/legal';
 import { LocaleToggle } from '../../components/legal/LocaleToggle';
-import { useAppLocale } from '../../hooks/useAppLocale';
 import { useApp } from '../../context/AppContext';
 import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
+import { useTranslation } from '../../i18n';
+import { getGenderLabel, getOrientationLabel } from '../../i18n/labels';
 import {
-  GENDER_LABELS,
-  ORIENTATION_LABELS,
   Orientation,
   ProfileGender,
   RelationshipIntent,
@@ -25,22 +24,9 @@ import { AnimatedPressable } from '../../components/AnimatedPressable';
 
 type Step = 'welcome' | 'rules' | 'location' | 'intent' | 'identity' | 'profile';
 
-const rules = [
-  'Be honest — use your own recent photos and accurate age.',
-  'Be respectful — no harassment, hate speech, or unwanted contact.',
-  'Stay safe — meet in public and report suspicious behaviour.',
-  '18+ only — one person, one account.',
-];
-
-const intentOptions: { value: RelationshipIntent; label: string; hint: string }[] = [
-  { value: 'long_term', label: 'Tech & business', hint: 'Startups, markets, product news' },
-  { value: 'short_term', label: 'Local & city life', hint: 'Transit, events, neighborhood updates' },
-  { value: 'new_friends', label: 'Food & lifestyle', hint: 'Recipes, culture, weekend ideas' },
-  { value: 'not_sure', label: 'Mix of everything', hint: 'A balanced home feed' },
-];
-
 export function OnboardingFlow() {
   const insets = useSafeAreaInsets();
+  const { t, locale } = useTranslation();
   const {
     completeOnboarding,
     signInWithAppleStub,
@@ -53,7 +39,6 @@ export function OnboardingFlow() {
   const [step, setStep] = useState<Step>('welcome');
   const [legalAccepted, setLegalAccepted] = useState(false);
   const [legalPreviewId, setLegalPreviewId] = useState<LegalDocumentId | null>(null);
-  const { locale } = useAppLocale();
   const legalUi = getLegalUiStrings(locale);
   const [email, setEmail] = useState('');
   const [emailMessage, setEmailMessage] = useState<string | null>(null);
@@ -69,6 +54,20 @@ export function OnboardingFlow() {
 
   const genderOptions: ProfileGender[] = ['woman', 'man', 'nonbinary'];
   const orientationOptions: Orientation[] = ['straight', 'gay', 'lesbian', 'bisexual', 'pansexual', 'queer', 'asexual', 'other'];
+
+  const rules = [
+    t('onboarding.ruleHonest'),
+    t('onboarding.ruleRespect'),
+    t('onboarding.ruleSafe'),
+    t('onboarding.ruleAge'),
+  ];
+
+  const intentOptions: { value: RelationshipIntent; label: string; hint: string }[] = [
+    { value: 'long_term', label: t('onboarding.intentLongTerm'), hint: t('onboarding.intentLongTermHint') },
+    { value: 'short_term', label: t('onboarding.intentShortTerm'), hint: t('onboarding.intentShortTermHint') },
+    { value: 'new_friends', label: t('onboarding.intentFriends'), hint: t('onboarding.intentFriendsHint') },
+    { value: 'not_sure', label: t('onboarding.intentNotSure'), hint: t('onboarding.intentNotSureHint') },
+  ];
 
   const handleEmailSignIn = async () => {
     setAuthLoading(true);
@@ -133,9 +132,9 @@ export function OnboardingFlow() {
           <View style={styles.badge}>
             <Ionicons name="pulse" size={36} color={pulseBrand.accent} />
           </View>
-          <Text style={styles.title}>Welcome to {DISGUISE_APP_NAME}</Text>
+          <Text style={styles.title}>{t('onboarding.welcomeTitle', { appName: DISGUISE_APP_NAME })}</Text>
           <Text style={styles.subtitle}>
-            News, trending topics, and updates from people you follow.
+            {t('onboarding.welcomeSubtitle')}
           </Text>
           <AnimatedPressable
             style={styles.appleButton}
@@ -147,14 +146,14 @@ export function OnboardingFlow() {
             ) : (
               <>
                 <Ionicons name="logo-apple" size={20} color={colors.textDark} />
-                <Text style={styles.appleButtonText}>Continue with Apple</Text>
+                <Text style={styles.appleButtonText}>{t('onboarding.continueApple')}</Text>
               </>
             )}
           </AnimatedPressable>
           <View style={styles.emailBlock}>
             <TextInput
               style={styles.emailInput}
-              placeholder="Email for magic link"
+              placeholder={t('onboarding.emailPlaceholder')}
               placeholderTextColor={colors.textMuted}
               value={email}
               onChangeText={setEmail}
@@ -168,12 +167,12 @@ export function OnboardingFlow() {
               disabled={authLoading || !email.trim()}
             >
               <Ionicons name="mail-outline" size={18} color={colors.text} />
-              <Text style={styles.emailButtonText}>Continue with email</Text>
+              <Text style={styles.emailButtonText}>{t('onboarding.continueEmail')}</Text>
             </AnimatedPressable>
             {emailMessage && <Text style={styles.emailHint}>{emailMessage}</Text>}
           </View>
           <AnimatedPressable onPress={() => { signInWithAppleStub(); setStep('rules'); }}>
-            <Text style={styles.link}>Continue without account</Text>
+            <Text style={styles.link}>{t('onboarding.continueGuest')}</Text>
           </AnimatedPressable>
         </View>
       )}
@@ -185,8 +184,8 @@ export function OnboardingFlow() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.title}>Community guidelines</Text>
-          <Text style={styles.subtitle}>A few rules before you join the feed.</Text>
+          <Text style={styles.title}>{t('onboarding.rulesTitle')}</Text>
+          <Text style={styles.subtitle}>{t('onboarding.rulesSubtitle')}</Text>
           {rules.map((rule) => (
             <View key={rule} style={styles.ruleRow}>
               <Text style={styles.ruleBullet}>•</Text>
@@ -211,7 +210,7 @@ export function OnboardingFlow() {
             <Text style={styles.legalLink} onPress={() => setLegalPreviewId('disguise')}>
               {legalUi.disguiseLink}
             </Text>
-            {locale === 'zh-TW' ? '及' : ', and'}{' '}
+            {legalUi.cookieAnd}{' '}
             <Text style={styles.legalLink} onPress={() => setLegalPreviewId('safety')}>
               {legalUi.safetyLink}
             </Text>
@@ -243,13 +242,13 @@ export function OnboardingFlow() {
 
       {step === 'location' && (
         <View style={styles.step}>
-          <Text style={styles.title}>Choose your region</Text>
+          <Text style={styles.title}>{t('onboarding.locationTitle')}</Text>
           <Text style={styles.subtitle}>
-            Local headlines and trending topics for your area. We never share your exact location.
+            {t('onboarding.locationSubtitle')}
           </Text>
           <View style={styles.mapPlaceholder}>
             <Text style={styles.mapEmoji}>📍</Text>
-            <Text style={styles.mapText}>Top stories near you</Text>
+            <Text style={styles.mapText}>{t('onboarding.topStoriesNearYou')}</Text>
           </View>
           <AnimatedPressable
             style={styles.primaryButton}
@@ -258,24 +257,26 @@ export function OnboardingFlow() {
               setStep('intent');
             }}
           >
-            <Text style={styles.primaryButtonText}>Use my location</Text>
+            <Text style={styles.primaryButtonText}>{t('onboarding.useMyLocation')}</Text>
           </AnimatedPressable>
           {showLocationInfo ? (
             <Text style={styles.locationInfo}>
-              We use your region for local headlines — never exact GPS. Change anytime in Profile → Discovery preferences.
+              {t('onboarding.locationHint')}
             </Text>
           ) : null}
           <AnimatedPressable onPress={() => setShowLocationInfo((v) => !v)}>
-            <Text style={styles.link}>{showLocationInfo ? 'Hide details' : 'Tell me more'}</Text>
+            <Text style={styles.link}>
+              {showLocationInfo ? t('onboarding.hideDetails') : t('onboarding.tellMeMore')}
+            </Text>
           </AnimatedPressable>
         </View>
       )}
 
       {step === 'intent' && (
         <View style={styles.step}>
-          <Text style={styles.title}>Personalize your feed</Text>
+          <Text style={styles.title}>{t('onboarding.intentTitle')}</Text>
           <Text style={styles.subtitle}>
-            Pick what you want to see more of in your timeline.
+            {t('onboarding.intentSubtitle')}
           </Text>
           {intentOptions.map((option) => {
             const selected = intent === option.value;
@@ -293,19 +294,19 @@ export function OnboardingFlow() {
             );
           })}
           <AnimatedPressable style={styles.primaryButton} onPress={() => setStep('identity')}>
-            <Text style={styles.primaryButtonText}>Continue</Text>
+            <Text style={styles.primaryButtonText}>{t('common.continue')}</Text>
           </AnimatedPressable>
         </View>
       )}
 
       {step === 'identity' && (
         <View style={styles.step}>
-          <Text style={styles.title}>Your public profile</Text>
+          <Text style={styles.title}>{t('onboarding.identityTitle')}</Text>
           <Text style={styles.subtitle}>
-            How you appear on Pulse. Spark safe mode uses this privately when you leave Pulse.
+            {t('onboarding.identitySubtitle')}
           </Text>
 
-          <Text style={styles.label}>I am a</Text>
+          <Text style={styles.label}>{t('onboarding.iAmA')}</Text>
           <View style={styles.chipRow}>
             {genderOptions.map((option) => {
               const selected = gender === option;
@@ -316,14 +317,14 @@ export function OnboardingFlow() {
                   onPress={() => setGender(option)}
                 >
                   <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
-                    {GENDER_LABELS[option]}
+                    {getGenderLabel(locale, option)}
                   </Text>
                 </AnimatedPressable>
               );
             })}
           </View>
 
-          <Text style={styles.label}>My orientation</Text>
+          <Text style={styles.label}>{t('onboarding.myOrientation')}</Text>
           <View style={styles.chipRow}>
             {orientationOptions.map((option) => {
               const selected = orientation === option;
@@ -334,7 +335,7 @@ export function OnboardingFlow() {
                   onPress={() => setOrientation(option)}
                 >
                   <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
-                    {ORIENTATION_LABELS[option]}
+                    {getOrientationLabel(locale, option)}
                   </Text>
                 </AnimatedPressable>
               );
@@ -342,15 +343,15 @@ export function OnboardingFlow() {
           </View>
 
           <AnimatedPressable style={styles.primaryButton} onPress={() => setStep('profile')}>
-            <Text style={styles.primaryButtonText}>Continue</Text>
+            <Text style={styles.primaryButtonText}>{t('common.continue')}</Text>
           </AnimatedPressable>
         </View>
       )}
 
       {step === 'profile' && (
         <View style={styles.step}>
-          <Text style={styles.title}>Create your profile</Text>
-          <Text style={styles.subtitle}>Add a photo so friends recognize you.</Text>
+          <Text style={styles.title}>{t('onboarding.profileTitle')}</Text>
+          <Text style={styles.subtitle}>{t('onboarding.profileSubtitle')}</Text>
 
           <PhotoCarousel
             photos={photos}
@@ -361,37 +362,39 @@ export function OnboardingFlow() {
 
           <AnimatedPressable style={styles.addPhotoButton} onPress={handleAddPhoto}>
             <Ionicons name="camera-outline" size={18} color={pulseBrand.accent} />
-            <Text style={styles.addPhotoText}>Add photos</Text>
+            <Text style={styles.addPhotoText}>{t('onboarding.addPhotos')}</Text>
           </AnimatedPressable>
 
-          <Text style={styles.label}>Name</Text>
+          <Text style={styles.label}>{t('onboarding.nameLabel')}</Text>
           <TextInput
             value={name}
             onChangeText={setName}
             style={styles.input}
             placeholderTextColor={colors.textMuted}
-            placeholder="Your first name"
+            placeholder={t('onboarding.namePlaceholder')}
           />
-          <Text style={styles.label}>Age</Text>
+          <Text style={styles.label}>{t('onboarding.ageLabel')}</Text>
           <TextInput
             value={age}
             onChangeText={setAge}
             style={styles.input}
             placeholderTextColor={colors.textMuted}
-            placeholder="18+"
+            placeholder={t('onboarding.agePlaceholder')}
             keyboardType="number-pad"
           />
-          <Text style={styles.label}>Bio</Text>
+          <Text style={styles.label}>{t('onboarding.bioLabel')}</Text>
           <TextInput
             value={bio}
             onChangeText={setBio}
             style={[styles.input, styles.inputMultiline]}
             placeholderTextColor={colors.textMuted}
-            placeholder="A line about you"
+            placeholder={t('onboarding.bioPlaceholder')}
             multiline
           />
           <AnimatedPressable style={styles.primaryButton} onPress={finish}>
-            <Text style={styles.primaryButtonText}>Open {DISGUISE_APP_NAME}</Text>
+            <Text style={styles.primaryButtonText}>
+              {t('onboarding.openApp', { appName: DISGUISE_APP_NAME })}
+            </Text>
           </AnimatedPressable>
         </View>
       )}

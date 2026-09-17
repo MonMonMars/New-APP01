@@ -44,7 +44,7 @@ export function DisguiseModeButton() {
   return (
     <ModeIconButton
       icon="eye-off-outline"
-      color={meta.world === 'harbor' ? colors.ember : colors.textMuted}
+      color={meta.accent}
       backgroundColor={colors.surface}
       accessibilityLabel={`Switch to ${meta.name} disguise mode`}
       onPress={() => {

@@ -19,7 +19,7 @@ export function RecentlyActiveStrip({ profiles, onSelect }: RecentlyActiveStripP
     return (
       <View style={styles.section}>
         <View style={styles.header}>
-          <View style={styles.liveDot} />
+          <View style={[styles.liveDot, { backgroundColor: colors.like }]} />
           <Text style={[styles.title, { color: colors.text }]}>Recently active</Text>
         </View>
         <Text style={[styles.emptyText, { color: colors.textMuted }]}>
@@ -32,7 +32,7 @@ export function RecentlyActiveStrip({ profiles, onSelect }: RecentlyActiveStripP
   return (
     <View style={styles.section}>
       <View style={styles.header}>
-        <View style={styles.liveDot} />
+        <View style={[styles.liveDot, { backgroundColor: colors.like }]} />
         <Text style={[styles.title, { color: colors.text }]}>Recently active</Text>
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
@@ -69,7 +69,6 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#21D07A',
   },
   title: {
     fontSize: 13,

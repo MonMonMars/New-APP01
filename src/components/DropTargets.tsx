@@ -174,9 +174,9 @@ export function DropTargets({
     <View style={[styles.row, compact && styles.rowCompact]} pointerEvents="box-none" onLayout={reportZones}>
       <TargetButton
         icon="trash-outline"
-        iconColor={colors.textDark}
-        backgroundColor={colors.card}
-        borderColor="rgba(0,0,0,0.08)"
+        iconColor={colors.card}
+        backgroundColor={colors.heartRed}
+        borderColor={colors.heartRed}
         active={trashActive}
         targetRef={trashRef}
         size={targetSize}

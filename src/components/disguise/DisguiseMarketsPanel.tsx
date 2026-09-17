@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import {
   marketCryptoForex,
@@ -10,8 +11,8 @@ import {
   marketTopMovers,
   MarketQuote,
 } from '../../data/disguiseMarkets';
-import { pulseBrand } from '../../theme/pulseBrand';
 import { radii, spacing } from '../../theme';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type DisguiseMarketsPanelProps = {
@@ -40,11 +41,13 @@ function QuoteRow({ quote, colors, onPress }: { quote: MarketQuote; colors: { te
 
 export function DisguiseMarketsPanel({ onQuotePress }: DisguiseMarketsPanelProps) {
   const { colors } = useTheme();
+  const { preferences } = useApp();
+  const meta = disguiseWorldMeta(preferences.sparkSection);
 
   return (
     <View style={styles.wrap}>
       <View style={[styles.sessionBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Ionicons name="newspaper-outline" size={14} color={pulseBrand.accent} />
+        <Ionicons name="newspaper-outline" size={14} color={meta.accent} />
         <Text style={[styles.sessionText, { color: colors.textMuted }]}>{marketSessionLabel}</Text>
       </View>
 

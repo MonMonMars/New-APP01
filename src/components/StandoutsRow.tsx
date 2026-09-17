@@ -19,7 +19,7 @@ export function StandoutsRow({ profiles, onSelect }: StandoutsRowProps) {
     return (
       <View style={styles.section}>
         <View style={styles.header}>
-          <Ionicons name="star" size={16} color="#FFD700" />
+          <Ionicons name="star" size={16} color={colors.superLike} />
           <Text style={[styles.title, { color: colors.text }]}>Standouts</Text>
         </View>
         <Text style={[styles.emptyText, { color: colors.textMuted }]}>
@@ -32,7 +32,7 @@ export function StandoutsRow({ profiles, onSelect }: StandoutsRowProps) {
   return (
     <View style={styles.section}>
       <View style={styles.header}>
-        <Ionicons name="star" size={16} color="#FFD700" />
+        <Ionicons name="star" size={16} color={colors.superLike} />
         <Text style={[styles.title, { color: colors.text }]}>Standouts</Text>
         <Text style={[styles.subtitle, { color: colors.textMuted }]}>Top Picks today</Text>
       </View>

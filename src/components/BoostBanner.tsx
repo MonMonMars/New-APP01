@@ -16,8 +16,8 @@ export function BoostBanner({ visible }: BoostBannerProps) {
   }
 
   return (
-    <View style={[styles.banner, { backgroundColor: 'rgba(255, 215, 0, 0.15)', borderColor: '#FFD700' }]}>
-      <Ionicons name="flash" size={16} color="#FFD700" />
+    <View style={[styles.banner, { backgroundColor: `${colors.boost}26`, borderColor: colors.boost }]}>
+      <Ionicons name="flash" size={16} color={colors.boost} />
       <Text style={[styles.text, { color: colors.text }]}>
         Boost active — you&apos;re a top profile for the next 30 minutes
       </Text>

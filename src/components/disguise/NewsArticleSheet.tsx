@@ -6,9 +6,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { NewsPost } from '../../data/disguiseFeed';
-import { pulseBrand } from '../../theme/pulseBrand';
 import { radii, spacing } from '../../theme';
 import { openExternalUrl } from '../../utils/openExternalUrl';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
 import { FadeSlideIn } from '../motion/FadeSlideIn';
 import { SavePostButton } from './SavePostButton';
@@ -23,7 +23,8 @@ type NewsArticleSheetProps = {
 export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { recordPulseReading } = useApp();
+  const { recordPulseReading, preferences } = useApp();
+  const meta = disguiseWorldMeta(preferences.sparkSection);
 
   useEffect(() => {
     if (visible && post) {
@@ -52,7 +53,7 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
         <FadeSlideIn replayKey={visible} index={0}>
           <View style={[styles.toolbar, { borderBottomColor: colors.border }]}>
             <View style={styles.toolbarMeta}>
-              <Text style={[styles.source, { color: pulseBrand.accent }]}>{post.source}</Text>
+              <Text style={[styles.source, { color: meta.accent }]}>{post.source}</Text>
               <Text style={[styles.category, { color: colors.textMuted }]}>{post.category}</Text>
             </View>
             <View style={styles.toolbarActions}>

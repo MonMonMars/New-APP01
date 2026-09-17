@@ -12,6 +12,8 @@ import {
   EMBER_DISCRETION_HINTS,
   EMBER_DISCRETION_LABELS,
   EMBER_SEEKING_LABELS,
+  EMBER_PROMPT_OPTIONS,
+  HINGE_PROMPT_OPTIONS,
   RelationshipIntent,
   RelationshipStatus,
   RELATIONSHIP_STATUS_LABELS,
@@ -385,7 +387,11 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
 
           <InterestsEditor interests={interests} onChange={setInterests} />
 
-          <PromptsEditor prompts={prompts} onChange={setPrompts} />
+          <PromptsEditor
+            prompts={prompts}
+            onChange={setPrompts}
+            questionOptions={[...EMBER_PROMPT_OPTIONS, ...HINGE_PROMPT_OPTIONS]}
+          />
 
           <Text style={[styles.label, { color: colors.textMuted }]}>Opening Move</Text>
           <Text style={[styles.openingMoveHint, { color: colors.textMuted }]}>

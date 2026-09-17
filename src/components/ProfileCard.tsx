@@ -22,12 +22,10 @@ import {
   emberLocationLine,
   emberRelationshipLabel,
   emberVisiblePhotoCount,
-  EMBER_AVAILABILITY_LABELS,
-  EMBER_DISCRETION_LABELS,
-  EMBER_SEEKING_LABELS,
   Profile,
 } from '../types/profile';
 import { AnimatedPressable } from './AnimatedPressable';
+import { EmberStatusChips } from './EmberStatusChips';
 
 type ProfileCardProps = {
   profile: Profile;
@@ -62,13 +60,6 @@ export function ProfileCard({
   const visiblePhotoCount = emberStatus
     ? emberVisiblePhotoCount(photoCount, profile.emberDiscretion)
     : photoCount;
-  const emberMeta = emberStatus
-    ? [
-        profile.emberDiscretion ? EMBER_DISCRETION_LABELS[profile.emberDiscretion] : null,
-        profile.emberSeeking ? EMBER_SEEKING_LABELS[profile.emberSeeking] : null,
-        profile.emberAvailability ? EMBER_AVAILABILITY_LABELS[profile.emberAvailability] : null,
-      ].filter((item): item is string => item !== null)
-    : [];
   const spotlightPulse = useSharedValue(0);
 
   useEffect(() => {
@@ -222,15 +213,10 @@ export function ProfileCard({
             size="sm"
           />
           {emberStatus ? (
-            <View style={styles.discreetChip}>
-              <Text style={styles.discreetChipText}>{emberStatus}</Text>
+            <View style={styles.discreetChipWrap}>
+              <EmberStatusChips profile={profile} compact />
             </View>
           ) : null}
-          {emberMeta.map((label) => (
-            <View key={label} style={styles.discreetChip}>
-              <Text style={styles.discreetChipText}>{label}</Text>
-            </View>
-          ))}
         </View>
         {profile.job && <Text style={[styles.job, compact && styles.jobCompact]}>{profile.job}</Text>}
         <Text style={[styles.distance, compact && styles.distanceCompact]}>
@@ -403,18 +389,8 @@ const styles = StyleSheet.create({
   nameCompact: {
     fontSize: 24,
   },
-  discreetChip: {
-    backgroundColor: 'rgba(255, 176, 32, 0.22)',
-    borderRadius: radii.button,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-  },
-  discreetChipText: {
-    color: palette.ember,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
+  discreetChipWrap: {
+    maxWidth: '100%',
   },
   job: {
     color: palette.text,

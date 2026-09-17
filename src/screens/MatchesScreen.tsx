@@ -13,6 +13,7 @@ import { useLiveExpiry } from '../hooks/useLiveExpiry';
 import { Conversation } from '../types/match';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
+import { EmberStatusChips } from '../components/EmberStatusChips';
 
 type MatchesScreenProps = {
   onOpenChat: (conversationId: string) => void;
@@ -47,6 +48,7 @@ function ConversationRow({
             </View>
           )}
         </View>
+        <EmberStatusChips profile={profile} compact />
         <Text style={[styles.preview, { color: unread ? colors.text : colors.textMuted }, unread && styles.previewUnread]} numberOfLines={1}>
           {lastMessage ?? 'Say something nice!'}
         </Text>
@@ -88,7 +90,9 @@ function NewMatchItem({
         </Text>
       ) : expiryLabel ? (
         <Text style={[styles.newMatchExpiry, { color: colors.rewind }]}>{expiryLabel}</Text>
-      ) : null}
+      ) : (
+        <Text style={[styles.newMatchExpiry, { color: colors.textMuted }]}>Say hi</Text>
+      )}
     </AnimatedPressable>
   );
 }
@@ -270,6 +274,8 @@ const styles = StyleSheet.create({
   },
   rowBody: {
     flex: 1,
+    minWidth: 0,
+    gap: 4,
   },
   rowTop: {
     flexDirection: 'row',

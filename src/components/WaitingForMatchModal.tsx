@@ -4,8 +4,9 @@ import { Image, Modal, StyleSheet, Text, View } from 'react-native';
 import { colors as palette, radii, spacing } from '../theme';
 import { modalFill } from '../theme/modalFill';
 import { useTheme } from '../context/ThemeContext';
-import { Profile } from '../types/profile';
+import { emberRelationshipLabel, Profile } from '../types/profile';
 import { AnimatedPressable } from './AnimatedPressable';
+import { EmberStatusChips } from './EmberStatusChips';
 
 type WaitingForMatchModalProps = {
   visible: boolean;
@@ -23,6 +24,8 @@ export function WaitingForMatchModal({
     return null;
   }
 
+  const emberStatus = emberRelationshipLabel(profile.relationshipStatus);
+
   return (
     <Modal visible={visible} animationType="fade" transparent>
       <View style={[styles.overlay, modalFill]}>
@@ -32,8 +35,15 @@ export function WaitingForMatchModal({
         >
           <Text style={styles.title}>Waiting for a match</Text>
           <Text style={styles.subtitle}>
-            You liked {profile.name}. Check back in Matches if they like you too.
+            {emberStatus
+              ? `You liked ${profile.name}. They'll show in Messages if they like you too.`
+              : `You liked ${profile.name}. Check back in Matches if they like you too.`}
           </Text>
+          {emberStatus ? (
+            <View style={styles.emberChips}>
+              <EmberStatusChips profile={profile} compact />
+            </View>
+          ) : null}
 
           <View style={styles.avatarWrap}>
             <Image
@@ -83,6 +93,10 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     textAlign: 'center',
     lineHeight: 22,
+  },
+  emberChips: {
+    marginTop: spacing.sm,
+    alignItems: 'center',
   },
   avatarWrap: {
     marginVertical: spacing.xl,

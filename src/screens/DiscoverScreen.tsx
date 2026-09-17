@@ -286,6 +286,22 @@ export function DiscoverScreen() {
     holdProfile(detailProfile.id);
   }, [detailProfile, heldIds, holdProfile, unholdProfile]);
 
+  const handleDetailSuperLike = useCallback(() => {
+    if (!detailProfile) {
+      return;
+    }
+    const profile = detailProfile;
+    setDetailProfile(null);
+    if (!canLike) {
+      setShowLikeLimit(true);
+      return;
+    }
+    const match = superLikeProfile(profile);
+    setSuperLikeProfileState(profile);
+    setSuperLikeIsMatch(match !== null);
+    setShowSuperLikeResult(true);
+  }, [canLike, detailProfile, superLikeProfile]);
+
   const handlePromptLikeSend = useCallback(
     (comment: string) => {
       if (!promptLikeTarget) {
@@ -466,6 +482,7 @@ export function DiscoverScreen() {
         onHold={handleDetailHold}
         onLike={handleDetailLike}
         onPass={handleDetailPass}
+        onSuperLike={handleDetailSuperLike}
         onSparkNote={canSendSparkNote ? handleDetailSparkNote : undefined}
         onReport={(profileId) => {
           if (detailProfile) {

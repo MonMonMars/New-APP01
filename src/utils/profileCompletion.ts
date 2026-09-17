@@ -1,4 +1,4 @@
-import { UserProfile } from '../types/profile';
+import { UserProfile, EMBER_PROMPT_OPTIONS } from '../types/profile';
 
 export type ProfileTip = {
   id: string;
@@ -41,6 +41,17 @@ export function computeProfileCompletion(user: UserProfile): {
       label: 'Set relationship intent',
       done: Boolean(user.intent),
       suggestion: 'Clear intent helps match with people on the same page.',
+    },
+    {
+      id: 'emberPrompt',
+      label: 'Add an Ember prompt',
+      done:
+        user.prompts?.some(
+          (prompt) =>
+            EMBER_PROMPT_OPTIONS.some((question) => question === prompt.question) &&
+            prompt.answer.trim().length > 12,
+        ) ?? false,
+      suggestion: 'A discretion prompt tells Ember matches what this is — and isn’t.',
     },
     {
       id: 'photo',

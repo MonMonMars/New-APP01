@@ -76,9 +76,9 @@ export function SparkNoteSheet({
           <View style={styles.handle} />
           <View style={styles.header}>
             <Ionicons name="chatbubble-ellipses" size={24} color={variant === 'ember' ? colors.ember : colors.gradientEnd} />
-            <Text style={styles.title}>{copy.title}</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{copy.title}</Text>
           </View>
-          <Text style={styles.subtitle}>{copy.subtitle}</Text>
+          <Text style={[styles.subtitle, { color: colors.textMuted }]}>{copy.subtitle}</Text>
           <Text style={[styles.quota, { color: colors.gradientEnd }]}>
             {remainingNotes > 0
               ? `${remainingNotes} note${remainingNotes === 1 ? '' : 's'} left today`

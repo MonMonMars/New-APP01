@@ -12,17 +12,23 @@ const MAX_PROMPTS = 3;
 type PromptsEditorProps = {
   prompts: ProfilePrompt[];
   onChange: (prompts: ProfilePrompt[]) => void;
+  questionOptions?: readonly string[];
 };
 
-export function PromptsEditor({ prompts, onChange }: PromptsEditorProps) {
+export function PromptsEditor({
+  prompts,
+  onChange,
+  questionOptions = HINGE_PROMPT_OPTIONS,
+}: PromptsEditorProps) {
   const { colors } = useTheme();
+  const options = questionOptions.length > 0 ? questionOptions : HINGE_PROMPT_OPTIONS;
 
   const addPrompt = () => {
     if (prompts.length >= MAX_PROMPTS) {
       return;
     }
     const usedQuestions = new Set(prompts.map((p) => p.question));
-    const nextQuestion = HINGE_PROMPT_OPTIONS.find((q) => !usedQuestions.has(q)) ?? HINGE_PROMPT_OPTIONS[0];
+    const nextQuestion = options.find((q) => !usedQuestions.has(q)) ?? options[0];
     onChange([...prompts, { question: nextQuestion, answer: '' }]);
   };
 
@@ -37,9 +43,9 @@ export function PromptsEditor({ prompts, onChange }: PromptsEditorProps) {
 
   const cycleQuestion = (index: number) => {
     const current = prompts[index].question;
-    const idx = HINGE_PROMPT_OPTIONS.indexOf(current as typeof HINGE_PROMPT_OPTIONS[number]);
-    const nextIdx = (idx + 1) % HINGE_PROMPT_OPTIONS.length;
-    updatePrompt(index, 'question', HINGE_PROMPT_OPTIONS[nextIdx]);
+    const idx = options.indexOf(current);
+    const nextIdx = (idx + 1) % options.length;
+    updatePrompt(index, 'question', options[nextIdx]);
   };
 
   return (

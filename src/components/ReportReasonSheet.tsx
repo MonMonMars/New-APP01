@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useTranslation } from '../i18n';
 import { colors, radii, spacing } from '../theme';
 import { modalFill } from '../theme/modalFill';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -17,6 +18,15 @@ export const REPORT_REASONS = [
 
 export type ReportReason = (typeof REPORT_REASONS)[number];
 
+const REPORT_REASON_KEYS: Record<ReportReason, string> = {
+  'Inappropriate photos': 'report.inappropriatePhotos',
+  'Harassment or hate speech': 'report.harassment',
+  'Spam or scam': 'report.spam',
+  'Underage user': 'report.underage',
+  'Fake profile': 'report.fakeProfile',
+  Other: 'report.other',
+};
+
 type ReportReasonSheetProps = {
   visible: boolean;
   profileName: string;
@@ -31,6 +41,7 @@ export function ReportReasonSheet({
   onSubmit,
 }: ReportReasonSheetProps) {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
@@ -40,10 +51,8 @@ export function ReportReasonSheet({
           onPress={(event) => event.stopPropagation()}
         >
           <View style={styles.handle} />
-          <Text style={styles.title}>Report {profileName}</Text>
-          <Text style={styles.subtitle}>
-            Select a reason. We&apos;ll review and take action within 24 hours.
-          </Text>
+          <Text style={styles.title}>{t('report.title', { name: profileName })}</Text>
+          <Text style={styles.subtitle}>{t('report.subtitle')}</Text>
 
           {REPORT_REASONS.map((reason) => (
             <AnimatedPressable
@@ -52,13 +61,13 @@ export function ReportReasonSheet({
               onPress={() => onSubmit(reason)}
             >
               <Ionicons name="flag-outline" size={18} color={colors.rewind} />
-              <Text style={styles.reasonText}>{reason}</Text>
+              <Text style={styles.reasonText}>{t(REPORT_REASON_KEYS[reason])}</Text>
               <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
             </AnimatedPressable>
           ))}
 
           <AnimatedPressable style={styles.cancelButton} onPress={onClose}>
-            <Text style={styles.cancelText}>Cancel</Text>
+            <Text style={styles.cancelText}>{t('common.cancel')}</Text>
           </AnimatedPressable>
         </AnimatedPressable>
       </AnimatedPressable>

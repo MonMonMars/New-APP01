@@ -4,6 +4,7 @@ import { Modal, StyleSheet, Text, View } from 'react-native';
 import { colors as palette, radii, spacing } from '../theme';
 import { modalFill } from '../theme/modalFill';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type SafetyActionSheetProps = {
@@ -30,20 +31,21 @@ export function SafetyActionSheet({
   onDateCheckIn,
 }: SafetyActionSheetProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <AnimatedPressable style={[styles.overlay, modalFill]} onPress={onClose}>
         <AnimatedPressable style={styles.sheet} onPress={(event) => event.stopPropagation()}>
           <View style={styles.handle} />
-          <Text style={styles.title}>Safety options</Text>
-          <Text style={styles.subtitle}>Choose an action for {profileName}.</Text>
+          <Text style={styles.title}>{t('safety.optionsTitle')}</Text>
+          <Text style={styles.subtitle}>{t('safety.optionsSubtitle', { name: profileName })}</Text>
 
           {onDateCheckIn && (
             <AnimatedPressable style={styles.actionRow} onPress={onDateCheckIn}>
               <Ionicons name="calendar-outline" size={22} color={colors.gradientEnd} />
               <View style={styles.actionText}>
-                <Text style={styles.actionLabel}>Date check-in</Text>
-                <Text style={styles.actionHint}>Share your meet-up plan and check in when you arrive.</Text>
+                <Text style={styles.actionLabel}>{t('safety.dateCheckInAction')}</Text>
+                <Text style={styles.actionHint}>{t('safety.dateCheckInHint')}</Text>
               </View>
             </AnimatedPressable>
           )}
@@ -58,8 +60,8 @@ export function SafetyActionSheet({
             >
               <Ionicons name="shield-checkmark-outline" size={22} color={colors.gradientEnd} />
               <View style={styles.actionText}>
-                <Text style={styles.actionLabel}>Safety Center</Text>
-                <Text style={styles.actionHint}>Tips, resources, and support links.</Text>
+                <Text style={styles.actionLabel}>{t('safety.safetyCenter')}</Text>
+                <Text style={styles.actionHint}>{t('safety.safetyCenterHint')}</Text>
               </View>
             </AnimatedPressable>
           )}
@@ -68,10 +70,8 @@ export function SafetyActionSheet({
             <AnimatedPressable style={styles.actionRow} onPress={onUnmatch}>
               <Ionicons name="heart-dislike-outline" size={22} color={colors.textMuted} />
               <View style={styles.actionText}>
-                <Text style={styles.actionLabel}>Unmatch</Text>
-                <Text style={styles.actionHint}>
-                  Remove this match and conversation. You can still block or report.
-                </Text>
+                <Text style={styles.actionLabel}>{t('safety.unmatch')}</Text>
+                <Text style={styles.actionHint}>{t('safety.unmatchHint')}</Text>
               </View>
             </AnimatedPressable>
           )}
@@ -79,21 +79,21 @@ export function SafetyActionSheet({
           <AnimatedPressable style={styles.actionRow} onPress={onReport}>
             <Ionicons name="flag-outline" size={22} color={colors.rewind} />
             <View style={styles.actionText}>
-              <Text style={styles.actionLabel}>Report</Text>
-              <Text style={styles.actionHint}>Flag inappropriate behavior to our team.</Text>
+              <Text style={styles.actionLabel}>{t('safety.report')}</Text>
+              <Text style={styles.actionHint}>{t('safety.reportHint')}</Text>
             </View>
           </AnimatedPressable>
 
           <AnimatedPressable style={styles.actionRow} onPress={onBlock}>
             <Ionicons name="hand-left-outline" size={22} color={colors.nope} />
             <View style={styles.actionText}>
-              <Text style={styles.actionLabel}>Block</Text>
-              <Text style={styles.actionHint}>They won&apos;t see you and you won&apos;t see them.</Text>
+              <Text style={styles.actionLabel}>{t('safety.block')}</Text>
+              <Text style={styles.actionHint}>{t('safety.blockHint')}</Text>
             </View>
           </AnimatedPressable>
 
           <AnimatedPressable style={styles.cancelButton} onPress={onClose}>
-            <Text style={styles.cancelText}>Cancel</Text>
+            <Text style={styles.cancelText}>{t('common.cancel')}</Text>
           </AnimatedPressable>
         </AnimatedPressable>
       </AnimatedPressable>

@@ -20,7 +20,8 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { EmberStatusChips } from '../components/EmberStatusChips';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { RelationshipIntent } from '../types/profile';
+import { useTranslation } from '../i18n';
+import { getProfileIntentLabel } from '../i18n/labels';
 import { ThemeMode } from '../types/settings';
 import { DisguiseAdGeneratorSheet } from '../components/disguise/DisguiseAdGeneratorSheet';
 import { computeProfileCompletion } from '../utils/profileCompletion';
@@ -29,13 +30,6 @@ import { canRevealProfileViews } from '../utils/genderAccountPerks';
 import { resolveSparkSection } from '../types/preferences';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
-
-const intentLabels: Record<RelationshipIntent, string> = {
-  long_term: 'Long-term partner',
-  short_term: 'Something casual',
-  new_friends: 'New friends',
-  not_sure: 'Still figuring it out',
-};
 
 type SettingsRoute =
   | 'Safety'
@@ -48,21 +42,22 @@ type SettingsRoute =
   | 'ConsumablesShop'
   | null;
 
-const settingsRows: { icon: keyof typeof Ionicons.glyphMap; label: string; route: SettingsRoute }[] = [
-  { icon: 'flame-outline', label: 'Discover tools', route: 'DiscoverHub' },
-  { icon: 'options-outline', label: 'Discovery preferences', route: 'DiscoveryPreferences' },
-  { icon: 'lock-closed-outline', label: 'Security & app lock', route: 'SecuritySettings' },
-  { icon: 'hand-left-outline', label: 'Privacy controls', route: 'PrivacyCenter' },
-  { icon: 'shield-checkmark-outline', label: 'Safety & privacy', route: 'Safety' },
-  { icon: 'notifications-outline', label: 'Notifications', route: 'NotificationPreferences' },
-  { icon: 'bag-outline', label: 'Shop — Boosts & Notes', route: 'ConsumablesShop' },
-  { icon: 'diamond-outline', label: 'Spark+ subscription', route: 'SparkPlus' },
+const settingsRows: { icon: keyof typeof Ionicons.glyphMap; labelKey: string; route: SettingsRoute }[] = [
+  { icon: 'flame-outline', labelKey: 'profile.discoverTools', route: 'DiscoverHub' },
+  { icon: 'options-outline', labelKey: 'profile.discoveryPreferences', route: 'DiscoveryPreferences' },
+  { icon: 'lock-closed-outline', labelKey: 'profile.securityAppLock', route: 'SecuritySettings' },
+  { icon: 'hand-left-outline', labelKey: 'profile.privacyControls', route: 'PrivacyCenter' },
+  { icon: 'shield-checkmark-outline', labelKey: 'profile.safetyPrivacy', route: 'Safety' },
+  { icon: 'notifications-outline', labelKey: 'profile.notifications', route: 'NotificationPreferences' },
+  { icon: 'bag-outline', labelKey: 'profile.shopBoostsNotes', route: 'ConsumablesShop' },
+  { icon: 'diamond-outline', labelKey: 'profile.sparkPlusSubscription', route: 'SparkPlus' },
 ];
 
 export function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { colors } = useTheme();
+  const { t, locale } = useTranslation();
   const {
     user,
     likedIds,
@@ -147,13 +142,13 @@ export function ProfileScreen() {
     setThemeMode(modes[(idx + 1) % modes.length]);
   };
 
-  const themeLabel = themeMode === 'light' ? 'Light' : 'Dark';
+  const themeLabel = themeMode === 'light' ? t('profile.lightMode') : t('profile.darkMode');
   const profileCompletion = computeProfileCompletion(user);
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <ScreenHeader
-        title="Profile"
+        title={t('profile.title')}
         showDisguiseButton
         rightIcon="settings-outline"
         onRightPress={() => scrollRef.current?.scrollTo({ y: 420, animated: true })}
@@ -181,17 +176,19 @@ export function ProfileScreen() {
                 <EmberStatusChips profile={user} />
               </View>
             ) : user.intent ? (
-              <Text style={[styles.intent, { color: colors.gradientEnd }]}>{intentLabels[user.intent]}</Text>
+              <Text style={[styles.intent, { color: colors.gradientEnd }]}>
+                {getProfileIntentLabel(locale, user.intent)}
+              </Text>
             ) : null}
             <Text style={[styles.bio, { color: colors.textMuted }]}>{user.bio}</Text>
             {user.openingMove ? (
               <Text style={[styles.openingMove, { color: colors.gradientEnd }]}>
-                Opening move: {user.openingMove}
+                {t('profile.openingMove')} {user.openingMove}
               </Text>
             ) : null}
             <ProfileSocialLinks user={user} compact />
             <AnimatedPressable style={[styles.editButton, { borderColor: colors.gradientEnd }]} onPress={() => setShowEdit(true)}>
-              <Text style={[styles.editButtonText, { color: colors.gradientEnd }]}>Edit profile</Text>
+              <Text style={[styles.editButtonText, { color: colors.gradientEnd }]}>{t('profile.editProfile')}</Text>
             </AnimatedPressable>
           </View>
         </View>
@@ -244,8 +241,8 @@ export function ProfileScreen() {
         <View style={[styles.toggleRow, { borderBottomColor: colors.border }]}>
           <Ionicons name="pause-circle-outline" size={22} color={colors.textMuted} />
           <View style={styles.toggleText}>
-            <Text style={[styles.toggleLabel, { color: colors.text }]}>Pause account</Text>
-            <Text style={[styles.toggleDesc, { color: colors.textMuted }]}>Hide your profile from the deck</Text>
+            <Text style={[styles.toggleLabel, { color: colors.text }]}>{t('profile.pauseAccount')}</Text>
+            <Text style={[styles.toggleDesc, { color: colors.textMuted }]}>{t('profile.pauseHint')}</Text>
           </View>
           <Switch
             value={isPaused}
@@ -258,8 +255,8 @@ export function ProfileScreen() {
         <View style={[styles.toggleRow, { borderBottomColor: colors.border }]}>
           <Ionicons name="moon-outline" size={22} color={colors.textMuted} />
           <View style={styles.toggleText}>
-            <Text style={[styles.toggleLabel, { color: colors.text }]}>Appearance</Text>
-            <Text style={[styles.toggleDesc, { color: colors.textMuted }]}>{themeLabel} mode</Text>
+            <Text style={[styles.toggleLabel, { color: colors.text }]}>{t('profile.appearance')}</Text>
+            <Text style={[styles.toggleDesc, { color: colors.textMuted }]}>{themeLabel}</Text>
           </View>
           <AnimatedPressable onPress={cycleTheme}>
             <Text style={[styles.themeToggle, { color: colors.gradientEnd }]}>{themeLabel}</Text>
@@ -269,9 +266,12 @@ export function ProfileScreen() {
         <View style={[styles.toggleRow, { borderBottomColor: colors.border }]}>
           <Ionicons name="eye-off-outline" size={22} color={colors.textMuted} />
           <View style={styles.toggleText}>
-            <Text style={[styles.toggleLabel, { color: colors.text }]}>Disguise mode</Text>
+            <Text style={[styles.toggleLabel, { color: colors.text }]}>{t('profile.disguiseMode')}</Text>
             <Text style={[styles.toggleDesc, { color: colors.textMuted }]}>
-              {disguiseMeta.name} is the default cover — turn off for {disguiseMeta.unlockLabel}
+              {t('profile.disguiseHint', {
+                appName: disguiseMeta.name,
+                unlockLabel: disguiseMeta.unlockLabel,
+              })}
             </Text>
           </View>
           <Switch
@@ -310,15 +310,15 @@ export function ProfileScreen() {
         <View style={styles.statsRow}>
           <View style={[styles.stat, { backgroundColor: colors.surface }]}>
             <Text style={[styles.statValue, { color: colors.text }]}>{likedIds.size}</Text>
-            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Likes sent</Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('profile.likesSent')}</Text>
           </View>
           <View style={[styles.stat, { backgroundColor: colors.surface }]}>
             <Text style={[styles.statValue, { color: colors.text }]}>{matches.length}</Text>
-            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Matches</Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('profile.matches')}</Text>
           </View>
           <View style={[styles.stat, { backgroundColor: colors.surface }]}>
             <Text style={[styles.statValue, { color: colors.text }]}>{profileCompletion.score}%</Text>
-            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Profile score</Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('profile.profileScore')}</Text>
           </View>
         </View>
 
@@ -354,12 +354,12 @@ export function ProfileScreen() {
         <View style={styles.section}>
           {settingsRows.map((row) => (
             <AnimatedPressable
-              key={row.label}
+              key={row.labelKey}
               style={[styles.settingsRow, { borderBottomColor: colors.border }]}
               onPress={() => handleRowPress(row.route)}
             >
               <Ionicons name={row.icon} size={20} color={colors.textMuted} />
-              <Text style={[styles.settingsLabel, { color: colors.text }]}>{row.label}</Text>
+              <Text style={[styles.settingsLabel, { color: colors.text }]}>{t(row.labelKey)}</Text>
               <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
             </AnimatedPressable>
           ))}
@@ -367,7 +367,7 @@ export function ProfileScreen() {
 
         <AnimatedPressable style={styles.deleteRow} onPress={handleDeleteAccount}>
           <Ionicons name="trash-outline" size={20} color={colors.nope} />
-          <Text style={[styles.deleteText, { color: colors.nope }]}>Delete account</Text>
+          <Text style={[styles.deleteText, { color: colors.nope }]}>{t('profile.deleteAccount')}</Text>
         </AnimatedPressable>
       </ScrollView>
 

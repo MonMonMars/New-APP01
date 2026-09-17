@@ -11,6 +11,7 @@ import { type ReactNode, useEffect, useRef } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { BrandMark } from '../components/brand/BrandMark';
+import { useTranslation } from '../i18n';
 import { CookieConsentBanner } from '../components/legal/CookieConsentBanner';
 import { useApp } from '../context/AppContext';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
@@ -71,6 +72,7 @@ function MatchesTabScreen() {
 function MainTabs() {
   const { likesTabBadge, matchesTabBadge, preferences } = useApp();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const discoverWorld = resolveSparkSection(preferences.sparkSection);
 
   return (
@@ -111,11 +113,16 @@ function MainTabs() {
         },
       })}
     >
-      <Tab.Screen name="Discover" component={DiscoverScreen} />
+      <Tab.Screen
+        name="Discover"
+        component={DiscoverScreen}
+        options={{ tabBarLabel: t('tabs.discover') }}
+      />
       <Tab.Screen
         name="Likes"
         component={LikesScreen}
         options={{
+          tabBarLabel: t('tabs.likes'),
           tabBarBadge: likesTabBadge > 0 ? likesTabBadge : undefined,
         }}
       />
@@ -123,10 +130,15 @@ function MainTabs() {
         name="Matches"
         component={MatchesTabScreen}
         options={{
+          tabBarLabel: t('tabs.matches'),
           tabBarBadge: matchesTabBadge > 0 ? matchesTabBadge : undefined,
         }}
       />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{ tabBarLabel: t('tabs.profile') }}
+      />
     </Tab.Navigator>
   );
 }

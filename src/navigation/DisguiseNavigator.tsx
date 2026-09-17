@@ -9,6 +9,7 @@ import { DisguiseAlertsScreen } from '../screens/disguise/DisguiseAlertsScreen';
 import { DisguiseFeedScreen } from '../screens/disguise/DisguiseFeedScreen';
 import { DisguiseProfileScreen } from '../screens/disguise/DisguiseProfileScreen';
 import { DisguiseTrendingScreen } from '../screens/disguise/DisguiseTrendingScreen';
+import { useTranslation } from '../i18n';
 import { disguiseWorldMeta } from '../utils/disguiseWorld';
 
 export type DisguiseTabParamList = {
@@ -22,6 +23,7 @@ const Tab = createBottomTabNavigator<DisguiseTabParamList>();
 
 export function DisguiseNavigator() {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const { pulseSocial, preferences, user } = useApp();
   const meta = disguiseWorldMeta(preferences.sparkSection, user.gender);
   const activityBadge =
@@ -69,9 +71,13 @@ export function DisguiseNavigator() {
       <Tab.Screen
         name="Activity"
         component={DisguiseAlertsScreen}
-        options={{ tabBarBadge: activityBadge }}
+        options={{ title: t('tabs.activity'), tabBarBadge: activityBadge }}
       />
-      <Tab.Screen name="Profile" component={DisguiseProfileScreen} />
+      <Tab.Screen
+        name="Profile"
+        component={DisguiseProfileScreen}
+        options={{ title: t('tabs.profile') }}
+      />
     </Tab.Navigator>
   );
 }

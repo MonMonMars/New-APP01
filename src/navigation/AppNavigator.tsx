@@ -340,7 +340,11 @@ function ThemedNavigator() {
   }, [disguiseMode, hasOnboarded, isHydrated, navigationRef]);
 
   return (
-    <ThemeProvider mode={themeMode} world={resolveSparkSection(preferences.sparkSection)}>
+    <ThemeProvider
+      mode={themeMode}
+      world={resolveSparkSection(preferences.sparkSection)}
+      disguise={disguiseMode}
+    >
       <NavigationContainer ref={navigationRef}>
         <HydrationGate>
           <RootNavigator />

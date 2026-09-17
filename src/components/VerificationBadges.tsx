@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, radii, spacing } from '../theme';
+import { useTheme } from '../context/ThemeContext';
+import { radii, spacing } from '../theme';
 
 export type VerificationFlags = {
   photoVerified?: boolean;
@@ -20,7 +21,6 @@ type BadgeSpec = {
   active: boolean;
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
-  color: string;
 };
 
 export function VerificationBadges({
@@ -29,7 +29,9 @@ export function VerificationBadges({
   ageVerified = false,
   size = 'md',
 }: VerificationBadgesProps) {
+  const { colors } = useTheme();
   const iconSize = size === 'sm' ? 12 : 14;
+  const accent = colors.like;
   const badges: BadgeSpec[] = (
     [
       {
@@ -37,21 +39,18 @@ export function VerificationBadges({
         active: photoVerified,
         icon: 'camera' as const,
         label: 'Photo verified',
-        color: '#3b82f6',
       },
       {
         key: 'person',
         active: personVerified,
         icon: 'person' as const,
         label: 'Real person',
-        color: colors.like,
       },
       {
         key: 'age',
         active: ageVerified,
         icon: 'shield-checkmark' as const,
         label: 'Age 18+',
-        color: colors.superLike,
       },
     ] satisfies BadgeSpec[]
   ).filter((badge) => badge.active);
@@ -68,16 +67,16 @@ export function VerificationBadges({
           style={[
             styles.badge,
             size === 'sm' ? styles.badgeSm : styles.badgeMd,
-            { backgroundColor: `${badge.color}18`, borderColor: `${badge.color}44` },
+            { backgroundColor: `${accent}18`, borderColor: `${accent}44` },
           ]}
           accessibilityLabel={badge.label}
         >
-          <Ionicons name={badge.icon} size={iconSize} color={badge.color} />
+          <Ionicons name={badge.icon} size={iconSize} color={accent} />
           <Text
             style={[
               styles.label,
               size === 'sm' ? styles.labelSm : styles.labelMd,
-              { color: badge.color },
+              { color: accent },
             ]}
           >
             {badge.label}

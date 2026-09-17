@@ -7,6 +7,7 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { FeedPersonRow } from './FeedPersonRow';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -45,7 +46,8 @@ export function SocialCommentSheet({
 }: SocialCommentSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { addPulseComment, getPulseComments } = useApp();
+  const { addPulseComment, getPulseComments, preferences } = useApp();
+  const accent = disguiseWorldMeta(preferences.sparkSection).accent;
   const [draft, setDraft] = useState('');
 
   if (!post) {
@@ -133,7 +135,7 @@ export function SocialCommentSheet({
           <AnimatedPressable
             onPress={handlePost}
             disabled={!draft.trim()}
-            style={[styles.sendBtn, { backgroundColor: draft.trim() ? colors.gradientEnd : colors.surface }]}
+            style={[styles.sendBtn, { backgroundColor: draft.trim() ? accent : colors.surface }]}
           >
             <Ionicons name="send" size={18} color={draft.trim() ? '#fff' : colors.textMuted} />
           </AnimatedPressable>

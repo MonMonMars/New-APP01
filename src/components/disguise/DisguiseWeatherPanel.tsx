@@ -53,9 +53,9 @@ export function DisguiseWeatherPanel({ weather, isLive = false, onPress }: Disgu
           <Text style={[styles.city, { color: colors.text }]}>{weather.city}</Text>
           <Text style={[styles.region, { color: colors.textMuted }]}>{weather.region}</Text>
         </View>
-        <View style={styles.livePill}>
-          {isLive ? <View style={styles.liveDot} /> : null}
-          <Text style={styles.liveText}>{isLive ? 'Live' : 'Forecast'}</Text>
+        <View style={[styles.livePill, { backgroundColor: `${accent}24` }]}>
+          {isLive ? <View style={[styles.liveDot, { backgroundColor: accent }]} /> : null}
+          <Text style={[styles.liveText, { color: accent }]}>{isLive ? 'Live' : 'Forecast'}</Text>
         </View>
       </View>
 
@@ -142,7 +142,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: 'rgba(34,197,94,0.14)',
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
     borderRadius: radii.button,
@@ -151,10 +150,8 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#22c55e',
   },
   liveText: {
-    color: '#22c55e',
     fontSize: 10,
     fontWeight: '800',
     textTransform: 'uppercase',

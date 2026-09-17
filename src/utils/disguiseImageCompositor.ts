@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 
+import { pulseBrand } from '../theme/pulseBrand';
 import { DisguiseOverlayVariant } from '../types/disguise';
 
 const CANVAS_WIDTH = 800;
@@ -99,7 +100,7 @@ export async function compositeDisguiseImage(
   ctx.shadowBlur = 0;
 
   if (variant === 'ad') {
-    ctx.fillStyle = '#3b82f6';
+    ctx.fillStyle = pulseBrand.accent;
     const buttonWidth = 280;
     const buttonHeight = 56;
     const buttonX = (CANVAS_WIDTH - buttonWidth) / 2;

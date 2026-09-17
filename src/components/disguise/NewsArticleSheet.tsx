@@ -80,7 +80,7 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
           ))}
           <FadeSlideIn replayKey={visible} index={3 + paragraphs.length}>
             <AnimatedPressable
-              style={styles.readOriginal}
+              style={[styles.readOriginal, { backgroundColor: meta.accent }]}
               onPress={() => {
                 void openExternalUrl(post.articleUrl, post.source);
               }}
@@ -163,7 +163,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.sm,
-    backgroundColor: '#3b82f6',
     borderRadius: radii.button,
     paddingVertical: spacing.md,
     marginTop: spacing.sm,

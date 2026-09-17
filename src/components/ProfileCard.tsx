@@ -152,7 +152,7 @@ export function ProfileCard({
       )}
 
       {profile.mostCompatible && isTop && (
-        <View style={styles.compatibleBadge}>
+        <View style={[styles.compatibleBadge, { backgroundColor: colors.boost }]}>
           <Text style={styles.compatibleBadgeText}>Most Compatible</Text>
         </View>
       )}

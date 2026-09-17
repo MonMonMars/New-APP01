@@ -2,9 +2,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { radii, spacing } from '../../theme';
 import { modalFill } from '../../theme/modalFill';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type PulseUnavailableSheetProps = {
@@ -22,6 +24,8 @@ export function PulseUnavailableSheet({
 }: PulseUnavailableSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { preferences } = useApp();
+  const accent = disguiseWorldMeta(preferences.sparkSection).accent;
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -30,7 +34,7 @@ export function PulseUnavailableSheet({
           <Ionicons name="document-text-outline" size={40} color={colors.textMuted} />
           <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
           <Text style={[styles.message, { color: colors.textMuted }]}>{message}</Text>
-          <AnimatedPressable style={[styles.button, { backgroundColor: colors.gradientEnd }]} onPress={onClose}>
+          <AnimatedPressable style={[styles.button, { backgroundColor: accent }]} onPress={onClose}>
             <Text style={styles.buttonText}>Got it</Text>
           </AnimatedPressable>
         </View>

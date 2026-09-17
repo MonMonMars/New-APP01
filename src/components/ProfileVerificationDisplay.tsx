@@ -33,7 +33,7 @@ export function ProfileVerificationDisplay({ profile }: ProfileVerificationDispl
       </View>
 
       <View style={styles.row}>
-        <View style={[styles.iconWrap, { backgroundColor: colors.background }, photoOk && styles.iconWrapDone]}>
+        <View style={[styles.iconWrap, { backgroundColor: colors.background }, photoOk && { backgroundColor: `${colors.like}22` }]}>
           <Ionicons name="camera" size={16} color={photoOk ? colors.like : colors.textMuted} />
         </View>
         <View style={styles.rowText}>
@@ -46,7 +46,7 @@ export function ProfileVerificationDisplay({ profile }: ProfileVerificationDispl
       </View>
 
       <View style={styles.row}>
-        <View style={[styles.iconWrap, { backgroundColor: colors.background }, personOk && styles.iconWrapDone]}>
+        <View style={[styles.iconWrap, { backgroundColor: colors.background }, personOk && { backgroundColor: `${colors.like}22` }]}>
           <Ionicons name="person" size={16} color={personOk ? colors.like : colors.textMuted} />
         </View>
         <View style={styles.rowText}>
@@ -101,9 +101,6 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  iconWrapDone: {
-    backgroundColor: 'rgba(33, 208, 122, 0.15)',
   },
   rowText: {
     flex: 1,

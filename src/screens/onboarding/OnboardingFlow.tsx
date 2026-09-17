@@ -18,6 +18,7 @@ import {
 import { signInWithApple } from '../../utils/appleAuth';
 import { pickProfilePhoto } from '../../utils/photoPicker';
 import { colors, radii, spacing } from '../../theme';
+import { pulseBrand } from '../../theme/pulseBrand';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 
 type Step = 'welcome' | 'rules' | 'location' | 'intent' | 'identity' | 'profile';
@@ -126,7 +127,7 @@ export function OnboardingFlow() {
       {step === 'welcome' && (
         <View style={styles.step}>
           <View style={styles.badge}>
-            <Ionicons name="pulse" size={36} color="#3b82f6" />
+            <Ionicons name="pulse" size={36} color={pulseBrand.accent} />
           </View>
           <Text style={styles.title}>Welcome to {DISGUISE_APP_NAME}</Text>
           <Text style={styles.subtitle}>
@@ -214,7 +215,7 @@ export function OnboardingFlow() {
             <Ionicons
               name={legalAccepted ? 'checkbox' : 'square-outline'}
               size={22}
-              color={legalAccepted ? colors.gradientEnd : colors.textMuted}
+              color={legalAccepted ? pulseBrand.accent : colors.textMuted}
             />
             <Text style={styles.checkboxLabel}>I have read and agree to the policies above</Text>
           </AnimatedPressable>
@@ -350,7 +351,7 @@ export function OnboardingFlow() {
           />
 
           <AnimatedPressable style={styles.addPhotoButton} onPress={handleAddPhoto}>
-            <Ionicons name="camera-outline" size={18} color={colors.gradientEnd} />
+            <Ionicons name="camera-outline" size={18} color={pulseBrand.accent} />
             <Text style={styles.addPhotoText}>Add photos</Text>
           </AnimatedPressable>
 
@@ -468,7 +469,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   ruleBullet: {
-    color: colors.gradientEnd,
+    color: pulseBrand.accent,
     fontSize: 18,
   },
   ruleText: {
@@ -485,7 +486,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   legalLink: {
-    color: colors.gradientEnd,
+    color: pulseBrand.accent,
     fontWeight: '700',
     textDecorationLine: 'underline',
   },
@@ -500,8 +501,8 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   checkboxRowActive: {
-    borderColor: colors.gradientEnd,
-    backgroundColor: 'rgba(99,102,241,0.08)',
+    borderColor: pulseBrand.accent,
+    backgroundColor: pulseBrand.accentSoft,
   },
   checkboxLabel: {
     color: colors.text,
@@ -536,7 +537,7 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   intentCardSelected: {
-    borderColor: colors.gradientEnd,
+    borderColor: pulseBrand.accent,
   },
   intentLabel: {
     color: colors.text,
@@ -544,7 +545,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   intentLabelSelected: {
-    color: colors.gradientEnd,
+    color: pulseBrand.accent,
   },
   intentHint: {
     color: colors.textMuted,
@@ -566,7 +567,7 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   chipSelected: {
-    borderColor: colors.gradientEnd,
+    borderColor: pulseBrand.accent,
   },
   chipText: {
     color: colors.textMuted,
@@ -584,7 +585,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   addPhotoText: {
-    color: colors.gradientEnd,
+    color: pulseBrand.accent,
     fontSize: 14,
     fontWeight: '600',
   },
@@ -609,7 +610,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   primaryButton: {
-    backgroundColor: colors.gradientEnd,
+    backgroundColor: pulseBrand.accent,
     borderRadius: radii.button,
     paddingVertical: spacing.md,
     alignItems: 'center',

@@ -2,9 +2,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
+import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { AdPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { ContentTypeIcon, MediaWithContentBadge } from './ContentTypeIcon';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { AdLandingSheet } from './AdLandingSheet';
@@ -35,6 +37,8 @@ type AdBannerCardProps = {
 
 export function AdBannerCard({ ad }: AdBannerCardProps) {
   const { colors } = useTheme();
+  const { preferences } = useApp();
+  const meta = disguiseWorldMeta(preferences.sparkSection);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [testimonialOpen, setTestimonialOpen] = useState(false);
   const testimonial = AD_TESTIMONIALS[ad.id.length % AD_TESTIMONIALS.length];
@@ -78,7 +82,7 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
               accessibilityLabel={`${testimonial.name} profile photo`}
             />
           </AnimatedPressable>
-          <View style={styles.cta}>
+          <View style={[styles.cta, { backgroundColor: meta.accent }]}>
             <Text style={styles.ctaText}>{ad.cta}</Text>
             <Ionicons name="chevron-forward" size={14} color="#fff" />
           </View>
@@ -147,7 +151,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'flex-start',
     gap: 6,
-    backgroundColor: '#3b82f6',
     borderRadius: radii.button,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,

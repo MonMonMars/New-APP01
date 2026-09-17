@@ -2,10 +2,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { AdPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { openExternalUrl } from '../../utils/openExternalUrl';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
 import { FadeSlideIn } from '../motion/FadeSlideIn';
 import { AnimatedPressable } from '../AnimatedPressable';
@@ -19,6 +21,8 @@ type AdLandingSheetProps = {
 export function AdLandingSheet({ visible, ad, onClose }: AdLandingSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { preferences } = useApp();
+  const meta = disguiseWorldMeta(preferences.sparkSection);
 
   if (!ad) {
     return null;
@@ -65,7 +69,7 @@ export function AdLandingSheet({ visible, ad, onClose }: AdLandingSheetProps) {
             </FadeSlideIn>
           ))}
           <FadeSlideIn replayKey={visible} index={3 + paragraphs.length}>
-            <AnimatedPressable style={styles.cta} onPress={handleVisit} scaleTo={0.97}>
+            <AnimatedPressable style={[styles.cta, { backgroundColor: meta.accent }]} onPress={handleVisit} scaleTo={0.97}>
               <Text style={styles.ctaText}>{ad.cta}</Text>
               <Ionicons name="open-outline" size={16} color="#fff" />
             </AnimatedPressable>
@@ -129,7 +133,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.sm,
-    backgroundColor: '#3b82f6',
     borderRadius: radii.button,
     paddingVertical: spacing.md,
     marginTop: spacing.sm,

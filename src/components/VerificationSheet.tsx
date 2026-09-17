@@ -114,7 +114,7 @@ export function VerificationSheet({
 
           {step === 'done' && (
             <>
-              <Ionicons name="checkmark-circle" size={52} color="#22c55e" />
+              <Ionicons name="checkmark-circle" size={52} color={colors.like} />
               <Text style={[styles.headline, { color: colors.text }]}>Verified</Text>
               <Text style={[styles.bodyText, { color: colors.textMuted }]}>{copy.success}</Text>
               <AnimatedPressable style={[styles.primaryBtn, { backgroundColor: colors.gradientEnd }]} onPress={handleFinish}>

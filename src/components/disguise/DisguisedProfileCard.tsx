@@ -149,7 +149,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
                 ? 'Market briefing — verified note from a Harbor member.'
                 : 'Reader spotlight — verified comment from a Pulse member.'}
             </Text>
-            <View style={styles.cta}>
+            <View style={[styles.cta, { backgroundColor: meta.accent }]}>
               <Text style={styles.ctaText}>{post.cta ?? 'Learn more'}</Text>
               <Ionicons name="chevron-forward" size={14} color="#fff" />
             </View>
@@ -294,7 +294,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'flex-start',
     gap: 6,
-    backgroundColor: '#3b82f6',
     borderRadius: radii.button,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,

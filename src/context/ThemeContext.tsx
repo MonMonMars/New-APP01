@@ -24,10 +24,12 @@ export function ThemeProvider({
   children,
   mode: externalMode = 'dark',
   world = 'spark',
+  disguise = false,
 }: {
   children: ReactNode;
   mode?: ThemeMode;
   world?: 'spark' | 'ember';
+  disguise?: boolean;
 }) {
   const [mode, setModeState] = useState<ThemeMode>(externalMode);
 
@@ -48,10 +50,11 @@ export function ThemeProvider({
       colors: paletteForSection(
         resolvedMode === 'light' ? lightColors : darkColors,
         world,
+        disguise,
       ),
       setMode,
     }),
-    [mode, resolvedMode, setMode, world],
+    [disguise, mode, resolvedMode, setMode, world],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

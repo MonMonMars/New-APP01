@@ -1,4 +1,5 @@
 import { harborBrand } from './theme/harborBrand';
+import { pulseBrand } from './theme/pulseBrand';
 import { sparkBrand } from './theme/sparkBrand';
 
 export type ColorPalette = {
@@ -93,14 +94,17 @@ export const lightColors: ColorPalette = {
   ...buttonTokens(sparkBrand.accent),
 };
 
-/** Spark pinks and Ember gold — one accent per world for every button. */
+/** One accent per world for every button: Spark pink, Ember gold, Pulse blue, Harbor gold. */
 export function paletteForSection(
   base: ColorPalette,
   section: 'spark' | 'ember',
+  disguise = false,
 ): ColorPalette {
   switch (section) {
     case 'spark':
-      return base;
+      return disguise
+        ? { ...base, ...buttonTokens(pulseBrand.accent) }
+        : base;
     case 'ember':
       return {
         ...base,

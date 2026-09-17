@@ -5,11 +5,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
+import { femaleTrendingTopics } from '../../data/disguiseFemaleTrending';
 import { disguiseTrendingTopics } from '../../data/disguiseTrending';
 import { radii, spacing } from '../../theme';
 import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { disguiseFeedItemsForGender } from '../../utils/disguiseFeedCatalog';
 import { findFeedItemById } from '../../utils/findFeedItem';
-import { disguiseFeedItems, FeedItem } from '../../data/disguiseFeed';
+import { FeedItem } from '../../data/disguiseFeed';
+import { usesFemalePulseExperience } from '../../utils/genderAccountPerks';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type SearchResult =
@@ -48,21 +51,25 @@ export function DisguiseSearchSheet({
 }: DisguiseSearchSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { preferences } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection);
+  const { user, preferences } = useApp();
+  const meta = disguiseWorldMeta(preferences.sparkSection, user.gender);
+  const feedCatalog = disguiseFeedItemsForGender(user.gender);
+  const trendingTopics = usesFemalePulseExperience(user.gender)
+    ? femaleTrendingTopics
+    : disguiseTrendingTopics;
   const [query, setQuery] = useState('');
 
   const results = useMemo((): SearchResult[] => {
     const q = query.trim().toLowerCase();
     if (!q) {
-      return disguiseTrendingTopics.slice(0, 6).map((topic) => ({
+      return trendingTopics.slice(0, 6).map((topic) => ({
         kind: 'topic' as const,
         label: topic.label,
         preview: topic.preview,
       }));
     }
 
-    const topicHits = disguiseTrendingTopics
+    const topicHits = trendingTopics
       .filter(
         (topic) =>
           topic.label.toLowerCase().includes(q) ||
@@ -74,7 +81,7 @@ export function DisguiseSearchSheet({
 
     const articleHits: SearchResult[] = [];
     const seen = new Set<string>();
-    for (const item of disguiseFeedItems) {
+    for (const item of feedCatalog) {
       if (seen.has(item.id)) {
         continue;
       }
@@ -88,7 +95,7 @@ export function DisguiseSearchSheet({
     }
 
     return [...topicHits, ...articleHits];
-  }, [query]);
+  }, [query, feedCatalog, trendingTopics]);
 
   const handleClose = () => {
     setQuery('');

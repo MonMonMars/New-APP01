@@ -1,7 +1,8 @@
-import { disguiseFeedItems, FeedItem } from '../data/disguiseFeed';
+import { FeedItem } from '../data/disguiseFeed';
 import { DisguiseAdCreative } from '../types/disguise';
 import { SparkSection } from '../types/preferences';
 import { UserProfile } from '../types/profile';
+import { disguiseFeedItemsForGender } from './disguiseFeedCatalog';
 import { buildDisguisedProfileFeedItem, buildDisguisedProfileFeedItems } from './disguiseProfileFeed';
 
 function weaveProfileCards(base: FeedItem[], profileCards: FeedItem[]): FeedItem[] {
@@ -34,7 +35,8 @@ export function buildDisguiseFeed(
   section?: SparkSection | string | null,
 ): FeedItem[] {
   const profileCards = buildDisguisedProfileFeedItems(section);
-  const withProfiles = weaveProfileCards(disguiseFeedItems, profileCards);
+  const baseFeed = disguiseFeedItemsForGender(user.gender);
+  const withProfiles = weaveProfileCards(baseFeed, profileCards);
 
   if (!creative) {
     return withProfiles;

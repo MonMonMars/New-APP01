@@ -1,4 +1,12 @@
 import { disguiseClientAds } from '../data/disguiseClientAds';
+import {
+  disguiseFemaleNewsItems,
+} from '../data/disguiseFemaleFeed';
+import {
+  femaleBreakingNowCards,
+  femaleEditorsPicks,
+  femalePulseBrief,
+} from '../data/disguiseFemaleTrending';
 import { breakingNowCards, editorsPicks, pulseBrief } from '../data/disguiseTrending';
 import { disguiseNewsExtra } from '../data/disguiseNewsExtra';
 import { disguiseSocialPosts } from '../data/disguiseSocialPosts';
@@ -44,6 +52,16 @@ for (const card of breakingNowCards) {
   registerItem(breakingToNewsPost(card));
 }
 for (const pick of editorsPicks) {
+  registerItem(editorsPickToNewsPost(pick));
+}
+for (const item of disguiseFemaleNewsItems) {
+  registerItem(item);
+}
+registerItem(briefToNewsPost(femalePulseBrief));
+for (const card of femaleBreakingNowCards) {
+  registerItem(breakingToNewsPost(card));
+}
+for (const pick of femaleEditorsPicks) {
   registerItem(editorsPickToNewsPost(pick));
 }
 

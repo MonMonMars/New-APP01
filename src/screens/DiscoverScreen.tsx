@@ -27,6 +27,7 @@ import { useTheme } from '../context/ThemeContext';
 import { Profile, ProfilePrompt } from '../types/profile';
 import { resolveSparkSection, SPARK_SECTION_EMPTY } from '../types/preferences';
 import { spacing } from '../theme';
+import { dailyLikeLimitForGender } from '../utils/genderAccountPerks';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 
 const TAB_BAR_HEIGHT = 72;
@@ -455,6 +456,7 @@ export function DiscoverScreen() {
           setShowLikeLimit(false);
           navigation.getParent()?.navigate('SparkPlus');
         }}
+        dailyLikeLimit={dailyLikeLimitForGender(user.gender, isSparkPlus)}
       />
 
       <PostMatchMomentumModal

@@ -27,14 +27,20 @@ export function DisguiseBrand({ size = 'md', showTagline = false, style }: Disgu
   }
 }
 
-export function DisguiseBrandMark({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
+export function DisguiseBrandMark({
+  size = 'md',
+  muted = false,
+}: {
+  size?: 'sm' | 'md' | 'lg';
+  muted?: boolean;
+}) {
   const { preferences } = useApp();
   const meta = disguiseWorldMeta(preferences.sparkSection);
   switch (meta.world) {
     case 'harbor':
-      return <HarborBrandMark size={size} />;
+      return <HarborBrandMark size={size} muted={muted} />;
     case 'pulse':
-      return <PulseBrandMark size={size} />;
+      return <PulseBrandMark size={size} muted={muted} />;
     default: {
       const _exhaustive: never = meta.world;
       return _exhaustive;

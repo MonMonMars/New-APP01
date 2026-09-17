@@ -22,8 +22,8 @@ const Tab = createBottomTabNavigator<DisguiseTabParamList>();
 
 export function DisguiseNavigator() {
   const { colors } = useTheme();
-  const { pulseSocial, preferences } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection);
+  const { pulseSocial, preferences, user } = useApp();
+  const meta = disguiseWorldMeta(preferences.sparkSection, user.gender);
   const activityBadge =
     !pulseSocial.activityAlertsRead && disguiseAlerts.length > 0
       ? disguiseAlerts.length
@@ -56,7 +56,7 @@ export function DisguiseNavigator() {
         tabBarIcon: ({ color, size }) => {
           const icons: Record<keyof DisguiseTabParamList, keyof typeof Ionicons.glyphMap> = {
             Home: meta.world === 'harbor' ? 'briefcase' : 'home',
-            Trending: meta.world === 'harbor' ? 'bar-chart' : 'trending-up',
+            Trending: meta.world === 'harbor' ? 'bar-chart' : meta.trendingTab === 'Cosmos' ? 'planet-outline' : 'trending-up',
             Activity: 'notifications-outline',
             Profile: 'person-circle-outline',
           };

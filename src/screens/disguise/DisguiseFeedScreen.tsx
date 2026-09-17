@@ -50,7 +50,7 @@ export function DisguiseFeedScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { user, disguiseAdCreative, pulseSocial, preferences } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection);
+  const meta = disguiseWorldMeta(preferences.sparkSection, user.gender);
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
   const route = useRoute<RouteProp<DisguiseTabParamList, 'Home'>>();
   const topic = route.params?.topic;

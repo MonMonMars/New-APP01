@@ -22,6 +22,18 @@ export const pulseNewsImages = {
     'https://images.pexels.com/photos/373543/pexels-photo-373543.jpeg?auto=compress&cs=tinysrgb&w=1200',
   fallback:
     'https://images.pexels.com/photos/3944454/pexels-photo-3944454.jpeg?auto=compress&cs=tinysrgb&w=1200',
+  stars:
+    'https://images.pexels.com/photos/998641/pexels-photo-998641.jpeg?auto=compress&cs=tinysrgb&w=1200',
+  moon:
+    'https://images.pexels.com/photos/87651/earth-blue-planet-globe-planet-87651.jpeg?auto=compress&cs=tinysrgb&w=1200',
+  tarot:
+    'https://images.pexels.com/photos/7661160/pexels-photo-7661160.jpeg?auto=compress&cs=tinysrgb&w=1200',
+  concert:
+    'https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=1200',
+  cinema:
+    'https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=1200',
+  fashion:
+    'https://images.pexels.com/photos/1926769/pexels-photo-1926769.jpeg?auto=compress&cs=tinysrgb&w=1200',
 } as const;
 
 /** Free-to-read publishers — no subscription or registration wall on these section pages. */
@@ -41,6 +53,11 @@ export const freeNewsLinks = {
   dwNews: 'https://www.dw.com/en/top-stories/s-9097',
   cbcNews: 'https://www.cbc.ca/news',
   abcNews: 'https://www.abc.net.au/news',
+  bbcCulture: 'https://www.bbc.com/culture',
+  guardianFilm: 'https://www.theguardian.com/film',
+  guardianStage: 'https://www.theguardian.com/stage',
+  nprPopCulture: 'https://www.npr.org/sections/pop-culture',
+  nprMusic: 'https://www.npr.org/sections/arts-life/music',
 } as const;
 
 export function freeNewsUrlForTopic(topic: string): string {

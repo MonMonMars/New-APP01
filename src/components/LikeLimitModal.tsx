@@ -12,9 +12,10 @@ type LikeLimitModalProps = {
   visible: boolean;
   onClose: () => void;
   onUpgrade: () => void;
+  dailyLikeLimit?: number;
 };
 
-export function LikeLimitModal({ visible, onClose, onUpgrade }: LikeLimitModalProps) {
+export function LikeLimitModal({ visible, onClose, onUpgrade, dailyLikeLimit = FREE_DAILY_LIKE_LIMIT }: LikeLimitModalProps) {
   const { colors } = useTheme();
   return (
     <AnimatedOverlay visible={visible} onClose={onClose} variant="center">
@@ -25,7 +26,7 @@ export function LikeLimitModal({ visible, onClose, onUpgrade }: LikeLimitModalPr
         <FadeSlideIn replayKey={visible} index={1}>
           <Text style={[styles.title, { color: colors.text }]}>You&apos;re out of likes today</Text>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-            Free members get {FREE_DAILY_LIKE_LIMIT} likes per day. Upgrade to Spark+ for unlimited
+            Free members get {dailyLikeLimit} likes per day. Upgrade to Spark+ for unlimited
             likes, see who liked you, and more.
           </Text>
         </FadeSlideIn>

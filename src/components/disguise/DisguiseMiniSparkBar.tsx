@@ -29,7 +29,7 @@ function MiniLetterButton({ letter, active, onPress, accessibilityLabel }: MiniL
   return (
     <ScalePressable
       onPress={onPress}
-      active={active}
+      active={false}
       accessibilityLabel={accessibilityLabel}
       scaleTo={0.86}
       style={[

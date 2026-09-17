@@ -1,3 +1,5 @@
+import { AppLocale } from './locale';
+
 export type ShowMePreference = 'women' | 'men' | 'everyone';
 
 import {
@@ -106,6 +108,8 @@ export type DiscoveryPreferences = {
   advancedFilters?: AdvancedDiscoverFilters;
   /** Spark (open dating) vs Ember (married group). Anyone can switch — not locked to profile status. */
   sparkSection?: SparkSection;
+  /** In-app language for legal docs and policy UI */
+  appLocale?: AppLocale;
 };
 
 export const SEARCH_RADIUS_PRESETS = [

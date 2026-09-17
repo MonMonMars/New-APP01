@@ -2,8 +2,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { getLegalUiStrings } from '../../content/legal';
+import { useAppLocale } from '../../hooks/useAppLocale';
 import { useTheme } from '../../context/ThemeContext';
-import { useApp } from '../../context/AppContext';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { AnimatedPressable } from '../AnimatedPressable';
@@ -15,14 +16,6 @@ type DisguisePolicyModalProps = {
   onOpenFullPolicy?: () => void;
 };
 
-const bullets = [
-  'Pulse disguises dating activity as a news/social feed for privacy in public.',
-  'Disguise does not hide your data from Spark or make you anonymous to existing matches.',
-  'Do not use disguise to harass, scam, or impersonate news organisations.',
-  'Sample BBC, Guardian, NPR, and ad brands in Pulse are illustrations — not real affiliations.',
-  'Lock your device and use app lock — disguise cannot stop screenshots or device access.',
-];
-
 export function DisguisePolicyModal({
   visible,
   onAccept,
@@ -31,7 +24,8 @@ export function DisguisePolicyModal({
 }: DisguisePolicyModalProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { preferences } = useApp();
+  const { locale } = useAppLocale();
+  const ui = getLegalUiStrings(locale);
   const meta = useDisguiseWorld();
 
   return (
@@ -41,20 +35,24 @@ export function DisguisePolicyModal({
           <AnimatedPressable onPress={onCancel} hitSlop={12}>
             <Ionicons name="close" size={24} color={colors.textMuted} />
           </AnimatedPressable>
-          <Text style={[styles.title, { color: colors.text }]}>Disguise mode policy</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{ui.disguiseModalTitle}</Text>
           <View style={styles.spacer} />
         </View>
 
         <ScrollView contentContainerStyle={styles.content}>
           <View style={[styles.hero, { backgroundColor: colors.surface }]}>
             <Ionicons name="eye-off" size={32} color={colors.gradientEnd} />
-            <Text style={[styles.heroTitle, { color: colors.text }]}>Before you leave {meta.name}</Text>
+            <Text style={[styles.heroTitle, { color: colors.text }]}>
+              {locale === 'zh-TW' ? `離開 ${meta.name} 之前` : `Before you leave ${meta.name}`}
+            </Text>
             <Text style={[styles.heroBody, { color: colors.textMuted }]}>
-              You are leaving {meta.name}. Please confirm you understand how disguise mode works.
+              {locale === 'zh-TW'
+                ? `您即將離開 ${meta.name}。請確認您了解偽裝模式的運作方式。`
+                : `You are leaving ${meta.name}. Please confirm you understand how disguise mode works.`}
             </Text>
           </View>
 
-          {bullets.map((bullet) => (
+          {ui.disguiseBullets.map((bullet) => (
             <View key={bullet} style={styles.bulletRow}>
               <Text style={[styles.bullet, { color: colors.gradientEnd }]}>•</Text>
               <Text style={[styles.bulletText, { color: colors.textMuted }]}>{bullet}</Text>
@@ -63,17 +61,17 @@ export function DisguisePolicyModal({
 
           {onOpenFullPolicy ? (
             <AnimatedPressable onPress={onOpenFullPolicy} style={styles.linkWrap}>
-              <Text style={[styles.link, { color: colors.gradientEnd }]}>Read full Disguise Mode Policy</Text>
+              <Text style={[styles.link, { color: colors.gradientEnd }]}>{ui.disguiseReadFull}</Text>
             </AnimatedPressable>
           ) : null}
         </ScrollView>
 
         <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.md, borderTopColor: colors.border }]}>
           <AnimatedPressable style={[styles.primary, { backgroundColor: colors.gradientEnd }]} onPress={onAccept}>
-            <Text style={styles.primaryText}>I understand — leave {meta.unlockLabel}</Text>
+            <Text style={styles.primaryText}>{ui.disguiseAccept(meta.unlockLabel)}</Text>
           </AnimatedPressable>
           <AnimatedPressable style={styles.secondary} onPress={onCancel}>
-            <Text style={[styles.secondaryText, { color: colors.textMuted }]}>Stay in {meta.name}</Text>
+            <Text style={[styles.secondaryText, { color: colors.textMuted }]}>{ui.disguiseStay(meta.name)}</Text>
           </AnimatedPressable>
         </View>
       </View>

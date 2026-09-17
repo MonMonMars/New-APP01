@@ -3,7 +3,9 @@ import { useState } from 'react';
 import { Image, Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { getLegalUiStrings } from '../content/legal';
 import { useApp } from '../context/AppContext';
+import { useAppLocale } from '../hooks/useAppLocale';
 import { useTheme } from '../context/ThemeContext';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -51,6 +53,8 @@ export function VerificationSheet({
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { acceptVerificationPolicy } = useApp();
+  const { locale } = useAppLocale();
+  const ui = getLegalUiStrings(locale);
   const [step, setStep] = useState<Step>('intro');
   const [policyAccepted, setPolicyAccepted] = useState(false);
   const copy = COPY[kind];
@@ -91,12 +95,12 @@ export function VerificationSheet({
               <Text style={[styles.headline, { color: colors.text }]}>{copy.title}</Text>
               <Text style={[styles.bodyText, { color: colors.textMuted }]}>{copy.body}</Text>
               <Text style={[styles.policyNote, { color: colors.textMuted }]}>
-                Verification badges are not background checks or safety guarantees.
+                {ui.verificationNotGuarantee}
                 {onOpenPolicy ? (
                   <>
                     {' '}
                     <Text style={[styles.policyLink, { color: colors.gradientEnd }]} onPress={onOpenPolicy}>
-                      Read Trust & Verification Policy
+                      {ui.verificationPolicyLink}
                     </Text>
                   </>
                 ) : null}
@@ -110,9 +114,7 @@ export function VerificationSheet({
                   size={22}
                   color={policyAccepted ? colors.gradientEnd : colors.textMuted}
                 />
-                <Text style={[styles.checkboxLabel, { color: colors.textMuted }]}>
-                  I agree to biometric and identity processing as described in the Verification Policy
-                </Text>
+                <Text style={[styles.checkboxLabel, { color: colors.textMuted }]}>{ui.verificationConsent}</Text>
               </AnimatedPressable>
               <Text style={[styles.demoNote, { color: colors.textMuted }]}>Demo mode — no real ID vendor connected.</Text>
               <AnimatedPressable

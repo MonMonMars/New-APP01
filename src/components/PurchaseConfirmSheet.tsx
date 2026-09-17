@@ -2,6 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { getLegalUiStrings } from '../content/legal';
+import { useAppLocale } from '../hooks/useAppLocale';
 import { useTheme } from '../context/ThemeContext';
 import { radii, spacing } from '../theme';
 import { modalFill } from '../theme/modalFill';
@@ -34,6 +36,8 @@ export function PurchaseConfirmSheet({
 }: PurchaseConfirmSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { locale } = useAppLocale();
+  const legalUi = getLegalUiStrings(locale);
   const accent = iconColor ?? colors.gradientEnd;
 
   return (
@@ -50,13 +54,12 @@ export function PurchaseConfirmSheet({
           ) : null}
           <Text style={[styles.price, { color: colors.text }]}>{price}</Text>
           <Text style={[styles.legal, { color: colors.textMuted }]}>
-            Demo purchase — no real charge. In production this uses Apple or Google billing. Subscriptions
-            auto-renew until cancelled in your store settings.
+            {legalUi.purchaseDemoNote} {legalUi.purchaseAutoRenew}
             {onOpenSubscriptionTerms ? (
               <>
                 {' '}
                 <Text style={[styles.legalLink, { color: accent }]} onPress={onOpenSubscriptionTerms}>
-                  Subscription Terms
+                  {legalUi.subscriptionTermsLink}
                 </Text>
               </>
             ) : null}

@@ -3,12 +3,14 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
+import { LocaleToggle } from '../components/legal/LocaleToggle';
 import {
-  VERIFICATION_POLICY_EFFECTIVE,
-  VERIFICATION_POLICY_TITLE,
-  verificationHowItWorksSteps,
-  verificationPolicySections,
+  getVerificationHowItWorksSteps,
+  getVerificationPolicyEffective,
+  getVerificationPolicySections,
+  getVerificationPolicyTitle,
 } from '../content/verificationPolicy';
+import { useAppLocale } from '../hooks/useAppLocale';
 import { useTheme } from '../context/ThemeContext';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -20,6 +22,17 @@ type VerificationPolicyScreenProps = {
 export function VerificationPolicyScreen({ onClose }: VerificationPolicyScreenProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { locale } = useAppLocale();
+  const title = getVerificationPolicyTitle(locale);
+  const effective = getVerificationPolicyEffective(locale);
+  const steps = getVerificationHowItWorksSteps(locale);
+  const sections = getVerificationPolicySections(locale);
+  const howToLabel = locale === 'zh-TW' ? '如何取得驗證' : 'How to get verified';
+  const legalLabel = locale === 'zh-TW' ? '法律政策' : 'Legal policy';
+  const footer =
+    locale === 'zh-TW'
+      ? '問題或申訴：support@spark.app — 主旨請包含「Verification」。'
+      : 'Questions or appeals: support@spark.app — include "Verification" in the subject line.';
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
@@ -28,20 +41,22 @@ export function VerificationPolicyScreen({ onClose }: VerificationPolicyScreenPr
           <Ionicons name="chevron-back" size={28} color={colors.text} />
         </AnimatedPressable>
         <Text style={[styles.headerTitle, { color: colors.text }]} numberOfLines={1}>
-          Verification policy
+          {locale === 'zh-TW' ? '驗證政策' : 'Verification policy'}
         </Text>
         <DisguiseModeButton />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
+        <LocaleToggle />
+
         <View style={[styles.hero, { backgroundColor: colors.surface }]}>
           <Ionicons name="shield-checkmark" size={32} color={colors.superLike} />
-          <Text style={[styles.title, { color: colors.text }]}>{VERIFICATION_POLICY_TITLE}</Text>
-          <Text style={[styles.effective, { color: colors.textMuted }]}>{VERIFICATION_POLICY_EFFECTIVE}</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
+          <Text style={[styles.effective, { color: colors.textMuted }]}>{effective}</Text>
         </View>
 
-        <Text style={[styles.sectionHeading, { color: colors.textMuted }]}>How to get verified</Text>
-        {verificationHowItWorksSteps.map((item) => (
+        <Text style={[styles.sectionHeading, { color: colors.textMuted }]}>{howToLabel}</Text>
+        {steps.map((item) => (
           <View key={item.step} style={[styles.stepCard, { backgroundColor: colors.surface }]}>
             <View style={[styles.stepBadge, { backgroundColor: colors.gradientEnd }]}>
               <Text style={styles.stepNum}>{item.step}</Text>
@@ -53,17 +68,15 @@ export function VerificationPolicyScreen({ onClose }: VerificationPolicyScreenPr
           </View>
         ))}
 
-        <Text style={[styles.sectionHeading, { color: colors.textMuted }]}>Legal policy</Text>
-        {verificationPolicySections.map((section) => (
+        <Text style={[styles.sectionHeading, { color: colors.textMuted }]}>{legalLabel}</Text>
+        {sections.map((section) => (
           <View key={section.id} style={[styles.policyBlock, { borderColor: colors.border }]}>
             <Text style={[styles.policyTitle, { color: colors.text }]}>{section.title}</Text>
             <Text style={[styles.policyBody, { color: colors.textMuted }]}>{section.body}</Text>
           </View>
         ))}
 
-        <Text style={[styles.footer, { color: colors.textMuted }]}>
-          Questions or appeals: support@spark.app — include &ldquo;Verification&rdquo; in the subject line.
-        </Text>
+        <Text style={[styles.footer, { color: colors.textMuted }]}>{footer}</Text>
       </ScrollView>
     </View>
   );

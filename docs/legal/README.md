@@ -3,7 +3,7 @@
 **Last updated:** 17 September 2026  
 **Entity:** Spark Labs Ltd. · 71-75 Shelton Street, Covent Garden, London WC2H 9JQ, United Kingdom
 
-This folder contains legal policies for the **Spark** dating app and **Pulse** disguise mode. In-app summaries live in `src/content/legalDocuments.ts`; these markdown files are the full reference copies (English + 繁體中文).
+This folder contains legal policies for the **Spark** dating app and **Pulse** disguise mode. In-app summaries live in `src/content/legal/` (English + 繁體中文 via **Settings → Privacy controls → App language**, or the **EN | 繁中** toggle on legal screens). These markdown files are the full reference copies.
 
 ---
 

@@ -2,10 +2,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { getLegalDocument, LegalDocumentId } from '../../content/legalDocuments';
+import { getLegalDocument, LegalDocumentId } from '../../content/legal';
+import { useAppLocale } from '../../hooks/useAppLocale';
 import { useTheme } from '../../context/ThemeContext';
 import { radii, spacing } from '../../theme';
 import { AnimatedPressable } from '../AnimatedPressable';
+import { LocaleToggle } from './LocaleToggle';
 
 type LegalPreviewSheetProps = {
   visible: boolean;
@@ -16,12 +18,13 @@ type LegalPreviewSheetProps = {
 export function LegalPreviewSheet({ visible, documentId, onClose }: LegalPreviewSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { locale } = useAppLocale();
 
   if (!documentId) {
     return null;
   }
 
-  const doc = getLegalDocument(documentId);
+  const doc = getLegalDocument(documentId, locale);
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
@@ -34,6 +37,7 @@ export function LegalPreviewSheet({ visible, documentId, onClose }: LegalPreview
           <View style={styles.spacer} />
         </View>
         <ScrollView contentContainerStyle={styles.content}>
+          <LocaleToggle compact />
           <Text style={[styles.effective, { color: colors.textMuted }]}>{doc.effective}</Text>
           <Text style={[styles.intro, { color: colors.textMuted }]}>{doc.intro}</Text>
           {doc.sections.map((section) => (
@@ -58,7 +62,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.sm,
   },
-  title: { fontSize: 17, fontWeight: '800' },
+  title: { fontSize: 17, fontWeight: '800', flex: 1, textAlign: 'center' },
   spacer: { width: 24 },
   content: { padding: spacing.lg, paddingBottom: spacing.xl * 2 },
   effective: { fontSize: 12, marginBottom: spacing.sm },

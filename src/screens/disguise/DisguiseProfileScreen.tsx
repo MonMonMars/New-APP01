@@ -10,6 +10,7 @@ import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
+import { APP_LOCALE_LABELS, AppLocale, resolveAppLocale } from '../../types/locale';
 import { PASSPORT_CITIES } from '../../types/preferences';
 import { ThemeMode } from '../../types/settings';
 import { LEGAL_ENTITY } from '../../constants/legalEntity';
@@ -109,7 +110,12 @@ export function DisguiseProfileScreen() {
       items: [
         { id: 'st1', title: 'Notifications', subtitle: `Matches, messages, and ${meta.name} alerts`, icon: 'notifications-outline' as const },
         { id: 'st2', title: 'Appearance', subtitle: 'Light, dark, or system', icon: 'moon-outline' as const },
-        { id: 'st3', title: 'Region & language', subtitle: 'United Kingdom · English', icon: 'globe-outline' as const },
+        {
+          id: 'st3',
+          title: 'Region & language',
+          subtitle: `${preferences.passportCity ?? 'United Kingdom'} · ${preferences.appLocale === 'zh-TW' ? '繁體中文' : 'English'}`,
+          icon: 'globe-outline' as const,
+        },
         { id: 'st4', title: 'Data & privacy', subtitle: `Download or delete your ${meta.name} data`, icon: 'shield-outline' as const },
       ],
     },
@@ -322,14 +328,30 @@ export function DisguiseProfileScreen() {
       <PulseListPickerSheet
         visible={regionPickerOpen}
         title="Region & language"
-        items={PASSPORT_CITIES.map((city) => ({
-          id: city,
-          label: city,
-          subtitle: 'English',
-          selected: preferences.passportCity === city,
-        }))}
+        items={[
+          ...(['en', 'zh-TW'] as AppLocale[]).map((loc) => ({
+            id: `lang:${loc}`,
+            label: APP_LOCALE_LABELS[loc],
+            subtitle: resolveAppLocale(preferences.appLocale) === loc ? 'Selected' : undefined,
+            selected: resolveAppLocale(preferences.appLocale) === loc,
+          })),
+          ...PASSPORT_CITIES.map((city) => ({
+            id: `city:${city}`,
+            label: city,
+            subtitle: 'Region',
+            selected: preferences.passportCity === city,
+          })),
+        ]}
         onClose={() => setRegionPickerOpen(false)}
-        onSelect={(city) => updatePreferences({ ...preferences, passportCity: city })}
+        onSelect={(id) => {
+          if (id.startsWith('lang:')) {
+            updatePreferences({ ...preferences, appLocale: id.replace('lang:', '') as AppLocale });
+            return;
+          }
+          if (id.startsWith('city:')) {
+            updatePreferences({ ...preferences, passportCity: id.replace('city:', '') });
+          }
+        }}
       />
     </View>
   );

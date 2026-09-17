@@ -17,6 +17,7 @@ on:
       - cursor/competitor-features-7b60
       - cursor/cloud-complete-7b60
       - cursor/red-star-superlike-7b60
+      - cursor/compact-mini-window-7b60
   workflow_dispatch:
 
 permissions:

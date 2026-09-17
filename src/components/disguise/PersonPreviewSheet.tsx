@@ -10,6 +10,7 @@ import { radii, spacing } from '../../theme';
 import { emberLocationLine, emberRelationshipLabel } from '../../types/profile';
 import { buildReporterPhotoUrls } from '../../utils/disguiseReporterPhotos';
 import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { webClass } from '../../motion/webMotion';
 import { resolveReporterSparkProfile } from '../../utils/resolveDisguiseProfile';
 import { MatchToast } from '../MatchToast';
 import { EmberStatusChips } from '../EmberStatusChips';
@@ -82,7 +83,9 @@ export function PersonPreviewSheet({
   const liked = profileId ? likedIds.has(profileId) : false;
   const superLiked = profileId ? superLikedIds.has(profileId) : false;
   const passed = profileId ? passedIds.has(profileId) : false;
-  const worldName = disguiseWorldMeta(preferences.sparkSection).unlockLabel;
+  const worldMeta = disguiseWorldMeta(preferences.sparkSection);
+  const worldName = worldMeta.unlockLabel;
+  const disguiseWorld = worldMeta.world;
   const emberStatus = linkedProfile ? emberRelationshipLabel(linkedProfile.relationshipStatus) : null;
 
   const photoCount = displayPhotos.length;
@@ -161,11 +164,12 @@ export function PersonPreviewSheet({
             {
               backgroundColor: colors.surface,
               borderColor: colors.border,
-              marginTop: insets.top * 0.1,
-              width: Math.min(360, windowWidth - 32),
-              maxHeight: windowHeight - insets.top - insets.bottom - 48,
+              marginTop: insets.top * 0.08,
+              width: Math.min(224, windowWidth - 96),
+              maxHeight: Math.min(windowHeight * 0.46, 318),
             },
           ]}
+          {...webClass('spark-sheet-in')}
         >
           <ScrollView
             bounces={false}
@@ -174,8 +178,8 @@ export function PersonPreviewSheet({
           >
           <FadeSlideIn replayKey={visible} index={0}>
             <View style={styles.header}>
-              <View style={[styles.headerIcon, { backgroundColor: `${colors.heartRed}22` }]}>
-                <ContentTypeIcon kind="profile" size={14} />
+              <View style={[styles.headerIcon, { backgroundColor: `${colors.gradientEnd}22` }]}>
+                <ContentTypeIcon kind="profile" size={12} />
               </View>
               <View style={styles.headerText}>
                 <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
@@ -204,7 +208,7 @@ export function PersonPreviewSheet({
 
           {showQuote ? (
             <FadeSlideIn replayKey={visible} index={2}>
-              <Text style={[styles.quote, { color: colors.text }]} numberOfLines={3}>
+              <Text style={[styles.quote, { color: colors.text }]} numberOfLines={2}>
                 &ldquo;{trimmedQuote}&rdquo;
               </Text>
             </FadeSlideIn>
@@ -212,7 +216,7 @@ export function PersonPreviewSheet({
 
           {linkedProfile?.bio ? (
             <FadeSlideIn replayKey={visible} index={2}>
-              <Text style={[styles.bio, { color: colors.textMuted }]} numberOfLines={2}>
+              <Text style={[styles.bio, { color: colors.textMuted }]} numberOfLines={1}>
                 {linkedProfile.bio}
               </Text>
             </FadeSlideIn>
@@ -229,6 +233,7 @@ export function PersonPreviewSheet({
               photos={displayPhotos}
               index={photoIndex}
               onIndexChange={setPhotoIndex}
+              height={96}
             />
           </FadeSlideIn>
 
@@ -250,6 +255,7 @@ export function PersonPreviewSheet({
                 onUnlike={handleUnlike}
                 onSuperLike={handleSuperLike}
                 onPass={handlePass}
+                world={disguiseWorld}
               />
               <Text style={[styles.hint, { color: colors.textMuted }]}>
                 {superLiked
@@ -284,15 +290,15 @@ export function PersonPreviewSheet({
 const styles = StyleSheet.create({
   card: {
     width: '100%',
-    maxWidth: 360,
-    borderRadius: radii.card,
+    maxWidth: 224,
+    borderRadius: radii.card - 4,
     borderWidth: StyleSheet.hairlineWidth,
     overflow: 'hidden',
     zIndex: 2,
   },
   cardInner: {
-    padding: spacing.md,
-    gap: spacing.sm,
+    padding: 6,
+    gap: 5,
   },
   header: {
     flexDirection: 'row',
@@ -300,9 +306,9 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   headerIcon: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    width: 20,
+    height: 20,
+    borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 1,
@@ -312,23 +318,23 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   name: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '800',
   },
   meta: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '500',
     marginTop: 1,
   },
   quote: {
-    fontSize: 12,
-    lineHeight: 17,
+    fontSize: 11,
+    lineHeight: 15,
     fontStyle: 'italic',
     fontWeight: '500',
   },
   bio: {
-    fontSize: 11,
-    lineHeight: 15,
+    fontSize: 10,
+    lineHeight: 14,
   },
   photoMeta: {
     marginTop: spacing.xs,

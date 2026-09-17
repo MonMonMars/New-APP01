@@ -31,6 +31,7 @@ import { VerificationPolicyScreen } from '../screens/VerificationPolicyScreen';
 import { SparkPlusScreen } from '../screens/SparkPlusScreen';
 import { OnboardingFlow } from '../screens/onboarding/OnboardingFlow';
 import { TabBarButton } from '../components/TabBarButton';
+import { WorldSwitchVeil } from '../components/motion/WorldSwitchVeil';
 import { DisguiseNavigator } from './DisguiseNavigator';
 import { MainTabParamList, RootStackParamList } from '../types/navigation';
 import { resolveSparkSection } from '../types/preferences';
@@ -75,6 +76,7 @@ function MainTabs() {
         headerShown: false,
         lazy: true,
         animation: 'fade',
+        animationDuration: 220,
         tabBarButton: (props) => <TabBarButton {...props} />,
         tabBarStyle: {
           backgroundColor: colors.background,
@@ -210,7 +212,11 @@ function MainShell() {
   const { disguiseMode } = useApp();
   // Mount only one tab navigator at a time — React Navigation rejects two Tab.Navigators
   // in the same NavigationContainer (crashes after onboarding on fresh sessions).
-  return disguiseMode ? <DisguiseNavigator /> : <MainTabs />;
+  return (
+    <WorldSwitchVeil activeKey={disguiseMode}>
+      {(shown) => (shown ? <DisguiseNavigator /> : <MainTabs />)}
+    </WorldSwitchVeil>
+  );
 }
 
 function RootNavigator() {
@@ -222,6 +228,8 @@ function RootNavigator() {
       key={hasOnboarded ? 'main' : 'onboarding'}
       screenOptions={{
         headerShown: false,
+        animation: 'fade_from_bottom',
+        animationDuration: 280,
         contentStyle: { backgroundColor: colors.background },
       }}
     >

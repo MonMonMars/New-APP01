@@ -11,6 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { MOTION } from '../../motion/presets';
+import { webClass } from '../../motion/webMotion';
 
 const AnimatedPressableBase = Animated.createAnimatedComponent(Pressable);
 
@@ -35,6 +36,7 @@ export function ScalePressable({
   const pressScale = useSharedValue(1);
   const activePop = useSharedValue(1);
   const highlight = useSharedValue(0);
+  const burst = useSharedValue(0);
 
   useEffect(() => {
     activePop.value = withSpring(active ? 1.08 : 1, MOTION.spring.bounce);
@@ -48,6 +50,11 @@ export function ScalePressable({
     opacity: highlight.value * 0.22,
   }));
 
+  const burstStyle = useAnimatedStyle(() => ({
+    opacity: (1 - burst.value) * 0.5,
+    transform: [{ scale: 0.72 + burst.value * 0.55 }],
+  }));
+
   return (
     <AnimatedPressableBase
       onPress={onPress}
@@ -55,6 +62,8 @@ export function ScalePressable({
       onPressIn={() => {
         pressScale.value = withSpring(scaleTo, MOTION.spring.bounce);
         highlight.value = withTiming(1, { duration: 70 });
+        burst.value = 0;
+        burst.value = withTiming(1, { duration: 280 });
         if (Platform.OS !== 'web') {
           void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         }
@@ -74,12 +83,16 @@ export function ScalePressable({
         animatedStyle,
         Platform.OS === 'web' ? { cursor: 'pointer' } : null,
       ]}
+      {...webClass('spark-press')}
     >
       {children}
+      <Animated.View pointerEvents="none" style={[styles.burst, burstStyle]} />
       <Animated.View pointerEvents="none" style={[styles.highlight, highlightStyle]} />
     </AnimatedPressableBase>
   );
 }
+
+export type SparkIconShape = 'circle' | 'squircle' | 'diamond' | 'hex' | 'pill';
 
 type SparkIconButtonProps = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -93,7 +106,42 @@ type SparkIconButtonProps = {
   onPress: () => void;
   accessibilityLabel: string;
   size?: number;
+  /** Circle is dating-coded; Pulse uses squircle / diamond / hex / pill so the cover stays news-like. */
+  shape?: SparkIconShape;
 };
+
+function shapeFrame(shape: SparkIconShape, size: number): ViewStyle {
+  switch (shape) {
+    case 'circle':
+      return { width: size, height: size, borderRadius: size / 2 };
+    case 'squircle':
+      return { width: size, height: size, borderRadius: 10 };
+    case 'diamond':
+      return {
+        width: size,
+        height: size,
+        borderRadius: 4,
+        ...(Platform.OS === 'web'
+          ? ({ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' } as ViewStyle)
+          : { transform: [{ rotate: '45deg' }] }),
+      };
+    case 'hex':
+      return {
+        width: size,
+        height: size,
+        borderRadius: Platform.OS === 'web' ? 0 : 8,
+        ...(Platform.OS === 'web'
+          ? ({ clipPath: 'polygon(50% 4%, 90% 25%, 90% 75%, 50% 96%, 10% 75%, 10% 25%)' } as ViewStyle)
+          : {}),
+      };
+    case 'pill':
+      return { width: size + 8, height: size - 2, borderRadius: size };
+    default: {
+      const _exhaustive: never = shape;
+      return _exhaustive;
+    }
+  }
+}
 
 export function SparkIconButton({
   icon,
@@ -107,7 +155,11 @@ export function SparkIconButton({
   onPress,
   accessibilityLabel,
   size = 40,
+  shape = 'circle',
 }: SparkIconButtonProps) {
+  const frame = shapeFrame(shape, size);
+  const rotateIconBack = shape === 'diamond' && Platform.OS !== 'web';
+
   return (
     <ScalePressable
       onPress={onPress}
@@ -115,16 +167,19 @@ export function SparkIconButton({
       accessibilityLabel={accessibilityLabel}
       style={[
         styles.iconBtn,
+        frame,
         {
-          width: size,
-          height: size,
-          borderRadius: size / 2,
           backgroundColor: active ? activeBackground : idleBackground,
           borderColor: active ? activeBorder : idleBorder,
         },
       ]}
     >
-      <Ionicons name={icon} size={iconSize} color={color} />
+      <Ionicons
+        name={icon}
+        size={iconSize}
+        color={color}
+        style={rotateIconBack ? { transform: [{ rotate: '-45deg' }] } : undefined}
+      />
     </ScalePressable>
   );
 }
@@ -136,6 +191,12 @@ const styles = StyleSheet.create({
   highlight: {
     ...StyleSheet.absoluteFill,
     backgroundColor: '#fff',
+  },
+  burst: {
+    ...StyleSheet.absoluteFill,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.7)',
+    borderRadius: 999,
   },
   iconBtn: {
     alignItems: 'center',

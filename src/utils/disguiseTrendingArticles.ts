@@ -29,6 +29,14 @@ function topicCategory(topic: string): string {
       return 'Business';
     case '#Weather':
       return 'Local';
+    case '#Zodiac':
+      return '星座';
+    case '#Tarot':
+      return 'Tarot';
+    case '#Film':
+    case '#Music':
+    case '#Style':
+      return 'Entertainment';
     default:
       return 'News';
   }

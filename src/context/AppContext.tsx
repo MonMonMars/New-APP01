@@ -72,7 +72,11 @@ import {
 } from '../types/settings';
 import { defaultSecuritySettings, SecuritySettings } from '../types/security';
 import { BoostActivationResult, getIsoWeekKey } from '../utils/boostQuota';
-import { FREE_DAILY_LIKE_LIMIT, FREE_DAILY_SPARK_NOTES, BOOST_DURATION_MS } from '../types/subscription';
+import { BOOST_DURATION_MS } from '../types/subscription';
+import {
+  dailyLikeLimitForGender,
+  dailySparkNoteLimitForGender,
+} from '../utils/genderAccountPerks';
 import { logSecurityEvent, submitSecurityReport } from '../services/securityReports';
 import { unlockSpark } from '../utils/appLock';
 import { isAllowedImageUrl } from '../utils/urlSafety';
@@ -1030,15 +1034,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const activeSection = resolveSparkSection(preferences.sparkSection);
   const isEmberWorld = activeSection === 'ember';
 
+  const dailyLikeLimit = dailyLikeLimitForGender(user.gender, isSparkPlus);
+  const likesUsedToday = isEmberWorld ? emberDailyLikesUsed : dailyLikesUsed;
   const remainingLikes = isSparkPlus
     ? Infinity
-    : Math.max(
-        0,
-        FREE_DAILY_LIKE_LIMIT - (isEmberWorld ? emberDailyLikesUsed : dailyLikesUsed),
-      );
-  const canLike =
-    isSparkPlus ||
-    (isEmberWorld ? emberDailyLikesUsed : dailyLikesUsed) < FREE_DAILY_LIKE_LIMIT;
+    : Math.max(0, dailyLikeLimit - likesUsedToday);
+  const canLike = isSparkPlus || likesUsedToday < dailyLikeLimit;
 
   const sparkNotesUsedForToday = useMemo(() => {
     const usedDate = isEmberWorld ? emberLastSparkNoteDate : lastSparkNoteDate;
@@ -1055,12 +1056,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     sparkNotesUsedToday,
   ]);
 
-  const dailyNoteLimit = isSparkPlus ? Infinity : FREE_DAILY_SPARK_NOTES;
+  const dailyNoteLimit = dailySparkNoteLimitForGender(user.gender, isSparkPlus);
   const remainingSparkNotes = isSparkPlus
     ? Infinity
     : Math.max(0, dailyNoteLimit - sparkNotesUsedForToday + bonusSparkNotes);
   const canSendSparkNote =
-    isSparkPlus || sparkNotesUsedForToday < FREE_DAILY_SPARK_NOTES + bonusSparkNotes;
+    isSparkPlus || sparkNotesUsedForToday < dailyNoteLimit + bonusSparkNotes;
 
   const incomingLikes = useMemo(() => {
     const actioned = new Set([...likedIds, ...passedIds, ...blockedIds]);

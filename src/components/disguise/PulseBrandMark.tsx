@@ -6,12 +6,13 @@ import { pulseBrand } from '../../theme/pulseBrand';
 
 type PulseBrandMarkProps = {
   size?: 'sm' | 'md' | 'lg';
+  muted?: boolean;
   style?: StyleProp<ImageStyle>;
 };
 
 /** Pulse logomark — locked P3 didone P on Pulse blue. */
-export function PulseBrandMark({ size = 'md', style }: PulseBrandMarkProps) {
-  return <BrandMark world="pulse" size={size} style={style} />;
+export function PulseBrandMark({ size = 'md', muted = false, style }: PulseBrandMarkProps) {
+  return <BrandMark world="pulse" size={size} muted={muted} style={style} />;
 }
 
 type PulseWordmarkProps = {

@@ -13,6 +13,7 @@ import { useApp } from '../context/AppContext';
 import { getProfileById } from '../data/profiles';
 import { resolveSparkSection } from '../types/preferences';
 import { emberRelationshipLabel, Profile } from '../types/profile';
+import { canRevealIncomingLikes } from '../utils/genderAccountPerks';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -43,6 +44,8 @@ export function LikesScreen() {
   const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
   const [showMatch, setShowMatch] = useState(false);
   const [showSparkNote, setShowSparkNote] = useState(false);
+
+  const revealIncomingLikes = canRevealIncomingLikes(user.gender, isSparkPlus);
 
   const superLikesSent = Array.from(superLikedIds)
     .map((id) => getProfileById(id))
@@ -145,11 +148,11 @@ export function LikesScreen() {
             {incomingLikes.length} {incomingLikes.length === 1 ? 'person' : 'people'} liked you
           </Text>
           <Text style={[styles.bannerSubtitle, { color: colors.textMuted }]}>
-            {isSparkPlus
-              ? 'Spark+ unlocked — like back to match instantly.'
+            {revealIncomingLikes
+              ? 'See who liked you and match back instantly.'
               : 'Upgrade to Spark+ to see who they are and match instantly.'}
           </Text>
-          {!isSparkPlus && (
+          {!revealIncomingLikes && (
             <AnimatedPressable style={[styles.upgradeButton, { backgroundColor: colors.gradientEnd }]} onPress={openPaywall}>
               <Text style={[styles.upgradeButtonText, { color: colors.text }]}>See who likes you</Text>
             </AnimatedPressable>
@@ -230,18 +233,18 @@ export function LikesScreen() {
               <AnimatedPressable
                 key={profile.id}
                 style={styles.card}
-                onPress={isSparkPlus ? () => setSelectedProfile(profile) : openPaywall}
+                onPress={revealIncomingLikes ? () => setSelectedProfile(profile) : openPaywall}
               >
                 <Image
                   source={{ uri: profile.photos[0] }}
                   style={[styles.photo, { backgroundColor: colors.surface }]}
-                  blurRadius={isSparkPlus ? 0 : 18}
+                  blurRadius={revealIncomingLikes ? 0 : 18}
                 />
-                <View style={[styles.cardOverlay, isSparkPlus && styles.cardOverlayRevealed]}>
+                <View style={[styles.cardOverlay, revealIncomingLikes && styles.cardOverlayRevealed]}>
                   <Text style={styles.cardName}>
-                    {isSparkPlus ? `${profile.name}, ${profile.age}` : '???'}
+                    {revealIncomingLikes ? `${profile.name}, ${profile.age}` : '???'}
                   </Text>
-                  {isSparkPlus ? (
+                  {revealIncomingLikes ? (
                     emberRelationshipLabel(profile.relationshipStatus) ? (
                       <View style={styles.likeChips}>
                         <EmberStatusChips profile={profile} compact />

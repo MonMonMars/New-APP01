@@ -6,12 +6,13 @@ import { harborBrand } from '../../theme/harborBrand';
 
 type HarborBrandMarkProps = {
   size?: 'sm' | 'md' | 'lg';
+  muted?: boolean;
   style?: StyleProp<ImageStyle>;
 };
 
 /** Harbor logomark — pale-gold H matching Ember E1e. */
-export function HarborBrandMark({ size = 'md', style }: HarborBrandMarkProps) {
-  return <BrandMark world="harbor" size={size} style={style} />;
+export function HarborBrandMark({ size = 'md', muted = false, style }: HarborBrandMarkProps) {
+  return <BrandMark world="harbor" size={size} muted={muted} style={style} />;
 }
 
 type HarborWordmarkProps = {

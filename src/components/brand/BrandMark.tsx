@@ -7,6 +7,8 @@ type BrandMarkSize = 'sm' | 'md' | 'lg';
 type BrandMarkProps = {
   world: BrandMarkWorld;
   size?: BrandMarkSize | number;
+  /** Dim grey treatment for disguise header taps — one mark, no wordmark. */
+  muted?: boolean;
   style?: StyleProp<ImageStyle>;
 };
 
@@ -35,7 +37,7 @@ function markSize(size: BrandMarkSize | number): number {
 }
 
 /** Locked lettermarks: Pulse P3, Spark S5, Ember E1e, Harbor H on E1e gold. */
-export function BrandMark({ world, size = 'md', style }: BrandMarkProps) {
+export function BrandMark({ world, size = 'md', muted = false, style }: BrandMarkProps) {
   const px = markSize(size);
 
   return (
@@ -44,7 +46,12 @@ export function BrandMark({ world, size = 'md', style }: BrandMarkProps) {
       accessibilityLabel={LABELS[world]}
       source={SOURCES[world]}
       resizeMode="contain"
-      style={[styles.mark, { width: px, height: px }, style]}
+      style={[
+        styles.mark,
+        { width: px, height: px },
+        muted && styles.muted,
+        style,
+      ]}
     />
   );
 }
@@ -52,5 +59,9 @@ export function BrandMark({ world, size = 'md', style }: BrandMarkProps) {
 const styles = StyleSheet.create({
   mark: {
     overflow: 'hidden',
+  },
+  muted: {
+    opacity: 0.42,
+    tintColor: '#8E8E93',
   },
 });

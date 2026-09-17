@@ -1,6 +1,8 @@
 import { harborBrand } from '../theme/harborBrand';
 import { pulseBrand } from '../theme/pulseBrand';
 import { resolveSparkSection } from '../types/preferences';
+import type { ProfileGender } from '../types/profile';
+import { usesFemalePulseExperience } from './genderAccountPerks';
 
 export type DisguiseWorld = 'pulse' | 'harbor';
 
@@ -34,10 +36,30 @@ export function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
 }
 
-export function disguiseWorldMeta(section?: string | null): DisguiseWorldMeta {
+export function disguiseWorldMeta(
+  section?: string | null,
+  gender?: ProfileGender | null,
+): DisguiseWorldMeta {
   const world = resolveDisguiseWorld(section);
   switch (world) {
     case 'pulse':
+      if (gender && usesFemalePulseExperience(gender)) {
+        return {
+          world,
+          name: 'Pulse',
+          tagline: '星座 · Tarot & Entertainment',
+          unlockLabel: 'Spark',
+          accent: pulseBrand.accent,
+          accentBright: pulseBrand.accentBright,
+          accentSoft: pulseBrand.accentSoft,
+          accentBorder: pulseBrand.accentBorder,
+          navy: pulseBrand.navy,
+          homeTab: 'Home',
+          trendingTab: 'Cosmos',
+          searchTitle: 'Search Pulse',
+          feedLabel: 'Cosmos & culture',
+        };
+      }
       return {
         world,
         name: 'Pulse',

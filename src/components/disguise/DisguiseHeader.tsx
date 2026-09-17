@@ -12,7 +12,7 @@ import { spacing } from '../../theme';
 import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
 import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { DisguiseSearchSheet } from './DisguiseSearchSheet';
-import { DisguiseBrand } from './DisguiseBrand';
+import { DisguiseBrandMark } from './DisguiseBrand';
 import { PulseFeedItemViewer } from './PulseFeedItemViewer';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -23,8 +23,8 @@ type DisguiseHeaderProps = {
 
 export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps) {
   const { colors } = useTheme();
-  const { preferences, setDisguiseMode } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection);
+  const { user, preferences, setDisguiseMode } = useApp();
+  const meta = disguiseWorldMeta(preferences.sparkSection, user.gender);
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchItemId, setSearchItemId] = useState<string | null>(null);
@@ -48,12 +48,14 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
             hitSlop={8}
             style={styles.brandTap}
           >
-            <DisguiseBrand size="sm" />
+            <DisguiseBrandMark size="sm" muted />
           </AnimatedPressable>
           {title ? (
-            <Text style={[styles.sectionTitle, { color: colors.textMuted }]} numberOfLines={1}>
-              {title}
-            </Text>
+            <View style={styles.titleBlock}>
+              <Text style={[styles.sectionTitle, { color: colors.textMuted }]} numberOfLines={1}>
+                {title}
+              </Text>
+            </View>
           ) : null}
         </View>
         <View style={styles.actions}>
@@ -110,16 +112,19 @@ const styles = StyleSheet.create({
     marginRight: spacing.sm,
   },
   brandTap: {
-    flexShrink: 1,
-    minWidth: 0,
+    flexShrink: 0,
     zIndex: 2,
   },
+  titleBlock: {
+    flex: 1,
+    minWidth: 0,
+    justifyContent: 'center',
+  },
   sectionTitle: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: '700',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    flexShrink: 0,
+    letterSpacing: 0.4,
   },
   actions: {
     flexDirection: 'row',

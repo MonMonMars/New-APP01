@@ -23,9 +23,9 @@ const Tab = createBottomTabNavigator<DisguiseTabParamList>();
 
 export function DisguiseNavigator() {
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { pulseSocial, preferences, user } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection, user.gender);
+  const meta = disguiseWorldMeta(preferences.sparkSection, user.gender, locale);
   const activityBadge =
     !pulseSocial.activityAlertsRead && disguiseAlerts.length > 0
       ? disguiseAlerts.length

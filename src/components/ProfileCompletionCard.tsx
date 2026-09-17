@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { ProfileTip } from '../utils/profileCompletion';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -15,17 +16,18 @@ type ProfileCompletionCardProps = {
 /** Bumble AI Profile Guidance–inspired completion meter (rule-based). */
 export function ProfileCompletionCard({ score, tips, onEditPress }: ProfileCompletionCardProps) {
   const { colors } = useTheme();
-  const incomplete = tips.filter((t) => !t.done);
+  const { t } = useTranslation();
+  const incomplete = tips.filter((tip) => !tip.done);
 
   return (
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={styles.header}>
         <View>
-          <Text style={[styles.title, { color: colors.text }]}>Profile strength</Text>
-          <Text style={[styles.score, { color: colors.gradientEnd }]}>{score}% complete</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('profile.profileStrength')}</Text>
+          <Text style={[styles.score, { color: colors.gradientEnd }]}>{t('profile.percentComplete', { score })}</Text>
         </View>
         <AnimatedPressable style={[styles.editButton, { borderColor: colors.gradientEnd }]} onPress={onEditPress}>
-          <Text style={[styles.editText, { color: colors.gradientEnd }]}>Improve</Text>
+          <Text style={[styles.editText, { color: colors.gradientEnd }]}>{t('common.improve')}</Text>
         </AnimatedPressable>
       </View>
       <View style={[styles.barTrack, { backgroundColor: colors.border }]}>

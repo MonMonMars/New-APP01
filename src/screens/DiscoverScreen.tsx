@@ -25,7 +25,9 @@ import { WaitingForMatchModal } from '../components/WaitingForMatchModal';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Profile, ProfilePrompt } from '../types/profile';
-import { resolveSparkSection, SPARK_SECTION_EMPTY } from '../types/preferences';
+import { getSparkSectionEmpty } from '../i18n/labels';
+import { useTranslation } from '../i18n';
+import { resolveSparkSection } from '../types/preferences';
 import { spacing } from '../theme';
 import { dailyLikeLimitForGender } from '../utils/genderAccountPerks';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -38,6 +40,7 @@ export function DiscoverScreen() {
   const deckHeight = Math.round((WINDOW_HEIGHT - insets.top - TAB_BAR_HEIGHT) * 0.92);
   const navigation = useNavigation();
   const { colors } = useTheme();
+  const { t, locale } = useTranslation();
   const deckRef = useRef<SwipeDeckHandle>(null);
   const {
     discoverQueue,
@@ -183,18 +186,18 @@ export function DiscoverScreen() {
       }
       reportProfile(reportProfileId, reason);
       setReportProfileId(null);
-      Alert.alert('Report submitted', `Thanks for reporting. Reason: ${reason}`);
+      Alert.alert(t('discover.reportSubmitted'), t('discover.reportThanks', { reason }));
     },
-    [reportProfile, reportProfileId],
+    [reportProfile, reportProfileId, t],
   );
 
   const handleBlockDetail = useCallback(
     (profileId: string) => {
       blockProfile(profileId);
       setDetailProfile(null);
-      Alert.alert('Blocked', 'You will no longer see this profile.');
+      Alert.alert(t('discover.blocked'), t('discover.blockedHint'));
     },
-    [blockProfile],
+    [blockProfile, t],
   );
 
   const dismissMatchToast = useCallback(() => {
@@ -348,7 +351,7 @@ export function DiscoverScreen() {
             variant="title"
           />
         </View>
-        <AnimatedPressable style={styles.hubButton} onPress={openDiscoverHub} accessibilityLabel="Discover tools">
+        <AnimatedPressable style={styles.hubButton} onPress={openDiscoverHub} accessibilityLabel={t('discover.toolsA11y')}>
           <Ionicons name="options-outline" size={22} color={colors.textMuted} />
         </AnimatedPressable>
       </View>
@@ -371,31 +374,31 @@ export function DiscoverScreen() {
         {isPaused ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyEmoji}>⏸️</Text>
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>Account paused</Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('discover.accountPaused')}</Text>
             <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-              Unpause in Profile settings to start discovering again.
+              {t('discover.accountPausedHint')}
             </Text>
           </View>
         ) : discoverQueue.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyEmoji}>🌍</Text>
             <Text style={[styles.emptyTitle, { color: colors.text }]}>
-              {SPARK_SECTION_EMPTY[resolveSparkSection(preferences.sparkSection)].title}
+              {getSparkSectionEmpty(locale, resolveSparkSection(preferences.sparkSection)).title}
             </Text>
             <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-              {SPARK_SECTION_EMPTY[resolveSparkSection(preferences.sparkSection)].subtitle}
+              {getSparkSectionEmpty(locale, resolveSparkSection(preferences.sparkSection)).subtitle}
             </Text>
             <AnimatedPressable
               style={[styles.primaryButton, { backgroundColor: colors.gradientEnd }]}
               onPress={hasMoreInPool ? searchMorePeople : () => setShowExpandLocation(true)}
             >
               <Text style={[styles.primaryButtonText, { color: colors.text }]}>
-                {hasMoreInPool ? 'Search more people' : 'Expand search'}
+                {hasMoreInPool ? t('discover.searchMore') : t('discover.expandSearch')}
               </Text>
             </AnimatedPressable>
             <AnimatedPressable style={styles.secondaryButton} onPress={openDiscoverHub}>
               <Text style={[styles.secondaryButtonText, { color: colors.textMuted }]}>
-                Open discover tools
+                {t('discover.openDiscoverTools')}
               </Text>
             </AnimatedPressable>
           </View>

@@ -12,6 +12,7 @@ import { DisguiseWeatherPanel } from '../../components/disguise/DisguiseWeatherP
 import { NewsArticleSheet } from '../../components/disguise/NewsArticleSheet';
 import { NewsHeroImage } from '../../components/disguise/NewsHeroImage';
 import { useApp } from '../../context/AppContext';
+import { useAppLocale } from '../../hooks/useAppLocale';
 import { useTheme } from '../../context/ThemeContext';
 import { NewsPost } from '../../data/disguiseFeed';
 import {
@@ -123,7 +124,8 @@ export function DisguiseTrendingScreen() {
   const { colors } = useTheme();
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
   const { user, preferences } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection, user.gender);
+  const { locale } = useAppLocale();
+  const meta = disguiseWorldMeta(preferences.sparkSection, user.gender, locale);
   const isHarbor = meta.world === 'harbor';
   const isFemalePulse = !isHarbor && usesFemalePulseExperience(user.gender);
   const brief = isFemalePulse ? femalePulseBrief : pulseBrief;

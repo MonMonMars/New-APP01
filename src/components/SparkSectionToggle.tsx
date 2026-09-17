@@ -4,11 +4,9 @@ import { Modal, Platform, StyleSheet, Text, View, type ViewStyle } from 'react-n
 
 import { BrandMark } from './brand/BrandMark';
 import { useTheme } from '../context/ThemeContext';
-import {
-  SparkSection,
-  SPARK_SECTION_HINTS,
-  SPARK_SECTION_LABELS,
-} from '../types/preferences';
+import { useTranslation } from '../i18n';
+import { getSparkSectionHint, getSparkSectionLabel } from '../i18n/labels';
+import { SparkSection } from '../types/preferences';
 import { ColorPalette, radii, spacing } from '../theme';
 import { harborBrand } from '../theme/harborBrand';
 import { sparkBrand } from '../theme/sparkBrand';
@@ -79,21 +77,25 @@ function WorldRow({
   item,
   selected,
   colors,
+  locale,
   onPress,
 }: {
   item: SparkSection;
   selected: boolean;
   colors: ColorPalette;
+  locale: ReturnType<typeof useTranslation>['locale'];
   onPress: () => void;
 }) {
   const accent = worldBrandAccent(item);
+  const label = getSparkSectionLabel(locale, item);
+  const hint = getSparkSectionHint(locale, item);
 
   return (
     <AnimatedPressable
       onPress={onPress}
       accessibilityRole="button"
       accessibilityState={{ selected }}
-      accessibilityLabel={`${SPARK_SECTION_LABELS[item]}. ${SPARK_SECTION_HINTS[item]}`}
+      accessibilityLabel={`${label}. ${hint}`}
       style={[
         styles.row,
         {
@@ -108,10 +110,10 @@ function WorldRow({
       </View>
       <View style={styles.rowText}>
         <Text style={[styles.rowTitle, { color: colors.text }]}>
-          {SPARK_SECTION_LABELS[item]}
+          {label}
         </Text>
         <Text style={[styles.rowHint, { color: colors.textMuted }]}>
-          {SPARK_SECTION_HINTS[item]}
+          {hint}
         </Text>
       </View>
       {selected ? <Ionicons name="checkmark-circle" size={22} color={accent} /> : null}
@@ -123,15 +125,18 @@ function WorldPickerSheet({
   visible,
   section,
   colors,
+  locale,
   onClose,
   onSelect,
 }: {
   visible: boolean;
   section: SparkSection;
   colors: ColorPalette;
+  locale: ReturnType<typeof useTranslation>['locale'];
   onClose: () => void;
   onSelect: (section: SparkSection) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <Modal
       visible={visible}
@@ -150,7 +155,7 @@ function WorldPickerSheet({
           popOnRelease={false}
           flash={false}
           accessibilityRole="button"
-          accessibilityLabel="Close world picker"
+          accessibilityLabel={t('discover.closeWorldPicker')}
         />
         <View
           style={[
@@ -162,9 +167,9 @@ function WorldPickerSheet({
             WEB_SHEET_IN,
           ]}
         >
-          <Text style={[styles.sheetTitle, { color: colors.text }]}>Choose a world</Text>
+          <Text style={[styles.sheetTitle, { color: colors.text }]}>{t('discover.chooseWorld')}</Text>
           <Text style={[styles.sheetSubtitle, { color: colors.textMuted }]}>
-            Anyone can join either section. Likes, matches, and chats stay in the world you pick.
+            {t('discover.worldHint')}
           </Text>
           <View style={styles.listWrap}>
             {SECTIONS.map((item) => (
@@ -173,6 +178,7 @@ function WorldPickerSheet({
                 item={item}
                 selected={section === item}
                 colors={colors}
+                locale={locale}
                 onPress={() => onSelect(item)}
               />
             ))}
@@ -187,21 +193,25 @@ function WorldTrigger({
   section,
   colors,
   variant,
+  locale,
   onPress,
 }: {
   section: SparkSection;
   colors: ColorPalette;
   variant: 'title' | 'chip';
+  locale: ReturnType<typeof useTranslation>['locale'];
   onPress: () => void;
 }) {
+  const { t } = useTranslation();
+  const label = getSparkSectionLabel(locale, section);
   switch (variant) {
     case 'chip':
       return (
         <AnimatedPressable
           onPress={onPress}
           accessibilityRole="button"
-          accessibilityLabel={`${SPARK_SECTION_LABELS[section]}. Switch world`}
-          accessibilityHint="Opens Spark and Ember. Anyone can join Ember."
+          accessibilityLabel={`${label}. ${t('discover.switchWorld')}`}
+          accessibilityHint={t('discover.worldPickerHint')}
           style={[
             styles.chipTrigger,
             {
@@ -213,7 +223,7 @@ function WorldTrigger({
         >
           <BrandMark world={section} size={SECTION_MARK_SIZE.chip} />
           <Text style={[styles.chipLabel, { color: section === 'ember' ? colors.ember : colors.text }]}>
-            {SPARK_SECTION_LABELS[section]}
+            {label}
           </Text>
           <Ionicons name="chevron-down" size={14} color={section === 'ember' ? colors.ember : colors.textMuted} />
         </AnimatedPressable>
@@ -223,14 +233,14 @@ function WorldTrigger({
         <AnimatedPressable
           onPress={onPress}
           accessibilityRole="button"
-          accessibilityLabel={`${SPARK_SECTION_LABELS[section]}. Switch world`}
-          accessibilityHint="Opens Spark and Ember. Anyone can join Ember."
+          accessibilityLabel={`${label}. ${t('discover.switchWorld')}`}
+          accessibilityHint={t('discover.worldPickerHint')}
           style={styles.titleTrigger}
           scaleTo={0.94}
         >
           <BrandMark world={section} size={SECTION_MARK_SIZE.title} />
           <Text style={[styles.titleLabel, { color: section === 'ember' ? colors.ember : colors.text }]}>
-            {SPARK_SECTION_LABELS[section]}
+            {label}
           </Text>
           <Ionicons name="chevron-down" size={18} color={section === 'ember' ? colors.ember : colors.textMuted} />
         </AnimatedPressable>
@@ -249,6 +259,7 @@ export function SparkSectionToggle({
   variant = 'title',
 }: SparkSectionToggleProps) {
   const { colors } = useTheme();
+  const { locale } = useTranslation();
   const [open, setOpen] = useState(false);
 
   const select = (next: SparkSection) => {
@@ -266,6 +277,7 @@ export function SparkSectionToggle({
               item={item}
               selected={section === item}
               colors={colors}
+              locale={locale}
               onPress={() => onChange(item)}
             />
           ))}
@@ -279,12 +291,14 @@ export function SparkSectionToggle({
             section={section}
             colors={colors}
             variant={variant}
+            locale={locale}
             onPress={() => setOpen(true)}
           />
           <WorldPickerSheet
             visible={open}
             section={section}
             colors={colors}
+            locale={locale}
             onClose={() => setOpen(false)}
             onSelect={select}
           />

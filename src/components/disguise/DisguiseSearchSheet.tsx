@@ -4,6 +4,7 @@ import { Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-nati
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../../context/AppContext';
+import { useAppLocale } from '../../hooks/useAppLocale';
 import { useTheme } from '../../context/ThemeContext';
 import { femaleTrendingTopics } from '../../data/disguiseFemaleTrending';
 import { disguiseTrendingTopics } from '../../data/disguiseTrending';
@@ -52,7 +53,8 @@ export function DisguiseSearchSheet({
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { user, preferences } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection, user.gender);
+  const { locale } = useAppLocale();
+  const meta = disguiseWorldMeta(preferences.sparkSection, user.gender, locale);
   const feedCatalog = disguiseFeedItemsForGender(user.gender);
   const trendingTopics = usesFemalePulseExperience(user.gender)
     ? femaleTrendingTopics

@@ -6,29 +6,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors as palette, radii, spacing } from '../theme';
 import { modalFill } from '../theme/modalFill';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { Profile } from '../types/profile';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type SparkNoteVariant = 'spark' | 'ember';
 
-function noteCopy(variant: SparkNoteVariant, name: string): { title: string; subtitle: string } {
-  switch (variant) {
-    case 'ember':
-      return {
-        title: 'Discreet note',
-        subtitle: `A private note only ${name} sees — it won't appear in notifications.`,
-      };
-    case 'spark':
-      return {
-        title: 'Spark Note',
-        subtitle: `Send ${name} a message with your like — like a comment on Hinge.`,
-      };
-    default: {
-      const _exhaustive: never = variant;
-      return _exhaustive;
-    }
-  }
-}
 
 type SparkNoteSheetProps = {
   visible: boolean;
@@ -50,6 +33,7 @@ export function SparkNoteSheet({
   onSkip,
 }: SparkNoteSheetProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [note, setNote] = useState('');
 
@@ -63,7 +47,16 @@ export function SparkNoteSheet({
     return null;
   }
 
-  const copy = noteCopy(variant, profile.name);
+  const copy =
+    variant === 'ember'
+      ? {
+          title: t('sparkNote.discreetNote'),
+          subtitle: t('sparkNote.discreetNoteSubtitle', { name: profile.name }),
+        }
+      : {
+          title: t('sparkNote.sparkNoteTitle'),
+          subtitle: t('sparkNote.sparkNoteSubtitle', { name: profile.name }),
+        };
   const canSend = note.trim().length > 0 && remainingNotes > 0;
 
   return (
@@ -81,14 +74,16 @@ export function SparkNoteSheet({
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>{copy.subtitle}</Text>
           <Text style={[styles.quota, { color: colors.gradientEnd }]}>
             {remainingNotes > 0
-              ? `${remainingNotes} note${remainingNotes === 1 ? '' : 's'} left today`
-              : 'No notes left today — upgrade to Spark+ for unlimited'}
+              ? remainingNotes === 1
+                ? t('sparkNote.notesLeftOne')
+                : t('sparkNote.notesLeftMany', { count: remainingNotes })
+              : t('sparkNote.noNotesLeft')}
           </Text>
 
           <TextInput
             value={note}
             onChangeText={setNote}
-            placeholder={`Say something to ${profile.name}...`}
+            placeholder={t('sparkNote.saySomethingPlaceholder', { name: profile.name })}
             placeholderTextColor={colors.textMuted}
             style={styles.input}
             multiline
@@ -110,11 +105,11 @@ export function SparkNoteSheet({
             }}
             disabled={!canSend}
           >
-            <Text style={styles.sendText}>Send like + note</Text>
+            <Text style={styles.sendText}>{t('sparkNote.sendLikeNote')}</Text>
           </AnimatedPressable>
 
           <AnimatedPressable style={styles.skipButton} onPress={onSkip}>
-            <Text style={styles.skipText}>Like without note</Text>
+            <Text style={styles.skipText}>{t('sparkNote.likeWithoutNote')}</Text>
           </AnimatedPressable>
         </AnimatedPressable>
       </AnimatedPressable>

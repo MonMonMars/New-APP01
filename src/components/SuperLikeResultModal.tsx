@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { Profile } from '../types/profile';
 import { AnimatedOverlay } from './motion/AnimatedOverlay';
 import { FadeSlideIn } from './motion/FadeSlideIn';
@@ -29,6 +30,7 @@ export function SuperLikeResultModal({
 }: SuperLikeResultModalProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   if (!profile) {
     return null;
@@ -53,12 +55,12 @@ export function SuperLikeResultModal({
         </FadeSlideIn>
 
         <FadeSlideIn replayKey={visible} index={1}>
-          <Text style={styles.kicker}>{isMatch ? "It's a" : 'Spark Star'}</Text>
-          <Text style={styles.title}>{isMatch ? 'Super Match!' : 'Super Like sent!'}</Text>
+          <Text style={styles.kicker}>{isMatch ? t('discover.itsA') : t('discover.superLikeKicker')}</Text>
+          <Text style={styles.title}>{isMatch ? t('discover.superMatch') : t('discover.superLikeSent')}</Text>
           <Text style={styles.subtitle}>
             {isMatch
-              ? `You and ${profile.name} super-liked each other.`
-              : `${profile.name} will see you first.`}
+              ? t('discover.superMatchSubtitle', { name: profile.name })
+              : t('discover.superLikeSentSubtitle', { name: profile.name })}
           </Text>
         </FadeSlideIn>
 
@@ -82,11 +84,11 @@ export function SuperLikeResultModal({
           <View style={styles.actions}>
             <AnimatedPressable style={styles.primaryButton} onPress={onChatNow} scaleTo={0.97}>
               <Text style={[styles.primaryButtonText, { color: colors.heartRed }]}>
-                {isMatch ? 'Message' : 'Send a note'}
+                {isMatch ? t('discover.message') : t('discover.sendNote')}
               </Text>
             </AnimatedPressable>
             <AnimatedPressable style={styles.secondaryButton} onPress={onTalkLater} scaleTo={0.97}>
-              <Text style={styles.secondaryButtonText}>Keep swiping</Text>
+              <Text style={styles.secondaryButtonText}>{t('discover.keepSwiping')}</Text>
             </AnimatedPressable>
           </View>
         </FadeSlideIn>

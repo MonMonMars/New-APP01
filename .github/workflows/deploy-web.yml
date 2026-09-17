@@ -18,6 +18,7 @@ on:
       - cursor/cloud-complete-7b60
       - cursor/red-star-superlike-7b60
       - cursor/compact-mini-window-7b60
+      - cursor/mini-xsl-buttons-7b60
   workflow_dispatch:
 
 permissions:

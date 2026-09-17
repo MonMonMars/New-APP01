@@ -131,11 +131,34 @@ const main = async () => {
     const likeBox = await like.boundingBox();
     const superBox = await superLike.boundingBox();
     const passBox = await pass.boundingBox();
-    console.log('pass_x', passBox?.x);
-    console.log('super_x', superBox?.x);
-    console.log('like_x', likeBox?.x);
+    console.log('pass_x', passBox?.x, 'pass_w', passBox?.width, 'pass_h', passBox?.height);
+    console.log('super_x', superBox?.x, 'super_w', superBox?.width, 'super_h', superBox?.height);
+    console.log('like_x', likeBox?.x, 'like_w', likeBox?.width, 'like_h', likeBox?.height);
     if (superBox && passBox && likeBox) {
       console.log('super_is_center', superBox.x > passBox.x && superBox.x < likeBox.x ? 1 : 0);
+      const sizes = [passBox, superBox, likeBox].map((b) => `${Math.round(b.width)}x${Math.round(b.height)}`);
+      console.log('button_sizes', sizes.join(' '));
+      if (Math.abs(passBox.width - superBox.width) > 1 || Math.abs(likeBox.width - superBox.width) > 1) {
+        throw new Error(`button sizes should match: ${sizes.join(' ')}`);
+      }
+      if (passBox.width > 28) {
+        throw new Error(`buttons still too large: ${passBox.width}`);
+      }
+    }
+
+    const xsl = await page.evaluate(() => {
+      const pass = document.querySelector('[aria-label="Pass profile"]');
+      const sup = document.querySelector('[aria-label="Super like profile"]');
+      const likeBtn = document.querySelector('[aria-label="Like profile"], [aria-label="Unlike profile"]');
+      return {
+        x: (pass?.textContent || '').trim(),
+        s: (sup?.textContent || '').trim(),
+        l: (likeBtn?.textContent || '').trim(),
+      };
+    });
+    console.log('letters', JSON.stringify(xsl));
+    if (xsl.x !== 'X' || xsl.s !== 'S' || xsl.l !== 'L') {
+      throw new Error(`expected X S L, got ${xsl.x} ${xsl.s} ${xsl.l}`);
     }
 
     await superLike.click({ force: true });

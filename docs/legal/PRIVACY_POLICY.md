@@ -171,4 +171,4 @@ privacy@spark.app
 
 ---
 
-*Template for product use. Consult qualified legal counsel before production launch.*
+*Consult qualified legal counsel before production launch.*

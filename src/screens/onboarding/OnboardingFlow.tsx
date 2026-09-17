@@ -202,9 +202,13 @@ export function OnboardingFlow() {
             <Text style={styles.legalLink} onPress={() => setLegalPreviewId('community')}>
               Community Guidelines
             </Text>
-            , and{' '}
+            ,{' '}
             <Text style={styles.legalLink} onPress={() => setLegalPreviewId('disguise')}>
               Disguise Mode Policy
+            </Text>
+            , and{' '}
+            <Text style={styles.legalLink} onPress={() => setLegalPreviewId('safety')}>
+              Safety Disclaimer
             </Text>
             . I am 18 or older.
           </Text>
@@ -217,7 +221,9 @@ export function OnboardingFlow() {
               size={22}
               color={legalAccepted ? pulseBrand.accent : colors.textMuted}
             />
-            <Text style={styles.checkboxLabel}>I have read and agree to the policies above</Text>
+            <Text style={styles.checkboxLabel}>
+              I have read and agree to the policies above, including the Safety Disclaimer
+            </Text>
           </AnimatedPressable>
           <AnimatedPressable
             style={[styles.primaryButton, !legalAccepted && styles.primaryButtonDisabled]}

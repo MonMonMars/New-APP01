@@ -3,7 +3,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AppErrorBoundary } from './src/components/AppErrorBoundary';
-import { CookieConsentBanner } from './src/components/legal/CookieConsentBanner';
 import { PrivacyShield } from './src/components/security/PrivacyShield';
 import { AppProvider, useApp } from './src/context/AppContext';
 import { ensureWebMotionCss } from './src/motion/webMotion';
@@ -25,7 +24,6 @@ export default function App() {
             <StatusBarWrapper />
             <AppNavigator />
             <PrivacyShield />
-            <CookieConsentBanner />
           </AppProvider>
         </SafeAreaProvider>
       </GestureHandlerRootView>

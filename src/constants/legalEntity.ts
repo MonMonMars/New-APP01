@@ -5,7 +5,7 @@ export const LEGAL_ENTITY = {
   jurisdiction: 'England and Wales',
   website: 'https://spark.app',
   effectiveDate: '15 September 2025',
-  lastUpdated: '15 September 2025',
+  lastUpdated: '17 September 2026',
   supportEmail: 'support@spark.app',
   privacyEmail: 'privacy@spark.app',
   legalEmail: 'legal@spark.app',

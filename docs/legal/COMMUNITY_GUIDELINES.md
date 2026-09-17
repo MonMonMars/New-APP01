@@ -96,4 +96,4 @@ Email support@spark.app with “Guidelines appeal” and your account email. We 
 
 ---
 
-*Template for product use. Consult qualified legal counsel before production launch.*
+*Consult qualified legal counsel before production launch.*

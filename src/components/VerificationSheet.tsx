@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Image, Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -14,6 +15,7 @@ type VerificationSheetProps = {
   kind: VerificationKind;
   onClose: () => void;
   onComplete: () => void;
+  onOpenPolicy?: () => void;
   photoUri?: string | null;
 };
 
@@ -43,22 +45,32 @@ export function VerificationSheet({
   kind,
   onClose,
   onComplete,
+  onOpenPolicy,
   photoUri,
 }: VerificationSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { acceptVerificationPolicy } = useApp();
   const [step, setStep] = useState<Step>('intro');
+  const [policyAccepted, setPolicyAccepted] = useState(false);
   const copy = COPY[kind];
 
   const handleClose = () => {
     setStep('intro');
+    setPolicyAccepted(false);
     onClose();
   };
 
   const handleFinish = () => {
     setStep('intro');
+    setPolicyAccepted(false);
     onComplete();
     onClose();
+  };
+
+  const handleContinueFromIntro = () => {
+    acceptVerificationPolicy();
+    setStep('capture');
   };
 
   return (
@@ -78,8 +90,40 @@ export function VerificationSheet({
               <Ionicons name="shield-checkmark-outline" size={48} color={colors.gradientEnd} />
               <Text style={[styles.headline, { color: colors.text }]}>{copy.title}</Text>
               <Text style={[styles.bodyText, { color: colors.textMuted }]}>{copy.body}</Text>
+              <Text style={[styles.policyNote, { color: colors.textMuted }]}>
+                Verification badges are not background checks or safety guarantees.
+                {onOpenPolicy ? (
+                  <>
+                    {' '}
+                    <Text style={[styles.policyLink, { color: colors.gradientEnd }]} onPress={onOpenPolicy}>
+                      Read Trust & Verification Policy
+                    </Text>
+                  </>
+                ) : null}
+              </Text>
+              <AnimatedPressable
+                style={[styles.checkboxRow, policyAccepted && styles.checkboxRowActive]}
+                onPress={() => setPolicyAccepted((v) => !v)}
+              >
+                <Ionicons
+                  name={policyAccepted ? 'checkbox' : 'square-outline'}
+                  size={22}
+                  color={policyAccepted ? colors.gradientEnd : colors.textMuted}
+                />
+                <Text style={[styles.checkboxLabel, { color: colors.textMuted }]}>
+                  I agree to biometric and identity processing as described in the Verification Policy
+                </Text>
+              </AnimatedPressable>
               <Text style={[styles.demoNote, { color: colors.textMuted }]}>Demo mode — no real ID vendor connected.</Text>
-              <AnimatedPressable style={[styles.primaryBtn, { backgroundColor: colors.gradientEnd }]} onPress={() => setStep('capture')}>
+              <AnimatedPressable
+                style={[
+                  styles.primaryBtn,
+                  { backgroundColor: colors.gradientEnd },
+                  !policyAccepted && styles.primaryBtnDisabled,
+                ]}
+                onPress={handleContinueFromIntro}
+                disabled={!policyAccepted}
+              >
                 <Text style={styles.primaryText}>Continue</Text>
               </AnimatedPressable>
             </>
@@ -136,8 +180,20 @@ const styles = StyleSheet.create({
   body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md, paddingBottom: spacing.xl },
   headline: { fontSize: 22, fontWeight: '800', textAlign: 'center' },
   bodyText: { fontSize: 15, lineHeight: 22, textAlign: 'center' },
+  policyNote: { fontSize: 13, lineHeight: 19, textAlign: 'center', paddingHorizontal: spacing.sm },
+  policyLink: { fontWeight: '700', textDecorationLine: 'underline' },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  checkboxRowActive: {},
+  checkboxLabel: { flex: 1, fontSize: 13, lineHeight: 18 },
   demoNote: { fontSize: 12, fontStyle: 'italic' },
   primaryBtn: { borderRadius: radii.button, paddingHorizontal: spacing.xl, paddingVertical: spacing.md, marginTop: spacing.md },
+  primaryBtnDisabled: { opacity: 0.45 },
   primaryText: { color: '#fff', fontSize: 16, fontWeight: '700' },
   scanFrame: {
     width: 220,

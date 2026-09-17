@@ -1,11 +1,16 @@
 import { Platform, StyleSheet, Text, View } from 'react-native';
 
+import { LegalDocumentId } from '../../content/legalDocuments';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { radii, spacing } from '../../theme';
 import { AnimatedPressable } from '../AnimatedPressable';
 
-export function CookieConsentBanner() {
+type CookieConsentBannerProps = {
+  onOpenLegal?: (documentId: LegalDocumentId) => void;
+};
+
+export function CookieConsentBanner({ onOpenLegal }: CookieConsentBannerProps) {
   const { colors } = useTheme();
   const { legalConsent, acceptCookieConsent, updatePrivacyPreferences, privacyPreferences, hasOnboarded } =
     useApp();
@@ -37,8 +42,21 @@ export function CookieConsentBanner() {
     <View style={[styles.banner, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <Text style={[styles.title, { color: colors.text }]}>Cookies & privacy</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>
-        We use essential cookies to run Spark on web. Optional analytics help us fix bugs. See our
-        Privacy Policy for details.
+        We use essential cookies to run Spark on web. Optional analytics help us fix bugs. See our{' '}
+        <Text
+          style={[styles.link, { color: colors.gradientEnd }]}
+          onPress={() => onOpenLegal?.('cookies')}
+        >
+          Cookie Policy
+        </Text>{' '}
+        and{' '}
+        <Text
+          style={[styles.link, { color: colors.gradientEnd }]}
+          onPress={() => onOpenLegal?.('privacy')}
+        >
+          Privacy Policy
+        </Text>
+        .
       </Text>
       <View style={styles.actions}>
         <AnimatedPressable style={[styles.button, { borderColor: colors.border }]} onPress={essentialOnly}>
@@ -73,6 +91,7 @@ const styles = StyleSheet.create({
   },
   title: { fontSize: 15, fontWeight: '800', marginBottom: spacing.xs },
   body: { fontSize: 13, lineHeight: 18, marginBottom: spacing.md },
+  link: { fontWeight: '700', textDecorationLine: 'underline' },
   actions: { flexDirection: 'row', gap: spacing.sm },
   button: {
     flex: 1,

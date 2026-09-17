@@ -100,4 +100,4 @@ We may update this policy. Material changes will be communicated in-app where pr
 
 ---
 
-*Template for product use. Consult qualified legal counsel before production launch.*
+*Consult qualified legal counsel before production launch.*

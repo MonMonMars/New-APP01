@@ -393,6 +393,7 @@ type AppContextValue = {
   completeDateCheckIn: (checkInId: string) => void;
   acceptOnboardingLegal: () => void;
   acceptDisguisePolicy: () => void;
+  acceptVerificationPolicy: () => void;
   acceptCookieConsent: () => void;
   exportUserData: () => Promise<boolean>;
   generateDisguiseAd: (
@@ -2157,6 +2158,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ...prev,
       termsAcceptedAt: now,
       privacyAcceptedAt: now,
+      communityAcceptedAt: now,
+      disguisePolicyAcceptedAt: prev.disguisePolicyAcceptedAt ?? now,
+      safetyAcknowledgedAt: now,
     }));
   }, []);
 
@@ -2164,6 +2168,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setLegalConsent((prev) => ({
       ...prev,
       disguisePolicyAcceptedAt: prev.disguisePolicyAcceptedAt ?? new Date().toISOString(),
+    }));
+  }, []);
+
+  const acceptVerificationPolicy = useCallback(() => {
+    setLegalConsent((prev) => ({
+      ...prev,
+      verificationPolicyAcknowledgedAt: prev.verificationPolicyAcknowledgedAt ?? new Date().toISOString(),
     }));
   }, []);
 
@@ -2379,6 +2390,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       completeDateCheckIn,
       acceptOnboardingLegal,
       acceptDisguisePolicy,
+      acceptVerificationPolicy,
       acceptCookieConsent,
       exportUserData,
       generateDisguiseAd,
@@ -2499,6 +2511,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       completeDateCheckIn,
       acceptOnboardingLegal,
       acceptDisguisePolicy,
+      acceptVerificationPolicy,
       acceptCookieConsent,
       exportUserData,
       generateDisguiseAd,

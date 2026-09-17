@@ -16,11 +16,13 @@ import { emberRelationshipLabel, Profile } from '../types/profile';
 import { canRevealIncomingLikes } from '../utils/genderAccountPerks';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { EmberStatusChips } from '../components/EmberStatusChips';
 
 export function LikesScreen() {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const {
@@ -126,7 +128,7 @@ export function LikesScreen() {
   return (
     <View style={[styles.screen, { paddingTop: insets.top, backgroundColor: colors.background }]}>
       <ScreenHeader
-        title="Likes"
+        title={t('likes.title')}
         showDisguiseButton
         rightIcon="diamond-outline"
         onRightPress={openPaywall}
@@ -145,16 +147,16 @@ export function LikesScreen() {
             <Text style={[styles.bannerCount, { color: colors.text }]}>{incomingLikes.length}</Text>
           </View>
           <Text style={[styles.bannerTitle, { color: colors.text }]}>
-            {incomingLikes.length} {incomingLikes.length === 1 ? 'person' : 'people'} liked you
+            {t(incomingLikes.length === 1 ? 'likes.personLikedYou' : 'likes.peopleLikedYou', {
+              count: incomingLikes.length,
+            })}
           </Text>
           <Text style={[styles.bannerSubtitle, { color: colors.textMuted }]}>
-            {revealIncomingLikes
-              ? 'See who liked you and match back instantly.'
-              : 'Upgrade to Spark+ to see who they are and match instantly.'}
+            {revealIncomingLikes ? t('likes.seeWhoSubtitle') : t('likes.upgradeSubtitle')}
           </Text>
           {!revealIncomingLikes && (
             <AnimatedPressable style={[styles.upgradeButton, { backgroundColor: colors.gradientEnd }]} onPress={openPaywall}>
-              <Text style={[styles.upgradeButtonText, { color: colors.text }]}>See who likes you</Text>
+              <Text style={[styles.upgradeButtonText, { color: colors.text }]}>{t('likes.seeWhoLikesYou')}</Text>
             </AnimatedPressable>
           )}
         </View>
@@ -163,7 +165,7 @@ export function LikesScreen() {
           <View style={[styles.superSection, { backgroundColor: colors.surface, borderColor: `${colors.heartPink}40` }]}>
             <View style={styles.superHeader}>
               <Ionicons name="heart-outline" size={18} color={colors.heartPink} />
-              <Text style={[styles.superTitle, { color: colors.text }]}>Likes you sent</Text>
+              <Text style={[styles.superTitle, { color: colors.text }]}>{t('likes.likesYouSent')}</Text>
               <Text style={[styles.superCount, { color: colors.heartPink }]}>{sentLikes.length}</Text>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.superRow}>
@@ -179,7 +181,7 @@ export function LikesScreen() {
                   />
                   <Text style={[styles.superName, { color: colors.text }]}>{profile.name}</Text>
                   <Text style={[styles.superStatus, emberRelationshipLabel(profile.relationshipStatus) ? { color: colors.ember } : { color: colors.textMuted }]}>
-                    {emberRelationshipLabel(profile.relationshipStatus) ?? 'Waiting for match'}
+                    {emberRelationshipLabel(profile.relationshipStatus) ?? t('likes.waitingForMatch')}
                   </Text>
                 </AnimatedPressable>
               ))}
@@ -191,7 +193,7 @@ export function LikesScreen() {
           <View style={[styles.superSection, { backgroundColor: colors.surface, borderColor: `${colors.superLike}40` }]}>
             <View style={styles.superHeader}>
               <Ionicons name="rose" size={18} color={colors.superLike} />
-              <Text style={[styles.superTitle, { color: colors.text }]}>Super Likes sent</Text>
+              <Text style={[styles.superTitle, { color: colors.text }]}>{t('likes.superLikesSent')}</Text>
               <Text style={[styles.superCount, { color: colors.superLike }]}>{superLikesSent.length}</Text>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.superRow}>
@@ -208,7 +210,7 @@ export function LikesScreen() {
                   <Text style={[styles.superName, { color: colors.text }]}>{profile.name}</Text>
                   <Text style={[styles.superStatus, emberRelationshipLabel(profile.relationshipStatus) ? { color: colors.ember } : { color: colors.textMuted }]}>
                     {emberRelationshipLabel(profile.relationshipStatus) ??
-                      (pendingLikeIds.has(profile.id) ? 'Pending' : 'Matched')}
+                      (pendingLikeIds.has(profile.id) ? t('likes.pending') : t('likes.matched'))}
                   </Text>
                 </AnimatedPressable>
               ))}
@@ -220,12 +222,12 @@ export function LikesScreen() {
           {incomingLikes.length === 0 ? (
             <View style={styles.empty}>
               <Text style={styles.emptyEmoji}>💫</Text>
-              <Text style={[styles.emptyTitle, { color: colors.text }]}>No likes yet</Text>
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('likes.emptyTitle')}</Text>
               <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
-                Keep discovering — when someone likes you, they&apos;ll show up here.
+                {t('likes.emptySubtitle')}
               </Text>
               <AnimatedPressable style={[styles.discoverButton, { backgroundColor: colors.gradientEnd }]} onPress={openDiscover}>
-                <Text style={[styles.discoverButtonText, { color: colors.text }]}>Start discovering</Text>
+                <Text style={[styles.discoverButtonText, { color: colors.text }]}>{t('likes.startDiscovering')}</Text>
               </AnimatedPressable>
             </View>
           ) : (
@@ -250,10 +252,10 @@ export function LikesScreen() {
                         <EmberStatusChips profile={profile} compact />
                       </View>
                     ) : (
-                      <Text style={styles.cardHint}>{profile.distanceMiles} mi away</Text>
+                      <Text style={styles.cardHint}>{t('likes.milesAway', { n: profile.distanceMiles })}</Text>
                     )
                   ) : (
-                    <Text style={styles.cardHint}>Tap to reveal</Text>
+                    <Text style={styles.cardHint}>{t('likes.tapToReveal')}</Text>
                   )}
                 </View>
               </AnimatedPressable>

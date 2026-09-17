@@ -7,6 +7,7 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { SparkSectionToggle } from '../components/SparkSectionToggle';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { resolveSparkSection } from '../types/preferences';
 import { emberRelationshipLabel, type RelationshipStatus } from '../types/profile';
 import { useLiveExpiry } from '../hooks/useLiveExpiry';
@@ -27,11 +28,16 @@ function ConversationRow({
   onPress: () => void;
 }) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const { match, lastMessage, yourTurn, unread } = conversation;
   const profile = match.profile;
   const expiryLabel = useLiveExpiry(match.expiresAt);
 
-  const turnLabel = yourTurn ? 'Your turn' : lastMessage ? 'Waiting for reply' : null;
+  const turnLabel = yourTurn
+    ? t('matches.yourTurn')
+    : lastMessage
+      ? t('matches.waitingReply')
+      : null;
 
   return (
     <AnimatedPressable style={styles.row} onPress={onPress}>
@@ -50,7 +56,7 @@ function ConversationRow({
         </View>
         <EmberStatusChips profile={profile} compact />
         <Text style={[styles.preview, { color: unread ? colors.text : colors.textMuted }, unread && styles.previewUnread]} numberOfLines={1}>
-          {lastMessage ?? 'Say something nice!'}
+          {lastMessage ?? t('matches.saySomethingNice')}
         </Text>
         {expiryLabel && (
           <Text style={[styles.expiryText, { color: colors.rewind }]}>{expiryLabel}</Text>
@@ -73,6 +79,7 @@ function NewMatchItem({
   onPress: () => void;
 }) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const expiryLabel = useLiveExpiry(match.expiresAt);
   const emberStatus = emberRelationshipLabel(match.profile.relationshipStatus);
 
@@ -91,7 +98,7 @@ function NewMatchItem({
       ) : expiryLabel ? (
         <Text style={[styles.newMatchExpiry, { color: colors.rewind }]}>{expiryLabel}</Text>
       ) : (
-        <Text style={[styles.newMatchExpiry, { color: colors.textMuted }]}>Say hi</Text>
+        <Text style={[styles.newMatchExpiry, { color: colors.textMuted }]}>{t('matches.sayHi')}</Text>
       )}
     </AnimatedPressable>
   );
@@ -101,6 +108,7 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const { conversations, matches, preferences, setSparkSection } = useApp();
 
   const superMatches = matches.filter((match) => match.isSuperMatch);
@@ -117,7 +125,7 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <ScreenHeader
-        title="Messages"
+        title={t('matches.title')}
         showDisguiseButton
         rightIcon="shield-checkmark-outline"
         onRightPress={() => navigation.getParent()?.navigate('Safety')}
@@ -136,7 +144,7 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
             <View style={styles.superHeader}>
               <Ionicons name="rose" size={14} color={colors.superLike} />
               <Text style={[styles.sectionTitle, { color: colors.superLike, marginBottom: 0 }]}>
-                Super Matches
+                {t('matches.superMatches')}
               </Text>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.matchRow}>
@@ -153,7 +161,7 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
 
         {newMatches.length > 0 && (
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>New matches</Text>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('matches.newMatches')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.matchRow}>
               {newMatches.map((match) => (
                 <NewMatchItem
@@ -167,12 +175,12 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
         )}
 
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Messages</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('matches.messages')}</Text>
           {conversations.length === 0 ? (
             <View style={styles.empty}>
               <Ionicons name="chatbubbles-outline" size={40} color={colors.textMuted} />
               <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-                Matches appear here when you both like each other.
+                {t('matches.empty')}
               </Text>
             </View>
           ) : (

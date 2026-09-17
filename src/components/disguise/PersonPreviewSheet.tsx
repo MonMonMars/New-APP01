@@ -85,7 +85,6 @@ export function PersonPreviewSheet({
   const passed = profileId ? passedIds.has(profileId) : false;
   const worldMeta = disguiseWorldMeta(preferences.sparkSection);
   const worldName = worldMeta.unlockLabel;
-  const disguiseWorld = worldMeta.world;
   const emberStatus = linkedProfile ? emberRelationshipLabel(linkedProfile.relationshipStatus) : null;
 
   const photoCount = displayPhotos.length;
@@ -255,7 +254,6 @@ export function PersonPreviewSheet({
                 onUnlike={handleUnlike}
                 onSuperLike={handleSuperLike}
                 onPass={handlePass}
-                world={disguiseWorld}
               />
               <Text style={[styles.hint, { color: colors.textMuted }]}>
                 {superLiked

@@ -44,6 +44,11 @@ export function DisguiseNavigator() {
         },
         tabBarActiveTintColor: meta.accent,
         tabBarInactiveTintColor: colors.textMuted,
+        tabBarBadgeStyle: {
+          backgroundColor: meta.accent,
+          color: '#FFFFFF',
+          fontSize: 11,
+        },
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '600',

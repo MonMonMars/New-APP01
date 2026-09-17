@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useIsFocused, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { useCallback, useRef, useState } from 'react';
 import { Alert, Dimensions, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -36,7 +36,6 @@ export function DiscoverScreen() {
   const insets = useSafeAreaInsets();
   const deckHeight = Math.round((WINDOW_HEIGHT - insets.top - TAB_BAR_HEIGHT) * 0.92);
   const navigation = useNavigation();
-  const isFocused = useIsFocused();
   const { colors } = useTheme();
   const deckRef = useRef<SwipeDeckHandle>(null);
   const {
@@ -336,10 +335,6 @@ export function DiscoverScreen() {
     setWaitingProfile(profile);
     setShowWaiting(true);
   }, [dismissSuperLikeResult, getConversationIdForProfile, navigation, superLikeIsMatch, superLikeProfileState]);
-
-  if (!isFocused) {
-    return <View style={[styles.screen, { backgroundColor: colors.background }]} />;
-  }
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>

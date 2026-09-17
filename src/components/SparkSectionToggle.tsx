@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Modal, Platform, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
 import { BrandMark } from './brand/BrandMark';
@@ -250,23 +250,10 @@ export function SparkSectionToggle({
 }: SparkSectionToggleProps) {
   const { colors } = useTheme();
   const [open, setOpen] = useState(false);
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(
-    () => () => {
-      if (closeTimer.current) {
-        clearTimeout(closeTimer.current);
-      }
-    },
-    [],
-  );
 
   const select = (next: SparkSection) => {
     onChange(next);
-    if (closeTimer.current) {
-      clearTimeout(closeTimer.current);
-    }
-    closeTimer.current = setTimeout(() => setOpen(false), 160);
+    setOpen(false);
   };
 
   switch (variant) {

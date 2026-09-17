@@ -58,7 +58,7 @@ function SuperParticle({ index, effectKey }: ParticleProps) {
   });
 
   const iconName = index % 4 === 0 ? 'star' : 'sparkles';
-  const iconColor = isGold ? '#FFD700' : index % 2 === 0 ? colors.heartRed : '#FFFFFF';
+  const iconColor = colors.heartRed;
 
   return (
     <Animated.View style={[styles.particle, style]}>
@@ -223,7 +223,7 @@ export function SuperLikeCelebration({
       <Animated.View style={[styles.flash, flashStyle, { backgroundColor: colors.heartRed }]} />
       <Animated.View style={[StyleSheet.absoluteFill, gradientStyle]}>
         <LinearGradient
-          colors={[colors.heartRed, colors.heartPink, '#FFD700']}
+          colors={[colors.heartRed, colors.heartPink, colors.heartRed]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={StyleSheet.absoluteFill}
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
     borderWidth: 3,
   },
   ringGold: {
-    borderColor: '#FFD700',
+    borderColor: palette.heartRed,
     borderWidth: 2,
   },
   particle: {

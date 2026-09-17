@@ -22,7 +22,6 @@ type Pack = {
   description: string;
   price: string;
   quantity: string;
-  color: string;
 };
 
 const PACKS: Pack[] = [
@@ -33,7 +32,6 @@ const PACKS: Pack[] = [
     description: 'Be a top profile for 30 minutes each',
     price: '$9.99',
     quantity: '3 Boosts',
-    color: '#FFD700',
   },
   {
     id: 'boost-1',
@@ -42,7 +40,6 @@ const PACKS: Pack[] = [
     description: 'One 30-minute visibility boost',
     price: '$3.99',
     quantity: '1 Boost',
-    color: '#FFD700',
   },
   {
     id: 'notes-5',
@@ -51,7 +48,6 @@ const PACKS: Pack[] = [
     description: 'Send a message before you match',
     price: '$4.99',
     quantity: '5 Notes',
-    color: '#FFD700',
   },
   {
     id: 'notes-1',
@@ -60,7 +56,6 @@ const PACKS: Pack[] = [
     description: 'One pre-match message',
     price: '$1.99',
     quantity: '1 Note',
-    color: '#FFD700',
   },
 ];
 
@@ -116,7 +111,7 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
         </LinearGradient>
 
         {PACKS.map((pack) => {
-          const packAccent = pack.id.startsWith('notes') ? colors.gradientEnd : pack.color;
+          const packAccent = colors.gradientEnd;
           return (
           <AnimatedPressable
             key={pack.id}
@@ -148,9 +143,7 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
         price={pendingPack?.price ?? ''}
         quantity={pendingPack?.quantity}
         icon={pendingPack?.icon}
-        iconColor={
-          pendingPack?.id.startsWith('notes') ? colors.gradientEnd : pendingPack?.color
-        }
+        iconColor={colors.gradientEnd}
         onClose={() => setPendingPack(null)}
         onConfirm={() => {
           if (pendingPack) {

@@ -1,7 +1,8 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { pulseBrand } from '../../theme/pulseBrand';
+import { useApp } from '../../context/AppContext';
 import { spacing } from '../../theme';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { ScalePressable } from '../motion/ScalePressable';
 
 type DisguiseMiniSparkBarProps = {
@@ -16,16 +17,26 @@ type DisguiseMiniSparkBarProps = {
 
 const BUTTON_SIZE = 22;
 const LETTER_SIZE = 10;
-const PULSE_BLUE = pulseBrand.accent;
 
 type MiniLetterButtonProps = {
   letter: 'X' | 'S' | 'L';
   active: boolean;
+  accent: string;
+  accentSoft: string;
+  accentBorder: string;
   onPress: () => void;
   accessibilityLabel: string;
 };
 
-function MiniLetterButton({ letter, active, onPress, accessibilityLabel }: MiniLetterButtonProps) {
+function MiniLetterButton({
+  letter,
+  active,
+  accent,
+  accentSoft,
+  accentBorder,
+  onPress,
+  accessibilityLabel,
+}: MiniLetterButtonProps) {
   return (
     <ScalePressable
       onPress={onPress}
@@ -35,17 +46,17 @@ function MiniLetterButton({ letter, active, onPress, accessibilityLabel }: MiniL
       style={[
         styles.button,
         {
-          backgroundColor: active ? PULSE_BLUE : pulseBrand.accentSoft,
-          borderColor: active ? PULSE_BLUE : pulseBrand.accentBorder,
+          backgroundColor: active ? accent : accentSoft,
+          borderColor: active ? accent : accentBorder,
         },
       ]}
     >
-      <Text style={[styles.letter, { color: active ? '#fff' : PULSE_BLUE }]}>{letter}</Text>
+      <Text style={[styles.letter, { color: active ? '#fff' : accent }]}>{letter}</Text>
     </ScalePressable>
   );
 }
 
-/** Compact X / S / L row. Same-size Pulse-blue circles. Super like stays in the middle. */
+/** Compact X / S / L row. Same-size circles in the active disguise accent. Super like stays in the middle. */
 export function DisguiseMiniSparkBar({
   liked,
   superLiked,
@@ -55,12 +66,18 @@ export function DisguiseMiniSparkBar({
   onSuperLike,
   onPass,
 }: DisguiseMiniSparkBarProps) {
+  const { preferences } = useApp();
+  const meta = disguiseWorldMeta(preferences.sparkSection);
+
   return (
     <View style={styles.bar}>
       <View style={styles.slot}>
         <MiniLetterButton
           letter="X"
           active={passed}
+          accent={meta.accent}
+          accentSoft={meta.accentSoft}
+          accentBorder={meta.accentBorder}
           onPress={onPass}
           accessibilityLabel="Pass profile"
         />
@@ -69,6 +86,9 @@ export function DisguiseMiniSparkBar({
         <MiniLetterButton
           letter="S"
           active={superLiked}
+          accent={meta.accent}
+          accentSoft={meta.accentSoft}
+          accentBorder={meta.accentBorder}
           onPress={onSuperLike}
           accessibilityLabel="Super like profile"
         />
@@ -77,6 +97,9 @@ export function DisguiseMiniSparkBar({
         <MiniLetterButton
           letter="L"
           active={liked}
+          accent={meta.accent}
+          accentSoft={meta.accentSoft}
+          accentBorder={meta.accentBorder}
           onPress={liked ? onUnlike : onLike}
           accessibilityLabel={liked ? 'Unlike profile' : 'Like profile'}
         />

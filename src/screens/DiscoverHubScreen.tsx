@@ -152,7 +152,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
             {(isPaused || isBoosted || (preferences.travelMode && preferences.passportCity)) && (
               <View style={styles.statusRow}>
                 {isPaused && <StatusPill label="Paused" color={colors.rewind} />}
-                {isBoosted && <StatusPill label="Boost active" color="#FFD700" />}
+                {isBoosted && <StatusPill label="Boost active" color={colors.boost} />}
                 {preferences.travelMode && preferences.passportCity && (
                   <StatusPill label={preferences.passportCity} color={colors.superLike} />
                 )}

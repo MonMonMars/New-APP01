@@ -63,7 +63,7 @@ export function BoostCard({
   return (
     <View style={styles.card}>
       <View style={styles.iconWrap}>
-        <Ionicons name="flash" size={24} color={isActive ? '#FFD700' : colors.gradientEnd} />
+        <Ionicons name="flash" size={24} color={colors.boost} />
       </View>
       <View style={styles.body}>
         <Text style={styles.title}>
@@ -84,7 +84,7 @@ export function BoostCard({
         </AnimatedPressable>
       )}
       {isActive && (
-        <View style={styles.activeBadge}>
+            <View style={[styles.activeBadge, { backgroundColor: colors.boost }]}>
           <Text style={styles.activeBadgeText}>LIVE</Text>
         </View>
       )}
@@ -140,7 +140,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   activeBadge: {
-    backgroundColor: '#FFD700',
     borderRadius: radii.button,
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,

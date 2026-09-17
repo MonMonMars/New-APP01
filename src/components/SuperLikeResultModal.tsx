@@ -41,7 +41,7 @@ export function SuperLikeResultModal({
       <LinearGradient
         colors={
           isMatch
-            ? [colors.heartRed, colors.heartPink, '#FFD700']
+            ? [colors.heartRed, colors.heartPink, colors.heartRed]
             : ['#1A1A2E', colors.heartRed, colors.heartPink]
         }
         style={[styles.card, { paddingBottom: insets.bottom + spacing.lg }]}

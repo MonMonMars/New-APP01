@@ -25,7 +25,6 @@ import {
 } from '../../data/disguiseTrending';
 import { useDisguiseWeather } from '../../hooks/useDisguiseWeather';
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
-import { pulseBrand } from '../../theme/pulseBrand';
 import { radii, spacing } from '../../theme';
 import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
 import { disguiseWorldMeta } from '../../utils/disguiseWorld';
@@ -51,7 +50,7 @@ function trendIcon(direction: TrendDirection): keyof typeof Ionicons.glyphMap {
   }
 }
 
-function trendColor(direction: TrendDirection): string {
+function trendColor(direction: TrendDirection, accent: string): string {
   switch (direction) {
     case 'up':
     case 'hot':
@@ -59,7 +58,7 @@ function trendColor(direction: TrendDirection): string {
     case 'down':
       return '#ef4444';
     case 'new':
-      return pulseBrand.accent;
+      return accent;
     case 'stable':
       return '#94a3b8';
     default: {
@@ -164,9 +163,9 @@ export function DisguiseTrendingScreen() {
           <Image source={{ uri: pulseBrief.imageUrl }} style={styles.briefImage} resizeMode="cover" />
           <View style={styles.briefBody}>
             <View style={styles.briefMeta}>
-              <View style={styles.livePill}>
-                <View style={styles.liveDot} />
-                <Text style={styles.liveText}>{isHarbor ? 'Harbor Brief' : 'Pulse Brief'}</Text>
+              <View style={[styles.livePill, { backgroundColor: meta.accentSoft }]}>
+                <View style={[styles.liveDot, { backgroundColor: meta.accent }]} />
+                <Text style={[styles.liveText, { color: meta.accent }]}>{isHarbor ? 'Harbor Brief' : 'Pulse Brief'}</Text>
               </View>
               <Text style={[styles.briefSource, { color: colors.textMuted }]}>
                 {pulseBrief.source} · {pulseBrief.readMinutes} min
@@ -273,13 +272,13 @@ export function DisguiseTrendingScreen() {
               <View style={styles.topicTopLine}>
                 <Text style={[styles.label, { color: colors.text }]}>{item.label}</Text>
                 {item.changeLabel && (
-                  <View style={[styles.trendPill, { backgroundColor: `${trendColor(item.direction)}22` }]}>
+                  <View style={[styles.trendPill, { backgroundColor: `${trendColor(item.direction, meta.accent)}22` }]}>
                     <Ionicons
                       name={trendIcon(item.direction)}
                       size={10}
-                      color={trendColor(item.direction)}
+                      color={trendColor(item.direction, meta.accent)}
                     />
-                    <Text style={[styles.trendPillText, { color: trendColor(item.direction) }]}>
+                    <Text style={[styles.trendPillText, { color: trendColor(item.direction, meta.accent) }]}>
                       {item.changeLabel}
                     </Text>
                   </View>
@@ -364,7 +363,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: pulseBrand.accentSoft,
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
     borderRadius: radii.button,
@@ -373,10 +371,8 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: pulseBrand.accent,
   },
   liveText: {
-    color: pulseBrand.accent,
     fontSize: 11,
     fontWeight: '800',
     textTransform: 'uppercase',

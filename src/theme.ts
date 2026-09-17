@@ -26,6 +26,45 @@ export type ColorPalette = {
   ember: string;
 };
 
+function hexAlpha(hex: string, alpha: number): string {
+  const raw = hex.replace('#', '');
+  if (raw.length !== 6) {
+    return hex;
+  }
+  const n = Number.parseInt(raw, 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+}
+
+/** Every interactive accent in a world uses this one color. */
+function buttonTokens(accent: string): Pick<
+  ColorPalette,
+  | 'like'
+  | 'heartRed'
+  | 'heartPink'
+  | 'nope'
+  | 'superLike'
+  | 'boost'
+  | 'rewind'
+  | 'gradientStart'
+  | 'gradientEnd'
+  | 'stampLike'
+  | 'stampNope'
+> {
+  return {
+    like: accent,
+    heartRed: accent,
+    heartPink: accent,
+    nope: accent,
+    superLike: accent,
+    boost: accent,
+    rewind: accent,
+    gradientStart: accent,
+    gradientEnd: accent,
+    stampLike: hexAlpha(accent, 0.9),
+    stampNope: hexAlpha(accent, 0.9),
+  };
+}
+
 export const darkColors: ColorPalette = {
   background: '#0F0F10',
   surface: '#1A1A1C',
@@ -33,21 +72,11 @@ export const darkColors: ColorPalette = {
   text: '#FFFFFF',
   textMuted: '#A0A0A5',
   textDark: '#111111',
-  like: '#21D07A',
-  heartRed: sparkBrand.accent,
-  heartPink: sparkBrand.accentBright,
-  nope: '#FF4458',
   passDim: '#1A1A1C',
-  superLike: '#1EC3FF',
-  boost: '#A855F7',
-  rewind: '#F5B300',
-  gradientStart: sparkBrand.accentBright,
-  gradientEnd: sparkBrand.accent,
   overlay: 'rgba(0, 0, 0, 0.35)',
-  stampLike: 'rgba(33, 208, 122, 0.9)',
-  stampNope: 'rgba(255, 68, 88, 0.9)',
   border: '#2A2A2E',
   ember: harborBrand.accent,
+  ...buttonTokens(sparkBrand.accent),
 };
 
 export const lightColors: ColorPalette = {
@@ -57,56 +86,32 @@ export const lightColors: ColorPalette = {
   text: '#111111',
   textMuted: '#6B6B70',
   textDark: '#111111',
-  like: '#21D07A',
-  heartRed: sparkBrand.accent,
-  heartPink: sparkBrand.accentBright,
-  nope: '#FF4458',
   passDim: '#E8E8EC',
-  superLike: '#1EC3FF',
-  boost: '#A855F7',
-  rewind: '#F5B300',
-  gradientStart: sparkBrand.accentBright,
-  gradientEnd: sparkBrand.accent,
   overlay: 'rgba(0, 0, 0, 0.25)',
-  stampLike: 'rgba(33, 208, 122, 0.9)',
-  stampNope: 'rgba(255, 68, 88, 0.9)',
   border: '#E0E0E4',
-  ember: '#C9A44E',
+  ember: harborBrand.accent,
+  ...buttonTokens(sparkBrand.accent),
 };
 
-/** Spark pinks/reds become Ember pale gold so every accent button follows the active world. */
+/** Spark pinks and Ember gold — one accent per world for every button. */
 export function paletteForSection(
   base: ColorPalette,
   section: 'spark' | 'ember',
 ): ColorPalette {
-  if (section !== 'ember') {
-    return base;
+  switch (section) {
+    case 'spark':
+      return base;
+    case 'ember':
+      return {
+        ...base,
+        ember: harborBrand.accent,
+        ...buttonTokens(harborBrand.accent),
+      };
+    default: {
+      const _exhaustive: never = section;
+      return _exhaustive;
+    }
   }
-
-  const isLight = base.background === lightColors.background;
-  if (isLight) {
-    return {
-      ...base,
-      gradientStart: harborBrand.accent,
-      gradientEnd: '#C9A44E',
-      heartRed: '#C9A44E',
-      heartPink: harborBrand.accent,
-      nope: '#A6853A',
-      superLike: '#C9A44E',
-      stampNope: 'rgba(201, 164, 78, 0.9)',
-    };
-  }
-
-  return {
-    ...base,
-    gradientStart: harborBrand.accentBright,
-    gradientEnd: harborBrand.accent,
-    heartRed: harborBrand.accent,
-    heartPink: harborBrand.accentBright,
-    nope: '#C9A44E',
-    superLike: harborBrand.accent,
-    stampNope: 'rgba(228, 195, 115, 0.9)',
-  };
 }
 
 /** Default export for backward compatibility — dark palette */

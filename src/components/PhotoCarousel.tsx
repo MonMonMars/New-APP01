@@ -2,7 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
-import { colors, radii, spacing } from '../theme';
+import { colors as palette, radii, spacing } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type PhotoCarouselProps = {
@@ -18,6 +19,7 @@ export function PhotoCarousel({
   editable = false,
   height = 280,
 }: PhotoCarouselProps) {
+  const { colors } = useTheme();
   const [index, setIndex] = useState(0);
   const safeIndex = photos.length > 0 ? Math.min(index, photos.length - 1) : 0;
   const currentPhoto = photos[safeIndex];
@@ -65,7 +67,7 @@ export function PhotoCarousel({
       )}
 
       {editable && onAddPhoto && (
-        <AnimatedPressable style={styles.addButton} onPress={onAddPhoto}>
+        <AnimatedPressable style={[styles.addButton, { backgroundColor: colors.gradientEnd }]} onPress={onAddPhoto}>
           <Ionicons name="add" size={20} color={colors.text} />
         </AnimatedPressable>
       )}
@@ -77,7 +79,7 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: radii.card,
     overflow: 'hidden',
-    backgroundColor: colors.surface,
+    backgroundColor: palette.surface,
     position: 'relative',
   },
   image: {
@@ -113,7 +115,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.4)',
   },
   dotActive: {
-    backgroundColor: colors.text,
+    backgroundColor: palette.text,
     width: 18,
   },
   addButton: {
@@ -123,13 +125,13 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: colors.gradientEnd,
+    backgroundColor: palette.gradientEnd,
     alignItems: 'center',
     justifyContent: 'center',
   },
   empty: {
     borderRadius: radii.card,
-    backgroundColor: colors.surface,
+    backgroundColor: palette.surface,
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.sm,
@@ -138,7 +140,7 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
   },
   emptyText: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 14,
     fontWeight: '600',
   },

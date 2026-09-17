@@ -67,8 +67,8 @@ export function DisguiseMiniSparkBar({
           active={liked}
           activeBackground={colors.heartRed}
           activeBorder={colors.heartRed}
-          idleBackground="rgba(255,107,107,0.08)"
-          idleBorder="rgba(255,107,107,0.45)"
+          idleBackground={`${colors.heartPink}14`}
+          idleBorder={`${colors.heartPink}73`}
           onPress={liked ? onUnlike : onLike}
           accessibilityLabel={liked ? 'Unlike profile' : 'Like profile'}
         />

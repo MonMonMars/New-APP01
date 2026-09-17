@@ -71,6 +71,39 @@ export const lightColors: ColorPalette = {
   ember: '#D97706',
 };
 
+/** Spark pinks/reds become Ember amber so every accent button follows the active world. */
+export function paletteForSection(
+  base: ColorPalette,
+  section: 'spark' | 'ember',
+): ColorPalette {
+  if (section !== 'ember') {
+    return base;
+  }
+
+  const isLight = base.background === lightColors.background;
+  if (isLight) {
+    return {
+      ...base,
+      gradientStart: '#FBBF24',
+      gradientEnd: '#D97706',
+      heartRed: '#D97706',
+      heartPink: '#F59E0B',
+      nope: '#B45309',
+      stampNope: 'rgba(217, 119, 6, 0.9)',
+    };
+  }
+
+  return {
+    ...base,
+    gradientStart: '#FFD36A',
+    gradientEnd: '#FFB020',
+    heartRed: '#FFB020',
+    heartPink: '#FFC85A',
+    nope: '#E8A317',
+    stampNope: 'rgba(255, 176, 32, 0.9)',
+  };
+}
+
 /** Default export for backward compatibility — dark palette */
 export const colors = darkColors;
 

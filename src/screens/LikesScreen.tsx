@@ -13,10 +13,12 @@ import { useApp } from '../context/AppContext';
 import { getProfileById } from '../data/profiles';
 import { resolveSparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
-import { colors, radii, spacing } from '../theme';
+import { colors as palette, radii, spacing } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 
 export function LikesScreen() {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const {
@@ -121,7 +123,7 @@ export function LikesScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.banner}>
-          <View style={styles.bannerBadge}>
+          <View style={[styles.bannerBadge, { backgroundColor: colors.gradientEnd }]}>
             <Text style={styles.bannerCount}>{incomingLikes.length}</Text>
           </View>
           <Text style={styles.bannerTitle}>
@@ -133,7 +135,7 @@ export function LikesScreen() {
               : 'Upgrade to Spark+ to see who they are and match instantly.'}
           </Text>
           {!isSparkPlus && (
-            <AnimatedPressable style={styles.upgradeButton} onPress={openPaywall}>
+            <AnimatedPressable style={[styles.upgradeButton, { backgroundColor: colors.gradientEnd }]} onPress={openPaywall}>
               <Text style={styles.upgradeButtonText}>See who likes you</Text>
             </AnimatedPressable>
           )}
@@ -195,7 +197,7 @@ export function LikesScreen() {
               <Text style={styles.emptySubtitle}>
                 Keep discovering — when someone likes you, they&apos;ll show up here.
               </Text>
-              <AnimatedPressable style={styles.discoverButton} onPress={openDiscover}>
+              <AnimatedPressable style={[styles.discoverButton, { backgroundColor: colors.gradientEnd }]} onPress={openDiscover}>
                 <Text style={styles.discoverButtonText}>Start discovering</Text>
               </AnimatedPressable>
             </View>
@@ -273,7 +275,7 @@ export function LikesScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: palette.background,
   },
   worldBar: {
     paddingHorizontal: spacing.md,
@@ -286,7 +288,7 @@ const styles = StyleSheet.create({
   banner: {
     marginHorizontal: spacing.lg,
     marginBottom: spacing.lg,
-    backgroundColor: colors.surface,
+    backgroundColor: palette.surface,
     borderRadius: radii.card,
     padding: spacing.lg,
     alignItems: 'center',
@@ -295,24 +297,24 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.gradientEnd,
+    backgroundColor: palette.gradientEnd,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.sm,
   },
   bannerCount: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 22,
     fontWeight: '900',
   },
   bannerTitle: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 20,
     fontWeight: '700',
     textAlign: 'center',
   },
   bannerSubtitle: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 14,
     lineHeight: 20,
     marginTop: spacing.sm,
@@ -321,20 +323,20 @@ const styles = StyleSheet.create({
   },
   upgradeButton: {
     alignSelf: 'stretch',
-    backgroundColor: colors.gradientEnd,
+    backgroundColor: palette.gradientEnd,
     borderRadius: radii.button,
     paddingVertical: spacing.sm + 2,
     alignItems: 'center',
   },
   upgradeButtonText: {
-    color: colors.text,
+    color: palette.text,
     fontWeight: '700',
     fontSize: 15,
   },
   superSection: {
     marginHorizontal: spacing.lg,
     marginBottom: spacing.lg,
-    backgroundColor: colors.surface,
+    backgroundColor: palette.surface,
     borderRadius: radii.card,
     padding: spacing.md,
     borderWidth: 1,
@@ -348,12 +350,12 @@ const styles = StyleSheet.create({
   },
   superTitle: {
     flex: 1,
-    color: colors.text,
+    color: palette.text,
     fontSize: 16,
     fontWeight: '800',
   },
   superCount: {
-    color: colors.superLike,
+    color: palette.superLike,
     fontSize: 14,
     fontWeight: '800',
   },
@@ -369,16 +371,16 @@ const styles = StyleSheet.create({
     height: 72,
     borderRadius: 36,
     borderWidth: 2,
-    borderColor: colors.superLike,
+    borderColor: palette.superLike,
   },
   superName: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 12,
     fontWeight: '700',
     marginTop: spacing.xs,
   },
   superStatus: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 10,
     fontWeight: '600',
   },
@@ -393,7 +395,7 @@ const styles = StyleSheet.create({
     aspectRatio: 0.75,
     borderRadius: radii.card,
     overflow: 'hidden',
-    backgroundColor: colors.surface,
+    backgroundColor: palette.surface,
   },
   photo: {
     width: '100%',
@@ -411,12 +413,12 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
   },
   cardName: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 18,
     fontWeight: '800',
   },
   cardHint: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 12,
     marginTop: spacing.xs,
     fontWeight: '600',
@@ -431,12 +433,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   emptyTitle: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 20,
     fontWeight: '800',
   },
   emptySubtitle: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 14,
     textAlign: 'center',
     lineHeight: 20,
@@ -444,13 +446,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   discoverButton: {
-    backgroundColor: colors.gradientEnd,
+    backgroundColor: palette.gradientEnd,
     borderRadius: radii.button,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm + 2,
   },
   discoverButtonText: {
-    color: colors.text,
+    color: palette.text,
     fontWeight: '700',
     fontSize: 15,
   },

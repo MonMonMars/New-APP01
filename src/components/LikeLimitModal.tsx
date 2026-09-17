@@ -2,7 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { FREE_DAILY_LIKE_LIMIT } from '../types/subscription';
-import { colors, radii, spacing } from '../theme';
+import { colors as palette, radii, spacing } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 import { AnimatedOverlay } from './motion/AnimatedOverlay';
 import { FadeSlideIn } from './motion/FadeSlideIn';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -14,6 +15,7 @@ type LikeLimitModalProps = {
 };
 
 export function LikeLimitModal({ visible, onClose, onUpgrade }: LikeLimitModalProps) {
+  const { colors } = useTheme();
   return (
     <AnimatedOverlay visible={visible} onClose={onClose} variant="center">
       <View style={styles.sheet}>
@@ -28,7 +30,7 @@ export function LikeLimitModal({ visible, onClose, onUpgrade }: LikeLimitModalPr
           </Text>
         </FadeSlideIn>
         <FadeSlideIn replayKey={visible} index={2}>
-          <AnimatedPressable style={styles.primaryButton} onPress={onUpgrade} scaleTo={0.97}>
+          <AnimatedPressable style={[styles.primaryButton, { backgroundColor: colors.gradientEnd }]} onPress={onUpgrade} scaleTo={0.97}>
             <Text style={styles.primaryText}>Get Spark+</Text>
           </AnimatedPressable>
           <AnimatedPressable style={styles.secondaryButton} onPress={onClose} scaleTo={0.97}>
@@ -44,20 +46,20 @@ const styles = StyleSheet.create({
   sheet: {
     width: '100%',
     maxWidth: 340,
-    backgroundColor: colors.surface,
+    backgroundColor: palette.surface,
     borderRadius: radii.card,
     padding: spacing.xl,
     alignItems: 'center',
   },
   title: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 22,
     fontWeight: '800',
     marginTop: spacing.md,
     textAlign: 'center',
   },
   subtitle: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 15,
     lineHeight: 22,
     textAlign: 'center',
@@ -66,13 +68,13 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     width: '100%',
-    backgroundColor: colors.gradientEnd,
+    backgroundColor: palette.gradientEnd,
     borderRadius: radii.button,
     paddingVertical: spacing.md,
     alignItems: 'center',
   },
   primaryText: {
-    color: colors.text,
+    color: palette.text,
     fontWeight: '700',
     fontSize: 16,
   },
@@ -81,7 +83,7 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
   },
   secondaryText: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 15,
   },
 });

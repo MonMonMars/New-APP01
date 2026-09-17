@@ -11,7 +11,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { colors } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 
 export type SwipeEffectKind = 'like' | 'pass' | 'super';
 
@@ -37,6 +37,7 @@ type ParticleProps = {
 };
 
 function Particle({ index, kind, origin, effectKey }: ParticleProps) {
+  const { colors } = useTheme();
   const progress = useSharedValue(0);
   const isLike = kind === 'like' || kind === 'super';
   const angle = (index / PARTICLE_COUNT) * Math.PI * 2 + (isLike ? 0.2 : -0.1);
@@ -101,6 +102,7 @@ export function SwipeBurstEffect({
   effectKey,
   onComplete,
 }: SwipeBurstEffectProps) {
+  const { colors } = useTheme();
   const flashOpacity = useSharedValue(0);
   const vignetteOpacity = useSharedValue(0);
   const ringScale = useSharedValue(0.4);

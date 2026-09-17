@@ -12,7 +12,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { colors } from '../theme';
+import { colors as palette } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 
 const PARTICLE_COUNT = 56;
 
@@ -28,6 +29,7 @@ type ParticleProps = {
 };
 
 function SuperParticle({ index, effectKey }: ParticleProps) {
+  const { colors } = useTheme();
   const progress = useSharedValue(0);
   const angle = (index / PARTICLE_COUNT) * Math.PI * 2 + (index % 5) * 0.15;
   const distance = 120 + (index % 9) * 42;
@@ -70,6 +72,7 @@ export function SuperLikeCelebration({
   effectKey,
   onComplete,
 }: SuperLikeCelebrationProps) {
+  const { colors } = useTheme();
   const flashOpacity = useSharedValue(0);
   const gradientOpacity = useSharedValue(0);
   const roseScale = useSharedValue(0);
@@ -217,10 +220,10 @@ export function SuperLikeCelebration({
 
   return (
     <Animated.View style={[styles.overlay, containerStyle]} pointerEvents="none">
-      <Animated.View style={[styles.flash, flashStyle]} />
+      <Animated.View style={[styles.flash, flashStyle, { backgroundColor: colors.heartRed }]} />
       <Animated.View style={[StyleSheet.absoluteFill, gradientStyle]}>
         <LinearGradient
-          colors={[colors.heartRed, '#FF6B8A', '#FFD700']}
+          colors={[colors.heartRed, colors.heartPink, '#FFD700']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={StyleSheet.absoluteFill}
@@ -231,7 +234,7 @@ export function SuperLikeCelebration({
         <View style={styles.burstCore}>
           <Animated.View style={[styles.ring, ring3Style, styles.ringGold]} />
           <Animated.View style={[styles.ring, ring2Style, styles.ringWhite]} />
-          <Animated.View style={[styles.ring, ring1Style, styles.ringBlue]} />
+          <Animated.View style={[styles.ring, ring1Style, styles.ringBlue, { borderColor: colors.heartRed }]} />
 
           <Animated.View style={starBurstStyle}>
             <Ionicons name="star" size={180} color="rgba(255,215,0,0.4)" />
@@ -260,7 +263,7 @@ const styles = StyleSheet.create({
   },
   flash: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: colors.heartRed,
+    backgroundColor: palette.heartRed,
   },
   centerStage: {
     ...StyleSheet.absoluteFill,
@@ -286,7 +289,7 @@ const styles = StyleSheet.create({
     borderWidth: 4,
   },
   ringBlue: {
-    borderColor: colors.heartRed,
+    borderColor: palette.heartRed,
   },
   ringWhite: {
     borderColor: 'rgba(255,255,255,0.7)',

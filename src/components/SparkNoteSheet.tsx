@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors, radii, spacing } from '../theme';
+import { colors as palette, radii, spacing } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 import { Profile } from '../types/profile';
 import { AnimatedPressable } from './AnimatedPressable';
 
@@ -47,6 +48,7 @@ export function SparkNoteSheet({
   onSend,
   onSkip,
 }: SparkNoteSheetProps) {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [note, setNote] = useState('');
 
@@ -76,7 +78,7 @@ export function SparkNoteSheet({
             <Text style={styles.title}>{copy.title}</Text>
           </View>
           <Text style={styles.subtitle}>{copy.subtitle}</Text>
-          <Text style={styles.quota}>
+          <Text style={[styles.quota, { color: colors.gradientEnd }]}>
             {remainingNotes > 0
               ? `${remainingNotes} note${remainingNotes === 1 ? '' : 's'} left today`
               : 'No notes left today — upgrade to Spark+ for unlimited'}
@@ -94,7 +96,11 @@ export function SparkNoteSheet({
           />
 
           <AnimatedPressable
-            style={[styles.sendButton, !canSend && styles.sendButtonDisabled]}
+            style={[
+              styles.sendButton,
+              { backgroundColor: colors.gradientEnd },
+              !canSend && styles.sendButtonDisabled,
+            ]}
             onPress={() => {
               if (canSend) {
                 onSend(note.trim());
@@ -122,7 +128,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: colors.surface,
+    backgroundColor: palette.surface,
     borderTopLeftRadius: radii.card,
     borderTopRightRadius: radii.card,
     padding: spacing.lg,
@@ -132,7 +138,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: colors.textMuted,
+    backgroundColor: palette.textMuted,
     marginBottom: spacing.md,
   },
   header: {
@@ -142,34 +148,34 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   title: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 20,
     fontWeight: '800',
   },
   subtitle: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 14,
     lineHeight: 20,
     marginBottom: spacing.sm,
   },
   quota: {
-    color: colors.gradientEnd,
+    color: palette.gradientEnd,
     fontSize: 13,
     fontWeight: '600',
     marginBottom: spacing.md,
   },
   input: {
-    backgroundColor: colors.background,
+    backgroundColor: palette.background,
     borderRadius: radii.card,
     padding: spacing.md,
-    color: colors.text,
+    color: palette.text,
     fontSize: 16,
     minHeight: 100,
     textAlignVertical: 'top',
     marginBottom: spacing.md,
   },
   sendButton: {
-    backgroundColor: colors.gradientEnd,
+    backgroundColor: palette.gradientEnd,
     borderRadius: radii.button,
     paddingVertical: spacing.md,
     alignItems: 'center',
@@ -178,7 +184,7 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   sendText: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 16,
     fontWeight: '700',
   },
@@ -187,7 +193,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   skipText: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 15,
     fontWeight: '600',
   },

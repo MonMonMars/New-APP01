@@ -33,6 +33,7 @@ import { OnboardingFlow } from '../screens/onboarding/OnboardingFlow';
 import { TabBarButton } from '../components/TabBarButton';
 import { DisguiseNavigator } from './DisguiseNavigator';
 import { MainTabParamList, RootStackParamList } from '../types/navigation';
+import { resolveSparkSection } from '../types/preferences';
 
 function HydrationGate({ children }: { children: ReactNode }) {
   const { isHydrated } = useApp();
@@ -296,7 +297,7 @@ function RootNavigator() {
 }
 
 function ThemedNavigator() {
-  const { themeMode, disguiseMode, hasOnboarded, isHydrated } = useApp();
+  const { themeMode, disguiseMode, hasOnboarded, isHydrated, preferences } = useApp();
   const navigationRef = useNavigationContainerRef<RootStackParamList>();
   const wasDisguiseMode = useRef(disguiseMode);
 
@@ -318,7 +319,7 @@ function ThemedNavigator() {
   }, [disguiseMode, hasOnboarded, isHydrated, navigationRef]);
 
   return (
-    <ThemeProvider mode={themeMode}>
+    <ThemeProvider mode={themeMode} world={resolveSparkSection(preferences.sparkSection)}>
       <NavigationContainer ref={navigationRef}>
         <HydrationGate>
           <RootNavigator />

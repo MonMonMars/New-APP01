@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, radii, spacing } from '../theme';
+import { colors as palette, radii, spacing } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 
 type DailyBatchIndicatorProps = {
   remaining: number;
@@ -10,13 +11,14 @@ type DailyBatchIndicatorProps = {
 
 /** Coffee Meets Bagel–style daily curated batch counter. */
 export function DailyBatchIndicator({ remaining, total, slim = false }: DailyBatchIndicatorProps) {
+  const { colors } = useTheme();
   if (remaining <= 0) {
     return null;
   }
 
   return (
     <View style={[styles.container, slim && styles.containerSlim]}>
-      <View style={[styles.dot, slim && styles.dotSlim]} />
+      <View style={[styles.dot, slim && styles.dotSlim, { backgroundColor: colors.heartRed }]} />
       <Text style={[styles.text, slim && styles.textSlim]}>
         {remaining} of {total} left
       </Text>
@@ -31,7 +33,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     marginHorizontal: spacing.lg,
     marginBottom: spacing.sm,
-    backgroundColor: colors.surface,
+    backgroundColor: palette.surface,
     borderRadius: radii.button,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
@@ -51,7 +53,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.heartRed,
+    backgroundColor: palette.heartRed,
   },
   dotSlim: {
     width: 6,
@@ -59,7 +61,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   text: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 13,
     fontWeight: '600',
   },

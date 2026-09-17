@@ -21,7 +21,11 @@ sleep 2
 
 if command -v cloudflared >/dev/null 2>&1; then
   echo "Starting Cloudflare tunnel..."
+  echo "NOTE: Use build:web (root paths). Do NOT serve a build:web:pages artifact on tunnels."
   cloudflared tunnel --url http://localhost:8090
+elif [ -x /tmp/cloudflared ]; then
+  echo "Starting Cloudflare tunnel (downloaded binary)..."
+  /tmp/cloudflared tunnel --url http://localhost:8090
 else
   echo "cloudflared not found — demo at http://localhost:8090"
   wait "$SERVE_PID"

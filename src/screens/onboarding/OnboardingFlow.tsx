@@ -5,7 +5,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LegalPreviewSheet } from '../../components/legal/LegalPreviewSheet';
 import { PhotoCarousel } from '../../components/PhotoCarousel';
-import { LegalDocumentId } from '../../content/legalDocuments';
+import { getLegalUiStrings, LegalDocumentId } from '../../content/legal';
+import { LocaleToggle } from '../../components/legal/LocaleToggle';
+import { useAppLocale } from '../../hooks/useAppLocale';
 import { useApp } from '../../context/AppContext';
 import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
 import {
@@ -51,6 +53,8 @@ export function OnboardingFlow() {
   const [step, setStep] = useState<Step>('welcome');
   const [legalAccepted, setLegalAccepted] = useState(false);
   const [legalPreviewId, setLegalPreviewId] = useState<LegalDocumentId | null>(null);
+  const { locale } = useAppLocale();
+  const legalUi = getLegalUiStrings(locale);
   const [email, setEmail] = useState('');
   const [emailMessage, setEmailMessage] = useState<string | null>(null);
   const [name, setName] = useState(user.name);
@@ -189,28 +193,29 @@ export function OnboardingFlow() {
               <Text style={styles.ruleText}>{rule}</Text>
             </View>
           ))}
+          <LocaleToggle compact />
           <Text style={styles.legalNote}>
-            I agree to Spark&apos;s{' '}
+            {legalUi.onboardingAgreePrefix}{' '}
             <Text style={styles.legalLink} onPress={() => setLegalPreviewId('terms')}>
-              Terms
+              {legalUi.termsLink}
             </Text>
-            ,{' '}
+            {legalUi.linkSeparator}
             <Text style={styles.legalLink} onPress={() => setLegalPreviewId('privacy')}>
-              Privacy Policy
+              {legalUi.privacyLink}
             </Text>
-            ,{' '}
+            {legalUi.linkSeparator}
             <Text style={styles.legalLink} onPress={() => setLegalPreviewId('community')}>
-              Community Guidelines
+              {legalUi.communityLink}
             </Text>
-            ,{' '}
+            {legalUi.linkSeparator}
             <Text style={styles.legalLink} onPress={() => setLegalPreviewId('disguise')}>
-              Disguise Mode Policy
+              {legalUi.disguiseLink}
             </Text>
-            , and{' '}
+            {locale === 'zh-TW' ? '及' : ', and'}{' '}
             <Text style={styles.legalLink} onPress={() => setLegalPreviewId('safety')}>
-              Safety Disclaimer
+              {legalUi.safetyLink}
             </Text>
-            . I am 18 or older.
+            {legalUi.onboardingAgeNote}
           </Text>
           <AnimatedPressable
             style={[styles.checkboxRow, legalAccepted && styles.checkboxRowActive]}
@@ -221,9 +226,7 @@ export function OnboardingFlow() {
               size={22}
               color={legalAccepted ? pulseBrand.accent : colors.textMuted}
             />
-            <Text style={styles.checkboxLabel}>
-              I have read and agree to the policies above, including the Safety Disclaimer
-            </Text>
+            <Text style={styles.checkboxLabel}>{legalUi.onboardingCheckbox}</Text>
           </AnimatedPressable>
           <AnimatedPressable
             style={[styles.primaryButton, !legalAccepted && styles.primaryButtonDisabled]}
@@ -233,7 +236,7 @@ export function OnboardingFlow() {
             }}
             disabled={!legalAccepted}
           >
-            <Text style={styles.primaryButtonText}>Continue — I am 18+</Text>
+            <Text style={styles.primaryButtonText}>{legalUi.onboardingContinue}</Text>
           </AnimatedPressable>
         </ScrollView>
       )}

@@ -10,6 +10,8 @@ import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { SparkPlusComparisonTable } from '../components/SparkPlusComparisonTable';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
+import { getLegalUiStrings } from '../content/legal';
+import { useAppLocale } from '../hooks/useAppLocale';
 import { RootStackParamList } from '../types/navigation';
 import { SPARK_PLUS_PRICING, SparkPlusPlan } from '../types/subscription';
 import { sparkPlusFeatureDescriptions } from '../utils/genderAccountPerks';
@@ -26,6 +28,8 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { colors } = useTheme();
   const { activateSparkPlus, restorePurchases, user } = useApp();
+  const { locale } = useAppLocale();
+  const legalUi = getLegalUiStrings(locale);
   const features = sparkPlusFeatureDescriptions(user.gender);
   const [selectedPlan, setSelectedPlan] = useState<SparkPlusPlan>('annual');
   const [restoring, setRestoring] = useState(false);
@@ -131,12 +135,14 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
         </AnimatedPressable>
 
         <Text style={[styles.legal, { color: colors.textMuted }]}>
-          Recurring billing. Cancel anytime in your App Store or Google Play subscription settings.{' '}
+          {locale === 'zh-TW'
+            ? '定期計費。可隨時在 App Store 或 Google Play 訂閱設定中取消。'
+            : 'Recurring billing. Cancel anytime in your App Store or Google Play subscription settings.'}{' '}
           <Text
             style={[styles.legalLink, { color: colors.gradientEnd }]}
             onPress={() => navigation.navigate('LegalDocument', { documentId: 'subscription' })}
           >
-            Subscription Terms
+            {legalUi.subscriptionTermsLink}
           </Text>
         </Text>
       </ScrollView>

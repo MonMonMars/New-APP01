@@ -6,7 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { useApp } from '../context/AppContext';
-import { legalDocumentLinks, LegalDocumentId } from '../content/legalDocuments';
+import { getLegalDocumentLinks, getLegalUiStrings, LegalDocumentId } from '../content/legal';
+import { useAppLocale } from '../hooks/useAppLocale';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -103,6 +104,9 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { blockedProfiles, unblockProfile } = useApp();
+  const { locale } = useAppLocale();
+  const ui = getLegalUiStrings(locale);
+  const legalLinks = getLegalDocumentLinks(locale);
   const [resourceSheet, setResourceSheet] = useState<{ title: string; body: string } | null>(null);
 
   return (
@@ -136,10 +140,8 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
         ))}
 
         <Text style={styles.sectionTitle}>Legal & policies</Text>
-        <Text style={styles.legalIntro}>
-          Read our terms, privacy policy, subscription terms, safety disclaimer, and all related policies below.
-        </Text>
-        {legalDocumentLinks.map((item) => (
+        <Text style={styles.legalIntro}>{ui.safetyLegalIntro}</Text>
+        {legalLinks.map((item) => (
           <AnimatedPressable
             key={item.id}
             style={styles.resourceRow}
@@ -156,10 +158,7 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
               size={22}
               color={colors.textMuted}
             />
-            <View style={styles.legalLabelWrap}>
-              <Text style={styles.resourceLabel}>{item.label}</Text>
-              <Text style={styles.legalLabelZh}>{item.labelZh}</Text>
-            </View>
+            <Text style={styles.resourceLabel}>{item.label}</Text>
             <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
           </AnimatedPressable>
         ))}

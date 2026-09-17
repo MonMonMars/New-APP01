@@ -3,7 +3,9 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
-import { getLegalDocument, LegalDocumentId } from '../content/legalDocuments';
+import { LocaleToggle } from '../components/legal/LocaleToggle';
+import { getLegalDocument, getLegalUiStrings, LegalDocumentId } from '../content/legal';
+import { useAppLocale } from '../hooks/useAppLocale';
 import { useTheme } from '../context/ThemeContext';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -16,7 +18,9 @@ type LegalDocumentScreenProps = {
 export function LegalDocumentScreen({ documentId, onClose }: LegalDocumentScreenProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const doc = getLegalDocument(documentId);
+  const { locale } = useAppLocale();
+  const ui = getLegalUiStrings(locale);
+  const doc = getLegalDocument(documentId, locale);
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
@@ -25,16 +29,17 @@ export function LegalDocumentScreen({ documentId, onClose }: LegalDocumentScreen
           <Ionicons name="chevron-back" size={28} color={colors.text} />
         </AnimatedPressable>
         <Text style={[styles.headerTitle, { color: colors.text }]} numberOfLines={1}>
-          Legal
+          {ui.legalHeader}
         </Text>
         <DisguiseModeButton />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
+        <LocaleToggle />
+
         <View style={[styles.hero, { backgroundColor: colors.surface }]}>
           <Ionicons name="document-text" size={32} color={colors.gradientEnd} />
           <Text style={[styles.title, { color: colors.text }]}>{doc.title}</Text>
-          <Text style={[styles.titleZh, { color: colors.textMuted }]}>{doc.titleZh}</Text>
           <Text style={[styles.effective, { color: colors.textMuted }]}>{doc.effective}</Text>
         </View>
 
@@ -49,10 +54,7 @@ export function LegalDocumentScreen({ documentId, onClose }: LegalDocumentScreen
 
         <View style={[styles.notice, { backgroundColor: colors.surface }]}>
           <Ionicons name="information-circle-outline" size={18} color={colors.textMuted} />
-          <Text style={[styles.noticeText, { color: colors.textMuted }]}>
-            These summaries support in-app transparency. They are not legal advice. For formal requests
-            or counsel review, contact legal@spark.app.
-          </Text>
+          <Text style={[styles.noticeText, { color: colors.textMuted }]}>{ui.legalNotice}</Text>
         </View>
 
         <Text style={[styles.footer, { color: colors.textMuted }]}>{doc.footer}</Text>
@@ -100,14 +102,10 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     textAlign: 'center',
   },
-  titleZh: {
-    fontSize: 15,
-    fontWeight: '600',
-    marginTop: spacing.xs,
-  },
   effective: {
     fontSize: 13,
     marginTop: spacing.xs,
+    textAlign: 'center',
   },
   intro: {
     fontSize: 14,

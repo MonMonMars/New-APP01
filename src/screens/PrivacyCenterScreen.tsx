@@ -7,7 +7,9 @@ import { LEGAL_ENTITY } from '../constants/legalEntity';
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { LegalDocumentId } from '../content/legalDocuments';
+import { LocaleToggle } from '../components/legal/LocaleToggle';
+import { getLegalDocumentLinks, getLegalUiStrings, LegalDocumentId } from '../content/legal';
+import { useAppLocale } from '../hooks/useAppLocale';
 import { PrivacyPreferences } from '../types/privacy';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -55,6 +57,9 @@ export function PrivacyCenterScreen({ onClose }: PrivacyCenterScreenProps) {
     isSparkPlus,
     setIncognitoMode,
   } = useApp();
+  const { locale } = useAppLocale();
+  const ui = getLegalUiStrings(locale);
+  const policyLinks = getLegalDocumentLinks(locale);
 
   const patch = (partial: Partial<PrivacyPreferences>) => {
     updatePrivacyPreferences({ ...privacyPreferences, ...partial });
@@ -209,25 +214,28 @@ export function PrivacyCenterScreen({ onClose }: PrivacyCenterScreenProps) {
           </View>
         </AnimatedPressable>
 
-        <Text style={[styles.section, { color: colors.textMuted }]}>Policies</Text>
-        {(
-          [
-            ['privacy', 'Privacy Policy', 'lock-closed-outline'],
-            ['cookies', 'Cookie Policy', 'nutrition-outline'],
-            ['terms', 'Terms of Service', 'document-text-outline'],
-            ['community', 'Community Guidelines', 'people-outline'],
-            ['disguise', 'Disguise Mode Policy', 'eye-off-outline'],
-            ['subscription', 'Subscription Terms', 'card-outline'],
-            ['safety', 'Safety Disclaimer', 'medkit-outline'],
-          ] as const
-        ).map(([id, label, icon]) => (
+        <Text style={[styles.section, { color: colors.textMuted }]}>{ui.languageSection}</Text>
+        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border, marginBottom: spacing.lg }]}>
+          <View style={[styles.languageRow, { borderBottomColor: colors.border }]}>
+            <View style={styles.rowText}>
+              <Text style={[styles.rowLabel, { color: colors.text }]}>{ui.privacyLanguage}</Text>
+              <Text style={[styles.rowHint, { color: colors.textMuted }]}>{ui.privacyLanguageHint}</Text>
+            </View>
+            <LocaleToggle compact />
+          </View>
+        </View>
+
+        <Text style={[styles.section, { color: colors.textMuted }]}>
+          {locale === 'zh-TW' ? '政策' : 'Policies'}
+        </Text>
+        {policyLinks.map((item) => (
           <AnimatedPressable
-            key={id}
+            key={item.id}
             style={[styles.linkRow, { borderBottomColor: colors.border }]}
-            onPress={() => openLegal(id)}
+            onPress={() => openLegal(item.id)}
           >
-            <Ionicons name={icon} size={20} color={colors.textMuted} />
-            <Text style={[styles.linkLabel, { color: colors.text }]}>{label}</Text>
+            <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={20} color={colors.textMuted} />
+            <Text style={[styles.linkLabel, { color: colors.text }]}>{item.label}</Text>
             <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
           </AnimatedPressable>
         ))}
@@ -304,5 +312,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   linkLabel: { flex: 1, fontSize: 16 },
+  languageRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    gap: spacing.md,
+  },
   footer: { fontSize: 12, lineHeight: 18, textAlign: 'center', marginTop: spacing.lg },
 });

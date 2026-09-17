@@ -8,6 +8,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { useApp } from '../context/AppContext';
+import { getLegalUiStrings } from '../content/legal';
+import { useAppLocale } from '../hooks/useAppLocale';
 import { RootStackParamList } from '../types/navigation';
 import { useTheme } from '../context/ThemeContext';
 import { radii, spacing } from '../theme';
@@ -67,6 +69,8 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { colors } = useTheme();
   const { activateBoost, addBonusBoosts, purchaseSparkNotes } = useApp();
+  const { locale } = useAppLocale();
+  const legalUi = getLegalUiStrings(locale);
   const [pendingPack, setPendingPack] = useState<Pack | null>(null);
 
   const handlePurchase = (pack: Pack) => {
@@ -136,12 +140,14 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
         })}
 
         <Text style={[styles.legal, { color: colors.textMuted }]}>
-          Purchases are processed by Apple or Google. Boosts and Notes activate immediately after purchase.{' '}
+          {locale === 'zh-TW'
+            ? '購買由 Apple 或 Google 處理。Boost 與 Note 購買後立即生效。'
+            : 'Purchases are processed by Apple or Google. Boosts and Notes activate immediately after purchase.'}{' '}
           <Text
             style={[styles.legalLink, { color: colors.gradientEnd }]}
             onPress={() => navigation.navigate('LegalDocument', { documentId: 'subscription' })}
           >
-            Subscription Terms
+            {legalUi.subscriptionTermsLink}
           </Text>
         </Text>
       </ScrollView>

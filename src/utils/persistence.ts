@@ -22,7 +22,7 @@ import { decryptLocalPayload, encryptLocalPayload } from './localEncryption';
 
 const STORAGE_KEY = '@spark/app_state';
 const SENSITIVE_VAULT_KEY = '@spark/sensitive_vault';
-const STORAGE_VERSION = 17;
+const STORAGE_VERSION = 18;
 
 type SensitiveVault = {
   conversations: Conversation[];

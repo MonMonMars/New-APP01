@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
@@ -12,12 +12,13 @@ type WorldSwitchVeilProps<T> = {
 
 /** Brief fade veil when swapping Spark ↔ Pulse / Ember ↔ Harbor so the switch feels like a page change. */
 export function WorldSwitchVeil<T>({ activeKey, children }: WorldSwitchVeilProps<T>) {
+  const shownRef = useRef(activeKey);
   const [shown, setShown] = useState(activeKey);
   const [veilOn, setVeilOn] = useState(false);
   const opacity = useSharedValue(0);
 
   useEffect(() => {
-    if (activeKey === shown) {
+    if (activeKey === shownRef.current) {
       return;
     }
 
@@ -27,6 +28,7 @@ export function WorldSwitchVeil<T>({ activeKey, children }: WorldSwitchVeilProps
     const hideAt = swapAt + MOTION.duration.normal;
 
     const swapTimer = setTimeout(() => {
+      shownRef.current = activeKey;
       setShown(activeKey);
       opacity.value = withTiming(0, { duration: MOTION.duration.normal });
     }, swapAt);
@@ -36,7 +38,7 @@ export function WorldSwitchVeil<T>({ activeKey, children }: WorldSwitchVeilProps
       clearTimeout(swapTimer);
       clearTimeout(hideTimer);
     };
-  }, [activeKey, opacity, shown]);
+  }, [activeKey, opacity]);
 
   const veilStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,

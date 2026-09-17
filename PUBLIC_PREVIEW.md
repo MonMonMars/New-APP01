@@ -4,7 +4,7 @@
 
 | Link | Durability | Notes |
 |------|------------|-------|
-| **https://divided-minimum-eva-therapy.trycloudflare.com** | Hours while workspace is awake | **Latest** — mini-window X / S / L in small Pulse-blue circles. Hard-refresh if stale. |
+| **https://divided-minimum-eva-therapy.trycloudflare.com** | Hours while workspace is awake | **Latest** — Pulse icons are Pulse blue (news, profile, tabs, weather). Hard-refresh if stale. |
 | **https://monmonmars.github.io/New-APP01/** | Permanent (GitHub Pages) | Same X S L mini-window build after `gh-pages` deploy. |
 | **https://temporary-rushing-savanna-mj6rm81.vercel.app** | ~60 min (claimable → permanent) | Previous Ember discretion build. [Claim on Vercel](https://vercel.com/claim-deployment?code=c0977a36-bcfb-453d-ba2d-ea74ad24de73) to keep forever. |
 

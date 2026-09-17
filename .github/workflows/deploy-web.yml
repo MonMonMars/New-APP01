@@ -19,6 +19,7 @@ on:
       - cursor/red-star-superlike-7b60
       - cursor/compact-mini-window-7b60
       - cursor/mini-xsl-buttons-7b60
+      - cursor/pulse-icons-blue-7b60
   workflow_dispatch:
 
 permissions:

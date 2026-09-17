@@ -90,18 +90,18 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
               <Ionicons
                 name={upvoted ? 'arrow-up' : 'arrow-up-outline'}
                 size={18}
-                color={upvoted ? colors.like : colors.textMuted}
+                color={upvoted ? meta.accent : colors.textMuted}
               />
-              <Text style={[styles.socialActionText, { color: upvoted ? colors.like : colors.textMuted }]}>
+              <Text style={[styles.socialActionText, { color: upvoted ? meta.accent : colors.textMuted }]}>
                 {upvoted ? 25 : 24}
               </Text>
             </AnimatedPressable>
             <AnimatedPressable style={styles.socialAction} onPress={() => setCommentsOpen(true)}>
-              <Ionicons name="chatbubble-outline" size={18} color={colors.textMuted} />
+              <Ionicons name="chatbubble-outline" size={18} color={meta.accent} />
               <Text style={[styles.socialActionText, { color: colors.textMuted }]}>3</Text>
             </AnimatedPressable>
           </View>
-          <OwnerHint label={post.hintLabel} color={colors.gradientEnd} />
+          <OwnerHint label={post.hintLabel} color={meta.accent} />
         </View>
         {previewSheet}
         <SocialCommentSheet
@@ -153,7 +153,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
               <Text style={styles.ctaText}>{post.cta ?? 'Learn more'}</Text>
               <Ionicons name="chevron-forward" size={14} color="#fff" />
             </View>
-            <OwnerHint label={post.hintLabel} color={colors.gradientEnd} />
+            <OwnerHint label={post.hintLabel} color={meta.accent} />
           </View>
         </AnimatedPressable>
         {previewSheet}
@@ -174,9 +174,9 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
         </MediaWithContentBadge>
         <View style={styles.body}>
           <View style={styles.metaRow}>
-            <Text style={[styles.source, { color: colors.gradientEnd }]}>{post.sourceLabel}</Text>
+            <Text style={[styles.source, { color: meta.accent }]}>{post.sourceLabel}</Text>
             <Text style={[styles.dot, { color: colors.textMuted }]}>·</Text>
-            <Text style={[styles.category, { color: colors.gradientEnd }]}>{post.category}</Text>
+            <Text style={[styles.category, { color: meta.accent }]}>{post.category}</Text>
             <Text style={[styles.time, { color: colors.textMuted }]}>{post.timeAgo}</Text>
           </View>
           <Text style={[styles.headline, { color: colors.text }]}>{post.headline}</Text>
@@ -185,7 +185,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
           </Text>
 
           <View style={styles.reportersRow}>{avatarRow}</View>
-          <OwnerHint label={post.hintLabel} color={colors.gradientEnd} />
+          <OwnerHint label={post.hintLabel} color={meta.accent} />
         </View>
       </AnimatedPressable>
       {previewSheet}

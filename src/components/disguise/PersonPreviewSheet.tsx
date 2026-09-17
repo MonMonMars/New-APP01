@@ -177,7 +177,7 @@ export function PersonPreviewSheet({
           >
           <FadeSlideIn replayKey={visible} index={0}>
             <View style={styles.header}>
-              <View style={[styles.headerIcon, { backgroundColor: `${colors.gradientEnd}22` }]}>
+              <View style={[styles.headerIcon, { backgroundColor: worldMeta.accentSoft }]}>
                 <ContentTypeIcon kind="profile" size={12} />
               </View>
               <View style={styles.headerText}>

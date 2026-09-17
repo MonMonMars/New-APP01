@@ -7,6 +7,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { buildSocialReporter, socialReporterPhotoIndex } from '../../utils/disguiseReporterPhotos';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
 import { DisguisePhotoLightbox } from './DisguisePhotoLightbox';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
@@ -31,6 +32,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
     reportPulsePost,
     preferences,
   } = useApp();
+  const accent = disguiseWorldMeta(preferences.sparkSection).accent;
   const upvoted = pulseSocial.likedPostIds.includes(post.id);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
@@ -127,7 +129,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
             ]);
           }}
         >
-          <Ionicons name="ellipsis-horizontal" size={18} color={colors.textMuted} />
+          <Ionicons name="ellipsis-horizontal" size={18} color={accent} />
         </AnimatedPressable>
       </View>
       <Text style={[styles.body, { color: colors.text }]}>{post.body}</Text>
@@ -153,9 +155,9 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
           <Ionicons
             name={upvoted ? 'arrow-up' : 'arrow-up-outline'}
             size={18}
-            color={upvoted ? colors.gradientEnd : colors.textMuted}
+            color={upvoted ? accent : colors.textMuted}
           />
-          <Text style={[styles.actionText, { color: upvoted ? colors.gradientEnd : colors.textMuted }]}>
+          <Text style={[styles.actionText, { color: upvoted ? accent : colors.textMuted }]}>
             {likeCount}
           </Text>
         </AnimatedPressable>
@@ -163,7 +165,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
           style={styles.action}
           onPress={() => setCommentsOpen(true)}
         >
-          <Ionicons name="chatbubble-outline" size={18} color={colors.textMuted} />
+          <Ionicons name="chatbubble-outline" size={18} color={accent} />
           <Text style={[styles.actionText, { color: colors.textMuted }]}>{post.comments}</Text>
         </AnimatedPressable>
         <AnimatedPressable
@@ -175,7 +177,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
             });
           }}
         >
-          <Ionicons name="share-outline" size={18} color={colors.textMuted} />
+          <Ionicons name="share-outline" size={18} color={accent} />
         </AnimatedPressable>
       </View>
 

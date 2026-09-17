@@ -64,14 +64,14 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
                 accessibilityLabel={meta.searchTitle}
                 onPress={() => setSearchOpen(true)}
               >
-                <Ionicons name="search-outline" size={22} color={colors.text} />
+                <Ionicons name="search-outline" size={22} color={meta.accent} />
               </AnimatedPressable>
               <AnimatedPressable
                 style={styles.iconBtn}
                 accessibilityLabel="Open activity"
                 onPress={() => navigation.navigate('Activity')}
               >
-                <Ionicons name="notifications-outline" size={22} color={colors.text} />
+                <Ionicons name="notifications-outline" size={22} color={meta.accent} />
               </AnimatedPressable>
             </>
           )}

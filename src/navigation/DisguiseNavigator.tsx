@@ -43,7 +43,7 @@ export function DisguiseNavigator() {
           height: 72,
         },
         tabBarActiveTintColor: meta.accent,
-        tabBarInactiveTintColor: colors.textMuted,
+        tabBarInactiveTintColor: meta.world === 'pulse' ? '#60A5FA' : colors.textMuted,
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '600',

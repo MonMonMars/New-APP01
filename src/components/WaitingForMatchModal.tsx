@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Image, Modal, StyleSheet, Text, View } from 'react-native';
 
 import { colors as palette, radii, spacing } from '../theme';
+import { modalFill } from '../theme/modalFill';
 import { useTheme } from '../context/ThemeContext';
 import { Profile } from '../types/profile';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -24,7 +25,7 @@ export function WaitingForMatchModal({
 
   return (
     <Modal visible={visible} animationType="fade" transparent>
-      <View style={styles.overlay}>
+      <View style={[styles.overlay, modalFill]}>
         <LinearGradient
           colors={[colors.gradientStart, colors.gradientEnd]}
           style={styles.sheet}

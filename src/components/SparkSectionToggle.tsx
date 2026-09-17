@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Modal, Platform, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
@@ -8,7 +8,8 @@ import {
   SPARK_SECTION_HINTS,
   SPARK_SECTION_LABELS,
 } from '../types/preferences';
-import { ColorPalette, radii, spacing } from '../theme';
+import { ColorPalette, darkColors, radii, spacing } from '../theme';
+import { modalFill } from '../theme/modalFill';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type SparkSectionToggleVariant = 'title' | 'chip' | 'list';
@@ -26,20 +27,6 @@ const SECTION_ICONS: Record<SparkSection, keyof typeof Ionicons.glyphMap> = {
   spark: 'flame',
   ember: 'bonfire',
 };
-
-const WEB_FILL = (
-  Platform.OS === 'web'
-    ? {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        width: '100vw',
-        height: '100vh',
-      }
-    : {}
-) as ViewStyle;
 
 const WEB_SHEET_IN = (
   Platform.OS === 'web'
@@ -70,8 +57,18 @@ const WEB_BACKDROP_IN = (
     : {}
 ) as ViewStyle;
 
-function sectionAccent(section: SparkSection, colors: ColorPalette): string {
-  return section === 'ember' ? colors.ember : colors.gradientEnd;
+/** Canonical Spark pink / Ember amber — do not use the remapped live palette. */
+function worldBrandAccent(section: SparkSection): string {
+  switch (section) {
+    case 'ember':
+      return darkColors.ember;
+    case 'spark':
+      return darkColors.gradientEnd;
+    default: {
+      const _exhaustive: never = section;
+      return _exhaustive;
+    }
+  }
 }
 
 function WorldRow({
@@ -85,7 +82,7 @@ function WorldRow({
   colors: ColorPalette;
   onPress: () => void;
 }) {
-  const accent = sectionAccent(item, colors);
+  const accent = worldBrandAccent(item);
 
   return (
     <AnimatedPressable
@@ -140,7 +137,7 @@ function WorldPickerSheet({
       statusBarTranslucent
       onRequestClose={onClose}
     >
-      <View style={[styles.modalRoot, WEB_FILL]} pointerEvents="box-none">
+      <View style={[styles.modalRoot, modalFill]} pointerEvents="box-none">
         <AnimatedPressable
           style={[styles.backdrop, WEB_BACKDROP_IN]}
           onPress={onClose}
@@ -193,7 +190,7 @@ function WorldTrigger({
   variant: 'title' | 'chip';
   onPress: () => void;
 }) {
-  const accent = sectionAccent(section, colors);
+  const accent = section === 'ember' ? colors.ember : colors.gradientEnd;
 
   switch (variant) {
     case 'chip':
@@ -251,10 +248,23 @@ export function SparkSectionToggle({
 }: SparkSectionToggleProps) {
   const { colors } = useTheme();
   const [open, setOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (closeTimer.current) {
+        clearTimeout(closeTimer.current);
+      }
+    },
+    [],
+  );
 
   const select = (next: SparkSection) => {
     onChange(next);
-    setTimeout(() => setOpen(false), 160);
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+    }
+    closeTimer.current = setTimeout(() => setOpen(false), 160);
   };
 
   switch (variant) {

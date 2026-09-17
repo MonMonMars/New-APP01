@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
 import { radii, spacing } from '../theme';
+import { modalFill } from '../theme/modalFill';
 
 type VibeGameSheetProps = {
   visible: boolean;
@@ -39,7 +40,7 @@ export function VibeGameSheet({ visible, profileName, onClose, onSendGuess }: Vi
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={styles.backdrop}>
+      <View style={[styles.backdrop, modalFill]}>
         <View style={[styles.sheet, { backgroundColor: colors.background, paddingBottom: insets.bottom + spacing.md }]}>
           <View style={styles.header}>
             <Text style={[styles.title, { color: colors.text }]}>Read My Vibe</Text>

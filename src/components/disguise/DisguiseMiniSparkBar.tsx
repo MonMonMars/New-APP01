@@ -34,7 +34,7 @@ export function DisguiseMiniSparkBar({
           iconSize={16}
           color={passed ? colors.nope : colors.textMuted}
           active={passed}
-          activeBackground="rgba(239,68,68,0.18)"
+          activeBackground={`${colors.nope}2e`}
           activeBorder={colors.nope}
           idleBackground="rgba(128,128,128,0.08)"
           idleBorder="rgba(128,128,128,0.35)"

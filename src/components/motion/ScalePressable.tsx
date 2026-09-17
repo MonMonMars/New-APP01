@@ -51,7 +51,7 @@ export function ScalePressable({
   return (
     <AnimatedPressableBase
       onPress={onPress}
-      hitSlop={8}
+      hitSlop={12}
       onPressIn={() => {
         pressScale.value = withSpring(scaleTo, MOTION.spring.bounce);
         highlight.value = withTiming(1, { duration: 70 });

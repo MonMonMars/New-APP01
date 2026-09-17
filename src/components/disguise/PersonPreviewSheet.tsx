@@ -168,7 +168,7 @@ export function PersonPreviewSheet({
           >
           <FadeSlideIn replayKey={visible} index={0}>
             <View style={styles.header}>
-              <View style={styles.headerIcon}>
+              <View style={[styles.headerIcon, { backgroundColor: `${colors.heartRed}22` }]}>
                 <ContentTypeIcon kind="profile" size={14} />
               </View>
               <View style={styles.headerText}>
@@ -292,7 +292,6 @@ const styles = StyleSheet.create({
     borderRadius: 11,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(233,64,87,0.12)',
     marginTop: 1,
   },
   headerText: {

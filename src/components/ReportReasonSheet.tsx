@@ -3,6 +3,7 @@ import { Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, radii, spacing } from '../theme';
+import { modalFill } from '../theme/modalFill';
 import { AnimatedPressable } from './AnimatedPressable';
 
 export const REPORT_REASONS = [
@@ -33,7 +34,7 @@ export function ReportReasonSheet({
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <AnimatedPressable style={styles.overlay} onPress={onClose}>
+      <AnimatedPressable style={[styles.overlay, modalFill]} onPress={onClose}>
         <AnimatedPressable
           style={[styles.sheet, { paddingBottom: insets.bottom + spacing.lg }]}
           onPress={(event) => event.stopPropagation()}

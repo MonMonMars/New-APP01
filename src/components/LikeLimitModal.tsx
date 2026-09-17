@@ -18,13 +18,13 @@ export function LikeLimitModal({ visible, onClose, onUpgrade }: LikeLimitModalPr
   const { colors } = useTheme();
   return (
     <AnimatedOverlay visible={visible} onClose={onClose} variant="center">
-      <View style={styles.sheet}>
+      <View style={[styles.sheet, { backgroundColor: colors.surface }]}>
         <FadeSlideIn replayKey={visible} index={0}>
           <Ionicons name="heart-dislike" size={40} color={colors.gradientEnd} />
         </FadeSlideIn>
         <FadeSlideIn replayKey={visible} index={1}>
-          <Text style={styles.title}>You&apos;re out of likes today</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, { color: colors.text }]}>You&apos;re out of likes today</Text>
+          <Text style={[styles.subtitle, { color: colors.textMuted }]}>
             Free members get {FREE_DAILY_LIKE_LIMIT} likes per day. Upgrade to Spark+ for unlimited
             likes, see who liked you, and more.
           </Text>

@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Modal, StyleSheet, Text, View } from 'react-native';
 
 import { colors as palette, radii, spacing } from '../theme';
+import { modalFill } from '../theme/modalFill';
 import { useTheme } from '../context/ThemeContext';
 import { AnimatedPressable } from './AnimatedPressable';
 
@@ -31,7 +32,7 @@ export function SafetyActionSheet({
   const { colors } = useTheme();
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <AnimatedPressable style={styles.overlay} onPress={onClose}>
+      <AnimatedPressable style={[styles.overlay, modalFill]} onPress={onClose}>
         <AnimatedPressable style={styles.sheet} onPress={(event) => event.stopPropagation()}>
           <View style={styles.handle} />
           <Text style={styles.title}>Safety options</Text>

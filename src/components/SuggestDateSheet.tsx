@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { DATE_SUGGESTIONS } from '../utils/dateSuggestions';
 import { radii, spacing } from '../theme';
+import { modalFill } from '../theme/modalFill';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type SuggestDateSheetProps = {
@@ -21,7 +22,7 @@ export function SuggestDateSheet({ visible, profileName, onClose, onSelect }: Su
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={styles.backdrop}>
+      <View style={[styles.backdrop, modalFill]}>
         <View style={[styles.sheet, { backgroundColor: colors.background, paddingBottom: insets.bottom + spacing.md }]}>
           <View style={styles.header}>
             <Text style={[styles.title, { color: colors.text }]}>Suggest a date</Text>

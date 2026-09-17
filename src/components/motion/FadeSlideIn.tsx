@@ -1,5 +1,5 @@
 import { ReactNode, useEffect } from 'react';
-import { type StyleProp, type ViewStyle } from 'react-native';
+import { Platform, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -44,6 +44,11 @@ export function FadeSlideIn({
     opacity: progress.value,
     transform: [{ translateY: (1 - progress.value) * distance }],
   }));
+
+  // Reanimated enter springs can stick at opacity 0 on web, hiding buttons inside.
+  if (Platform.OS === 'web') {
+    return <View style={style}>{children}</View>;
+  }
 
   return <Animated.View style={[animatedStyle, style]}>{children}</Animated.View>;
 }

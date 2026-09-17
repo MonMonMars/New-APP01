@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../context/ThemeContext';
 import { radii, spacing } from '../../theme';
+import { modalFill } from '../../theme/modalFill';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type PulseUnavailableSheetProps = {
@@ -24,7 +25,7 @@ export function PulseUnavailableSheet({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.backdrop}>
+      <View style={[styles.backdrop, modalFill]}>
         <View style={[styles.sheet, { backgroundColor: colors.surface, paddingBottom: insets.bottom + spacing.lg }]}>
           <Ionicons name="document-text-outline" size={40} color={colors.textMuted} />
           <Text style={[styles.title, { color: colors.text }]}>{title}</Text>

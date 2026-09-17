@@ -24,11 +24,13 @@ import { buildAlertReporter } from '../../utils/disguiseReporterPhotos';
 import { radii, spacing } from '../../theme';
 import { useApp } from '../../context/AppContext';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 
 export function DisguiseAlertsScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { markActivityAlertsRead, preferences } = useApp();
+  const meta = disguiseWorldMeta(preferences.sparkSection);
 
   useFocusEffect(
     useCallback(() => {
@@ -95,8 +97,8 @@ export function DisguiseAlertsScreen() {
                 </View>
               ) : (
                 <>
-                  <View style={[styles.iconWrap, { backgroundColor: 'rgba(59,130,246,0.12)' }]}>
-                    <Ionicons name={item.icon} size={20} color="#3b82f6" />
+                  <View style={[styles.iconWrap, { backgroundColor: meta.accentSoft }]}>
+                    <Ionicons name={item.icon} size={20} color={meta.accent} />
                   </View>
                   <View style={styles.textWrap}>
                     <Text style={[styles.text, { color: colors.text }]} numberOfLines={3}>

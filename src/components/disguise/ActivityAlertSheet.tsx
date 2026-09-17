@@ -69,8 +69,8 @@ export function ActivityAlertSheet({ visible, alert, onClose }: ActivityAlertShe
               />
             ) : (
               <>
-                <View style={[styles.iconWrap, { backgroundColor: 'rgba(59,130,246,0.12)' }]}>
-                  <Ionicons name={alert.icon} size={22} color="#3b82f6" />
+                <View style={[styles.iconWrap, { backgroundColor: meta.accentSoft }]}>
+                  <Ionicons name={alert.icon} size={22} color={meta.accent} />
                 </View>
                 <Text style={[styles.text, { color: colors.text }]}>{alert.text}</Text>
               </>

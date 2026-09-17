@@ -2,8 +2,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { radii, spacing } from '../../theme';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 export type PulseListPickerItem = {
@@ -30,6 +32,8 @@ export function PulseListPickerSheet({
 }: PulseListPickerSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { preferences } = useApp();
+  const accent = disguiseWorldMeta(preferences.sparkSection).accent;
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
@@ -45,7 +49,7 @@ export function PulseListPickerSheet({
           {items.map((item) => (
             <AnimatedPressable
               key={item.id}
-              style={[styles.row, { borderBottomColor: colors.border, backgroundColor: item.selected ? `${colors.gradientEnd}12` : 'transparent' }]}
+              style={[styles.row, { borderBottomColor: colors.border, backgroundColor: item.selected ? `${accent}12` : 'transparent' }]}
               onPress={() => {
                 onSelect(item.id);
                 onClose();
@@ -57,7 +61,7 @@ export function PulseListPickerSheet({
                   <Text style={[styles.subtitle, { color: colors.textMuted }]}>{item.subtitle}</Text>
                 ) : null}
               </View>
-              {item.selected ? <Ionicons name="checkmark-circle" size={20} color={colors.gradientEnd} /> : null}
+              {item.selected ? <Ionicons name="checkmark-circle" size={20} color={accent} /> : null}
             </AnimatedPressable>
           ))}
         </ScrollView>

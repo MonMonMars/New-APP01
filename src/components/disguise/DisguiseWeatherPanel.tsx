@@ -1,9 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { WeatherIcon, WeatherSnapshot } from '../../data/disguiseWeather';
 import { radii, spacing } from '../../theme';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type DisguiseWeatherPanelProps = {
@@ -35,6 +37,8 @@ function weatherIconName(icon: WeatherIcon): keyof typeof Ionicons.glyphMap {
 
 export function DisguiseWeatherPanel({ weather, isLive = false, onPress }: DisguiseWeatherPanelProps) {
   const { colors } = useTheme();
+  const { preferences } = useApp();
+  const accent = disguiseWorldMeta(preferences.sparkSection).accent;
 
   return (
     <AnimatedPressable
@@ -56,7 +60,7 @@ export function DisguiseWeatherPanel({ weather, isLive = false, onPress }: Disgu
       </View>
 
       <View style={styles.currentRow}>
-        <Ionicons name={weatherIconName(weather.icon)} size={42} color="#f59e0b" />
+        <Ionicons name={weatherIconName(weather.icon)} size={42} color={accent} />
         <View style={styles.tempBlock}>
           <Text style={[styles.temp, { color: colors.text }]}>{weather.tempC}°</Text>
           <Text style={[styles.condition, { color: colors.textMuted }]}>{weather.condition}</Text>
@@ -72,16 +76,16 @@ export function DisguiseWeatherPanel({ weather, isLive = false, onPress }: Disgu
       </View>
 
       <View style={styles.statsRow}>
-        <Stat icon="water-outline" label="Humidity" value={`${weather.humidityPct}%`} color={colors.textMuted} />
-        <Stat icon="flag-outline" label="Wind" value={`${weather.windKph} km/h`} color={colors.textMuted} />
-        <Stat icon="sunny-outline" label="UV" value={`${weather.uvIndex}`} color={colors.textMuted} />
+        <Stat icon="water-outline" label="Humidity" value={`${weather.humidityPct}%`} color={accent} />
+        <Stat icon="flag-outline" label="Wind" value={`${weather.windKph} km/h`} color={accent} />
+        <Stat icon="sunny-outline" label="UV" value={`${weather.uvIndex}`} color={accent} />
       </View>
 
       <View style={styles.forecastRow}>
         {weather.forecast.map((day) => (
           <View key={day.id} style={styles.forecastCell}>
             <Text style={[styles.forecastLabel, { color: colors.textMuted }]}>{day.label}</Text>
-            <Ionicons name={weatherIconName(day.icon)} size={16} color="#94a3b8" />
+            <Ionicons name={weatherIconName(day.icon)} size={16} color={accent} />
             <Text style={[styles.forecastHigh, { color: colors.text }]}>{day.highC}°</Text>
             <Text style={[styles.forecastLow, { color: colors.textMuted }]}>{day.lowC}°</Text>
           </View>

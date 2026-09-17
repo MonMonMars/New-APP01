@@ -2,8 +2,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { radii, spacing } from '../../theme';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 export type PulseDetailItem = {
@@ -30,6 +32,8 @@ export function PulseDetailSheet({
 }: PulseDetailSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { preferences } = useApp();
+  const accent = disguiseWorldMeta(preferences.sparkSection).accent;
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
@@ -52,9 +56,9 @@ export function PulseDetailSheet({
                 disabled={isPlaceholder}
               >
                 {item.icon ? (
-                  <Ionicons name={item.icon} size={20} color={colors.textMuted} />
+                  <Ionicons name={item.icon} size={20} color={accent} />
                 ) : (
-                  <View style={[styles.dot, { backgroundColor: colors.gradientEnd }]} />
+                  <View style={[styles.dot, { backgroundColor: accent }]} />
                 )}
                 <View style={styles.rowText}>
                   <Text style={[styles.rowTitle, { color: colors.text }]}>{item.title}</Text>

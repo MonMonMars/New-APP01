@@ -2,7 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { ReactNode } from 'react';
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { useTheme } from '../../context/ThemeContext';
+import { useApp } from '../../context/AppContext';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 
 /** Visual category for Pulse / Harbor feed media. */
 export type ContentTypeKind = 'news' | 'ad' | 'sponsored' | 'social' | 'profile' | 'trending' | 'alert';
@@ -11,15 +12,15 @@ const ICON_SIZE = 16;
 
 const KIND_META: Record<
   ContentTypeKind,
-  { icon: keyof typeof Ionicons.glyphMap; color: string; label: string }
+  { icon: keyof typeof Ionicons.glyphMap; label: string }
 > = {
-  news: { icon: 'newspaper', color: '#DC2626', label: 'News' },
-  ad: { icon: 'megaphone', color: '#16A34A', label: 'Ad' },
-  sponsored: { icon: 'information-circle', color: '#3B82F6', label: 'Sponsored' },
-  social: { icon: 'chatbubble', color: '#8B5CF6', label: 'Social' },
-  profile: { icon: 'person', color: '#E94057', label: 'Profile' },
-  trending: { icon: 'flame', color: '#F97316', label: 'Trending' },
-  alert: { icon: 'notifications', color: '#EAB308', label: 'Alert' },
+  news: { icon: 'newspaper', label: 'News' },
+  ad: { icon: 'megaphone', label: 'Ad' },
+  sponsored: { icon: 'information-circle', label: 'Sponsored' },
+  social: { icon: 'chatbubble', label: 'Social' },
+  profile: { icon: 'person', label: 'Profile' },
+  trending: { icon: 'flame', label: 'Trending' },
+  alert: { icon: 'notifications', label: 'Alert' },
 };
 
 type ContentTypeIconProps = {
@@ -31,10 +32,14 @@ export function contentTypeLabel(kind: ContentTypeKind): string {
   return KIND_META[kind].label;
 }
 
+function useDisguiseIconColor(): string {
+  const { preferences } = useApp();
+  return disguiseWorldMeta(preferences.sparkSection).accent;
+}
+
 export function ContentTypeIcon({ kind, size = ICON_SIZE }: ContentTypeIconProps) {
-  const { colors } = useTheme();
   const meta = KIND_META[kind];
-  const color = kind === 'profile' ? colors.heartRed : meta.color;
+  const color = useDisguiseIconColor();
   return (
     <Ionicons
       name={meta.icon}
@@ -47,9 +52,8 @@ export function ContentTypeIcon({ kind, size = ICON_SIZE }: ContentTypeIconProps
 
 /** Word + icon row — same pattern as “Sponsored ⓘ”. */
 export function ContentTypeLabel({ kind }: { kind: ContentTypeKind }) {
-  const { colors } = useTheme();
+  const color = useDisguiseIconColor();
   const meta = KIND_META[kind];
-  const color = kind === 'profile' ? colors.heartRed : meta.color;
   return (
     <View style={styles.labelRow}>
       <Text style={[styles.labelText, { color }]}>{meta.label}</Text>

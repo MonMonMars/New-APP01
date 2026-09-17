@@ -169,6 +169,7 @@ export function DisguiseProfileScreen() {
                   icon="newspaper-outline"
                   label={item.title}
                   colors={colors}
+                  accent={meta.accent}
                   onPress={() => setViewerHeadline(item.title)}
                 />
               ))}
@@ -181,11 +182,12 @@ export function DisguiseProfileScreen() {
             icon="bookmark-outline"
             label={`Saved posts${savedPosts.length > 0 ? ` (${savedPosts.length})` : ''}`}
             colors={colors}
+            accent={meta.accent}
             onPress={() => setDetailSheet('saved')}
           />
-          <MenuRow icon="time-outline" label="Reading history" colors={colors} onPress={() => setDetailSheet('history')} />
-          <MenuRow icon="settings-outline" label="Settings" colors={colors} onPress={() => setDetailSheet('settings')} />
-          <MenuRow icon="help-circle-outline" label="Help center" colors={colors} onPress={() => setDetailSheet('help')} />
+          <MenuRow icon="time-outline" label="Reading history" colors={colors} accent={meta.accent} onPress={() => setDetailSheet('history')} />
+          <MenuRow icon="settings-outline" label="Settings" colors={colors} accent={meta.accent} onPress={() => setDetailSheet('settings')} />
+          <MenuRow icon="help-circle-outline" label="Help center" colors={colors} accent={meta.accent} onPress={() => setDetailSheet('help')} />
         </View>
 
         <View style={[styles.privacyCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -337,16 +339,18 @@ function MenuRow({
   icon,
   label,
   colors,
+  accent,
   onPress,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
   colors: { text: string; textMuted: string; border: string };
+  accent: string;
   onPress: () => void;
 }) {
   return (
     <AnimatedPressable style={[styles.menuRow, { borderBottomColor: colors.border }]} onPress={onPress}>
-      <Ionicons name={icon} size={20} color={colors.textMuted} />
+      <Ionicons name={icon} size={20} color={accent} />
       <Text style={[styles.menuLabel, { color: colors.text }]}>{label}</Text>
       <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
     </AnimatedPressable>

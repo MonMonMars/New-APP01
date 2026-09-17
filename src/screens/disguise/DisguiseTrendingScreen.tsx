@@ -220,8 +220,8 @@ export function DisguiseTrendingScreen() {
               style={[styles.radarCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => openTopic(item.topic)}
             >
-              <View style={[styles.radarIcon, { backgroundColor: `${item.accent}22` }]}>
-                <Ionicons name={radarIcon(item.icon)} size={18} color={item.accent} />
+              <View style={[styles.radarIcon, { backgroundColor: meta.accentSoft }]}>
+                <Ionicons name={radarIcon(item.icon)} size={18} color={meta.accent} />
               </View>
               <Text style={[styles.radarTitle, { color: colors.text }]}>{item.title}</Text>
               <Text style={[styles.radarDetail, { color: colors.textMuted }]}>{item.detail}</Text>

@@ -8,6 +8,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { isDisguiseAiConfigured } from '../../services/disguiseImageGeneration';
 import { DisguiseOverlayVariant } from '../../types/disguise';
 import { radii, spacing } from '../../theme';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -30,7 +31,9 @@ export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGenerat
     isGeneratingDisguiseAd,
     generateDisguiseAd,
     clearDisguiseAd,
+    preferences,
   } = useApp();
+  const accent = disguiseWorldMeta(preferences.sparkSection).accent;
 
   const [overlayText, setOverlayText] = useState(disguiseAdCreative?.overlayText ?? 'Weekend sale — 50% off');
   const [variant, setVariant] = useState<DisguiseOverlayVariant>(disguiseAdCreative?.variant ?? 'ad');
@@ -97,15 +100,15 @@ export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGenerat
                   style={[
                     styles.variantChip,
                     {
-                      borderColor: selected ? colors.gradientEnd : colors.border,
-                      backgroundColor: selected ? 'rgba(59,130,246,0.12)' : colors.surface,
+                      borderColor: selected ? accent : colors.border,
+                      backgroundColor: selected ? `${accent}1f` : colors.surface,
                     },
                   ]}
                 >
                   <Ionicons
                     name={item.icon}
                     size={18}
-                    color={selected ? colors.gradientEnd : colors.textMuted}
+                    color={selected ? accent : colors.textMuted}
                   />
                   <Text style={[styles.variantLabel, { color: selected ? colors.text : colors.textMuted }]}>
                     {item.label}
@@ -147,7 +150,7 @@ export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGenerat
           <AnimatedPressable
             onPress={() => void handleGenerate()}
             disabled={isGeneratingDisguiseAd}
-            style={[styles.primaryBtn, { backgroundColor: colors.gradientEnd, opacity: isGeneratingDisguiseAd ? 0.7 : 1 }]}
+            style={[styles.primaryBtn, { backgroundColor: accent, opacity: isGeneratingDisguiseAd ? 0.7 : 1 }]}
           >
             {isGeneratingDisguiseAd ? (
               <ActivityIndicator color="#fff" />

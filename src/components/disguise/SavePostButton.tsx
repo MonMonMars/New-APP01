@@ -2,8 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
-import { useTheme } from '../../context/ThemeContext';
-import { pulseBrand } from '../../theme/pulseBrand';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type SavePostButtonProps = {
@@ -12,9 +11,9 @@ type SavePostButtonProps = {
 };
 
 export function SavePostButton({ postId, size = 22 }: SavePostButtonProps) {
-  const { colors } = useTheme();
-  const { pulseSocial, savePulsePost, unsavePulsePost } = useApp();
+  const { pulseSocial, savePulsePost, unsavePulsePost, preferences } = useApp();
   const isSaved = pulseSocial.savedPostIds.includes(postId);
+  const accent = disguiseWorldMeta(preferences.sparkSection).accent;
 
   return (
     <AnimatedPressable
@@ -34,7 +33,7 @@ export function SavePostButton({ postId, size = 22 }: SavePostButtonProps) {
       <Ionicons
         name={isSaved ? 'bookmark' : 'bookmark-outline'}
         size={size}
-        color={isSaved ? pulseBrand.accent : colors.textMuted}
+        color={accent}
       />
     </AnimatedPressable>
   );

@@ -1,66 +1,17 @@
-import { StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { ImageStyle, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 
+import { BrandMark } from '../brand/BrandMark';
 import { useTheme } from '../../context/ThemeContext';
 import { pulseBrand } from '../../theme/pulseBrand';
 
 type PulseBrandMarkProps = {
   size?: 'sm' | 'md' | 'lg';
-  style?: ViewStyle;
+  style?: StyleProp<ImageStyle>;
 };
 
-const SIZE_PX = { sm: 28, md: 34, lg: 40 } as const;
-const RADIUS = { sm: 7, md: 8, lg: 10 } as const;
-const LETTER = { sm: 16, md: 20, lg: 24 } as const;
-const PIP = { sm: 6, md: 7, lg: 8 } as const;
-
-/** Professional Pulse logomark — live news “P” tile. */
+/** Pulse logomark — locked P3 didone P on Pulse blue. */
 export function PulseBrandMark({ size = 'md', style }: PulseBrandMarkProps) {
-  const { resolvedMode } = useTheme();
-  const isDark = resolvedMode === 'dark';
-  const dimensions = SIZE_PX[size];
-  const pip = PIP[size];
-
-  return (
-    <View
-      style={[
-        styles.mark,
-        {
-          width: dimensions,
-          height: dimensions,
-          borderRadius: RADIUS[size],
-          backgroundColor: isDark ? pulseBrand.accentBright : pulseBrand.navy,
-        },
-        style,
-      ]}
-      accessibilityRole="image"
-      accessibilityLabel="Pulse"
-      pointerEvents="none"
-    >
-      <Text
-        style={[
-          styles.letter,
-          {
-            fontSize: LETTER[size],
-            lineHeight: LETTER[size] + 2,
-          },
-        ]}
-      >
-        P
-      </Text>
-      <View
-        style={[
-          styles.pip,
-          {
-            width: pip,
-            height: pip,
-            borderRadius: pip / 2,
-            top: size === 'sm' ? 3 : 4,
-            right: size === 'sm' ? 3 : 4,
-          },
-        ]}
-      />
-    </View>
-  );
+  return <BrandMark world="pulse" size={size} style={style} />;
 }
 
 type PulseWordmarkProps = {
@@ -112,23 +63,6 @@ export function PulseBrand({ size = 'md', showTagline = false, style }: PulseBra
 }
 
 const styles = StyleSheet.create({
-  mark: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  letter: {
-    color: '#FFFFFF',
-    fontWeight: '800',
-    letterSpacing: -0.8,
-    marginLeft: -1,
-  },
-  pip: {
-    position: 'absolute',
-    backgroundColor: pulseBrand.live,
-    borderWidth: 1.5,
-    borderColor: '#FFFFFF',
-  },
   wordmarkWrap: {
     justifyContent: 'center',
     minWidth: 0,

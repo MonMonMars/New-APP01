@@ -2,13 +2,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef, useState } from 'react';
 import { Modal, Platform, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
+import { BrandMark } from './brand/BrandMark';
 import { useTheme } from '../context/ThemeContext';
 import {
   SparkSection,
   SPARK_SECTION_HINTS,
   SPARK_SECTION_LABELS,
 } from '../types/preferences';
-import { ColorPalette, darkColors, radii, spacing } from '../theme';
+import { ColorPalette, radii, spacing } from '../theme';
+import { harborBrand } from '../theme/harborBrand';
+import { sparkBrand } from '../theme/sparkBrand';
 import { modalFill } from '../theme/modalFill';
 import { AnimatedPressable } from './AnimatedPressable';
 
@@ -23,9 +26,10 @@ type SparkSectionToggleProps = {
 
 const SECTIONS: SparkSection[] = ['spark', 'ember'];
 
-const SECTION_ICONS: Record<SparkSection, keyof typeof Ionicons.glyphMap> = {
-  spark: 'flame',
-  ember: 'bonfire',
+const SECTION_MARK_SIZE: Record<'title' | 'chip' | 'row', number> = {
+  title: 22,
+  chip: 16,
+  row: 40,
 };
 
 const WEB_SHEET_IN = (
@@ -57,13 +61,13 @@ const WEB_BACKDROP_IN = (
     : {}
 ) as ViewStyle;
 
-/** Canonical Spark pink / Ember amber — do not use the remapped live palette. */
+/** Canonical Spark S5 pink / Ember E1e gold — do not use the remapped live palette. */
 function worldBrandAccent(section: SparkSection): string {
   switch (section) {
     case 'ember':
-      return darkColors.ember;
+      return harborBrand.accent;
     case 'spark':
-      return darkColors.gradientEnd;
+      return sparkBrand.accent;
     default: {
       const _exhaustive: never = section;
       return _exhaustive;
@@ -99,8 +103,8 @@ function WorldRow({
       ]}
       scaleTo={0.96}
     >
-      <View style={[styles.rowIcon, { backgroundColor: `${accent}22` }]}>
-        <Ionicons name={SECTION_ICONS[item]} size={20} color={accent} />
+      <View style={styles.rowIcon}>
+        <BrandMark world={item} size={SECTION_MARK_SIZE.row} />
       </View>
       <View style={styles.rowText}>
         <Text style={[styles.rowTitle, { color: colors.text }]}>
@@ -190,8 +194,6 @@ function WorldTrigger({
   variant: 'title' | 'chip';
   onPress: () => void;
 }) {
-  const accent = section === 'ember' ? colors.ember : colors.gradientEnd;
-
   switch (variant) {
     case 'chip':
       return (
@@ -209,7 +211,7 @@ function WorldTrigger({
           ]}
           scaleTo={0.94}
         >
-          <Ionicons name={SECTION_ICONS[section]} size={14} color={accent} />
+          <BrandMark world={section} size={SECTION_MARK_SIZE.chip} />
           <Text style={[styles.chipLabel, { color: section === 'ember' ? colors.ember : colors.text }]}>
             {SPARK_SECTION_LABELS[section]}
           </Text>
@@ -226,7 +228,7 @@ function WorldTrigger({
           style={styles.titleTrigger}
           scaleTo={0.94}
         >
-          <Ionicons name={SECTION_ICONS[section]} size={20} color={accent} />
+          <BrandMark world={section} size={SECTION_MARK_SIZE.title} />
           <Text style={[styles.titleLabel, { color: section === 'ember' ? colors.ember : colors.text }]}>
             {SPARK_SECTION_LABELS[section]}
           </Text>
@@ -389,7 +391,6 @@ const styles = StyleSheet.create({
   rowIcon: {
     width: 40,
     height: 40,
-    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },

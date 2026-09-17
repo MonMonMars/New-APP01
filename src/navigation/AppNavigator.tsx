@@ -10,6 +10,7 @@ import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navig
 import { type ReactNode, useEffect, useRef } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
+import { BrandMark } from '../components/brand/BrandMark';
 import { useApp } from '../context/AppContext';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { ChatScreen } from '../screens/ChatScreen';
@@ -67,8 +68,9 @@ function MatchesTabScreen() {
 }
 
 function MainTabs() {
-  const { likesTabBadge, matchesTabBadge } = useApp();
+  const { likesTabBadge, matchesTabBadge, preferences } = useApp();
   const { colors } = useTheme();
+  const discoverWorld = resolveSparkSection(preferences.sparkSection);
 
   return (
     <Tab.Navigator
@@ -92,13 +94,19 @@ function MainTabs() {
           fontSize: 11,
         },
         tabBarIcon: ({ color, size }) => {
-          const icons: Record<keyof MainTabParamList, keyof typeof Ionicons.glyphMap> = {
-            Discover: 'flame',
+          if (route.name === 'Discover') {
+            return <BrandMark world={discoverWorld} size={size} />;
+          }
+          const icons: Record<
+            Exclude<keyof MainTabParamList, 'Discover'>,
+            keyof typeof Ionicons.glyphMap
+          > = {
             Likes: 'heart',
             Matches: 'chatbubble',
             Profile: 'person',
           };
-          return <Ionicons name={icons[route.name]} size={size} color={color} />;
+          const iconName = icons[route.name as Exclude<keyof MainTabParamList, 'Discover'>];
+          return <Ionicons name={iconName} size={size} color={color} />;
         },
       })}
     >

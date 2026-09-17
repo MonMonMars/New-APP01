@@ -1,10 +1,10 @@
-import { Ionicons } from '@expo/vector-icons';
 import { ReactNode, useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { BrandMark } from '../brand/BrandMark';
 import { useApp } from '../../context/AppContext';
-import { useTheme } from '../../context/ThemeContext';
 import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { resolveSparkSection } from '../../types/preferences';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type ModeToggleLogoProps = {
@@ -19,21 +19,17 @@ type LogoButtonProps = {
   accessibilityLabel: string;
   accessibilityHint: string;
   children: ReactNode;
-  borderColor: string;
-  backgroundColor: string;
 };
 
-/** Bordered logo button — clear tap target for Spark/Ember ↔ disguise switching. */
+/** Brand-tile tap target for Spark/Ember ↔ disguise switching. */
 function LogoButton({
   compact = false,
   onPress,
   accessibilityLabel,
   accessibilityHint,
   children,
-  borderColor,
-  backgroundColor,
 }: LogoButtonProps) {
-  const size = compact ? 40 : 44;
+  const size = compact ? 36 : 40;
 
   return (
     <AnimatedPressable
@@ -43,32 +39,19 @@ function LogoButton({
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}
       hitSlop={6}
-      style={[
-        styles.button,
-        {
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          backgroundColor,
-          borderColor,
-        },
-      ]}
+      style={[styles.button, { width: size, height: size }]}
     >
       {children}
     </AnimatedPressable>
   );
 }
 
-/** Spark/Ember: tap logo to enter that world’s disguise. Pulse header uses DisguiseBrand instead. */
+/** Spark/Ember: tap the S5 / E1e mark to enter that world’s disguise. */
 export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps) {
-  const { colors } = useTheme();
   const { disguiseMode, setDisguiseMode, preferences } = useApp();
   const meta = disguiseWorldMeta(preferences.sparkSection);
-  const isEmber = meta.world === 'harbor';
-
-  const iconColor = isEmber ? colors.ember : colors.gradientEnd;
-  const iconBg = `${iconColor}24`;
-  const borderColor = `${iconColor}88`;
+  const section = resolveSparkSection(preferences.sparkSection);
+  const markSize = compact ? 36 : 40;
 
   const enterDisguise = useCallback(() => {
     setDisguiseMode(true);
@@ -82,12 +65,10 @@ export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps
     <LogoButton
       compact={compact}
       onPress={enterDisguise}
-      borderColor={borderColor}
-      backgroundColor={iconBg}
       accessibilityLabel={`Emergency — switch to ${meta.name} disguise mode`}
       accessibilityHint={`Tap to hide ${meta.unlockLabel} behind ${meta.name}`}
     >
-      <Ionicons name={isEmber ? 'bonfire' : 'flame'} size={compact ? 18 : 20} color={iconColor} />
+      <BrandMark world={section} size={markSize} />
     </LogoButton>
   );
 }
@@ -96,14 +77,13 @@ const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
   },
   placeholder: {
     width: 44,
     height: 44,
   },
   placeholderCompact: {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
   },
 });

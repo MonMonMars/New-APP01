@@ -1,3 +1,6 @@
+import { harborBrand } from './theme/harborBrand';
+import { sparkBrand } from './theme/sparkBrand';
+
 export type ColorPalette = {
   background: string;
   surface: string;
@@ -19,7 +22,7 @@ export type ColorPalette = {
   stampLike: string;
   stampNope: string;
   border: string;
-  /** Ember world accent — amber, distinct from Spark pink */
+  /** Ember world accent — pale gold from E1e, distinct from Spark pink */
   ember: string;
 };
 
@@ -31,20 +34,20 @@ export const darkColors: ColorPalette = {
   textMuted: '#A0A0A5',
   textDark: '#111111',
   like: '#21D07A',
-  heartRed: '#E94057',
-  heartPink: '#FF6B8A',
+  heartRed: sparkBrand.accent,
+  heartPink: sparkBrand.accentBright,
   nope: '#FF4458',
   passDim: '#1A1A1C',
   superLike: '#1EC3FF',
   boost: '#A855F7',
   rewind: '#F5B300',
-  gradientStart: '#FF6B6B',
-  gradientEnd: '#FF2D55',
+  gradientStart: sparkBrand.accentBright,
+  gradientEnd: sparkBrand.accent,
   overlay: 'rgba(0, 0, 0, 0.35)',
   stampLike: 'rgba(33, 208, 122, 0.9)',
   stampNope: 'rgba(255, 68, 88, 0.9)',
   border: '#2A2A2E',
-  ember: '#FFB020',
+  ember: harborBrand.accent,
 };
 
 export const lightColors: ColorPalette = {
@@ -55,23 +58,23 @@ export const lightColors: ColorPalette = {
   textMuted: '#6B6B70',
   textDark: '#111111',
   like: '#21D07A',
-  heartRed: '#E94057',
-  heartPink: '#FF6B8A',
+  heartRed: sparkBrand.accent,
+  heartPink: sparkBrand.accentBright,
   nope: '#FF4458',
   passDim: '#E8E8EC',
   superLike: '#1EC3FF',
   boost: '#A855F7',
   rewind: '#F5B300',
-  gradientStart: '#FF6B6B',
-  gradientEnd: '#FF2D55',
+  gradientStart: sparkBrand.accentBright,
+  gradientEnd: sparkBrand.accent,
   overlay: 'rgba(0, 0, 0, 0.25)',
   stampLike: 'rgba(33, 208, 122, 0.9)',
   stampNope: 'rgba(255, 68, 88, 0.9)',
   border: '#E0E0E4',
-  ember: '#D97706',
+  ember: '#C9A44E',
 };
 
-/** Spark pinks/reds become Ember amber so every accent button follows the active world. */
+/** Spark pinks/reds become Ember pale gold so every accent button follows the active world. */
 export function paletteForSection(
   base: ColorPalette,
   section: 'spark' | 'ember',
@@ -84,25 +87,25 @@ export function paletteForSection(
   if (isLight) {
     return {
       ...base,
-      gradientStart: '#FBBF24',
-      gradientEnd: '#D97706',
-      heartRed: '#D97706',
-      heartPink: '#F59E0B',
-      nope: '#B45309',
-      superLike: '#D97706',
-      stampNope: 'rgba(217, 119, 6, 0.9)',
+      gradientStart: harborBrand.accent,
+      gradientEnd: '#C9A44E',
+      heartRed: '#C9A44E',
+      heartPink: harborBrand.accent,
+      nope: '#A6853A',
+      superLike: '#C9A44E',
+      stampNope: 'rgba(201, 164, 78, 0.9)',
     };
   }
 
   return {
     ...base,
-    gradientStart: '#FFD36A',
-    gradientEnd: '#FFB020',
-    heartRed: '#FFB020',
-    heartPink: '#FFC85A',
-    nope: '#E8A317',
-    superLike: '#FFB020',
-    stampNope: 'rgba(255, 176, 32, 0.9)',
+    gradientStart: harborBrand.accentBright,
+    gradientEnd: harborBrand.accent,
+    heartRed: harborBrand.accent,
+    heartPink: harborBrand.accentBright,
+    nope: '#C9A44E',
+    superLike: harborBrand.accent,
+    stampNope: 'rgba(228, 195, 115, 0.9)',
   };
 }
 

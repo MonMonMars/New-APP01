@@ -36,7 +36,7 @@ function ConversationRow({
   return (
     <AnimatedPressable style={styles.row} onPress={onPress}>
       <View style={styles.avatarWrap}>
-        <Image source={{ uri: profile.photos[0] }} style={styles.avatar} />
+        <Image source={{ uri: profile.photos[0] }} style={[styles.avatar, { backgroundColor: colors.surface }]} />
         {match.expiresAt && <View style={[styles.expiryRing, { borderColor: colors.rewind }]} />}
       </View>
       <View style={styles.rowBody}>
@@ -79,7 +79,7 @@ function NewMatchItem({
   return (
     <AnimatedPressable style={styles.newMatch} onPress={onPress}>
       <View style={[styles.newMatchRing, { borderColor: colors.gradientEnd }]}>
-        <Image source={{ uri: match.profile.photos[0] }} style={styles.newMatchPhoto} />
+        <Image source={{ uri: match.profile.photos[0] }} style={[styles.newMatchPhoto, { backgroundColor: colors.surface }]} />
       </View>
       <Text style={[styles.newMatchName, { color: colors.text }]} numberOfLines={1}>
         {match.profile.name}

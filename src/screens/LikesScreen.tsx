@@ -170,7 +170,10 @@ export function LikesScreen() {
                   style={styles.superCard}
                   onPress={() => setSelectedProfile(profile)}
                 >
-                  <Image source={{ uri: profile.photos[0] }} style={styles.superPhoto} />
+                  <Image
+                    source={{ uri: profile.photos[0] }}
+                    style={[styles.superPhoto, { borderColor: colors.heartPink, backgroundColor: colors.surface }]}
+                  />
                   <Text style={styles.superName}>{profile.name}</Text>
                   <Text style={[styles.superStatus, emberRelationshipLabel(profile.relationshipStatus) ? { color: colors.ember } : null]}>
                     {emberRelationshipLabel(profile.relationshipStatus) ?? 'Waiting for match'}
@@ -195,7 +198,10 @@ export function LikesScreen() {
                   style={styles.superCard}
                   onPress={() => openSuperLikeProfile(profile)}
                 >
-                  <Image source={{ uri: profile.photos[0] }} style={styles.superPhoto} />
+                  <Image
+                    source={{ uri: profile.photos[0] }}
+                    style={[styles.superPhoto, { borderColor: colors.superLike, backgroundColor: colors.surface }]}
+                  />
                   <Text style={styles.superName}>{profile.name}</Text>
                   <Text style={[styles.superStatus, emberRelationshipLabel(profile.relationshipStatus) ? { color: colors.ember } : null]}>
                     {emberRelationshipLabel(profile.relationshipStatus) ??

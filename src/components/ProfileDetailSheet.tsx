@@ -14,14 +14,12 @@ import {
   emberLocationLine,
   emberRelationshipLabel,
   emberVisiblePhotoCount,
-  EMBER_AVAILABILITY_LABELS,
   EMBER_DISCRETION_HINTS,
-  EMBER_DISCRETION_LABELS,
-  EMBER_SEEKING_LABELS,
   Profile,
   ProfilePrompt,
 } from '../types/profile';
 import { ProfileSocialLinks } from './ProfileSocialLinks';
+import { EmberStatusChips } from './EmberStatusChips';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type ProfileDetailSheetProps = {
@@ -105,7 +103,7 @@ export function ProfileDetailSheet({
 
           <View style={styles.section}>
             <View style={styles.nameRow}>
-              <Text style={styles.name}>
+              <Text style={[styles.name, { color: colors.text }]}>
                 {profile.name}, {profile.age}
               </Text>
               <AiPersonaBadge profile={profile} />
@@ -121,34 +119,30 @@ export function ProfileDetailSheet({
                 <Text style={[styles.compatText, { color: colors.gradientEnd }]}>{compatibilityScore}% compatible</Text>
               </View>
             )}
-            {profile.job && <Text style={styles.meta}>{profile.job}</Text>}
-            {profile.school && <Text style={styles.meta}>{profile.school}</Text>}
+            {profile.job && <Text style={[styles.meta, { color: colors.textMuted }]}>{profile.job}</Text>}
+            {profile.school && <Text style={[styles.meta, { color: colors.textMuted }]}>{profile.school}</Text>}
             {emberStatus ? (
-              <Text style={[styles.intentMeta, { color: colors.ember }]}>{emberStatus}</Text>
-            ) : null}
-            {emberStatus && profile.emberDiscretion ? (
-              <Text style={[styles.intentMeta, { color: colors.ember }]}>
-                {EMBER_DISCRETION_LABELS[profile.emberDiscretion]}
-                {' · '}
-                {EMBER_DISCRETION_HINTS[profile.emberDiscretion]}
-              </Text>
-            ) : null}
-            {emberStatus && profile.emberSeeking ? (
-              <Text style={[styles.intentMeta, { color: colors.ember }]}>{EMBER_SEEKING_LABELS[profile.emberSeeking]}</Text>
-            ) : null}
-            {emberStatus && profile.emberAvailability ? (
-              <Text style={styles.meta}>{EMBER_AVAILABILITY_LABELS[profile.emberAvailability]}</Text>
+              <>
+                <View style={styles.emberChipWrap}>
+                  <EmberStatusChips profile={profile} />
+                </View>
+                {profile.emberDiscretion ? (
+                  <Text style={[styles.meta, { color: colors.textMuted }]}>
+                    {EMBER_DISCRETION_HINTS[profile.emberDiscretion]}
+                  </Text>
+                ) : null}
+              </>
             ) : null}
             {profile.intent && !emberStatus ? (
               <Text style={[styles.intentMeta, { color: colors.gradientEnd }]}>{RELATIONSHIP_INTENT_LABELS[profile.intent]}</Text>
             ) : null}
-            <Text style={styles.distance}>
+            <Text style={[styles.distance, { color: colors.textMuted }]}>
               {emberStatus ? emberLocationLine(profile) : `${profile.distanceMiles} miles away`}
             </Text>
             {profile.openingMove ? (
               <View style={styles.openingMove}>
                 <Ionicons name="chatbubble-ellipses-outline" size={14} color={colors.gradientEnd} />
-                <Text style={styles.openingMoveText}>{profile.openingMove}</Text>
+                <Text style={[styles.openingMoveText, { color: colors.text }]}>{profile.openingMove}</Text>
               </View>
             ) : null}
           </View>
@@ -167,8 +161,8 @@ export function ProfileDetailSheet({
           )}
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>About</Text>
-            <Text style={styles.bio}>{profile.bio}</Text>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>About</Text>
+            <Text style={[styles.bio, { color: colors.text }]}>{profile.bio}</Text>
             {isAiPersonaProfile(profile) && (
               <View style={styles.aiDisclaimer}>
                 <Text style={styles.aiDisclaimerText}>
@@ -192,8 +186,8 @@ export function ProfileDetailSheet({
               onPress={() => onLikePrompt?.(prompt)}
               disabled={!onLikePrompt}
             >
-              <Text style={styles.promptQuestion}>{prompt.question}</Text>
-              <Text style={styles.promptAnswer}>{prompt.answer}</Text>
+              <Text style={[styles.promptQuestion, { color: colors.textMuted }]}>{prompt.question}</Text>
+              <Text style={[styles.promptAnswer, { color: colors.text }]}>{prompt.answer}</Text>
               {onLikePrompt && (
                 <View style={styles.likePromptRow}>
                   <Ionicons name="heart-outline" size={16} color={colors.heartPink} />
@@ -204,11 +198,11 @@ export function ProfileDetailSheet({
           ))}
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Interests</Text>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Interests</Text>
             <View style={styles.tags}>
               {profile.interests.map((interest) => (
                 <View key={interest} style={styles.tag}>
-                  <Text style={styles.tagText}>{interest}</Text>
+                  <Text style={[styles.tagText, { color: colors.text }]}>{interest}</Text>
                 </View>
               ))}
             </View>
@@ -216,17 +210,17 @@ export function ProfileDetailSheet({
 
           {(onReport || onBlock) && (
             <View style={styles.safetySection}>
-              <Text style={styles.sectionTitle}>Safety</Text>
+              <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Safety</Text>
               {onReport && (
                 <AnimatedPressable style={styles.safetyRow} onPress={() => onReport(profile.id)}>
                   <Ionicons name="flag-outline" size={20} color={colors.rewind} />
-                  <Text style={styles.safetyLabel}>Report {profile.name}</Text>
+                  <Text style={[styles.safetyLabel, { color: colors.text }]}>Report {profile.name}</Text>
                 </AnimatedPressable>
               )}
               {onBlock && (
                 <AnimatedPressable style={styles.safetyRow} onPress={() => onBlock(profile.id)}>
                   <Ionicons name="hand-left-outline" size={20} color={colors.nope} />
-                  <Text style={styles.safetyLabel}>Block {profile.name}</Text>
+                  <Text style={[styles.safetyLabel, { color: colors.text }]}>Block {profile.name}</Text>
                 </AnimatedPressable>
               )}
             </View>
@@ -340,6 +334,9 @@ const styles = StyleSheet.create({
     color: palette.textMuted,
     fontSize: 16,
     marginTop: spacing.xs,
+  },
+  emberChipWrap: {
+    marginTop: spacing.sm,
   },
   intentMeta: {
     color: palette.gradientEnd,

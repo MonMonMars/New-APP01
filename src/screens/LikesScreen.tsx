@@ -12,7 +12,7 @@ import { SparkSectionToggle } from '../components/SparkSectionToggle';
 import { useApp } from '../context/AppContext';
 import { getProfileById } from '../data/profiles';
 import { resolveSparkSection } from '../types/preferences';
-import { Profile } from '../types/profile';
+import { emberRelationshipLabel, Profile } from '../types/profile';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -217,10 +217,13 @@ export function LikesScreen() {
                   <Text style={styles.cardName}>
                     {isSparkPlus ? `${profile.name}, ${profile.age}` : '???'}
                   </Text>
-                  {!isSparkPlus ? (
-                    <Text style={styles.cardHint}>Tap to reveal</Text>
+                  {isSparkPlus ? (
+                    <Text style={styles.cardHint}>
+                      {emberRelationshipLabel(profile.relationshipStatus) ??
+                        `${profile.distanceMiles} mi away`}
+                    </Text>
                   ) : (
-                    <Text style={styles.cardHint}>{profile.distanceMiles} mi away</Text>
+                    <Text style={styles.cardHint}>Tap to reveal</Text>
                   )}
                 </View>
               </AnimatedPressable>

@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AiPersonaBadge } from '../components/AiPersonaBadge';
 import { AnimatedPressable } from '../components/AnimatedPressable';
+import { EmberStatusChips } from '../components/EmberStatusChips';
 import { ChatComposer } from '../components/ChatComposer';
 import { GifPickerSheet } from '../components/GifPickerSheet';
 import { MessageReactionPicker } from '../components/MessageReactionPicker';
@@ -215,6 +216,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
                 size="sm"
               />
             </View>
+            <EmberStatusChips profile={profile} compact />
             <Text style={[styles.headerMeta, { color: colors.textMuted }]}>
               {profile.activeToday ? 'Active now · ' : ''}
               {expiryLabel ?? 'Matched recently'}
@@ -493,6 +495,8 @@ const styles = StyleSheet.create({
   },
   headerText: {
     flex: 1,
+    minWidth: 0,
+    gap: 4,
   },
   headerNameRow: {
     flexDirection: 'row',

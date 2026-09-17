@@ -8,6 +8,7 @@ import { SparkSectionToggle } from '../components/SparkSectionToggle';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { resolveSparkSection } from '../types/preferences';
+import { emberRelationshipLabel, type RelationshipStatus } from '../types/profile';
 import { useLiveExpiry } from '../hooks/useLiveExpiry';
 import { Conversation } from '../types/match';
 import { radii, spacing } from '../theme';
@@ -62,21 +63,32 @@ function NewMatchItem({
   match,
   onPress,
 }: {
-  match: { id: string; profile: { id: string; name: string; photos: string[] }; expiresAt?: string };
+  match: {
+    id: string;
+    profile: { id: string; name: string; photos: string[]; relationshipStatus?: RelationshipStatus };
+    expiresAt?: string;
+  };
   onPress: () => void;
 }) {
   const { colors } = useTheme();
   const expiryLabel = useLiveExpiry(match.expiresAt);
+  const emberStatus = emberRelationshipLabel(match.profile.relationshipStatus);
 
   return (
     <AnimatedPressable style={styles.newMatch} onPress={onPress}>
       <View style={[styles.newMatchRing, { borderColor: colors.gradientEnd }]}>
         <Image source={{ uri: match.profile.photos[0] }} style={styles.newMatchPhoto} />
       </View>
-      <Text style={[styles.newMatchName, { color: colors.text }]}>{match.profile.name}</Text>
-      {expiryLabel && (
+      <Text style={[styles.newMatchName, { color: colors.text }]} numberOfLines={1}>
+        {match.profile.name}
+      </Text>
+      {emberStatus ? (
+        <Text style={[styles.newMatchExpiry, { color: colors.ember }]} numberOfLines={1}>
+          {emberStatus}
+        </Text>
+      ) : expiryLabel ? (
         <Text style={[styles.newMatchExpiry, { color: colors.rewind }]}>{expiryLabel}</Text>
-      )}
+      ) : null}
     </AnimatedPressable>
   );
 }

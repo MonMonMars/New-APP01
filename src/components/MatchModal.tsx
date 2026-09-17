@@ -4,9 +4,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
-import { Profile } from '../types/profile';
+import { emberRelationshipLabel, Profile } from '../types/profile';
 import { pickOpeningMove } from '../utils/openingMove';
 import { Button } from './Button';
+import { EmberStatusChips } from './EmberStatusChips';
 
 type MatchModalProps = {
   visible: boolean;
@@ -31,6 +32,7 @@ export function MatchModal({
   }
 
   const openingMove = pickOpeningMove(profile);
+  const emberStatus = emberRelationshipLabel(profile.relationshipStatus);
 
   return (
     <Modal visible={visible} animationType="fade">
@@ -41,8 +43,15 @@ export function MatchModal({
         <Text style={styles.kicker}>It&apos;s a</Text>
         <Text style={styles.title}>Match!</Text>
         <Text style={styles.subtitle}>
-          You and {profile.name} liked each other. Say hi before the spark fades.
+          {emberStatus
+            ? `You and ${profile.name} both liked. Keep it discreet — say hi when you're ready.`
+            : `You and ${profile.name} liked each other. Say hi before the spark fades.`}
         </Text>
+        {emberStatus ? (
+          <View style={styles.emberChips}>
+            <EmberStatusChips profile={profile} compact />
+          </View>
+        ) : null}
 
         <View style={styles.avatarRow}>
           <Image source={{ uri: userPhoto }} style={[styles.avatar, styles.avatarLeft]} />
@@ -95,6 +104,10 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     opacity: 0.95,
     maxWidth: 300,
+  },
+  emberChips: {
+    marginTop: spacing.sm,
+    alignItems: 'center',
   },
   avatarRow: {
     flexDirection: 'row',

@@ -51,7 +51,7 @@ const PACKS: Pack[] = [
     description: 'Send a message before you match',
     price: '$4.99',
     quantity: '5 Notes',
-    color: '#FF2D55',
+    color: '#FFD700',
   },
   {
     id: 'notes-1',
@@ -60,7 +60,7 @@ const PACKS: Pack[] = [
     description: 'One pre-match message',
     price: '$1.99',
     quantity: '1 Note',
-    color: '#FF2D55',
+    color: '#FFD700',
   },
 ];
 

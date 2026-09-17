@@ -8,30 +8,36 @@ import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { EXPLORE_CATEGORY_MAP, mockProfiles } from '../data/profiles';
 import { matchesSparkSection, resolveSparkSection, SparkSection } from '../types/preferences';
-import { Profile } from '../types/profile';
+import { emberLocationLine, emberRelationshipLabel, Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 
 type ExploreCategory = 'serious' | 'new' | 'nearby';
 
-const CATEGORIES: { id: ExploreCategory; label: string; icon: keyof typeof Ionicons.glyphMap; description: string }[] = [
+const CATEGORIES: { id: ExploreCategory; label: string; emberLabel: string; icon: keyof typeof Ionicons.glyphMap; description: string; emberDescription: string }[] = [
   {
     id: 'serious',
     label: 'Serious daters',
+    emberLabel: 'Ongoing',
     icon: 'heart-circle',
     description: 'Looking for something real',
+    emberDescription: 'Looking for something ongoing',
   },
   {
     id: 'new',
     label: 'New members',
+    emberLabel: 'New in Ember',
     icon: 'sparkles',
     description: 'Just joined Spark',
+    emberDescription: 'Just joined Ember',
   },
   {
     id: 'nearby',
     label: 'Nearby',
+    emberLabel: 'Nearby',
     icon: 'location',
     description: 'Within 10 miles',
+    emberDescription: 'Close by — city hidden when they choose Hidden',
   },
 ];
 
@@ -62,6 +68,8 @@ export function ExploreScreen({ onClose }: ExploreScreenProps) {
   const { passedIds, likedIds, blockedIds, prioritizeProfileInDeck, preferences } = useApp();
 
   const excluded = new Set([...passedIds, ...likedIds, ...blockedIds]);
+  const section = resolveSparkSection(preferences.sparkSection);
+  const isEmber = section === 'ember';
 
   const openInDeck = (profileId: string) => {
     prioritizeProfileInDeck(profileId);
@@ -75,22 +83,28 @@ export function ExploreScreen({ onClose }: ExploreScreenProps) {
 
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={[styles.lead, { color: colors.textMuted }]}>
-          Curated stacks inspired by Hinge Standouts &amp; Bumble For You
+          {isEmber
+            ? 'Curated Ember stacks — discretion first, same people as your Ember deck.'
+            : 'Curated stacks inspired by Hinge Standouts & Bumble For You'}
         </Text>
 
         {CATEGORIES.map((category) => {
           const profiles = profilesForCategory(
             category.id,
             excluded,
-            resolveSparkSection(preferences.sparkSection),
+            section,
           );
           return (
             <View key={category.id} style={styles.section}>
               <View style={styles.sectionHeader}>
                 <Ionicons name={category.icon} size={20} color={colors.gradientEnd} />
                 <View>
-                  <Text style={[styles.sectionTitle, { color: colors.text }]}>{category.label}</Text>
-                  <Text style={[styles.sectionDesc, { color: colors.textMuted }]}>{category.description}</Text>
+                  <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                    {isEmber ? category.emberLabel : category.label}
+                  </Text>
+                  <Text style={[styles.sectionDesc, { color: colors.textMuted }]}>
+                    {isEmber ? category.emberDescription : category.description}
+                  </Text>
                 </View>
               </View>
 
@@ -106,7 +120,15 @@ export function ExploreScreen({ onClose }: ExploreScreenProps) {
                     >
                       <Image source={{ uri: profile.photos[0] }} style={styles.photo} />
                       <Text style={[styles.name, { color: colors.text }]}>{profile.name}, {profile.age}</Text>
-                      <Text style={[styles.distance, { color: colors.textMuted }]}>{profile.distanceMiles} mi</Text>
+                      <Text
+                        style={[
+                          styles.distance,
+                          { color: emberRelationshipLabel(profile.relationshipStatus) ? colors.ember : colors.textMuted },
+                        ]}
+                      >
+                        {emberRelationshipLabel(profile.relationshipStatus) ??
+                          (isEmber ? emberLocationLine(profile) : `${profile.distanceMiles} mi`)}
+                      </Text>
                     </AnimatedPressable>
                   ))}
                 </ScrollView>

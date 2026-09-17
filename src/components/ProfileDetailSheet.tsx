@@ -35,6 +35,7 @@ type ProfileDetailSheetProps = {
   onLike?: () => void;
   onPass?: () => void;
   onSparkNote?: () => void;
+  onSuperLike?: () => void;
   /** True after a match — Ember private photos unlock */
   photosUnlocked?: boolean;
 };
@@ -52,6 +53,7 @@ export function ProfileDetailSheet({
   onLike,
   onPass,
   onSparkNote,
+  onSuperLike,
   photosUnlocked = false,
 }: ProfileDetailSheetProps) {
   const { colors } = useTheme();
@@ -68,7 +70,7 @@ export function ProfileDetailSheet({
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
-      <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.background }]}>
         <View style={styles.toolbar}>
           <AnimatedPressable onPress={onClose} style={styles.closeButton}>
             <Ionicons name="chevron-down" size={28} color={colors.text} />
@@ -85,7 +87,7 @@ export function ProfileDetailSheet({
           {profile.photos.map((photo, photoIndex) => {
             const locked = photoIndex >= visiblePhotoCount;
             return (
-              <View key={`${profile.id}-photo-${photoIndex}`} style={styles.heroWrap}>
+              <View key={`${profile.id}-photo-${photoIndex}`} style={[styles.heroWrap, { backgroundColor: colors.surface }]}>
                 <Image
                   source={{ uri: photo }}
                   style={styles.hero}
@@ -227,15 +229,24 @@ export function ProfileDetailSheet({
           )}
         </ScrollView>
 
-        {(onLike || onPass || onSparkNote) && (
-          <View style={styles.actionBar}>
+        {(onLike || onPass || onSparkNote || onSuperLike) && (
+          <View style={[styles.actionBar, { backgroundColor: colors.background, borderTopColor: colors.border }]}>
             {onPass && (
-              <AnimatedPressable style={[styles.passButton, styles.actionButton, { borderColor: colors.nope }]} onPress={onPass}>
+              <AnimatedPressable style={[styles.passButton, styles.actionButton, { borderColor: colors.nope, backgroundColor: colors.surface }]} onPress={onPass}>
                 <Ionicons name="close" size={24} color={colors.nope} />
               </AnimatedPressable>
             )}
+            {onSuperLike && (
+              <AnimatedPressable
+                style={[styles.actionButton, { backgroundColor: colors.superLike }]}
+                onPress={onSuperLike}
+                accessibilityLabel="Super like"
+              >
+                <Ionicons name="star" size={24} color="#fff" />
+              </AnimatedPressable>
+            )}
             {onSparkNote && (
-              <AnimatedPressable style={[styles.sparkNoteButton, styles.actionButton, { borderColor: colors.gradientEnd }]} onPress={onSparkNote}>
+              <AnimatedPressable style={[styles.sparkNoteButton, styles.actionButton, { borderColor: colors.gradientEnd, backgroundColor: colors.surface }]} onPress={onSparkNote}>
                 <Ionicons name="chatbubble-ellipses" size={22} color={colors.gradientEnd} />
               </AnimatedPressable>
             )}

@@ -16,6 +16,7 @@ import { emberRelationshipLabel, Profile } from '../types/profile';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { AnimatedPressable } from '../components/AnimatedPressable';
+import { EmberStatusChips } from '../components/EmberStatusChips';
 
 export function LikesScreen() {
   const { colors } = useTheme();
@@ -30,6 +31,7 @@ export function LikesScreen() {
     matches,
     likeProfile,
     passProfile,
+    superLikeProfile,
     canLike,
     getConversationIdForProfile,
     remainingSparkNotes,
@@ -89,6 +91,19 @@ export function LikesScreen() {
     setSelectedProfile(null);
   };
 
+  const handleSuperLike = (profile: Profile) => {
+    if (!canLike) {
+      openPaywall();
+      return;
+    }
+    const match = superLikeProfile(profile);
+    setSelectedProfile(null);
+    if (match) {
+      setMatchProfile(profile);
+      setShowMatch(true);
+    }
+  };
+
   const openChat = (profile: Profile) => {
     const conversationId = getConversationIdForProfile(profile.id);
     navigation.getParent()?.navigate('Chat', { conversationId });
@@ -106,7 +121,7 @@ export function LikesScreen() {
   };
 
   return (
-    <View style={[styles.screen, { paddingTop: insets.top }]}>
+    <View style={[styles.screen, { paddingTop: insets.top, backgroundColor: colors.background }]}>
       <ScreenHeader
         title="Likes"
         showDisguiseButton
@@ -157,7 +172,9 @@ export function LikesScreen() {
                 >
                   <Image source={{ uri: profile.photos[0] }} style={styles.superPhoto} />
                   <Text style={styles.superName}>{profile.name}</Text>
-                  <Text style={styles.superStatus}>Waiting for match</Text>
+                  <Text style={[styles.superStatus, emberRelationshipLabel(profile.relationshipStatus) ? { color: colors.ember } : null]}>
+                    {emberRelationshipLabel(profile.relationshipStatus) ?? 'Waiting for match'}
+                  </Text>
                 </AnimatedPressable>
               ))}
             </ScrollView>
@@ -180,8 +197,9 @@ export function LikesScreen() {
                 >
                   <Image source={{ uri: profile.photos[0] }} style={styles.superPhoto} />
                   <Text style={styles.superName}>{profile.name}</Text>
-                  <Text style={styles.superStatus}>
-                    {pendingLikeIds.has(profile.id) ? 'Pending' : 'Matched'}
+                  <Text style={[styles.superStatus, emberRelationshipLabel(profile.relationshipStatus) ? { color: colors.ember } : null]}>
+                    {emberRelationshipLabel(profile.relationshipStatus) ??
+                      (pendingLikeIds.has(profile.id) ? 'Pending' : 'Matched')}
                   </Text>
                 </AnimatedPressable>
               ))}
@@ -218,10 +236,13 @@ export function LikesScreen() {
                     {isSparkPlus ? `${profile.name}, ${profile.age}` : '???'}
                   </Text>
                   {isSparkPlus ? (
-                    <Text style={styles.cardHint}>
-                      {emberRelationshipLabel(profile.relationshipStatus) ??
-                        `${profile.distanceMiles} mi away`}
-                    </Text>
+                    emberRelationshipLabel(profile.relationshipStatus) ? (
+                      <View style={styles.likeChips}>
+                        <EmberStatusChips profile={profile} compact />
+                      </View>
+                    ) : (
+                      <Text style={styles.cardHint}>{profile.distanceMiles} mi away</Text>
+                    )
                   ) : (
                     <Text style={styles.cardHint}>Tap to reveal</Text>
                   )}
@@ -238,6 +259,7 @@ export function LikesScreen() {
         onClose={() => setSelectedProfile(null)}
         onLike={selectedProfile ? () => handleLike(selectedProfile) : undefined}
         onPass={selectedProfile ? () => handlePass(selectedProfile) : undefined}
+        onSuperLike={selectedProfile ? () => handleSuperLike(selectedProfile) : undefined}
         onSparkNote={selectedProfile && canSendSparkNote ? handleSparkNote : undefined}
       />
 
@@ -425,6 +447,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: spacing.xs,
     fontWeight: '600',
+  },
+  likeChips: {
+    marginTop: 6,
+    alignItems: 'center',
   },
   empty: {
     alignItems: 'center',

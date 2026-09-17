@@ -71,7 +71,7 @@ export function SocialCommentSheet({
       <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text }]}>{sheetTitle}</Text>
-          <AnimatedPressable onPress={onClose} hitSlop={12}>
+          <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel="Close">
             <Ionicons name="close" size={24} color={colors.textMuted} />
           </AnimatedPressable>
         </View>
@@ -135,6 +135,7 @@ export function SocialCommentSheet({
           <AnimatedPressable
             onPress={handlePost}
             disabled={!draft.trim()}
+            accessibilityLabel="Send comment"
             style={[styles.sendBtn, { backgroundColor: draft.trim() ? accent : colors.surface }]}
           >
             <Ionicons name="send" size={18} color={draft.trim() ? '#fff' : colors.textMuted} />

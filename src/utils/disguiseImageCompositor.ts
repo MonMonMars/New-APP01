@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 
-import { pulseBrand } from '../theme/pulseBrand';
 import { DisguiseOverlayVariant } from '../types/disguise';
+import { disguiseWorldMeta, hexToRgba } from './disguiseWorld';
 
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 800;
@@ -55,6 +55,7 @@ export async function compositeDisguiseImage(
   sourcePhotoUrl: string,
   overlayText: string,
   variant: DisguiseOverlayVariant,
+  section?: string | null,
 ): Promise<string> {
   if (Platform.OS !== 'web' || typeof document === 'undefined') {
     return sourcePhotoUrl;
@@ -69,20 +70,16 @@ export async function compositeDisguiseImage(
     return sourcePhotoUrl;
   }
 
+  const meta = disguiseWorldMeta(section);
   drawCover(ctx, image, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-  if (variant === 'news') {
-    ctx.fillStyle = 'rgba(120, 0, 0, 0.55)';
-  } else {
-    ctx.fillStyle = 'rgba(0, 40, 120, 0.62)';
-  }
+  ctx.fillStyle = hexToRgba(meta.navy, variant === 'news' ? 0.58 : 0.62);
   ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
   const badge = variant === 'news' ? 'BREAKING' : 'SPONSORED';
-  const badgeColor = variant === 'news' ? '#fde047' : '#86efac';
 
   ctx.textAlign = 'center';
-  ctx.fillStyle = badgeColor;
+  ctx.fillStyle = meta.accentBright;
   ctx.font = 'bold 36px system-ui, sans-serif';
   ctx.fillText(badge, CANVAS_WIDTH / 2, CANVAS_HEIGHT * 0.38);
 
@@ -100,7 +97,7 @@ export async function compositeDisguiseImage(
   ctx.shadowBlur = 0;
 
   if (variant === 'ad') {
-    ctx.fillStyle = pulseBrand.accent;
+    ctx.fillStyle = meta.accent;
     const buttonWidth = 280;
     const buttonHeight = 56;
     const buttonX = (CANVAS_WIDTH - buttonWidth) / 2;

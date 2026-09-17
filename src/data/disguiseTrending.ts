@@ -34,7 +34,6 @@ export type LocalRadarItem = {
   title: string;
   detail: string;
   topic?: string;
-  accent: string;
 };
 
 export type MarketPulse = {
@@ -82,7 +81,6 @@ export const localRadarItems: LocalRadarItem[] = [
     title: 'Night buses expanded',
     detail: 'Fri–Sat until 3am on 4 routes',
     topic: '#CityLife',
-    accent: '#3b82f6',
   },
   {
     id: 'lr2',
@@ -90,7 +88,6 @@ export const localRadarItems: LocalRadarItem[] = [
     title: 'Dry evening',
     detail: '18°C · light wind · good for patios',
     topic: '#WeekendPlans',
-    accent: '#22c55e',
   },
   {
     id: 'lr3',
@@ -98,7 +95,6 @@ export const localRadarItems: LocalRadarItem[] = [
     title: 'Free gallery nights',
     detail: '12 venues open late downtown',
     topic: '#WeekendPlans',
-    accent: '#a855f7',
   },
 ];
 

@@ -8,18 +8,19 @@ type GenerateParams = {
   sourcePhotoUrl: string;
   overlayText: string;
   variant: DisguiseOverlayVariant;
+  section?: string | null;
 };
 
 function buildAiPrompt(overlayText: string, variant: DisguiseOverlayVariant): string {
   if (variant === 'news') {
     return (
-      `Breaking news social media thumbnail. Bold yellow BREAKING badge and large white uppercase headline text: "${overlayText}". ` +
-      'Red news overlay aesthetic, dramatic but professional, mobile feed style. No readable faces or identifiable people.'
+      `Breaking news social media thumbnail. Bold BREAKING badge in the brand accent color and large white uppercase headline text: "${overlayText}". ` +
+      'Navy news overlay aesthetic, dramatic but professional, mobile feed style. No readable faces or identifiable people.'
     );
   }
   return (
     `Sponsored social media advertisement banner. Large bold white uppercase promo text: "${overlayText}". ` +
-    'Blue gradient ad aesthetic, SPONSORED badge, shop-now button. Modern mobile feed sponsored post. No readable faces.'
+    'Navy gradient ad aesthetic, SPONSORED badge, shop-now button in the brand accent. Modern mobile feed sponsored post. No readable faces.'
   );
 }
 
@@ -68,6 +69,7 @@ async function generateLocally(params: GenerateParams): Promise<DisguiseAdCreati
     params.sourcePhotoUrl,
     params.overlayText,
     params.variant,
+    params.section,
   );
   const usedCompositor = bakedUrl !== params.sourcePhotoUrl;
 

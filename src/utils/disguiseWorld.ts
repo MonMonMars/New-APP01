@@ -24,6 +24,16 @@ export function resolveDisguiseWorld(section?: string | null): DisguiseWorld {
   return resolveSparkSection(section) === 'ember' ? 'harbor' : 'pulse';
 }
 
+/** Convert a 6-digit hex color to an rgba() string. */
+export function hexToRgba(hex: string, alpha: number): string {
+  const raw = hex.replace('#', '');
+  if (raw.length !== 6) {
+    return hex;
+  }
+  const n = Number.parseInt(raw, 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+}
+
 export function disguiseWorldMeta(section?: string | null): DisguiseWorldMeta {
   const world = resolveDisguiseWorld(section);
   switch (world) {

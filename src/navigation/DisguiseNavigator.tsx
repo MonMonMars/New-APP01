@@ -34,6 +34,7 @@ export function DisguiseNavigator() {
       screenOptions={({ route }) => ({
         headerShown: false,
         animation: 'fade',
+        animationDuration: 220,
         tabBarButton: (props) => <TabBarButton {...props} />,
         tabBarStyle: {
           backgroundColor: colors.background,

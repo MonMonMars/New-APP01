@@ -1,8 +1,9 @@
 import { StyleSheet, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
+import { DisguiseWorld } from '../../utils/disguiseWorld';
 import { spacing } from '../../theme';
-import { SparkIconButton } from '../motion/ScalePressable';
+import { SparkIconButton, type SparkIconShape } from '../motion/ScalePressable';
 
 type DisguiseMiniSparkBarProps = {
   liked: boolean;
@@ -12,9 +13,47 @@ type DisguiseMiniSparkBarProps = {
   onUnlike: () => void;
   onSuperLike: () => void;
   onPass: () => void;
+  world?: DisguiseWorld;
 };
 
-/** Compact pass / super-like / like row. Super-like sits in the middle. */
+function chromeForWorld(world: DisguiseWorld): {
+  pass: 'close-outline';
+  superLike: 'flash' | 'trending-up';
+  like: 'thumbs-up' | 'bookmark';
+  likeOutline: 'thumbs-up-outline' | 'bookmark-outline';
+  passShape: SparkIconShape;
+  superShape: SparkIconShape;
+  likeShape: SparkIconShape;
+} {
+  switch (world) {
+    case 'harbor':
+      return {
+        pass: 'close-outline',
+        superLike: 'trending-up',
+        like: 'bookmark',
+        likeOutline: 'bookmark-outline',
+        passShape: 'squircle',
+        superShape: 'hex',
+        likeShape: 'pill',
+      };
+    case 'pulse':
+      return {
+        pass: 'close-outline',
+        superLike: 'flash',
+        like: 'thumbs-up',
+        likeOutline: 'thumbs-up-outline',
+        passShape: 'hex',
+        superShape: 'diamond',
+        likeShape: 'pill',
+      };
+    default: {
+      const _exhaustive: never = world;
+      return _exhaustive;
+    }
+  }
+}
+
+/** Compact pass / featured / save row. Featured sits in the middle. No hearts in Pulse. */
 export function DisguiseMiniSparkBar({
   liked,
   superLiked,
@@ -23,15 +62,18 @@ export function DisguiseMiniSparkBar({
   onUnlike,
   onSuperLike,
   onPass,
+  world = 'pulse',
 }: DisguiseMiniSparkBarProps) {
   const { colors } = useTheme();
+  const chrome = chromeForWorld(world);
+  const likeColor = world === 'harbor' ? colors.ember : colors.gradientEnd;
 
   return (
     <View style={styles.bar}>
       <View style={styles.slot}>
         <SparkIconButton
-          icon="trash-outline"
-          iconSize={16}
+          icon={chrome.pass}
+          iconSize={13}
           color={passed ? colors.nope : colors.textMuted}
           active={passed}
           activeBackground={`${colors.nope}2e`}
@@ -40,13 +82,15 @@ export function DisguiseMiniSparkBar({
           idleBorder="rgba(128,128,128,0.35)"
           onPress={onPass}
           accessibilityLabel="Pass profile"
+          size={30}
+          shape={chrome.passShape}
         />
       </View>
 
       <View style={styles.centerSlot}>
         <SparkIconButton
-          icon="star"
-          iconSize={20}
+          icon={chrome.superLike}
+          iconSize={14}
           color={superLiked ? '#fff' : colors.superLike}
           active={superLiked}
           activeBackground={colors.superLike}
@@ -55,22 +99,25 @@ export function DisguiseMiniSparkBar({
           idleBorder={`${colors.superLike}8c`}
           onPress={onSuperLike}
           accessibilityLabel="Super like profile"
-          size={48}
+          size={36}
+          shape={chrome.superShape}
         />
       </View>
 
       <View style={styles.slot}>
         <SparkIconButton
-          icon={liked ? 'heart' : 'heart'}
-          iconSize={16}
-          color={liked ? '#fff' : colors.heartPink}
+          icon={liked ? chrome.like : chrome.likeOutline}
+          iconSize={13}
+          color={liked ? '#fff' : likeColor}
           active={liked}
-          activeBackground={colors.heartRed}
-          activeBorder={colors.heartRed}
-          idleBackground={`${colors.heartPink}14`}
-          idleBorder={`${colors.heartPink}73`}
+          activeBackground={likeColor}
+          activeBorder={likeColor}
+          idleBackground={`${likeColor}14`}
+          idleBorder={`${likeColor}73`}
           onPress={liked ? onUnlike : onLike}
           accessibilityLabel={liked ? 'Unlike profile' : 'Like profile'}
+          size={30}
+          shape={chrome.likeShape}
         />
       </View>
     </View>
@@ -82,17 +129,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: spacing.xs,
-    paddingHorizontal: spacing.sm,
+    paddingTop: 2,
+    paddingHorizontal: spacing.xs,
     zIndex: 4,
   },
   slot: {
-    width: 48,
+    width: 42,
     alignItems: 'center',
     justifyContent: 'center',
   },
   centerSlot: {
-    width: 56,
+    width: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },

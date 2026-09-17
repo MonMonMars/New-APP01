@@ -10,6 +10,7 @@ import Animated, {
 
 import { MOTION } from '../../motion/presets';
 import { modalFill } from '../../theme/modalFill';
+import { webClass } from '../../motion/webMotion';
 
 type OverlayVariant = 'center' | 'bottom';
 
@@ -105,6 +106,7 @@ export function AnimatedOverlay({
             <View
               pointerEvents="auto"
               style={variant === 'center' ? styles.centerChildren : styles.bottomChildren}
+              {...webClass('spark-sheet-in')}
             >
               {children}
             </View>

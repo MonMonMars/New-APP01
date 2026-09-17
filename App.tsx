@@ -6,7 +6,10 @@ import { AppErrorBoundary } from './src/components/AppErrorBoundary';
 import { CookieConsentBanner } from './src/components/legal/CookieConsentBanner';
 import { PrivacyShield } from './src/components/security/PrivacyShield';
 import { AppProvider, useApp } from './src/context/AppContext';
+import { ensureWebMotionCss } from './src/motion/webMotion';
 import { AppNavigator } from './src/navigation/AppNavigator';
+
+ensureWebMotionCss();
 
 function StatusBarWrapper() {
   const { themeMode } = useApp();

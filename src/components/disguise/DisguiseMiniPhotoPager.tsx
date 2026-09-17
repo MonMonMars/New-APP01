@@ -3,7 +3,6 @@ import { Image } from 'expo-image';
 import { StyleSheet, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
-import { radii, spacing } from '../../theme';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type DisguiseMiniPhotoPagerProps = {
@@ -18,7 +17,7 @@ export function DisguiseMiniPhotoPager({
   photos,
   index,
   onIndexChange,
-  height = 220,
+  height = 96,
 }: DisguiseMiniPhotoPagerProps) {
   const { colors } = useTheme();
   const safeIndex = photos.length > 0 ? Math.min(index, photos.length - 1) : 0;
@@ -42,7 +41,7 @@ export function DisguiseMiniPhotoPager({
   if (photos.length === 0 || !currentUri) {
     return (
       <View style={[styles.empty, { height, backgroundColor: colors.surface }]}>
-        <Ionicons name="image-outline" size={28} color={colors.textMuted} />
+        <Ionicons name="image-outline" size={22} color={colors.textMuted} />
       </View>
     );
   }
@@ -67,7 +66,7 @@ export function DisguiseMiniPhotoPager({
             accessibilityLabel="Previous photo"
             scaleTo={0.9}
           >
-            <Ionicons name="chevron-back" size={20} color="#fff" />
+            <Ionicons name="chevron-back" size={14} color="#fff" />
           </AnimatedPressable>
           <AnimatedPressable
             onPress={goNext}
@@ -75,7 +74,7 @@ export function DisguiseMiniPhotoPager({
             accessibilityLabel="Next photo"
             scaleTo={0.9}
           >
-            <Ionicons name="chevron-forward" size={20} color="#fff" />
+            <Ionicons name="chevron-forward" size={14} color="#fff" />
           </AnimatedPressable>
           <View style={styles.dots} pointerEvents="none">
             {photos.map((_, dotIndex) => (
@@ -94,11 +93,11 @@ export function DisguiseMiniPhotoPager({
 const styles = StyleSheet.create({
   lane: {
     width: '100%',
-    borderRadius: radii.card - 2,
+    borderRadius: 8,
     overflow: 'hidden',
     backgroundColor: '#111',
     position: 'relative',
-    marginTop: spacing.xs,
+    marginTop: 4,
   },
   image: {
     width: '100%',
@@ -107,10 +106,10 @@ const styles = StyleSheet.create({
   navButton: {
     position: 'absolute',
     top: '50%',
-    marginTop: -18,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    marginTop: -12,
+    width: 24,
+    height: 24,
+    borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(0,0,0,0.45)',
@@ -142,9 +141,9 @@ const styles = StyleSheet.create({
   },
   empty: {
     width: '100%',
-    borderRadius: radii.card - 2,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: spacing.xs,
+    marginTop: 4,
   },
 });

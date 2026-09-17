@@ -8,6 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { MOTION, staggerDelay } from '../../motion/presets';
+import { webClass } from '../../motion/webMotion';
 
 type FadeSlideInProps = {
   children: ReactNode;
@@ -45,9 +46,19 @@ export function FadeSlideIn({
     transform: [{ translateY: (1 - progress.value) * distance }],
   }));
 
-  // Reanimated enter springs can stick at opacity 0 on web, hiding buttons inside.
+  // CSS enter on web — Reanimated mount springs can stick at opacity 0 and hide buttons.
   if (Platform.OS === 'web') {
-    return <View style={style}>{children}</View>;
+    return (
+      <View
+        style={[
+          style,
+          { animationDelay: `${delay + staggerDelay(index)}ms` } as ViewStyle,
+        ]}
+        {...webClass('spark-fade-up')}
+      >
+        {children}
+      </View>
+    );
   }
 
   return <Animated.View style={[animatedStyle, style]}>{children}</Animated.View>;

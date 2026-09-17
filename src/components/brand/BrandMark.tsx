@@ -1,4 +1,4 @@
-import { Image, ImageSourcePropType, ImageStyle, StyleProp, StyleSheet } from 'react-native';
+import { Image, ImageSourcePropType, ImageStyle, Platform, StyleProp, StyleSheet } from 'react-native';
 
 export type BrandMarkWorld = 'spark' | 'ember' | 'pulse' | 'harbor';
 
@@ -60,8 +60,13 @@ const styles = StyleSheet.create({
   mark: {
     overflow: 'hidden',
   },
-  muted: {
-    opacity: 0.42,
-    tintColor: '#8E8E93',
-  },
+  muted: Platform.select({
+    web: {
+      opacity: 0.48,
+      filter: 'grayscale(1) brightness(0.92)',
+    },
+    default: {
+      opacity: 0.42,
+    },
+  }),
 });

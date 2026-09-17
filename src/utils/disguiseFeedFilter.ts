@@ -44,6 +44,23 @@ const TOPIC_FILTERS: Record<string, (item: FeedItem) => boolean> = {
     (item.type === 'news' && item.category === 'Local') ||
     item.type === 'social' ||
     (item.type === 'news' && item.category === 'Lifestyle'),
+  '#Zodiac': (item) =>
+    item.type === 'news' && (item.category === '星座' || item.source.includes('Cosmos')),
+  '#Tarot': (item) =>
+    item.type === 'news' && (item.category === 'Tarot' || item.source.includes('Tarot')),
+  '#Film': (item) =>
+    item.type === 'news' &&
+    (item.category === 'Entertainment' || item.headline.toLowerCase().includes('film')),
+  '#Music': (item) =>
+    item.type === 'news' &&
+    (item.category === 'Entertainment' ||
+      item.headline.toLowerCase().includes('festival') ||
+      item.headline.toLowerCase().includes('music')),
+  '#Style': (item) =>
+    item.type === 'news' &&
+    (item.category === 'Entertainment' ||
+      item.headline.toLowerCase().includes('red carpet') ||
+      item.headline.toLowerCase().includes('fashion')),
 };
 
 export function filterDisguiseFeed(items: FeedItem[], topic?: string): FeedItem[] {

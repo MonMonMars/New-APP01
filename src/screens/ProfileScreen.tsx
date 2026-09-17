@@ -17,13 +17,15 @@ import { VerificationBadges } from '../components/VerificationBadges';
 import { VoicePromptCard } from '../components/VoicePromptCard';
 import { PhotoCarousel } from '../components/PhotoCarousel';
 import { ScreenHeader } from '../components/ScreenHeader';
+import { EmberStatusChips } from '../components/EmberStatusChips';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { RelationshipIntent } from '../types/profile';
 import { ThemeMode } from '../types/settings';
 import { DisguiseAdGeneratorSheet } from '../components/disguise/DisguiseAdGeneratorSheet';
-import { DISGUISE_APP_NAME } from '../data/disguiseFeed';
 import { computeProfileCompletion } from '../utils/profileCompletion';
+import { disguiseWorldMeta } from '../utils/disguiseWorld';
+import { resolveSparkSection } from '../types/preferences';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 
@@ -85,6 +87,8 @@ export function ProfileScreen() {
     profileViewers,
     profileViewCount,
   } = useApp();
+  const section = resolveSparkSection(preferences.sparkSection);
+  const disguiseMeta = disguiseWorldMeta(preferences.sparkSection);
   const [showEdit, setShowEdit] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
   const [showDisguiseGenerator, setShowDisguiseGenerator] = useState(false);
@@ -171,9 +175,13 @@ export function ProfileScreen() {
                 size="sm"
               />
             </View>
-            {user.intent && (
+            {section === 'ember' ? (
+              <View style={styles.emberChips}>
+                <EmberStatusChips profile={user} />
+              </View>
+            ) : user.intent ? (
               <Text style={[styles.intent, { color: colors.gradientEnd }]}>{intentLabels[user.intent]}</Text>
-            )}
+            ) : null}
             <Text style={[styles.bio, { color: colors.textMuted }]}>{user.bio}</Text>
             {user.openingMove ? (
               <Text style={[styles.openingMove, { color: colors.gradientEnd }]}>
@@ -262,7 +270,7 @@ export function ProfileScreen() {
           <View style={styles.toggleText}>
             <Text style={[styles.toggleLabel, { color: colors.text }]}>Disguise mode</Text>
             <Text style={[styles.toggleDesc, { color: colors.textMuted }]}>
-              {DISGUISE_APP_NAME} is the default — turn off for Spark big-picture mode
+              {disguiseMeta.name} is the default cover — turn off for {disguiseMeta.unlockLabel}
             </Text>
           </View>
           <Switch
@@ -432,6 +440,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     marginTop: 2,
+  },
+  emberChips: {
+    marginTop: 8,
+    alignItems: 'center',
   },
   bio: {
     fontSize: 14,

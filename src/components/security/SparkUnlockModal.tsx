@@ -10,6 +10,7 @@ import { AnimatedPressable } from '../AnimatedPressable';
 type SparkUnlockModalProps = {
   visible: boolean;
   error?: string | null;
+  unlockLabel?: string;
   onSubmitPin: (pin: string) => void;
   onCancel: () => void;
   onRetryBiometric?: () => void;
@@ -19,6 +20,7 @@ type SparkUnlockModalProps = {
 export function SparkUnlockModal({
   visible,
   error,
+  unlockLabel = 'Spark',
   onSubmitPin,
   onCancel,
   onRetryBiometric,
@@ -38,7 +40,7 @@ export function SparkUnlockModal({
       <View style={[styles.overlay, modalFill]}>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <Ionicons name="lock-closed" size={32} color={colors.gradientEnd} />
-          <Text style={[styles.title, { color: colors.text }]}>Unlock Spark</Text>
+          <Text style={[styles.title, { color: colors.text }]}>Unlock {unlockLabel}</Text>
           <Text style={[styles.body, { color: colors.textMuted }]}>
             Confirm it&apos;s you before opening private dating content.
           </Text>

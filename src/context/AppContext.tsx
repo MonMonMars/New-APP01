@@ -2523,6 +2523,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       <SparkUnlockModal
         visible={unlockModalVisible}
         error={unlockError}
+        unlockLabel={disguiseWorldMeta(preferences.sparkSection).unlockLabel}
         onSubmitPin={handleUnlockPinSubmit}
         onCancel={handleUnlockCancel}
         onRetryBiometric={handleRetryBiometric}

@@ -29,19 +29,6 @@ import { AnimatedPressable } from '../../components/AnimatedPressable';
 
 type DetailSheetKey = 'saved' | 'history' | 'settings' | 'help' | null;
 
-const SETTINGS_ITEMS: PulseDetailItem[] = [
-  { id: 'st1', title: 'Notifications', subtitle: 'Matches, messages, and Pulse alerts', icon: 'notifications-outline' },
-  { id: 'st2', title: 'Appearance', subtitle: 'Light, dark, or system', icon: 'moon-outline' },
-  { id: 'st3', title: 'Region & language', subtitle: 'United Kingdom · English', icon: 'globe-outline' },
-  { id: 'st4', title: 'Data & privacy', subtitle: 'Download or delete your Pulse data', icon: 'shield-outline' },
-];
-
-const HELP_ITEMS: PulseDetailItem[] = [
-  { id: 'h1', title: 'How disguise mode works', subtitle: 'Switch between Pulse and Spark safely', icon: 'eye-off-outline' },
-  { id: 'h2', title: 'Report a post', subtitle: 'Flag misleading or harmful content', icon: 'flag-outline' },
-  { id: 'h3', title: 'Contact support', subtitle: 'support@spark.app', icon: 'mail-outline' },
-];
-
 function formatReadAge(iso: string): string {
   const days = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86400000));
   if (days === 0) {
@@ -118,9 +105,29 @@ export function DisguiseProfileScreen() {
           ? historyItems
           : [{ id: 'empty-history', title: 'No reading history yet', subtitle: 'Open articles from your feed to track them here', icon: 'newspaper-outline' as const }],
     },
-    settings: { title: 'Settings', items: SETTINGS_ITEMS },
-    help: { title: 'Help center', items: HELP_ITEMS },
-  } as const;
+    settings: {
+      title: 'Settings',
+      items: [
+        { id: 'st1', title: 'Notifications', subtitle: `Matches, messages, and ${meta.name} alerts`, icon: 'notifications-outline' as const },
+        { id: 'st2', title: 'Appearance', subtitle: 'Light, dark, or system', icon: 'moon-outline' as const },
+        { id: 'st3', title: 'Region & language', subtitle: 'United Kingdom · English', icon: 'globe-outline' as const },
+        { id: 'st4', title: 'Data & privacy', subtitle: `Download or delete your ${meta.name} data`, icon: 'shield-outline' as const },
+      ],
+    },
+    help: {
+      title: 'Help center',
+      items: [
+        {
+          id: 'h1',
+          title: 'How disguise mode works',
+          subtitle: `Switch between ${meta.name} and ${meta.unlockLabel} safely`,
+          icon: 'eye-off-outline' as const,
+        },
+        { id: 'h2', title: 'Report a post', subtitle: 'Flag misleading or harmful content', icon: 'flag-outline' as const },
+        { id: 'h3', title: 'Contact support', subtitle: 'support@spark.app', icon: 'mail-outline' as const },
+      ],
+    },
+  };
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>

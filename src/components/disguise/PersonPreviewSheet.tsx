@@ -7,9 +7,12 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { emberLocationLine, emberRelationshipLabel } from '../../types/profile';
 import { buildReporterPhotoUrls } from '../../utils/disguiseReporterPhotos';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { resolveReporterSparkProfile } from '../../utils/resolveDisguiseProfile';
 import { MatchToast } from '../MatchToast';
+import { EmberStatusChips } from '../EmberStatusChips';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
 import { FadeSlideIn } from '../motion/FadeSlideIn';
 import { AnimatedPressable } from '../AnimatedPressable';
@@ -42,6 +45,7 @@ export function PersonPreviewSheet({
     superLikedIds,
     passedIds,
     canLike,
+    preferences,
   } = useApp();
 
   const [photoIndex, setPhotoIndex] = useState(initialPhotoIndex);
@@ -78,6 +82,8 @@ export function PersonPreviewSheet({
   const liked = profileId ? likedIds.has(profileId) : false;
   const superLiked = profileId ? superLikedIds.has(profileId) : false;
   const passed = profileId ? passedIds.has(profileId) : false;
+  const worldName = disguiseWorldMeta(preferences.sparkSection).unlockLabel;
+  const emberStatus = linkedProfile ? emberRelationshipLabel(linkedProfile.relationshipStatus) : null;
 
   const photoCount = displayPhotos.length;
   const trimmedQuote = reporter.quote.trim();
@@ -178,8 +184,9 @@ export function PersonPreviewSheet({
                 </Text>
                 {linkedProfile ? (
                   <Text style={[styles.meta, { color: colors.textMuted }]} numberOfLines={1}>
-                    {linkedProfile.distanceMiles} mi away
-                    {linkedProfile.job ? ` · ${linkedProfile.job}` : ''}
+                    {emberStatus
+                      ? emberLocationLine(linkedProfile)
+                      : `${linkedProfile.distanceMiles} mi away${linkedProfile.job ? ` · ${linkedProfile.job}` : ''}`}
                   </Text>
                 ) : null}
               </View>
@@ -189,8 +196,14 @@ export function PersonPreviewSheet({
             </View>
           </FadeSlideIn>
 
-          {showQuote ? (
+          {linkedProfile ? (
             <FadeSlideIn replayKey={visible} index={1}>
+              <EmberStatusChips profile={linkedProfile} compact />
+            </FadeSlideIn>
+          ) : null}
+
+          {showQuote ? (
+            <FadeSlideIn replayKey={visible} index={2}>
               <Text style={[styles.quote, { color: colors.text }]} numberOfLines={3}>
                 &ldquo;{trimmedQuote}&rdquo;
               </Text>
@@ -240,12 +253,12 @@ export function PersonPreviewSheet({
               />
               <Text style={[styles.hint, { color: colors.textMuted }]}>
                 {superLiked
-                  ? 'Super liked — saved to Spark'
+                  ? `Super liked — saved to ${worldName}`
                   : liked
                     ? 'Saved to Likes'
                     : passed
                       ? 'Passed — hidden from deck'
-                      : 'Actions sync to Spark'}
+                      : `Actions sync to ${worldName}`}
               </Text>
             </FadeSlideIn>
           ) : (

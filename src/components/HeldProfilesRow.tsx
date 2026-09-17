@@ -5,6 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
+import { EmberStatusChips } from './EmberStatusChips';
 
 type HeldProfilesRowProps = {
   profiles: Profile[];
@@ -38,6 +39,9 @@ export function HeldProfilesRow({ profiles, onSelect, onRemove }: HeldProfilesRo
               <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
                 {profile.name}
               </Text>
+              <View style={styles.chips}>
+                <EmberStatusChips profile={profile} compact />
+              </View>
             </AnimatedPressable>
             <AnimatedPressable style={styles.remove} onPress={() => onRemove(profile.id)}>
               <Ionicons name="close-circle" size={18} color={colors.textMuted} />
@@ -93,6 +97,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginTop: 4,
     maxWidth: 68,
+  },
+  chips: {
+    marginTop: 2,
+    maxWidth: 68,
+    alignItems: 'center',
   },
   remove: {
     position: 'absolute',

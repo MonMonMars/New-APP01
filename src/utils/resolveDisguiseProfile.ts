@@ -1,5 +1,6 @@
 import { NewsReporter } from '../data/disguiseFeed';
-import { getAllProfiles, getProfileById, incomingLikeProfiles } from '../data/profiles';
+import { getAllProfiles, getIncomingLikeProfilesForSection, getProfileById } from '../data/profiles';
+import { matchesSparkSection, resolveSparkSection, SparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
 
 const reporterProfileCache = new Map<string, string>();
@@ -44,20 +45,31 @@ function hashReporterId(id: string): number {
   return Math.abs(hash);
 }
 
-/** Stable map from Pulse commenter / social avatar ids → real Spark profile ids. */
-function mappedProfileIdForReporter(reporterId: string): string | undefined {
-  const cached = reporterProfileCache.get(reporterId);
+function cacheKey(reporterId: string, section: SparkSection): string {
+  return `${section}:${reporterId}`;
+}
+
+/** Stable map from disguise commenter / social avatar ids → dating profile ids in the active world. */
+function mappedProfileIdForReporter(
+  reporterId: string,
+  section?: SparkSection | string | null,
+): string | undefined {
+  const resolvedSection = resolveSparkSection(section);
+  const key = cacheKey(reporterId, resolvedSection);
+  const cached = reporterProfileCache.get(key);
   if (cached) {
     return cached;
   }
 
   const explicit = resolveDisguiseProfileId(reporterId);
   if (explicit) {
-    reporterProfileCache.set(reporterId, explicit);
+    reporterProfileCache.set(key, explicit);
     return explicit;
   }
 
-  const pool = [...incomingLikeProfiles, ...getAllProfiles()];
+  const incoming = getIncomingLikeProfilesForSection(resolvedSection);
+  const rest = getAllProfiles().filter((profile) => matchesSparkSection(profile, resolvedSection));
+  const pool = [...incoming, ...rest];
   const uniquePool = pool.filter(
     (profile, index, list) => list.findIndex((item) => item.id === profile.id) === index,
   );
@@ -66,12 +78,19 @@ function mappedProfileIdForReporter(reporterId: string): string | undefined {
   }
 
   const picked = uniquePool[hashReporterId(reporterId) % uniquePool.length];
-  reporterProfileCache.set(reporterId, picked.id);
+  reporterProfileCache.set(key, picked.id);
   return picked.id;
 }
 
-export function resolveDisguiseProfile(reporterId: string, profileId?: string): Profile | null {
-  const id = profileId ?? resolveDisguiseProfileId(reporterId) ?? mappedProfileIdForReporter(reporterId);
+export function resolveDisguiseProfile(
+  reporterId: string,
+  profileId?: string,
+  section?: SparkSection | string | null,
+): Profile | null {
+  const id =
+    profileId ??
+    resolveDisguiseProfileId(reporterId) ??
+    mappedProfileIdForReporter(reporterId, section);
   if (!id) {
     return null;
   }
@@ -80,10 +99,13 @@ export function resolveDisguiseProfile(reporterId: string, profileId?: string): 
 }
 
 /**
- * Resolve a Pulse / disguise persona to a real Spark profile for like, unlike, pass, and match.
+ * Resolve a Pulse / Harbor persona to a real dating profile for like, unlike, pass, and match.
  * Returns null only for the user's own disguised ad slot.
  */
-export function resolveReporterSparkProfile(reporter: NewsReporter): Profile | null {
+export function resolveReporterSparkProfile(
+  reporter: NewsReporter,
+  section?: SparkSection | string | null,
+): Profile | null {
   if (reporter.id === 'disguised-user') {
     return null;
   }
@@ -91,7 +113,7 @@ export function resolveReporterSparkProfile(reporter: NewsReporter): Profile | n
   const profileId =
     reporter.profileId ??
     resolveDisguiseProfileId(reporter.id) ??
-    mappedProfileIdForReporter(reporter.id);
+    mappedProfileIdForReporter(reporter.id, section);
 
   if (!profileId) {
     return null;

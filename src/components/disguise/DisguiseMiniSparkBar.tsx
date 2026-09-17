@@ -51,8 +51,8 @@ export function DisguiseMiniSparkBar({
           active={superLiked}
           activeBackground={colors.superLike}
           activeBorder={colors.superLike}
-          idleBackground="rgba(30,195,255,0.12)"
-          idleBorder="rgba(30,195,255,0.55)"
+          idleBackground={`${colors.superLike}1f`}
+          idleBorder={`${colors.superLike}8c`}
           onPress={onSuperLike}
           accessibilityLabel="Super like profile"
           size={48}

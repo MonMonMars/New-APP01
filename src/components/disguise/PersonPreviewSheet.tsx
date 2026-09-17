@@ -58,7 +58,7 @@ export function PersonPreviewSheet({
     }
   }, [visible, initialPhotoIndex, reporter?.id]);
 
-  const linkedProfile = reporter ? resolveReporterSparkProfile(reporter) : null;
+  const linkedProfile = reporter ? resolveReporterSparkProfile(reporter, preferences.sparkSection) : null;
 
   const displayPhotos = useMemo(() => {
     if (!reporter) {
@@ -132,7 +132,7 @@ export function PersonPreviewSheet({
       unlikeProfile(linkedProfile.id);
       return;
     }
-    if (!guardLikeLimit()) {
+    if (!liked && !guardLikeLimit()) {
       return;
     }
     const match = superLikeProfile(linkedProfile);

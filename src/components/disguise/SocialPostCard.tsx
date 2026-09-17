@@ -29,6 +29,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
     togglePulseLike,
     mutePulseAuthor,
     reportPulsePost,
+    preferences,
   } = useApp();
   const upvoted = pulseSocial.likedPostIds.includes(post.id);
   const [photoOpen, setPhotoOpen] = useState(false);
@@ -37,8 +38,8 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
   const isSaved = pulseSocial.savedPostIds.includes(post.id);
   const likeCount = upvoted ? post.likes + 1 : post.likes;
 
-  const photoReporter = buildSocialReporter(post);
-  const feedPhotoIndex = socialReporterPhotoIndex(photoReporter, post.imageUrl);
+  const photoReporter = buildSocialReporter(post, preferences.sparkSection);
+  const feedPhotoIndex = socialReporterPhotoIndex(photoReporter, post.imageUrl, preferences.sparkSection);
 
   const maskSnippet = post.avatarMask?.text.split(' ').slice(0, 2).join(' ') ?? 'LIVE';
   const handleSave = () => {

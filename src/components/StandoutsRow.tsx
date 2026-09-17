@@ -5,6 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
+import { EmberStatusChips } from './EmberStatusChips';
 
 type StandoutsRowProps = {
   profiles: Profile[];
@@ -39,7 +40,7 @@ export function StandoutsRow({ profiles, onSelect }: StandoutsRowProps) {
         {profiles.map((profile) => (
           <AnimatedPressable
             key={profile.id}
-            style={[styles.card, { borderColor: colors.superLike }]}
+            style={[styles.card, { borderColor: colors.superLike, backgroundColor: `${colors.superLike}14` }]}
             onPress={() => onSelect(profile)}
           >
             <Image source={{ uri: profile.photos[0] }} style={styles.photo} />
@@ -49,6 +50,9 @@ export function StandoutsRow({ profiles, onSelect }: StandoutsRowProps) {
             <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
               {profile.name}
             </Text>
+            <View style={styles.chips}>
+              <EmberStatusChips profile={profile} compact />
+            </View>
           </AnimatedPressable>
         ))}
       </ScrollView>
@@ -91,7 +95,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: radii.card,
     padding: 4,
-    backgroundColor: 'rgba(30,195,255,0.08)',
+    backgroundColor: 'transparent',
   },
   photo: {
     width: 76,
@@ -114,5 +118,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginTop: 4,
     maxWidth: 80,
+  },
+  chips: {
+    marginTop: 4,
+    maxWidth: 80,
+    alignItems: 'center',
   },
 });

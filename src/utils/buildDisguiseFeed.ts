@@ -1,5 +1,6 @@
 import { disguiseFeedItems, FeedItem } from '../data/disguiseFeed';
 import { DisguiseAdCreative } from '../types/disguise';
+import { SparkSection } from '../types/preferences';
 import { UserProfile } from '../types/profile';
 import { buildDisguisedProfileFeedItem, buildDisguisedProfileFeedItems } from './disguiseProfileFeed';
 
@@ -30,8 +31,9 @@ function weaveProfileCards(base: FeedItem[], profileCards: FeedItem[]): FeedItem
 export function buildDisguiseFeed(
   user: UserProfile,
   creative: DisguiseAdCreative | null,
+  section?: SparkSection | string | null,
 ): FeedItem[] {
-  const profileCards = buildDisguisedProfileFeedItems();
+  const profileCards = buildDisguisedProfileFeedItems(section);
   const withProfiles = weaveProfileCards(disguiseFeedItems, profileCards);
 
   if (!creative) {

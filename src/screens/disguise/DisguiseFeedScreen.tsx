@@ -56,7 +56,7 @@ export function DisguiseFeedScreen() {
   const topic = route.params?.topic;
 
   const feedItems = useMemo(() => {
-    const base = buildDisguiseFeed(user, disguiseAdCreative);
+    const base = buildDisguiseFeed(user, disguiseAdCreative, preferences.sparkSection);
     const filtered = filterDisguiseFeed(base, topic);
     return filtered.filter((item) => {
       if (item.type !== 'social') {
@@ -68,7 +68,7 @@ export function DisguiseFeedScreen() {
       const authorHandle = item.handle.trim().toLowerCase();
       return !pulseSocial.mutedAuthors.includes(authorHandle);
     });
-  }, [user, disguiseAdCreative, topic, pulseSocial.mutedAuthors, pulseSocial.reportedPostIds]);
+  }, [user, disguiseAdCreative, topic, pulseSocial.mutedAuthors, pulseSocial.reportedPostIds, preferences.sparkSection]);
 
   const sectionLabel = topic ? topicFilterLabel(topic) : meta.feedLabel;
 

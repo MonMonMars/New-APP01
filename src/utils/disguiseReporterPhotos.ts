@@ -1,5 +1,6 @@
 import { DisguiseAlertPerson, NewsReporter, SocialPost } from '../data/disguiseFeed';
 import { disguiseSocialPosts } from '../data/disguiseSocialPosts';
+import { SparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
 import { resolveDisguiseProfile } from './resolveDisguiseProfile';
 
@@ -29,8 +30,11 @@ export function buildReporterPhotoUrls(
 }
 
 /** Reporter + photo list for a social post (feed image always included when present). */
-export function buildSocialReporter(post: SocialPost): NewsReporter {
-  const linkedProfile = resolveDisguiseProfile(`social-${post.id}`);
+export function buildSocialReporter(
+  post: SocialPost,
+  section?: SparkSection | string | null,
+): NewsReporter {
+  const linkedProfile = resolveDisguiseProfile(`social-${post.id}`, undefined, section);
   const feedPhotos = post.imageUrl ? [post.imageUrl] : [];
 
   return {
@@ -43,11 +47,15 @@ export function buildSocialReporter(post: SocialPost): NewsReporter {
   };
 }
 
-export function socialReporterPhotoIndex(reporter: NewsReporter, targetUrl?: string | null): number {
+export function socialReporterPhotoIndex(
+  reporter: NewsReporter,
+  targetUrl?: string | null,
+  section?: SparkSection | string | null,
+): number {
   if (!targetUrl?.trim()) {
     return 0;
   }
-  const linkedProfile = resolveDisguiseProfile(reporter.id, reporter.profileId);
+  const linkedProfile = resolveDisguiseProfile(reporter.id, reporter.profileId, section);
   const urls = buildReporterPhotoUrls(reporter, linkedProfile);
   const index = urls.indexOf(targetUrl.trim());
   return index >= 0 ? index : 0;
@@ -60,11 +68,14 @@ export function findSocialPostForAlertPerson(person: DisguiseAlertPerson): Socia
   );
 }
 
-/** Build a mini-window reporter for activity alerts — links to real Spark profile when possible. */
-export function buildAlertReporter(person: DisguiseAlertPerson): NewsReporter {
+/** Build a mini-window reporter for activity alerts — links to a dating profile when possible. */
+export function buildAlertReporter(
+  person: DisguiseAlertPerson,
+  section?: SparkSection | string | null,
+): NewsReporter {
   const social = findSocialPostForAlertPerson(person);
   if (social) {
-    return buildSocialReporter(social);
+    return buildSocialReporter(social, section);
   }
 
   return {

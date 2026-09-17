@@ -1,7 +1,8 @@
 import { DisguisedProfilePost, DisguisedProfileVariant } from '../data/disguiseFeed';
 import { disguiseClientAds } from '../data/disguiseClientAds';
-import { incomingLikeProfiles } from '../data/profiles';
+import { getIncomingLikeProfilesForSection } from '../data/profiles';
 import { DisguiseAdCreative } from '../types/disguise';
+import { SparkSection } from '../types/preferences';
 import { Profile, UserProfile } from '../types/profile';
 
 const NEWS_TEMPLATES = [
@@ -91,8 +92,12 @@ function toDisguisedProfilePost(
 }
 
 /** Disguised profiles — same card chrome as news/ad/social; only copy and avatar differ. */
-export function buildDisguisedProfileFeedItems(): DisguisedProfilePost[] {
-  return incomingLikeProfiles.map((profile, index) => toDisguisedProfilePost(profile, index));
+export function buildDisguisedProfileFeedItems(
+  section?: SparkSection | string | null,
+): DisguisedProfilePost[] {
+  return getIncomingLikeProfilesForSection(section).map((profile, index) =>
+    toDisguisedProfilePost(profile, index),
+  );
 }
 
 export function buildDisguisedProfileFeedItem(

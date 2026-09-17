@@ -25,6 +25,7 @@ import { VoiceNoteSheet } from '../components/VoiceNoteSheet';
 import { TypingIndicator } from '../components/TypingIndicator';
 import { VibeGameSheet } from '../components/VibeGameSheet';
 import { isAiPersonaProfile } from '../data/aiPersonas';
+import { emberRelationshipLabel } from '../types/profile';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { useLiveExpiry } from '../hooks/useLiveExpiry';
@@ -290,7 +291,9 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
           <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
             {isAiPersonaProfile(profile)
               ? 'They already sent an opener — reply to keep the practice going.'
-              : 'Matches expire in 24 hours — send the first message to keep the spark alive.'}
+              : emberRelationshipLabel(profile.relationshipStatus)
+                ? 'Matches expire in 24 hours — send the first message while this is still open.'
+                : 'Matches expire in 24 hours — send the first message to keep the spark alive.'}
           </Text>
           <View style={styles.icebreakers}>
             <Text style={[styles.icebreakerTitle, { color: colors.textMuted }]}>

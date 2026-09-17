@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import {
   forwardRef,
   useCallback,
@@ -17,6 +18,9 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Profile } from '../types/profile';
+import { spacing } from '../theme';
+import { useTheme } from '../context/ThemeContext';
+import { AnimatedPressable } from './AnimatedPressable';
 import { DropTargets, ZoneLayout } from './DropTargets';
 import { ProfileCard } from './ProfileCard';
 import { SuperLikeCelebration } from './SuperLikeCelebration';
@@ -96,6 +100,7 @@ function zoneProximity(
 
 export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
   function SwipeDeck({ profiles, onSwipe, onEmpty, canLike = true, onLikeBlocked, onSuperLike, onOpenProfile, compact = false }, ref) {
+    const { colors } = useTheme();
     const containerRef = useRef<View>(null);
     const [activeIndex, setActiveIndex] = useState(0);
     const [activeEffect, setActiveEffect] = useState<ActiveEffect | null>(null);
@@ -341,8 +346,8 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
     );
 
     const panGesture = Gesture.Pan()
-      .activeOffsetX([-12, 12])
-      .activeOffsetY([-12, 12])
+      .activeOffsetX([-16, 16])
+      .activeOffsetY([-16, 16])
       .onUpdate((event) => {
         translateX.value = event.translationX;
         translateY.value = event.translationY;
@@ -456,21 +461,33 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
 
               if (isTop) {
                 return (
-                  <GestureDetector key={profile.id} gesture={panGesture}>
-                    <Animated.View style={styles.cardSlot}>
-                      <ProfileCard
-                        profile={profile}
-                        index={index}
-                        activeIndex={activeIndex}
-                        translateX={translateX}
-                        translateY={translateY}
-                        scale={cardScale}
-                        passDim={passDim}
-                        compact={compact}
-                        onOpenDetail={onOpenProfile ? () => onOpenProfile(profile) : undefined}
-                      />
-                    </Animated.View>
-                  </GestureDetector>
+                  <View key={profile.id} style={styles.cardSlot} pointerEvents="box-none">
+                    <GestureDetector gesture={panGesture}>
+                      <Animated.View style={styles.cardSlot} collapsable={false}>
+                        <ProfileCard
+                          profile={profile}
+                          index={index}
+                          activeIndex={activeIndex}
+                          translateX={translateX}
+                          translateY={translateY}
+                          scale={cardScale}
+                          passDim={passDim}
+                          compact={compact}
+                        />
+                      </Animated.View>
+                    </GestureDetector>
+                    {onOpenProfile ? (
+                      <AnimatedPressable
+                        style={styles.infoButton}
+                        onPress={() => onOpenProfile(profile)}
+                        accessibilityLabel="Open profile details"
+                        hitSlop={12}
+                        scaleTo={0.9}
+                      >
+                        <Ionicons name="information-circle" size={28} color={colors.text} />
+                      </AnimatedPressable>
+                    ) : null}
+                  </View>
                 );
               }
 
@@ -529,5 +546,18 @@ const styles = StyleSheet.create({
   },
   cardSlot: {
     ...StyleSheet.absoluteFill,
+  },
+  infoButton: {
+    position: 'absolute',
+    bottom: spacing.lg + 8,
+    right: spacing.md,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 20,
+    elevation: 20,
   },
 });

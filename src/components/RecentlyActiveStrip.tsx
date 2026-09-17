@@ -5,6 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 import { Profile } from '../types/profile';
 import { spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
+import { EmberStatusChips } from './EmberStatusChips';
 
 type RecentlyActiveStripProps = {
   profiles: Profile[];
@@ -43,6 +44,9 @@ export function RecentlyActiveStrip({ profiles, onSelect }: RecentlyActiveStripP
             <Text style={[styles.name, { color: colors.textMuted }]} numberOfLines={1}>
               {profile.name}
             </Text>
+            <View style={styles.chips}>
+              <EmberStatusChips profile={profile} compact />
+            </View>
           </AnimatedPressable>
         ))}
       </ScrollView>
@@ -95,6 +99,11 @@ const styles = StyleSheet.create({
     marginTop: 4,
     maxWidth: 64,
     textAlign: 'center',
+  },
+  chips: {
+    marginTop: 2,
+    maxWidth: 64,
+    alignItems: 'center',
   },
   emptyText: {
     fontSize: 13,

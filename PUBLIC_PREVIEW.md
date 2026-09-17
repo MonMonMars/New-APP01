@@ -4,8 +4,8 @@
 
 | Link | Durability | Notes |
 |------|------------|-------|
-| **https://combines-rely-occupational-witness.trycloudflare.com** | Hours while workspace is awake | **Latest** — Leave Spark copy, Pulse news photos, free BBC/NPR/Guardian links. Hard-refresh if stale. |
-| **https://monmonmars.github.io/New-APP01/** | Permanent (GitHub Pages) | Same X S L mini-window build after `gh-pages` deploy. |
+| **https://cold-keys-pick.loca.lt** | Hours (tunnel) | **Latest** — Full app i18n (EN + 繁體中文). Hard-refresh if stale. |
+| **https://monmonmars.github.io/New-APP01/** | Permanent (GitHub Pages) | Deployed 2026-09-17 — i18n build on `gh-pages`. Enable Pages in repo settings if 404. |
 | **https://temporary-rushing-savanna-mj6rm81.vercel.app** | ~60 min (claimable → permanent) | Previous Ember discretion build. [Claim on Vercel](https://vercel.com/claim-deployment?code=c0977a36-bcfb-453d-ba2d-ea74ad24de73) to keep forever. |
 
 **Best long-term fix:** connect Vercel or Netlify to GitHub once (see below) — auto-deploys on every push, stable URL, works with a private repo.

@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { FREE_DAILY_LIKE_LIMIT } from '../types/subscription';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { AnimatedOverlay } from './motion/AnimatedOverlay';
 import { FadeSlideIn } from './motion/FadeSlideIn';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -17,6 +18,7 @@ type LikeLimitModalProps = {
 
 export function LikeLimitModal({ visible, onClose, onUpgrade, dailyLikeLimit = FREE_DAILY_LIKE_LIMIT }: LikeLimitModalProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   return (
     <AnimatedOverlay visible={visible} onClose={onClose} variant="center">
       <View style={[styles.sheet, { backgroundColor: colors.surface }]}>
@@ -24,18 +26,17 @@ export function LikeLimitModal({ visible, onClose, onUpgrade, dailyLikeLimit = F
           <Ionicons name="heart-dislike" size={40} color={colors.gradientEnd} />
         </FadeSlideIn>
         <FadeSlideIn replayKey={visible} index={1}>
-          <Text style={[styles.title, { color: colors.text }]}>You&apos;re out of likes today</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('discover.outOfLikes')}</Text>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-            Free members get {dailyLikeLimit} likes per day. Upgrade to Spark+ for unlimited
-            likes, see who liked you, and more.
+            {t('discover.likeLimitSubtitle', { limit: dailyLikeLimit })}
           </Text>
         </FadeSlideIn>
         <FadeSlideIn replayKey={visible} index={2}>
           <AnimatedPressable style={[styles.primaryButton, { backgroundColor: colors.gradientEnd }]} onPress={onUpgrade} scaleTo={0.97}>
-            <Text style={styles.primaryText}>Get Spark+</Text>
+            <Text style={styles.primaryText}>{t('discover.getSparkPlus')}</Text>
           </AnimatedPressable>
           <AnimatedPressable style={styles.secondaryButton} onPress={onClose} scaleTo={0.97}>
-            <Text style={styles.secondaryText}>Come back tomorrow</Text>
+            <Text style={styles.secondaryText}>{t('discover.comeBackTomorrow')}</Text>
           </AnimatedPressable>
         </FadeSlideIn>
       </View>

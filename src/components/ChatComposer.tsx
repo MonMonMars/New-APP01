@@ -9,6 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
 
@@ -43,6 +44,7 @@ export function ChatComposer({
   paddingBottom,
 }: ChatComposerProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [extrasOpen, setExtrasOpen] = useState(false);
   const extrasProgress = useSharedValue(0);
 
@@ -74,16 +76,16 @@ export function ChatComposer({
   };
 
   const extras: ExtraAction[] = [
-    { id: 'photo', icon: 'images-outline', label: 'Photo', onPress: onPickImage },
+    { id: 'photo', icon: 'images-outline', label: t('chat.photo'), onPress: onPickImage },
     ...(onPickGif
-      ? [{ id: 'gif', icon: 'happy-outline' as keyof typeof Ionicons.glyphMap, label: 'GIF', onPress: onPickGif }]
+      ? [{ id: 'gif', icon: 'happy-outline' as keyof typeof Ionicons.glyphMap, label: t('chat.gif'), onPress: onPickGif }]
       : []),
-    { id: 'date', icon: 'calendar-outline', label: 'Date', onPress: onSuggestDate },
-    { id: 'vibe', icon: 'color-wand-outline', label: 'Vibe', onPress: onVibeGame },
+    { id: 'date', icon: 'calendar-outline', label: t('chat.date'), onPress: onSuggestDate },
+    { id: 'vibe', icon: 'color-wand-outline', label: t('chat.vibe'), onPress: onVibeGame },
     {
       id: 'voice',
       icon: 'mic-outline',
-      label: 'Voice',
+      label: t('chat.voice'),
       onPress: () => (onVoiceNote ? onVoiceNote() : onSend('🎤 Voice note: Hey!')),
     },
   ];
@@ -117,7 +119,7 @@ export function ChatComposer({
               backgroundColor: extrasOpen ? colors.gradientEnd : colors.surface,
             },
           ]}
-          accessibilityLabel={extrasOpen ? 'Hide extras' : 'More actions'}
+          accessibilityLabel={extrasOpen ? t('chat.hideExtras') : t('chat.moreActions')}
         >
           <Ionicons
             name={extrasOpen ? 'close' : 'add'}
@@ -129,7 +131,7 @@ export function ChatComposer({
         <TextInput
           value={draft}
           onChangeText={onChangeDraft}
-          placeholder="Message..."
+          placeholder={t('chat.messagePlaceholder')}
           placeholderTextColor={colors.textMuted}
           style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]}
           onSubmitEditing={handleSend}
@@ -144,7 +146,7 @@ export function ChatComposer({
             styles.sendButton,
             { backgroundColor: hasText ? colors.gradientEnd : colors.surface },
           ]}
-          accessibilityLabel="Send message"
+          accessibilityLabel={t('chat.sendMessage')}
         >
           <Ionicons
             name="send"

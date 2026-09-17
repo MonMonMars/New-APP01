@@ -1,3 +1,5 @@
+import { translate } from '../i18n';
+import { AppLocale, resolveAppLocale } from '../types/locale';
 import { harborBrand } from '../theme/harborBrand';
 import { pulseBrand } from '../theme/pulseBrand';
 import { resolveSparkSection } from '../types/preferences';
@@ -39,7 +41,9 @@ export function hexToRgba(hex: string, alpha: number): string {
 export function disguiseWorldMeta(
   section?: string | null,
   gender?: ProfileGender | null,
+  locale?: AppLocale | null,
 ): DisguiseWorldMeta {
+  const lang = resolveAppLocale(locale);
   const world = resolveDisguiseWorld(section);
   switch (world) {
     case 'pulse':
@@ -47,49 +51,49 @@ export function disguiseWorldMeta(
         return {
           world,
           name: 'Pulse',
-          tagline: '星座 · Tarot & Entertainment',
+          tagline: translate(lang, 'disguiseWorld.pulseFemaleTagline'),
           unlockLabel: 'Spark',
           accent: pulseBrand.accent,
           accentBright: pulseBrand.accentBright,
           accentSoft: pulseBrand.accentSoft,
           accentBorder: pulseBrand.accentBorder,
           navy: pulseBrand.navy,
-          homeTab: 'Home',
-          trendingTab: 'Cosmos',
-          searchTitle: 'Search Pulse',
-          feedLabel: 'Cosmos & culture',
+          homeTab: translate(lang, 'tabs.home'),
+          trendingTab: translate(lang, 'tabs.cosmos'),
+          searchTitle: translate(lang, 'disguiseWorld.searchPulse'),
+          feedLabel: translate(lang, 'disguiseWorld.pulseFemaleFeedLabel'),
         };
       }
       return {
         world,
         name: 'Pulse',
-        tagline: 'World & Local News',
+        tagline: translate(lang, 'disguiseWorld.pulseTagline'),
         unlockLabel: 'Spark',
         accent: pulseBrand.accent,
         accentBright: pulseBrand.accentBright,
         accentSoft: pulseBrand.accentSoft,
         accentBorder: pulseBrand.accentBorder,
         navy: pulseBrand.navy,
-        homeTab: 'Home',
-        trendingTab: 'Trending',
-        searchTitle: 'Search Pulse',
-        feedLabel: 'Top stories',
+        homeTab: translate(lang, 'tabs.home'),
+        trendingTab: translate(lang, 'tabs.trending'),
+        searchTitle: translate(lang, 'disguiseWorld.searchPulse'),
+        feedLabel: translate(lang, 'disguiseWorld.pulseFeedLabel'),
       };
     case 'harbor':
       return {
         world,
-        name: 'Harbor',
-        tagline: 'Markets & Briefing',
-        unlockLabel: 'Ember',
+        name: translate(lang, 'disguiseWorld.harborName'),
+        tagline: translate(lang, 'disguiseWorld.harborTagline'),
+        unlockLabel: translate(lang, 'disguiseWorld.harborUnlock'),
         accent: harborBrand.accent,
         accentBright: harborBrand.accentBright,
         accentSoft: harborBrand.accentSoft,
         accentBorder: harborBrand.accentBorder,
         navy: harborBrand.navy,
-        homeTab: 'Briefing',
-        trendingTab: 'Markets',
-        searchTitle: 'Search Harbor',
-        feedLabel: 'Market briefing',
+        homeTab: translate(lang, 'tabs.briefing'),
+        trendingTab: translate(lang, 'tabs.markets'),
+        searchTitle: translate(lang, 'disguiseWorld.searchHarbor'),
+        feedLabel: translate(lang, 'disguiseWorld.harborFeedLabel'),
       };
     default: {
       const _exhaustive: never = world;

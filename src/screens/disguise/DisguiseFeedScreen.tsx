@@ -10,6 +10,7 @@ import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
 import { NewsPostCard } from '../../components/disguise/NewsPostCard';
 import { SocialPostCard } from '../../components/disguise/SocialPostCard';
 import { useApp } from '../../context/AppContext';
+import { useAppLocale } from '../../hooks/useAppLocale';
 import { useTheme } from '../../context/ThemeContext';
 import { FeedItem } from '../../data/disguiseFeed';
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
@@ -50,7 +51,8 @@ export function DisguiseFeedScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { user, disguiseAdCreative, pulseSocial, preferences } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection, user.gender);
+  const { locale } = useAppLocale();
+  const meta = disguiseWorldMeta(preferences.sparkSection, user.gender, locale);
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
   const route = useRoute<RouteProp<DisguiseTabParamList, 'Home'>>();
   const topic = route.params?.topic;

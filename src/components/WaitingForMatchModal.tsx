@@ -4,6 +4,7 @@ import { Image, Modal, StyleSheet, Text, View } from 'react-native';
 import { colors as palette, radii, spacing } from '../theme';
 import { modalFill } from '../theme/modalFill';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { emberRelationshipLabel, Profile } from '../types/profile';
 import { AnimatedPressable } from './AnimatedPressable';
 import { EmberStatusChips } from './EmberStatusChips';
@@ -20,6 +21,7 @@ export function WaitingForMatchModal({
   onFindMorePeople,
 }: WaitingForMatchModalProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   if (!profile) {
     return null;
   }
@@ -33,11 +35,11 @@ export function WaitingForMatchModal({
           colors={[colors.gradientStart, colors.gradientEnd]}
           style={styles.sheet}
         >
-          <Text style={styles.title}>Waiting for a match</Text>
+          <Text style={styles.title}>{t('discover.waitingForMatch')}</Text>
           <Text style={styles.subtitle}>
             {emberStatus
-              ? `You liked ${profile.name}. They'll show in Messages if they like you too.`
-              : `You liked ${profile.name}. Check back in Matches if they like you too.`}
+              ? t('discover.waitingSubtitleEmber', { name: profile.name })
+              : t('discover.waitingSubtitleSpark', { name: profile.name })}
           </Text>
           {emberStatus ? (
             <View style={styles.emberChips}>
@@ -56,11 +58,11 @@ export function WaitingForMatchModal({
           </View>
 
           <Text style={styles.hint}>
-            Keep exploring — the more people you meet, the better your chances.
+            {t('discover.waitingHint')}
           </Text>
 
           <AnimatedPressable style={styles.primaryButton} onPress={onFindMorePeople}>
-            <Text style={[styles.primaryButtonText, { color: colors.gradientEnd }]}>Find more people</Text>
+            <Text style={[styles.primaryButtonText, { color: colors.gradientEnd }]}>{t('discover.findMorePeople')}</Text>
           </AnimatedPressable>
         </LinearGradient>
       </View>

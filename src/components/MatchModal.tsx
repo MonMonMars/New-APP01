@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { emberRelationshipLabel, Profile } from '../types/profile';
 import { pickOpeningMove } from '../utils/openingMove';
 import { Button } from './Button';
@@ -26,6 +27,7 @@ export function MatchModal({
 }: MatchModalProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   if (!profile) {
     return null;
@@ -40,12 +42,12 @@ export function MatchModal({
         colors={[colors.gradientStart, colors.gradientEnd, colors.heartRed]}
         style={[styles.screen, { paddingTop: insets.top + spacing.xl }]}
       >
-        <Text style={styles.kicker}>It&apos;s a</Text>
-        <Text style={styles.title}>Match!</Text>
+        <Text style={styles.kicker}>{t('discover.itsA')}</Text>
+        <Text style={styles.title}>{t('discover.match')}</Text>
         <Text style={styles.subtitle}>
           {emberStatus
-            ? `You and ${profile.name} both liked. Keep it discreet — say hi when you're ready.`
-            : `You and ${profile.name} liked each other. Say hi before the spark fades.`}
+            ? t('discover.matchSubtitleEmber', { name: profile.name })
+            : t('discover.matchSubtitleSpark', { name: profile.name })}
         </Text>
         {emberStatus ? (
           <View style={styles.emberChips}>
@@ -62,13 +64,13 @@ export function MatchModal({
         </View>
 
         <View style={styles.openingMoveCard}>
-          <Text style={styles.openingMoveLabel}>Opening Move</Text>
+          <Text style={styles.openingMoveLabel}>{t('discover.openingMove')}</Text>
           <Text style={styles.openingMoveText}>{openingMove}</Text>
         </View>
 
         <View style={[styles.actions, { paddingBottom: insets.bottom + spacing.lg }]}>
-          <Button label="Start talking" onPress={onMessage} />
-          <Button label="Keep looking" variant="ghost" onPress={onClose} />
+          <Button label={t('discover.startTalking')} onPress={onMessage} />
+          <Button label={t('discover.keepLooking')} variant="ghost" onPress={onClose} />
         </View>
       </LinearGradient>
     </Modal>

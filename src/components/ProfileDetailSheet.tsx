@@ -7,7 +7,8 @@ import { VoicePromptCard } from './VoicePromptCard';
 import { ProfileVerificationDisplay } from './ProfileVerificationDisplay';
 import { VerificationBadges } from './VerificationBadges';
 import { isAiPersonaProfile } from '../data/aiPersonas';
-import { RELATIONSHIP_INTENT_LABELS } from '../types/preferences';
+import { useTranslation } from '../i18n';
+import { getProfileIntentLabel } from '../i18n/labels';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import {
@@ -57,6 +58,7 @@ export function ProfileDetailSheet({
   photosUnlocked = false,
 }: ProfileDetailSheetProps) {
   const { colors } = useTheme();
+  const { t, locale } = useTranslation();
   const insets = useSafeAreaInsets();
 
   if (!profile) {
@@ -78,7 +80,7 @@ export function ProfileDetailSheet({
           {onHold && (
             <AnimatedPressable style={styles.holdButton} onPress={onHold}>
               <Ionicons name={isHeld ? 'bookmark' : 'bookmark-outline'} size={22} color={colors.gradientEnd} />
-              <Text style={[styles.holdText, { color: colors.gradientEnd }]}>{isHeld ? 'On hold' : 'Hold'}</Text>
+              <Text style={[styles.holdText, { color: colors.gradientEnd }]}>{isHeld ? t('profileDetail.onHold') : t('profileDetail.hold')}</Text>
             </AnimatedPressable>
           )}
         </View>
@@ -96,7 +98,7 @@ export function ProfileDetailSheet({
                 {locked ? (
                   <View style={styles.privatePhotoMask}>
                     <Ionicons name="lock-closed" size={22} color={colors.ember} />
-                    <Text style={styles.privatePhotoText}>Private until you match</Text>
+                    <Text style={styles.privatePhotoText}>{t('profileDetail.privateUntilMatch')}</Text>
                   </View>
                 ) : null}
               </View>
@@ -118,7 +120,7 @@ export function ProfileDetailSheet({
             {compatibilityScore !== undefined && (
               <View style={[styles.compatBadge, { backgroundColor: `${colors.gradientEnd}1f` }]}>
                 <Ionicons name="sparkles" size={14} color={colors.gradientEnd} />
-                <Text style={[styles.compatText, { color: colors.gradientEnd }]}>{compatibilityScore}% compatible</Text>
+                <Text style={[styles.compatText, { color: colors.gradientEnd }]}>{t('profileDetail.compatible', { score: compatibilityScore })}</Text>
               </View>
             )}
             {profile.job && <Text style={[styles.meta, { color: colors.textMuted }]}>{profile.job}</Text>}
@@ -136,10 +138,10 @@ export function ProfileDetailSheet({
               </>
             ) : null}
             {profile.intent && !emberStatus ? (
-              <Text style={[styles.intentMeta, { color: colors.gradientEnd }]}>{RELATIONSHIP_INTENT_LABELS[profile.intent]}</Text>
+              <Text style={[styles.intentMeta, { color: colors.gradientEnd }]}>{getProfileIntentLabel(locale, profile.intent)}</Text>
             ) : null}
             <Text style={[styles.distance, { color: colors.textMuted }]}>
-              {emberStatus ? emberLocationLine(profile) : `${profile.distanceMiles} miles away`}
+              {emberStatus ? emberLocationLine(profile) : t('likes.milesAway', { n: profile.distanceMiles })}
             </Text>
             {profile.openingMove ? (
               <View style={[styles.openingMove, { backgroundColor: `${colors.gradientEnd}1a` }]}>
@@ -163,13 +165,12 @@ export function ProfileDetailSheet({
           )}
 
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>About</Text>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('profileDetail.about')}</Text>
             <Text style={[styles.bio, { color: colors.text }]}>{profile.bio}</Text>
             {isAiPersonaProfile(profile) && (
               <View style={styles.aiDisclaimer}>
                 <Text style={styles.aiDisclaimerText}>
-                  This is a Spark AI practice persona — not a real person. Chat safely to practice
-                  before matching with real people.
+                  {t('profileDetail.aiPersonaDisclaimer')}
                 </Text>
               </View>
             )}
@@ -193,14 +194,14 @@ export function ProfileDetailSheet({
               {onLikePrompt && (
                 <View style={styles.likePromptRow}>
                   <Ionicons name="heart-outline" size={16} color={colors.heartPink} />
-                  <Text style={[styles.likePromptText, { color: colors.heartPink }]}>Like this answer</Text>
+                  <Text style={[styles.likePromptText, { color: colors.heartPink }]}>{t('profileDetail.likeThisAnswer')}</Text>
                 </View>
               )}
             </AnimatedPressable>
           ))}
 
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Interests</Text>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('profile.interests')}</Text>
             <View style={styles.tags}>
               {profile.interests.map((interest) => (
                 <View key={interest} style={styles.tag}>
@@ -212,17 +213,17 @@ export function ProfileDetailSheet({
 
           {(onReport || onBlock) && (
             <View style={styles.safetySection}>
-              <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Safety</Text>
+              <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('safety.title')}</Text>
               {onReport && (
                 <AnimatedPressable style={styles.safetyRow} onPress={() => onReport(profile.id)}>
                   <Ionicons name="flag-outline" size={20} color={colors.rewind} />
-                  <Text style={[styles.safetyLabel, { color: colors.text }]}>Report {profile.name}</Text>
+                  <Text style={[styles.safetyLabel, { color: colors.text }]}>{t('profileDetail.reportName', { name: profile.name })}</Text>
                 </AnimatedPressable>
               )}
               {onBlock && (
                 <AnimatedPressable style={styles.safetyRow} onPress={() => onBlock(profile.id)}>
                   <Ionicons name="hand-left-outline" size={20} color={colors.nope} />
-                  <Text style={[styles.safetyLabel, { color: colors.text }]}>Block {profile.name}</Text>
+                  <Text style={[styles.safetyLabel, { color: colors.text }]}>{t('profileDetail.blockName', { name: profile.name })}</Text>
                 </AnimatedPressable>
               )}
             </View>
@@ -240,7 +241,7 @@ export function ProfileDetailSheet({
               <AnimatedPressable
                 style={[styles.actionButton, { backgroundColor: colors.superLike }]}
                 onPress={onSuperLike}
-                accessibilityLabel="Super like"
+                accessibilityLabel={t('discover.superLike')}
               >
                 <Ionicons name="star" size={24} color="#fff" />
               </AnimatedPressable>

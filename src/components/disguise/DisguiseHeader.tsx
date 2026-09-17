@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
+import { useAppLocale } from '../../hooks/useAppLocale';
 import { useTheme } from '../../context/ThemeContext';
 import { FeedItem } from '../../data/disguiseFeed';
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
@@ -24,7 +25,8 @@ type DisguiseHeaderProps = {
 export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps) {
   const { colors } = useTheme();
   const { user, preferences, setDisguiseMode } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection, user.gender);
+  const { locale } = useAppLocale();
+  const meta = disguiseWorldMeta(preferences.sparkSection, user.gender, locale);
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchItemId, setSearchItemId] = useState<string | null>(null);

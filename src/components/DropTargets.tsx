@@ -12,6 +12,7 @@ import Animated, {
 import { PRESS_SPRING } from './AnimatedPressable';
 import { spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 
 export type ZoneLayout = {
   x: number;
@@ -124,6 +125,7 @@ export function DropTargets({
   onStarPress,
 }: DropTargetsProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const trashRef = useRef<View>(null);
   const heartRef = useRef<View>(null);
   const starRef = useRef<View>(null);
@@ -180,7 +182,7 @@ export function DropTargets({
         active={trashActive}
         targetRef={trashRef}
         size={targetSize}
-        accessibilityLabel="Pass"
+        accessibilityLabel={t('discover.pass')}
         onLayout={reportTrashZone}
         onPress={onTrashPress}
       />
@@ -202,7 +204,7 @@ export function DropTargets({
             active={starActiveValue}
             targetRef={starRef}
             size={starSize}
-            accessibilityLabel="Super like"
+            accessibilityLabel={t('discover.superLike')}
             onLayout={reportStarZone}
             onPress={onStarPress}
           />
@@ -217,7 +219,7 @@ export function DropTargets({
         active={heartActive}
         targetRef={heartRef}
         size={targetSize}
-        accessibilityLabel="Like"
+        accessibilityLabel={t('discover.like')}
         onLayout={reportHeartZone}
         onPress={onHeartPress}
       />

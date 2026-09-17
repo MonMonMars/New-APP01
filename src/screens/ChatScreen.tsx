@@ -28,6 +28,7 @@ import { isAiPersonaProfile } from '../data/aiPersonas';
 import { emberRelationshipLabel } from '../types/profile';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { useLiveExpiry } from '../hooks/useLiveExpiry';
 import { Message, MessageStatus } from '../types/match';
 import { getIcebreakerSuggestions } from '../utils/openingMove';
@@ -43,6 +44,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const {
     conversations,
     sendMessage,
@@ -81,9 +83,9 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   if (!conversation) {
     return (
       <View style={[styles.missing, { backgroundColor: colors.background }]}>
-        <Text style={[styles.missingText, { color: colors.text }]}>Conversation not found.</Text>
+        <Text style={[styles.missingText, { color: colors.text }]}>{t('chat.notFound')}</Text>
         <AnimatedPressable onPress={onBack}>
-          <Text style={[styles.backLink, { color: colors.gradientEnd }]}>Go back</Text>
+          <Text style={[styles.backLink, { color: colors.gradientEnd }]}>{t('common.goBack')}</Text>
         </AnimatedPressable>
       </View>
     );
@@ -92,9 +94,9 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const profile = conversation.match.profile;
   const activeDateCheckIn = getActiveDateCheckIn(profile.id);
   const turnLabel = conversation.yourTurn
-    ? 'Your turn'
+    ? t('matches.yourTurn')
     : conversation.messages.length > 0
-      ? 'Waiting for reply'
+      ? t('matches.waitingReply')
       : null;
 
   const handleSend = (text: string, imageUrl?: string, isGif = false) => {
@@ -112,7 +114,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const handleBlock = () => {
     setShowSafety(false);
     blockProfile(profile.id);
-    Alert.alert('Blocked', `${profile.name} has been blocked.`);
+    Alert.alert(t('discover.blocked'), t('chat.blockedAlert', { name: profile.name }));
     onBack();
   };
 
@@ -124,23 +126,23 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const handleReportSubmit = (reason: ReportReason) => {
     setShowReport(false);
     reportProfile(profile.id, reason);
-    Alert.alert('Report submitted', `Thanks for reporting. Reason: ${reason}`);
+    Alert.alert(t('discover.reportSubmitted'), t('discover.reportThanks', { reason }));
     onBack();
   };
 
   const handleUnmatch = () => {
     setShowSafety(false);
     Alert.alert(
-      'Unmatch?',
-      `Remove ${profile.name} from your matches? This can't be undone.`,
+      t('chat.unmatchTitle'),
+      t('chat.unmatchBody', { name: profile.name }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Unmatch',
+          text: t('chat.unmatch'),
           style: 'destructive',
           onPress: () => {
             unmatchProfile(profile.id);
-            Alert.alert('Unmatched', `You and ${profile.name} are no longer matched.`);
+            Alert.alert(t('chat.unmatched'), t('chat.unmatchedBody', { name: profile.name }));
             onBack();
           },
         },
@@ -202,7 +204,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
-        <AnimatedPressable onPress={onBack} style={styles.backButton} accessibilityLabel="Go back">
+        <AnimatedPressable onPress={onBack} style={styles.backButton} accessibilityLabel={t('common.goBack')}>
           <Ionicons name="chevron-back" size={28} color={colors.text} />
         </AnimatedPressable>
         <AnimatedPressable style={styles.headerProfile} onPress={() => setShowProfile(true)}>
@@ -219,8 +221,8 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
             </View>
             <EmberStatusChips profile={profile} compact />
             <Text style={[styles.headerMeta, { color: colors.textMuted }]}>
-              {profile.activeToday ? 'Active now · ' : ''}
-              {expiryLabel ?? 'Matched recently'}
+              {profile.activeToday ? t('chat.activeNow') : ''}
+              {expiryLabel ?? t('chat.matchedRecently')}
             </Text>
           </View>
         </AnimatedPressable>
@@ -239,7 +241,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
           <AnimatedPressable
             style={styles.headerAction}
             onPress={() => setShowSafety(true)}
-            accessibilityLabel="More options"
+            accessibilityLabel={t('chat.moreOptions')}
           >
             <Ionicons name="ellipsis-vertical" size={22} color={colors.text} />
           </AnimatedPressable>
@@ -250,10 +252,10 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         <View style={[styles.checkInCard, { backgroundColor: colors.surface, borderColor: colors.gradientEnd }]}>
           <Ionicons name="shield-checkmark" size={18} color={colors.gradientEnd} />
           <View style={styles.checkInText}>
-            <Text style={[styles.checkInTitle, { color: colors.text }]}>Date check-in active</Text>
+            <Text style={[styles.checkInTitle, { color: colors.text }]}>{t('chat.dateCheckInActive')}</Text>
             <Text style={[styles.checkInMeta, { color: colors.textMuted }]}>
               {activeDateCheckIn.location}
-              {activeDateCheckIn.checkedInAt ? ' · Arrived' : ' · Plan saved'}
+              {activeDateCheckIn.checkedInAt ? t('chat.arrived') : t('chat.planSaved')}
             </Text>
           </View>
           {!activeDateCheckIn.checkedInAt ? (
@@ -261,20 +263,20 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
               style={[styles.checkInButton, { backgroundColor: colors.gradientEnd }]}
               onPress={() => {
                 checkInDateNow(activeDateCheckIn.id);
-                handleSend(`✅ Checked in safely at ${activeDateCheckIn.location}`);
+                handleSend(t('chat.checkedInSafely', { location: activeDateCheckIn.location }));
               }}
             >
-              <Text style={[styles.checkInButtonText, { color: colors.text }]}>Check in</Text>
+              <Text style={[styles.checkInButtonText, { color: colors.text }]}>{t('chat.checkIn')}</Text>
             </AnimatedPressable>
           ) : (
             <AnimatedPressable
               style={[styles.checkInButton, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
               onPress={() => {
                 completeDateCheckIn(activeDateCheckIn.id);
-                handleSend('🏠 Home safe — ending date check-in');
+                handleSend(t('chat.homeSafeEnding'));
               }}
             >
-              <Text style={[styles.checkInButtonText, { color: colors.text }]}>Home safe</Text>
+              <Text style={[styles.checkInButtonText, { color: colors.text }]}>{t('chat.homeSafe')}</Text>
             </AnimatedPressable>
           )}
         </View>
@@ -283,7 +285,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
       {isAiPersonaProfile(profile) && (
         <View style={[styles.aiBanner, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <Text style={[styles.aiBannerText, { color: colors.textMuted }]}>
-            ✨ AI practice match — replies are generated to help you practice chatting. Not a real person.
+            {t('chat.aiPracticeBanner')}
           </Text>
         </View>
       )}
@@ -291,17 +293,17 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
       {conversation.messages.length === 0 ? (
         <View style={styles.emptyThread}>
           <Text style={styles.emptyEmoji}>👋</Text>
-          <Text style={[styles.emptyTitle, { color: colors.text }]}>Say hi to {profile.name}</Text>
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('chat.sayHiTo', { name: profile.name })}</Text>
           <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
             {isAiPersonaProfile(profile)
-              ? 'They already sent an opener — reply to keep the practice going.'
+              ? t('chat.emberOpenerHint')
               : emberRelationshipLabel(profile.relationshipStatus)
-                ? 'Matches expire in 24 hours — send the first message while this is still open.'
-                : 'Matches expire in 24 hours — send the first message to keep the spark alive.'}
+                ? t('chat.expireHintEmber')
+                : t('chat.expireHintSpark')}
           </Text>
           <View style={styles.icebreakers}>
             <Text style={[styles.icebreakerTitle, { color: colors.textMuted }]}>
-              {profile.openingMove ? `${profile.name}'s Opening Move` : 'Break the ice'}
+              {profile.openingMove ? t('chat.openingMoveLabel', { name: profile.name }) : t('chat.breakTheIce')}
             </Text>
             {profile.openingMove && (
               <Text style={[styles.openingMovePreview, { color: colors.text }]}>
@@ -326,7 +328,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
               >
                 <Ionicons name="checkmark-done" size={14} color={colors.textMuted} />
                 <Text style={[styles.readReceiptHintText, { color: colors.textMuted }]}>
-                  Spark+ unlocks read receipts
+                  {t('chat.readReceiptsSparkPlus')}
                 </Text>
               </AnimatedPressable>
             )}
@@ -337,7 +339,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
                 onPress={() => setShowSuggestDate(true)}
               >
                 <Ionicons name="calendar-outline" size={16} color={colors.gradientEnd} />
-                <Text style={[styles.gameChipText, { color: colors.gradientEnd }]}>Suggest a date</Text>
+                <Text style={[styles.gameChipText, { color: colors.gradientEnd }]}>{t('chat.suggestDate')}</Text>
               </AnimatedPressable>
               <AnimatedPressable
                 scaleTo={0.95}
@@ -345,7 +347,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
                 onPress={() => setShowVibeGame(true)}
               >
                 <Ionicons name="color-wand-outline" size={16} color={colors.gradientEnd} />
-                <Text style={[styles.gameChipText, { color: colors.gradientEnd }]}>Read my vibe</Text>
+                <Text style={[styles.gameChipText, { color: colors.gradientEnd }]}>{t('chat.readMyVibe')}</Text>
               </AnimatedPressable>
             </View>
           </View>

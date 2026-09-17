@@ -5,7 +5,7 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { NewsPost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { MediaWithContentBadge } from './ContentTypeIcon';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { NewsArticleSheet } from './NewsArticleSheet';
@@ -20,7 +20,7 @@ type NewsPostCardProps = {
 export function NewsPostCard({ post }: NewsPostCardProps) {
   const { colors } = useTheme();
   const { preferences } = useApp();
-  const accent = disguiseWorldMeta(preferences.sparkSection).accent;
+  const accent = useDisguiseWorld().accent;
   const [articleOpen, setArticleOpen] = useState(false);
   const [selectedReporter, setSelectedReporter] = useState<NewsReporter | null>(null);
 

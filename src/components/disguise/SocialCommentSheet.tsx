@@ -7,7 +7,7 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { FeedPersonRow } from './FeedPersonRow';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -47,7 +47,7 @@ export function SocialCommentSheet({
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { addPulseComment, getPulseComments, preferences } = useApp();
-  const accent = disguiseWorldMeta(preferences.sparkSection).accent;
+  const accent = useDisguiseWorld().accent;
   const [draft, setDraft] = useState('');
 
   if (!post) {

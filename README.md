@@ -26,7 +26,9 @@ npm run demo:tunnel   # public Cloudflare URL (requires cloudflared)
 ## Features
 
 ### Pulse disguise mode
-- News feed with reporter avatars, in-app article reader (BBC, Verge — free sources)
+- News feed with reporter avatars, in-app article reader (BBC, Guardian, NPR — free sources)
+- **Women:** Cosmos disguise — 星座 zodiac, tarot, entertainment feed + Cosmos tab
+- **Men:** World & local news, markets, weather trending
 - Sponsored ads with real client landing pages
 - Social posts with news/ad overlays on photos
 - AI disguise ad generator (Profile)
@@ -47,15 +49,23 @@ npm run demo:tunnel   # public Cloudflare URL (requires cloudflared)
 | Tab | Highlights |
 |-----|------------|
 | **Discover** | Drag targets, daily like limit, spark notes, rewind |
-| **Likes** | Blurred grid → Spark+ reveals names/photos |
+| **Likes** | Blurred grid → Spark+ reveals (free for women) |
 | **Matches** | New matches row, expiry, your turn |
 | **Profile** | Edit profile + photos, Boost, Spark+, disguise toggle |
 
 ### Chat
 - Icebreaker prompts, unmatch, report / block
 
+### Free tier (gender-aware)
+| Perk | Men | Women |
+|------|-----|-------|
+| Daily likes | 10 | **25** |
+| Spark Notes | 1/day | **3/day** |
+| See who likes you | Spark+ | **Free** |
+| See who viewed you | Spark+ | **Free** |
+
 ### Premium (Spark+)
-- See who likes you, unlimited likes & notes, rewind, boost
+- Unlimited likes & notes, rewind, boost, advanced filters
 
 ### Persistence
 - **AsyncStorage** — matches, chats, disguise settings survive restart

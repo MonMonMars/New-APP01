@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { BrandMark } from '../brand/BrandMark';
 import { useApp } from '../../context/AppContext';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { resolveSparkSection } from '../../types/preferences';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -49,7 +49,7 @@ function LogoButton({
 /** Spark/Ember: tap the S5 / E1e mark to enter that world’s disguise. */
 export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps) {
   const { disguiseMode, setDisguiseMode, preferences } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection);
+  const meta = useDisguiseWorld();
   const section = resolveSparkSection(preferences.sparkSection);
   const markSize = compact ? 36 : 40;
 

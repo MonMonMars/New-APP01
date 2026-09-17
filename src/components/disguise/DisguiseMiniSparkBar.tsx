@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { spacing } from '../../theme';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { ScalePressable } from '../motion/ScalePressable';
 
 type DisguiseMiniSparkBarProps = {
@@ -67,7 +67,7 @@ export function DisguiseMiniSparkBar({
   onPass,
 }: DisguiseMiniSparkBarProps) {
   const { preferences } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection);
+  const meta = useDisguiseWorld();
 
   return (
     <View style={styles.bar}>

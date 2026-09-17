@@ -24,13 +24,13 @@ import { buildAlertReporter } from '../../utils/disguiseReporterPhotos';
 import { radii, spacing } from '../../theme';
 import { useApp } from '../../context/AppContext';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 
 export function DisguiseAlertsScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { markActivityAlertsRead, preferences } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection);
+  const meta = useDisguiseWorld();
 
   useFocusEffect(
     useCallback(() => {

@@ -6,7 +6,7 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { DisguisedProfilePost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { ContentTypeIcon, MediaWithContentBadge } from './ContentTypeIcon';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { PROFILE_AVATAR_SIZE } from './DisguiseOverlayAvatar';
@@ -32,7 +32,7 @@ function OwnerHint({ label, color }: { label: string; color: string }) {
 export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   const { colors } = useTheme();
   const { pulseSocial, togglePulseLike, preferences } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection);
+  const meta = useDisguiseWorld();
   const [previewOpen, setPreviewOpen] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const upvoted = pulseSocial.likedPostIds.includes(post.id);

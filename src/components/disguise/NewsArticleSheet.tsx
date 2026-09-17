@@ -8,7 +8,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { NewsPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { openExternalUrl } from '../../utils/openExternalUrl';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
 import { FadeSlideIn } from '../motion/FadeSlideIn';
 import { SavePostButton } from './SavePostButton';
@@ -25,7 +25,7 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { recordPulseReading, preferences } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection);
+  const meta = useDisguiseWorld();
 
   useEffect(() => {
     if (visible && post) {

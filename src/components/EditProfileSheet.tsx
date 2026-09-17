@@ -14,7 +14,11 @@ import {
   EMBER_DISCRETION_LABELS,
   EMBER_SEEKING_LABELS,
   EMBER_PROMPT_OPTIONS,
+  GENDER_LABELS,
   HINGE_PROMPT_OPTIONS,
+  ORIENTATION_LABELS,
+  Orientation,
+  ProfileGender,
   RelationshipIntent,
   RelationshipStatus,
   RELATIONSHIP_STATUS_LABELS,
@@ -54,6 +58,17 @@ const statusOptions: { value: RelationshipStatus; label: string }[] = (
 const discretionOptions: EmberDiscretion[] = ['open', 'careful', 'hidden'];
 const seekingOptions: EmberSeeking[] = ['online', 'travel', 'ongoing', 'light'];
 const availabilityOptions: EmberAvailability[] = ['evenings', 'weekends', 'flexible'];
+const genderOptions: ProfileGender[] = ['woman', 'man', 'nonbinary'];
+const orientationOptions: Orientation[] = [
+  'straight',
+  'gay',
+  'lesbian',
+  'bisexual',
+  'pansexual',
+  'queer',
+  'asexual',
+  'other',
+];
 
 export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfileSheetProps) {
   const insets = useSafeAreaInsets();
@@ -82,6 +97,8 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
   const [ageVerified, setAgeVerified] = useState(user.ageVerified ?? false);
   const [photoVerified, setPhotoVerified] = useState(user.photoVerified ?? false);
   const [personVerified, setPersonVerified] = useState(user.personVerified ?? false);
+  const [gender, setGender] = useState<ProfileGender>(user.gender ?? 'man');
+  const [orientation, setOrientation] = useState<Orientation>(user.orientation ?? 'straight');
   const [openingMove, setOpeningMove] = useState(user.openingMove ?? '');
   const [voicePrompt, setVoicePrompt] = useState<VoicePrompt | undefined>(user.voicePrompt);
   const [showVoicePrompt, setShowVoicePrompt] = useState(false);
@@ -108,6 +125,8 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       setAgeVerified(user.ageVerified ?? false);
       setPhotoVerified(user.photoVerified ?? false);
       setPersonVerified(user.personVerified ?? false);
+      setGender(user.gender ?? 'man');
+      setOrientation(user.orientation ?? 'straight');
       setOpeningMove(user.openingMove ?? '');
       setVoicePrompt(user.voicePrompt);
     }
@@ -146,6 +165,8 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       ageVerified,
       photoVerified,
       personVerified,
+      gender,
+      orientation,
       openingMove: openingMove.trim() || undefined,
       voicePrompt,
     });
@@ -232,6 +253,57 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
             placeholder="18+"
             placeholderTextColor={colors.textMuted}
           />
+
+          <Text style={[styles.label, { color: colors.textMuted }]}>I am a</Text>
+          <Text style={[styles.openingMoveHint, { color: colors.textMuted }]}>
+            Affects free perks and your Pulse disguise feed (Cosmos for women).
+          </Text>
+          <View style={styles.intentRow}>
+            {genderOptions.map((option) => {
+              const selected = gender === option;
+              return (
+                <AnimatedPressable
+                  key={option}
+                  style={[
+                    styles.intentChip,
+                    {
+                      backgroundColor: selected ? colors.gradientEnd : colors.surface,
+                      borderColor: selected ? colors.gradientEnd : colors.border,
+                    },
+                  ]}
+                  onPress={() => setGender(option)}
+                >
+                  <Text style={[styles.intentChipText, { color: selected ? '#fff' : colors.text }]}>
+                    {GENDER_LABELS[option]}
+                  </Text>
+                </AnimatedPressable>
+              );
+            })}
+          </View>
+
+          <Text style={[styles.label, { color: colors.textMuted }]}>My orientation</Text>
+          <View style={styles.intentRow}>
+            {orientationOptions.map((option) => {
+              const selected = orientation === option;
+              return (
+                <AnimatedPressable
+                  key={option}
+                  style={[
+                    styles.intentChip,
+                    {
+                      backgroundColor: selected ? colors.gradientEnd : colors.surface,
+                      borderColor: selected ? colors.gradientEnd : colors.border,
+                    },
+                  ]}
+                  onPress={() => setOrientation(option)}
+                >
+                  <Text style={[styles.intentChipText, { color: selected ? '#fff' : colors.text }]}>
+                    {ORIENTATION_LABELS[option]}
+                  </Text>
+                </AnimatedPressable>
+              );
+            })}
+          </View>
 
           <View style={styles.labelRow}>
             <Text style={[styles.label, { color: colors.textMuted }]}>Bio</Text>

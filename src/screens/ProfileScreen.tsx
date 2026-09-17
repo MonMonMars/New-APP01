@@ -24,7 +24,8 @@ import { RelationshipIntent } from '../types/profile';
 import { ThemeMode } from '../types/settings';
 import { DisguiseAdGeneratorSheet } from '../components/disguise/DisguiseAdGeneratorSheet';
 import { computeProfileCompletion } from '../utils/profileCompletion';
-import { disguiseWorldMeta } from '../utils/disguiseWorld';
+import { useDisguiseWorld } from '../hooks/useDisguiseWorld';
+import { canRevealProfileViews } from '../utils/genderAccountPerks';
 import { resolveSparkSection } from '../types/preferences';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -88,7 +89,7 @@ export function ProfileScreen() {
     profileViewCount,
   } = useApp();
   const section = resolveSparkSection(preferences.sparkSection);
-  const disguiseMeta = disguiseWorldMeta(preferences.sparkSection);
+  const disguiseMeta = useDisguiseWorld();
   const [showEdit, setShowEdit] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
   const [showDisguiseGenerator, setShowDisguiseGenerator] = useState(false);
@@ -204,7 +205,7 @@ export function ProfileScreen() {
         <ProfileViewsCard
           viewers={profileViewers}
           totalCount={profileViewCount}
-          isSparkPlus={isSparkPlus}
+          canReveal={canRevealProfileViews(user.gender, isSparkPlus)}
           onUpgrade={() => navigation.getParent()?.navigate('SparkPlus')}
         />
 

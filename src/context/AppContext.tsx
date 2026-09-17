@@ -711,7 +711,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   ]);
 
   const runSparkUnlockFlow = useCallback(async (): Promise<boolean> => {
-    const leaveLabel = disguiseWorldMeta(preferences.sparkSection).unlockLabel;
+    const leaveLabel = disguiseWorldMeta(preferences.sparkSection, user.gender).unlockLabel;
     if (await isUnlockLockedOut()) {
       const remaining = await getUnlockLockoutRemainingMs();
       const minutes = Math.ceil(remaining / 60_000);
@@ -736,11 +736,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setUnlockError(null);
       setUnlockModalVisible(true);
     });
-  }, [securitySettings, userId, preferences.sparkSection]);
+  }, [securitySettings, userId, preferences.sparkSection, user.gender]);
 
   const handleUnlockPinSubmit = useCallback(
     async (pin: string) => {
-      const leaveLabel = disguiseWorldMeta(preferences.sparkSection).unlockLabel;
+      const leaveLabel = disguiseWorldMeta(preferences.sparkSection, user.gender).unlockLabel;
       if (await isUnlockLockedOut()) {
         const remaining = await getUnlockLockoutRemainingMs();
         const minutes = Math.ceil(remaining / 60_000);
@@ -771,7 +771,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       setUnlockError(`Incorrect PIN. ${lockout.remainingAttempts} attempts left.`);
     },
-    [securitySettings, userId, preferences.sparkSection],
+    [securitySettings, userId, preferences.sparkSection, user.gender],
   );
 
   const handleUnlockCancel = useCallback(() => {
@@ -782,7 +782,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const handleRetryBiometric = useCallback(async () => {
-    const leaveLabel = disguiseWorldMeta(preferences.sparkSection).unlockLabel;
+    const leaveLabel = disguiseWorldMeta(preferences.sparkSection, user.gender).unlockLabel;
     const result = await unlockSpark(securitySettings, undefined, leaveLabel);
     if (result.ok) {
       setUnlockModalVisible(false);
@@ -791,7 +791,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       unlockResolverRef.current?.(true);
       unlockResolverRef.current = null;
     }
-  }, [securitySettings, preferences.sparkSection]);
+  }, [securitySettings, preferences.sparkSection, user.gender]);
 
   useEffect(() => {
     const onAppStateChange = (nextState: AppStateStatus) => {
@@ -2513,16 +2513,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
       {children}
       <DisguiseUnlockConfirm
         visible={unlockConfirmVisible}
-        disguiseName={disguiseWorldMeta(preferences.sparkSection).name}
-        unlockLabel={disguiseWorldMeta(preferences.sparkSection).unlockLabel}
-        accent={disguiseWorldMeta(preferences.sparkSection).accent}
+        disguiseName={disguiseWorldMeta(preferences.sparkSection, user.gender).name}
+        unlockLabel={disguiseWorldMeta(preferences.sparkSection, user.gender).unlockLabel}
+        accent={disguiseWorldMeta(preferences.sparkSection, user.gender).accent}
         onConfirm={confirmLeaveDisguise}
         onCancel={cancelLeaveDisguise}
       />
       <SparkUnlockModal
         visible={unlockModalVisible}
         error={unlockError}
-        unlockLabel={disguiseWorldMeta(preferences.sparkSection).unlockLabel}
+        unlockLabel={disguiseWorldMeta(preferences.sparkSection, user.gender).unlockLabel}
         onSubmitPin={handleUnlockPinSubmit}
         onCancel={handleUnlockCancel}
         onRetryBiometric={handleRetryBiometric}

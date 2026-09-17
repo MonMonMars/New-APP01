@@ -7,7 +7,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { buildSocialReporter, socialReporterPhotoIndex } from '../../utils/disguiseReporterPhotos';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
 import { DisguisePhotoLightbox } from './DisguisePhotoLightbox';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
@@ -32,7 +32,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
     reportPulsePost,
     preferences,
   } = useApp();
-  const accent = disguiseWorldMeta(preferences.sparkSection).accent;
+  const accent = useDisguiseWorld().accent;
   const upvoted = pulseSocial.likedPostIds.includes(post.id);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);

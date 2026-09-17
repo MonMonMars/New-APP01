@@ -9,14 +9,14 @@ import { AnimatedPressable } from './AnimatedPressable';
 type ProfileViewsCardProps = {
   viewers: Profile[];
   totalCount: number;
-  isSparkPlus: boolean;
+  canReveal: boolean;
   onUpgrade: () => void;
 };
 
 export function ProfileViewsCard({
   viewers,
   totalCount,
-  isSparkPlus,
+  canReveal,
   onUpgrade,
 }: ProfileViewsCardProps) {
   const { colors } = useTheme();
@@ -45,7 +45,7 @@ export function ProfileViewsCard({
         </View>
       </View>
       <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-        {isSparkPlus
+        {canReveal
           ? `${totalCount} people checked out your profile this week`
           : 'Upgrade to see who viewed your profile'}
       </Text>
@@ -54,7 +54,7 @@ export function ProfileViewsCard({
         {viewers.slice(0, 6).map((profile) => (
           <View key={profile.id} style={styles.viewerWrap}>
             <Image source={{ uri: profile.photos[0] }} style={styles.viewerPhoto} />
-            {isSparkPlus ? (
+            {canReveal ? (
               <Text style={[styles.viewerName, { color: colors.text }]} numberOfLines={1}>
                 {profile.name}
               </Text>
@@ -68,7 +68,7 @@ export function ProfileViewsCard({
         ))}
       </View>
 
-      {!isSparkPlus && (
+      {!canReveal && (
         <AnimatedPressable
           style={[styles.upgradeButton, { backgroundColor: colors.gradientEnd }]}
           onPress={onUpgrade}

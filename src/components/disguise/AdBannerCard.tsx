@@ -6,7 +6,7 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { AdPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { ContentTypeIcon, MediaWithContentBadge } from './ContentTypeIcon';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { AdLandingSheet } from './AdLandingSheet';
@@ -38,7 +38,7 @@ type AdBannerCardProps = {
 export function AdBannerCard({ ad }: AdBannerCardProps) {
   const { colors } = useTheme();
   const { preferences } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection);
+  const meta = useDisguiseWorld();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [testimonialOpen, setTestimonialOpen] = useState(false);
   const testimonial = AD_TESTIMONIALS[ad.id.length % AD_TESTIMONIALS.length];

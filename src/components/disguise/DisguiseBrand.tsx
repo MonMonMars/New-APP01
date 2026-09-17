@@ -1,7 +1,6 @@
 import { ViewStyle } from 'react-native';
 
-import { useApp } from '../../context/AppContext';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { HarborBrand, HarborBrandMark } from './HarborBrandMark';
 import { PulseBrand, PulseBrandMark } from './PulseBrandMark';
 
@@ -13,13 +12,12 @@ type DisguiseBrandProps = {
 
 /** Pulse (Spark) or Harbor (Ember) masthead — never both. */
 export function DisguiseBrand({ size = 'md', showTagline = false, style }: DisguiseBrandProps) {
-  const { preferences } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection);
+  const meta = useDisguiseWorld();
   switch (meta.world) {
     case 'harbor':
       return <HarborBrand size={size} showTagline={showTagline} style={style} />;
     case 'pulse':
-      return <PulseBrand size={size} showTagline={showTagline} style={style} />;
+      return <PulseBrand size={size} showTagline={showTagline} tagline={meta.tagline} style={style} />;
     default: {
       const _exhaustive: never = meta.world;
       return _exhaustive;
@@ -34,8 +32,7 @@ export function DisguiseBrandMark({
   size?: 'sm' | 'md' | 'lg';
   muted?: boolean;
 }) {
-  const { preferences } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection);
+  const meta = useDisguiseWorld();
   switch (meta.world) {
     case 'harbor':
       return <HarborBrandMark size={size} muted={muted} />;

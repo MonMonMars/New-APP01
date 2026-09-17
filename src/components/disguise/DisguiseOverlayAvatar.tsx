@@ -1,6 +1,8 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useApp } from '../../context/AppContext';
+import { disguiseWorldMeta, hexToRgba } from '../../utils/disguiseWorld';
 import { FaceCenteredImage } from './FaceCenteredImage';
 
 export type DisguiseOverlayVariant = 'news' | 'ad';
@@ -23,8 +25,11 @@ export function DisguiseOverlayAvatar({
   size = PROFILE_AVATAR_SIZE,
   badgeOnly = false,
 }: DisguiseOverlayAvatarProps) {
+  const { preferences } = useApp();
+  const meta = disguiseWorldMeta(preferences.sparkSection);
   const radius = size / 2;
   const isNews = variant === 'news';
+  const navyScrim = hexToRgba(meta.navy, 0.78);
 
   return (
     <View
@@ -34,18 +39,14 @@ export function DisguiseOverlayAvatar({
           width: size,
           height: size,
           borderRadius: radius,
-          borderColor: isNews ? 'rgba(220, 38, 38, 0.85)' : 'rgba(37, 99, 235, 0.85)',
+          borderColor: meta.accent,
         },
       ]}
     >
       <FaceCenteredImage imageUrl={imageUrl} size={size} />
 
       <LinearGradient
-        colors={
-          isNews
-            ? ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(127,29,29,0.72)']
-            : ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(30,58,138,0.78)']
-        }
+        colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0)', navyScrim]}
         locations={[0, 0.52, 1]}
         style={[styles.bottomScrim, { borderRadius: radius }]}
       />
@@ -53,7 +54,7 @@ export function DisguiseOverlayAvatar({
       <View style={styles.badgeStrip}>
         {isNews ? (
           <>
-            <Text style={styles.newsBadge}>BREAKING</Text>
+            <Text style={[styles.newsBadge, { color: meta.accentBright }]}>BREAKING</Text>
             {!badgeOnly && (
               <Text
                 style={styles.newsText}
@@ -67,7 +68,7 @@ export function DisguiseOverlayAvatar({
           </>
         ) : (
           <>
-            <Text style={styles.adBadge}>AD</Text>
+            <Text style={[styles.adBadge, { color: meta.accentBright }]}>AD</Text>
             {!badgeOnly && (
               <Text
                 style={styles.adText}
@@ -106,7 +107,6 @@ const styles = StyleSheet.create({
     minHeight: '38%',
   },
   newsBadge: {
-    color: '#fde047',
     fontSize: 6,
     fontWeight: '900',
     letterSpacing: 0.35,
@@ -124,7 +124,6 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   adBadge: {
-    color: '#86efac',
     fontSize: 6,
     fontWeight: '900',
     letterSpacing: 0.4,

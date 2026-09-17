@@ -2190,6 +2190,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           sourcePhotoUrl,
           overlayText,
           variant,
+          section: preferences.sparkSection,
         });
         setDisguiseAdCreative(creative);
         return { ok: true };
@@ -2200,7 +2201,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setIsGeneratingDisguiseAd(false);
       }
     },
-    [user.photos],
+    [user.photos, preferences.sparkSection],
   );
 
   const clearDisguiseAd = useCallback(() => {

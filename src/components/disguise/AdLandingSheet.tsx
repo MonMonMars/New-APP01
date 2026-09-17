@@ -55,7 +55,11 @@ export function AdLandingSheet({ visible, ad, onClose }: AdLandingSheetProps) {
           </View>
         </FadeSlideIn>
 
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
           <FadeSlideIn replayKey={visible} index={1}>
             <Image source={{ uri: ad.imageUrl }} style={styles.hero} resizeMode="cover" />
           </FadeSlideIn>
@@ -68,13 +72,18 @@ export function AdLandingSheet({ visible, ad, onClose }: AdLandingSheetProps) {
               <Text style={[styles.paragraph, { color: colors.text }]}>{paragraph}</Text>
             </FadeSlideIn>
           ))}
-          <FadeSlideIn replayKey={visible} index={3 + paragraphs.length}>
-            <AnimatedPressable style={[styles.cta, { backgroundColor: meta.accent }]} onPress={handleVisit} scaleTo={0.97}>
-              <Text style={styles.ctaText}>{ad.cta}</Text>
-              <Ionicons name="open-outline" size={16} color="#fff" />
-            </AnimatedPressable>
-          </FadeSlideIn>
         </ScrollView>
+        <View style={[styles.footer, { borderTopColor: colors.border }]}>
+          <AnimatedPressable
+            style={[styles.cta, { backgroundColor: meta.accent }]}
+            onPress={handleVisit}
+            scaleTo={0.97}
+            accessibilityLabel={ad.cta}
+          >
+            <Text style={styles.ctaText}>{ad.cta}</Text>
+            <Ionicons name="open-outline" size={16} color="#fff" />
+          </AnimatedPressable>
+        </View>
       </View>
     </AnimatedOverlay>
   );
@@ -87,6 +96,9 @@ const styles = StyleSheet.create({
     borderTopRightRadius: radii.card + 4,
     borderWidth: StyleSheet.hairlineWidth,
     overflow: 'hidden',
+  },
+  scroll: {
+    maxHeight: 440,
   },
   toolbar: {
     flexDirection: 'row',
@@ -128,6 +140,11 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: spacing.md,
   },
+  footer: {
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
   cta: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -135,7 +152,6 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     borderRadius: radii.button,
     paddingVertical: spacing.md,
-    marginTop: spacing.sm,
   },
   ctaText: {
     color: '#fff',

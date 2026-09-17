@@ -202,7 +202,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
-        <AnimatedPressable onPress={onBack} style={styles.backButton}>
+        <AnimatedPressable onPress={onBack} style={styles.backButton} accessibilityLabel="Go back">
           <Ionicons name="chevron-back" size={28} color={colors.text} />
         </AnimatedPressable>
         <AnimatedPressable style={styles.headerProfile} onPress={() => setShowProfile(true)}>
@@ -236,7 +236,11 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
             </View>
           ) : null}
           <DisguiseModeButton />
-          <AnimatedPressable style={styles.headerAction} onPress={() => setShowSafety(true)}>
+          <AnimatedPressable
+            style={styles.headerAction}
+            onPress={() => setShowSafety(true)}
+            accessibilityLabel="More options"
+          >
             <Ionicons name="ellipsis-vertical" size={22} color={colors.text} />
           </AnimatedPressable>
         </View>

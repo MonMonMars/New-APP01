@@ -77,7 +77,7 @@ async function completeOnboarding(page) {
       await page.waitForTimeout(700);
       continue;
     }
-    const unlockVisible = await page.getByLabel(/tap to unlock spark/i).first().isVisible().catch(() => false);
+    const unlockVisible = await page.getByLabel(/tap .+ logo to leave spark/i).first().isVisible().catch(() => false);
     const trendingTab = await page.getByText(/^trending$/i).first().isVisible().catch(() => false);
     if (unlockVisible || trendingTab) {
       return;
@@ -87,12 +87,18 @@ async function completeOnboarding(page) {
 
 async function unlockSpark(page) {
   await dismissCookies(page);
-  const unlock = page.getByLabel(/tap to unlock spark/i).first();
+  const unlock = page.getByLabel(/tap .+ logo to leave spark/i).first();
   await unlock.waitFor({ state: 'visible', timeout: 8000 });
   await unlock.click({ force: true });
   await page.waitForTimeout(600);
 
-  const policy = page.getByText(/i understand — unlock spark/i).first();
+  const leave = page.getByText(/^Leave Spark$/i).first();
+  if (await leave.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await leave.click();
+    await page.waitForTimeout(600);
+  }
+
+  const policy = page.getByText(/i understand — leave spark/i).first();
   if (await policy.isVisible({ timeout: 3000 }).catch(() => false)) {
     await policy.click();
     await page.waitForTimeout(1200);

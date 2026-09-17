@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MediaWithContentBadge } from '../../components/disguise/ContentTypeIcon';
@@ -10,6 +10,7 @@ import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
 import { DisguiseMarketsPanel } from '../../components/disguise/DisguiseMarketsPanel';
 import { DisguiseWeatherPanel } from '../../components/disguise/DisguiseWeatherPanel';
 import { NewsArticleSheet } from '../../components/disguise/NewsArticleSheet';
+import { NewsHeroImage } from '../../components/disguise/NewsHeroImage';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { NewsPost } from '../../data/disguiseFeed';
@@ -160,7 +161,7 @@ export function DisguiseTrendingScreen() {
           accessibilityRole="button"
           accessibilityLabel={`Read brief: ${pulseBrief.headline}`}
         >
-          <Image source={{ uri: pulseBrief.imageUrl }} style={styles.briefImage} resizeMode="cover" />
+          <NewsHeroImage uri={pulseBrief.imageUrl} style={styles.briefImage} accessibilityLabel={pulseBrief.headline} />
           <View style={styles.briefBody}>
             <View style={styles.briefMeta}>
               <View style={[styles.livePill, { backgroundColor: meta.accentSoft }]}>
@@ -237,7 +238,7 @@ export function DisguiseTrendingScreen() {
               onPress={() => openBreaking(card)}
             >
               <MediaWithContentBadge kind="news">
-                <Image source={{ uri: card.imageUrl }} style={styles.breakingImage} resizeMode="cover" />
+                <NewsHeroImage uri={card.imageUrl} style={styles.breakingImage} accessibilityLabel={card.headline} />
               </MediaWithContentBadge>
               <View style={styles.breakingBody}>
                 <Text style={[styles.breakingSource, { color: colors.textMuted }]}>
@@ -261,7 +262,7 @@ export function DisguiseTrendingScreen() {
             <Text style={[styles.rank, { color: colors.textMuted }]}>{index + 1}</Text>
             {item.imageUrl ? (
               <MediaWithContentBadge kind="trending">
-                <Image source={{ uri: item.imageUrl }} style={styles.topicThumb} resizeMode="cover" />
+                <NewsHeroImage uri={item.imageUrl} style={styles.topicThumb} accessibilityLabel={item.label} />
               </MediaWithContentBadge>
             ) : (
               <View style={[styles.topicThumbPlaceholder, { backgroundColor: colors.surface }]}>

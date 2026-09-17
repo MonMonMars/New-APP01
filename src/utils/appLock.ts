@@ -38,6 +38,7 @@ export async function authenticateWithBiometric(prompt: string): Promise<boolean
 export async function unlockSpark(
   settings: SecuritySettings,
   pin?: string,
+  leaveLabel = 'Spark',
 ): Promise<{ ok: boolean; method: UnlockMethod }> {
   if (!settings.appLockEnabled) {
     return { ok: true, method: 'none' };
@@ -46,7 +47,7 @@ export async function unlockSpark(
   if (settings.biometricEnabled) {
     const biometricAvailable = await isBiometricAvailable();
     if (biometricAvailable) {
-      const biometricOk = await authenticateWithBiometric('Unlock Spark');
+      const biometricOk = await authenticateWithBiometric(`Leave ${leaveLabel}`);
       if (biometricOk) {
         return { ok: true, method: 'biometric' };
       }

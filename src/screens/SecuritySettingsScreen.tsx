@@ -9,6 +9,7 @@ import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { SecuritySettings } from '../types/security';
 import { isBiometricAvailable } from '../utils/appLock';
+import { disguiseWorldMeta } from '../utils/disguiseWorld';
 import { hashPin, setStoredPinHash, clearStoredPinHash } from '../utils/secureStorage';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -51,7 +52,8 @@ export function SecuritySettingsScreen({ onClose }: SecuritySettingsScreenProps)
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { colors } = useTheme();
-  const { securitySettings, updateSecuritySettings } = useApp();
+  const { securitySettings, updateSecuritySettings, preferences } = useApp();
+  const world = disguiseWorldMeta(preferences.sparkSection);
   const [pinDraft, setPinDraft] = useState('');
   const [biometricAvailable, setBiometricAvailable] = useState(false);
 
@@ -105,16 +107,16 @@ export function SecuritySettingsScreen({ onClose }: SecuritySettingsScreenProps)
         <Text style={[styles.section, { color: colors.textMuted }]}>App lock</Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <SettingRow
-            label="Require unlock for Spark"
-            hint="Face ID, Touch ID, or PIN before leaving Pulse"
+            label={`Ask before leaving ${world.name}`}
+            hint={`Face ID, Touch ID, or PIN before opening ${world.unlockLabel}`}
             value={securitySettings.appLockEnabled}
             onValueChange={(next) => patch({ appLockEnabled: next })}
           />
           <SettingRow
-            label="Biometric unlock"
+            label="Use Face ID / Touch ID"
             hint={
               biometricAvailable
-                ? 'Use device biometrics when available'
+                ? 'Confirm with device biometrics when available'
                 : 'Not available on this device'
             }
             value={securitySettings.biometricEnabled}
@@ -159,19 +161,19 @@ export function SecuritySettingsScreen({ onClose }: SecuritySettingsScreenProps)
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <SettingRow
             label="Auto-disguise on background"
-            hint="Switch to Pulse when you leave the app"
+            hint={`Switch to ${world.name} when you leave the app`}
             value={securitySettings.autoDisguiseOnBackground}
             onValueChange={(next) => patch({ autoDisguiseOnBackground: next })}
           />
           <SettingRow
             label="Disguise-safe notifications"
-            hint="Neutral Pulse copy on lock screen while disguised"
+            hint={`Neutral ${world.name} copy on lock screen while disguised`}
             value={securitySettings.disguiseSafeNotifications}
             onValueChange={(next) => patch({ disguiseSafeNotifications: next })}
           />
           <SettingRow
-            label="Re-lock after 5 minutes"
-            hint="Require unlock again after background timeout"
+            label="Ask again after 5 minutes"
+            hint="Confirm again after the app has been in the background"
             value={securitySettings.sessionTimeoutMinutes > 0}
             onValueChange={(next) => patch({ sessionTimeoutMinutes: next ? 5 : 0 })}
           />
@@ -180,14 +182,14 @@ export function SecuritySettingsScreen({ onClose }: SecuritySettingsScreenProps)
         <Text style={[styles.section, { color: colors.textMuted }]}>Screen protection</Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <SettingRow
-            label="Block screenshots (Spark)"
+            label={`Block screenshots (${world.unlockLabel})`}
             hint="Prevent screenshots and screen recording on dating screens"
             value={securitySettings.blockScreenshots}
             onValueChange={(next) => patch({ blockScreenshots: next })}
           />
           <SettingRow
             label="Privacy shield"
-            hint="Hide Spark in app switcher with Pulse overlay"
+            hint={`Hide ${world.unlockLabel} in app switcher with ${world.name} overlay`}
             value={securitySettings.privacyShieldEnabled}
             onValueChange={(next) => patch({ privacyShieldEnabled: next })}
           />

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect } from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../../context/AppContext';
@@ -12,6 +12,7 @@ import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
 import { FadeSlideIn } from '../motion/FadeSlideIn';
 import { SavePostButton } from './SavePostButton';
+import { NewsHeroImage } from './NewsHeroImage';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type NewsArticleSheetProps = {
@@ -71,7 +72,7 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
           contentContainerStyle={styles.content}
         >
           <FadeSlideIn replayKey={visible} index={1}>
-            <Image source={{ uri: post.imageUrl }} style={styles.hero} resizeMode="cover" />
+            <NewsHeroImage uri={post.imageUrl} style={styles.hero} accessibilityLabel={post.headline} />
           </FadeSlideIn>
           <FadeSlideIn replayKey={visible} index={2}>
             <Text style={[styles.headline, { color: colors.text }]}>{post.headline}</Text>

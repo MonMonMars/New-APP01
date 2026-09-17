@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -10,6 +10,7 @@ import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { ContentTypeIcon, MediaWithContentBadge } from './ContentTypeIcon';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { PROFILE_AVATAR_SIZE } from './DisguiseOverlayAvatar';
+import { NewsHeroImage } from './NewsHeroImage';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
 import { SocialCommentSheet } from './SocialCommentSheet';
 import { profileIdFromPostId } from '../../utils/resolveDisguiseProfile';
@@ -138,7 +139,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
             <ContentTypeIcon kind="sponsored" />
           </View>
           <MediaWithContentBadge kind="ad">
-            <Image source={{ uri: post.coverImageUrl }} style={styles.adImage} resizeMode="cover" />
+            <NewsHeroImage uri={post.coverImageUrl} style={styles.adImage} accessibilityLabel={post.headline} />
           </MediaWithContentBadge>
           <View style={styles.body}>
             <Text style={styles.brand}>{post.headline}</Text>
@@ -170,7 +171,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
         accessibilityLabel={`Profile disguised as news: ${post.headline}`}
       >
         <MediaWithContentBadge kind="news">
-          <Image source={{ uri: post.coverImageUrl }} style={styles.newsImage} resizeMode="cover" />
+          <NewsHeroImage uri={post.coverImageUrl} style={styles.newsImage} accessibilityLabel={post.headline} />
         </MediaWithContentBadge>
         <View style={styles.body}>
           <View style={styles.metaRow}>

@@ -1,5 +1,6 @@
 import { BreakingCard, editorsPicks, TrendingBrief } from '../data/disguiseTrending';
 import { NewsPost } from '../data/disguiseFeed';
+import { freeNewsUrlForTopic, pulseNewsImages } from '../data/pulseNewsMedia';
 
 function topicCategory(topic: string): string {
   switch (topic) {
@@ -46,7 +47,7 @@ export function briefToNewsPost(brief: TrendingBrief): NewsPost {
     imageUrl: brief.imageUrl,
     timeAgo: `${brief.readMinutes} min read`,
     category,
-    articleUrl: 'https://www.bbc.co.uk/news',
+    articleUrl: freeNewsUrlForTopic(brief.topic),
     reporters: [],
   };
 }
@@ -62,10 +63,10 @@ export function editorsPickToNewsPost(pick: (typeof editorsPicks)[number]): News
     headline: pick.title,
     summary: pick.subtitle,
     articleBody: `${pick.title}\n\n${pick.subtitle}\n\nThis editor's pick is curated by Pulse. Follow ${source} for the full story and related coverage in your feed.`,
-    imageUrl: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800&q=80',
+    imageUrl: pulseNewsImages.newspaper,
     timeAgo: 'Editor\'s pick',
     category,
-    articleUrl: 'https://www.bbc.co.uk/news',
+    articleUrl: freeNewsUrlForTopic(pick.topic),
     reporters: [],
   };
 }
@@ -83,7 +84,7 @@ export function breakingToNewsPost(card: BreakingCard): NewsPost {
     imageUrl: card.imageUrl,
     timeAgo: card.timeAgo,
     category,
-    articleUrl: 'https://www.bbc.co.uk/news',
+    articleUrl: freeNewsUrlForTopic(card.topic),
     reporters: [],
   };
 }

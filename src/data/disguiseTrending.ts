@@ -1,3 +1,5 @@
+import { pulseNewsImages } from './pulseNewsMedia';
+
 export type TrendDirection = 'up' | 'down' | 'new' | 'hot' | 'stable';
 
 export type TrendingTopic = {
@@ -60,7 +62,7 @@ export const pulseBrief: TrendingBrief = {
     'Meta, Alphabet and Microsoft are ramping up AI capex — investors are watching whether returns keep pace.',
   source: 'BBC News',
   readMinutes: 4,
-  imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c9aeeda0bf6?w=800&q=80',
+  imageUrl: pulseNewsImages.cityFinance,
   topic: '#TechNews',
 };
 
@@ -109,26 +111,26 @@ export const breakingNowCards: BreakingCard[] = [
   {
     id: 'b1',
     headline: 'EU smartphone labels for battery & repairability land in June',
-    source: 'The Verge',
+    source: 'NPR',
     timeAgo: '3h',
     topic: '#TechNews',
-    imageUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&q=80',
+    imageUrl: pulseNewsImages.phone,
   },
   {
     id: 'b2',
     headline: 'Speedy chorizo with chickpeas — 10-minute pantry supper',
-    source: 'BBC Good Food',
+    source: 'BBC Food',
     timeAgo: '5h',
     topic: '#CoffeeShops',
-    imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80',
+    imageUrl: pulseNewsImages.restaurant,
   },
   {
     id: 'b3',
     headline: 'Night routes return for Bristol commuters',
-    source: 'BBC News',
+    source: 'The Guardian',
     timeAgo: '1h',
     topic: '#CityLife',
-    imageUrl: 'https://images.unsplash.com/photo-1544627677-05470f41cd8a?w=400&q=80',
+    imageUrl: pulseNewsImages.transit,
   },
   {
     id: 'b4',
@@ -136,7 +138,7 @@ export const breakingNowCards: BreakingCard[] = [
     source: 'Pulse Community',
     timeAgo: '45m',
     topic: '#DesignTips',
-    imageUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&q=80',
+    imageUrl: pulseNewsImages.office,
   },
 ];
 
@@ -149,7 +151,7 @@ export const disguiseTrendingTopics: TrendingTopic[] = [
     changeLabel: 'Live',
     category: 'Business',
     preview: 'AI capex surge dominates earnings calls',
-    imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c9aeeda0bf6?w=200&q=80',
+    imageUrl: pulseNewsImages.cityFinance,
   },
   {
     id: 't2',
@@ -159,6 +161,7 @@ export const disguiseTrendingTopics: TrendingTopic[] = [
     changeLabel: '+24%',
     category: 'Lifestyle',
     preview: 'Gallery nights and late ramen runs trending',
+    imageUrl: pulseNewsImages.cafe,
   },
   {
     id: 't3',
@@ -168,7 +171,7 @@ export const disguiseTrendingTopics: TrendingTopic[] = [
     changeLabel: '+18%',
     category: 'Local',
     preview: 'Transit upgrades and night routes in focus',
-    imageUrl: 'https://images.unsplash.com/photo-1544627677-05470f41cd8a?w=200&q=80',
+    imageUrl: pulseNewsImages.transit,
   },
   {
     id: 't4',
@@ -178,6 +181,7 @@ export const disguiseTrendingTopics: TrendingTopic[] = [
     changeLabel: 'New',
     category: 'Markets',
     preview: 'Tech leads indices; crypto cools after rally',
+    imageUrl: pulseNewsImages.cityFinance,
   },
   {
     id: 't5',
@@ -186,6 +190,7 @@ export const disguiseTrendingTopics: TrendingTopic[] = [
     direction: 'stable',
     category: 'Food',
     preview: 'Third-wave counters extend hours downtown',
+    imageUrl: pulseNewsImages.cafe,
   },
   {
     id: 't6',
@@ -195,6 +200,7 @@ export const disguiseTrendingTopics: TrendingTopic[] = [
     changeLabel: '+11%',
     category: 'Creators',
     preview: 'Spacing, contrast, and mobile-first layouts',
+    imageUrl: pulseNewsImages.office,
   },
   {
     id: 't7',
@@ -204,6 +210,7 @@ export const disguiseTrendingTopics: TrendingTopic[] = [
     changeLabel: 'Live',
     category: 'Finance',
     preview: 'Chip makers and cloud hyperscalers in spotlight',
+    imageUrl: pulseNewsImages.chips,
   },
   {
     id: 't8',
@@ -213,6 +220,7 @@ export const disguiseTrendingTopics: TrendingTopic[] = [
     changeLabel: '-6%',
     category: 'Work',
     preview: 'Hybrid policies tighten at large employers',
+    imageUrl: pulseNewsImages.office,
   },
   {
     id: 't9',
@@ -222,6 +230,7 @@ export const disguiseTrendingTopics: TrendingTopic[] = [
     changeLabel: '+31%',
     category: 'Policy',
     preview: 'Repairability labels reach smartphones',
+    imageUrl: pulseNewsImages.phone,
   },
   {
     id: 't10',
@@ -231,6 +240,7 @@ export const disguiseTrendingTopics: TrendingTopic[] = [
     changeLabel: 'New',
     category: 'Local',
     preview: 'Late buses and safety at stops debated',
+    imageUrl: pulseNewsImages.transit,
   },
   {
     id: 't11',
@@ -240,6 +250,7 @@ export const disguiseTrendingTopics: TrendingTopic[] = [
     changeLabel: '+9%',
     category: 'Careers',
     preview: 'Health-tech hiring picks up in Q3',
+    imageUrl: pulseNewsImages.newsroom,
   },
   {
     id: 't12',
@@ -248,6 +259,7 @@ export const disguiseTrendingTopics: TrendingTopic[] = [
     direction: 'stable',
     category: 'Food',
     preview: 'Quick pantry recipes and brunch lists',
+    imageUrl: pulseNewsImages.restaurant,
   },
   {
     id: 't13',
@@ -257,6 +269,7 @@ export const disguiseTrendingTopics: TrendingTopic[] = [
     changeLabel: '+14%',
     category: 'Science',
     preview: 'Grid storage startups raise fresh rounds',
+    imageUrl: pulseNewsImages.earthTech,
   },
   {
     id: 't14',
@@ -265,6 +278,7 @@ export const disguiseTrendingTopics: TrendingTopic[] = [
     direction: 'stable',
     category: 'Culture',
     preview: 'Summer reads and indie bookstore picks',
+    imageUrl: pulseNewsImages.newspaper,
   },
   {
     id: 't15',
@@ -274,7 +288,7 @@ export const disguiseTrendingTopics: TrendingTopic[] = [
     changeLabel: 'Live',
     category: 'Local',
     preview: 'Riders debate real-time tracking at night stops',
-    imageUrl: 'https://images.unsplash.com/photo-1544627677-05470f41cd8a?w=200&q=80',
+    imageUrl: pulseNewsImages.transit,
   },
 ];
 
@@ -300,13 +314,13 @@ export const editorsPicks = [
   {
     id: 'ep4',
     title: 'Brunch walk-ins: editors\' 12-spot list',
-    subtitle: 'BBC Good Food · weekend',
+    subtitle: 'BBC Food · weekend',
     topic: '#WeekendEats',
   },
   {
     id: 'ep5',
     title: 'EU repair labels: what changes in June',
-    subtitle: 'The Verge · policy brief',
+    subtitle: 'NPR · policy brief',
     topic: '#EURegulation',
   },
   {

@@ -47,9 +47,10 @@ export function DisguiseUnlockConfirm({
               style={[styles.unlock, { backgroundColor: accent }]}
               onPress={onConfirm}
               scaleTo={0.97}
-              accessibilityLabel={`Unlock ${unlockLabel}`}
+              accessibilityLabel={`Leave ${unlockLabel}`}
+              accessibilityHint={`Opens ${unlockLabel}`}
             >
-              <Text style={styles.unlockText}>Unlock {unlockLabel}</Text>
+              <Text style={styles.unlockText}>Leave {unlockLabel}</Text>
             </AnimatedPressable>
           </View>
         </View>

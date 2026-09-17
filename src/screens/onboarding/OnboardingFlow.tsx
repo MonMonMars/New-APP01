@@ -293,7 +293,7 @@ export function OnboardingFlow() {
         <View style={styles.step}>
           <Text style={styles.title}>Your public profile</Text>
           <Text style={styles.subtitle}>
-            How you appear on Pulse. Spark safe mode uses this privately when you unlock it.
+            How you appear on Pulse. Spark safe mode uses this privately when you leave Pulse.
           </Text>
 
           <Text style={styles.label}>I am a</Text>

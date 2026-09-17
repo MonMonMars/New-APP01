@@ -3,7 +3,9 @@ import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../context/ThemeContext';
+import { useApp } from '../../context/AppContext';
 import { radii, spacing } from '../../theme';
+import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type DisguisePolicyModalProps = {
@@ -17,7 +19,7 @@ const bullets = [
   'Pulse disguises dating activity as a news/social feed for privacy in public.',
   'Disguise does not hide your data from Spark or make you anonymous to existing matches.',
   'Do not use disguise to harass, scam, or impersonate news organisations.',
-  'Sample BBC, Verge, and ad brands in Pulse are illustrations — not real affiliations.',
+  'Sample BBC, Guardian, NPR, and ad brands in Pulse are illustrations — not real affiliations.',
   'Lock your device and use app lock — disguise cannot stop screenshots or device access.',
 ];
 
@@ -29,6 +31,8 @@ export function DisguisePolicyModal({
 }: DisguisePolicyModalProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { preferences } = useApp();
+  const meta = disguiseWorldMeta(preferences.sparkSection);
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onCancel}>
@@ -44,10 +48,9 @@ export function DisguisePolicyModal({
         <ScrollView contentContainerStyle={styles.content}>
           <View style={[styles.hero, { backgroundColor: colors.surface }]}>
             <Ionicons name="eye-off" size={32} color={colors.gradientEnd} />
-            <Text style={[styles.heroTitle, { color: colors.text }]}>Before you open Spark</Text>
+            <Text style={[styles.heroTitle, { color: colors.text }]}>Before you leave {meta.name}</Text>
             <Text style={[styles.heroBody, { color: colors.textMuted }]}>
-              You are leaving Pulse and unlocking Spark. Please confirm you understand how disguise
-              mode works.
+              You are leaving {meta.name}. Please confirm you understand how disguise mode works.
             </Text>
           </View>
 
@@ -67,10 +70,10 @@ export function DisguisePolicyModal({
 
         <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.md, borderTopColor: colors.border }]}>
           <AnimatedPressable style={[styles.primary, { backgroundColor: colors.gradientEnd }]} onPress={onAccept}>
-            <Text style={styles.primaryText}>I understand — unlock Spark</Text>
+            <Text style={styles.primaryText}>I understand — leave {meta.unlockLabel}</Text>
           </AnimatedPressable>
           <AnimatedPressable style={styles.secondary} onPress={onCancel}>
-            <Text style={[styles.secondaryText, { color: colors.textMuted }]}>Stay in Pulse</Text>
+            <Text style={[styles.secondaryText, { color: colors.textMuted }]}>Stay in {meta.name}</Text>
           </AnimatedPressable>
         </View>
       </View>

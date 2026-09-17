@@ -1,5 +1,8 @@
 const ALLOWED_IMAGE_HOSTS = [
   'images.unsplash.com',
+  'images.pexels.com',
+  'upload.wikimedia.org',
+  'picsum.photos',
   'media.giphy.com',
   'supabase.co',
   'supabase.in',

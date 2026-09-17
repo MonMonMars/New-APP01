@@ -42,8 +42,8 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
               setDisguiseMode(false);
             }}
             accessibilityRole="button"
-            accessibilityLabel={`Tap ${meta.name} logo to unlock ${meta.unlockLabel}`}
-            accessibilityHint={`Returns to ${meta.unlockLabel}`}
+            accessibilityLabel={`Tap ${meta.name} logo to leave ${meta.unlockLabel}`}
+            accessibilityHint={`Leaves ${meta.name} and opens ${meta.unlockLabel}`}
             scaleTo={0.96}
             hitSlop={8}
             style={styles.brandTap}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -9,6 +9,7 @@ import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { MediaWithContentBadge } from './ContentTypeIcon';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { NewsArticleSheet } from './NewsArticleSheet';
+import { NewsHeroImage } from './NewsHeroImage';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -40,7 +41,7 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
         style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
       >
         <MediaWithContentBadge kind="news">
-          <Image source={{ uri: post.imageUrl }} style={styles.image} resizeMode="cover" />
+          <NewsHeroImage uri={post.imageUrl} style={styles.image} accessibilityLabel={post.headline} />
         </MediaWithContentBadge>
         <View style={styles.body}>
           <View style={styles.metaRow}>

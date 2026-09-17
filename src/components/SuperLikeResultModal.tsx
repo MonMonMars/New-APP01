@@ -3,7 +3,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors, radii, spacing } from '../theme';
+import { colors as palette, radii, spacing } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 import { Profile } from '../types/profile';
 import { AnimatedOverlay } from './motion/AnimatedOverlay';
 import { FadeSlideIn } from './motion/FadeSlideIn';
@@ -27,6 +28,7 @@ export function SuperLikeResultModal({
   onChatNow,
 }: SuperLikeResultModalProps) {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
 
   if (!profile) {
     return null;
@@ -39,8 +41,8 @@ export function SuperLikeResultModal({
       <LinearGradient
         colors={
           isMatch
-            ? [colors.heartRed, '#FF6B8A', '#FFD700']
-            : ['#1A1A2E', colors.heartRed, '#FF6B8A']
+            ? [colors.heartRed, colors.heartPink, '#FFD700']
+            : ['#1A1A2E', colors.heartRed, colors.heartPink]
         }
         style={[styles.card, { paddingBottom: insets.bottom + spacing.lg }]}
       >
@@ -79,7 +81,7 @@ export function SuperLikeResultModal({
         <FadeSlideIn replayKey={visible} index={3}>
           <View style={styles.actions}>
             <AnimatedPressable style={styles.primaryButton} onPress={onChatNow} scaleTo={0.97}>
-              <Text style={styles.primaryButtonText}>
+              <Text style={[styles.primaryButtonText, { color: colors.heartRed }]}>
                 {isMatch ? 'Message' : 'Send a note'}
               </Text>
             </AnimatedPressable>
@@ -113,14 +115,14 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   kicker: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 22,
     fontWeight: '600',
     fontStyle: 'italic',
     opacity: 0.9,
   },
   title: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 36,
     fontWeight: '900',
     fontStyle: 'italic',
@@ -128,7 +130,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   subtitle: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 15,
     marginTop: spacing.md,
     textAlign: 'center',
@@ -146,7 +148,7 @@ const styles = StyleSheet.create({
     height: 96,
     borderRadius: 48,
     borderWidth: 3,
-    borderColor: colors.text,
+    borderColor: palette.text,
   },
   avatarLeft: {
     marginRight: -16,
@@ -160,7 +162,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: colors.text,
+    backgroundColor: palette.text,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 2,
@@ -183,14 +185,14 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     width: '100%',
-    backgroundColor: colors.text,
+    backgroundColor: palette.text,
     borderRadius: radii.button,
     paddingVertical: spacing.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
   primaryButtonText: {
-    color: colors.heartRed,
+    color: palette.heartRed,
     fontSize: 17,
     fontWeight: '800',
   },
@@ -204,7 +206,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.5)',
   },
   secondaryButtonText: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 16,
     fontWeight: '700',
   },

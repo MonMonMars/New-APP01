@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Modal, StyleSheet, Text, View } from 'react-native';
 
-import { colors, radii, spacing } from '../theme';
+import { colors as palette, radii, spacing } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type SafetyActionSheetProps = {
@@ -27,6 +28,7 @@ export function SafetyActionSheet({
   onOpenSafetyCenter,
   onDateCheckIn,
 }: SafetyActionSheetProps) {
+  const { colors } = useTheme();
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <AnimatedPressable style={styles.overlay} onPress={onClose}>
@@ -105,7 +107,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: colors.surface,
+    backgroundColor: palette.surface,
     borderTopLeftRadius: radii.card,
     borderTopRightRadius: radii.card,
     padding: spacing.lg,
@@ -116,16 +118,16 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: colors.textMuted,
+    backgroundColor: palette.textMuted,
     marginBottom: spacing.md,
   },
   title: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 20,
     fontWeight: '800',
   },
   subtitle: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 14,
     marginTop: spacing.xs,
     marginBottom: spacing.lg,
@@ -142,12 +144,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   actionLabel: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 16,
     fontWeight: '700',
   },
   actionHint: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 13,
     marginTop: 2,
     lineHeight: 18,
@@ -158,7 +160,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   cancelText: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 16,
     fontWeight: '600',
   },

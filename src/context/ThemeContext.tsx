@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 
-import { ColorPalette, darkColors, lightColors } from '../theme';
+import { ColorPalette, darkColors, lightColors, paletteForSection } from '../theme';
 import { ThemeMode } from '../types/settings';
 
 type ThemeContextValue = {
@@ -23,9 +23,11 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 export function ThemeProvider({
   children,
   mode: externalMode = 'dark',
+  world = 'spark',
 }: {
   children: ReactNode;
   mode?: ThemeMode;
+  world?: 'spark' | 'ember';
 }) {
   const [mode, setModeState] = useState<ThemeMode>(externalMode);
 
@@ -43,10 +45,13 @@ export function ThemeProvider({
     () => ({
       mode,
       resolvedMode,
-      colors: resolvedMode === 'light' ? lightColors : darkColors,
+      colors: paletteForSection(
+        resolvedMode === 'light' ? lightColors : darkColors,
+        world,
+      ),
       setMode,
     }),
-    [mode, resolvedMode, setMode],
+    [mode, resolvedMode, setMode, world],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

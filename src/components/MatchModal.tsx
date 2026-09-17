@@ -2,7 +2,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Image, Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors, radii, spacing } from '../theme';
+import { colors as palette, radii, spacing } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 import { Profile } from '../types/profile';
 import { pickOpeningMove } from '../utils/openingMove';
 import { Button } from './Button';
@@ -23,6 +24,7 @@ export function MatchModal({
   onMessage,
 }: MatchModalProps) {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
 
   if (!profile) {
     return null;
@@ -33,7 +35,7 @@ export function MatchModal({
   return (
     <Modal visible={visible} animationType="fade">
       <LinearGradient
-        colors={[colors.gradientStart, colors.gradientEnd, '#C9184A']}
+        colors={[colors.gradientStart, colors.gradientEnd, colors.heartRed]}
         style={[styles.screen, { paddingTop: insets.top + spacing.xl }]}
       >
         <Text style={styles.kicker}>It&apos;s a</Text>
@@ -45,7 +47,7 @@ export function MatchModal({
         <View style={styles.avatarRow}>
           <Image source={{ uri: userPhoto }} style={[styles.avatar, styles.avatarLeft]} />
           <View style={styles.heartBadge}>
-            <Text style={styles.heart}>♥</Text>
+            <Text style={[styles.heart, { color: colors.gradientEnd }]}>♥</Text>
           </View>
           <Image source={{ uri: profile.photos[0] }} style={[styles.avatar, styles.avatarRight]} />
         </View>
@@ -72,21 +74,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
   },
   kicker: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 28,
     fontWeight: '600',
     fontStyle: 'italic',
     opacity: 0.9,
   },
   title: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 52,
     fontWeight: '900',
     fontStyle: 'italic',
     marginTop: -4,
   },
   subtitle: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 16,
     marginTop: spacing.md,
     textAlign: 'center',
@@ -104,7 +106,7 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     borderWidth: 4,
-    borderColor: colors.text,
+    borderColor: palette.text,
   },
   avatarLeft: {
     marginRight: -20,
@@ -118,13 +120,13 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: colors.text,
+    backgroundColor: palette.text,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 2,
   },
   heart: {
-    color: colors.gradientEnd,
+    color: palette.gradientEnd,
     fontSize: 24,
   },
   openingMoveCard: {
@@ -137,7 +139,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.25)',
   },
   openingMoveLabel: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 11,
     fontWeight: '800',
     textTransform: 'uppercase',
@@ -146,7 +148,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   openingMoveText: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 15,
     fontWeight: '600',
     lineHeight: 22,
@@ -157,13 +159,13 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     width: '100%',
-    backgroundColor: colors.text,
+    backgroundColor: palette.text,
     borderRadius: radii.button,
     paddingVertical: spacing.md,
     alignItems: 'center',
   },
   primaryButtonText: {
-    color: colors.gradientEnd,
+    color: palette.gradientEnd,
     fontSize: 17,
     fontWeight: '800',
   },
@@ -178,7 +180,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   secondaryButtonText: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 16,
     fontWeight: '700',
   },

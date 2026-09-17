@@ -16,7 +16,8 @@ import Animated, {
 import { AiPersonaBadge } from './AiPersonaBadge';
 import { VideoProfileOverlay } from './VideoProfileOverlay';
 import { VerificationBadges } from './VerificationBadges';
-import { colors, radii, spacing } from '../theme';
+import { colors as palette, radii, spacing } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 import {
   emberLocationLine,
   emberRelationshipLabel,
@@ -53,6 +54,7 @@ export function ProfileCard({
   onPhotoTap,
   onOpenDetail,
 }: ProfileCardProps) {
+  const { colors } = useTheme();
   const isTop = index === activeIndex;
   const [photoIndex, setPhotoIndex] = useState(0);
   const photoCount = profile.photos.length;
@@ -123,7 +125,6 @@ export function ProfileCard({
     const pulse = 0.4 + spotlightPulse.value * 0.6;
     return {
       opacity: pulse,
-      borderColor: colors.heartPink,
     };
   });
 
@@ -143,7 +144,7 @@ export function ProfileCard({
   return (
     <Animated.View style={[styles.card, cardStyle]}>
       {profile.spotlight && isTop && (
-        <Animated.View style={[styles.spotlightRing, spotlightStyle]} pointerEvents="none" />
+        <Animated.View style={[styles.spotlightRing, spotlightStyle, { borderColor: colors.heartPink }]} pointerEvents="none" />
       )}
       <Image
         source={{ uri: profile.photos[photoIndex] }}
@@ -166,7 +167,7 @@ export function ProfileCard({
       )}
 
       {profile.spotlight && isTop && (
-        <View style={styles.crushBadge}>
+        <View style={[styles.crushBadge, { backgroundColor: colors.heartRed }]}>
           <Text style={styles.crushBadgeText}>Crush</Text>
         </View>
       )}
@@ -259,7 +260,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
     borderRadius: radii.card,
     overflow: 'hidden',
-    backgroundColor: colors.surface,
+    backgroundColor: palette.surface,
     shadowColor: '#000',
     shadowOpacity: 0.25,
     shadowRadius: 16,
@@ -281,14 +282,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: spacing.md + 28,
     left: spacing.md,
-    backgroundColor: colors.boost,
+    backgroundColor: palette.boost,
     borderRadius: radii.button,
     paddingHorizontal: spacing.sm + 4,
     paddingVertical: spacing.xs + 2,
     zIndex: 6,
   },
   compatibleBadgeText: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 11,
     fontWeight: '800',
     textTransform: 'uppercase',
@@ -298,14 +299,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: spacing.md + 12,
     right: spacing.md,
-    backgroundColor: colors.heartRed,
+    backgroundColor: palette.heartRed,
     borderRadius: radii.button,
     paddingHorizontal: spacing.sm + 4,
     paddingVertical: spacing.xs + 2,
     zIndex: 6,
   },
   crushBadgeText: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 11,
     fontWeight: '800',
     textTransform: 'uppercase',
@@ -333,7 +334,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.35)',
   },
   dotActive: {
-    backgroundColor: colors.text,
+    backgroundColor: palette.text,
   },
   dotLocked: {
     backgroundColor: 'rgba(255, 176, 32, 0.55)',
@@ -352,7 +353,7 @@ const styles = StyleSheet.create({
     zIndex: 6,
   },
   privateBadgeText: {
-    color: colors.ember,
+    color: palette.ember,
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 0.3,
@@ -395,7 +396,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   name: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 28,
     fontWeight: '700',
   },
@@ -409,14 +410,14 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   discreetChipText: {
-    color: colors.ember,
+    color: palette.ember,
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 0.4,
     textTransform: 'uppercase',
   },
   job: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 15,
     marginTop: spacing.xs,
     opacity: 0.9,
@@ -425,7 +426,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   distance: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 14,
     marginTop: spacing.xs,
   },
@@ -433,7 +434,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   bio: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 15,
     lineHeight: 21,
     marginTop: spacing.sm,
@@ -451,7 +452,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs + 2,
   },
   tagText: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 12,
     fontWeight: '600',
   },

@@ -1,7 +1,8 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Image, Modal, StyleSheet, Text, View } from 'react-native';
 
-import { colors, radii, spacing } from '../theme';
+import { colors as palette, radii, spacing } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 import { Profile } from '../types/profile';
 import { AnimatedPressable } from './AnimatedPressable';
 
@@ -16,6 +17,7 @@ export function WaitingForMatchModal({
   profile,
   onFindMorePeople,
 }: WaitingForMatchModalProps) {
+  const { colors } = useTheme();
   if (!profile) {
     return null;
   }
@@ -47,7 +49,7 @@ export function WaitingForMatchModal({
           </Text>
 
           <AnimatedPressable style={styles.primaryButton} onPress={onFindMorePeople}>
-            <Text style={styles.primaryButtonText}>Find more people</Text>
+            <Text style={[styles.primaryButtonText, { color: colors.gradientEnd }]}>Find more people</Text>
           </AnimatedPressable>
         </LinearGradient>
       </View>
@@ -68,14 +70,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 30,
     fontWeight: '800',
     fontStyle: 'italic',
     textAlign: 'center',
   },
   subtitle: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 16,
     marginTop: spacing.sm,
     textAlign: 'center',
@@ -90,13 +92,13 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     borderWidth: 4,
-    borderColor: colors.text,
+    borderColor: palette.text,
     opacity: 0.9,
   },
   pendingBadge: {
     position: 'absolute',
     bottom: -8,
-    backgroundColor: colors.text,
+    backgroundColor: palette.text,
     width: 44,
     height: 44,
     borderRadius: 22,
@@ -107,7 +109,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   hint: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 14,
     textAlign: 'center',
     lineHeight: 20,
@@ -116,13 +118,13 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     width: '100%',
-    backgroundColor: colors.text,
+    backgroundColor: palette.text,
     borderRadius: radii.button,
     paddingVertical: spacing.md,
     alignItems: 'center',
   },
   primaryButtonText: {
-    color: colors.gradientEnd,
+    color: palette.gradientEnd,
     fontSize: 16,
     fontWeight: '700',
   },

@@ -8,7 +8,8 @@ import { ProfileVerificationDisplay } from './ProfileVerificationDisplay';
 import { VerificationBadges } from './VerificationBadges';
 import { isAiPersonaProfile } from '../data/aiPersonas';
 import { RELATIONSHIP_INTENT_LABELS } from '../types/preferences';
-import { colors, radii, spacing } from '../theme';
+import { colors as palette, radii, spacing } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 import {
   emberLocationLine,
   emberRelationshipLabel,
@@ -55,6 +56,7 @@ export function ProfileDetailSheet({
   onSparkNote,
   photosUnlocked = false,
 }: ProfileDetailSheetProps) {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
   if (!profile) {
@@ -76,7 +78,7 @@ export function ProfileDetailSheet({
           {onHold && (
             <AnimatedPressable style={styles.holdButton} onPress={onHold}>
               <Ionicons name={isHeld ? 'bookmark' : 'bookmark-outline'} size={22} color={colors.gradientEnd} />
-              <Text style={styles.holdText}>{isHeld ? 'On hold' : 'Hold'}</Text>
+              <Text style={[styles.holdText, { color: colors.gradientEnd }]}>{isHeld ? 'On hold' : 'Hold'}</Text>
             </AnimatedPressable>
           )}
         </View>
@@ -116,7 +118,7 @@ export function ProfileDetailSheet({
             {compatibilityScore !== undefined && (
               <View style={styles.compatBadge}>
                 <Ionicons name="sparkles" size={14} color={colors.gradientEnd} />
-                <Text style={styles.compatText}>{compatibilityScore}% compatible</Text>
+                <Text style={[styles.compatText, { color: colors.gradientEnd }]}>{compatibilityScore}% compatible</Text>
               </View>
             )}
             {profile.job && <Text style={styles.meta}>{profile.job}</Text>}
@@ -132,13 +134,13 @@ export function ProfileDetailSheet({
               </Text>
             ) : null}
             {emberStatus && profile.emberSeeking ? (
-              <Text style={styles.intentMeta}>{EMBER_SEEKING_LABELS[profile.emberSeeking]}</Text>
+              <Text style={[styles.intentMeta, { color: colors.ember }]}>{EMBER_SEEKING_LABELS[profile.emberSeeking]}</Text>
             ) : null}
             {emberStatus && profile.emberAvailability ? (
               <Text style={styles.meta}>{EMBER_AVAILABILITY_LABELS[profile.emberAvailability]}</Text>
             ) : null}
             {profile.intent && !emberStatus ? (
-              <Text style={styles.intentMeta}>{RELATIONSHIP_INTENT_LABELS[profile.intent]}</Text>
+              <Text style={[styles.intentMeta, { color: colors.gradientEnd }]}>{RELATIONSHIP_INTENT_LABELS[profile.intent]}</Text>
             ) : null}
             <Text style={styles.distance}>
               {emberStatus ? emberLocationLine(profile) : `${profile.distanceMiles} miles away`}
@@ -195,7 +197,7 @@ export function ProfileDetailSheet({
               {onLikePrompt && (
                 <View style={styles.likePromptRow}>
                   <Ionicons name="heart-outline" size={16} color={colors.heartPink} />
-                  <Text style={styles.likePromptText}>Like this answer</Text>
+                  <Text style={[styles.likePromptText, { color: colors.heartPink }]}>Like this answer</Text>
                 </View>
               )}
             </AnimatedPressable>
@@ -234,17 +236,17 @@ export function ProfileDetailSheet({
         {(onLike || onPass || onSparkNote) && (
           <View style={styles.actionBar}>
             {onPass && (
-              <AnimatedPressable style={[styles.passButton, styles.actionButton]} onPress={onPass}>
+              <AnimatedPressable style={[styles.passButton, styles.actionButton, { borderColor: colors.nope }]} onPress={onPass}>
                 <Ionicons name="close" size={24} color={colors.nope} />
               </AnimatedPressable>
             )}
             {onSparkNote && (
-              <AnimatedPressable style={[styles.sparkNoteButton, styles.actionButton]} onPress={onSparkNote}>
+              <AnimatedPressable style={[styles.sparkNoteButton, styles.actionButton, { borderColor: colors.gradientEnd }]} onPress={onSparkNote}>
                 <Ionicons name="chatbubble-ellipses" size={22} color={colors.gradientEnd} />
               </AnimatedPressable>
             )}
             {onLike && (
-              <AnimatedPressable style={[styles.likeButton, styles.actionButton]} onPress={onLike}>
+              <AnimatedPressable style={[styles.likeButton, styles.actionButton, { backgroundColor: colors.heartRed }]} onPress={onLike}>
                 <Ionicons name="heart" size={26} color={colors.text} />
               </AnimatedPressable>
             )}
@@ -258,7 +260,7 @@ export function ProfileDetailSheet({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: palette.background,
   },
   toolbar: {
     flexDirection: 'row',
@@ -277,7 +279,7 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
   },
   holdText: {
-    color: colors.gradientEnd,
+    color: palette.gradientEnd,
     fontSize: 14,
     fontWeight: '700',
   },
@@ -300,7 +302,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   privatePhotoText: {
-    color: colors.ember,
+    color: palette.ember,
     fontSize: 13,
     fontWeight: '800',
   },
@@ -314,7 +316,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   name: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 30,
     fontWeight: '800',
   },
@@ -330,23 +332,23 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   compatText: {
-    color: colors.gradientEnd,
+    color: palette.gradientEnd,
     fontSize: 13,
     fontWeight: '700',
   },
   meta: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 16,
     marginTop: spacing.xs,
   },
   intentMeta: {
-    color: colors.gradientEnd,
+    color: palette.gradientEnd,
     fontSize: 14,
     fontWeight: '700',
     marginTop: spacing.xs,
   },
   distance: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 14,
     marginTop: spacing.sm,
   },
@@ -361,13 +363,13 @@ const styles = StyleSheet.create({
   },
   openingMoveText: {
     flex: 1,
-    color: colors.text,
+    color: palette.text,
     fontSize: 14,
     lineHeight: 20,
     fontWeight: '600',
   },
   sectionTitle: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 13,
     fontWeight: '700',
     textTransform: 'uppercase',
@@ -375,24 +377,24 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   bio: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 16,
     lineHeight: 24,
   },
   promptCard: {
     marginHorizontal: spacing.lg,
     marginTop: spacing.md,
-    backgroundColor: colors.surface,
+    backgroundColor: palette.surface,
     borderRadius: radii.card,
     padding: spacing.md,
   },
   promptQuestion: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 13,
     fontWeight: '600',
   },
   promptAnswer: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 18,
     fontWeight: '600',
     marginTop: spacing.sm,
@@ -408,7 +410,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#2A2A2E',
   },
   likePromptText: {
-    color: colors.heartPink,
+    color: palette.heartPink,
     fontSize: 13,
     fontWeight: '700',
   },
@@ -418,13 +420,13 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   tag: {
-    backgroundColor: colors.surface,
+    backgroundColor: palette.surface,
     borderRadius: radii.button,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
   tagText: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 14,
     fontWeight: '600',
   },
@@ -437,7 +439,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(138, 43, 226, 0.35)',
   },
   aiDisclaimerText: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 13,
     lineHeight: 19,
   },
@@ -455,7 +457,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#2A2A2E',
   },
   safetyLabel: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 15,
     fontWeight: '600',
   },
@@ -468,7 +470,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#2A2A2E',
-    backgroundColor: colors.background,
+    backgroundColor: palette.background,
   },
   actionButton: {
     width: 64,
@@ -478,16 +480,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   passButton: {
-    backgroundColor: colors.surface,
+    backgroundColor: palette.surface,
     borderWidth: 2,
-    borderColor: colors.nope,
+    borderColor: palette.nope,
   },
   sparkNoteButton: {
-    backgroundColor: colors.surface,
+    backgroundColor: palette.surface,
     borderWidth: 2,
-    borderColor: colors.gradientEnd,
+    borderColor: palette.gradientEnd,
   },
   likeButton: {
-    backgroundColor: colors.heartRed,
+    backgroundColor: palette.heartRed,
   },
 });

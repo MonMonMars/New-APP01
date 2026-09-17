@@ -7,7 +7,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { useApp } from '../context/AppContext';
 import { legalDocumentLinks, LegalDocumentId } from '../content/legalDocuments';
-import { colors, radii, spacing } from '../theme';
+import { colors as palette, radii, spacing } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { SafetyResourceSheet } from '../components/SafetyResourceSheet';
 
@@ -95,6 +96,7 @@ const legalDocIconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
 };
 
 export function SafetyScreen({ onClose }: SafetyScreenProps) {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { blockedProfiles, unblockProfile } = useApp();
@@ -171,7 +173,7 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
                     Alert.alert('Unblocked', `${profile.name} can appear in your deck again.`);
                   }}
                 >
-                  <Text style={styles.unblockText}>Unblock</Text>
+                  <Text style={[styles.unblockText, { color: colors.gradientEnd }]}>Unblock</Text>
                 </AnimatedPressable>
               </View>
             ))}
@@ -225,7 +227,7 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: palette.background,
   },
   header: {
     flexDirection: 'row',
@@ -241,7 +243,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 18,
     fontWeight: '700',
   },
@@ -250,27 +252,27 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   banner: {
-    backgroundColor: colors.surface,
+    backgroundColor: palette.surface,
     borderRadius: radii.card,
     padding: spacing.lg,
     alignItems: 'center',
     marginBottom: spacing.lg,
   },
   bannerTitle: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 20,
     fontWeight: '800',
     marginTop: spacing.sm,
   },
   bannerBody: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 14,
     textAlign: 'center',
     marginTop: spacing.sm,
     lineHeight: 20,
   },
   sectionTitle: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 13,
     fontWeight: '700',
     textTransform: 'uppercase',
@@ -280,7 +282,7 @@ const styles = StyleSheet.create({
   tipCard: {
     flexDirection: 'row',
     gap: spacing.md,
-    backgroundColor: colors.surface,
+    backgroundColor: palette.surface,
     borderRadius: radii.card,
     padding: spacing.md,
     marginBottom: spacing.sm,
@@ -289,12 +291,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tipTitle: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 16,
     fontWeight: '700',
   },
   tipBody: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 14,
     lineHeight: 20,
     marginTop: spacing.xs,
@@ -309,11 +311,11 @@ const styles = StyleSheet.create({
   },
   resourceLabel: {
     flex: 1,
-    color: colors.text,
+    color: palette.text,
     fontSize: 16,
   },
   legalIntro: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 13,
     lineHeight: 19,
     marginBottom: spacing.sm,
@@ -322,7 +324,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   legalLabelZh: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 12,
     marginTop: 2,
   },
@@ -335,12 +337,12 @@ const styles = StyleSheet.create({
     borderBottomColor: '#2A2A2E',
   },
   blockedName: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 16,
     fontWeight: '600',
   },
   unblockText: {
-    color: colors.gradientEnd,
+    color: palette.gradientEnd,
     fontSize: 14,
     fontWeight: '700',
   },

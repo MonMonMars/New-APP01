@@ -115,23 +115,26 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
           <Text style={styles.heroSubtitle}>Boost visibility or send Spark Notes</Text>
         </LinearGradient>
 
-        {PACKS.map((pack) => (
+        {PACKS.map((pack) => {
+          const packAccent = pack.id.startsWith('notes') ? colors.gradientEnd : pack.color;
+          return (
           <AnimatedPressable
             key={pack.id}
             style={[styles.packCard, { backgroundColor: colors.surface }]}
             onPress={() => setPendingPack(pack)}
           >
-            <View style={[styles.packIcon, { backgroundColor: `${pack.color}22` }]}>
-              <Ionicons name={pack.icon} size={24} color={pack.color} />
+            <View style={[styles.packIcon, { backgroundColor: `${packAccent}22` }]}>
+              <Ionicons name={pack.icon} size={24} color={packAccent} />
             </View>
             <View style={styles.packInfo}>
               <Text style={[styles.packTitle, { color: colors.text }]}>{pack.title}</Text>
               <Text style={[styles.packDesc, { color: colors.textMuted }]}>{pack.description}</Text>
-              <Text style={[styles.packQty, { color: pack.color }]}>{pack.quantity}</Text>
+              <Text style={[styles.packQty, { color: packAccent }]}>{pack.quantity}</Text>
             </View>
             <Text style={[styles.packPrice, { color: colors.text }]}>{pack.price}</Text>
           </AnimatedPressable>
-        ))}
+          );
+        })}
 
         <Text style={[styles.legal, { color: colors.textMuted }]}>
           Purchases are processed by Apple or Google. Boosts and Notes activate immediately after purchase.
@@ -145,7 +148,9 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
         price={pendingPack?.price ?? ''}
         quantity={pendingPack?.quantity}
         icon={pendingPack?.icon}
-        iconColor={pendingPack?.color}
+        iconColor={
+          pendingPack?.id.startsWith('notes') ? colors.gradientEnd : pendingPack?.color
+        }
         onClose={() => setPendingPack(null)}
         onConfirm={() => {
           if (pendingPack) {

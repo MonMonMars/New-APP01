@@ -9,7 +9,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { colors, radii, spacing } from '../theme';
+import { colors as palette, radii, spacing } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type MatchToastProps = {
@@ -19,6 +20,7 @@ type MatchToastProps = {
 };
 
 export function MatchToast({ visible, profileName, onDismiss }: MatchToastProps) {
+  const { colors } = useTheme();
   const translateY = useSharedValue(-120);
   const opacity = useSharedValue(0);
 
@@ -50,7 +52,7 @@ export function MatchToast({ visible, profileName, onDismiss }: MatchToastProps)
 
   return (
     <Animated.View style={[styles.container, animatedStyle]}>
-      <AnimatedPressable style={styles.toast} onPress={onDismiss}>
+      <AnimatedPressable style={[styles.toast, { borderColor: colors.gradientEnd }]} onPress={onDismiss}>
         <Text style={styles.emoji}>✨</Text>
         <View style={styles.textCol}>
           <Text style={styles.title}>New match!</Text>
@@ -73,11 +75,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    backgroundColor: colors.surface,
+    backgroundColor: palette.surface,
     borderRadius: radii.card,
     padding: spacing.md,
     borderWidth: 1,
-    borderColor: colors.gradientEnd,
+    borderColor: palette.gradientEnd,
     shadowColor: '#000',
     shadowOpacity: 0.25,
     shadowRadius: 12,
@@ -91,12 +93,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 16,
     fontWeight: '800',
   },
   subtitle: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 13,
     marginTop: 2,
   },

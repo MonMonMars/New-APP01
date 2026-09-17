@@ -2,7 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, radii, spacing } from '../theme';
+import { colors as palette, radii, spacing } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type BoostCardProps = {
@@ -27,6 +28,7 @@ export function BoostCard({
   canUseFreeWeeklyBoost,
   onActivate,
 }: BoostCardProps) {
+  const { colors } = useTheme();
   const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
@@ -71,7 +73,11 @@ export function BoostCard({
       </View>
       {!isActive && (
         <AnimatedPressable
-          style={[styles.button, !canActivate && !isSparkPlus && styles.buttonMuted]}
+          style={[
+            styles.button,
+            { backgroundColor: colors.gradientEnd },
+            !canActivate && !isSparkPlus && styles.buttonMuted,
+          ]}
           onPress={onActivate}
         >
           <Text style={styles.buttonText}>{canActivate || !isSparkPlus ? 'Boost' : 'Shop'}</Text>
@@ -92,7 +98,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginHorizontal: spacing.lg,
     marginTop: spacing.lg,
-    backgroundColor: colors.surface,
+    backgroundColor: palette.surface,
     borderRadius: radii.card,
     padding: spacing.md,
     gap: spacing.md,
@@ -101,7 +107,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: colors.background,
+    backgroundColor: palette.background,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -109,18 +115,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    color: colors.text,
+    color: palette.text,
     fontSize: 16,
     fontWeight: '800',
   },
   subtitle: {
-    color: colors.textMuted,
+    color: palette.textMuted,
     fontSize: 13,
     marginTop: 2,
     lineHeight: 18,
   },
   button: {
-    backgroundColor: colors.gradientEnd,
+    backgroundColor: palette.gradientEnd,
     borderRadius: radii.button,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
@@ -129,7 +135,7 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
   buttonText: {
-    color: colors.text,
+    color: palette.text,
     fontWeight: '800',
     fontSize: 14,
   },
@@ -140,7 +146,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   activeBadgeText: {
-    color: colors.textDark,
+    color: palette.textDark,
     fontSize: 11,
     fontWeight: '900',
   },

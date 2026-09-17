@@ -10,7 +10,8 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { PRESS_SPRING } from './AnimatedPressable';
-import { colors, spacing } from '../theme';
+import { spacing } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 
 export type ZoneLayout = {
   x: number;
@@ -122,6 +123,7 @@ export function DropTargets({
   onHeartPress,
   onStarPress,
 }: DropTargetsProps) {
+  const { colors } = useTheme();
   const trashRef = useRef<View>(null);
   const heartRef = useRef<View>(null);
   const starRef = useRef<View>(null);
@@ -185,7 +187,13 @@ export function DropTargets({
 
       {onStarPress && (
         <View style={styles.starWrap}>
-          <View style={[styles.starGlow, { width: starSize + 20, height: starSize + 20, borderRadius: (starSize + 20) / 2 }]} />
+          <View style={[styles.starGlow, {
+            width: starSize + 20,
+            height: starSize + 20,
+            borderRadius: (starSize + 20) / 2,
+            backgroundColor: `${colors.heartRed}40`,
+            borderColor: `${colors.heartPink}80`,
+          }]} />
           <TargetButton
             icon="star"
             iconColor={colors.card}
@@ -248,8 +256,6 @@ const styles = StyleSheet.create({
   },
   starGlow: {
     position: 'absolute',
-    backgroundColor: 'rgba(233,64,87,0.25)',
     borderWidth: 2,
-    borderColor: 'rgba(255,107,138,0.5)',
   },
 });

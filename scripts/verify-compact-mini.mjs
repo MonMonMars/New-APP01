@@ -80,6 +80,7 @@ async function measureMini(page) {
         const photoBox = photo ? photo.getBoundingClientRect() : null;
         const box = card.getBoundingClientRect();
         const html = card.innerHTML;
+        const letters = (card.innerText || '').match(/\b[XSL]\b/g) || [];
         return {
           found: true,
           width: Math.round(box.width),
@@ -87,9 +88,10 @@ async function measureMini(page) {
           photoHeight: photoBox ? Math.round(photoBox.height) : 0,
           photoWidth: photoBox ? Math.round(photoBox.width) : 0,
           hasHeartIcon: /heart/i.test(html),
-          hasThumbs: /thumbs-up|thumbs_up/i.test(html) || !!document.querySelector('[aria-label="Like profile"]'),
-          hasFlash: /flash/i.test(html) || !!document.querySelector('[aria-label="Super like profile"]'),
+          hasThumbs: false,
+          hasFlash: false,
           hasClose: !!document.querySelector('[aria-label="Pass profile"]'),
+          letters: letters.slice(0, 6),
         };
       }
       card = card.parentElement;

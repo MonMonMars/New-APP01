@@ -1,6 +1,7 @@
 import { DisguisedProfilePost, DisguisedProfileVariant } from '../data/disguiseFeed';
 import { disguiseClientAds } from '../data/disguiseClientAds';
 import { getIncomingLikeProfilesForSection } from '../data/profiles';
+import { pulseNewsImages } from '../data/pulseNewsMedia';
 import { DisguiseAdCreative } from '../types/disguise';
 import { SparkSection } from '../types/preferences';
 import { Profile, UserProfile } from '../types/profile';
@@ -12,26 +13,26 @@ const NEWS_TEMPLATES = [
     headline: 'Tech hiring surges as firms race to staff new AI projects',
     summary:
       'Employers across finance and health-tech are competing for engineers — with remote roles still commanding premium offers.',
-    coverImageUrl: 'https://images.unsplash.com/photo-1611974789855-9c9aeeda0bf6?w=800&q=80',
+    coverImageUrl: pulseNewsImages.cityFinance,
     reporterQuote: 'The market feels hotter than last quarter',
   },
   {
-    source: 'BBC News',
+    source: 'The Guardian',
     category: 'Local',
     headline: 'City food scene heats up with late-night openings',
     summary:
       'A wave of ramen counters and wine bars is extending hours downtown — locals say reservations are harder to snag.',
-    coverImageUrl: 'https://images.unsplash.com/photo-1544627677-05470f41cd8a?w=800&q=80',
+    coverImageUrl: pulseNewsImages.restaurant,
     reporterQuote: 'Finally tried the spot everyone keeps posting about',
   },
   {
-    source: 'The Verge',
+    source: 'NPR',
     category: 'Tech',
     headline: 'Weekend reads: the apps and gadgets worth your time',
     summary:
       'Our editors rounded up the best long reads on design, productivity, and the gadgets that actually stuck around.',
-    coverImageUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&q=80',
-    reporterQuote: 'Bookmarking this before the paywall hits',
+    coverImageUrl: pulseNewsImages.phone,
+    reporterQuote: 'Bookmarking this before the weekend rush',
   },
 ];
 

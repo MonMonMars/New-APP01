@@ -707,6 +707,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   ]);
 
   const runSparkUnlockFlow = useCallback(async (): Promise<boolean> => {
+    const leaveLabel = disguiseWorldMeta(preferences.sparkSection).unlockLabel;
     if (await isUnlockLockedOut()) {
       const remaining = await getUnlockLockoutRemainingMs();
       const minutes = Math.ceil(remaining / 60_000);
@@ -715,7 +716,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return false;
     }
 
-    const result = await unlockSpark(securitySettings);
+    const result = await unlockSpark(securitySettings, undefined, leaveLabel);
     if (result.ok) {
       await clearFailedUnlockAttempts();
       void logSecurityEvent(userId, 'spark_unlock_success', { method: result.method });
@@ -731,10 +732,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setUnlockError(null);
       setUnlockModalVisible(true);
     });
-  }, [securitySettings, userId]);
+  }, [securitySettings, userId, preferences.sparkSection]);
 
   const handleUnlockPinSubmit = useCallback(
     async (pin: string) => {
+      const leaveLabel = disguiseWorldMeta(preferences.sparkSection).unlockLabel;
       if (await isUnlockLockedOut()) {
         const remaining = await getUnlockLockoutRemainingMs();
         const minutes = Math.ceil(remaining / 60_000);
@@ -742,7 +744,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const result = await unlockSpark(securitySettings, pin);
+      const result = await unlockSpark(securitySettings, pin, leaveLabel);
       if (result.ok) {
         await clearFailedUnlockAttempts();
         void logSecurityEvent(userId, 'spark_unlock_success', { method: 'pin' });
@@ -765,7 +767,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       setUnlockError(`Incorrect PIN. ${lockout.remainingAttempts} attempts left.`);
     },
-    [securitySettings, userId],
+    [securitySettings, userId, preferences.sparkSection],
   );
 
   const handleUnlockCancel = useCallback(() => {
@@ -776,7 +778,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const handleRetryBiometric = useCallback(async () => {
-    const result = await unlockSpark(securitySettings);
+    const leaveLabel = disguiseWorldMeta(preferences.sparkSection).unlockLabel;
+    const result = await unlockSpark(securitySettings, undefined, leaveLabel);
     if (result.ok) {
       setUnlockModalVisible(false);
       setUnlockError(null);
@@ -784,7 +787,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       unlockResolverRef.current?.(true);
       unlockResolverRef.current = null;
     }
-  }, [securitySettings]);
+  }, [securitySettings, preferences.sparkSection]);
 
   useEffect(() => {
     const onAppStateChange = (nextState: AppStateStatus) => {

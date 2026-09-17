@@ -209,7 +209,7 @@ export function DisguiseProfileScreen() {
             />
           </View>
           <Text style={[styles.hint, { color: colors.textMuted }]}>
-            Turn off disguise here, or tap the {meta.name} logo in the header to unlock {meta.unlockLabel}.
+            Turn off disguise here, or tap the {meta.name} logo in the header to leave {meta.unlockLabel}.
           </Text>
         </View>
 

@@ -66,7 +66,7 @@ Latest verified tunnel: **https://divided-minimum-eva-therapy.trycloudflare.com*
 2. Tap **Continue without account**
 3. Complete onboarding (defaults are fine)
 4. You land in **Pulse** disguise mode
-5. **Tap the Pulse logo** in the header to unlock Spark
+5. **Tap the Pulse logo** in the header, then **Leave Spark**
 6. Switch the Discover title to **Ember**, then disguise again — that cover is **Harbor** (markets), not Pulse
 
 ---

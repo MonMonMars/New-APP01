@@ -1,6 +1,7 @@
 import { disguiseClientAds } from './disguiseClientAds';
 import { disguiseNewsExtra } from './disguiseNewsExtra';
 import { disguiseSocialPosts } from './disguiseSocialPosts';
+import { freeNewsLinks, pulseNewsImages } from './pulseNewsMedia';
 
 export type NewsReporter = {
   id: string;
@@ -97,10 +98,10 @@ const newsItems: NewsPost[] = [
       'Meta, Alphabet and Microsoft are ramping up AI spending on data centres and chips — even as investors question how long the returns will take.',
     articleBody:
       'The titans of the technology sector are ramping up their spending on artificial intelligence, as they rush to reap the benefits of an AI boom that has pushed stocks to record highs.\n\nEarnings reports from Meta, Alphabet and Microsoft reaffirmed the colossal amounts of money these firms are spending on everything from data centres to chips, even as questions swirl about returns on the investments.\n\nMeta said its capital expenditures for 2025 will be between $70bn and $72bn, up from an earlier estimate. Alphabet raised its forecast to $91bn to $93bn. Microsoft reported quarterly capital expenditures of $34.9bn, up from $24bn in the previous quarter.\n\nExuberance among investors about massive AI spending has helped all three tech firms outperform the broader S&P 500 index — but analysts continue to watch whether revenue growth can keep pace with the capex surge.',
-    imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c9aeeda0bf6?w=800&q=80',
+    imageUrl: pulseNewsImages.cityFinance,
     timeAgo: '12m ago',
     category: 'Business',
-    articleUrl: 'https://www.bbc.co.uk/news/articles/c5yp2y8rdpro',
+    articleUrl: freeNewsLinks.bbcTechnology,
     reporters: [
       {
         id: 'rep-1a',
@@ -128,16 +129,16 @@ const newsItems: NewsPost[] = [
   {
     id: 'news-2',
     type: 'news',
-    source: 'BBC News',
+    source: 'The Guardian',
     headline: "New night routes and earlier starts for Bristol's buses",
     summary:
       'First Bus is adding overnight Friday and Saturday services and extending routes to better serve the city’s night-time economy.',
     articleBody:
       'First Bus has announced expanded night services across Bristol, with new routes running until 3 a.m. on Fridays and Saturdays.\n\nEarlier weekday starts on key commuter lines will begin next month, aimed at hospital and hospitality workers. The operator says the changes respond to years of community feedback about gaps after midnight.\n\nCity councillors welcomed the move but called for clearer real-time tracking at late-night stops.',
-    imageUrl: 'https://images.unsplash.com/photo-1544627677-05470f41cd8a?w=800&q=80',
+    imageUrl: pulseNewsImages.transit,
     timeAgo: '1h ago',
     category: 'Local',
-    articleUrl: 'https://www.bbc.co.uk/news/articles/cz0y7kl938do',
+    articleUrl: freeNewsLinks.guardianTransport,
     reporters: [
       {
         id: 'rep-2a',
@@ -154,17 +155,16 @@ const newsItems: NewsPost[] = [
   {
     id: 'news-3',
     type: 'news',
-    source: 'The Verge',
+    source: 'NPR',
     headline: 'New smartphone labels for battery life and repairability are coming to the EU',
     summary:
       'From June 20, phones sold in the EU must meet ecodesign standards — including longer software support and repairability ratings.',
     articleBody:
       'Starting June 20, every smartphone and tablet sold in the European Union must display an energy label similar to those on appliances, rating battery endurance and ease of repair.\n\nManufacturers will also be required to provide at least five years of security updates for mid-range devices and seven for flagships. Spare parts must be available to independent repair shops within two weeks of a request.\n\nConsumer groups say the rules could push global design changes, as brands rarely maintain separate hardware SKUs for a single region.',
-    imageUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&q=80',
+    imageUrl: pulseNewsImages.phone,
     timeAgo: '3h ago',
     category: 'Tech',
-    articleUrl:
-      'https://www.theverge.com/news/655275/smartphone-tablet-labels-eu-energy-efficiency-battery-life-repairability',
+    articleUrl: freeNewsLinks.nprTechnology,
     reporters: [
       {
         id: 'rep-3a',
@@ -192,16 +192,16 @@ const newsItems: NewsPost[] = [
   {
     id: 'news-4',
     type: 'news',
-    source: 'BBC Good Food',
+    source: 'BBC Food',
     headline: 'Speedy chorizo with chickpeas',
     summary:
       'A 10-minute pantry supper: chorizo, chickpeas, tomatoes and cabbage bubble together for a quick bowl with crusty bread.',
     articleBody:
-      'This speedy supper from BBC Good Food is ready in about 10 minutes and leans on pantry staples you likely already have.\n\nPut a medium pan on the heat and tip in chopped tomatoes followed by a canful of water. While the tomatoes heat, chop the chorizo into chunky pieces and shred the cabbage.\n\nPile the chorizo and cabbage into the pan with chilli flakes and drained chickpeas, then crumble in a stock cube. Stir well, cover and leave to bubble over a high heat for 6 minutes until the cabbage is just tender.\n\nLadle into bowls and eat with crusty or garlic bread. For an Indian-inspired twist, swap the chorizo for chicken and add a teaspoon of curry paste.',
-    imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80',
+      'This speedy supper from BBC Food is ready in about 10 minutes and leans on pantry staples you likely already have.\n\nPut a medium pan on the heat and tip in chopped tomatoes followed by a canful of water. While the tomatoes heat, chop the chorizo into chunky pieces and shred the cabbage.\n\nPile the chorizo and cabbage into the pan with chilli flakes and drained chickpeas, then crumble in a stock cube. Stir well, cover and leave to bubble over a high heat for 6 minutes until the cabbage is just tender.\n\nLadle into bowls and eat with crusty or garlic bread. For an Indian-inspired twist, swap the chorizo for chicken and add a teaspoon of curry paste.',
+    imageUrl: pulseNewsImages.restaurant,
     timeAgo: '5h ago',
     category: 'Lifestyle',
-    articleUrl: 'https://www.bbcgoodfood.com/recipes/speedy-chorizo-chickpeas',
+    articleUrl: freeNewsLinks.bbcFood,
     reporters: [
       {
         id: 'rep-4a',
@@ -364,15 +364,14 @@ export const disguiseAlerts: DisguiseAlert[] = [
     icon: 'newspaper-outline',
     text: 'BBC News: Tech giants AI spending story trending',
     time: '6h ago',
-    articleUrl: 'https://www.bbc.co.uk/news/articles/c5yp2y8rdpro',
+    articleUrl: freeNewsLinks.bbcTechnology,
   },
   {
     id: 'a8',
     icon: 'newspaper-outline',
-    text: 'The Verge: EU repairability labels explained',
+    text: 'NPR: EU repairability labels explained',
     time: '8h ago',
-    articleUrl:
-      'https://www.theverge.com/news/655275/smartphone-tablet-labels-eu-energy-efficiency-battery-life-repairability',
+    articleUrl: freeNewsLinks.nprTechnology,
   },
   {
     id: 'a9',
@@ -412,9 +411,9 @@ export const disguiseAlerts: DisguiseAlert[] = [
   {
     id: 'a13',
     icon: 'newspaper-outline',
-    text: 'BBC Good Food: Speedy chorizo with chickpeas',
+    text: 'BBC Food: Speedy chorizo with chickpeas',
     time: '2d ago',
-    articleUrl: 'https://www.bbcgoodfood.com/recipes/speedy-chorizo-chickpeas',
+    articleUrl: freeNewsLinks.bbcFood,
   },
   {
     id: 'a14',
@@ -443,7 +442,7 @@ export const disguiseAlerts: DisguiseAlert[] = [
     icon: 'newspaper-outline',
     text: 'Remote teams rethink async standups — trending in Business',
     time: '4d ago',
-    articleUrl: 'https://www.bbc.co.uk/news/articles/remote-standups-demo',
+    articleUrl: freeNewsLinks.bbcNews,
   },
   {
     id: 'a17',

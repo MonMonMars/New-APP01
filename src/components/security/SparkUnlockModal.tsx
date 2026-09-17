@@ -40,7 +40,7 @@ export function SparkUnlockModal({
       <View style={[styles.overlay, modalFill]}>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <Ionicons name="lock-closed" size={32} color={colors.gradientEnd} />
-          <Text style={[styles.title, { color: colors.text }]}>Unlock {unlockLabel}</Text>
+          <Text style={[styles.title, { color: colors.text }]}>Leave {unlockLabel}</Text>
           <Text style={[styles.body, { color: colors.textMuted }]}>
             Confirm it&apos;s you before opening private dating content.
           </Text>
@@ -84,8 +84,9 @@ export function SparkUnlockModal({
               style={[styles.unlock, { backgroundColor: colors.gradientEnd }]}
               onPress={() => onSubmitPin(pin)}
               disabled={pin.length < 4}
+              accessibilityLabel={`Leave ${unlockLabel}`}
             >
-              <Text style={styles.unlockText}>Unlock</Text>
+              <Text style={styles.unlockText}>Leave {unlockLabel}</Text>
             </AnimatedPressable>
           </View>
         </View>

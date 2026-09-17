@@ -113,17 +113,22 @@ async function main() {
         continue;
       }
 
-      if (/tap to unlock|trending|for you/i.test(text)) break;
+      if (/tap .* to leave|leave spark|trending|for you/i.test(text)) break;
     }
 
     await snap(page, '01-after-onboarding');
 
     await dismissCookies(page);
-    const unlock = page.getByLabel(/tap to unlock spark/i).first();
+    const unlock = page.getByLabel(/tap .+ logo to leave spark/i).first();
     if (await unlock.isVisible({ timeout: 4000 }).catch(() => false)) {
       await unlock.click();
       await page.waitForTimeout(600);
-      const policy = page.getByText(/i understand — unlock spark/i).first();
+      const leave = page.getByText(/^Leave Spark$/i).first();
+      if (await leave.isVisible().catch(() => false)) {
+        await leave.click();
+        await page.waitForTimeout(600);
+      }
+      const policy = page.getByText(/i understand — leave spark/i).first();
       if (await policy.isVisible().catch(() => false)) {
         await policy.click();
         await page.waitForTimeout(1200);

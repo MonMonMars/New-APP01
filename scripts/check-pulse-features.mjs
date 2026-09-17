@@ -46,7 +46,7 @@ async function completeOnboarding(page) {
       await page.waitForTimeout(700);
       continue;
     }
-    if (/tap to unlock|for you|trending/i.test(text)) {
+    if (/tap .* to leave|leave spark|for you|trending/i.test(text)) {
       return;
     }
   }

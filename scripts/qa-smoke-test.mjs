@@ -71,7 +71,7 @@ async function skipOnboarding(page) {
       continue;
     }
 
-    if (/tap to unlock|for you|trending/i.test(body)) {
+    if (/tap .* to leave|leave spark|for you|trending/i.test(body)) {
       break;
     }
   }
@@ -79,11 +79,16 @@ async function skipOnboarding(page) {
 
 async function unlockSpark(page) {
   await dismissCookies(page);
-  const unlock = page.getByLabel(/tap to unlock spark/i).first();
+  const unlock = page.getByLabel(/tap .+ logo to leave spark/i).first();
   if (await unlock.isVisible({ timeout: 8000 }).catch(() => false)) {
     await unlock.click({ force: true });
     await page.waitForTimeout(600);
-    const confirm = page.getByText(/i understand — unlock spark/i).first();
+    const leave = page.getByText(/^Leave Spark$/i).first();
+    if (await leave.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await leave.click();
+      await page.waitForTimeout(600);
+    }
+    const confirm = page.getByText(/i understand — leave spark/i).first();
     if (await confirm.isVisible({ timeout: 3000 }).catch(() => false)) {
       await confirm.click();
       await page.waitForTimeout(1200);

@@ -18,6 +18,7 @@ export const en = {
   },
   tabs: {
     discover: 'Discover',
+    pulse: 'Pulse',
     likes: 'Likes',
     matches: 'Matches',
     messages: 'Messages',
@@ -579,6 +580,13 @@ export const en = {
     advancedFiltersIntent: 'Relationship intent',
     advancedFiltersSharedInterests: 'Shared interests only',
     advancedFiltersSharedInterestsHint: 'Show people who like at least one thing you do',
+  },
+  pulseEntry: {
+    tabA11y: 'Pulse disguise mode',
+    tabHint: 'Go to discover, or tap again to enter Pulse disguise',
+    tabHintActive: 'Enter Pulse disguise mode',
+    emergencyA11y: 'Emergency — switch to {appName} disguise mode',
+    emergencyHint: 'Tap to hide {unlockLabel} behind {appName}',
   },
   disguiseWorld: {
     pulseTagline: 'World & Local News',

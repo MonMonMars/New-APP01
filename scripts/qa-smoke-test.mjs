@@ -165,7 +165,7 @@ async function main() {
     record('Profile tab', profileOk ? 'PASS' : 'FAIL', profileOk ? 'Settings/profile visible' : 'Wrong content');
 
     // Discover Hub via options icon
-    await clickTab(page, 'Discover');
+    await page.getByRole('tab', { name: /pulse disguise mode/i }).click();
     await page.waitForTimeout(1000);
     const hubBtn = page.locator('[aria-label="Discover tools"]').first();
     if (await hubBtn.isVisible().catch(() => false)) {

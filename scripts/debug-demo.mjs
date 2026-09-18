@@ -164,7 +164,7 @@ async function main() {
     else issue('phase-d', 'Who viewed you card not visible on Profile');
 
     // Discover rewind
-    await page.getByRole('tab', { name: /discover/i }).click();
+    await page.getByRole('tab', { name: /pulse disguise mode/i }).click();
     await page.waitForTimeout(1000);
 
     // Pass a card if possible

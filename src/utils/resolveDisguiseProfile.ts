@@ -50,6 +50,14 @@ function cacheKey(reporterId: string, section: SparkSection): string {
 }
 
 /** Stable map from disguise commenter / social avatar ids → dating profile ids in the active world. */
+/** Stable reporter → profile mapping for Pulse feed links (survives likes/passes). */
+export function pinnedReporterProfileId(
+  reporterId: string,
+  section?: SparkSection | string | null,
+): string | undefined {
+  return mappedProfileIdForReporter(reporterId, section);
+}
+
 function mappedProfileIdForReporter(
   reporterId: string,
   section?: SparkSection | string | null,

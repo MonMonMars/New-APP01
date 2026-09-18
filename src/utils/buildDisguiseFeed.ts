@@ -4,6 +4,7 @@ import { SparkSection } from '../types/preferences';
 import { UserProfile } from '../types/profile';
 import { disguiseFeedItemsForGender } from './disguiseFeedCatalog';
 import { buildDisguisedProfileFeedItem, buildDisguisedProfileFeedItems } from './disguiseProfileFeed';
+import { pinnedReporterProfileId, resolveDisguiseProfileId } from './resolveDisguiseProfile';
 
 function weaveProfileCards(base: FeedItem[], profileCards: FeedItem[]): FeedItem[] {
   if (profileCards.length === 0) {
@@ -29,6 +30,25 @@ function weaveProfileCards(base: FeedItem[], profileCards: FeedItem[]): FeedItem
   return result;
 }
 
+/** Pin reporter profile ids so news links do not swap after mini-window likes. */
+function pinFeedProfileLinks(items: FeedItem[], section?: SparkSection | string | null): FeedItem[] {
+  return items.map((item) => {
+    if (item.type !== 'news') {
+      return item;
+    }
+    return {
+      ...item,
+      reporters: item.reporters.map((reporter) => ({
+        ...reporter,
+        profileId:
+          reporter.profileId ??
+          resolveDisguiseProfileId(reporter.id) ??
+          pinnedReporterProfileId(reporter.id, section),
+      })),
+    };
+  });
+}
+
 export function buildDisguiseFeed(
   user: UserProfile,
   creative: DisguiseAdCreative | null,
@@ -38,12 +58,17 @@ export function buildDisguiseFeed(
   const baseFeed = disguiseFeedItemsForGender(user.gender);
   const withProfiles = weaveProfileCards(baseFeed, profileCards);
 
+  const linked = pinFeedProfileLinks(withProfiles, section);
+
   if (!creative) {
-    return withProfiles;
+    return linked;
   }
 
   const userItem = buildDisguisedProfileFeedItem(user, creative);
-  const withoutUserSlot = withProfiles.filter((item) => item.id !== 'disguised-user');
+  const withoutUserSlot = linked.filter((item) => item.id !== 'disguised-user');
 
-  return [withoutUserSlot[0], withoutUserSlot[1], userItem, ...withoutUserSlot.slice(2)];
+  return pinFeedProfileLinks(
+    [withoutUserSlot[0], withoutUserSlot[1], userItem, ...withoutUserSlot.slice(2)],
+    section,
+  );
 }

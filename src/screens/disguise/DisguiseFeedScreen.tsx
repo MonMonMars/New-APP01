@@ -1,6 +1,5 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { useMemo } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -15,8 +14,8 @@ import { useTranslation } from '../../i18n';
 import { useTheme } from '../../context/ThemeContext';
 import { FeedItem } from '../../data/disguiseFeed';
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
-import { buildDisguiseFeed } from '../../utils/buildDisguiseFeed';
-import { filterDisguiseFeed, topicFilterLabel } from '../../utils/disguiseFeedFilter';
+import { useDisguiseFeedItems } from '../../hooks/useDisguiseFeedItems';
+import { topicFilterLabel } from '../../utils/disguiseFeedFilter';
 import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
 import { spacing } from '../../theme';
 import { disguiseWorldMeta } from '../../utils/disguiseWorld';
@@ -51,7 +50,7 @@ function renderFeedItem({ item, index }: { item: FeedItem; index: number }) {
 export function DisguiseFeedScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { user, disguiseAdCreative, pulseSocial, preferences } = useApp();
+  const { user, preferences } = useApp();
   const { locale } = useAppLocale();
   const { t } = useTranslation();
   const meta = disguiseWorldMeta(preferences.sparkSection, user.gender, locale);
@@ -59,20 +58,7 @@ export function DisguiseFeedScreen() {
   const route = useRoute<RouteProp<DisguiseTabParamList, 'Home'>>();
   const topic = route.params?.topic;
 
-  const feedItems = useMemo(() => {
-    const base = buildDisguiseFeed(user, disguiseAdCreative, preferences.sparkSection);
-    const filtered = filterDisguiseFeed(base, topic, user.gender);
-    return filtered.filter((item) => {
-      if (item.type !== 'social') {
-        return true;
-      }
-      if (pulseSocial.reportedPostIds.includes(item.id)) {
-        return false;
-      }
-      const authorHandle = item.handle.trim().toLowerCase();
-      return !pulseSocial.mutedAuthors.includes(authorHandle);
-    });
-  }, [user, disguiseAdCreative, topic, pulseSocial.mutedAuthors, pulseSocial.reportedPostIds, preferences.sparkSection]);
+  const feedItems = useDisguiseFeedItems(topic);
 
   const sectionLabel = topic ? topicFilterLabel(topic) : meta.feedLabel;
 

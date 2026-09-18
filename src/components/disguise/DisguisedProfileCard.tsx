@@ -43,7 +43,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
     avatarUrl: post.avatarUrl,
     quote: post.overlayText,
     photos: post.photos,
-    profileId: profileIdFromPostId(post.id),
+    profileId: post.profileId ?? profileIdFromPostId(post.id),
   };
 
   const maskVariant = post.variant === 'ad' ? 'ad' : 'news';

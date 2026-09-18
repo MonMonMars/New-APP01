@@ -168,6 +168,7 @@ export function PersonPreviewSheet({
               maxHeight: Math.min(windowHeight * 0.52, 360),
             },
           ]}
+          onStartShouldSetResponder={() => true}
           {...webClass('spark-sheet-in')}
         >
           <View style={styles.cardInner}>

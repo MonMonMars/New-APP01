@@ -67,6 +67,8 @@ export type DisguisedProfileVariant = 'news' | 'ad' | 'social';
 export type DisguisedProfilePost = {
   id: string;
   type: 'disguised_profile';
+  /** Stable dating-profile link for mini-window Spark actions. */
+  profileId?: string;
   name: string;
   avatarUrl: string;
   variant: DisguisedProfileVariant;

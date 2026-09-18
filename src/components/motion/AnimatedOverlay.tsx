@@ -92,24 +92,31 @@ export function AnimatedOverlay({
       <Modal visible transparent animationType="none" onRequestClose={onClose}>
         <View style={[styles.root, modalFill]} pointerEvents="box-none">
           <Pressable
-            style={[styles.backdrop, { opacity: 0.52 }]}
+            style={[styles.backdrop, styles.backdropLayer, { opacity: 0.52 }]}
             onPress={onClose}
             accessibilityLabel="Close"
           />
           <View
             style={[
               variant === 'center' ? styles.centerPanel : styles.bottomPanel,
+              styles.panelLayer,
               contentStyle,
             ]}
             pointerEvents="box-none"
           >
-            <View
-              pointerEvents="auto"
+            <Pressable
+              pointerEvents="box-none"
               style={variant === 'center' ? styles.centerChildren : styles.bottomChildren}
-              {...webClass('spark-sheet-in')}
+              onPress={(event) => event.stopPropagation()}
             >
-              {children}
-            </View>
+              <View
+                pointerEvents="auto"
+                style={variant === 'center' ? styles.centerChildren : styles.bottomChildren}
+                {...webClass('spark-sheet-in')}
+              >
+                {children}
+              </View>
+            </Pressable>
           </View>
         </View>
       </Modal>
@@ -151,6 +158,12 @@ const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFill,
     backgroundColor: '#000',
+  },
+  backdropLayer: {
+    zIndex: 1,
+  },
+  panelLayer: {
+    zIndex: 2,
   },
   centerPanel: {
     ...StyleSheet.absoluteFill,

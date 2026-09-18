@@ -27,6 +27,7 @@ import { DisguiseAdGeneratorSheet } from '../components/disguise/DisguiseAdGener
 import { computeProfileCompletion } from '../utils/profileCompletion';
 import { useDisguiseWorld } from '../hooks/useDisguiseWorld';
 import { canRevealProfileViews } from '../utils/genderAccountPerks';
+import { SparkSectionToggle } from '../components/SparkSectionToggle';
 import { resolveSparkSection } from '../types/preferences';
 import { radii, spacing } from '../theme';
 import { LocaleToggle } from '../components/legal/LocaleToggle';
@@ -68,6 +69,7 @@ export function ProfileScreen() {
     matches,
     preferences,
     updatePreferences,
+    setSparkSection,
     updateUser,
     isSparkPlus,
     isSubscriptionActive,
@@ -262,6 +264,17 @@ export function ProfileScreen() {
           canUseFreeWeeklyBoost={canUseFreeWeeklyBoost}
           onActivate={handleActivateBoost}
         />
+
+        <View style={[styles.worldSection, { borderBottomColor: colors.border }]}>
+          <View style={styles.worldHeader}>
+            <Ionicons name="planet-outline" size={22} color={colors.textMuted} />
+            <View style={styles.toggleText}>
+              <Text style={[styles.toggleLabel, { color: colors.text }]}>{t('profile.worldMode')}</Text>
+              <Text style={[styles.toggleDesc, { color: colors.textMuted }]}>{t('profile.worldModeHint')}</Text>
+            </View>
+          </View>
+          <SparkSectionToggle section={section} onChange={setSparkSection} variant="list" />
+        </View>
 
         <View style={[styles.toggleRow, { borderBottomColor: colors.border }]}>
           <Ionicons name="pause-circle-outline" size={22} color={colors.textMuted} />
@@ -537,6 +550,18 @@ const styles = StyleSheet.create({
   syncText: {
     fontSize: 12,
     fontWeight: '600',
+  },
+  worldSection: {
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
+    paddingBottom: spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    gap: spacing.sm,
+  },
+  worldHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.md,
   },
   toggleRow: {
     flexDirection: 'row',

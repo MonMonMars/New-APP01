@@ -6,14 +6,14 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { useAppLocale } from '../../hooks/useAppLocale';
-import { useTheme } from '../../context/ThemeContext';
 import { FeedItem } from '../../data/disguiseFeed';
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
 import { spacing } from '../../theme';
+import { pulseBrand } from '../../theme/pulseBrand';
 import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
 import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { DisguiseSearchSheet } from './DisguiseSearchSheet';
-import { DisguiseBrandMark } from './DisguiseBrand';
+import { DisguiseHeaderLogo } from './DisguiseBrand';
 import { PulseFeedItemViewer } from './PulseFeedItemViewer';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -23,7 +23,6 @@ type DisguiseHeaderProps = {
 };
 
 export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps) {
-  const { colors } = useTheme();
   const { user, preferences, setDisguiseMode } = useApp();
   const { locale } = useAppLocale();
   const meta = disguiseWorldMeta(preferences.sparkSection, user.gender, locale);
@@ -37,7 +36,7 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
 
   return (
     <>
-      <View style={[styles.header, { borderBottomColor: colors.border }]}>
+      <View style={[styles.header, { backgroundColor: pulseBrand.navy, borderBottomColor: pulseBrand.navyMuted }]}>
         <View style={styles.leading}>
           <AnimatedPressable
             onPress={() => {
@@ -50,11 +49,11 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
             hitSlop={8}
             style={styles.brandTap}
           >
-            <DisguiseBrandMark size="sm" muted={false} />
+            <DisguiseHeaderLogo />
           </AnimatedPressable>
           {title ? (
             <View style={styles.titleBlock}>
-              <Text style={[styles.sectionTitle, { color: colors.textMuted }]} numberOfLines={1}>
+              <Text style={styles.sectionTitle} numberOfLines={1}>
                 {title}
               </Text>
             </View>
@@ -68,14 +67,14 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
                 accessibilityLabel={meta.searchTitle}
                 onPress={() => setSearchOpen(true)}
               >
-                <Ionicons name="search-outline" size={22} color={meta.accent} />
+                <Ionicons name="search-outline" size={22} color={pulseBrand.mastheadText} />
               </AnimatedPressable>
               <AnimatedPressable
                 style={styles.iconBtn}
                 accessibilityLabel="Open activity"
                 onPress={() => navigation.navigate('Activity')}
               >
-                <Ionicons name="notifications-outline" size={22} color={meta.accent} />
+                <Ionicons name="notifications-outline" size={22} color={pulseBrand.mastheadText} />
               </AnimatedPressable>
             </>
           )}
@@ -127,6 +126,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.4,
+    color: 'rgba(255, 255, 255, 0.72)',
   },
   actions: {
     flexDirection: 'row',

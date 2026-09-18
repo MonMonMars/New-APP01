@@ -1,7 +1,7 @@
 import { ViewStyle } from 'react-native';
 
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
-import { PulseBrand, PulseBrandMark } from './PulseBrandMark';
+import { PulseBrand, PulseBrandMark, PulseHeaderLogo } from './PulseBrandMark';
 
 type DisguiseBrandProps = {
   size?: 'sm' | 'md' | 'lg';
@@ -23,4 +23,8 @@ export function DisguiseBrandMark({
   muted?: boolean;
 }) {
   return <PulseBrandMark size={size} muted={muted} />;
+}
+
+export function DisguiseHeaderLogo() {
+  return <PulseHeaderLogo size="sm" />;
 }

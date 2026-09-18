@@ -2,7 +2,7 @@ import { ImageStyle, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-
 
 import { BrandMark } from '../brand/BrandMark';
 import { useTheme } from '../../context/ThemeContext';
-import { pulseBrand } from '../../theme/pulseBrand';
+import { pulseBrand, pulseTimesFontFamily } from '../../theme/pulseBrand';
 
 type PulseBrandMarkProps = {
   size?: 'sm' | 'md' | 'lg';
@@ -13,6 +13,47 @@ type PulseBrandMarkProps = {
 /** Pulse logomark — locked P3 didone P on Pulse blue. */
 export function PulseBrandMark({ size = 'md', muted = false, style }: PulseBrandMarkProps) {
   return <BrandMark world="pulse" size={size} muted={muted} style={style} />;
+}
+
+type PulseHeaderLogoProps = {
+  size?: 'sm' | 'md';
+};
+
+/** Top-left Pulse masthead — white Times “P” + “Pulse”. */
+export function PulseHeaderLogo({ size = 'sm' }: PulseHeaderLogoProps) {
+  const pSize = size === 'sm' ? 24 : 28;
+  const wordSize = size === 'sm' ? 22 : 26;
+
+  return (
+    <View style={styles.headerLogoRow} pointerEvents="none">
+      <Text
+        style={[
+          styles.headerP,
+          {
+            fontSize: pSize,
+            lineHeight: pSize + 2,
+            color: pulseBrand.mastheadText,
+            fontFamily: pulseTimesFontFamily,
+          },
+        ]}
+      >
+        P
+      </Text>
+      <Text
+        style={[
+          styles.headerWordmark,
+          {
+            fontSize: wordSize,
+            lineHeight: wordSize + 2,
+            color: pulseBrand.mastheadText,
+            fontFamily: pulseTimesFontFamily,
+          },
+        ]}
+      >
+        Pulse
+      </Text>
+    </View>
+  );
 }
 
 type PulseWordmarkProps = {
@@ -66,6 +107,19 @@ export function PulseBrand({ size = 'md', showTagline = false, tagline, style }:
 }
 
 const styles = StyleSheet.create({
+  headerLogoRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 5,
+  },
+  headerP: {
+    fontWeight: '700',
+    letterSpacing: -0.5,
+  },
+  headerWordmark: {
+    fontWeight: '600',
+    letterSpacing: -0.3,
+  },
   wordmarkWrap: {
     justifyContent: 'center',
     minWidth: 0,

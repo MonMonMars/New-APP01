@@ -11,7 +11,6 @@ import {
 import { AppState, Linking, type AppStateStatus } from 'react-native';
 
 import { seedConversations } from '../data/conversations';
-import { getAiPersonaConfig } from '../data/aiPersonas';
 import {
   AI_PERSONA_IDS,
   getIncomingLikeProfilesForSection,
@@ -120,7 +119,8 @@ import {
   LegalConsentRecord,
   PrivacyPreferences,
 } from '../types/privacy';
-import { generateDemoReply } from '../services/demoChatLlm';
+import { generateDemoReply, generateMatchOpener } from '../services/demoChatLlm';
+import { isDemoChatProfile } from '../utils/demoProfileChat';
 import { buildUserDataExport, shareUserDataExport } from '../utils/dataExport';
 import {
   clearPersistedState,
@@ -1507,6 +1507,50 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [blockProfile, userId],
   );
 
+  const scheduleDemoMatchOpener = useCallback((conversationId: string, profile: Profile) => {
+    if (!isDemoChatProfile(profile)) {
+      return;
+    }
+
+    setTimeout(() => {
+      setConversations((prev) =>
+        prev.map((conversation) =>
+          conversation.id === conversationId && conversation.messages.length === 0
+            ? { ...conversation, isTyping: true }
+            : conversation,
+        ),
+      );
+    }, 800);
+
+    void generateMatchOpener(profile).then(({ text }) => {
+      setConversations((prev) =>
+        prev.map((conversation) => {
+          if (conversation.id !== conversationId) {
+            return conversation;
+          }
+          if (conversation.messages.length > 0) {
+            return { ...conversation, isTyping: false };
+          }
+          const opener: Message = {
+            id: `msg-opener-${profile.id}-${Date.now()}`,
+            text,
+            sentAt: new Date().toISOString(),
+            isMine: false,
+          };
+          return {
+            ...conversation,
+            isTyping: false,
+            messages: [opener],
+            yourTurn: true,
+            unread: true,
+            lastMessage: text,
+            lastMessageAt: opener.sentAt,
+          };
+        }),
+      );
+    });
+  }, []);
+
   const likeProfile = useCallback(
     (profile: Profile, sparkNote?: string): Match | null => {
       if (!canLike) {
@@ -1585,26 +1629,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
           return prev;
         }
 
-        const persona = getAiPersonaConfig(profile);
-        const openerText = persona?.openerMessages[0];
-        const openerMessage = openerText
-          ? {
-              id: `msg-opener-${profile.id}`,
-              text: openerText,
-              sentAt: new Date().toISOString(),
-              isMine: false,
-            }
-          : null;
-
         const conversation: Conversation = {
           id: `conv-${profile.id}`,
           match,
-          messages: openerMessage ? [openerMessage] : [],
+          messages: [],
           yourTurn: true,
           unread: false,
-          lastMessage: openerText,
-          lastMessageAt: openerMessage?.sentAt,
         };
+        scheduleDemoMatchOpener(conversation.id, profile);
         return [conversation, ...prev];
       });
 
@@ -1629,6 +1661,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       securitySettings.disguiseSafeNotifications,
       maybeRecordViewer,
       likedIds,
+      scheduleDemoMatchOpener,
     ],
   );
 
@@ -1665,6 +1698,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           yourTurn: true,
           unread: false,
         };
+        scheduleDemoMatchOpener(conversation.id, profile);
         return [conversation, ...prev];
       });
 
@@ -1680,6 +1714,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       notificationsEnabled,
       notificationPreferences.matches,
       disguiseMode,
+      scheduleDemoMatchOpener,
       securitySettings.disguiseSafeNotifications,
     ],
   );
@@ -1808,59 +1843,57 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }, 2000);
       }
 
-      setTimeout(() => {
-        setConversations((prev) =>
-          prev.map((conversation) => {
-            if (conversation.id !== conversationId) {
-              return conversation;
-            }
-            return { ...conversation, isTyping: true };
-          }),
-        );
-      }, 2500);
-
       const replyProfile = targetConversation?.match.profile;
       const replyHistory = targetConversation
         ? [...targetConversation.messages, message]
         : [message];
 
-      setTimeout(() => {
-        void (async () => {
-          let replyText = 'Haha, love that! 😊';
-          if (replyProfile) {
+      if (replyProfile && isDemoChatProfile(replyProfile)) {
+        setTimeout(() => {
+          setConversations((prev) =>
+            prev.map((conversation) => {
+              if (conversation.id !== conversationId) {
+                return conversation;
+              }
+              return { ...conversation, isTyping: true };
+            }),
+          );
+        }, 2500);
+
+        setTimeout(() => {
+          void (async () => {
             const result = await generateDemoReply({
               profile: replyProfile,
               userMessage: trimmed || (imageUrl ? 'sent a photo' : ''),
               recentMessages: replyHistory,
               userName: user.name,
             });
-            replyText = result.text;
-          }
 
-          setConversations((prev) =>
-            prev.map((conversation) => {
-              if (conversation.id !== conversationId) {
-                return conversation;
-              }
-              const reply: Message = {
-                id: `msg-reply-${Date.now()}`,
-                text: replyText,
-                sentAt: new Date().toISOString(),
-                isMine: false,
-              };
-              return {
-                ...conversation,
-                isTyping: false,
-                messages: [...conversation.messages, reply],
-                lastMessage: reply.text,
-                lastMessageAt: reply.sentAt,
-                yourTurn: true,
-                unread: true,
-              };
-            }),
-          );
-        })();
-      }, 4500);
+            setConversations((prev) =>
+              prev.map((conversation) => {
+                if (conversation.id !== conversationId) {
+                  return conversation;
+                }
+                const reply: Message = {
+                  id: `msg-reply-${Date.now()}`,
+                  text: result.text,
+                  sentAt: new Date().toISOString(),
+                  isMine: false,
+                };
+                return {
+                  ...conversation,
+                  isTyping: false,
+                  messages: [...conversation.messages, reply],
+                  lastMessage: reply.text,
+                  lastMessageAt: reply.sentAt,
+                  yourTurn: true,
+                  unread: true,
+                };
+              }),
+            );
+          })();
+        }, 4500);
+      }
     },
     [
       conversations,

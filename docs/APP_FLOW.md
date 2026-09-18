@@ -12,7 +12,7 @@ Research synthesis from **Tinder**, **Bumble**, **Hinge**, **Badoo**, and **Coff
 | **Daily like limit** | ~100/12h; paywall at cap | Daily cap; Premium unlimited | 8 free likes/day | Limited free actions | **10/day free + banner + LikeLimitModal → Spark+** |
 | **Empty deck** | “Out of people” + widen search | Same + Snooze | “You’re all caught up” | Expand radius | **“No more people nearby” + Widen filters + Discovery settings** |
 | **Matches list** | New matches row + inbox | New matches + 24h expiry ring | “Your turn” badge | Chat list | **New matches row + Your turn + Expires in Xh** (Bumble urgency) |
-| **Chat openers** | GIFs, suggested messages | Opening Moves, icebreakers | Prompt replies | Quick replies | **Icebreaker chips on empty thread** (Bumble/Hinge) |
+| **Chat openers** | GIFs, suggested messages | Opening Moves, icebreakers | Prompt replies | Quick replies | **AI reply suggestions** (3 chips, prefill composer) + icebreaker chips |
 | **Profile detail** | Photo carousel, bio | Badges, modes | **Prompt cards** interleaved with photos | Interests | **Hinge-style prompt cards** in profile sheet |
 | **Safety** | Report/block in chat & profile | Safety Center hub | Report/block | Safety tips | **Safety Center + report/block in chat menu & profile sheet** |
 | **Tab badges** | Likes count, unread messages | Beeline count, chat badge | Likes + matches | Notifications | **Dynamic Likes count + Matches unread/your-turn badge** |
@@ -58,7 +58,7 @@ Research synthesis from **Tinder**, **Bumble**, **Hinge**, **Badoo**, and **Coff
 | Post-like | Keep swiping | Keep swiping | Keep browsing | **Waiting modal → Find more people** |
 | Likes inbox | Gold blur grid | Beeline blur | Roses / likes tab | Blurred grid + badge + Spark+ CTA |
 | Matches | New matches row + inbox | Expiring matches ring | "Your turn" badge | New matches + messages + your turn + expiry |
-| Chat | GIFs, safety | Icebreakers, voice/video | Focused thread | Icebreaker chips, report/block menu |
+| Chat | GIFs, safety | Icebreakers, voice/video | Focused thread | AI suggestions, demo auto-replies, icebreaker chips, report/block menu |
 | Profile | Edit, settings, premium | Verification, modes | Prompts editor | Stats, interests, Safety & Spark+ links |
 | Paywall | Like limit, blur tap | Beeline tap | Rose limit | Like limit modal, Likes tap, Spark+ screen |
 
@@ -72,9 +72,9 @@ Root Stack
 │   ├── Location permission
 │   └── Profile setup
 └── Main (Bottom Tabs)
-    ├── Discover
-    │   ├── Almost full-screen photo card deck (drag → trash / heart / rose)
-    │   ├── Map button → MapDiscover (fake map + pins)
+    ├── Pulse (Discover hub — branded tab with Pulse logo + label)
+    │   ├── Discover card deck (drag → trash / heart / rose)
+    │   ├── Hub sheet → map preview (Esri tiles + avatar pins), Explore, preferences
     │   ├── Search radius pill + Expand location sheet (25 → Anywhere)
     │   ├── Batch loading — 6 profiles at a time, “Search more people” CTA
     │   ├── Like limit pill + modal
@@ -85,10 +85,11 @@ Root Stack
     │   ├── Spark Rose → SuperLikeCelebration + SuperLikeResultModal
     │   ├── Profile detail sheet (prompts, report/block)
     │   └── Full-screen match celebration
-    ├── MapDiscover (stack push from Discover)
-    │   ├── Stylized map with profile pins
-    │   ├── Tap pin → preview card
-    │   └── “Search this area” → load batch / prioritize in deck
+    ├── MapDiscover (stack push from Discover Hub)
+    │   ├── Esri street map with real lat/lng + avatar pins
+    │   ├── Pan / pinch zoom + zoom +/- controls
+    │   ├── Tap pin → preview card → add to deck
+    │   └── “Search this area” → filter pool + reload batch
     ├── Explore (stack push from Discover)
     │   ├── Serious daters / New members / Nearby categories
     │   └── Tap profile → prioritize in deck
@@ -108,7 +109,9 @@ Root Stack
     │   └── Settings → Safety, Spark+
     ├── Chat (stack push)
     │   ├── Header (avatar, expiry, safety menu)
-    │   ├── Icebreakers (empty state)
+    │   ├── AI opener/reply suggestions (prefill composer)
+    │   ├── Demo profiles: AI opening message + auto-reply
+    │   ├── Icebreakers (empty state fallback)
     │   └── Composer
     ├── SparkPlus (modal)
     └── Safety (stack push)
@@ -116,7 +119,7 @@ Root Stack
 
 ## Navigation pattern
 
-- **Bottom tabs** (4): Discover, Likes, Matches, Profile — matches Tinder/Bumble thumb-zone convention.
+- **Bottom tabs** (4): Pulse (Discover), Likes, Matches, Profile — matches Tinder/Bumble thumb-zone convention; Pulse tab uses branded logo + “Pulse” label like other tabs.
 - **Stack overlay**: Chat, Safety push on top of tabs; Spark+ presents as modal.
 - **Modals**: Waiting for match, like limit, profile detail sheet.
 - **Full-screen**: Match celebration (Tinder-style, not a small sheet).
@@ -147,13 +150,11 @@ This avoids direct replication of Tinder's patented swipe gesture while keeping 
 ## Data flow (prototype)
 
 - `AppContext` holds: discover queue (batched), pool total, likes, passes, pending likes, matches, conversations, daily like count, blocked IDs.
-- Discover loads **6 profiles per batch** from a pool filtered by radius (25 → 50 → 100 → 250 → Anywhere).
-- **52 mock discover profiles** (`1`–`6`, `11`–`56`) with cities, distances, map pins.
-- **6 incoming likes** (`7`–`10`, `37`, `38`) — Likes tab badge = 6.
-- **4 pre-matched** (`1` Ava w/ messages, `5` Sofia empty, `15` Amara w/ messages, `27` Isabella new).
-- **5 pending likes** (`6`, `14`, `20`, `22`, `31`) — waiting for reciprocation.
-- **4 instant heart matches** (`3`, `18`, `41`, `45`); **3 super-match IDs** (`11`, `29`, `34`).
-- See `profiles.ts` header comment for full QA bucket map.
+- Discover loads **6 profiles per batch** from a pool filtered by radius (25 → 50 → 100 → 250 → Anywhere) and optional map search center (`mapSearchLat` / `mapSearchLng`).
+- Profiles carry **real latitude/longitude** for map placement; `SearchMapView` uses Esri tiles with avatar pins.
+- **Demo / AI chat profiles** receive AI opening messages and gated auto-replies via `chatReplyCoach` + `demoChatLlm`.
+- Seed matches with empty threads get **demo openers** from `seedState.ts`.
+- See `profiles.ts` header comment for full QA bucket map (IDs, likes, matches, pending).
 
 ## References
 

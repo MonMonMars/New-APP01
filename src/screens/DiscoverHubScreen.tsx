@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -45,6 +45,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
     setSparkSection,
     toggleDiscoverFilter,
     discoverQueue,
+    discoverPool,
     discoverPoolTotal,
     hasMoreInPool,
     searchMorePeople,
@@ -72,6 +73,20 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
   const [closeAfterToast, setCloseAfterToast] = useState(false);
 
   const activeFilters = preferences.discoverFilters ?? [];
+
+  const mapPreviewPins = useMemo(
+    () => discoverPool.slice(0, 16),
+    [discoverPool],
+  );
+
+  const mapPreviewCenter = useMemo(() => {
+    if (preferences.mapSearchLat != null && preferences.mapSearchLng != null) {
+      return { lat: preferences.mapSearchLat, lng: preferences.mapSearchLng };
+    }
+    return preferences.travelMode && preferences.passportCity
+      ? mapCenterForCity(preferences.passportCity)
+      : mapCenterForCity(null);
+  }, [preferences.mapSearchLat, preferences.mapSearchLng, preferences.passportCity, preferences.travelMode]);
 
   const openMap = () => {
     navigation.navigate('MapDiscover');
@@ -137,14 +152,12 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
             onPress={openMap}
             featured
             mapPreview
-            mapCenter={
-              preferences.travelMode && preferences.passportCity
-                ? mapCenterForCity(preferences.passportCity)
-                : mapCenterForCity(null)
-            }
+            mapCenter={mapPreviewCenter}
             mapZoom={zoomForRadius(preferences.maxDistanceMiles)}
             mapRadiusMiles={preferences.maxDistanceMiles}
             mapAccent={colors.gradientEnd}
+            mapPins={mapPreviewPins}
+            mapPinColor={colors.heartRed}
           />
           <HubTile icon="compass-outline" label={t('discoverHub.explore')} colors={colors} onPress={openExplore} />
           <HubTile
@@ -317,6 +330,8 @@ function HubTile({
   mapZoom,
   mapRadiusMiles,
   mapAccent,
+  mapPins,
+  mapPinColor,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
@@ -329,6 +344,8 @@ function HubTile({
   mapZoom?: number;
   mapRadiusMiles?: number;
   mapAccent?: string;
+  mapPins?: Profile[];
+  mapPinColor?: string;
 }) {
   return (
     <AnimatedPressable
@@ -347,9 +364,11 @@ function HubTile({
             zoom={mapZoom}
             radiusMiles={mapRadiusMiles}
             accentColor={mapAccent}
-            pinColor={mapAccent}
-            showYouMarker
+            pinColor={mapPinColor ?? mapAccent}
+            pins={mapPins}
+            showYouMarker={false}
             showRadiusRing
+            showAvatarPins
             interactive={false}
             style={styles.hubMapPreview}
           />

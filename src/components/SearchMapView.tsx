@@ -17,11 +17,13 @@ import { AnimatedPressable } from './AnimatedPressable';
 
 type MapProfilePin = {
   id: string;
-  distanceMiles: number;
+  distanceMiles?: number;
   latitude?: number;
   longitude?: number;
   mapX?: number;
   mapY?: number;
+  photos?: string[];
+  name?: string;
 };
 
 type SearchMapViewProps = {
@@ -34,17 +36,22 @@ type SearchMapViewProps = {
   userLocation?: GeoPoint | null;
   showRadiusRing?: boolean;
   showYouMarker?: boolean;
+  showAvatarPins?: boolean;
   selectedPinId?: string | null;
   interactive?: boolean;
   onCenterChange?: (center: GeoPoint) => void;
   onZoomChange?: (zoom: number) => void;
   onPinPress?: (profileId: string) => void;
+  pinAccessibilityLabel?: (name: string) => string;
   style?: ViewStyle;
 };
 
 const windowSize = Dimensions.get('window');
-const MIN_ZOOM = 3;
-const MAX_ZOOM = 16;
+export const MAP_MIN_ZOOM = 3;
+export const MAP_MAX_ZOOM = 16;
+
+const AVATAR_PIN_SIZE = 28;
+const AVATAR_PIN_SELECTED = 34;
 
 /** Esri street map with real lat/lng pins, pan, and pinch zoom. */
 export function SearchMapView({
@@ -57,11 +64,13 @@ export function SearchMapView({
   userLocation = null,
   showRadiusRing = true,
   showYouMarker = true,
+  showAvatarPins = true,
   selectedPinId = null,
   interactive = true,
   onCenterChange,
   onZoomChange,
   onPinPress,
+  pinAccessibilityLabel,
   style,
 }: SearchMapViewProps) {
   const [mapSize, setMapSize] = useState({
@@ -104,7 +113,7 @@ export function SearchMapView({
     .enabled(interactive && Boolean(onZoomChange))
     .onEnd((event) => {
       const nextZoom = Math.round(
-        Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom + Math.log2(event.scale) * 1.5)),
+        Math.min(MAP_MAX_ZOOM, Math.max(MAP_MIN_ZOOM, zoom + Math.log2(event.scale) * 1.5)),
       );
       if (nextZoom !== zoom) {
         onZoomChange?.(nextZoom);
@@ -120,6 +129,59 @@ export function SearchMapView({
     }
     setMapSize((prev) =>
       prev.width === width && prev.height === height ? prev : { width, height },
+    );
+  };
+
+  const renderPin = (pin: MapPin) => {
+    const selected = selectedPinId === pin.id;
+    const useAvatar = showAvatarPins && Boolean(pin.photoUrl);
+    const size = useAvatar ? (selected ? AVATAR_PIN_SELECTED : AVATAR_PIN_SIZE) : selected ? 14 : 10;
+    const half = size / 2;
+    const positionStyle = {
+      left: pin.left - half,
+      top: pin.top - half,
+      width: size,
+      height: size,
+      borderRadius: half,
+    };
+
+    const pinStyle = [
+      useAvatar ? styles.avatarPin : styles.pin,
+      selected && (useAvatar ? styles.avatarPinSelected : styles.pinSelected),
+      positionStyle,
+      {
+        backgroundColor: useAvatar ? '#fff' : selected ? accentColor : pinColor,
+        borderColor: selected ? accentColor : '#fff',
+      },
+    ];
+
+    const a11yLabel = pin.name
+      ? pinAccessibilityLabel?.(pin.name) ?? pin.name
+      : undefined;
+
+    if (!onPinPress) {
+      return (
+        <View key={pin.id} pointerEvents="none" style={pinStyle}>
+          {useAvatar ? (
+            <Image source={{ uri: pin.photoUrl }} style={styles.avatarImage} contentFit="cover" />
+          ) : null}
+        </View>
+      );
+    }
+
+    return (
+      <AnimatedPressable
+        key={pin.id}
+        hitSlop={10}
+        accessibilityRole="button"
+        accessibilityLabel={a11yLabel}
+        onPress={() => onPinPress(pin.id)}
+        style={pinStyle}
+      >
+        {useAvatar ? (
+          <Image source={{ uri: pin.photoUrl }} style={styles.avatarImage} contentFit="cover" />
+        ) : null}
+      </AnimatedPressable>
     );
   };
 
@@ -168,32 +230,7 @@ export function SearchMapView({
         </View>
       ) : null}
 
-      {mapPins.map((pin) => {
-        const selected = selectedPinId === pin.id;
-        const pinStyle = [
-          styles.pin,
-          selected && styles.pinSelected,
-          {
-            left: pin.left,
-            top: pin.top,
-            backgroundColor: selected ? accentColor : pinColor,
-          },
-        ];
-
-        if (!onPinPress) {
-          return <View key={pin.id} pointerEvents="none" style={pinStyle} />;
-        }
-
-        return (
-          <AnimatedPressable
-            key={pin.id}
-            hitSlop={10}
-            accessibilityRole="button"
-            onPress={() => onPinPress(pin.id)}
-            style={pinStyle}
-          />
-        );
-      })}
+      {mapPins.map(renderPin)}
     </View>
   );
 
@@ -238,22 +275,27 @@ const styles = StyleSheet.create({
   },
   pin: {
     position: 'absolute',
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginLeft: -5,
-    marginTop: -5,
     borderWidth: 1.5,
-    borderColor: '#fff',
-    zIndex: 3,
   },
   pinSelected: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    marginLeft: -7,
-    marginTop: -7,
     borderWidth: 2,
     zIndex: 5,
+  },
+  avatarPin: {
+    position: 'absolute',
+    borderWidth: 2,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.18,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+  },
+  avatarPinSelected: {
+    borderWidth: 3,
+    zIndex: 6,
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
   },
 });

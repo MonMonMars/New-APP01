@@ -141,10 +141,20 @@ export type MapPin = {
   id: string;
   left: number;
   top: number;
+  photoUrl?: string;
+  name?: string;
 };
 
 export function layoutMapPins(
-  profiles: Array<{ id: string; latitude?: number; longitude?: number; mapX?: number; mapY?: number }>,
+  profiles: Array<{
+    id: string;
+    latitude?: number;
+    longitude?: number;
+    mapX?: number;
+    mapY?: number;
+    photos?: string[];
+    name?: string;
+  }>,
   center: GeoPoint,
   zoom: number,
   mapWidth: number,
@@ -172,7 +182,15 @@ export function layoutMapPins(
       ) {
         return [];
       }
-      return [{ id: profile.id, left: pixel.left, top: pixel.top }];
+      return [
+        {
+          id: profile.id,
+          left: pixel.left,
+          top: pixel.top,
+          photoUrl: profile.photos?.[0],
+          name: profile.name,
+        },
+      ];
     }
 
     const dx = (profile.mapX ?? 50) - 50;
@@ -187,6 +205,8 @@ export function layoutMapPins(
         id: profile.id,
         left: mapWidth / 2 + Math.cos(angle) * radius,
         top: mapHeight / 2 + Math.sin(angle) * radius,
+        photoUrl: profile.photos?.[0],
+        name: profile.name,
       },
     ];
   });

@@ -246,6 +246,8 @@ export const zhTw = {
     sendMessage: '傳送訊息',
     checkedInSafely: '✅ 已在 {location} 安全簽到',
     homeSafeEnding: '🏠 已安全到家 — 結束約會簽到',
+    dateCheckInStarted: '📍 約會簽到：見面地點 {location}{contactSuffix}',
+    dateCheckInContactSuffix: ' · 聯絡人：{contact}',
     suggestDateSubtitle: '跳過寒暄 — 向 {name} 發出明確的見面邀請。',
     dateSuggestionCoffee: '這週喝咖啡？',
     dateSuggestionCoffeeMsg: '這週想一起喝咖啡嗎？我知道附近一家不錯的店。',
@@ -464,6 +466,54 @@ export const zhTw = {
     pinA11y: '將 {name} 加入推薦',
     areaLoaded: '此區域的人已加入你的推薦',
     attribution: '© Esri',
+    zoomInA11y: '放大',
+    zoomOutA11y: '縮小',
+  },
+  referral: {
+    title: '邀請朋友',
+    subtitle: '分享 Spark 三次即可解鎖 30 分鐘免費 Boost。',
+    sharesProgress: '（{count}/3 次分享）',
+    shareTitle: '邀請加入 Spark',
+    boostUnlockedTitle: 'Boost 已解鎖！',
+    boostUnlockedBody: '已完成三次分享 — 享受 30 分鐘免費 Boost。',
+  },
+  profileCompletion: {
+    photos: {
+      label: '新增 3 張以上照片',
+      suggestion: '有 3 張以上照片的個人檔案獲得 2 倍喜歡（Bumble 研究）。',
+    },
+    bio: {
+      label: '撰寫自介（40 字以上）',
+      suggestion: '分享具體細節 — 嗜好、氛圍，或你在找什麼。',
+    },
+    prompts: {
+      label: '回答 2 個以上提示問題',
+      suggestion: '有提示問題的 Hinge 用戶更容易開啟深度對話。',
+    },
+    interests: {
+      label: '新增 5 個以上興趣',
+      suggestion: '興趣驅動相容度評分與 Standouts 推薦。',
+    },
+    intent: {
+      label: '設定關係意向',
+      suggestion: '明確意向有助於配對到同頻的人。',
+    },
+    emberPrompt: {
+      label: '新增 Ember 提示問題',
+      suggestion: '私密提示告訴 Ember 配對這段關係的界線。',
+    },
+    photo: {
+      label: '驗證你的照片',
+      suggestion: '照片驗證表示自拍與個人檔案一致。',
+    },
+    person: {
+      label: '驗證你是真人',
+      suggestion: '活體檢測幫助大家信任配對對象。',
+    },
+    age: {
+      label: '驗證你的年齡',
+      suggestion: '年齡驗證建立信任並解鎖 18+ 徽章。',
+    },
   },
   profileCoach: {
     title: 'AI 個人檔案教練',

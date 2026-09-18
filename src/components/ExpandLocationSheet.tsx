@@ -21,7 +21,7 @@ import { mapCenterForCity, zoomForRadius } from '../utils/searchMapTiles';
 import { radii, spacing } from '../theme';
 import { ActionToast } from './ActionToast';
 import { AnimatedPressable } from './AnimatedPressable';
-import { SearchMapView } from './SearchMapView';
+import { MAP_MAX_ZOOM, MAP_MIN_ZOOM, SearchMapView } from './SearchMapView';
 
 const RADIUS_CHIPS = [
   { labelKey: '25', value: 25 },
@@ -59,6 +59,10 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const section = resolveSparkSection(preferences.sparkSection);
   const accent = section === 'ember' ? colors.ember : colors.gradientEnd;
   const currentRadius = preferences.maxDistanceMiles;
+  const chromeBg = colors.surface;
+  const chromeText = colors.text;
+  const chromeMuted = colors.textMuted;
+  const onAccentText = section === 'ember' ? colors.text : '#fff';
 
   const [userLocation, setUserLocation] = useState<GeoPoint | null>(null);
   const [mapCenter, setMapCenter] = useState<GeoPoint>(() =>
@@ -141,6 +145,14 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     setSelectedPinId(profileId);
   };
 
+  const handleZoomIn = () => {
+    setMapZoom((prev) => Math.min(MAP_MAX_ZOOM, prev + 1));
+  };
+
+  const handleZoomOut = () => {
+    setMapZoom((prev) => Math.max(MAP_MIN_ZOOM, prev - 1));
+  };
+
   const handleAddToDeck = (profile: Profile) => {
     prioritizeProfileInDeck(profile.id);
     setDeckToast(t('discoverHub.addedToDeck', { name: profile.name }));
@@ -174,6 +186,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         onCenterChange={setMapCenter}
         onZoomChange={setMapZoom}
         onPinPress={handlePinPress}
+        pinAccessibilityLabel={(name) => t('mapDiscover.pinA11y', { name })}
         style={styles.fullMap}
       />
 
@@ -182,12 +195,12 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
           onPress={onClose}
           hitSlop={12}
           accessibilityLabel={t('common.close')}
-          style={styles.iconButton}
+          style={[styles.iconButton, { backgroundColor: chromeBg }]}
         >
-          <Ionicons name="close" size={22} color="#111" />
+          <Ionicons name="close" size={22} color={chromeText} />
         </AnimatedPressable>
-        <View style={styles.metaPill}>
-          <Text style={styles.metaText}>
+        <View style={[styles.metaPill, { backgroundColor: chromeBg }]}>
+          <Text style={[styles.metaText, { color: chromeText }]}>
             {t('mapDiscover.meta', {
               radius: formatSearchRadiusLocalized(locale, currentRadius),
               count: visiblePins.length,
@@ -198,9 +211,28 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
           onPress={handleRecenter}
           hitSlop={12}
           accessibilityLabel={t('mapDiscover.recenterA11y')}
-          style={styles.iconButton}
+          style={[styles.iconButton, { backgroundColor: chromeBg }]}
         >
-          <Ionicons name="locate" size={20} color="#111" />
+          <Ionicons name="locate" size={20} color={chromeText} />
+        </AnimatedPressable>
+      </View>
+
+      <View style={[styles.zoomControls, { top: insets.top + spacing.sm + 52 }]}>
+        <AnimatedPressable
+          onPress={handleZoomIn}
+          hitSlop={8}
+          accessibilityLabel={t('mapDiscover.zoomInA11y')}
+          style={[styles.iconButton, { backgroundColor: chromeBg }]}
+        >
+          <Ionicons name="add" size={20} color={chromeText} />
+        </AnimatedPressable>
+        <AnimatedPressable
+          onPress={handleZoomOut}
+          hitSlop={8}
+          accessibilityLabel={t('mapDiscover.zoomOutA11y')}
+          style={[styles.iconButton, { backgroundColor: chromeBg }]}
+        >
+          <Ionicons name="remove" size={20} color={chromeText} />
         </AnimatedPressable>
       </View>
 
@@ -211,20 +243,30 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
             onPress={handleSearchThisArea}
             accessibilityLabel={t('mapDiscover.searchThisArea')}
           >
-            <Ionicons name="search" size={16} color="#fff" />
-            <Text style={styles.searchAreaText}>{t('mapDiscover.searchThisArea')}</Text>
+            <Ionicons name="search" size={16} color={onAccentText} />
+            <Text style={[styles.searchAreaText, { color: onAccentText }]}>
+              {t('mapDiscover.searchThisArea')}
+            </Text>
           </AnimatedPressable>
         </View>
       ) : null}
 
       {selectedProfile ? (
-        <View style={[styles.previewCard, { bottom: Math.max(insets.bottom, spacing.md) + 112 }]}>
+        <View
+          style={[
+            styles.previewCard,
+            {
+              bottom: Math.max(insets.bottom, spacing.md) + 112,
+              backgroundColor: chromeBg,
+            },
+          ]}
+        >
           <Image source={{ uri: selectedProfile.photos[0] }} style={styles.previewPhoto} contentFit="cover" />
           <View style={styles.previewBody}>
-            <Text style={styles.previewName}>
+            <Text style={[styles.previewName, { color: chromeText }]}>
               {selectedProfile.name}, {selectedProfile.age}
             </Text>
-            <Text style={styles.previewDistance}>
+            <Text style={[styles.previewDistance, { color: chromeMuted }]}>
               {t('mapDiscover.milesAway', {
                 miles: Math.max(
                   1,
@@ -238,16 +280,18 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
             accessibilityLabel={t('mapDiscover.pinA11y', { name: selectedProfile.name })}
             onPress={() => handleAddToDeck(selectedProfile)}
           >
-            <Ionicons name="add" size={22} color="#fff" />
+            <Ionicons name="add" size={22} color={onAccentText} />
           </AnimatedPressable>
         </View>
       ) : null}
 
       <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
         {visiblePins.length === 0 ? (
-          <Text style={styles.emptyHint}>{t('mapDiscover.emptyArea')}</Text>
+          <Text style={[styles.emptyHint, { color: chromeText, backgroundColor: chromeBg }]}>
+            {t('mapDiscover.emptyArea')}
+          </Text>
         ) : null}
-        <View style={styles.segment}>
+        <View style={[styles.segment, { backgroundColor: chromeBg }]}>
           {RADIUS_CHIPS.map((preset) => {
             const isActive = currentRadius === preset.value;
             return (
@@ -257,14 +301,14 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
                 style={[styles.segmentItem, isActive ? { backgroundColor: accent } : null]}
                 onPress={() => expandSearchRadius(preset.value)}
               >
-                <Text style={[styles.segmentText, { color: isActive ? '#fff' : '#111' }]}>
+                <Text style={[styles.segmentText, { color: isActive ? onAccentText : chromeText }]}>
                   {radiusChipLabel(preset.labelKey)}
                 </Text>
               </AnimatedPressable>
             );
           })}
         </View>
-        <Text style={styles.attrib}>{t('mapDiscover.attribution')}</Text>
+        <Text style={[styles.attrib, { color: chromeMuted }]}>{t('mapDiscover.attribution')}</Text>
       </View>
 
       <ActionToast
@@ -312,24 +356,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     gap: spacing.sm,
   },
+  zoomControls: {
+    position: 'absolute',
+    right: spacing.md,
+    gap: spacing.xs,
+  },
   iconButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.92)',
   },
   metaPill: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.92)',
     borderRadius: radii.button,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
   },
   metaText: {
-    color: '#111',
     fontSize: 14,
     fontWeight: '800',
   },
@@ -352,7 +398,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
   },
   searchAreaText: {
-    color: '#fff',
     fontSize: 14,
     fontWeight: '800',
   },
@@ -363,7 +408,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: 'rgba(255,255,255,0.96)',
     borderRadius: radii.card,
     padding: spacing.sm,
   },
@@ -377,12 +421,10 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   previewName: {
-    color: '#111',
     fontSize: 16,
     fontWeight: '800',
   },
   previewDistance: {
-    color: 'rgba(17,17,17,0.55)',
     fontSize: 13,
     fontWeight: '600',
   },
@@ -402,11 +444,9 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   emptyHint: {
-    color: '#111',
     fontSize: 13,
     fontWeight: '700',
     textAlign: 'center',
-    backgroundColor: 'rgba(255,255,255,0.92)',
     alignSelf: 'center',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
@@ -414,7 +454,6 @@ const styles = StyleSheet.create({
   },
   segment: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.94)',
     borderRadius: radii.button,
     padding: 4,
     gap: 2,
@@ -431,7 +470,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   attrib: {
-    color: 'rgba(17,17,17,0.45)',
     fontSize: 10,
     fontWeight: '600',
     textAlign: 'center',

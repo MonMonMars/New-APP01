@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import { DisguisedProfilePost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
@@ -31,6 +32,7 @@ function OwnerHint({ label, color }: { label: string; color: string }) {
 
 export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const { pulseSocial, togglePulseLike, preferences } = useApp();
   const meta = useDisguiseWorld();
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -68,7 +70,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
       caption={post.overlayText}
       size={PROFILE_AVATAR_SIZE}
       onPress={openPreview}
-      accessibilityLabel={`View profile: ${post.name}`}
+      accessibilityLabel={t('disguiseMiniWindow.viewProfile', { name: post.name })}
     />
   );
 
@@ -84,7 +86,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
             caption={post.summary}
             size={PROFILE_AVATAR_SIZE}
             onPress={openPreview}
-            accessibilityLabel={`View profile: ${post.name}`}
+            accessibilityLabel={t('disguiseMiniWindow.viewProfile', { name: post.name })}
           />
           <View style={styles.socialActions}>
             <AnimatedPressable style={styles.socialAction} onPress={() => togglePulseLike(post.id)}>

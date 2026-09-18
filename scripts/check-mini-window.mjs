@@ -44,8 +44,10 @@ async function completeOnboarding(page) {
 
 async function openMiniWindow(page, index = 0) {
   const thumb = page.getByLabel(/view photos from/i).nth(index);
+  const label = (await thumb.getAttribute('aria-label')) ?? '';
   await thumb.click();
   await page.waitForTimeout(800);
+  return label.replace(/^View photos from\s+/i, '').trim();
 }
 
 async function waitForDismiss(page) {
@@ -68,7 +70,7 @@ await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
 await completeOnboarding(page);
 await dismissCookies(page);
 
-await openMiniWindow(page, 0);
+const reporterName = await openMiniWindow(page, 0);
 
 const body = await page.locator('body').innerText();
 const hasPhotoMeta = /photo 1 of \d+/i.test(body);
@@ -86,12 +88,31 @@ const likeBtn = page.getByLabel(/like profile/i).first();
 const hasLike = await likeBtn.isVisible().catch(() => false);
 let likeStatVisible = false;
 let closedAfterLike = false;
+let feedStableAfterLike = false;
 
 if (hasLike) {
   await likeBtn.click();
   likeStatVisible = await statVisible(page, /\bSAVED\b/i);
   await waitForDismiss(page);
   closedAfterLike = await sheetClosed(page);
+  const feedAfterLike = await page.locator('body').innerText();
+  feedStableAfterLike = reporterName.length > 0 && feedAfterLike.includes(reporterName.split(' ')[0]);
+}
+
+let unlikeStatVisible = false;
+let closedAfterUnlike = false;
+let hasUnlike = false;
+
+if (closedAfterLike) {
+  await openMiniWindow(page, 0);
+  hasUnlike = await page.getByLabel(/unlike profile/i).first().isVisible().catch(() => false);
+}
+
+if (hasUnlike) {
+  await page.getByLabel(/unlike profile/i).first().click();
+  unlikeStatVisible = await statVisible(page, /\bREMOVED\b/i);
+  await waitForDismiss(page);
+  closedAfterUnlike = await sheetClosed(page);
 }
 
 await openMiniWindow(page, 1);
@@ -121,6 +142,7 @@ if (hasSuper) {
 }
 
 console.log(JSON.stringify({
+  reporterName,
   hasPhotoMeta,
   hasNext,
   advanced,
@@ -128,6 +150,10 @@ console.log(JSON.stringify({
   hasLike,
   likeStatVisible,
   closedAfterLike,
+  feedStableAfterLike,
+  hasUnlike,
+  unlikeStatVisible,
+  closedAfterUnlike,
   hasPass,
   passStatVisible,
   closedAfterPass,
@@ -146,6 +172,10 @@ const ok =
   hasLike &&
   likeStatVisible &&
   closedAfterLike &&
+  feedStableAfterLike &&
+  hasUnlike &&
+  unlikeStatVisible &&
+  closedAfterUnlike &&
   hasPass &&
   passStatVisible &&
   closedAfterPass &&

@@ -659,6 +659,8 @@ export const en = {
     actionsSync: 'Actions sync to {world}',
     sponsoredPreview: 'This is your sponsored profile preview.',
     closeA11y: 'Close',
+    viewPhotosFrom: 'View photos from {name}',
+    viewProfile: 'View profile: {name}',
   },
   momentum: {
     title: "You're on a roll!",

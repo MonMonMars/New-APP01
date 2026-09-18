@@ -4,6 +4,7 @@ import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { buildSocialReporter, socialReporterPhotoIndex } from '../../utils/disguiseReporterPhotos';
@@ -23,6 +24,7 @@ type SocialPostCardProps = {
 
 export function SocialPostCard({ post }: SocialPostCardProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const {
     pulseSocial,
     savePulsePost,
@@ -94,7 +96,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
                 hideLabel
                 showIconBadge
                 onPress={() => setAuthorOpen(true)}
-                accessibilityLabel={`View profile: ${post.author}`}
+                accessibilityLabel={t('disguiseMiniWindow.viewProfile', { name: post.author })}
               />
             ) : (
               <FeedPersonThumbnail
@@ -104,7 +106,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
                 showIconBadge
                 imageUrl={post.avatarUrl}
                 onPress={() => setAuthorOpen(true)}
-                accessibilityLabel={`View profile: ${post.author}`}
+                accessibilityLabel={t('disguiseMiniWindow.viewProfile', { name: post.author })}
               />
             )}
           </View>

@@ -1,11 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
 
 import { AnimatedPressable } from './AnimatedPressable';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
+import { AppLocale } from '../types/locale';
 import { radii, spacing } from '../theme';
 import { modalFill } from '../theme/modalFill';
 
@@ -16,21 +18,34 @@ type VibeGameSheetProps = {
   onSendGuess: (message: string) => void;
 };
 
-const VIBE_LABELS = ['Chill 😌', 'Playful 😄', 'Romantic 🌹', 'Adventurous 🏔️', 'Curious 🤔'];
+const VIBE_KEYS = [
+  'chat.vibeChill',
+  'chat.vibePlayful',
+  'chat.vibeRomantic',
+  'chat.vibeAdventurous',
+  'chat.vibeCurious',
+] as const;
+
+function getVibeLabels(locale: AppLocale, t: (key: string) => string): string[] {
+  return VIBE_KEYS.map((key) => t(key));
+}
 
 /** Apollo Read My Vibe–inspired mini-game in chat. */
 export function VibeGameSheet({ visible, profileName, onClose, onSendGuess }: VibeGameSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const [secretVibe] = useState(() => Math.floor(Math.random() * VIBE_LABELS.length));
+  const { t, locale } = useTranslation();
+  const vibeLabels = useMemo(() => getVibeLabels(locale, t), [locale, t]);
+  const [secretVibe] = useState(() => Math.floor(Math.random() * VIBE_KEYS.length));
   const [picked, setPicked] = useState<number | null>(null);
 
   const handlePick = (index: number) => {
     setPicked(index);
+    const vibe = vibeLabels[index];
     const correct = index === secretVibe;
     const message = correct
-      ? `Read My Vibe: I guessed you're feeling ${VIBE_LABELS[index]} — nailed it! 🎯`
-      : `Read My Vibe: I'm guessing ${VIBE_LABELS[index]} — am I close?`;
+      ? t('chat.vibeCorrect', { vibe })
+      : t('chat.vibeGuess', { vibe });
     setTimeout(() => {
       onSendGuess(message);
       setPicked(null);
@@ -43,18 +58,18 @@ export function VibeGameSheet({ visible, profileName, onClose, onSendGuess }: Vi
       <View style={[styles.backdrop, modalFill]}>
         <View style={[styles.sheet, { backgroundColor: colors.background, paddingBottom: insets.bottom + spacing.md }]}>
           <View style={styles.header}>
-            <Text style={[styles.title, { color: colors.text }]}>Read My Vibe</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('chat.readMyVibe')}</Text>
             <AnimatedPressable onPress={onClose}>
               <Ionicons name="close" size={24} color={colors.textMuted} />
             </AnimatedPressable>
           </View>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-            What vibe is {profileName} giving off right now? Guess to break the ice.
+            {t('chat.vibeGameSubtitle', { name: profileName })}
           </Text>
           <View style={styles.grid}>
-            {VIBE_LABELS.map((label, index) => (
+            {vibeLabels.map((label, index) => (
               <AnimatedPressable
-                key={label}
+                key={VIBE_KEYS[index]}
                 scaleTo={0.94}
                 style={[
                   styles.chip,

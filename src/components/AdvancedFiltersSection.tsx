@@ -2,17 +2,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Switch, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
+import {
+  getEmberDiscretionLabel,
+  getEmberSeekingLabel,
+  getEmberStatusLabel,
+  getRelationshipIntentLabel,
+} from '../i18n/labels';
 import {
   AdvancedDiscoverFilters,
-  RELATIONSHIP_INTENT_LABELS,
 } from '../types/preferences';
 import {
   EmberDiscretion,
   EmberSeeking,
-  EMBER_DISCRETION_LABELS,
-  EMBER_SEEKING_LABELS,
   RelationshipIntent,
-  RELATIONSHIP_STATUS_LABELS,
 } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -38,6 +41,7 @@ export function AdvancedFiltersSection({
   emberMode = false,
 }: AdvancedFiltersSectionProps) {
   const { colors } = useTheme();
+  const { t, locale } = useTranslation();
   const accent = emberMode ? colors.ember : colors.gradientEnd;
 
   const toggleIntent = (intent: RelationshipIntent) => {
@@ -88,7 +92,7 @@ export function AdvancedFiltersSection({
     <View style={styles.wrap}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.textMuted }]}>
-          {emberMode ? 'Ember filters' : 'Advanced filters'}
+          {emberMode ? t('preferences.emberFiltersTitle') : t('preferences.advancedFiltersTitle')}
         </Text>
         {!emberMode && !isSparkPlus && (
           <View style={[styles.plusBadge, { backgroundColor: colors.gradientEnd }]}>
@@ -98,14 +102,14 @@ export function AdvancedFiltersSection({
         )}
       </View>
       <Text style={[styles.hint, { color: colors.textMuted }]}>
-        {emberMode
-          ? 'Match on status, discretion, and what they want — the same ideas as Gleeden, Victoria Milan, and Ashley Madison.'
-          : 'Hinge-style intent matching and shared-interest discovery.'}
+        {emberMode ? t('preferences.advancedFiltersEmberHint') : t('preferences.advancedFiltersSparkHint')}
       </Text>
 
       {emberMode ? (
         <>
-          <Text style={[styles.subLabel, { color: colors.textMuted }]}>Status</Text>
+          <Text style={[styles.subLabel, { color: colors.textMuted }]}>
+            {t('preferences.advancedFiltersStatus')}
+          </Text>
           <View style={styles.chipRow}>
             {EMBER_STATUS_OPTIONS.map((status) => {
               const selected = filters.emberStatuses?.includes(status) ?? false;
@@ -120,14 +124,16 @@ export function AdvancedFiltersSection({
                   onPress={() => toggleEmberStatus(status)}
                 >
                   <Text style={[styles.chipText, { color: selected ? colors.text : colors.textMuted }]}>
-                    {RELATIONSHIP_STATUS_LABELS[status]}
+                    {getEmberStatusLabel(locale, status)}
                   </Text>
                 </AnimatedPressable>
               );
             })}
           </View>
 
-          <Text style={[styles.subLabel, { color: colors.textMuted }]}>Discretion</Text>
+          <Text style={[styles.subLabel, { color: colors.textMuted }]}>
+            {t('preferences.advancedFiltersDiscretion')}
+          </Text>
           <View style={styles.chipRow}>
             {EMBER_DISCRETION_OPTIONS.map((value) => {
               const selected = filters.emberDiscretion?.includes(value) ?? false;
@@ -142,14 +148,16 @@ export function AdvancedFiltersSection({
                   onPress={() => toggleEmberDiscretion(value)}
                 >
                   <Text style={[styles.chipText, { color: selected ? colors.text : colors.textMuted }]}>
-                    {EMBER_DISCRETION_LABELS[value]}
+                    {getEmberDiscretionLabel(locale, value)}
                   </Text>
                 </AnimatedPressable>
               );
             })}
           </View>
 
-          <Text style={[styles.subLabel, { color: colors.textMuted }]}>Looking for</Text>
+          <Text style={[styles.subLabel, { color: colors.textMuted }]}>
+            {t('preferences.advancedFiltersLookingFor')}
+          </Text>
           <View style={styles.chipRow}>
             {EMBER_SEEKING_OPTIONS.map((value) => {
               const selected = filters.emberSeeking?.includes(value) ?? false;
@@ -164,7 +172,7 @@ export function AdvancedFiltersSection({
                   onPress={() => toggleEmberSeeking(value)}
                 >
                   <Text style={[styles.chipText, { color: selected ? colors.text : colors.textMuted }]}>
-                    {EMBER_SEEKING_LABELS[value]}
+                    {getEmberSeekingLabel(locale, value)}
                   </Text>
                 </AnimatedPressable>
               );
@@ -173,7 +181,9 @@ export function AdvancedFiltersSection({
         </>
       ) : (
         <>
-          <Text style={[styles.subLabel, { color: colors.textMuted }]}>Relationship intent</Text>
+          <Text style={[styles.subLabel, { color: colors.textMuted }]}>
+            {t('preferences.advancedFiltersIntent')}
+          </Text>
           <View style={styles.chipRow}>
             {INTENT_OPTIONS.map((intent) => {
               const selected = filters.intents?.includes(intent) ?? false;
@@ -188,7 +198,7 @@ export function AdvancedFiltersSection({
                   onPress={() => toggleIntent(intent)}
                 >
                   <Text style={[styles.chipText, { color: selected ? colors.text : colors.textMuted }]}>
-                    {RELATIONSHIP_INTENT_LABELS[intent]}
+                    {getRelationshipIntentLabel(locale, intent)}
                   </Text>
                 </AnimatedPressable>
               );
@@ -199,9 +209,11 @@ export function AdvancedFiltersSection({
 
       <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <View style={styles.rowText}>
-          <Text style={[styles.rowLabel, { color: colors.text }]}>Shared interests only</Text>
+          <Text style={[styles.rowLabel, { color: colors.text }]}>
+            {t('preferences.advancedFiltersSharedInterests')}
+          </Text>
           <Text style={[styles.rowHint, { color: colors.textMuted }]}>
-            Show people who like at least one thing you do
+            {t('preferences.advancedFiltersSharedInterestsHint')}
           </Text>
         </View>
         <Switch

@@ -7,10 +7,11 @@ import { useNavigation } from '@react-navigation/native';
 import { AdvancedFiltersSection } from './AdvancedFiltersSection';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
+import { getShowMeLabel } from '../i18n/labels';
 import {
   DiscoveryPreferences,
   PASSPORT_CITIES,
-  SHOW_ME_LABELS,
   ShowMePreference,
   resolveSparkSection,
 } from '../types/preferences';
@@ -81,6 +82,7 @@ export function DiscoveryPreferencesSheet({
   const navigation = useNavigation();
   const { colors } = useTheme();
   const { isSparkPlus } = useApp();
+  const { t, locale } = useTranslation();
 
   const openSparkPlus = () => {
     navigation.getParent()?.navigate('SparkPlus');
@@ -90,14 +92,18 @@ export function DiscoveryPreferencesSheet({
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
       <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top + spacing.md }]}>
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>Discovery settings</Text>
+          <Text style={[styles.title, { color: colors.text }]}>
+            {t('preferences.discoverySettingsTitle')}
+          </Text>
           <AnimatedPressable onPress={onClose} style={styles.doneButton}>
-            <Text style={[styles.doneText, { color: colors.gradientEnd }]}>Done</Text>
+            <Text style={[styles.doneText, { color: colors.gradientEnd }]}>{t('common.done')}</Text>
           </AnimatedPressable>
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
-          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Show me</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
+            {t('preferences.discoveryShowMe')}
+          </Text>
           <View style={styles.chipRow}>
             {showMeOptions.map((option) => {
               const selected = preferences.showMe === option;
@@ -112,17 +118,21 @@ export function DiscoveryPreferencesSheet({
                   onPress={() => onChange({ ...preferences, showMe: option })}
                 >
                   <Text style={[styles.chipText, { color: selected ? colors.text : colors.textMuted }]}>
-                    {SHOW_ME_LABELS[option]}
+                    {getShowMeLabel(locale, option)}
                   </Text>
                 </AnimatedPressable>
               );
             })}
           </View>
 
-          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Passport / Travel mode</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
+            {t('preferences.discoveryPassport')}
+          </Text>
           <View style={[styles.passportRow, { backgroundColor: colors.surface }]}>
             <Ionicons name="airplane" size={20} color={colors.superLike} />
-            <Text style={[styles.passportLabel, { color: colors.text }]}>Change location</Text>
+            <Text style={[styles.passportLabel, { color: colors.text }]}>
+              {t('preferences.discoveryChangeLocation')}
+            </Text>
             <Switch
               value={preferences.travelMode ?? false}
               onValueChange={(travelMode) =>
@@ -160,11 +170,13 @@ export function DiscoveryPreferencesSheet({
             </View>
           )}
 
-          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Distance</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
+            {t('preferences.discoveryDistance')}
+          </Text>
           <StepperRow
-            label="Maximum distance"
+            label={t('preferences.discoveryMaxDistance')}
             value={preferences.maxDistanceMiles}
-            suffix=" mi"
+            suffix={t('preferences.discoveryMilesSuffix')}
             min={1}
             max={100}
             step={5}
@@ -173,9 +185,11 @@ export function DiscoveryPreferencesSheet({
             }
           />
 
-          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Age range</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
+            {t('preferences.discoveryAgeRange')}
+          </Text>
           <StepperRow
-            label="Minimum age"
+            label={t('preferences.discoveryMinAge')}
             value={preferences.minAge}
             min={18}
             max={preferences.maxAge - 1}
@@ -183,7 +197,7 @@ export function DiscoveryPreferencesSheet({
             onChange={(minAge) => onChange({ ...preferences, minAge })}
           />
           <StepperRow
-            label="Maximum age"
+            label={t('preferences.discoveryMaxAge')}
             value={preferences.maxAge}
             min={preferences.minAge + 1}
             max={60}
@@ -200,9 +214,9 @@ export function DiscoveryPreferencesSheet({
           />
 
           <Text style={[styles.hint, { color: colors.textMuted }]}>
-            Profiles outside these settings are hidden from your deck.
+            {t('preferences.discoveryHint')}
             {preferences.travelMode && preferences.passportCity
-              ? ` Showing people near ${preferences.passportCity}.`
+              ? t('preferences.discoveryShowingNear', { city: preferences.passportCity })
               : ''}
           </Text>
         </ScrollView>

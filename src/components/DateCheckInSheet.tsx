@@ -4,6 +4,7 @@ import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { radii, spacing } from '../theme';
 import { modalFill } from '../theme/modalFill';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -15,12 +16,6 @@ type DateCheckInSheetProps = {
   onStart: (payload: { location: string; plannedAt: string; emergencyContact?: string }) => void;
 };
 
-const TIME_PRESETS = [
-  { label: 'In 1 hour', hours: 1 },
-  { label: 'Tonight', hours: 4 },
-  { label: 'Tomorrow evening', hours: 24 },
-] as const;
-
 export function DateCheckInSheet({
   visible,
   profileName,
@@ -29,9 +24,16 @@ export function DateCheckInSheet({
 }: DateCheckInSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [location, setLocation] = useState('');
   const [emergencyContact, setEmergencyContact] = useState('');
   const [hoursFromNow, setHoursFromNow] = useState(4);
+
+  const timePresets = [
+    { label: t('chat.dateCheckInInOneHour'), hours: 1 },
+    { label: t('chat.dateCheckInTonight'), hours: 4 },
+    { label: t('chat.dateCheckInTomorrow'), hours: 24 },
+  ] as const;
 
   const canStart = location.trim().length > 0;
 
@@ -59,24 +61,24 @@ export function DateCheckInSheet({
           <View style={styles.handle} />
           <View style={styles.header}>
             <Ionicons name="shield-checkmark" size={24} color={colors.gradientEnd} />
-            <Text style={[styles.title, { color: colors.text }]}>Date check-in</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('safety.dateCheckIn')}</Text>
           </View>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-            Share your plans with {profileName}. We&apos;ll remind you to check in when you arrive and when you&apos;re home safe.
+            {t('chat.dateCheckInSubtitle', { name: profileName })}
           </Text>
 
-          <Text style={[styles.label, { color: colors.textMuted }]}>Where are you meeting?</Text>
+          <Text style={[styles.label, { color: colors.textMuted }]}>{t('chat.dateCheckInWhere')}</Text>
           <TextInput
             value={location}
             onChangeText={setLocation}
-            placeholder="Cafe name, neighborhood, or address"
+            placeholder={t('chat.dateCheckInWherePlaceholder')}
             placeholderTextColor={colors.textMuted}
             style={[styles.input, { backgroundColor: colors.background, color: colors.text }]}
           />
 
-          <Text style={[styles.label, { color: colors.textMuted }]}>When</Text>
+          <Text style={[styles.label, { color: colors.textMuted }]}>{t('chat.dateCheckInWhen')}</Text>
           <View style={styles.presetRow}>
-            {TIME_PRESETS.map((preset) => {
+            {timePresets.map((preset) => {
               const selected = hoursFromNow === preset.hours;
               return (
                 <AnimatedPressable
@@ -98,11 +100,11 @@ export function DateCheckInSheet({
             })}
           </View>
 
-          <Text style={[styles.label, { color: colors.textMuted }]}>Trusted contact (optional)</Text>
+          <Text style={[styles.label, { color: colors.textMuted }]}>{t('chat.dateCheckInTrustedContact')}</Text>
           <TextInput
             value={emergencyContact}
             onChangeText={setEmergencyContact}
-            placeholder="Friend or family name"
+            placeholder={t('chat.dateCheckInTrustedPlaceholder')}
             placeholderTextColor={colors.textMuted}
             style={[styles.input, { backgroundColor: colors.background, color: colors.text }]}
           />
@@ -112,7 +114,7 @@ export function DateCheckInSheet({
             onPress={handleStart}
             disabled={!canStart}
           >
-            <Text style={[styles.startText, { color: colors.text }]}>Start check-in plan</Text>
+            <Text style={[styles.startText, { color: colors.text }]}>{t('chat.dateCheckInStart')}</Text>
           </AnimatedPressable>
         </AnimatedPressable>
       </AnimatedPressable>

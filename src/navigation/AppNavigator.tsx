@@ -31,6 +31,7 @@ import { PrivacyCenterScreen } from '../screens/PrivacyCenterScreen';
 import { SecurityProtocolsScreen } from '../screens/SecurityProtocolsScreen';
 import { SecuritySettingsScreen } from '../screens/SecuritySettingsScreen';
 import { VerificationPolicyScreen } from '../screens/VerificationPolicyScreen';
+import { PurchaseHistoryScreen } from '../screens/PurchaseHistoryScreen';
 import { SparkPlusScreen } from '../screens/SparkPlusScreen';
 import { OnboardingFlow } from '../screens/onboarding/OnboardingFlow';
 import { TabBarButton } from '../components/TabBarButton';
@@ -229,6 +230,12 @@ function DiscoverHubWrapper({
   return <DiscoverHubScreen onClose={() => navigation.goBack()} />;
 }
 
+function PurchaseHistoryWrapper({
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, 'PurchaseHistory'>) {
+  return <PurchaseHistoryScreen onClose={() => navigation.goBack()} />;
+}
+
 function MainShell() {
   const { disguiseMode } = useApp();
   // Mount only one tab navigator at a time — React Navigation rejects two Tab.Navigators
@@ -322,6 +329,11 @@ function RootNavigator() {
           <Stack.Screen
             name="DiscoverHub"
             component={DiscoverHubWrapper}
+            options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="PurchaseHistory"
+            component={PurchaseHistoryWrapper}
             options={{ animation: 'slide_from_right' }}
           />
         </>

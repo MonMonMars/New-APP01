@@ -3,7 +3,8 @@ import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
-import { DATE_SUGGESTIONS } from '../utils/dateSuggestions';
+import { useTranslation } from '../i18n';
+import { getLocalizedDateSuggestions } from '../utils/localizedDateSuggestions';
 import { radii, spacing } from '../theme';
 import { modalFill } from '../theme/modalFill';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -19,22 +20,24 @@ type SuggestDateSheetProps = {
 export function SuggestDateSheet({ visible, profileName, onClose, onSelect }: SuggestDateSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t, locale } = useTranslation();
+  const suggestions = getLocalizedDateSuggestions(locale);
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={[styles.backdrop, modalFill]}>
         <View style={[styles.sheet, { backgroundColor: colors.background, paddingBottom: insets.bottom + spacing.md }]}>
           <View style={styles.header}>
-            <Text style={[styles.title, { color: colors.text }]}>Suggest a date</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('chat.suggestDate')}</Text>
             <AnimatedPressable onPress={onClose}>
               <Ionicons name="close" size={24} color={colors.textMuted} />
             </AnimatedPressable>
           </View>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-            Skip small talk — send {profileName} a clear invite to meet.
+            {t('chat.suggestDateSubtitle', { name: profileName })}
           </Text>
           <ScrollView contentContainerStyle={styles.list}>
-            {DATE_SUGGESTIONS.map((item) => (
+            {suggestions.map((item) => (
               <AnimatedPressable
                 key={item.id}
                 style={[styles.option, { backgroundColor: colors.surface, borderColor: colors.border }]}

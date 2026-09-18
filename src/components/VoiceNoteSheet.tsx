@@ -4,6 +4,7 @@ import { Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { radii, spacing } from '../theme';
 import { modalFill } from '../theme/modalFill';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -18,6 +19,7 @@ type VoiceNoteSheetProps = {
 export function VoiceNoteSheet({ visible, profileName, onClose, onSend }: VoiceNoteSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [recording, setRecording] = useState(false);
   const [elapsed, setElapsed] = useState(0);
 
@@ -59,9 +61,9 @@ export function VoiceNoteSheet({ visible, profileName, onClose, onSend }: VoiceN
           style={[styles.sheet, { backgroundColor: colors.surface, paddingBottom: insets.bottom + spacing.lg }]}
           onPress={(event) => event.stopPropagation()}
         >
-          <Text style={[styles.title, { color: colors.text }]}>Voice note</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('chat.voiceNoteTitle')}</Text>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-            Record a quick voice note for {profileName}. Tap record, then send when you are ready.
+            {t('chat.voiceNoteSubtitle', { name: profileName })}
           </Text>
           <AnimatedPressable
             style={[styles.recordButton, { backgroundColor: recording ? colors.nope : colors.gradientEnd }]}
@@ -70,14 +72,18 @@ export function VoiceNoteSheet({ visible, profileName, onClose, onSend }: VoiceN
             <Ionicons name={recording ? 'stop' : 'mic'} size={28} color={colors.text} />
           </AnimatedPressable>
           <Text style={[styles.timer, { color: colors.text }]}>
-            {recording ? `Recording… ${elapsed}s` : elapsed > 0 ? `${elapsed}s recorded` : 'Tap to record'}
+            {recording
+              ? t('chat.voiceNoteRecording', { seconds: elapsed })
+              : elapsed > 0
+                ? t('chat.voiceNoteRecorded', { seconds: elapsed })
+                : t('chat.voiceNoteTapRecord')}
           </Text>
           <AnimatedPressable
             style={[styles.sendButton, { backgroundColor: colors.gradientEnd }, elapsed < 1 && styles.sendDisabled]}
             onPress={handleSend}
             disabled={elapsed < 1}
           >
-            <Text style={[styles.sendText, { color: colors.text }]}>Send voice note</Text>
+            <Text style={[styles.sendText, { color: colors.text }]}>{t('chat.voiceNoteSend')}</Text>
           </AnimatedPressable>
         </AnimatedPressable>
       </AnimatedPressable>

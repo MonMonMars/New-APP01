@@ -2,10 +2,10 @@
 
 ## Demo link (verified working)
 
-**https://cordless-somewhat-interesting-involve.trycloudflare.com**
+**https://realm-tape-employees-tuner.trycloudflare.com**
 
-- **Build:** i18n (English + 繁體中文), root-hosted web export
-- **Verified:** 2026-09-17 — HTTP 200, JS bundle loads, onboarding + Spark discover work
+- **Build:** i18n (English + 繁體中文), discovery/chat sheets, purchase history, root-hosted web export
+- **Verified:** 2026-09-18 — HTTP 200, JS bundle loads, onboarding + Spark discover work (7/8 checks)
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps. Hard-refresh (Cmd/Ctrl+Shift+R) if stale.
 
 ### Quick start

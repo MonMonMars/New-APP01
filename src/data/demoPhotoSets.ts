@@ -6,6 +6,11 @@ const u = (photoId: string, w = 800, h = 1000, crop = 'faces') =>
 const p = (id: number, w = 800, h = 1000) =>
   `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}&h=${h}&fit=crop`;
 
+/** Three crops from one Pexels portrait — guaranteed same person, face-forward framing. */
+function pSet(id: number): string[] {
+  return [p(id, 800, 1000), p(id, 800, 600), p(id, 600, 800)];
+}
+
 /** Same-person photo arrays keyed by set id — used when building demo profiles. */
 export const DEMO_PHOTO_SETS = {
   maya: [u('1573496359142-b8d87734a5a2'), u('1573496359142-b8d87734a5a2', 800, 600, 'entropy'), u('1573497019943-4967731265f5')],
@@ -28,7 +33,31 @@ export const DEMO_PHOTO_SETS = {
   anthony: [p(91227), p(91227, 800, 600), p(91227, 600, 800)],
   oliver: [p(220453), p(220453, 800, 600), p(220453, 600, 800)],
   morris: [p(1689710), p(1689710, 800, 600), p(1689710, 600, 800)],
+  // Batch 2 — unique Pexels portrait ids (117–136 profiles)
+  amara: pSet(774909),
+  sloane: pSet(1130626),
+  camille: pSet(415829),
+  luna: pSet(1181519),
+  tessa: pSet(733872),
+  yuki: pSet(1468379),
+  aaliyah: pSet(1065081),
+  giulia: pSet(3756679),
+  renata: pSet(1544723),
+  ingrid: pSet(1821625),
+  ethan: pSet(1222271),
+  kwame: pSet(1462980),
+  theo: pSet(1310474),
+  andre: pSet(1688170),
+  rafael: pSet(1851164),
+  kenji: pSet(3211476),
+  declan: pSet(1559486),
+  caleb: pSet(1043474),
+  henrik: pSet(1181244),
+  dorian: pSet(2379005),
 } as const;
+
+/** Default face focal point for portrait crops (center-top bias). */
+export const PORTRAIT_FOCAL = { x: 0.5, y: 0.34 } as const;
 
 export type DemoPhotoSetKey = keyof typeof DEMO_PHOTO_SETS;
 

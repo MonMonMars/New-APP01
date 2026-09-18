@@ -1,9 +1,21 @@
+import { PORTRAIT_FOCAL } from '../data/demoPhotoSets';
+
 export type FaceFocalPoint = {
   x: number;
   y: number;
 };
 
 const DEFAULT_FOCAL: FaceFocalPoint = { x: 0.5, y: 0.38 };
+
+function presetFocalForUrl(imageUrl: string): FaceFocalPoint | null {
+  if (imageUrl.includes('images.pexels.com/photos/')) {
+    return PORTRAIT_FOCAL;
+  }
+  if (imageUrl.includes('images.unsplash.com/') && imageUrl.includes('crop=faces')) {
+    return PORTRAIT_FOCAL;
+  }
+  return null;
+}
 
 const focalCache = new Map<string, FaceFocalPoint>();
 
@@ -62,7 +74,7 @@ export async function getFaceFocalPoint(imageUrl: string): Promise<FaceFocalPoin
   }
 
   const detected = await detectFaceFocalOnWeb(imageUrl);
-  const focal = detected ?? DEFAULT_FOCAL;
+  const focal = detected ?? presetFocalForUrl(imageUrl) ?? DEFAULT_FOCAL;
   focalCache.set(imageUrl, focal);
   return focal;
 }

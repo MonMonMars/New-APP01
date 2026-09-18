@@ -8,6 +8,7 @@ import { useTranslation } from '../../i18n';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { buildSocialReporter, socialReporterPhotoIndex } from '../../utils/disguiseReporterPhotos';
+import { profileIntroCaption } from '../../utils/profileIntroCaption';
 import { resolveDisguiseProfile } from '../../utils/resolveDisguiseProfile';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
@@ -51,6 +52,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
     preferences.sparkSection,
   );
   const authorContentKind = linkedAuthorProfile ? 'profile' : 'social';
+  const authorCaption = linkedAuthorProfile ? profileIntroCaption(linkedAuthorProfile) : undefined;
 
   const maskSnippet = post.avatarMask?.text.split(' ').slice(0, 2).join(' ') ?? 'LIVE';
   const handleSave = () => {
@@ -100,6 +102,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
                 overlayText={maskSnippet}
                 overlayVariant={post.avatarMask.variant}
                 contentKind={authorContentKind}
+                caption={authorCaption}
                 hideLabel
                 showIconBadge={authorContentKind !== 'profile'}
                 onPress={() => setAuthorOpen(true)}
@@ -109,6 +112,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
               <FeedPersonThumbnail
                 plainAvatar
                 contentKind={authorContentKind}
+                caption={authorCaption}
                 hideLabel
                 showIconBadge={authorContentKind !== 'profile'}
                 imageUrl={post.avatarUrl}

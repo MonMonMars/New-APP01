@@ -5,6 +5,7 @@ import { pulseNewsImages } from '../data/pulseNewsMedia';
 import { DisguiseAdCreative } from '../types/disguise';
 import { SparkSection } from '../types/preferences';
 import { Profile, UserProfile } from '../types/profile';
+import { profileIntroCaption } from './profileIntroCaption';
 
 const NEWS_TEMPLATES = [
   {
@@ -36,12 +37,6 @@ const NEWS_TEMPLATES = [
   },
 ];
 
-const SOCIAL_TEMPLATES = [
-  'Hot take: the best productivity hack is still a 20-minute walk without your phone.',
-  'Shipped a small UI refresh today — cleaner spacing and better contrast.',
-  'Local spots worth bookmarking before the weekend rush.',
-];
-
 const VARIANTS: DisguisedProfileVariant[] = ['news', 'ad', 'social'];
 
 function profileHandle(name: string): string {
@@ -67,6 +62,7 @@ function toDisguisedProfilePost(
   const isSocial = variant === 'social';
   const adCampaign = disguiseClientAds[index % disguiseClientAds.length];
   const newsTemplate = NEWS_TEMPLATES[index % NEWS_TEMPLATES.length];
+  const intro = profileIntroCaption(profile);
 
   return {
     id: `disguised-profile-${idSuffix}`,
@@ -75,10 +71,10 @@ function toDisguisedProfilePost(
     name: disguiseDisplayName(profile.name),
     avatarUrl: profile.photos[0],
     variant,
-    overlayText: newsTemplate.reporterQuote,
+    overlayText: intro,
     sourceLabel: newsTemplate.source,
     headline: isAd ? adCampaign.brand : isSocial ? disguiseDisplayName(profile.name) : newsTemplate.headline,
-    summary: isAd ? adCampaign.tagline : isSocial ? SOCIAL_TEMPLATES[index % SOCIAL_TEMPLATES.length] : newsTemplate.summary,
+    summary: isAd ? adCampaign.tagline : isSocial ? profile.bio.trim() : newsTemplate.summary,
     timeAgo: `${index + 1}h ago`,
     photos: profile.photos,
     coverImageUrl: isAd ? adCampaign.imageUrl : newsTemplate.coverImageUrl,
@@ -137,7 +133,7 @@ export function profileToDisguisedProfilePost(
 ): DisguisedProfilePost {
   const adCampaign = disguiseClientAds[0];
   const newsTemplate = NEWS_TEMPLATES[0];
-  const quote = profile.bio.split('.')[0] || newsTemplate.reporterQuote;
+  const intro = profileIntroCaption(profile);
 
   return {
     id: `disguised-${profile.id}`,
@@ -146,9 +142,9 @@ export function profileToDisguisedProfilePost(
     name: disguiseDisplayName(profile.name),
     avatarUrl: profile.photos[0],
     variant,
-    overlayText: quote,
+    overlayText: intro,
     sourceLabel: variant === 'ad' ? 'Sponsored' : newsTemplate.source,
-    headline: variant === 'ad' ? adCampaign.brand : quote,
+    headline: variant === 'ad' ? adCampaign.brand : intro,
     summary: variant === 'ad' ? adCampaign.tagline : profile.bio,
     timeAgo: 'Just now',
     photos: profile.photos,

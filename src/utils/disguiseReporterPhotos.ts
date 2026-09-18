@@ -2,6 +2,7 @@ import { DisguiseAlertPerson, NewsReporter, SocialPost } from '../data/disguiseF
 import { disguiseSocialPosts } from '../data/disguiseSocialPosts';
 import { SparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
+import { profileIntroCaption } from './profileIntroCaption';
 import { resolveDisguiseProfile } from './resolveDisguiseProfile';
 
 /** Build a de-duplicated photo list for disguise mini-window previews. */
@@ -41,7 +42,7 @@ export function buildSocialReporter(
     id: `social-${post.id}`,
     name: post.author,
     avatarUrl: post.avatarUrl,
-    quote: post.body,
+    quote: linkedProfile ? profileIntroCaption(linkedProfile) : post.body,
     photos: feedPhotos,
     profileId: linkedProfile?.id,
   };

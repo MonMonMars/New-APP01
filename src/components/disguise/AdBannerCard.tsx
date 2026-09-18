@@ -4,7 +4,10 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
+import { AI_PERSONA_IDS, mockProfiles } from '../../data/profiles';
 import { AdPost } from '../../data/disguiseFeed';
+import { disguiseDisplayName } from '../../utils/disguiseProfileFeed';
+import { profileIntroCaption } from '../../utils/profileIntroCaption';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { ContentTypeIcon, MediaWithContentBadge } from './ContentTypeIcon';
@@ -13,23 +16,9 @@ import { AdLandingSheet } from './AdLandingSheet';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
 import { AnimatedPressable } from '../AnimatedPressable';
 
-const AD_TESTIMONIALS = [
-  {
-    name: 'Jamie R.',
-    quote: 'Switched last month — commute podcasts finally download offline.',
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
-  },
-  {
-    name: 'Sofia L.',
-    quote: 'The VPN deal paid for itself on one hotel Wi‑Fi trip.',
-    avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80',
-  },
-  {
-    name: 'Dev P.',
-    quote: 'Flexible cancellation saved our weekend booking.',
-    avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80',
-  },
-];
+const AD_TESTIMONIAL_PROFILES = mockProfiles.filter(
+  (profile) => !AI_PERSONA_IDS.has(profile.id) && !profile.isAiPersona && profile.photos.length > 0,
+);
 
 type AdBannerCardProps = {
   ad: AdPost;
@@ -41,14 +30,18 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
   const meta = useDisguiseWorld();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [testimonialOpen, setTestimonialOpen] = useState(false);
-  const testimonial = AD_TESTIMONIALS[ad.id.length % AD_TESTIMONIALS.length];
-  const testimonialReporter = {
-    id: `ad-testimonial-${ad.id}`,
-    name: testimonial.name,
-    avatarUrl: testimonial.avatarUrl,
-    quote: testimonial.quote,
-    photos: [testimonial.avatarUrl],
-  };
+  const testimonialProfile =
+    AD_TESTIMONIAL_PROFILES[ad.id.length % AD_TESTIMONIAL_PROFILES.length] ?? AD_TESTIMONIAL_PROFILES[0];
+  const testimonialReporter = testimonialProfile
+    ? {
+        id: `ad-testimonial-${testimonialProfile.id}`,
+        name: disguiseDisplayName(testimonialProfile.name),
+        avatarUrl: testimonialProfile.photos[0],
+        quote: profileIntroCaption(testimonialProfile),
+        photos: testimonialProfile.photos,
+        profileId: testimonialProfile.id,
+      }
+    : null;
 
   return (
     <>
@@ -68,20 +61,22 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
         <View style={styles.body}>
           <Text style={styles.brand}>{ad.brand}</Text>
           <Text style={styles.tagline}>{ad.tagline}</Text>
-          <AnimatedPressable
-            onPress={() => setTestimonialOpen(true)}
-            accessibilityRole="button"
-            accessibilityLabel={`View reader comment from ${testimonial.name}`}
-            style={styles.testimonialRow}
-          >
-            <FeedPersonThumbnail
-              plainAvatar
-              contentKind="ad"
-              imageUrl={testimonial.avatarUrl}
-              caption={testimonial.quote}
-              accessibilityLabel={`${testimonial.name} profile photo`}
-            />
-          </AnimatedPressable>
+          {testimonialReporter ? (
+            <AnimatedPressable
+              onPress={() => setTestimonialOpen(true)}
+              accessibilityRole="button"
+              accessibilityLabel={`View profile: ${testimonialReporter.name}`}
+              style={styles.testimonialRow}
+            >
+              <FeedPersonThumbnail
+                plainAvatar
+                contentKind="profile"
+                imageUrl={testimonialReporter.avatarUrl}
+                caption={testimonialReporter.quote}
+                accessibilityLabel={`${testimonialReporter.name} profile photo`}
+              />
+            </AnimatedPressable>
+          ) : null}
           <View style={[styles.cta, { backgroundColor: meta.accent }]}>
             <Text style={styles.ctaText}>{ad.cta}</Text>
             <Ionicons name="chevron-forward" size={14} color="#fff" />
@@ -90,11 +85,13 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
       </AnimatedPressable>
 
       <AdLandingSheet visible={sheetOpen} ad={ad} onClose={() => setSheetOpen(false)} />
-      <PersonPreviewSheet
-        visible={testimonialOpen}
-        reporter={testimonialReporter}
-        onClose={() => setTestimonialOpen(false)}
-      />
+      {testimonialReporter ? (
+        <PersonPreviewSheet
+          visible={testimonialOpen}
+          reporter={testimonialReporter}
+          onClose={() => setTestimonialOpen(false)}
+        />
+      ) : null}
     </>
   );
 }

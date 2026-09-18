@@ -2,10 +2,10 @@
 
 ## Demo link (verified working)
 
-**https://successfully-surveys-preparation-remarks.trycloudflare.com**
+**https://bow-lesson-developers-involves.trycloudflare.com**
 
-- **Build:** Pulse mini icons (Spark-style), header logo layout, i18n, purchase history, root-hosted web export
-- **Verified:** 2026-09-18 — HTTP 200, JS bundle loads, onboarding + Spark discover work
+- **Build:** Map discover, language settings, Cosmos gender feed, disguise i18n, debug details pass
+- **Verified:** 2026-09-18 — HTTP 200, root-hosted web export
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps. Hard-refresh (Cmd/Ctrl+Shift+R) if stale.
 
 ### Quick start

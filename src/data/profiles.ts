@@ -1,6 +1,7 @@
 import { aiPersonaProfiles, AI_PERSONA_IDS } from './aiPersonas';
 import { extraRawProfiles } from './extraProfiles';
 import { moreRawProfiles } from './moreProfiles';
+import { nextRawProfiles } from './nextProfiles';
 import {
   matchesSparkSection,
   resolveSparkSection,
@@ -42,6 +43,7 @@ export const INCOMING_LIKE_IDS = [
   '7', '8', '9', '10', '37', '38', '46', '51', '54', '61', '62', '63', '64', '65',
   '71', '72', '73', '78', '81', '84', '85', '88',
   '97', '99', '101', '103', '105', '107', '109', '111', '113', '115',
+  '117', '119', '121', '123', '125', '127', '129', '131', '133', '135',
 ] as const;
 export const INCOMING_LIKE_IDS_SET = new Set<string>(INCOMING_LIKE_IDS);
 export const MUTUAL_MATCH_IDS = new Set([
@@ -53,7 +55,7 @@ export const MUTUAL_SUPER_LIKE_IDS = new Set(['11', '29', '34', '36', '48', '59'
 export const SUPER_PRE_MATCHED_IDS = new Set(['30', '33']);
 export const STANDOUT_IDS = [
   '15', '30', '36', '48', '52', '59', '68', '72', '81', '84',
-  '97', '107', '110', '115',
+  '97', '107', '110', '115', '117', '131', '136',
 ] as const;
 /** Ember world — married-group clone of Spark. Data never mixes with Spark. */
 export const MARRIED_PROFILE_IDS = new Set([
@@ -72,13 +74,14 @@ export const EMBER_RECENTLY_ACTIVE_IDS = ['13', '40', '66', '83', '68', '60'] as
 /** Demo profile viewers for "Who viewed you" (Spark+ feature) */
 export const PROFILE_VIEWER_IDS = [
   '13', '17', '25', '33', '40', '50', '57', '66', '72', '81',
-  '97', '101', '107', '111', '115',
+  '97', '101', '107', '111', '115', '119', '125', '131', '135',
 ] as const;
 
 export const RECENTLY_ACTIVE_IDS = [
   '2', '13', '17', '25', '33', '40', '50', '57', '66', '67',
   '69', '71', '73', '77', '83', '88',
   '97', '99', '101', '104', '108', '110', '114', '116',
+  '117', '118', '122', '125', '128', '131', '134', '136',
 ] as const;
 
 export const EXPLORE_CATEGORY_MAP: Record<string, 'serious' | 'new' | 'nearby'> = {
@@ -1119,6 +1122,7 @@ const rawProfiles: Profile[] = [
   },
   ...extraRawProfiles,
   ...moreRawProfiles,
+  ...nextRawProfiles,
   ...aiPersonaProfiles,
 ];
 
@@ -1298,7 +1302,10 @@ export function getIncomingLikeProfilesForSection(
       (profile): profile is Profile => profile !== undefined,
     );
   }
-  return incomingLikeProfiles.filter((profile) => matchesSparkSection(profile, 'spark'));
+  return INCOMING_LIKE_IDS.map((id) => getProfileById(id)).filter(
+    (profile): profile is Profile =>
+      profile !== undefined && matchesSparkSection(profile, 'spark'),
+  );
 }
 
 export function getProfilesWithinRadius(

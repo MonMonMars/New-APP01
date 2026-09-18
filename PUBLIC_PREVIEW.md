@@ -2,10 +2,10 @@
 
 ## Demo link (verified working)
 
-**https://bow-lesson-developers-involves.trycloudflare.com**
+**https://distribution-doom-dropped-belly.trycloudflare.com**
 
 - **Build:** Map discover, language settings, Cosmos gender feed, disguise i18n, debug details pass
-- **Verified:** 2026-09-18 — HTTP 200, root-hosted web export
+- **Verified:** 2026-09-18 — 8/8 checks (HTTP, JS bundle, onboarding, Pulse, Spark discover)
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps. Hard-refresh (Cmd/Ctrl+Shift+R) if stale.
 
 ### Quick start

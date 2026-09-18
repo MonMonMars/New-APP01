@@ -1,4 +1,5 @@
 import { PASSPORT_CITIES } from '../types/preferences';
+import type { GeoPoint } from './geoMap';
 
 export const TILE_PX = 256;
 
@@ -40,20 +41,65 @@ export function zoomForRadius(miles: number): number {
   return 12;
 }
 
-export function mapCenterForCity(city?: string | null): { lat: number; lng: number } {
+export function mapCenterForCity(city?: string | null): GeoPoint {
   if (city && city in CITY_COORDS) {
     return CITY_COORDS[city as (typeof PASSPORT_CITIES)[number]];
   }
   return DEFAULT_MAP_CENTER;
 }
 
-function lonToTile(lon: number, zoom: number): number {
+export function lonToTile(lon: number, zoom: number): number {
   return ((lon + 180) / 360) * 2 ** zoom;
 }
 
-function latToTile(lat: number, zoom: number): number {
+export function latToTile(lat: number, zoom: number): number {
   const latRad = (lat * Math.PI) / 180;
   return ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * 2 ** zoom;
+}
+
+export function tileToLon(x: number, zoom: number): number {
+  return (x / 2 ** zoom) * 360 - 180;
+}
+
+export function tileToLat(y: number, zoom: number): number {
+  const n = Math.PI - (2 * Math.PI * y) / 2 ** zoom;
+  return (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
+}
+
+export function moveMapCenter(center: GeoPoint, dx: number, dy: number, zoom: number): GeoPoint {
+  const cx = lonToTile(center.lng, zoom);
+  const cy = latToTile(center.lat, zoom);
+  return {
+    lat: tileToLat(cy - dy / TILE_PX, zoom),
+    lng: tileToLon(cx - dx / TILE_PX, zoom),
+  };
+}
+
+export function latLngToPixel(
+  point: GeoPoint,
+  center: GeoPoint,
+  zoom: number,
+  mapWidth: number,
+  mapHeight: number,
+): { left: number; top: number } {
+  const cx = lonToTile(center.lng, zoom);
+  const cy = latToTile(center.lat, zoom);
+  const px = lonToTile(point.lng, zoom);
+  const py = latToTile(point.lat, zoom);
+  return {
+    left: (px - cx) * TILE_PX + mapWidth / 2,
+    top: (py - cy) * TILE_PX + mapHeight / 2,
+  };
+}
+
+/** Web Mercator meters per pixel at latitude. */
+export function metersPerPixel(lat: number, zoom: number): number {
+  return (156543.03392 * Math.cos((lat * Math.PI) / 180)) / 2 ** zoom;
+}
+
+export function milesToPixels(miles: number, lat: number, zoom: number): number {
+  const meters = miles * 1609.34;
+  return meters / metersPerPixel(lat, zoom);
 }
 
 export function buildMapTiles(
@@ -98,31 +144,50 @@ export type MapPin = {
 };
 
 export function layoutMapPins(
-  profiles: Array<{ id: string; distanceMiles: number; mapX?: number; mapY?: number }>,
+  profiles: Array<{ id: string; latitude?: number; longitude?: number; mapX?: number; mapY?: number }>,
+  center: GeoPoint,
+  zoom: number,
   mapWidth: number,
   mapHeight: number,
-  radiusMiles: number,
-  maxPins = 24,
+  maxPins = 48,
 ): MapPin[] {
-  const scale = Math.min(mapWidth, mapHeight);
-  const ringDiameter = scale * 0.52;
-  if (ringDiameter <= 0) {
+  if (mapWidth <= 0 || mapHeight <= 0) {
     return [];
   }
 
-  return profiles.slice(0, maxPins).map((profile) => {
+  return profiles.slice(0, maxPins).flatMap((profile) => {
+    if (typeof profile.latitude === 'number' && typeof profile.longitude === 'number') {
+      const pixel = latLngToPixel(
+        { lat: profile.latitude, lng: profile.longitude },
+        center,
+        zoom,
+        mapWidth,
+        mapHeight,
+      );
+      if (
+        pixel.left < -24 ||
+        pixel.top < -24 ||
+        pixel.left > mapWidth + 24 ||
+        pixel.top > mapHeight + 24
+      ) {
+        return [];
+      }
+      return [{ id: profile.id, left: pixel.left, top: pixel.top }];
+    }
+
     const dx = (profile.mapX ?? 50) - 50;
     const dy = (profile.mapY ?? 50) - 50;
+    const scale = Math.min(mapWidth, mapHeight);
+    const ringDiameter = scale * 0.52;
     const angle = Math.atan2(dy, dx);
-    const distNorm =
-      radiusMiles >= 9999
-        ? Math.min(profile.distanceMiles / 400, 0.92)
-        : Math.min(profile.distanceMiles / Math.max(radiusMiles, 1), 0.92);
+    const distNorm = Math.min(Math.hypot(dx, dy) / 50, 0.92);
     const radius = distNorm * (ringDiameter / 2);
-    return {
-      id: profile.id,
-      left: mapWidth / 2 + Math.cos(angle) * radius,
-      top: mapHeight / 2 + Math.sin(angle) * radius,
-    };
+    return [
+      {
+        id: profile.id,
+        left: mapWidth / 2 + Math.cos(angle) * radius,
+        top: mapHeight / 2 + Math.sin(angle) * radius,
+      },
+    ];
   });
 }

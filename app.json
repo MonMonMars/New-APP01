@@ -36,6 +36,7 @@
         "CAMERA",
         "READ_MEDIA_IMAGES",
         "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
         "USE_BIOMETRIC",
         "USE_FINGERPRINT"
       ],
@@ -55,6 +56,12 @@
         "expo-image-picker",
         {
           "photosPermission": "Allow Spark to access your photos for your profile."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Spark uses your location to show people nearby on the map."
         }
       ],
       "expo-notifications"

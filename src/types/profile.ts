@@ -106,7 +106,10 @@ export type Profile = {
   emberAvailability?: EmberAvailability;
   /** City label for map / discovery */
   city?: string;
-  /** Fake map pin position (0–100 % of map viewport) */
+  /** Real map coordinates for nearby search */
+  latitude?: number;
+  longitude?: number;
+  /** @deprecated Legacy fake pin — prefer latitude/longitude */
   mapX?: number;
   mapY?: number;
   instagramHandle?: string;

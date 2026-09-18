@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useMemo, useState } from 'react';
+import { Image } from 'expo-image';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -8,6 +9,14 @@ import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
 import { formatSearchRadiusLocalized } from '../i18n/labels';
 import { resolveSparkSection } from '../types/preferences';
+import type { Profile } from '../types/profile';
+import {
+  distanceFromCenter,
+  filterProfilesInRadius,
+  sortProfilesByDistance,
+  type GeoPoint,
+} from '../utils/geoMap';
+import { resolveUserLocation } from '../services/userLocation';
 import { mapCenterForCity, zoomForRadius } from '../utils/searchMapTiles';
 import { radii, spacing } from '../theme';
 import { ActionToast } from './ActionToast';
@@ -26,7 +35,14 @@ type ExpandSearchMapProps = {
   onClose: () => void;
 };
 
-/** Full-bleed map. Radius chips zoom the map. Tap pins to add people to your deck. */
+function centersDiffer(a: GeoPoint, b: GeoPoint): boolean {
+  return (
+    Math.abs(a.lat - b.lat) > 0.004 ||
+    Math.abs(a.lng - b.lng) > 0.004
+  );
+}
+
+/** Full-bleed real map — pan/zoom, geo pins, search this area. */
 export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
@@ -41,27 +57,82 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const section = resolveSparkSection(preferences.sparkSection);
   const accent = section === 'ember' ? colors.ember : colors.gradientEnd;
   const currentRadius = preferences.maxDistanceMiles;
-  const zoom = zoomForRadius(currentRadius);
-  const center = useMemo(
-    () =>
-      preferences.travelMode && preferences.passportCity
-        ? mapCenterForCity(preferences.passportCity)
-        : mapCenterForCity(null),
-    [preferences.passportCity, preferences.travelMode],
-  );
 
+  const [userLocation, setUserLocation] = useState<GeoPoint | null>(null);
+  const [mapCenter, setMapCenter] = useState<GeoPoint>(() =>
+    preferences.travelMode && preferences.passportCity
+      ? mapCenterForCity(preferences.passportCity)
+      : mapCenterForCity(null),
+  );
+  const [searchCenter, setSearchCenter] = useState<GeoPoint>(mapCenter);
+  const [mapZoom, setMapZoom] = useState(() => zoomForRadius(currentRadius));
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
   const [deckToast, setDeckToast] = useState<string | null>(null);
 
-  const pins = discoverPool;
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      const result = await resolveUserLocation(preferences.passportCity);
+      if (!active) {
+        return;
+      }
+      setUserLocation(result.coords);
+      if (!preferences.travelMode) {
+        setMapCenter(result.coords);
+        setSearchCenter(result.coords);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [preferences.passportCity, preferences.travelMode]);
+
+  useEffect(() => {
+    setMapZoom(zoomForRadius(currentRadius));
+  }, [currentRadius]);
+
+  useEffect(() => {
+    if (preferences.travelMode && preferences.passportCity) {
+      const passportCenter = mapCenterForCity(preferences.passportCity);
+      setMapCenter(passportCenter);
+      setSearchCenter(passportCenter);
+    }
+  }, [preferences.passportCity, preferences.travelMode]);
+
+  const visiblePins = useMemo(
+    () =>
+      sortProfilesByDistance(
+        filterProfilesInRadius(discoverPool, searchCenter, currentRadius),
+        searchCenter,
+      ),
+    [currentRadius, discoverPool, searchCenter],
+  );
+
+  const selectedProfile = useMemo(
+    () => visiblePins.find((profile) => profile.id === selectedPinId) ?? null,
+    [selectedPinId, visiblePins],
+  );
+
+  const showSearchArea = centersDiffer(mapCenter, searchCenter);
+
+  const handleSearchThisArea = useCallback(() => {
+    setSearchCenter(mapCenter);
+    setSelectedPinId(null);
+  }, [mapCenter]);
+
+  const handleRecenter = useCallback(() => {
+    const target = userLocation ?? mapCenterForCity(preferences.passportCity);
+    setMapCenter(target);
+    setSearchCenter(target);
+    setSelectedPinId(null);
+  }, [preferences.passportCity, userLocation]);
 
   const handlePinPress = (profileId: string) => {
     setSelectedPinId(profileId);
-    const profile = pins.find((item) => item.id === profileId);
-    if (!profile) {
-      return;
-    }
-    prioritizeProfileInDeck(profileId);
+  };
+
+  const handleAddToDeck = (profile: Profile) => {
+    prioritizeProfileInDeck(profile.id);
     setDeckToast(t('discoverHub.addedToDeck', { name: profile.name }));
   };
 
@@ -82,13 +153,16 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   return (
     <View style={styles.screen}>
       <SearchMapView
-        center={center}
-        zoom={zoom}
+        center={mapCenter}
+        zoom={mapZoom}
         radiusMiles={currentRadius}
         accentColor={accent}
         pinColor={colors.heartRed}
-        pins={pins}
+        pins={visiblePins}
+        userLocation={userLocation}
         selectedPinId={selectedPinId}
+        onCenterChange={setMapCenter}
+        onZoomChange={setMapZoom}
         onPinPress={handlePinPress}
         style={styles.fullMap}
       />
@@ -98,7 +172,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
           onPress={onClose}
           hitSlop={12}
           accessibilityLabel={t('common.close')}
-          style={styles.closeButton}
+          style={styles.iconButton}
         >
           <Ionicons name="close" size={22} color="#111" />
         </AnimatedPressable>
@@ -106,15 +180,61 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
           <Text style={styles.metaText}>
             {t('mapDiscover.meta', {
               radius: formatSearchRadiusLocalized(locale, currentRadius),
-              count: pins.length,
+              count: visiblePins.length,
             })}
           </Text>
         </View>
-        <View style={styles.closeSlot} />
+        <AnimatedPressable
+          onPress={handleRecenter}
+          hitSlop={12}
+          accessibilityLabel={t('mapDiscover.recenterA11y')}
+          style={styles.iconButton}
+        >
+          <Ionicons name="locate" size={20} color="#111" />
+        </AnimatedPressable>
       </View>
 
+      {showSearchArea ? (
+        <View style={[styles.searchAreaWrap, { top: insets.top + spacing.sm + 52 }]}>
+          <AnimatedPressable
+            style={[styles.searchAreaButton, { backgroundColor: accent }]}
+            onPress={handleSearchThisArea}
+            accessibilityLabel={t('mapDiscover.searchThisArea')}
+          >
+            <Ionicons name="search" size={16} color="#fff" />
+            <Text style={styles.searchAreaText}>{t('mapDiscover.searchThisArea')}</Text>
+          </AnimatedPressable>
+        </View>
+      ) : null}
+
+      {selectedProfile ? (
+        <View style={[styles.previewCard, { bottom: Math.max(insets.bottom, spacing.md) + 112 }]}>
+          <Image source={{ uri: selectedProfile.photos[0] }} style={styles.previewPhoto} contentFit="cover" />
+          <View style={styles.previewBody}>
+            <Text style={styles.previewName}>
+              {selectedProfile.name}, {selectedProfile.age}
+            </Text>
+            <Text style={styles.previewDistance}>
+              {t('mapDiscover.milesAway', {
+                miles: Math.max(
+                  1,
+                  Math.round(distanceFromCenter(selectedProfile, searchCenter)),
+                ),
+              })}
+            </Text>
+          </View>
+          <AnimatedPressable
+            style={[styles.previewAction, { backgroundColor: accent }]}
+            accessibilityLabel={t('mapDiscover.pinA11y', { name: selectedProfile.name })}
+            onPress={() => handleAddToDeck(selectedProfile)}
+          >
+            <Ionicons name="add" size={22} color="#fff" />
+          </AnimatedPressable>
+        </View>
+      ) : null}
+
       <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
-        {pins.length === 0 ? (
+        {visiblePins.length === 0 ? (
           <Text style={styles.emptyHint}>{t('mapDiscover.emptyArea')}</Text>
         ) : null}
         <View style={styles.segment}>
@@ -182,17 +302,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     gap: spacing.sm,
   },
-  closeButton: {
+  iconButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.92)',
-  },
-  closeSlot: {
-    width: 40,
-    height: 40,
   },
   metaPill: {
     flex: 1,
@@ -206,6 +322,66 @@ const styles = StyleSheet.create({
     color: '#111',
     fontSize: 14,
     fontWeight: '800',
+  },
+  searchAreaWrap: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  searchAreaButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radii.button,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  searchAreaText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  previewCard: {
+    position: 'absolute',
+    left: spacing.md,
+    right: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: 'rgba(255,255,255,0.96)',
+    borderRadius: radii.card,
+    padding: spacing.sm,
+  },
+  previewPhoto: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+  },
+  previewBody: {
+    flex: 1,
+    gap: 2,
+  },
+  previewName: {
+    color: '#111',
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  previewDistance: {
+    color: 'rgba(17,17,17,0.55)',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  previewAction: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   bottomBar: {
     position: 'absolute',

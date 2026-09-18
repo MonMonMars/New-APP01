@@ -50,7 +50,7 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
             hitSlop={8}
             style={styles.brandTap}
           >
-            <DisguiseBrandMark size="sm" muted />
+            <DisguiseBrandMark size="sm" muted={false} />
           </AnimatedPressable>
           {title ? (
             <View style={styles.titleBlock}>

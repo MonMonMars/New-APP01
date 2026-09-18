@@ -1,8 +1,8 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { StyleSheet, View } from 'react-native';
 
-import { useApp } from '../../context/AppContext';
+import { pulseBrand } from '../../theme/pulseBrand';
 import { spacing } from '../../theme';
-import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { ScalePressable } from '../motion/ScalePressable';
 
 type DisguiseMiniSparkBarProps = {
@@ -15,28 +15,31 @@ type DisguiseMiniSparkBarProps = {
   onPass: () => void;
 };
 
-const BUTTON_SIZE = 22;
-const LETTER_SIZE = 10;
+const BUTTON_SIZE = 36;
+const STAR_SIZE = 32;
+const ICON_SIZE = 18;
+const STAR_ICON_SIZE = 16;
 
-type MiniLetterButtonProps = {
-  letter: 'X' | 'S' | 'L';
+type MiniIconButtonProps = {
+  icon: keyof typeof Ionicons.glyphMap;
   active: boolean;
-  accent: string;
-  accentSoft: string;
-  accentBorder: string;
+  size?: number;
+  iconSize?: number;
   onPress: () => void;
   accessibilityLabel: string;
 };
 
-function MiniLetterButton({
-  letter,
+/** Same Ionicons as Spark discover — pass / super like / like — in Pulse blue. */
+function MiniIconButton({
+  icon,
   active,
-  accent,
-  accentSoft,
-  accentBorder,
+  size = BUTTON_SIZE,
+  iconSize = ICON_SIZE,
   onPress,
   accessibilityLabel,
-}: MiniLetterButtonProps) {
+}: MiniIconButtonProps) {
+  const accent = pulseBrand.accent;
+
   return (
     <ScalePressable
       onPress={onPress}
@@ -46,17 +49,19 @@ function MiniLetterButton({
       style={[
         styles.button,
         {
-          backgroundColor: active ? accent : accentSoft,
-          borderColor: active ? accent : accentBorder,
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: active ? accent : pulseBrand.accentSoft,
+          borderColor: active ? accent : pulseBrand.accentBorder,
         },
       ]}
     >
-      <Text style={[styles.letter, { color: active ? '#fff' : accent }]}>{letter}</Text>
+      <Ionicons name={icon} size={iconSize} color={active ? '#fff' : accent} />
     </ScalePressable>
   );
 }
 
-/** Compact X / S / L row. Same-size circles in the active disguise accent. Super like stays in the middle. */
 export function DisguiseMiniSparkBar({
   liked,
   superLiked,
@@ -66,40 +71,30 @@ export function DisguiseMiniSparkBar({
   onSuperLike,
   onPass,
 }: DisguiseMiniSparkBarProps) {
-  const { preferences } = useApp();
-  const meta = useDisguiseWorld();
-
   return (
     <View style={styles.bar}>
-      <View style={styles.slot}>
-        <MiniLetterButton
-          letter="X"
+      <View style={[styles.slot, { width: BUTTON_SIZE, height: BUTTON_SIZE }]}>
+        <MiniIconButton
+          icon="trash-outline"
           active={passed}
-          accent={meta.accent}
-          accentSoft={meta.accentSoft}
-          accentBorder={meta.accentBorder}
           onPress={onPass}
           accessibilityLabel="Pass profile"
         />
       </View>
-      <View style={styles.slot}>
-        <MiniLetterButton
-          letter="S"
+      <View style={[styles.slot, { width: STAR_SIZE, height: STAR_SIZE }]}>
+        <MiniIconButton
+          icon="star"
           active={superLiked}
-          accent={meta.accent}
-          accentSoft={meta.accentSoft}
-          accentBorder={meta.accentBorder}
+          size={STAR_SIZE}
+          iconSize={STAR_ICON_SIZE}
           onPress={onSuperLike}
           accessibilityLabel="Super like profile"
         />
       </View>
-      <View style={styles.slot}>
-        <MiniLetterButton
-          letter="L"
+      <View style={[styles.slot, { width: BUTTON_SIZE, height: BUTTON_SIZE }]}>
+        <MiniIconButton
+          icon="heart"
           active={liked}
-          accent={meta.accent}
-          accentSoft={meta.accentSoft}
-          accentBorder={meta.accentBorder}
           onPress={liked ? onUnlike : onLike}
           accessibilityLabel={liked ? 'Unlike profile' : 'Like profile'}
         />
@@ -118,23 +113,12 @@ const styles = StyleSheet.create({
     zIndex: 4,
   },
   slot: {
-    width: BUTTON_SIZE,
-    height: BUTTON_SIZE,
     alignItems: 'center',
     justifyContent: 'center',
   },
   button: {
-    width: BUTTON_SIZE,
-    height: BUTTON_SIZE,
-    borderRadius: BUTTON_SIZE / 2,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-  },
-  letter: {
-    fontSize: LETTER_SIZE,
-    fontWeight: '800',
-    letterSpacing: 0.2,
-    lineHeight: LETTER_SIZE + 1,
   },
 });

@@ -120,7 +120,7 @@ function MainTabs() {
           color: '#111111',
           fontSize: 11,
         },
-        tabBarIcon: ({ focused, size }) => {
+        tabBarIcon: ({ focused, color, size }) => {
           if (route.name === 'Discover') {
             return <PulseDisguiseWordmark markSize={size} focused={focused} />;
           }
@@ -143,6 +143,7 @@ function MainTabs() {
         options={{
           tabBarShowLabel: false,
           tabBarAccessibilityLabel: t('pulseEntry.tabA11y'),
+          tabBarItemStyle: styles.pulseTabItem,
         }}
       />
       <Tab.Screen
@@ -421,5 +422,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  pulseTabItem: {
+    minWidth: 76,
   },
 });

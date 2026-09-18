@@ -1,0 +1,130 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useEffect } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
+
+import { useTheme } from '../../context/ThemeContext';
+import { spacing } from '../../theme';
+
+export type MiniDismissKind = 'like' | 'unlike' | 'super';
+
+type DisguiseMiniDismissStatProps = {
+  kind: MiniDismissKind;
+  accent: string;
+};
+
+const STAT_COPY: Record<
+  MiniDismissKind,
+  { icon: keyof typeof Ionicons.glyphMap; label: string; iconColorKey: 'heartRed' | 'textMuted' | 'superLike' }
+> = {
+  like: { icon: 'heart', label: 'Saved', iconColorKey: 'heartRed' },
+  unlike: { icon: 'heart-dislike-outline', label: 'Removed', iconColorKey: 'textMuted' },
+  super: { icon: 'star', label: 'Super liked', iconColorKey: 'superLike' },
+};
+
+/** Brief pulse + icon flash while the mini window fades out after a Spark action. */
+export function DisguiseMiniDismissStat({ kind, accent }: DisguiseMiniDismissStatProps) {
+  const { colors } = useTheme();
+  const copy = STAT_COPY[kind];
+  const iconColor = colors[copy.iconColorKey];
+
+  const ringScale = useSharedValue(0.45);
+  const ringOpacity = useSharedValue(0);
+  const badgeScale = useSharedValue(0.72);
+  const badgeOpacity = useSharedValue(0);
+  const labelOpacity = useSharedValue(0);
+
+  useEffect(() => {
+    ringScale.value = 0.45;
+    ringOpacity.value = 0.85;
+    ringScale.value = withTiming(2.2, { duration: 420, easing: Easing.out(Easing.cubic) });
+    ringOpacity.value = withTiming(0, { duration: 420, easing: Easing.out(Easing.cubic) });
+
+    badgeScale.value = 0.72;
+    badgeOpacity.value = 0;
+    badgeScale.value = withSequence(
+      withTiming(1.08, { duration: 160, easing: Easing.out(Easing.back(1.4)) }),
+      withTiming(1, { duration: 120 }),
+      withDelay(80, withTiming(0.88, { duration: 180 })),
+    );
+    badgeOpacity.value = withSequence(
+      withTiming(1, { duration: 120 }),
+      withDelay(180, withTiming(0, { duration: 200 })),
+    );
+
+    labelOpacity.value = withSequence(
+      withDelay(60, withTiming(1, { duration: 140 })),
+      withDelay(160, withTiming(0, { duration: 180 })),
+    );
+  }, [badgeOpacity, badgeScale, kind, labelOpacity, ringOpacity, ringScale]);
+
+  const ringStyle = useAnimatedStyle(() => ({
+    opacity: ringOpacity.value,
+    transform: [{ scale: ringScale.value }],
+  }));
+
+  const badgeStyle = useAnimatedStyle(() => ({
+    opacity: badgeOpacity.value,
+    transform: [{ scale: badgeScale.value }],
+  }));
+
+  const labelStyle = useAnimatedStyle(() => ({
+    opacity: labelOpacity.value,
+  }));
+
+  return (
+    <View style={styles.overlay} pointerEvents="none">
+      <Animated.View
+        style={[styles.ring, { borderColor: accent }, ringStyle]}
+      />
+      <Animated.View style={[styles.badge, { backgroundColor: colors.surface, borderColor: accent }, badgeStyle]}>
+        <Ionicons name={copy.icon} size={kind === 'super' ? 22 : 20} color={iconColor} />
+      </Animated.View>
+      <Animated.Text style={[styles.label, { color: colors.text }, labelStyle]}>{copy.label}</Animated.Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 8,
+  },
+  ring: {
+    position: 'absolute',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 2,
+  },
+  badge: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: StyleSheet.hairlineWidth,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
+  label: {
+    position: 'absolute',
+    bottom: spacing.sm,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
+  },
+});

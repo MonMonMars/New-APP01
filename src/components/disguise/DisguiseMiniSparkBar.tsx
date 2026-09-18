@@ -9,6 +9,7 @@ type DisguiseMiniSparkBarProps = {
   liked: boolean;
   superLiked: boolean;
   passed: boolean;
+  disabled?: boolean;
   onLike: () => void;
   onUnlike: () => void;
   onSuperLike: () => void;
@@ -23,6 +24,7 @@ const STAR_ICON_SIZE = 16;
 type MiniIconButtonProps = {
   icon: keyof typeof Ionicons.glyphMap;
   active: boolean;
+  disabled?: boolean;
   size?: number;
   iconSize?: number;
   onPress: () => void;
@@ -37,6 +39,7 @@ function stopMiniActionPropagation(event?: GestureResponderEvent) {
 function MiniIconButton({
   icon,
   active,
+  disabled = false,
   size = BUTTON_SIZE,
   iconSize = ICON_SIZE,
   onPress,
@@ -47,12 +50,15 @@ function MiniIconButton({
   return (
     <ScalePressable
       onPress={(event) => {
+        if (disabled) {
+          return;
+        }
         stopMiniActionPropagation(event);
         onPress();
       }}
       active={false}
       accessibilityLabel={accessibilityLabel}
-      scaleTo={0.86}
+      scaleTo={disabled ? 1 : 0.86}
       style={[
         styles.button,
         {
@@ -61,6 +67,7 @@ function MiniIconButton({
           borderRadius: size / 2,
           backgroundColor: active ? accent : pulseBrand.accentSoft,
           borderColor: active ? accent : pulseBrand.accentBorder,
+          opacity: disabled ? 0.55 : 1,
         },
       ]}
     >
@@ -73,6 +80,7 @@ export function DisguiseMiniSparkBar({
   liked,
   superLiked,
   passed,
+  disabled = false,
   onLike,
   onUnlike,
   onSuperLike,
@@ -84,6 +92,7 @@ export function DisguiseMiniSparkBar({
         <MiniIconButton
           icon="trash-outline"
           active={passed}
+          disabled={disabled}
           onPress={onPass}
           accessibilityLabel="Pass profile"
         />
@@ -92,6 +101,7 @@ export function DisguiseMiniSparkBar({
         <MiniIconButton
           icon="star"
           active={superLiked}
+          disabled={disabled}
           size={STAR_SIZE}
           iconSize={STAR_ICON_SIZE}
           onPress={onSuperLike}
@@ -102,6 +112,7 @@ export function DisguiseMiniSparkBar({
         <MiniIconButton
           icon="heart"
           active={liked}
+          disabled={disabled}
           onPress={liked ? onUnlike : onLike}
           accessibilityLabel={liked ? 'Unlike profile' : 'Like profile'}
         />

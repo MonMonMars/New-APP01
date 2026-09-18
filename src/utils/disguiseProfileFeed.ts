@@ -92,10 +92,17 @@ function toDisguisedProfilePost(
 /** Disguised profiles — same card chrome as news/ad/social; only copy and avatar differ. */
 export function buildDisguisedProfileFeedItems(
   section?: SparkSection | string | null,
+  rotationOffset = 0,
 ): DisguisedProfilePost[] {
-  return getIncomingLikeProfilesForSection(section).map((profile, index) =>
-    toDisguisedProfilePost(profile, index),
-  );
+  const profiles = getIncomingLikeProfilesForSection(section);
+  if (profiles.length === 0) {
+    return [];
+  }
+
+  const offset = ((rotationOffset % profiles.length) + profiles.length) % profiles.length;
+  const rotated = [...profiles.slice(offset), ...profiles.slice(0, offset)];
+
+  return rotated.map((profile, index) => toDisguisedProfilePost(profile, index));
 }
 
 export function buildDisguisedProfileFeedItem(

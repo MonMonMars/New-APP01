@@ -5,6 +5,8 @@ import { FeedItem } from '../data/disguiseFeed';
 import { buildDisguiseFeed } from '../utils/buildDisguiseFeed';
 import { filterActionedDisguiseFeed } from '../utils/filterActionedDisguiseFeed';
 import { filterDisguiseFeed } from '../utils/disguiseFeedFilter';
+import { renewPulseFeedProfiles } from '../utils/refreshPulseFeed';
+import { usePulseFeedRefreshGeneration } from './usePulseFeedRefresh';
 
 function disguiseFeedSignature(
   userId: string,
@@ -18,27 +20,31 @@ function disguiseFeedSignature(
 /** Pulse feed layout stays cached; liked/passed profiles fade into fresh replacements in-place. */
 export function useDisguiseFeedItems(topic?: string): FeedItem[] {
   const { user, disguiseAdCreative, preferences, pulseSocial, likedIds, passedIds, superLikedIds } = useApp();
+  const refreshGeneration = usePulseFeedRefreshGeneration();
   const cacheRef = useRef<{ signature: string; base: FeedItem[] } | null>(null);
 
   const creativeKey = disguiseAdCreative
     ? `${disguiseAdCreative.variant}|${disguiseAdCreative.sourcePhotoUrl}|${disguiseAdCreative.overlayText}`
     : '';
 
-  const signature = disguiseFeedSignature(
+  const signature = `${disguiseFeedSignature(
     user.id,
     user.gender,
     preferences.sparkSection ?? 'spark',
     creativeKey,
-  );
+  )}|refresh:${refreshGeneration}`;
 
   const baseFeed = useMemo(() => {
     if (cacheRef.current?.signature === signature) {
       return cacheRef.current.base;
     }
-    const built = buildDisguiseFeed(user, disguiseAdCreative, preferences.sparkSection);
+    let built = buildDisguiseFeed(user, disguiseAdCreative, preferences.sparkSection);
+    if (refreshGeneration > 0) {
+      built = renewPulseFeedProfiles(built, preferences.sparkSection, refreshGeneration);
+    }
     cacheRef.current = { signature, base: built };
     return built;
-  }, [disguiseAdCreative, preferences.sparkSection, signature, user]);
+  }, [disguiseAdCreative, preferences.sparkSection, refreshGeneration, signature, user]);
 
   return useMemo(() => {
     const filtered = filterDisguiseFeed(baseFeed, topic, user.gender);

@@ -23,14 +23,21 @@ import {
 import { buildAlertReporter } from '../../utils/disguiseReporterPhotos';
 import { radii, spacing } from '../../theme';
 import { useApp } from '../../context/AppContext';
+import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefreshFooter';
+import { PulseProfileSwap } from '../../components/motion/PulseProfileSwap';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
+import { usePulseFeedRefreshGeneration, usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
+import { resolveDisguiseProfile } from '../../utils/resolveDisguiseProfile';
+import { profileIntroCaption } from '../../utils/profileIntroCaption';
 
 export function DisguiseAlertsScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { markActivityAlertsRead, preferences } = useApp();
   const meta = useDisguiseWorld();
+  const refreshGeneration = usePulseFeedRefreshGeneration();
+  const { refreshing, flatListProps } = usePulseScrollRefresh();
 
   useFocusEffect(
     useCallback(() => {
@@ -56,6 +63,8 @@ export function DisguiseAlertsScreen() {
         data={disguiseAlerts}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
+        {...flatListProps}
+        ListFooterComponent={<PulseFeedRefreshFooter refreshing={refreshing} />}
         renderItem={({ item }) => {
           const newsPost = item.articleUrl ? findNewsPostByArticleUrl(item.articleUrl) : undefined;
           const ad = item.landingUrl ? findAdPostByLandingUrl(item.landingUrl) : undefined;
@@ -67,6 +76,13 @@ export function DisguiseAlertsScreen() {
                 ? () => openPersonPreview(item)
                 : () => setActivityAlert(item);
 
+          const linkedProfile = item.person
+            ? resolveDisguiseProfile(`alert-${item.id}`, undefined, preferences.sparkSection)
+            : null;
+          const profileKey = linkedProfile?.id ?? `alert-${item.id}-${refreshGeneration}`;
+          const avatarUrl = linkedProfile?.photos[0] ?? item.person?.avatarUrl ?? '';
+          const avatarCaption = linkedProfile ? profileIntroCaption(linkedProfile) : undefined;
+
           return (
             <AnimatedPressable
               accessibilityRole="button"
@@ -75,19 +91,20 @@ export function DisguiseAlertsScreen() {
             >
               {item.person ? (
                 <View style={styles.personRow}>
-                  <View style={styles.avatarSlot}>
+                  <PulseProfileSwap profileKey={profileKey} style={styles.avatarSlot}>
                     <FeedPersonThumbnail
-                      imageUrl={item.person.avatarUrl}
+                      imageUrl={avatarUrl}
                       overlayText={item.person.overlayText ?? 'LIVE'}
                       overlayVariant={item.person.overlayVariant ?? 'news'}
                       plainAvatar={!item.person.overlayVariant}
                       contentKind="profile"
+                      caption={avatarCaption}
                       hideLabel
                       showIconBadge
                       onPress={() => openPersonPreview(item)}
                       accessibilityLabel={`View profile: ${item.person.name}`}
                     />
-                  </View>
+                  </PulseProfileSwap>
                   <View style={styles.textWrap}>
                     <Text style={[styles.text, { color: colors.text }]} numberOfLines={3}>
                       {item.text}

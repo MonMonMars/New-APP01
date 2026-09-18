@@ -75,7 +75,7 @@ export function DisguiseProfileScreen() {
     generatedAt: new Date().toISOString(),
   };
   const refreshGeneration = usePulseFeedRefreshGeneration();
-  const { refreshing, scrollViewProps } = usePulseScrollRefresh();
+  const { refreshing, justUpdated, scrollViewProps } = usePulseScrollRefresh();
   const profileFeedItem = buildDisguisedProfileFeedItem(user, profileCreative);
   const recentPosts = useMemo(
     () => buildDisguisedProfileFeedItems(preferences.sparkSection, refreshGeneration),
@@ -181,7 +181,10 @@ export function DisguiseProfileScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader title={t('disguiseProfile.title')} showSearch={false} />
-      <ScrollView contentContainerStyle={styles.content} {...scrollViewProps}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        {...scrollViewProps}
+      >
         <View style={styles.hero}>
           <DisguisedProfileCard post={profileFeedItem} />
           <Text style={[styles.name, { color: colors.text }]}>{user.name}</Text>
@@ -283,7 +286,7 @@ export function DisguiseProfileScreen() {
           <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
         </AnimatedPressable>
 
-        <PulseFeedRefreshFooter refreshing={refreshing} />
+        <PulseFeedRefreshFooter refreshing={refreshing} justUpdated={justUpdated} />
       </ScrollView>
 
       <DisguiseAdGeneratorSheet visible={showGenerator} onClose={() => setShowGenerator(false)} />

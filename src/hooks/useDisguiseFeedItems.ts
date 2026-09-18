@@ -5,7 +5,6 @@ import { FeedItem } from '../data/disguiseFeed';
 import { buildDisguiseFeed } from '../utils/buildDisguiseFeed';
 import { filterActionedDisguiseFeed } from '../utils/filterActionedDisguiseFeed';
 import { filterDisguiseFeed } from '../utils/disguiseFeedFilter';
-import { renewPulseFeedProfiles } from '../utils/refreshPulseFeed';
 import { usePulseFeedRefreshGeneration } from './usePulseFeedRefresh';
 
 function disguiseFeedSignature(
@@ -38,10 +37,12 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
     if (cacheRef.current?.signature === signature) {
       return cacheRef.current.base;
     }
-    let built = buildDisguiseFeed(user, disguiseAdCreative, preferences.sparkSection);
-    if (refreshGeneration > 0) {
-      built = renewPulseFeedProfiles(built, preferences.sparkSection, refreshGeneration);
-    }
+    const built = buildDisguiseFeed(
+      user,
+      disguiseAdCreative,
+      preferences.sparkSection,
+      refreshGeneration,
+    );
     cacheRef.current = { signature, base: built };
     return built;
   }, [disguiseAdCreative, preferences.sparkSection, refreshGeneration, signature, user]);

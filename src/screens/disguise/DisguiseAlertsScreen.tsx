@@ -27,6 +27,7 @@ import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefre
 import { PulseProfileSwap } from '../../components/motion/PulseProfileSwap';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
+import { useRotatedPulseContent } from '../../hooks/useRotatedPulseContent';
 import { usePulseFeedRefreshGeneration, usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
 import { resolveDisguiseProfile } from '../../utils/resolveDisguiseProfile';
 import { profileIntroCaption } from '../../utils/profileIntroCaption';
@@ -37,7 +38,8 @@ export function DisguiseAlertsScreen() {
   const { markActivityAlertsRead, preferences } = useApp();
   const meta = useDisguiseWorld();
   const refreshGeneration = usePulseFeedRefreshGeneration();
-  const { refreshing, flatListProps } = usePulseScrollRefresh();
+  const alerts = useRotatedPulseContent(disguiseAlerts);
+  const { refreshing, justUpdated, flatListProps } = usePulseScrollRefresh();
 
   useFocusEffect(
     useCallback(() => {
@@ -60,11 +62,12 @@ export function DisguiseAlertsScreen() {
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader title="Activity" showSearch={false} />
       <FlatList
-        data={disguiseAlerts}
+        data={alerts}
+        extraData={refreshGeneration}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         {...flatListProps}
-        ListFooterComponent={<PulseFeedRefreshFooter refreshing={refreshing} />}
+        ListFooterComponent={<PulseFeedRefreshFooter refreshing={refreshing} justUpdated={justUpdated} />}
         renderItem={({ item }) => {
           const newsPost = item.articleUrl ? findNewsPostByArticleUrl(item.articleUrl) : undefined;
           const ad = item.landingUrl ? findAdPostByLandingUrl(item.landingUrl) : undefined;

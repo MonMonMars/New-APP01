@@ -6,6 +6,11 @@ import { UserProfile } from '../types/profile';
 import { disguiseFeedItemsForGender } from './disguiseFeedCatalog';
 import { buildDisguisedProfileFeedItem, buildDisguisedProfileFeedItems } from './disguiseProfileFeed';
 import { profileIntroCaption } from './profileIntroCaption';
+import {
+  freshenPulseFeedTimestamps,
+  renewPulseFeedProfiles,
+  rotatePulseList,
+} from './refreshPulseFeed';
 import { pinnedReporterProfileId, resolveDisguiseProfileId } from './resolveDisguiseProfile';
 
 function weaveProfileCards(base: FeedItem[], profileCards: FeedItem[]): FeedItem[] {
@@ -112,25 +117,32 @@ export function buildDisguiseFeed(
   user: UserProfile,
   creative: DisguiseAdCreative | null,
   section?: SparkSection | string | null,
+  refreshGeneration = 0,
 ): FeedItem[] {
-  const profileCards = buildDisguisedProfileFeedItems(section);
-  const baseFeed = disguiseFeedItemsForGender(user.gender);
+  const profileCards = buildDisguisedProfileFeedItems(section, refreshGeneration);
+  let baseFeed = disguiseFeedItemsForGender(user.gender);
+  if (refreshGeneration > 0) {
+    baseFeed = freshenPulseFeedTimestamps(rotatePulseList(baseFeed, refreshGeneration), refreshGeneration);
+  }
   const withProfiles = weaveProfileCards(baseFeed, profileCards);
 
-  const linked = syncReporterPhotos(pinFeedProfileLinks(withProfiles, section), section);
+  let linked = syncReporterPhotos(pinFeedProfileLinks(withProfiles, section), section);
 
-  if (!creative) {
-    return linked;
+  if (creative) {
+    const userItem = buildDisguisedProfileFeedItem(user, creative);
+    const withoutUserSlot = linked.filter((item) => item.id !== 'disguised-user');
+    linked = syncReporterPhotos(
+      pinFeedProfileLinks(
+        [withoutUserSlot[0], withoutUserSlot[1], userItem, ...withoutUserSlot.slice(2)],
+        section,
+      ),
+      section,
+    );
   }
 
-  const userItem = buildDisguisedProfileFeedItem(user, creative);
-  const withoutUserSlot = linked.filter((item) => item.id !== 'disguised-user');
+  if (refreshGeneration > 0) {
+    return renewPulseFeedProfiles(linked, section, refreshGeneration);
+  }
 
-  return syncReporterPhotos(
-    pinFeedProfileLinks(
-      [withoutUserSlot[0], withoutUserSlot[1], userItem, ...withoutUserSlot.slice(2)],
-      section,
-    ),
-    section,
-  );
+  return linked;
 }

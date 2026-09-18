@@ -1,6 +1,5 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { useRef } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -23,7 +22,7 @@ import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefreshFooter';
 import { FadeSlideIn } from '../../components/motion/FadeSlideIn';
-import { usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
+import { usePulseFeedRefreshGeneration, usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
 
 function renderFeedItem({ item, index }: { item: FeedItem; index: number }) {
   const card = (() => {
@@ -62,12 +61,8 @@ export function DisguiseFeedScreen() {
   const topic = route.params?.topic;
 
   const feedItems = useDisguiseFeedItems(topic);
-  const listRef = useRef<FlatList<FeedItem>>(null);
-  const { refreshing, flatListProps } = usePulseScrollRefresh({
-    onRefreshed: () => {
-      listRef.current?.scrollToOffset({ offset: 0, animated: true });
-    },
-  });
+  const refreshGeneration = usePulseFeedRefreshGeneration();
+  const { refreshing, justUpdated, flatListProps } = usePulseScrollRefresh();
 
   const sectionLabel = topic ? topicFilterLabel(topic) : meta.feedLabel;
 
@@ -75,13 +70,13 @@ export function DisguiseFeedScreen() {
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader />
       <FlatList
-        ref={listRef}
         data={feedItems}
+        extraData={refreshGeneration}
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => renderFeedItem({ item, index })}
         contentContainerStyle={[styles.list, { paddingBottom: spacing.xl * 2 }]}
         {...flatListProps}
-        ListFooterComponent={<PulseFeedRefreshFooter refreshing={refreshing} />}
+        ListFooterComponent={<PulseFeedRefreshFooter refreshing={refreshing} justUpdated={justUpdated} />}
         ListHeaderComponent={
           <View style={styles.headerRow}>
             <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>{sectionLabel}</Text>

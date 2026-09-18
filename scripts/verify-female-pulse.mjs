@@ -62,7 +62,7 @@ async function main() {
     checks.likes_reveal_free = /See who liked you and match back instantly/i.test(likesBody);
     checks.no_paywall_banner = !/Upgrade to Spark\+ to see who they are/i.test(likesBody);
 
-    await page.getByRole('tab', { name: 'Discover' }).click({ force: true });
+    await page.getByRole('tab', { name: /pulse disguise mode/i }).click({ force: true });
     await page.waitForTimeout(500);
     await page.getByLabel('Discover tools').click({ force: true });
     await page.getByText('Discover tools', { exact: true }).waitFor({ timeout: 8000 });

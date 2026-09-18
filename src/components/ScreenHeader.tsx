@@ -10,6 +10,8 @@ import { PulseDisguiseLogo, SectionCenterLogo } from './disguise/ModeToggleLogo'
 type ScreenHeaderProps = {
   title?: string;
   showLogo?: boolean;
+  /** Grey P-only Pulse entry on the left while keeping the title centered. */
+  showPulseEntry?: boolean;
   compact?: boolean;
   leftIcon?: keyof typeof Ionicons.glyphMap;
   onLeftPress?: () => void;
@@ -23,6 +25,7 @@ type ScreenHeaderProps = {
 export function ScreenHeader({
   title,
   showLogo = false,
+  showPulseEntry = false,
   compact = false,
   leftIcon,
   onLeftPress,
@@ -37,7 +40,7 @@ export function ScreenHeader({
   return (
     <View style={[styles.header, compact && styles.headerCompact]}>
       <View style={styles.leftSlot}>
-        {showLogo ? (
+        {showLogo || showPulseEntry ? (
           <PulseDisguiseLogo compact={compact} />
         ) : leftIcon ? (
           <IconButton icon={leftIcon} onPress={onLeftPress} backgroundColor={colors.surface} />

@@ -18,6 +18,7 @@ export const zhTw = {
   },
   tabs: {
     discover: '探索',
+    pulse: 'Pulse',
     likes: '喜歡',
     matches: '配對',
     messages: '訊息',
@@ -578,6 +579,13 @@ export const zhTw = {
     advancedFiltersIntent: '關係意圖',
     advancedFiltersSharedInterests: '僅共同興趣',
     advancedFiltersSharedInterestsHint: '只顯示與你至少有一項共同興趣的人',
+  },
+  pulseEntry: {
+    tabA11y: 'Pulse 偽裝模式',
+    tabHint: '前往探索，或再次點擊進入 Pulse 偽裝',
+    tabHintActive: '進入 Pulse 偽裝模式',
+    emergencyA11y: '緊急 — 切換至 {appName} 偽裝模式',
+    emergencyHint: '點擊以將 {unlockLabel} 隱藏在 {appName} 後方',
   },
   disguiseWorld: {
     pulseTagline: '全球與本地新聞',

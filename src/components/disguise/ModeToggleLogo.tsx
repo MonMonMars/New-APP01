@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { BrandMark } from '../brand/BrandMark';
 import { useApp } from '../../context/AppContext';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
+import { useTranslation } from '../../i18n';
 import { pulseTimesFontFamily } from '../../theme/pulseBrand';
 import { resolveSparkSection } from '../../types/preferences';
 import { useTheme } from '../../context/ThemeContext';
@@ -47,13 +48,25 @@ function LogoButton({
   );
 }
 
+type PulseDisguiseWordmarkProps = {
+  markSize?: number;
+  /** Tab bar focus — slightly brighter grey wordmark when the Pulse tab is active. */
+  focused?: boolean;
+};
+
 /** Grey P + “Pulse” wordmark — lower-left tab bar entry in Spark/Ember. */
-export function PulseDisguiseWordmark({ markSize = 22 }: { markSize?: number }) {
+export function PulseDisguiseWordmark({ markSize = 22, focused = false }: PulseDisguiseWordmarkProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const wordSize = Math.max(11, Math.round(markSize * 0.58));
+  const wordColor = focused ? colors.text : colors.textMuted;
 
   return (
-    <View style={styles.wordmarkRow} accessibilityRole="image" accessibilityLabel="Pulse">
+    <View
+      style={styles.wordmarkRow}
+      accessibilityRole="image"
+      accessibilityLabel={t('pulseEntry.tabA11y')}
+    >
       <BrandMark world="pulse" size={markSize} muted />
       <Text
         style={[
@@ -61,12 +74,12 @@ export function PulseDisguiseWordmark({ markSize = 22 }: { markSize?: number }) 
           {
             fontSize: wordSize,
             lineHeight: wordSize + 2,
-            color: colors.textMuted,
+            color: wordColor,
             fontFamily: pulseTimesFontFamily,
           },
         ]}
       >
-        Pulse
+        {t('tabs.pulse')}
       </Text>
     </View>
   );
@@ -76,6 +89,7 @@ export function PulseDisguiseWordmark({ markSize = 22 }: { markSize?: number }) 
 export function PulseDisguiseLogo({ compact = false }: { compact?: boolean }) {
   const { disguiseMode, setDisguiseMode } = useApp();
   const meta = useDisguiseWorld();
+  const { t } = useTranslation();
   const markSize = compact ? 36 : 40;
 
   const enterDisguise = useCallback(() => {
@@ -90,8 +104,11 @@ export function PulseDisguiseLogo({ compact = false }: { compact?: boolean }) {
     <LogoButton
       compact={compact}
       onPress={enterDisguise}
-      accessibilityLabel={`Emergency — switch to ${meta.name} disguise mode`}
-      accessibilityHint={`Tap to hide ${meta.unlockLabel} behind ${meta.name}`}
+      accessibilityLabel={t('pulseEntry.emergencyA11y', { appName: meta.name })}
+      accessibilityHint={t('pulseEntry.emergencyHint', {
+        appName: meta.name,
+        unlockLabel: meta.unlockLabel,
+      })}
     >
       <BrandMark world="pulse" size={markSize} muted />
     </LogoButton>

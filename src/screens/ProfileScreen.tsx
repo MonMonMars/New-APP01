@@ -160,7 +160,7 @@ export function ProfileScreen() {
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <ScreenHeader
         title={t('profile.title')}
-        showDisguiseButton
+        showPulseEntry
         rightIcon="settings-outline"
         onRightPress={() => scrollRef.current?.scrollTo({ y: 420, animated: true })}
       />

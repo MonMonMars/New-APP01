@@ -43,11 +43,15 @@ import { resolveSparkSection } from '../types/preferences';
 
 function DiscoverTabButton(props: BottomTabBarButtonProps) {
   const { setDisguiseMode } = useApp();
+  const { t } = useTranslation();
   const selected = props.accessibilityState?.selected ?? false;
 
   return (
     <TabBarButton
       {...props}
+      accessibilityHint={
+        selected ? t('pulseEntry.tabHintActive') : t('pulseEntry.tabHint')
+      }
       onPress={(event) => {
         if (selected) {
           setDisguiseMode(true);
@@ -116,9 +120,9 @@ function MainTabs() {
           color: '#111111',
           fontSize: 11,
         },
-        tabBarIcon: ({ color, size }) => {
+        tabBarIcon: ({ focused, size }) => {
           if (route.name === 'Discover') {
-            return <PulseDisguiseWordmark markSize={size} />;
+            return <PulseDisguiseWordmark markSize={size} focused={focused} />;
           }
           const icons: Record<
             Exclude<keyof MainTabParamList, 'Discover'>,
@@ -137,8 +141,8 @@ function MainTabs() {
         name="Discover"
         component={DiscoverScreen}
         options={{
-          tabBarLabel: 'Pulse',
-          tabBarAccessibilityLabel: 'Pulse disguise mode',
+          tabBarShowLabel: false,
+          tabBarAccessibilityLabel: t('pulseEntry.tabA11y'),
         }}
       />
       <Tab.Screen

@@ -1,66 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet } from 'react-native';
+import { PulseDisguiseLogo } from './ModeToggleLogo';
 
-import { useApp } from '../../context/AppContext';
-import { useTheme } from '../../context/ThemeContext';
-import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
-import { AnimatedPressable } from '../AnimatedPressable';
-
-type IconButtonProps = {
-  onPress: () => void;
-  icon: keyof typeof Ionicons.glyphMap;
-  color: string;
-  backgroundColor: string;
-  accessibilityLabel: string;
-};
-
-function ModeIconButton({
-  onPress,
-  icon,
-  color,
-  backgroundColor,
-  accessibilityLabel,
-}: IconButtonProps) {
-  return (
-    <AnimatedPressable
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
-      onPress={onPress}
-      hitSlop={8}
-      scaleTo={0.97}
-      style={[styles.button, { backgroundColor }]}
-    >
-      <Ionicons name={icon} size={20} color={color} />
-    </AnimatedPressable>
-  );
-}
-
-/** Enter Pulse or Harbor disguise from any Spark/Ember screen. */
+/** Grey P-only Pulse entry — used on stack/modal headers (right slot). */
 export function DisguiseModeButton() {
-  const { colors } = useTheme();
-  const { setDisguiseMode, preferences } = useApp();
-  const meta = useDisguiseWorld();
-
-  return (
-    <ModeIconButton
-      icon="eye-off-outline"
-      color={meta.accent}
-      backgroundColor={colors.surface}
-      accessibilityLabel={`Switch to ${meta.name} disguise mode`}
-      onPress={() => {
-        setDisguiseMode(true);
-      }}
-    />
-  );
+  return <PulseDisguiseLogo compact />;
 }
-
-const styles = StyleSheet.create({
-  button: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 2,
-  },
-});

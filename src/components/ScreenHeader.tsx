@@ -39,14 +39,21 @@ export function ScreenHeader({
 
   return (
     <View style={[styles.header, compact && styles.headerCompact]}>
-      <View style={styles.leftSlot}>
+      <View
+        style={[
+          styles.leftSlot,
+          leftIcon && (showLogo || showPulseEntry) ? styles.leftSlotDual : null,
+        ]}
+      >
+        {leftIcon ? (
+          <IconButton icon={leftIcon} onPress={onLeftPress} backgroundColor={colors.surface} />
+        ) : null}
         {showLogo || showPulseEntry ? (
           <PulseDisguiseLogo compact={compact} />
-        ) : leftIcon ? (
-          <IconButton icon={leftIcon} onPress={onLeftPress} backgroundColor={colors.surface} />
-        ) : (
+        ) : null}
+        {!leftIcon && !showLogo && !showPulseEntry ? (
           <View style={styles.iconButtonPlaceholder} />
-        )}
+        ) : null}
       </View>
 
       <View style={styles.centerSlot}>
@@ -94,6 +101,12 @@ const styles = StyleSheet.create({
   leftSlot: {
     width: 40,
     flexShrink: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  leftSlotDual: {
+    width: 84,
+    gap: spacing.xs,
   },
   centerSlot: {
     flex: 1,

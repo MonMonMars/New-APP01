@@ -1,6 +1,10 @@
 import { aiPersonaProfiles, AI_PERSONA_IDS } from './aiPersonas';
 import { extraRawProfiles } from './extraProfiles';
+import { latestRawProfiles } from './latestProfiles';
 import { moreRawProfiles } from './moreProfiles';
+import { newestRawProfiles } from './newestProfiles';
+import { nextRawProfiles } from './nextProfiles';
+import { withDemoProfilePhotos } from '../utils/withDemoProfilePhotos';
 import {
   matchesSparkSection,
   resolveSparkSection,
@@ -39,9 +43,12 @@ export const PRE_MATCHED_IDS = [
 ] as const;
 export const PENDING_LIKE_IDS = ['6', '14', '20', '21', '22', '26', '31', '35', '39', '49'] as const;
 export const INCOMING_LIKE_IDS = [
-  '7', '8', '9', '10', '37', '38', '46', '51', '54', '61', '62', '63', '64', '65',
+  '37', '38', '46', '51', '54',
   '71', '72', '73', '78', '81', '84', '85', '88',
   '97', '99', '101', '103', '105', '107', '109', '111', '113', '115',
+  '117', '119', '121', '123', '125', '127', '129', '131', '133', '135',
+  '137', '139', '141', '143', '145', '147', '149', '151', '153',
+  '157', '159', '161', '163', '165', '167', '169', '171', '173', '175',
 ] as const;
 export const INCOMING_LIKE_IDS_SET = new Set<string>(INCOMING_LIKE_IDS);
 export const MUTUAL_MATCH_IDS = new Set([
@@ -53,7 +60,8 @@ export const MUTUAL_SUPER_LIKE_IDS = new Set(['11', '29', '34', '36', '48', '59'
 export const SUPER_PRE_MATCHED_IDS = new Set(['30', '33']);
 export const STANDOUT_IDS = [
   '15', '30', '36', '48', '52', '59', '68', '72', '81', '84',
-  '97', '107', '110', '115',
+  '97', '107', '110', '115', '117', '131', '136',
+  '137', '149', '156', '157', '170', '176',
 ] as const;
 /** Ember world — married-group clone of Spark. Data never mixes with Spark. */
 export const MARRIED_PROFILE_IDS = new Set([
@@ -72,13 +80,17 @@ export const EMBER_RECENTLY_ACTIVE_IDS = ['13', '40', '66', '83', '68', '60'] as
 /** Demo profile viewers for "Who viewed you" (Spark+ feature) */
 export const PROFILE_VIEWER_IDS = [
   '13', '17', '25', '33', '40', '50', '57', '66', '72', '81',
-  '97', '101', '107', '111', '115',
+  '97', '101', '107', '111', '115', '119', '125', '131', '135',
+  '137', '141', '149', '153', '157', '165', '173',
 ] as const;
 
 export const RECENTLY_ACTIVE_IDS = [
   '2', '13', '17', '25', '33', '40', '50', '57', '66', '67',
   '69', '71', '73', '77', '83', '88',
   '97', '99', '101', '104', '108', '110', '114', '116',
+  '117', '118', '122', '125', '128', '131', '134', '136',
+  '138', '140', '142', '144', '146', '148', '150', '152', '154', '156',
+  '158', '160', '162', '164', '166', '168', '170', '172', '174', '176',
 ] as const;
 
 export const EXPLORE_CATEGORY_MAP: Record<string, 'serious' | 'new' | 'nearby'> = {
@@ -130,6 +142,46 @@ export const EXPLORE_CATEGORY_MAP: Record<string, 'serious' | 'new' | 'nearby'> 
   '86': 'nearby',
   '87': 'serious',
   '88': 'nearby',
+  '137': 'new',
+  '138': 'nearby',
+  '139': 'serious',
+  '140': 'nearby',
+  '141': 'new',
+  '142': 'serious',
+  '143': 'nearby',
+  '144': 'new',
+  '145': 'serious',
+  '146': 'nearby',
+  '147': 'new',
+  '148': 'nearby',
+  '149': 'serious',
+  '150': 'new',
+  '151': 'serious',
+  '152': 'nearby',
+  '153': 'new',
+  '154': 'nearby',
+  '155': 'serious',
+  '156': 'new',
+  '157': 'new',
+  '158': 'nearby',
+  '159': 'serious',
+  '160': 'nearby',
+  '161': 'new',
+  '162': 'serious',
+  '163': 'nearby',
+  '164': 'new',
+  '165': 'serious',
+  '166': 'nearby',
+  '167': 'new',
+  '168': 'serious',
+  '169': 'nearby',
+  '170': 'new',
+  '171': 'serious',
+  '172': 'nearby',
+  '173': 'new',
+  '174': 'serious',
+  '175': 'nearby',
+  '176': 'new',
 };
 
 function mapPin(distanceMiles: number, seed: number): { mapX: number; mapY: number } {
@@ -1119,6 +1171,9 @@ const rawProfiles: Profile[] = [
   },
   ...extraRawProfiles,
   ...moreRawProfiles,
+  ...nextRawProfiles,
+  ...latestRawProfiles,
+  ...newestRawProfiles,
   ...aiPersonaProfiles,
 ];
 
@@ -1139,146 +1194,15 @@ function withVerification(profile: Profile): Profile {
 export const mockProfiles: Profile[] = rawProfiles.map((profile, index) => {
   const seed = Number(profile.id) || index + 1;
   return withEmberFields(
-    withRelationshipStatus(withVerification(withIntent(withMap(profile, seed), seed))),
+    withRelationshipStatus(
+      withVerification(withIntent(withMap(withDemoProfilePhotos(profile), seed), seed)),
+    ),
     seed,
   );
 });
 
-function incomingFromMock(id: string): Profile {
-  const profile = rawProfiles.find((p) => p.id === id);
-  if (!profile) {
-    throw new Error(`Missing incoming-like profile id ${id}`);
-  }
-  const { mapX, mapY } = mapPin(profile.distanceMiles, Number(id));
-  return withEmberFields(withRelationshipStatus(withVerification({ ...profile, mapX, mapY })), Number(id));
-}
-
-/** Profiles that liked you — excluded from discover deck; see INCOMING_LIKE_IDS */
-export const incomingLikeProfiles: Profile[] = [
-  {
-    id: '7',
-    name: 'Emma',
-    age: 25,
-    gender: 'woman',
-    bio: 'Bookworm and brunch enthusiast.',
-    distanceMiles: 4,
-    city: 'Chelsea, NY',
-    photos: ['https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=80'],
-    interests: ['Books', 'Brunch'],
-    openingMove: "What's your go-to weekend plan?",
-    ...mapPin(4, 7),
-  },
-  {
-    id: '8',
-    name: 'Noah',
-    age: 30,
-    gender: 'man',
-    bio: 'Climber. Dog person. Always planning the next trip.',
-    distanceMiles: 7,
-    city: 'Lower East Side, NY',
-    photos: ['https://images.unsplash.com/photo-1504257432389-52343af06da3?w=800&q=80'],
-    interests: ['Climbing', 'Travel'],
-    ...mapPin(7, 8),
-  },
-  {
-    id: '9',
-    name: 'Zoe',
-    age: 23,
-    gender: 'woman',
-    bio: 'Film student. Loves indie cinemas.',
-    distanceMiles: 2,
-    city: 'East Village, NY',
-    photos: ['https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&q=80'],
-    interests: ['Film', 'Photography'],
-    ...mapPin(2, 9),
-  },
-  {
-    id: '10',
-    name: 'Sam',
-    age: 27,
-    gender: 'man',
-    bio: 'Chef. Will cook for you on the second date.',
-    distanceMiles: 5,
-    city: 'Tribeca, NY',
-    photos: ['https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=800&q=80'],
-    interests: ['Cooking', 'Wine'],
-    ...mapPin(5, 10),
-  },
-  incomingFromMock('37'),
-  incomingFromMock('38'),
-  incomingFromMock('46'),
-  incomingFromMock('51'),
-  incomingFromMock('54'),
-  {
-    id: '61',
-    name: 'Taylor',
-    age: 28,
-    gender: 'nonbinary',
-    bio: 'Ceramicist. Farmers markets every Saturday.',
-    distanceMiles: 8,
-    city: 'Park Slope, NY',
-    photos: ['https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=800&q=80'],
-    interests: ['Pottery', 'Markets', 'Cats'],
-    ...mapPin(8, 61),
-  },
-  {
-    id: '62',
-    name: 'Chris',
-    age: 32,
-    gender: 'man',
-    bio: 'Marathon runner who still eats pizza after every race.',
-    distanceMiles: 12,
-    city: 'Long Island City, NY',
-    photos: ['https://images.unsplash.com/photo-1552374196-1ab2a5c59363?w=800&q=80'],
-    interests: ['Running', 'Pizza', 'Music'],
-    ...mapPin(12, 62),
-  },
-  {
-    id: '63',
-    name: 'Dana',
-    age: 27,
-    gender: 'woman',
-    bio: 'Therapist by day, karaoke legend by night.',
-    distanceMiles: 6,
-    city: 'Upper West Side, NY',
-    photos: ['https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&q=80'],
-    interests: ['Karaoke', 'Psychology', 'Wine'],
-    ...mapPin(6, 63),
-  },
-  {
-    id: '64',
-    name: 'Morgan',
-    age: 30,
-    gender: 'woman',
-    bio: 'Startup PM. Board games > bars.',
-    distanceMiles: 3,
-    city: 'SoHo, NY',
-    verified: true,
-    photos: ['https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80'],
-    interests: ['Board games', 'Startups', 'Coffee'],
-    ...mapPin(3, 64),
-  },
-  {
-    id: '65',
-    name: 'Blake',
-    age: 29,
-    gender: 'man',
-    bio: 'Photographer. Golden hour is a personality trait.',
-    distanceMiles: 10,
-    city: 'DUMBO, NY',
-    photos: ['https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=80'],
-    interests: ['Photography', 'Cycling', 'Film'],
-    ...mapPin(10, 65),
-  },
-  incomingFromMock('71'),
-  incomingFromMock('72'),
-  incomingFromMock('73'),
-  incomingFromMock('78'),
-  incomingFromMock('81'),
-  incomingFromMock('84'),
-  incomingFromMock('85'),
-  incomingFromMock('88'),
-];
+/** Legacy incoming-only profiles removed — all INCOMING_LIKE_IDS resolve from mockProfiles. */
+export const incomingLikeProfiles: Profile[] = [];
 
 export function getAllProfiles(): Profile[] {
   return [...mockProfiles, ...incomingLikeProfiles];
@@ -1298,7 +1222,10 @@ export function getIncomingLikeProfilesForSection(
       (profile): profile is Profile => profile !== undefined,
     );
   }
-  return incomingLikeProfiles.filter((profile) => matchesSparkSection(profile, 'spark'));
+  return INCOMING_LIKE_IDS.map((id) => getProfileById(id)).filter(
+    (profile): profile is Profile =>
+      profile !== undefined && matchesSparkSection(profile, 'spark'),
+  );
 }
 
 export function getProfilesWithinRadius(

@@ -52,7 +52,8 @@
     "verify:demo": "node scripts/verify-demo-link.mjs",
     "verify:mini-window": "node scripts/check-mini-window.mjs http://127.0.0.1:8090",
     "verify:activity-preview": "node scripts/check-activity-preview.mjs http://127.0.0.1:8090",
-    "verify:compact-mini": "node scripts/verify-compact-mini.mjs"
+    "verify:compact-mini": "node scripts/verify-compact-mini.mjs",
+    "validate:profiles": "tsx scripts/validate-demo-profiles.ts"
   },
   "private": true
 }

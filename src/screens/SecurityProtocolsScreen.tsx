@@ -3,7 +3,6 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LEGAL_ENTITY } from '../constants/legalEntity';
-import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { useTheme } from '../context/ThemeContext';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -74,7 +73,6 @@ export function SecurityProtocolsScreen({ onClose }: SecurityProtocolsScreenProp
           <Ionicons name="chevron-back" size={28} color={colors.text} />
         </AnimatedPressable>
         <Text style={[styles.title, { color: colors.text }]}>Security protocols</Text>
-        <DisguiseModeButton />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>

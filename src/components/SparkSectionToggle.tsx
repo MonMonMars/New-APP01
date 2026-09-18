@@ -13,7 +13,7 @@ import { sparkBrand } from '../theme/sparkBrand';
 import { modalFill } from '../theme/modalFill';
 import { AnimatedPressable } from './AnimatedPressable';
 
-type SparkSectionToggleVariant = 'title' | 'chip' | 'list';
+type SparkSectionToggleVariant = 'title' | 'chip' | 'list' | 'mark';
 
 type SparkSectionToggleProps = {
   section: SparkSection;
@@ -24,10 +24,11 @@ type SparkSectionToggleProps = {
 
 const SECTIONS: SparkSection[] = ['spark', 'ember'];
 
-const SECTION_MARK_SIZE: Record<'title' | 'chip' | 'row', number> = {
+const SECTION_MARK_SIZE: Record<'title' | 'chip' | 'row' | 'mark', number> = {
   title: 36,
   chip: 16,
   row: 40,
+  mark: 36,
 };
 
 const WEB_SHEET_IN = (
@@ -198,13 +199,26 @@ function WorldTrigger({
 }: {
   section: SparkSection;
   colors: ColorPalette;
-  variant: 'title' | 'chip';
+  variant: 'title' | 'chip' | 'mark';
   locale: ReturnType<typeof useTranslation>['locale'];
   onPress: () => void;
 }) {
   const { t } = useTranslation();
   const label = getSparkSectionLabel(locale, section);
   switch (variant) {
+    case 'mark':
+      return (
+        <AnimatedPressable
+          onPress={onPress}
+          accessibilityRole="button"
+          accessibilityLabel={`${label}. ${t('discover.switchWorld')}`}
+          accessibilityHint={t('discover.worldPickerHint')}
+          style={styles.markTrigger}
+          scaleTo={0.94}
+        >
+          <BrandMark world={section} size={SECTION_MARK_SIZE.mark} />
+        </AnimatedPressable>
+      );
     case 'chip':
       return (
         <AnimatedPressable
@@ -280,6 +294,7 @@ export function SparkSectionToggle({
           ))}
         </View>
       );
+    case 'mark':
     case 'chip':
     case 'title':
       return (
@@ -309,6 +324,12 @@ export function SparkSectionToggle({
 }
 
 const styles = StyleSheet.create({
+  markTrigger: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 40,
+    height: 40,
+  },
   titleTrigger: {
     flexDirection: 'row',
     alignItems: 'center',

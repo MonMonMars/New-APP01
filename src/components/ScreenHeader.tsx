@@ -4,14 +4,11 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { spacing } from '../theme';
 import { IconButton } from './Button';
-import { DisguiseModeButton } from './disguise/ModeToggleButtons';
-import { PulseDisguiseLogo, SectionCenterLogo } from './disguise/ModeToggleLogo';
+import { SectionLeftLogo } from './disguise/ModeToggleLogo';
 
 type ScreenHeaderProps = {
   title?: string;
   showLogo?: boolean;
-  /** Grey P-only Pulse entry on the left while keeping the title centered. */
-  showPulseEntry?: boolean;
   compact?: boolean;
   leftIcon?: keyof typeof Ionicons.glyphMap;
   onLeftPress?: () => void;
@@ -19,13 +16,11 @@ type ScreenHeaderProps = {
   onRightPress?: () => void;
   secondaryRightIcon?: keyof typeof Ionicons.glyphMap;
   onSecondaryRightPress?: () => void;
-  showDisguiseButton?: boolean;
 };
 
 export function ScreenHeader({
   title,
   showLogo = false,
-  showPulseEntry = false,
   compact = false,
   leftIcon,
   onLeftPress,
@@ -33,7 +28,6 @@ export function ScreenHeader({
   onRightPress,
   secondaryRightIcon,
   onSecondaryRightPress,
-  showDisguiseButton = false,
 }: ScreenHeaderProps) {
   const { colors } = useTheme();
 
@@ -42,32 +36,23 @@ export function ScreenHeader({
       <View
         style={[
           styles.leftSlot,
-          leftIcon && (showLogo || showPulseEntry) ? styles.leftSlotDual : null,
+          leftIcon && showLogo ? styles.leftSlotDual : null,
         ]}
       >
         {leftIcon ? (
           <IconButton icon={leftIcon} onPress={onLeftPress} backgroundColor={colors.surface} />
         ) : null}
-        {showLogo || showPulseEntry ? (
-          <PulseDisguiseLogo compact={compact} />
-        ) : null}
-        {!leftIcon && !showLogo && !showPulseEntry ? (
-          <View style={styles.iconButtonPlaceholder} />
-        ) : null}
+        {showLogo ? <SectionLeftLogo compact={compact} /> : null}
+        {!leftIcon && !showLogo ? <View style={styles.iconButtonPlaceholder} /> : null}
       </View>
 
       <View style={styles.centerSlot}>
-        {showLogo ? (
-          <SectionCenterLogo compact={compact} />
-        ) : (
-          <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
-            {title}
-          </Text>
-        )}
+        <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
+          {title}
+        </Text>
       </View>
 
       <View style={styles.rightGroup}>
-        {showDisguiseButton ? <DisguiseModeButton /> : null}
         {secondaryRightIcon ? (
           <IconButton
             icon={secondaryRightIcon}

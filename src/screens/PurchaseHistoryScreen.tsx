@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
@@ -61,7 +60,6 @@ export function PurchaseHistoryScreen({ onClose }: PurchaseHistoryScreenProps) {
           <Ionicons name="chevron-back" size={28} color={colors.text} />
         </AnimatedPressable>
         <Text style={[styles.headerTitle, { color: colors.text }]}>{t('payments.historyTitle')}</Text>
-        <DisguiseModeButton />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>

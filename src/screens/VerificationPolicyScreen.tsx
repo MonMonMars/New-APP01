@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { LocaleToggle } from '../components/legal/LocaleToggle';
 import {
   getVerificationHowItWorksSteps,
@@ -43,7 +42,6 @@ export function VerificationPolicyScreen({ onClose }: VerificationPolicyScreenPr
         <Text style={[styles.headerTitle, { color: colors.text }]} numberOfLines={1}>
           {locale === 'zh-TW' ? '驗證政策' : 'Verification policy'}
         </Text>
-        <DisguiseModeButton />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>

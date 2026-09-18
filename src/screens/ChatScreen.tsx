@@ -12,7 +12,6 @@ import { EmberStatusChips } from '../components/EmberStatusChips';
 import { ChatComposer } from '../components/ChatComposer';
 import { GifPickerSheet } from '../components/GifPickerSheet';
 import { MessageReactionPicker } from '../components/MessageReactionPicker';
-import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { VerificationBadges } from '../components/VerificationBadges';
 import { MessageStatusIcon } from '../components/MessageStatusIcon';
 import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
@@ -237,7 +236,6 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
               <Text style={[styles.turnText, { color: colors.text }]}>{turnLabel}</Text>
             </View>
           ) : null}
-          <DisguiseModeButton />
           <AnimatedPressable
             style={styles.headerAction}
             onPress={() => setShowSafety(true)}

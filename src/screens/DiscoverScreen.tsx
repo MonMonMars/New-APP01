@@ -12,7 +12,6 @@ import { LikeLimitModal } from '../components/LikeLimitModal';
 import { PostMatchMomentumModal } from '../components/PostMatchMomentumModal';
 import { MatchModal } from '../components/MatchModal';
 import { MatchToast } from '../components/MatchToast';
-import { PulseDisguiseLogo } from '../components/disguise/ModeToggleLogo';
 import { PromptLikeSheet } from '../components/PromptLikeSheet';
 import { SuperLikeResultModal } from '../components/SuperLikeResultModal';
 import { SparkSectionToggle } from '../components/SparkSectionToggle';
@@ -343,14 +342,12 @@ export function DiscoverScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <View style={[styles.emergencyBar, { paddingTop: insets.top }]}>
-        <PulseDisguiseLogo compact />
-        <View style={styles.sectionToggle}>
-          <SparkSectionToggle
-            section={resolveSparkSection(preferences.sparkSection)}
-            onChange={setSparkSection}
-            variant="title"
-          />
-        </View>
+        <SparkSectionToggle
+          section={resolveSparkSection(preferences.sparkSection)}
+          onChange={setSparkSection}
+          variant="mark"
+        />
+        <View style={styles.headerSpacer} />
         <View style={styles.headerActions}>
           <RewindButton
             variant="header"
@@ -561,9 +558,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.sm,
   },
-  sectionToggle: {
+  headerSpacer: {
     flex: 1,
-    alignItems: 'center',
   },
   headerActions: {
     flexDirection: 'row',

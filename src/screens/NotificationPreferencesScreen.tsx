@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Switch, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
@@ -63,7 +62,6 @@ export function NotificationPreferencesScreen({ onClose }: NotificationPreferenc
           <Ionicons name="chevron-back" size={28} color={colors.text} />
         </AnimatedPressable>
         <Text style={[styles.title, { color: colors.text }]}>{t('notifications.title')}</Text>
-        <DisguiseModeButton />
       </View>
 
       <Text style={[styles.section, { color: colors.textMuted }]}>{t('notifications.pushSection')}</Text>

@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { SecuritySettings } from '../types/security';
@@ -93,7 +92,6 @@ export function SecuritySettingsScreen({ onClose }: SecuritySettingsScreenProps)
           <Ionicons name="chevron-back" size={28} color={colors.text} />
         </AnimatedPressable>
         <Text style={[styles.title, { color: colors.text }]}>{t('security.title')}</Text>
-        <DisguiseModeButton />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>

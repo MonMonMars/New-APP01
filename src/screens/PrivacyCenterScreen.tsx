@@ -4,7 +4,6 @@ import { Alert, ScrollView, StyleSheet, Switch, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LEGAL_ENTITY } from '../constants/legalEntity';
-import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { LocaleToggle } from '../components/legal/LocaleToggle';
@@ -105,7 +104,6 @@ export function PrivacyCenterScreen({ onClose }: PrivacyCenterScreenProps) {
           <Ionicons name="chevron-back" size={28} color={colors.text} />
         </AnimatedPressable>
         <Text style={[styles.title, { color: colors.text }]}>{t('privacy.title')}</Text>
-        <DisguiseModeButton />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>

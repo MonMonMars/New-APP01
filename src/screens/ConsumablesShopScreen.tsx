@@ -6,7 +6,6 @@ import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import {
   formatProductPrice,
   PRODUCT_CATALOG,
@@ -146,7 +145,6 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
           <Ionicons name="close" size={28} color={colors.text} />
         </AnimatedPressable>
         <Text style={[styles.title, { color: colors.text }]}>{t('shop.title')}</Text>
-        <DisguiseModeButton />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>

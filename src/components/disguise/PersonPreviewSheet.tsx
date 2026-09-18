@@ -19,7 +19,7 @@ import { EmberStatusChips } from '../EmberStatusChips';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
 import { FadeSlideIn } from '../motion/FadeSlideIn';
 import { AnimatedPressable } from '../AnimatedPressable';
-import { ContentTypeIcon } from './ContentTypeIcon';
+import { ContentTypeIcon, PROFILE_THUMB_ICON_SIZE } from './ContentTypeIcon';
 import { DisguiseMiniDismissStat, MiniDismissKind } from './DisguiseMiniDismissStat';
 import { DisguiseMiniPhotoPager } from './DisguiseMiniPhotoPager';
 import { DisguiseMiniSparkBar } from './DisguiseMiniSparkBar';
@@ -246,7 +246,7 @@ export function PersonPreviewSheet({
             <FadeSlideIn replayKey={visible} index={0}>
               <View style={styles.header}>
                 <View style={[styles.headerIcon, { backgroundColor: worldMeta.accentSoft }]}>
-                  <ContentTypeIcon kind="profile" size={12} />
+                  <ContentTypeIcon kind="profile" size={PROFILE_THUMB_ICON_SIZE} />
                 </View>
                 <View style={styles.headerText}>
                   <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>

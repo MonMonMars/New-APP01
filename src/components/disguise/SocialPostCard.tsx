@@ -8,6 +8,7 @@ import { useTranslation } from '../../i18n';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { buildSocialReporter, socialReporterPhotoIndex } from '../../utils/disguiseReporterPhotos';
+import { resolveDisguiseProfile } from '../../utils/resolveDisguiseProfile';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
 import { DisguisePhotoLightbox } from './DisguisePhotoLightbox';
@@ -44,6 +45,12 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
 
   const photoReporter = buildSocialReporter(post, preferences.sparkSection);
   const feedPhotoIndex = socialReporterPhotoIndex(photoReporter, post.imageUrl, preferences.sparkSection);
+  const linkedAuthorProfile = resolveDisguiseProfile(
+    `social-${post.id}`,
+    undefined,
+    preferences.sparkSection,
+  );
+  const authorContentKind = linkedAuthorProfile ? 'profile' : 'social';
 
   const maskSnippet = post.avatarMask?.text.split(' ').slice(0, 2).join(' ') ?? 'LIVE';
   const handleSave = () => {
@@ -92,18 +99,18 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
                 imageUrl={post.avatarUrl}
                 overlayText={maskSnippet}
                 overlayVariant={post.avatarMask.variant}
-                contentKind="social"
+                contentKind={authorContentKind}
                 hideLabel
-                showIconBadge
+                showIconBadge={authorContentKind !== 'profile'}
                 onPress={() => setAuthorOpen(true)}
                 accessibilityLabel={t('disguiseMiniWindow.viewProfile', { name: post.author })}
               />
             ) : (
               <FeedPersonThumbnail
                 plainAvatar
-                contentKind="social"
+                contentKind={authorContentKind}
                 hideLabel
-                showIconBadge
+                showIconBadge={authorContentKind !== 'profile'}
                 imageUrl={post.avatarUrl}
                 onPress={() => setAuthorOpen(true)}
                 accessibilityLabel={t('disguiseMiniWindow.viewProfile', { name: post.author })}

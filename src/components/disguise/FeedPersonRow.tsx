@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { StyleSheet, Text, View, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
 
 import { spacing } from '../../theme';
-import { ContentTypeIcon, ContentTypeKind } from './ContentTypeIcon';
+import { ContentTypeIcon, ContentTypeKind, PROFILE_THUMB_ICON_SIZE } from './ContentTypeIcon';
 import { DisguiseOverlayAvatar, DisguiseOverlayVariant, PROFILE_AVATAR_SIZE } from './DisguiseOverlayAvatar';
 import { FaceCenteredImage } from './FaceCenteredImage';
 
@@ -64,7 +64,10 @@ export function FeedPersonRow({
         {avatar}
         {contentKind ? (
           <View style={styles.avatarBadge}>
-            <ContentTypeIcon kind={contentKind} />
+            <ContentTypeIcon
+              kind={contentKind}
+              size={contentKind === 'profile' ? PROFILE_THUMB_ICON_SIZE : undefined}
+            />
           </View>
         ) : null}
       </View>

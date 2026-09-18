@@ -8,6 +8,8 @@ import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 export type ContentTypeKind = 'news' | 'ad' | 'sponsored' | 'social' | 'profile' | 'trending' | 'alert';
 
 const ICON_SIZE = 16;
+/** Shared badge size for profile mini-thumbs across Pulse feed rows. */
+export const PROFILE_THUMB_ICON_SIZE = 12;
 
 const KIND_META: Record<
   ContentTypeKind,

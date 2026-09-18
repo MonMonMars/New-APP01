@@ -1,6 +1,12 @@
 import { AppLocale } from '../types/locale';
 import { DiscoverFilter, ShowMePreference, SparkSection } from '../types/preferences';
-import { Orientation, ProfileGender, RelationshipIntent } from '../types/profile';
+import {
+  EmberDiscretion,
+  EmberSeeking,
+  Orientation,
+  ProfileGender,
+  RelationshipIntent,
+} from '../types/profile';
 import { translate } from './index';
 
 export function getGenderLabel(locale: AppLocale, gender: ProfileGender): string {
@@ -88,6 +94,31 @@ export function formatSearchRadiusLocalized(locale: AppLocale, miles: number): s
     return translate(locale, 'preferences.anywhere');
   }
   return translate(locale, 'preferences.miles', { n: miles });
+}
+
+export function getEmberDiscretionLabel(locale: AppLocale, value: EmberDiscretion): string {
+  const map: Record<EmberDiscretion, string> = {
+    open: translate(locale, 'editProfile.emberDiscretionOpen'),
+    careful: translate(locale, 'editProfile.emberDiscretionCareful'),
+    hidden: translate(locale, 'editProfile.emberDiscretionHidden'),
+  };
+  return map[value];
+}
+
+export function getEmberSeekingLabel(locale: AppLocale, value: EmberSeeking): string {
+  const map: Record<EmberSeeking, string> = {
+    online: translate(locale, 'editProfile.emberSeekingOnline'),
+    travel: translate(locale, 'editProfile.emberSeekingTravel'),
+    ongoing: translate(locale, 'editProfile.emberSeekingOngoing'),
+    light: translate(locale, 'editProfile.emberSeekingLight'),
+  };
+  return map[value];
+}
+
+export function getEmberStatusLabel(locale: AppLocale, status: 'married' | 'divorced'): string {
+  return status === 'married'
+    ? translate(locale, 'editProfile.statusMarried')
+    : translate(locale, 'editProfile.statusDivorced');
 }
 
 export function getSparkSectionEmpty(

@@ -40,6 +40,7 @@ type SettingsRoute =
   | 'DiscoveryPreferences'
   | 'NotificationPreferences'
   | 'ConsumablesShop'
+  | 'PurchaseHistory'
   | null;
 
 const settingsRows: { icon: keyof typeof Ionicons.glyphMap; labelKey: string; route: SettingsRoute }[] = [
@@ -51,6 +52,7 @@ const settingsRows: { icon: keyof typeof Ionicons.glyphMap; labelKey: string; ro
   { icon: 'notifications-outline', labelKey: 'profile.notifications', route: 'NotificationPreferences' },
   { icon: 'bag-outline', labelKey: 'profile.shopBoostsNotes', route: 'ConsumablesShop' },
   { icon: 'diamond-outline', labelKey: 'profile.sparkPlusSubscription', route: 'SparkPlus' },
+  { icon: 'receipt-outline', labelKey: 'profile.purchaseHistory', route: 'PurchaseHistory' },
 ];
 
 export function ProfileScreen() {
@@ -242,7 +244,7 @@ export function ProfileScreen() {
         {isSupabaseEnabled && (
           <View style={[styles.syncBadge, { backgroundColor: colors.surface }]}>
             <Ionicons name="cloud-done" size={14} color={colors.like} />
-            <Text style={[styles.syncText, { color: colors.like }]}>Cloud sync enabled</Text>
+            <Text style={[styles.syncText, { color: colors.like }]}>{t('profile.cloudSync')}</Text>
           </View>
         )}
 
@@ -306,11 +308,11 @@ export function ProfileScreen() {
         >
           <Ionicons name="sparkles-outline" size={22} color={colors.textMuted} />
           <View style={styles.toggleText}>
-            <Text style={[styles.toggleLabel, { color: colors.text }]}>AI disguise ad image</Text>
+            <Text style={[styles.toggleLabel, { color: colors.text }]}>{t('profile.aiDisguiseAd')}</Text>
             <Text style={[styles.toggleDesc, { color: colors.textMuted }]}>
               {disguiseAdCreative
-                ? `Ready — ${disguiseAdCreative.overlayText}`
-                : 'Generate a sponsored post from your photo'}
+                ? t('profile.aiDisguiseReady', { text: disguiseAdCreative.overlayText })
+                : t('profile.aiDisguiseEmpty')}
             </Text>
           </View>
           <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
@@ -319,7 +321,7 @@ export function ProfileScreen() {
         {notificationsEnabled && (
           <View style={styles.notifBadge}>
             <Ionicons name="notifications" size={14} color={colors.gradientEnd} />
-            <Text style={[styles.notifText, { color: colors.gradientEnd }]}>Notifications on</Text>
+            <Text style={[styles.notifText, { color: colors.gradientEnd }]}>{t('profile.notificationsOn')}</Text>
           </View>
         )}
 
@@ -340,7 +342,7 @@ export function ProfileScreen() {
 
         {user.prompts && user.prompts.length > 0 && (
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Prompts</Text>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('profile.prompts')}</Text>
             {user.prompts.map((prompt) => (
               <View key={prompt.question} style={[styles.promptCard, { backgroundColor: colors.surface }]}>
                 <Text style={[styles.promptQ, { color: colors.textMuted }]}>{prompt.question}</Text>
@@ -351,9 +353,9 @@ export function ProfileScreen() {
         )}
 
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Interests</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('profile.interests')}</Text>
           {user.interests.length === 0 ? (
-            <Text style={[styles.emptyInterests, { color: colors.textMuted }]}>Add interests when editing your profile.</Text>
+            <Text style={[styles.emptyInterests, { color: colors.textMuted }]}>{t('profile.addInterestsHint')}</Text>
           ) : (
             <View style={styles.tags}>
               {user.interests.map((interest) => (

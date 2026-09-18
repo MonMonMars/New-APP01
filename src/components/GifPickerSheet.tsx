@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DEMO_GIFS, DemoGif } from '../data/demoGifs';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
 
@@ -17,6 +18,7 @@ type GifPickerSheetProps = {
 export function GifPickerSheet({ visible, onClose, onSelect }: GifPickerSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
 
   const filtered = useMemo(() => {
@@ -35,7 +37,7 @@ export function GifPickerSheet({ visible, onClose, onSelect }: GifPickerSheetPro
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
       <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top }]}>
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>Send a GIF</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('chat.gifPickerTitle')}</Text>
           <AnimatedPressable onPress={onClose}>
             <Ionicons name="close" size={28} color={colors.text} />
           </AnimatedPressable>
@@ -43,7 +45,7 @@ export function GifPickerSheet({ visible, onClose, onSelect }: GifPickerSheetPro
         <TextInput
           value={query}
           onChangeText={setQuery}
-          placeholder="Search GIFs..."
+          placeholder={t('chat.gifPickerSearch')}
           placeholderTextColor={colors.textMuted}
           style={[styles.search, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
           autoCapitalize="none"
@@ -51,7 +53,9 @@ export function GifPickerSheet({ visible, onClose, onSelect }: GifPickerSheetPro
         />
         <ScrollView contentContainerStyle={styles.grid}>
           {filtered.length === 0 ? (
-            <Text style={[styles.empty, { color: colors.textMuted }]}>No GIFs match “{query}”</Text>
+            <Text style={[styles.empty, { color: colors.textMuted }]}>
+              {t('chat.gifPickerEmpty', { query })}
+            </Text>
           ) : (
             filtered.map((gif) => (
               <AnimatedPressable

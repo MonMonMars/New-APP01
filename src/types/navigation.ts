@@ -19,6 +19,7 @@ export type RootStackParamList = {
   MapDiscover: undefined;
   Explore: undefined;
   DiscoverHub: undefined;
+  PurchaseHistory: undefined;
 };
 
 export type MainTabParamList = {

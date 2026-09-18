@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../../context/AppContext';
@@ -14,6 +14,11 @@ import { FadeSlideIn } from '../motion/FadeSlideIn';
 import { SavePostButton } from './SavePostButton';
 import { NewsHeroImage } from './NewsHeroImage';
 import { AnimatedPressable } from '../AnimatedPressable';
+import {
+  disguiseReadHeroHeight,
+  disguiseReadSheetHeight,
+  disguiseReadSheetStyles,
+} from './disguiseReadSheetLayout';
 
 type NewsArticleSheetProps = {
   visible: boolean;
@@ -23,9 +28,12 @@ type NewsArticleSheetProps = {
 
 export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetProps) {
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
   const { colors } = useTheme();
-  const { recordPulseReading, preferences } = useApp();
+  const { recordPulseReading } = useApp();
   const meta = useDisguiseWorld();
+  const heroHeight = disguiseReadHeroHeight(windowHeight);
+  const sheetHeight = disguiseReadSheetHeight(windowHeight);
 
   useEffect(() => {
     if (visible && post) {
@@ -43,16 +51,18 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
     <AnimatedOverlay visible={visible} onClose={onClose} variant="bottom">
       <View
         style={[
-          styles.sheet,
+          disguiseReadSheetStyles.sheet,
           {
             backgroundColor: colors.background,
             borderColor: colors.border,
+            height: sheetHeight,
+            maxHeight: sheetHeight,
             paddingBottom: insets.bottom + spacing.md,
           },
         ]}
       >
         <FadeSlideIn replayKey={visible} index={0}>
-          <View style={[styles.toolbar, { borderBottomColor: colors.border }]}>
+          <View style={[disguiseReadSheetStyles.toolbar, { borderBottomColor: colors.border }]}>
             <View style={styles.toolbarMeta}>
               <Text style={[styles.source, { color: meta.accent }]}>{post.source}</Text>
               <Text style={[styles.category, { color: colors.textMuted }]}>{post.category}</Text>
@@ -68,11 +78,15 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
 
         <ScrollView
           showsVerticalScrollIndicator={false}
-          style={styles.scroll}
-          contentContainerStyle={styles.content}
+          style={disguiseReadSheetStyles.scroll}
+          contentContainerStyle={disguiseReadSheetStyles.content}
         >
           <FadeSlideIn replayKey={visible} index={1}>
-            <NewsHeroImage uri={post.imageUrl} style={styles.hero} accessibilityLabel={post.headline} />
+            <NewsHeroImage
+              uri={post.imageUrl}
+              style={[styles.hero, { height: heroHeight }]}
+              accessibilityLabel={post.headline}
+            />
           </FadeSlideIn>
           <FadeSlideIn replayKey={visible} index={2}>
             <Text style={[styles.headline, { color: colors.text }]}>{post.headline}</Text>
@@ -84,7 +98,7 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
             </FadeSlideIn>
           ))}
         </ScrollView>
-        <View style={[styles.footer, { borderTopColor: colors.border }]}>
+        <View style={[disguiseReadSheetStyles.footer, { borderTopColor: colors.border }]}>
           <AnimatedPressable
             style={[styles.readOriginal, { backgroundColor: meta.accent }]}
             onPress={() => {
@@ -103,24 +117,6 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
 }
 
 const styles = StyleSheet.create({
-  sheet: {
-    maxHeight: '78%',
-    borderTopLeftRadius: radii.card + 4,
-    borderTopRightRadius: radii.card + 4,
-    borderWidth: StyleSheet.hairlineWidth,
-    overflow: 'hidden',
-  },
-  scroll: {
-    maxHeight: 440,
-  },
-  toolbar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
   toolbarMeta: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -142,20 +138,15 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
-  content: {
-    padding: spacing.md,
-    paddingBottom: spacing.xl,
-  },
   hero: {
     width: '100%',
-    height: 180,
     borderRadius: radii.card,
     marginBottom: spacing.md,
   },
   headline: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '800',
-    lineHeight: 28,
+    lineHeight: 30,
     marginBottom: spacing.xs,
   },
   time: {
@@ -164,13 +155,8 @@ const styles = StyleSheet.create({
   },
   paragraph: {
     fontSize: 16,
-    lineHeight: 24,
+    lineHeight: 26,
     marginBottom: spacing.md,
-  },
-  footer: {
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
-    borderTopWidth: StyleSheet.hairlineWidth,
   },
   readOriginal: {
     flexDirection: 'row',

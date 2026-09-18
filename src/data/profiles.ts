@@ -1,5 +1,6 @@
 import { aiPersonaProfiles, AI_PERSONA_IDS } from './aiPersonas';
 import { extraRawProfiles } from './extraProfiles';
+import { moreRawProfiles } from './moreProfiles';
 import {
   matchesSparkSection,
   resolveSparkSection,
@@ -40,6 +41,7 @@ export const PENDING_LIKE_IDS = ['6', '14', '20', '21', '22', '26', '31', '35', 
 export const INCOMING_LIKE_IDS = [
   '7', '8', '9', '10', '37', '38', '46', '51', '54', '61', '62', '63', '64', '65',
   '71', '72', '73', '78', '81', '84', '85', '88',
+  '97', '99', '101', '103', '105', '107', '109', '111', '113', '115',
 ] as const;
 export const INCOMING_LIKE_IDS_SET = new Set<string>(INCOMING_LIKE_IDS);
 export const MUTUAL_MATCH_IDS = new Set([
@@ -49,7 +51,10 @@ export const MUTUAL_MATCH_IDS = new Set([
 ]);
 export const MUTUAL_SUPER_LIKE_IDS = new Set(['11', '29', '34', '36', '48', '59', '60', '68']);
 export const SUPER_PRE_MATCHED_IDS = new Set(['30', '33']);
-export const STANDOUT_IDS = ['15', '30', '36', '48', '52', '59', '68', '72', '81', '84'] as const;
+export const STANDOUT_IDS = [
+  '15', '30', '36', '48', '52', '59', '68', '72', '81', '84',
+  '97', '107', '110', '115',
+] as const;
 /** Ember world — married-group clone of Spark. Data never mixes with Spark. */
 export const MARRIED_PROFILE_IDS = new Set([
   '4', '11', '13', '16', '19', '23', '28', '32', '36', '40',
@@ -67,11 +72,13 @@ export const EMBER_RECENTLY_ACTIVE_IDS = ['13', '40', '66', '83', '68', '60'] as
 /** Demo profile viewers for "Who viewed you" (Spark+ feature) */
 export const PROFILE_VIEWER_IDS = [
   '13', '17', '25', '33', '40', '50', '57', '66', '72', '81',
+  '97', '101', '107', '111', '115',
 ] as const;
 
 export const RECENTLY_ACTIVE_IDS = [
   '2', '13', '17', '25', '33', '40', '50', '57', '66', '67',
   '69', '71', '73', '77', '83', '88',
+  '97', '99', '101', '104', '108', '110', '114', '116',
 ] as const;
 
 export const EXPLORE_CATEGORY_MAP: Record<string, 'serious' | 'new' | 'nearby'> = {
@@ -1111,6 +1118,7 @@ const rawProfiles: Profile[] = [
     interests: ['Animation', 'Gaming', 'Coffee'],
   },
   ...extraRawProfiles,
+  ...moreRawProfiles,
   ...aiPersonaProfiles,
 ];
 

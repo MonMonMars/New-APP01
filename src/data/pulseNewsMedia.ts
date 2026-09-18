@@ -84,9 +84,17 @@ export function freeNewsUrlForTopic(topic: string): string {
     case '#StartupJobs':
       return freeNewsLinks.nprHealth;
     case '#BookClub':
-      return freeNewsLinks.cbcNews;
+    case '#IndieBooks':
+      return freeNewsLinks.bbcCulture;
     case '#Weather':
+    case '#HeatWave':
       return freeNewsLinks.abcNews;
+    case '#OnDeviceAI':
+      return freeNewsLinks.bbcTechnology;
+    case '#CarFreeCities':
+      return freeNewsLinks.guardianTransport;
+    case '#SolarHome':
+      return freeNewsLinks.dwNews;
     default:
       return freeNewsLinks.bbcNews;
   }

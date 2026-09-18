@@ -30,6 +30,14 @@ const CSS = `
   from { opacity: 0; transform: translate3d(18px, 0, 0); }
   to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
+@keyframes spark-profile-swap-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes spark-profile-swap-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 .spark-fade-up {
   animation: spark-fade-up 340ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -41,6 +49,12 @@ const CSS = `
 }
 .spark-page-in {
   animation: spark-page-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.spark-profile-swap-out {
+  animation: spark-profile-swap-out 200ms ease both;
+}
+.spark-profile-swap-in {
+  animation: spark-profile-swap-in 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .spark-press {
   transition: filter 120ms ease, box-shadow 180ms ease;

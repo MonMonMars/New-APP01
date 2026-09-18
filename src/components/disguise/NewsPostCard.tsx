@@ -14,6 +14,7 @@ import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { NewsArticleSheet } from './NewsArticleSheet';
 import { NewsHeroImage } from './NewsHeroImage';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
+import { PulseProfileSwap } from '../motion/PulseProfileSwap';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type NewsPostCardProps = {
@@ -72,17 +73,21 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
           {post.reporters.length > 0 && (
             <View style={styles.reportersRow}>
               {post.reporters.map((reporter) => (
-                <FeedPersonThumbnail
+                <PulseProfileSwap
                   key={reporter.id}
-                  plainAvatar
-                  contentKind="profile"
-                  hideLabel
-                  imageUrl={reporter.avatarUrl}
-                  caption={reporterCaption(reporter)}
-                  onPress={() => openReporter(reporter)}
-                  accessibilityLabel={t('disguiseMiniWindow.viewPhotosFrom', { name: reporter.name })}
+                  profileKey={reporter.profileId ?? reporter.id}
                   style={styles.reporterRow}
-                />
+                >
+                  <FeedPersonThumbnail
+                    plainAvatar
+                    contentKind="profile"
+                    hideLabel
+                    imageUrl={reporter.avatarUrl}
+                    caption={reporterCaption(reporter)}
+                    onPress={() => openReporter(reporter)}
+                    accessibilityLabel={t('disguiseMiniWindow.viewPhotosFrom', { name: reporter.name })}
+                  />
+                </PulseProfileSwap>
               ))}
             </View>
           )}

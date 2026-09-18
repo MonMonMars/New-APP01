@@ -4,6 +4,19 @@ import { matchesSparkSection, resolveSparkSection, SparkSection } from '../types
 import { Profile } from '../types/profile';
 
 const reporterProfileCache = new Map<string, string>();
+const actionedProfileIds = new Set<string>();
+
+/** Keep social / activity reporter remaps aligned with Pulse feed swaps. */
+export function syncActionedProfileIds(ids: Set<string>): void {
+  actionedProfileIds.clear();
+  ids.forEach((id) => actionedProfileIds.add(id));
+
+  for (const [key, profileId] of reporterProfileCache.entries()) {
+    if (actionedProfileIds.has(profileId)) {
+      reporterProfileCache.delete(key);
+    }
+  }
+}
 
 export function profileIdFromPostId(postId: string): string | undefined {
   if (postId === 'disguised-user') {
@@ -65,8 +78,11 @@ function mappedProfileIdForReporter(
   const resolvedSection = resolveSparkSection(section);
   const key = cacheKey(reporterId, resolvedSection);
   const cached = reporterProfileCache.get(key);
-  if (cached) {
+  if (cached && !actionedProfileIds.has(cached)) {
     return cached;
+  }
+  if (cached) {
+    reporterProfileCache.delete(key);
   }
 
   const explicit = resolveDisguiseProfileId(reporterId);
@@ -81,11 +97,12 @@ function mappedProfileIdForReporter(
   const uniquePool = pool.filter(
     (profile, index, list) => list.findIndex((item) => item.id === profile.id) === index,
   );
-  if (uniquePool.length === 0) {
+  const availablePool = uniquePool.filter((profile) => !actionedProfileIds.has(profile.id));
+  if (availablePool.length === 0) {
     return undefined;
   }
 
-  const picked = uniquePool[hashReporterId(reporterId) % uniquePool.length];
+  const picked = availablePool[hashReporterId(reporterId) % availablePool.length];
   reporterProfileCache.set(key, picked.id);
   return picked.id;
 }

@@ -15,7 +15,7 @@ function disguiseFeedSignature(
   return `${section}|${userId}|${gender ?? ''}|${creativeKey}`;
 }
 
-/** Pulse feed layout stays cached; liked/passed profiles are hidden without reshuffling slots. */
+/** Pulse feed layout stays cached; liked/passed profiles fade into fresh replacements in-place. */
 export function useDisguiseFeedItems(topic?: string): FeedItem[] {
   const { user, disguiseAdCreative, preferences, pulseSocial, likedIds, passedIds, superLikedIds } = useApp();
   const cacheRef = useRef<{ signature: string; base: FeedItem[] } | null>(null);

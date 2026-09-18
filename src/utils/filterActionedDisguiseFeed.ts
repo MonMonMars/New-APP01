@@ -1,6 +1,15 @@
-import { FeedItem, NewsReporter } from '../data/disguiseFeed';
-import { SparkSection } from '../types/preferences';
-import { pinnedReporterProfileId, profileIdFromPostId, resolveDisguiseProfileId } from './resolveDisguiseProfile';
+import { DisguisedProfilePost, FeedItem, NewsReporter } from '../data/disguiseFeed';
+import { getAllProfiles, getIncomingLikeProfilesForSection } from '../data/profiles';
+import { matchesSparkSection, resolveSparkSection, SparkSection } from '../types/preferences';
+import { Profile } from '../types/profile';
+import { disguiseDisplayName } from './disguiseProfileFeed';
+import { profileIntroCaption } from './profileIntroCaption';
+import {
+  profileIdFromPostId,
+  resolveDisguiseProfileId,
+  syncActionedProfileIds,
+  pinnedReporterProfileId,
+} from './resolveDisguiseProfile';
 
 function actionedProfileIds(
   likedIds: Set<string>,
@@ -14,6 +23,14 @@ function actionedProfileIds(
   return ids;
 }
 
+function hashSlotId(id: string): number {
+  let hash = 0;
+  for (let i = 0; i < id.length; i += 1) {
+    hash = (hash * 31 + id.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash);
+}
+
 function reporterProfileId(reporter: NewsReporter, section?: SparkSection | string | null): string | undefined {
   return (
     reporter.profileId ??
@@ -22,7 +39,87 @@ function reporterProfileId(reporter: NewsReporter, section?: SparkSection | stri
   );
 }
 
-/** Drop disguised profile cards and news reporter avatars after mini-window like / pass / super-like. */
+function disguisedProfileId(item: DisguisedProfilePost): string | undefined {
+  return item.profileId ?? profileIdFromPostId(item.id);
+}
+
+function buildReplacementPool(
+  section: SparkSection | string | null | undefined,
+  excluded: Set<string>,
+): Profile[] {
+  const resolved = resolveSparkSection(section);
+  const incoming = getIncomingLikeProfilesForSection(resolved);
+  const rest = getAllProfiles().filter((profile) => matchesSparkSection(profile, resolved));
+  const merged = [...incoming, ...rest];
+  const unique = merged.filter(
+    (profile, index, list) => list.findIndex((item) => item.id === profile.id) === index,
+  );
+  return unique.filter((profile) => !excluded.has(profile.id) && profile.photos.length > 0);
+}
+
+function pickReplacementProfile(
+  slotId: string,
+  pool: Profile[],
+  reserved: Set<string>,
+): Profile | undefined {
+  const available = pool.filter((profile) => !reserved.has(profile.id));
+  if (available.length === 0) {
+    return undefined;
+  }
+  return available[hashSlotId(slotId) % available.length];
+}
+
+function profileToReporter(reporter: NewsReporter, profile: Profile): NewsReporter {
+  const intro = profileIntroCaption(profile);
+  return {
+    ...reporter,
+    profileId: profile.id,
+    name: disguiseDisplayName(profile.name),
+    avatarUrl: profile.photos[0],
+    photos: profile.photos,
+    quote: intro,
+  };
+}
+
+function profileToDisguisedPost(post: DisguisedProfilePost, profile: Profile): DisguisedProfilePost {
+  const intro = profileIntroCaption(profile);
+  return {
+    ...post,
+    profileId: profile.id,
+    name: disguiseDisplayName(profile.name),
+    avatarUrl: profile.photos[0],
+    photos: profile.photos,
+    overlayText: intro,
+    summary: post.variant === 'social' ? profile.bio.trim() : post.summary,
+  };
+}
+
+function collectReservedProfileIds(items: FeedItem[], section?: SparkSection | string | null): Set<string> {
+  const reserved = new Set<string>();
+
+  items.forEach((item) => {
+    if (item.type === 'disguised_profile') {
+      const profileId = disguisedProfileId(item);
+      if (profileId) {
+        reserved.add(profileId);
+      }
+      return;
+    }
+
+    if (item.type === 'news') {
+      item.reporters.forEach((reporter) => {
+        const profileId = reporterProfileId(reporter, section);
+        if (profileId) {
+          reserved.add(profileId);
+        }
+      });
+    }
+  });
+
+  return reserved;
+}
+
+/** Swap liked/passed/super-liked Pulse profiles with fresh faces instead of leaving empty slots. */
 export function filterActionedDisguiseFeed(
   items: FeedItem[],
   likedIds: Set<string>,
@@ -31,24 +128,60 @@ export function filterActionedDisguiseFeed(
   section?: SparkSection | string | null,
 ): FeedItem[] {
   const actioned = actionedProfileIds(likedIds, passedIds, superLikedIds);
+  syncActionedProfileIds(actioned);
+
+  if (actioned.size === 0) {
+    return items;
+  }
+
+  const reserved = collectReservedProfileIds(items, section);
+  actioned.forEach((id) => reserved.delete(id));
+
+  const pool = buildReplacementPool(section, actioned);
 
   return items.flatMap((item) => {
     if (item.type === 'disguised_profile') {
-      const profileId = item.profileId ?? profileIdFromPostId(item.id);
-      if (profileId && actioned.has(profileId)) {
+      if (item.id === 'disguised-user') {
+        return [item];
+      }
+
+      const profileId = disguisedProfileId(item);
+      if (!profileId || !actioned.has(profileId)) {
+        return [item];
+      }
+
+      const replacement = pickReplacementProfile(item.id, pool, reserved);
+      if (!replacement) {
         return [];
       }
-      return [item];
+
+      reserved.add(replacement.id);
+      return [profileToDisguisedPost(item, replacement)];
     }
 
     if (item.type === 'news') {
-      const reporters = item.reporters.filter((reporter) => {
+      let changed = false;
+      const reporters = item.reporters.flatMap((reporter) => {
         const profileId = reporterProfileId(reporter, section);
-        return !profileId || !actioned.has(profileId);
+        if (!profileId || !actioned.has(profileId)) {
+          return [reporter];
+        }
+
+        const replacement = pickReplacementProfile(reporter.id, pool, reserved);
+        if (!replacement) {
+          changed = true;
+          return [];
+        }
+
+        changed = true;
+        reserved.add(replacement.id);
+        return [profileToReporter(reporter, replacement)];
       });
-      if (reporters.length === item.reporters.length) {
+
+      if (!changed) {
         return [item];
       }
+
       return [{ ...item, reporters }];
     }
 

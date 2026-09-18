@@ -89,6 +89,8 @@ export const zhTw = {
     shopBoostsNotes: '商店 — Boost 與 Spark Note',
     sparkPlusSubscription: 'Spark+ 訂閱',
     purchaseHistory: '購買紀錄',
+    worldMode: '約會世界',
+    worldModeHint: 'Spark 為開放式約會；Ember 以隱私優先。喜歡、配對與聊天會保留在你選擇的世界。',
     pauseAccount: '暫停帳號',
     pauseHint: '從推薦列表中隱藏你的個人檔案',
     appearance: '外觀',

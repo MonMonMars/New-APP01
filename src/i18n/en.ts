@@ -89,6 +89,8 @@ export const en = {
     shopBoostsNotes: 'Shop — Boosts & Notes',
     sparkPlusSubscription: 'Spark+ subscription',
     purchaseHistory: 'Purchase history',
+    worldMode: 'Dating world',
+    worldModeHint: 'Spark is open dating; Ember is discretion-first. Likes, matches, and chats stay in the world you pick.',
     pauseAccount: 'Pause account',
     pauseHint: 'Hide your profile from the deck',
     appearance: 'Appearance',

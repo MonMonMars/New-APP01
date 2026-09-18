@@ -12,7 +12,8 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { useTranslation } from '../../i18n';
-import { PASSPORT_CITIES } from '../../types/preferences';
+import { SparkSectionToggle } from '../../components/SparkSectionToggle';
+import { PASSPORT_CITIES, resolveSparkSection } from '../../types/preferences';
 import { ThemeMode } from '../../types/settings';
 import { LEGAL_ENTITY } from '../../constants/legalEntity';
 import { openExternalUrl } from '../../utils/openExternalUrl';
@@ -57,7 +58,9 @@ export function DisguiseProfileScreen() {
     updatePreferences,
     preferences,
     pulseSocial,
+    setSparkSection,
   } = useApp();
+  const sparkSection = resolveSparkSection(preferences.sparkSection);
   const meta = useDisguiseWorld();
   const { t } = useTranslation();
   const [showGenerator, setShowGenerator] = useState(false);
@@ -297,13 +300,20 @@ export function DisguiseProfileScreen() {
           items={detailConfig[detailSheet].items}
           headerExtra={
             detailSheet === 'settings' ? (
-              <View style={[styles.languageBlock, { borderBottomColor: colors.border }]}>
-                <View style={styles.languageText}>
-                  <Text style={[styles.languageTitle, { color: colors.text }]}>{t('profile.language')}</Text>
-                  <Text style={[styles.languageHint, { color: colors.textMuted }]}>{t('profile.languageHint')}</Text>
+              <>
+                <View style={[styles.worldBlock, { borderBottomColor: colors.border }]}>
+                  <Text style={[styles.languageTitle, { color: colors.text }]}>{t('profile.worldMode')}</Text>
+                  <Text style={[styles.languageHint, { color: colors.textMuted }]}>{t('profile.worldModeHint')}</Text>
+                  <SparkSectionToggle section={sparkSection} onChange={setSparkSection} variant="list" />
                 </View>
-                <LocaleToggle compact inline />
-              </View>
+                <View style={[styles.languageBlock, { borderBottomColor: colors.border }]}>
+                  <View style={styles.languageText}>
+                    <Text style={[styles.languageTitle, { color: colors.text }]}>{t('profile.language')}</Text>
+                    <Text style={[styles.languageHint, { color: colors.textMuted }]}>{t('profile.languageHint')}</Text>
+                  </View>
+                  <LocaleToggle compact inline />
+                </View>
+              </>
             ) : undefined
           }
           onClose={() => setDetailSheet(null)}
@@ -542,6 +552,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 2,
     lineHeight: 17,
+  },
+  worldBlock: {
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.sm,
+    paddingBottom: spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    gap: spacing.sm,
   },
   languageBlock: {
     flexDirection: 'row',

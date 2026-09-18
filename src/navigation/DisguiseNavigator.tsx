@@ -60,7 +60,7 @@ export function DisguiseNavigator() {
             Home: 'home',
             Trending: meta.trendingTab === 'Cosmos' ? 'planet-outline' : 'trending-up',
             Activity: 'notifications-outline',
-            Profile: 'person-circle-outline',
+            Profile: 'settings-outline',
           };
           return <Ionicons name={icons[route.name]} size={size} color={color} />;
         },
@@ -76,7 +76,7 @@ export function DisguiseNavigator() {
       <Tab.Screen
         name="Profile"
         component={DisguiseProfileScreen}
-        options={{ title: t('tabs.profile') }}
+        options={{ title: t('tabs.settings') }}
       />
     </Tab.Navigator>
   );

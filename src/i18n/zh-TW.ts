@@ -23,6 +23,7 @@ export const zhTw = {
     matches: '配對',
     messages: '訊息',
     profile: '個人檔案',
+    settings: '設定',
     activity: '動態',
     home: '首頁',
     trending: '熱門',

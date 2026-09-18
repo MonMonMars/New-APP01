@@ -180,7 +180,7 @@ export function DisguiseProfileScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
-      <DisguiseHeader title={t('disguiseProfile.title')} showSearch={false} />
+      <DisguiseHeader title={t('tabs.settings')} showSearch={false} />
       <ScrollView
         contentContainerStyle={styles.content}
         {...scrollViewProps}

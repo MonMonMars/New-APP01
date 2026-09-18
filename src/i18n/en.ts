@@ -23,6 +23,7 @@ export const en = {
     matches: 'Matches',
     messages: 'Messages',
     profile: 'Profile',
+    settings: 'Settings',
     activity: 'Activity',
     home: 'Home',
     trending: 'Trending',

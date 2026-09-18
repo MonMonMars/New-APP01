@@ -1,3 +1,5 @@
+import { StyleSheet, View } from 'react-native';
+
 import { ExpandSearchMap } from '../components/ExpandLocationSheet';
 
 type MapDiscoverScreenProps = {
@@ -5,5 +7,15 @@ type MapDiscoverScreenProps = {
 };
 
 export function MapDiscoverScreen({ onClose }: MapDiscoverScreenProps) {
-  return <ExpandSearchMap onClose={onClose} />;
+  return (
+    <View style={styles.root}>
+      <ExpandSearchMap onClose={onClose} />
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+});

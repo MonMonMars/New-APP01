@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCallback, useState } from 'react';
-import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DailyBatchIndicator } from '../components/DailyBatchIndicator';
@@ -26,7 +26,9 @@ import { RootStackParamList } from '../types/navigation';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { ActionToast } from '../components/ActionToast';
+import { SearchMapView } from '../components/SearchMapView';
 import { AnimatedPressable } from '../components/AnimatedPressable';
+import { mapCenterForCity, zoomForRadius } from '../utils/searchMapTiles';
 
 type DiscoverHubScreenProps = {
   onClose: () => void;
@@ -135,6 +137,14 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
             onPress={openMap}
             featured
             mapPreview
+            mapCenter={
+              preferences.travelMode && preferences.passportCity
+                ? mapCenterForCity(preferences.passportCity)
+                : mapCenterForCity(null)
+            }
+            mapZoom={zoomForRadius(preferences.maxDistanceMiles)}
+            mapRadiusMiles={preferences.maxDistanceMiles}
+            mapAccent={colors.gradientEnd}
           />
           <HubTile icon="compass-outline" label={t('discoverHub.explore')} colors={colors} onPress={openExplore} />
           <HubTile
@@ -303,6 +313,10 @@ function HubTile({
   onPress,
   featured,
   mapPreview,
+  mapCenter,
+  mapZoom,
+  mapRadiusMiles,
+  mapAccent,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
@@ -311,6 +325,10 @@ function HubTile({
   onPress: () => void;
   featured?: boolean;
   mapPreview?: boolean;
+  mapCenter?: { lat: number; lng: number };
+  mapZoom?: number;
+  mapRadiusMiles?: number;
+  mapAccent?: string;
 }) {
   return (
     <AnimatedPressable
@@ -322,12 +340,16 @@ function HubTile({
       onPress={onPress}
       accessibilityLabel={label}
     >
-      {mapPreview ? (
+      {mapPreview && mapCenter && mapZoom !== undefined && mapRadiusMiles !== undefined && mapAccent ? (
         <>
-          <Image
-            source={{
-              uri: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/12/1539/1206',
-            }}
+          <SearchMapView
+            center={mapCenter}
+            zoom={mapZoom}
+            radiusMiles={mapRadiusMiles}
+            accentColor={mapAccent}
+            pinColor={mapAccent}
+            showYouMarker
+            showRadiusRing
             style={styles.hubMapPreview}
           />
           <View style={styles.hubMapScrim} />
@@ -384,6 +406,7 @@ const styles = StyleSheet.create({
   },
   hubMapPreview: {
     ...StyleSheet.absoluteFill,
+    minHeight: 132,
   },
   hubMapScrim: {
     ...StyleSheet.absoluteFill,

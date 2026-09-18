@@ -2079,8 +2079,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return false;
   }, []);
 
-  const confirmLeaveDisguise = useCallback(() => {
+  const confirmLeaveDisguise = useCallback(async () => {
     setUnlockConfirmVisible(false);
+    const unlocked = await runSparkUnlockFlow();
+    if (!unlocked) {
+      return;
+    }
     if (!legalConsent.disguisePolicyAcceptedAt) {
       setLegalConsent((prev) => ({
         ...prev,
@@ -2088,7 +2092,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }));
     }
     setDisguiseModeState(false);
-  }, [legalConsent.disguisePolicyAcceptedAt]);
+  }, [legalConsent.disguisePolicyAcceptedAt, runSparkUnlockFlow]);
 
   const cancelLeaveDisguise = useCallback(() => {
     setUnlockConfirmVisible(false);

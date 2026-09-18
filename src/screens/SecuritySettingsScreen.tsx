@@ -10,6 +10,7 @@ import { useTheme } from '../context/ThemeContext';
 import { SecuritySettings } from '../types/security';
 import { isBiometricAvailable } from '../utils/appLock';
 import { useDisguiseWorld } from '../hooks/useDisguiseWorld';
+import { useTranslation } from '../i18n';
 import { hashPin, setStoredPinHash, clearStoredPinHash } from '../utils/secureStorage';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -54,6 +55,7 @@ export function SecuritySettingsScreen({ onClose }: SecuritySettingsScreenProps)
   const { colors } = useTheme();
   const { securitySettings, updateSecuritySettings, preferences } = useApp();
   const world = useDisguiseWorld();
+  const { t } = useTranslation();
   const [pinDraft, setPinDraft] = useState('');
   const [biometricAvailable, setBiometricAvailable] = useState(false);
 
@@ -67,21 +69,21 @@ export function SecuritySettingsScreen({ onClose }: SecuritySettingsScreenProps)
 
   const savePin = async () => {
     if (pinDraft.length < 4 || pinDraft.length > 6) {
-      Alert.alert('PIN', 'Use 4–6 digits.');
+      Alert.alert(t('security.pinAlertTitle'), t('security.pinInvalid'));
       return;
     }
     const hashed = await hashPin(pinDraft);
     await setStoredPinHash(hashed);
     patch({ pinEnabled: true, appLockEnabled: true });
     setPinDraft('');
-    Alert.alert('PIN saved', 'Your app lock PIN is set.');
+    Alert.alert(t('security.pinSavedTitle'), t('security.pinSavedBody'));
   };
 
   const removePin = async () => {
     await clearStoredPinHash();
     patch({ pinEnabled: false });
     setPinDraft('');
-    Alert.alert('PIN removed', 'Biometric lock still applies if enabled.');
+    Alert.alert(t('security.pinRemovedTitle'), t('security.pinRemovedBody'));
   };
 
   return (
@@ -90,34 +92,29 @@ export function SecuritySettingsScreen({ onClose }: SecuritySettingsScreenProps)
         <AnimatedPressable onPress={onClose} style={styles.back}>
           <Ionicons name="chevron-back" size={28} color={colors.text} />
         </AnimatedPressable>
-        <Text style={[styles.title, { color: colors.text }]}>Security</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('security.title')}</Text>
         <DisguiseModeButton />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={[styles.banner, { backgroundColor: colors.surface }]}>
           <Ionicons name="shield-checkmark" size={28} color={colors.gradientEnd} />
-          <Text style={[styles.bannerTitle, { color: colors.text }]}>Protect your privacy</Text>
-          <Text style={[styles.bannerBody, { color: colors.textMuted }]}>
-            App lock, encrypted local storage, and disguise-safe notifications help keep dating
-            data off your lock screen and away from shoulder surfers.
-          </Text>
+          <Text style={[styles.bannerTitle, { color: colors.text }]}>{t('security.bannerTitle')}</Text>
+          <Text style={[styles.bannerBody, { color: colors.textMuted }]}>{t('security.bannerBody')}</Text>
         </View>
 
-        <Text style={[styles.section, { color: colors.textMuted }]}>App lock</Text>
+        <Text style={[styles.section, { color: colors.textMuted }]}>{t('security.appLockSection')}</Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <SettingRow
-            label={`Ask before leaving ${world.name}`}
-            hint={`Face ID, Touch ID, or PIN before opening ${world.unlockLabel}`}
+            label={t('security.askBeforeLeaving', { name: world.name })}
+            hint={t('security.askBeforeLeavingHint', { unlock: world.unlockLabel })}
             value={securitySettings.appLockEnabled}
             onValueChange={(next) => patch({ appLockEnabled: next })}
           />
           <SettingRow
-            label="Use Face ID / Touch ID"
+            label={t('security.useBiometric')}
             hint={
-              biometricAvailable
-                ? 'Confirm with device biometrics when available'
-                : 'Not available on this device'
+              biometricAvailable ? t('security.biometricAvailable') : t('security.biometricUnavailable')
             }
             value={securitySettings.biometricEnabled}
             onValueChange={(next) => patch({ biometricEnabled: next })}
@@ -125,12 +122,10 @@ export function SecuritySettingsScreen({ onClose }: SecuritySettingsScreenProps)
           />
         </View>
 
-        <Text style={[styles.section, { color: colors.textMuted }]}>PIN fallback</Text>
+        <Text style={[styles.section, { color: colors.textMuted }]}>{t('security.pinFallbackSection')}</Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <Text style={[styles.pinHint, { color: colors.textMuted }]}>
-            {securitySettings.pinEnabled
-              ? 'PIN is set. Enter a new PIN below to change it.'
-              : 'Optional 4–6 digit PIN if biometrics fail.'}
+            {securitySettings.pinEnabled ? t('security.pinSetHint') : t('security.pinUnsetHint')}
           </Text>
           <TextInput
             style={[
@@ -141,55 +136,55 @@ export function SecuritySettingsScreen({ onClose }: SecuritySettingsScreenProps)
             onChangeText={(value) => setPinDraft(value.replace(/\D/g, '').slice(0, 6))}
             keyboardType="number-pad"
             secureTextEntry
-            placeholder="New PIN"
+            placeholder={t('security.newPinPlaceholder')}
             placeholderTextColor={colors.textMuted}
             maxLength={6}
           />
           <View style={styles.pinActions}>
             <AnimatedPressable style={[styles.pinButton, { borderColor: colors.border }]} onPress={savePin}>
-              <Text style={[styles.pinButtonText, { color: colors.text }]}>Save PIN</Text>
+              <Text style={[styles.pinButtonText, { color: colors.text }]}>{t('security.savePin')}</Text>
             </AnimatedPressable>
             {securitySettings.pinEnabled && (
               <AnimatedPressable style={[styles.pinButton, { borderColor: colors.border }]} onPress={removePin}>
-                <Text style={[styles.pinButtonText, { color: '#ef4444' }]}>Remove PIN</Text>
+                <Text style={[styles.pinButtonText, { color: '#ef4444' }]}>{t('security.removePin')}</Text>
               </AnimatedPressable>
             )}
           </View>
         </View>
 
-        <Text style={[styles.section, { color: colors.textMuted }]}>Disguise & session</Text>
+        <Text style={[styles.section, { color: colors.textMuted }]}>{t('security.disguiseSection')}</Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <SettingRow
-            label="Auto-disguise on background"
-            hint={`Switch to ${world.name} when you leave the app`}
+            label={t('security.autoDisguise')}
+            hint={t('security.autoDisguiseHint', { name: world.name })}
             value={securitySettings.autoDisguiseOnBackground}
             onValueChange={(next) => patch({ autoDisguiseOnBackground: next })}
           />
           <SettingRow
-            label="Disguise-safe notifications"
-            hint={`Neutral ${world.name} copy on lock screen while disguised`}
+            label={t('security.disguiseSafeNotifications')}
+            hint={t('security.disguiseSafeNotificationsHint', { name: world.name })}
             value={securitySettings.disguiseSafeNotifications}
             onValueChange={(next) => patch({ disguiseSafeNotifications: next })}
           />
           <SettingRow
-            label="Ask again after 5 minutes"
-            hint="Confirm again after the app has been in the background"
+            label={t('security.askAgainAfter5')}
+            hint={t('security.askAgainAfter5Hint')}
             value={securitySettings.sessionTimeoutMinutes > 0}
             onValueChange={(next) => patch({ sessionTimeoutMinutes: next ? 5 : 0 })}
           />
         </View>
 
-        <Text style={[styles.section, { color: colors.textMuted }]}>Screen protection</Text>
+        <Text style={[styles.section, { color: colors.textMuted }]}>{t('security.screenProtectionSection')}</Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <SettingRow
-            label={`Block screenshots (${world.unlockLabel})`}
-            hint="Prevent screenshots and screen recording on dating screens"
+            label={t('security.blockScreenshots', { unlock: world.unlockLabel })}
+            hint={t('security.blockScreenshotsHint')}
             value={securitySettings.blockScreenshots}
             onValueChange={(next) => patch({ blockScreenshots: next })}
           />
           <SettingRow
-            label="Privacy shield"
-            hint={`Hide ${world.unlockLabel} in app switcher with ${world.name} overlay`}
+            label={t('security.privacyShield')}
+            hint={t('security.privacyShieldHint', { unlock: world.unlockLabel, name: world.name })}
             value={securitySettings.privacyShieldEnabled}
             onValueChange={(next) => patch({ privacyShieldEnabled: next })}
           />
@@ -201,15 +196,12 @@ export function SecuritySettingsScreen({ onClose }: SecuritySettingsScreenProps)
         >
           <Ionicons name="shield-half-outline" size={20} color={colors.gradientEnd} />
           <Text style={[styles.protocolLinkText, { color: colors.text }]}>
-            Read security protocols — anti-phishing & hacker protection
+            {t('security.protocolLink')}
           </Text>
           <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
         </AnimatedPressable>
 
-        <Text style={[styles.footer, { color: colors.textMuted }]}>
-          Local chat data is encrypted on device. Never share your PIN, magic links, or verification
-          selfies with anyone claiming to be Spark support.
-        </Text>
+        <Text style={[styles.footer, { color: colors.textMuted }]}>{t('security.footer')}</Text>
       </ScrollView>
     </View>
   );

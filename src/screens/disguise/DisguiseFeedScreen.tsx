@@ -11,6 +11,7 @@ import { NewsPostCard } from '../../components/disguise/NewsPostCard';
 import { SocialPostCard } from '../../components/disguise/SocialPostCard';
 import { useApp } from '../../context/AppContext';
 import { useAppLocale } from '../../hooks/useAppLocale';
+import { useTranslation } from '../../i18n';
 import { useTheme } from '../../context/ThemeContext';
 import { FeedItem } from '../../data/disguiseFeed';
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
@@ -52,6 +53,7 @@ export function DisguiseFeedScreen() {
   const { colors } = useTheme();
   const { user, disguiseAdCreative, pulseSocial, preferences } = useApp();
   const { locale } = useAppLocale();
+  const { t } = useTranslation();
   const meta = disguiseWorldMeta(preferences.sparkSection, user.gender, locale);
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
   const route = useRoute<RouteProp<DisguiseTabParamList, 'Home'>>();
@@ -88,9 +90,11 @@ export function DisguiseFeedScreen() {
             {topic ? (
               <AnimatedPressable
                 onPress={() => navigateDisguiseFeedTopic(navigation)}
-                accessibilityLabel="Clear topic filter"
+                accessibilityLabel={t('disguiseFeed.clearFilterA11y')}
               >
-                <Text style={[styles.clearFilter, { color: meta.accent }]}>Clear</Text>
+                <Text style={[styles.clearFilter, { color: meta.accent }]}>
+                  {t('disguiseFeed.clearFilter')}
+                </Text>
               </AnimatedPressable>
             ) : null}
           </View>
@@ -99,19 +103,21 @@ export function DisguiseFeedScreen() {
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={[styles.emptyTitle, { color: colors.text }]}>
-              {topic ? `No posts for ${sectionLabel}` : 'Nothing in your feed'}
+              {topic
+                ? t('disguiseFeed.emptyTopic', { topic: sectionLabel })
+                : t('disguiseFeed.emptyNoTopic')}
             </Text>
             <Text style={[styles.emptyBody, { color: colors.textMuted }]}>
-              {topic
-                ? 'Try another topic or clear the filter to see everything.'
-                : 'Check back soon — or explore Trending for more stories.'}
+              {topic ? t('disguiseFeed.emptyTopicBody') : t('disguiseFeed.emptyNoTopicBody')}
             </Text>
             {topic ? (
               <AnimatedPressable
                 style={[styles.emptyButton, { borderColor: meta.accent }]}
                 onPress={() => navigateDisguiseFeedTopic(navigation)}
               >
-                <Text style={[styles.emptyButtonText, { color: meta.accent }]}>Clear filter</Text>
+                <Text style={[styles.emptyButtonText, { color: meta.accent }]}>
+                  {t('disguiseFeed.clearFilterButton')}
+                </Text>
               </AnimatedPressable>
             ) : (
               <AnimatedPressable
@@ -119,7 +125,7 @@ export function DisguiseFeedScreen() {
                 onPress={() => navigation.navigate('Trending')}
               >
                 <Text style={[styles.emptyButtonText, { color: meta.accent }]}>
-                  Explore {meta.trendingTab}
+                  {t('disguiseFeed.exploreTrending', { tab: meta.trendingTab })}
                 </Text>
               </AnimatedPressable>
             )}

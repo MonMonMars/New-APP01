@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -20,16 +21,17 @@ export function ProfileViewsCard({
   onUpgrade,
 }: ProfileViewsCardProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   if (totalCount === 0) {
     return (
       <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <View style={styles.header}>
           <Ionicons name="eye-outline" size={20} color={colors.gradientEnd} />
-          <Text style={[styles.title, { color: colors.text }]}>Who viewed you</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('profileViews.title')}</Text>
         </View>
         <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-          Keep swiping and updating your profile — views show up here as people discover you.
+          {t('profileViews.empty')}
         </Text>
       </View>
     );
@@ -39,15 +41,15 @@ export function ProfileViewsCard({
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={styles.header}>
         <Ionicons name="eye-outline" size={20} color={colors.gradientEnd} />
-        <Text style={[styles.title, { color: colors.text }]}>Who viewed you</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('profileViews.title')}</Text>
         <View style={[styles.countBadge, { backgroundColor: colors.gradientEnd }]}>
           <Text style={[styles.countText, { color: colors.text }]}>{totalCount}</Text>
         </View>
       </View>
       <Text style={[styles.subtitle, { color: colors.textMuted }]}>
         {canReveal
-          ? `${totalCount} people checked out your profile this week`
-          : 'Upgrade to see who viewed your profile'}
+          ? t('profileViews.checkedOut', { count: totalCount })
+          : t('profileViews.upgrade')}
       </Text>
 
       <View style={styles.grid}>
@@ -74,7 +76,7 @@ export function ProfileViewsCard({
           onPress={onUpgrade}
         >
           <Ionicons name="diamond" size={16} color={colors.text} />
-          <Text style={[styles.upgradeText, { color: colors.text }]}>See who viewed you</Text>
+          <Text style={[styles.upgradeText, { color: colors.text }]}>{t('profileViews.seeWho')}</Text>
         </AnimatedPressable>
       )}
     </View>

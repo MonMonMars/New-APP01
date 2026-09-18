@@ -10,6 +10,7 @@ import { useTheme } from '../context/ThemeContext';
 import { LocaleToggle } from '../components/legal/LocaleToggle';
 import { getLegalDocumentLinks, getLegalUiStrings, LegalDocumentId } from '../content/legal';
 import { useAppLocale } from '../hooks/useAppLocale';
+import { useTranslation } from '../i18n';
 import { PrivacyPreferences } from '../types/privacy';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -58,6 +59,7 @@ export function PrivacyCenterScreen({ onClose }: PrivacyCenterScreenProps) {
     setIncognitoMode,
   } = useApp();
   const { locale } = useAppLocale();
+  const { t } = useTranslation();
   const ui = getLegalUiStrings(locale);
   const policyLinks = getLegalDocumentLinks(locale);
 
@@ -72,20 +74,20 @@ export function PrivacyCenterScreen({ onClose }: PrivacyCenterScreenProps) {
   const handleExport = async () => {
     const ok = await exportUserData();
     if (!ok) {
-      Alert.alert('Export failed', 'Could not prepare your data export. Try again.');
+      Alert.alert(t('alerts.exportFailed'), t('alerts.exportFailedBody'));
       return;
     }
-    Alert.alert('Export ready', 'Your data export was prepared. Use the share sheet to save or send it.');
+    Alert.alert(t('alerts.exportReady'), t('alerts.exportReadyBody'));
   };
 
   const handleDelete = () => {
     Alert.alert(
-      'Delete account',
-      'This permanently removes your profile, matches, and messages from this device and our servers when connected.',
+      t('alerts.deleteAccountTitle'),
+      t('alerts.deleteAccountPrivacyBody'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: () => {
             void deleteAccount();
@@ -102,61 +104,61 @@ export function PrivacyCenterScreen({ onClose }: PrivacyCenterScreenProps) {
         <AnimatedPressable onPress={onClose} style={styles.back}>
           <Ionicons name="chevron-back" size={28} color={colors.text} />
         </AnimatedPressable>
-        <Text style={[styles.title, { color: colors.text }]}>Privacy controls</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('privacy.title')}</Text>
         <DisguiseModeButton />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={[styles.banner, { backgroundColor: colors.surface }]}>
           <Ionicons name="hand-left-outline" size={28} color={colors.gradientEnd} />
-          <Text style={[styles.bannerTitle, { color: colors.text }]}>Your data, your choices</Text>
+          <Text style={[styles.bannerTitle, { color: colors.text }]}>{t('privacy.bannerTitle')}</Text>
           <Text style={[styles.bannerBody, { color: colors.textMuted }]}>
-            Control what Spark collects, how we personalise your experience, and when we contact you.
+            {t('privacy.bannerBody')}
           </Text>
         </View>
 
-        <Text style={[styles.section, { color: colors.textMuted }]}>Data use</Text>
+        <Text style={[styles.section, { color: colors.textMuted }]}>{t('privacy.dataUse')}</Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <PreferenceRow
-            label="Analytics & crash reports"
-            hint="Help improve Spark with anonymised usage and stability data"
+            label={t('privacy.analytics')}
+            hint={t('privacy.analyticsHint')}
             value={privacyPreferences.analyticsEnabled}
             onValueChange={(next) => patch({ analyticsEnabled: next })}
           />
           <PreferenceRow
-            label="Personalised recommendations"
-            hint="Use your activity to rank profiles and prompts"
+            label={t('privacy.personalisation')}
+            hint={t('privacy.personalisationHint')}
             value={privacyPreferences.personalisationEnabled}
             onValueChange={(next) => patch({ personalisationEnabled: next })}
           />
           <PreferenceRow
-            label="Marketing"
-            hint="Product news and offers by email or push"
+            label={t('privacy.marketing')}
+            hint={t('privacy.marketingHint')}
             value={privacyPreferences.marketingConsent}
             onValueChange={(next) => patch({ marketingConsent: next })}
           />
         </View>
 
-        <Text style={[styles.section, { color: colors.textMuted }]}>Visibility</Text>
+        <Text style={[styles.section, { color: colors.textMuted }]}>{t('privacy.visibility')}</Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <PreferenceRow
-            label="Location for discovery"
-            hint="Show approximate distance on cards when permission is granted"
+            label={t('privacy.locationSharing')}
+            hint={t('privacy.locationSharingHint')}
             value={privacyPreferences.locationSharing}
             onValueChange={(next) => patch({ locationSharing: next })}
           />
           <PreferenceRow
-            label="Active status"
-            hint="Let matches see when you were recently active"
+            label={t('privacy.activeStatus')}
+            hint={t('privacy.activeStatusHint')}
             value={privacyPreferences.showActiveStatus}
             onValueChange={(next) => patch({ showActiveStatus: next })}
           />
           <PreferenceRow
-            label="Incognito mode"
+            label={t('privacy.incognito')}
             hint={
               isSparkPlus
-                ? 'Browse without appearing in stacks until you like someone'
-                : 'Spark+ feature — upgrade to browse invisibly'
+                ? t('privacy.incognitoHintSparkPlus')
+                : t('privacy.incognitoHintUpgrade')
             }
             value={privacyPreferences.incognitoMode && isSparkPlus}
             onValueChange={(next) => {
@@ -171,16 +173,16 @@ export function PrivacyCenterScreen({ onClose }: PrivacyCenterScreenProps) {
           />
         </View>
 
-        <Text style={[styles.section, { color: colors.textMuted }]}>Your rights</Text>
+        <Text style={[styles.section, { color: colors.textMuted }]}>{t('privacy.yourRights')}</Text>
         <AnimatedPressable
           style={[styles.actionRow, { borderColor: colors.border, backgroundColor: colors.surface }]}
           onPress={() => void handleExport()}
         >
           <Ionicons name="download-outline" size={22} color={colors.gradientEnd} />
           <View style={styles.actionText}>
-            <Text style={[styles.actionTitle, { color: colors.text }]}>Download my data</Text>
+            <Text style={[styles.actionTitle, { color: colors.text }]}>{t('privacy.downloadData')}</Text>
             <Text style={[styles.actionHint, { color: colors.textMuted }]}>
-              JSON export of profile, preferences, and match metadata
+              {t('privacy.downloadDataHint')}
             </Text>
           </View>
         </AnimatedPressable>
@@ -188,16 +190,16 @@ export function PrivacyCenterScreen({ onClose }: PrivacyCenterScreenProps) {
           style={[styles.actionRow, { borderColor: colors.border, backgroundColor: colors.surface }]}
           onPress={() =>
             Alert.alert(
-              'Data subject request',
-              `Email ${LEGAL_ENTITY.privacyEmail} with "Data subject request". We respond within 30 days where required by law.`,
+              t('alerts.dataSubjectTitle'),
+              t('alerts.dataSubjectBody', { email: LEGAL_ENTITY.privacyEmail }),
             )
           }
         >
           <Ionicons name="mail-outline" size={22} color={colors.gradientEnd} />
           <View style={styles.actionText}>
-            <Text style={[styles.actionTitle, { color: colors.text }]}>Request access or deletion</Text>
+            <Text style={[styles.actionTitle, { color: colors.text }]}>{t('privacy.requestAccess')}</Text>
             <Text style={[styles.actionHint, { color: colors.textMuted }]}>
-              GDPR, UK GDPR, CCPA, and regional privacy rights
+              {t('privacy.requestAccessHint')}
             </Text>
           </View>
         </AnimatedPressable>
@@ -207,9 +209,9 @@ export function PrivacyCenterScreen({ onClose }: PrivacyCenterScreenProps) {
         >
           <Ionicons name="trash-outline" size={22} color="#ef4444" />
           <View style={styles.actionText}>
-            <Text style={[styles.actionTitle, { color: '#ef4444' }]}>Delete account</Text>
+            <Text style={[styles.actionTitle, { color: '#ef4444' }]}>{t('privacy.deleteAccount')}</Text>
             <Text style={[styles.actionHint, { color: colors.textMuted }]}>
-              Permanent — cannot be undone
+              {t('privacy.deleteAccountHint')}
             </Text>
           </View>
         </AnimatedPressable>
@@ -226,7 +228,7 @@ export function PrivacyCenterScreen({ onClose }: PrivacyCenterScreenProps) {
         </View>
 
         <Text style={[styles.section, { color: colors.textMuted }]}>
-          {locale === 'zh-TW' ? '政策' : 'Policies'}
+          {t('privacy.policies')}
         </Text>
         {policyLinks.map((item) => (
           <AnimatedPressable
@@ -241,7 +243,7 @@ export function PrivacyCenterScreen({ onClose }: PrivacyCenterScreenProps) {
         ))}
 
         <Text style={[styles.footer, { color: colors.textMuted }]}>
-          Controller: {LEGAL_ENTITY.name} · {LEGAL_ENTITY.privacyEmail}
+          {t('privacy.controller', { name: LEGAL_ENTITY.name, email: LEGAL_ENTITY.privacyEmail })}
         </Text>
       </ScrollView>
     </View>

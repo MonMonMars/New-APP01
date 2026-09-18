@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Alert, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../../context/AppContext';
@@ -170,11 +170,7 @@ export function PersonPreviewSheet({
           ]}
           {...webClass('spark-sheet-in')}
         >
-          <ScrollView
-            bounces={false}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.cardInner}
-          >
+          <View style={styles.cardInner}>
           <FadeSlideIn replayKey={visible} index={0}>
             <View style={styles.header}>
               <View style={[styles.headerIcon, { backgroundColor: worldMeta.accentSoft }]}>
@@ -271,7 +267,7 @@ export function PersonPreviewSheet({
               </Text>
             </FadeSlideIn>
           )}
-          </ScrollView>
+          </View>
         </View>
       </AnimatedOverlay>
 

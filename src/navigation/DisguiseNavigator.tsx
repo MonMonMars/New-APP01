@@ -57,8 +57,8 @@ export function DisguiseNavigator() {
         },
         tabBarIcon: ({ color, size }) => {
           const icons: Record<keyof DisguiseTabParamList, keyof typeof Ionicons.glyphMap> = {
-            Home: meta.world === 'harbor' ? 'briefcase' : 'home',
-            Trending: meta.world === 'harbor' ? 'bar-chart' : meta.trendingTab === 'Cosmos' ? 'planet-outline' : 'trending-up',
+            Home: 'home',
+            Trending: meta.trendingTab === 'Cosmos' ? 'planet-outline' : 'trending-up',
             Activity: 'notifications-outline',
             Profile: 'person-circle-outline',
           };

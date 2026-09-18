@@ -1,12 +1,11 @@
 import { translate } from '../i18n';
 import { AppLocale, resolveAppLocale } from '../types/locale';
-import { harborBrand } from '../theme/harborBrand';
 import { pulseBrand } from '../theme/pulseBrand';
 import { resolveSparkSection } from '../types/preferences';
 import type { ProfileGender } from '../types/profile';
 import { usesFemalePulseExperience } from './genderAccountPerks';
 
-export type DisguiseWorld = 'pulse' | 'harbor';
+export type DisguiseWorld = 'pulse';
 
 export type DisguiseWorldMeta = {
   world: DisguiseWorld;
@@ -24,8 +23,16 @@ export type DisguiseWorldMeta = {
   feedLabel: string;
 };
 
-export function resolveDisguiseWorld(section?: string | null): DisguiseWorld {
-  return resolveSparkSection(section) === 'ember' ? 'harbor' : 'pulse';
+/** Spark and Ember both use the same Pulse disguise shell. */
+export function resolveDisguiseWorld(_section?: string | null): DisguiseWorld {
+  return 'pulse';
+}
+
+function resolveUnlockLabel(section?: string | null, locale?: AppLocale | null): string {
+  const lang = resolveAppLocale(locale);
+  return resolveSparkSection(section) === 'ember'
+    ? translate(lang, 'preferences.ember')
+    : translate(lang, 'preferences.spark');
 }
 
 /** Convert a 6-digit hex color to an rgba() string. */
@@ -45,59 +52,39 @@ export function disguiseWorldMeta(
 ): DisguiseWorldMeta {
   const lang = resolveAppLocale(locale);
   const world = resolveDisguiseWorld(section);
-  switch (world) {
-    case 'pulse':
-      if (gender && usesFemalePulseExperience(gender)) {
-        return {
-          world,
-          name: 'Pulse',
-          tagline: translate(lang, 'disguiseWorld.pulseFemaleTagline'),
-          unlockLabel: 'Spark',
-          accent: pulseBrand.accent,
-          accentBright: pulseBrand.accentBright,
-          accentSoft: pulseBrand.accentSoft,
-          accentBorder: pulseBrand.accentBorder,
-          navy: pulseBrand.navy,
-          homeTab: translate(lang, 'tabs.home'),
-          trendingTab: translate(lang, 'tabs.cosmos'),
-          searchTitle: translate(lang, 'disguiseWorld.searchPulse'),
-          feedLabel: translate(lang, 'disguiseWorld.pulseFemaleFeedLabel'),
-        };
-      }
-      return {
-        world,
-        name: 'Pulse',
-        tagline: translate(lang, 'disguiseWorld.pulseTagline'),
-        unlockLabel: 'Spark',
-        accent: pulseBrand.accent,
-        accentBright: pulseBrand.accentBright,
-        accentSoft: pulseBrand.accentSoft,
-        accentBorder: pulseBrand.accentBorder,
-        navy: pulseBrand.navy,
-        homeTab: translate(lang, 'tabs.home'),
-        trendingTab: translate(lang, 'tabs.trending'),
-        searchTitle: translate(lang, 'disguiseWorld.searchPulse'),
-        feedLabel: translate(lang, 'disguiseWorld.pulseFeedLabel'),
-      };
-    case 'harbor':
-      return {
-        world,
-        name: translate(lang, 'disguiseWorld.harborName'),
-        tagline: translate(lang, 'disguiseWorld.harborTagline'),
-        unlockLabel: translate(lang, 'disguiseWorld.harborUnlock'),
-        accent: harborBrand.accent,
-        accentBright: harborBrand.accentBright,
-        accentSoft: harborBrand.accentSoft,
-        accentBorder: harborBrand.accentBorder,
-        navy: harborBrand.navy,
-        homeTab: translate(lang, 'tabs.briefing'),
-        trendingTab: translate(lang, 'tabs.markets'),
-        searchTitle: translate(lang, 'disguiseWorld.searchHarbor'),
-        feedLabel: translate(lang, 'disguiseWorld.harborFeedLabel'),
-      };
-    default: {
-      const _exhaustive: never = world;
-      return _exhaustive;
-    }
+  const unlockLabel = resolveUnlockLabel(section, locale);
+
+  if (gender && usesFemalePulseExperience(gender)) {
+    return {
+      world,
+      name: 'Pulse',
+      tagline: translate(lang, 'disguiseWorld.pulseFemaleTagline'),
+      unlockLabel,
+      accent: pulseBrand.accent,
+      accentBright: pulseBrand.accentBright,
+      accentSoft: pulseBrand.accentSoft,
+      accentBorder: pulseBrand.accentBorder,
+      navy: pulseBrand.navy,
+      homeTab: translate(lang, 'tabs.home'),
+      trendingTab: translate(lang, 'tabs.cosmos'),
+      searchTitle: translate(lang, 'disguiseWorld.searchPulse'),
+      feedLabel: translate(lang, 'disguiseWorld.pulseFemaleFeedLabel'),
+    };
   }
+
+  return {
+    world,
+    name: 'Pulse',
+    tagline: translate(lang, 'disguiseWorld.pulseTagline'),
+    unlockLabel,
+    accent: pulseBrand.accent,
+    accentBright: pulseBrand.accentBright,
+    accentSoft: pulseBrand.accentSoft,
+    accentBorder: pulseBrand.accentBorder,
+    navy: pulseBrand.navy,
+    homeTab: translate(lang, 'tabs.home'),
+    trendingTab: translate(lang, 'tabs.trending'),
+    searchTitle: translate(lang, 'disguiseWorld.searchPulse'),
+    feedLabel: translate(lang, 'disguiseWorld.pulseFeedLabel'),
+  };
 }

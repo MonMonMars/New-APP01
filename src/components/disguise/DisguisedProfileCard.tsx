@@ -146,9 +146,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
             <Text style={styles.tagline}>{post.summary}</Text>
             {avatarRow}
             <Text style={styles.spotlightHint} numberOfLines={2}>
-              {meta.world === 'harbor'
-                ? 'Market briefing — verified note from a Harbor member.'
-                : 'Reader spotlight — verified comment from a Pulse member.'}
+              Reader spotlight — verified comment from a Pulse member.
             </Text>
             <View style={[styles.cta, { backgroundColor: meta.accent }]}>
               <Text style={styles.ctaText}>{post.cta ?? 'Learn more'}</Text>

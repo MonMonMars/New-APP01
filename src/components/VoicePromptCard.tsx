@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { VoicePrompt } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -15,6 +16,7 @@ type VoicePromptCardProps = {
 
 export function VoicePromptCard({ voicePrompt, profileName, compact = false }: VoicePromptCardProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
 
@@ -49,7 +51,7 @@ export function VoicePromptCard({ voicePrompt, profileName, compact = false }: V
     <View style={[styles.card, { backgroundColor: colors.surface }, compact && styles.cardCompact]}>
       <View style={styles.header}>
         <Ionicons name="mic" size={18} color={colors.gradientEnd} />
-        <Text style={[styles.label, { color: colors.textMuted }]}>Voice prompt</Text>
+        <Text style={[styles.label, { color: colors.textMuted }]}>{t('editProfile.voicePromptLabel')}</Text>
       </View>
       <Text style={[styles.question, { color: colors.text }]}>{voicePrompt.question}</Text>
       <AnimatedPressable

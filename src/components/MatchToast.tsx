@@ -11,6 +11,7 @@ import Animated, {
 
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type MatchToastProps = {
@@ -28,6 +29,7 @@ const TOAST_TIMING = {
 
 export function MatchToast({ visible, profileName, onDismiss, variant = 'default' }: MatchToastProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const translateY = useSharedValue(-120);
   const opacity = useSharedValue(0);
   const timing = TOAST_TIMING[variant];
@@ -66,8 +68,8 @@ export function MatchToast({ visible, profileName, onDismiss, variant = 'default
       <AnimatedPressable style={[styles.toast, { borderColor: colors.gradientEnd }]} onPress={onDismiss}>
         <Text style={styles.emoji}>✨</Text>
         <View style={styles.textCol}>
-          <Text style={styles.title}>New match!</Text>
-          <Text style={styles.subtitle}>You and {profileName} liked each other</Text>
+          <Text style={styles.title}>{t('matchToast.title')}</Text>
+          <Text style={styles.subtitle}>{t('matchToast.subtitle', { name: profileName })}</Text>
         </View>
       </AnimatedPressable>
     </Animated.View>

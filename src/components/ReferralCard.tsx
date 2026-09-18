@@ -11,7 +11,7 @@ import { AnimatedPressable } from './AnimatedPressable';
 
 export function ReferralCard() {
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { user, userId, recordReferralShare, pulseSocial } = useApp();
   const inviteLink = buildInviteLink(userId);
 
@@ -21,6 +21,7 @@ export function ReferralCard() {
       message,
       title: t('referral.shareTitle'),
       url: inviteLink,
+      locale,
     });
     if (shared) {
       const count = recordReferralShare();

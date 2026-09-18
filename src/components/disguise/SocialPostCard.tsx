@@ -27,7 +27,7 @@ type SocialPostCardProps = {
 
 export function SocialPostCard({ post }: SocialPostCardProps) {
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const {
     pulseSocial,
     savePulsePost,
@@ -138,11 +138,11 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
         <AnimatedPressable
           style={styles.moreButton}
           onPress={() => {
-            Alert.alert('Post options', undefined, [
-              { text: isSaved ? 'Unsave post' : 'Save post', onPress: handleSave },
-              { text: 'Mute author', onPress: handleMute },
-              { text: 'Report', style: 'destructive', onPress: handleReport },
-              { text: 'Cancel', style: 'cancel' },
+            Alert.alert(t('pulseSocial.postOptions'), undefined, [
+              { text: isSaved ? t('pulseSocial.unsavePost') : t('pulseSocial.savePost'), onPress: handleSave },
+              { text: t('pulseSocial.muteAuthor'), onPress: handleMute },
+              { text: t('pulseSocial.report'), style: 'destructive', onPress: handleReport },
+              { text: t('pulseSocial.cancel'), style: 'cancel' },
             ]);
           }}
         >
@@ -155,7 +155,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
           style={styles.postImageWrap}
           onPress={() => setPhotoOpen(true)}
           accessibilityRole="button"
-          accessibilityLabel="Open post photo"
+          accessibilityLabel={t('pulseSocial.openPostPhoto')}
         >
           <DisguiseOverlayImage
             imageUrl={post.imageUrl}
@@ -190,7 +190,8 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
           onPress={() => {
             void shareWithFallback({
               message: `${post.author}: ${post.body}`,
-              title: 'Share post',
+              title: t('pulseSocial.sharePost'),
+              locale,
             });
           }}
         >

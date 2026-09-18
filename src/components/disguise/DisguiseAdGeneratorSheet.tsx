@@ -57,7 +57,7 @@ export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGenerat
     setError(null);
     const result = await generateDisguiseAd(overlayText, variant);
     if (!result.ok) {
-      setError(result.message ?? 'Could not generate disguise image.');
+      setError(result.message ?? t('disguiseAd.generateFailed'));
     }
   };
 
@@ -68,21 +68,18 @@ export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGenerat
           <AnimatedPressable onPress={onClose} hitSlop={12}>
             <Ionicons name="close" size={24} color={colors.text} />
           </AnimatedPressable>
-          <Text style={[styles.title, { color: colors.text }]}>AI disguise ad</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('disguiseAd.title')}</Text>
           <View style={styles.headerSpacer} />
         </View>
 
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          <Text style={[styles.lead, { color: colors.textMuted }]}>
-            Generate a sponsored post or news thumbnail from your profile photo so disguise mode looks
-            like a real feed — not a dating app.
-          </Text>
+          <Text style={[styles.lead, { color: colors.textMuted }]}>{t('disguiseAd.lead')}</Text>
 
-          <Text style={[styles.label, { color: colors.text }]}>Headline / promo text</Text>
+          <Text style={[styles.label, { color: colors.text }]}>{t('disguiseAd.headlineLabel')}</Text>
           <TextInput
             value={overlayText}
             onChangeText={setOverlayText}
-            placeholder="e.g. Free delivery tonight"
+            placeholder={t('disguiseAd.headlinePlaceholder')}
             placeholderTextColor={colors.textMuted}
             style={[
               styles.input,
@@ -91,7 +88,7 @@ export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGenerat
             maxLength={80}
           />
 
-          <Text style={[styles.label, { color: colors.text }]}>Style</Text>
+          <Text style={[styles.label, { color: colors.text }]}>{t('disguiseAd.styleLabel')}</Text>
           <View style={styles.variantRow}>
             {VARIANTS.map((item) => {
               const selected = variant === item.id;
@@ -120,7 +117,7 @@ export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGenerat
             })}
           </View>
 
-          <Text style={[styles.label, { color: colors.text }]}>Preview</Text>
+          <Text style={[styles.label, { color: colors.text }]}>{t('disguiseAd.previewLabel')}</Text>
           <View style={[styles.previewCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             {previewCreative && previewCreative.useOverlay ? (
               <DisguiseOverlayImage
@@ -134,14 +131,14 @@ export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGenerat
             ) : (
               <DisguiseOverlayImage
                 imageUrl={sourcePhoto}
-                overlayText={overlayText || 'Your headline'}
+                overlayText={overlayText || t('disguiseAd.yourHeadline')}
                 variant={variant}
                 height={220}
               />
             )}
             {previewCreative && (
               <Text style={[styles.previewMeta, { color: colors.textMuted }]}>
-                {previewCreative.isAiGenerated ? 'AI generated' : 'Smart overlay'} ·{' '}
+                {previewCreative.isAiGenerated ? t('disguiseAd.aiGenerated') : t('disguiseAd.smartOverlay')} ·{' '}
                 {new Date(previewCreative.generatedAt).toLocaleString()}
               </Text>
             )}

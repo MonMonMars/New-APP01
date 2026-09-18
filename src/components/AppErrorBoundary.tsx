@@ -1,11 +1,26 @@
 import { Component, type ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useTranslation } from '../i18n';
 import { darkColors, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type Props = { children: ReactNode };
 type State = { error: Error | null };
+
+function ErrorFallback({ error, onRetry }: { error: Error; onRetry: () => void }) {
+  const { t } = useTranslation();
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>{t('errors.title')}</Text>
+      <Text style={styles.message}>{error.message}</Text>
+      <AnimatedPressable onPress={onRetry} style={styles.button}>
+        <Text style={styles.buttonText}>{t('common.tryAgain')}</Text>
+      </AnimatedPressable>
+    </View>
+  );
+}
 
 export class AppErrorBoundary extends Component<Props, State> {
   state: State = { error: null };
@@ -20,15 +35,7 @@ export class AppErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.error) {
-      return (
-        <View style={styles.container}>
-          <Text style={styles.title}>Spark hit a snag</Text>
-          <Text style={styles.message}>{this.state.error.message}</Text>
-          <AnimatedPressable onPress={this.handleRetry} style={styles.button}>
-            <Text style={styles.buttonText}>Try again</Text>
-          </AnimatedPressable>
-        </View>
-      );
+      return <ErrorFallback error={this.state.error} onRetry={this.handleRetry} />;
     }
 
     return this.props.children;

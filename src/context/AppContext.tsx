@@ -1678,6 +1678,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (notificationsEnabled && notificationPreferences.matches) {
         void scheduleMatchNotification(profile.name, {
           disguiseSafe: disguiseMode && securitySettings.disguiseSafeNotifications,
+          locale: resolveAppLocale(preferences.appLocale),
         });
       }
 
@@ -1694,6 +1695,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       bonusSparkNotes,
       disguiseMode,
       securitySettings.disguiseSafeNotifications,
+      preferences.appLocale,
       maybeRecordViewer,
       likedIds,
       scheduleDemoMatchOpener,
@@ -1740,6 +1742,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (notificationsEnabled && notificationPreferences.matches) {
         void scheduleMatchNotification(profile.name, {
           disguiseSafe: disguiseMode && securitySettings.disguiseSafeNotifications,
+          locale: resolveAppLocale(preferences.appLocale),
         });
       }
 
@@ -1751,6 +1754,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       disguiseMode,
       scheduleDemoMatchOpener,
       securitySettings.disguiseSafeNotifications,
+      preferences.appLocale,
     ],
   );
 
@@ -1844,6 +1848,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ) {
         void scheduleMessageNotification(targetConversation.match.profile.name, trimmed, {
           disguiseSafe: disguiseMode && securitySettings.disguiseSafeNotifications,
+          locale: resolveAppLocale(preferences.appLocale),
         });
       }
 
@@ -2014,6 +2019,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (notificationsEnabled && notificationPreferences.boosts) {
         void scheduleMatchNotification('You', {
           disguiseSafe: disguiseMode && securitySettings.disguiseSafeNotifications,
+          locale: resolveAppLocale(preferences.appLocale),
         });
       }
       return { ok: true, source };
@@ -2303,9 +2309,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         emergencyContact: payload.emergencyContact,
       };
       setDateCheckIns((prev) => [checkIn, ...prev.filter((item) => item.profileId !== profileId)]);
-      void scheduleDateCheckInReminder(profileName, payload.location, 60);
+      void scheduleDateCheckInReminder(
+        profileName,
+        payload.location,
+        60,
+        resolveAppLocale(preferences.appLocale),
+      );
     },
-    [],
+    [preferences.appLocale],
   );
 
   const checkInDateNow = useCallback((checkInId: string) => {

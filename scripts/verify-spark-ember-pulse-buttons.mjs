@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Spark/Ember dating mode — grey Pulse entry buttons (top P-only + tab P+Pulse).
+ * Spark/Ember dating mode — grey P-only tab entry + Spark/Ember logo top-left.
  * Usage: node scripts/verify-spark-ember-pulse-buttons.mjs [baseUrl]
  */
 import { chromium } from 'playwright';
@@ -40,16 +40,22 @@ async function main() {
     await skipOnboarding(page);
     await page.waitForTimeout(800);
 
-    checks.top_pulse_entry = (await page.getByLabel(/Emergency — switch to .* disguise mode/i).count()) >= 1;
+    checks.no_top_pulse_entry =
+      (await page.getByLabel(/Emergency — switch to .* disguise mode/i).count()) === 0;
 
     const pulseTab = page.getByRole('tab', { name: /pulse disguise mode/i });
     checks.pulse_tab_a11y = (await pulseTab.count()) === 1;
-    checks.tab_shows_pulse_word = (await page.getByText('Pulse', { exact: true }).count()) >= 1;
+    checks.tab_p_only = (await page.getByText('Pulse', { exact: true }).count()) === 0;
+
+    checks.discover_spark_logo =
+      (await page.getByRole('button', { name: /Spark\./i }).count()) >= 1 ||
+      (await page.getByRole('img', { name: 'Spark' }).count()) >= 1;
 
     await page.getByRole('tab', { name: /likes/i }).click({ force: true });
     await page.waitForTimeout(600);
-    checks.likes_top_pulse_entry =
-      (await page.getByLabel(/Emergency — switch to .* disguise mode/i).count()) >= 1;
+    checks.likes_no_top_pulse =
+      (await page.getByLabel(/Emergency — switch to .* disguise mode/i).count()) === 0;
+    checks.likes_spark_logo = (await page.getByRole('img', { name: 'Spark' }).count()) >= 1;
 
     await pulseTab.click({ force: true });
     await page.waitForTimeout(600);

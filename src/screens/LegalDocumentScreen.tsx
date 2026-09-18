@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { LocaleToggle } from '../components/legal/LocaleToggle';
 import { getLegalDocument, getLegalUiStrings, LegalDocumentId } from '../content/legal';
 import { useAppLocale } from '../hooks/useAppLocale';
@@ -31,7 +30,6 @@ export function LegalDocumentScreen({ documentId, onClose }: LegalDocumentScreen
         <Text style={[styles.headerTitle, { color: colors.text }]} numberOfLines={1}>
           {ui.legalHeader}
         </Text>
-        <DisguiseModeButton />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>

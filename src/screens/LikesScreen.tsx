@@ -129,7 +129,7 @@ export function LikesScreen() {
     <View style={[styles.screen, { paddingTop: insets.top, backgroundColor: colors.background }]}>
       <ScreenHeader
         title={t('likes.title')}
-        showPulseEntry
+        showLogo
         rightIcon="diamond-outline"
         onRightPress={openPaywall}
       />

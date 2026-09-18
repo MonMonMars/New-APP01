@@ -6,7 +6,6 @@ import { useState } from 'react';
 import { ActivityIndicator, Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { SparkPlusComparisonTable } from '../components/SparkPlusComparisonTable';
 import { formatProductPrice, PRODUCT_CATALOG, sparkPlusProductForPlan } from '../constants/products';
 import { useApp } from '../context/AppContext';
@@ -106,7 +105,6 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
           <AnimatedPressable style={styles.close} onPress={onClose}>
             <Ionicons name="close" size={28} color={colors.text} />
           </AnimatedPressable>
-          <DisguiseModeButton />
         </View>
         <Ionicons name="diamond" size={48} color={colors.text} />
         <Text style={styles.heroTitle}>{t('sparkPlus.title')}</Text>

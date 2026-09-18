@@ -124,7 +124,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
         title={t('discoverHub.title')}
         leftIcon="chevron-back"
         onLeftPress={onClose}
-        showPulseEntry
+        showLogo
       />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>

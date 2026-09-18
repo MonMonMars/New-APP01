@@ -11,7 +11,7 @@ import { type ReactNode, useEffect, useRef } from 'react';
 import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
-import { PulseDisguiseWordmark } from '../components/disguise/ModeToggleLogo';
+import { PulseTabIcon } from '../components/disguise/ModeToggleLogo';
 import { useTranslation } from '../i18n';
 import { CookieConsentBanner } from '../components/legal/CookieConsentBanner';
 import { useApp } from '../context/AppContext';
@@ -122,7 +122,7 @@ function MainTabs() {
         },
         tabBarIcon: ({ focused, color, size }) => {
           if (route.name === 'Discover') {
-            return <PulseDisguiseWordmark markSize={size} focused={focused} />;
+            return <PulseTabIcon size={size} />;
           }
           const icons: Record<
             Exclude<keyof MainTabParamList, 'Discover'>,

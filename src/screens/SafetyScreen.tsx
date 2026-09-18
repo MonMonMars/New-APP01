@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { useApp } from '../context/AppContext';
 import { getLegalDocumentLinks, getLegalUiStrings, LegalDocumentId } from '../content/legal';
 import { useTranslation } from '../i18n';
@@ -130,7 +129,6 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
           <Ionicons name="chevron-back" size={28} color={colors.text} />
         </AnimatedPressable>
         <Text style={styles.title}>{t('safety.title')}</Text>
-        <DisguiseModeButton />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>

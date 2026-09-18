@@ -1,14 +1,8 @@
-import { ReactNode, useCallback } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { BrandMark } from '../brand/BrandMark';
 import { useApp } from '../../context/AppContext';
-import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
-import { useTranslation } from '../../i18n';
-import { pulseTimesFontFamily } from '../../theme/pulseBrand';
 import { resolveSparkSection } from '../../types/preferences';
-import { useTheme } from '../../context/ThemeContext';
-import { AnimatedPressable } from '../AnimatedPressable';
 
 type ModeToggleLogoProps = {
   variant: 'pulse' | 'spark';
@@ -16,107 +10,27 @@ type ModeToggleLogoProps = {
   compact?: boolean;
 };
 
-type LogoButtonProps = {
-  compact?: boolean;
-  onPress: () => void;
-  accessibilityLabel: string;
-  accessibilityHint: string;
-  children: ReactNode;
-};
-
-function LogoButton({
-  compact = false,
-  onPress,
-  accessibilityLabel,
-  accessibilityHint,
-  children,
-}: LogoButtonProps) {
-  const size = compact ? 36 : 40;
-
+/** Grey P-only Pulse entry — lower-left tab bar in Spark/Ember. */
+export function PulseTabIcon({ size = 24 }: { size?: number }) {
   return (
-    <AnimatedPressable
-      onPress={onPress}
-      scaleTo={0.97}
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
-      accessibilityHint={accessibilityHint}
-      hitSlop={6}
-      style={[styles.button, { width: size, height: size }]}
-    >
-      {children}
-    </AnimatedPressable>
-  );
-}
-
-type PulseDisguiseWordmarkProps = {
-  markSize?: number;
-  /** Tab bar focus — slightly brighter grey wordmark when the Pulse tab is active. */
-  focused?: boolean;
-};
-
-/** Grey P + “Pulse” wordmark — lower-left tab bar entry in Spark/Ember. */
-export function PulseDisguiseWordmark({ markSize = 22, focused = false }: PulseDisguiseWordmarkProps) {
-  const { colors } = useTheme();
-  const { t } = useTranslation();
-  const wordSize = Math.max(11, Math.round(markSize * 0.58));
-  const wordColor = focused ? colors.text : colors.textMuted;
-
-  return (
-    <View
-      style={styles.wordmarkRow}
-      accessibilityRole="image"
-      accessibilityLabel={t('pulseEntry.tabA11y')}
-    >
-      <BrandMark world="pulse" size={markSize} muted />
-      <Text
-        style={[
-          styles.pulseWord,
-          {
-            fontSize: wordSize,
-            lineHeight: wordSize + 2,
-            color: wordColor,
-            fontFamily: pulseTimesFontFamily,
-          },
-        ]}
-      >
-        {t('tabs.pulse')}
-      </Text>
+    <View accessibilityRole="image" accessibilityLabel="Pulse">
+      <BrandMark world="pulse" size={size} muted />
     </View>
   );
 }
 
-/** Pulse P3 top-left — grey P only in Spark/Ember, tap to enter disguise. Hidden while disguised. */
-export function PulseDisguiseLogo({ compact = false }: { compact?: boolean }) {
-  const { disguiseMode, setDisguiseMode } = useApp();
-  const meta = useDisguiseWorld();
-  const { t } = useTranslation();
-  const markSize = compact ? 36 : 40;
-
-  const enterDisguise = useCallback(() => {
-    setDisguiseMode(true);
-  }, [setDisguiseMode]);
-
-  if (disguiseMode) {
-    return <View style={[styles.placeholder, compact && styles.placeholderCompact]} />;
-  }
-
-  return (
-    <LogoButton
-      compact={compact}
-      onPress={enterDisguise}
-      accessibilityLabel={t('pulseEntry.emergencyA11y', { appName: meta.name })}
-      accessibilityHint={t('pulseEntry.emergencyHint', {
-        appName: meta.name,
-        unlockLabel: meta.unlockLabel,
-      })}
-    >
-      <BrandMark world="pulse" size={markSize} muted />
-    </LogoButton>
-  );
+/** @deprecated Pulse entry is tab-bar only — use PulseTabIcon. */
+export function PulseDisguiseWordmark({ markSize = 22 }: { markSize?: number; focused?: boolean }) {
+  return <PulseTabIcon size={markSize} />;
 }
 
-/** Spark S5 / Ember E1e centered while in dating mode. */
-export function SectionCenterLogo({ compact = false }: { compact?: boolean }) {
+/** @deprecated Pulse entry is tab-bar only. */
+export function PulseDisguiseLogo({ compact = false }: { compact?: boolean }) {
+  return <View style={[styles.placeholder, compact && styles.placeholderCompact]} />;
+}
+
+/** Spark S5 / Ember E1e — top-left brand mark in dating mode. */
+export function SectionLeftLogo({ compact = false }: { compact?: boolean }) {
   const { disguiseMode, preferences } = useApp();
   const section = resolveSparkSection(preferences.sparkSection);
   const markSize = compact ? 36 : 40;
@@ -126,35 +40,33 @@ export function SectionCenterLogo({ compact = false }: { compact?: boolean }) {
   }
 
   return (
-    <View style={styles.centerMark} accessibilityRole="image" accessibilityLabel={section === 'ember' ? 'Ember' : 'Spark'}>
+    <View
+      style={styles.leftMark}
+      accessibilityRole="image"
+      accessibilityLabel={section === 'ember' ? 'Ember' : 'Spark'}
+    >
       <BrandMark world={section} size={markSize} />
     </View>
   );
 }
 
-/** @deprecated Use PulseDisguiseLogo (left) + SectionCenterLogo (center). */
+/** @deprecated Use SectionLeftLogo. */
+export function SectionCenterLogo({ compact = false }: { compact?: boolean }) {
+  return <SectionLeftLogo compact={compact} />;
+}
+
+/** @deprecated Use PulseTabIcon / SectionLeftLogo. */
 export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps) {
   if (variant === 'pulse') {
     return null;
   }
-  return <PulseDisguiseLogo compact={compact} />;
+  return <SectionLeftLogo compact={compact} />;
 }
 
 const styles = StyleSheet.create({
-  wordmarkRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-  },
-  pulseWord: {
-    fontWeight: '600',
-    letterSpacing: -0.2,
-  },
-  button: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  centerMark: {
+  leftMark: {
+    width: 40,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
   },

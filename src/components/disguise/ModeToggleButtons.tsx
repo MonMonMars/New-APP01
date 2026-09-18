@@ -1,6 +1,6 @@
-import { PulseDisguiseLogo } from './ModeToggleLogo';
+import { View } from 'react-native';
 
-/** Grey P-only Pulse entry — used on stack/modal headers (right slot). */
+/** Pulse disguise entry lives in the tab bar only — no header button. */
 export function DisguiseModeButton() {
-  return <PulseDisguiseLogo compact />;
+  return <View />;
 }

@@ -1,13 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { useEffect, useRef, useState } from 'react';
-import {
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { useCallback, useMemo, useRef } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
 
 import { useTheme } from '../../context/ThemeContext';
 import { radii, spacing } from '../../theme';
@@ -20,60 +16,53 @@ type DisguiseMiniPhotoPagerProps = {
   height?: number;
 };
 
-/** Swipeable full-photo strip for the disguise mini-window — contain fit, drag to page. */
+const SWIPE_THRESHOLD = 36;
+
+/** Full-photo mini-window pager — segment bar, tap zones, and horizontal swipe. */
 export function DisguiseMiniPhotoPager({
   photos,
   index,
   onIndexChange,
-  height = 156,
+  height = 140,
 }: DisguiseMiniPhotoPagerProps) {
   const { colors } = useTheme();
-  const scrollRef = useRef<ScrollView>(null);
-  const scrollSourceRef = useRef<'external' | 'gesture'>('external');
-  const [laneWidth, setLaneWidth] = useState(0);
   const safeIndex = photos.length > 0 ? Math.min(index, photos.length - 1) : 0;
   const multiPhoto = photos.length > 1;
+  const currentUri = photos[safeIndex];
+  const indexRef = useRef(safeIndex);
+  indexRef.current = safeIndex;
 
-  useEffect(() => {
-    if (laneWidth <= 0 || !multiPhoto) {
+  const goPrev = useCallback(() => {
+    if (photos.length <= 1) {
       return;
     }
-    if (scrollSourceRef.current === 'gesture') {
-      scrollSourceRef.current = 'external';
+    const current = indexRef.current;
+    onIndexChange((current - 1 + photos.length) % photos.length);
+  }, [onIndexChange, photos.length]);
+
+  const goNext = useCallback(() => {
+    if (photos.length <= 1) {
       return;
     }
-    scrollRef.current?.scrollTo({ x: safeIndex * laneWidth, animated: false });
-  }, [laneWidth, multiPhoto, photos.length, safeIndex]);
+    const current = indexRef.current;
+    onIndexChange((current + 1) % photos.length);
+  }, [onIndexChange, photos.length]);
 
-  const syncIndexFromOffset = (offsetX: number) => {
-    if (laneWidth <= 0) {
-      return;
-    }
-    const nextIndex = Math.round(offsetX / laneWidth);
-    const clamped = Math.max(0, Math.min(nextIndex, photos.length - 1));
-    if (clamped !== safeIndex) {
-      scrollSourceRef.current = 'gesture';
-      onIndexChange(clamped);
-    }
-  };
-
-  const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    syncIndexFromOffset(event.nativeEvent.contentOffset.x);
-  };
-
-  const goPrev = () => {
-    if (!multiPhoto) {
-      return;
-    }
-    onIndexChange((safeIndex - 1 + photos.length) % photos.length);
-  };
-
-  const goNext = () => {
-    if (!multiPhoto) {
-      return;
-    }
-    onIndexChange((safeIndex + 1) % photos.length);
-  };
+  const panGesture = useMemo(
+    () =>
+      Gesture.Pan()
+        .activeOffsetX([-14, 14])
+        .failOffsetY([-10, 10])
+        .onEnd((event) => {
+          'worklet';
+          if (event.translationX <= -SWIPE_THRESHOLD) {
+            runOnJS(goNext)();
+          } else if (event.translationX >= SWIPE_THRESHOLD) {
+            runOnJS(goPrev)();
+          }
+        }),
+    [goNext, goPrev],
+  );
 
   if (photos.length === 0) {
     return (
@@ -83,148 +72,109 @@ export function DisguiseMiniPhotoPager({
     );
   }
 
-  return (
-    <View style={[styles.row, { height }]}>
+  const photoLane = (
+    <View style={[styles.lane, { height }]}>
       {multiPhoto ? (
-        <AnimatedPressable
-          onPress={goPrev}
-          style={styles.navButton}
-          accessibilityLabel="Previous photo"
-          scaleTo={0.9}
-        >
-          <Ionicons name="chevron-back" size={20} color={colors.textMuted} />
-        </AnimatedPressable>
+        <View style={styles.segments} pointerEvents="box-none">
+          {photos.map((_, segmentIndex) => (
+            <AnimatedPressable
+              key={segmentIndex}
+              style={[
+                styles.segment,
+                segmentIndex === safeIndex && styles.segmentActive,
+              ]}
+              onPress={() => onIndexChange(segmentIndex)}
+              accessibilityRole="button"
+              accessibilityLabel={`Photo ${segmentIndex + 1} of ${photos.length}`}
+              scaleTo={0.98}
+            />
+          ))}
+        </View>
       ) : null}
 
-      <View
-        style={styles.lane}
-        onLayout={(event) => {
-          const nextWidth = event.nativeEvent.layout.width;
-          if (nextWidth > 0 && nextWidth !== laneWidth) {
-            setLaneWidth(nextWidth);
-          }
-        }}
-      >
-        {multiPhoto && laneWidth > 0 ? (
-          <ScrollView
-            ref={scrollRef}
-            horizontal
-            pagingEnabled
-            scrollEnabled
-            showsHorizontalScrollIndicator={false}
-            decelerationRate="fast"
-            onMomentumScrollEnd={handleScrollEnd}
-            onScrollEndDrag={handleScrollEnd}
-            style={styles.scroll}
-            contentContainerStyle={styles.scrollContent}
-          >
-            {photos.map((uri, photoIdx) => (
-              <View key={`${uri}-${photoIdx}`} style={[styles.page, { width: laneWidth, height }]}>
-                <Image
-                  source={{ uri }}
-                  style={styles.image}
-                  contentFit="contain"
-                  transition={120}
-                  accessibilityLabel={`Photo ${photoIdx + 1} of ${photos.length}`}
-                />
-              </View>
-            ))}
-          </ScrollView>
-        ) : multiPhoto ? (
-          <View style={[styles.page, { height, opacity: 0.35 }]} />
-        ) : (
-          <Image
-            source={{ uri: photos[safeIndex] }}
-            style={styles.image}
-            contentFit="contain"
-            transition={120}
-            accessibilityLabel="Profile photo"
+      <Image
+        source={{ uri: currentUri }}
+        style={styles.image}
+        contentFit="contain"
+        transition={120}
+        accessibilityLabel={`Photo ${safeIndex + 1} of ${photos.length}`}
+      />
+
+      {multiPhoto ? (
+        <>
+          <AnimatedPressable
+            style={styles.tapLeft}
+            onPress={goPrev}
+            accessibilityRole="button"
+            accessibilityLabel="Previous photo"
           />
-        )}
-
-        {multiPhoto && laneWidth > 0 ? (
-          <View style={styles.dots} pointerEvents="none">
-            {photos.map((_, dotIndex) => (
-              <View
-                key={dotIndex}
-                style={[styles.dot, dotIndex === safeIndex && styles.dotActive]}
-              />
-            ))}
-          </View>
-        ) : null}
-      </View>
-
-      {multiPhoto ? (
-        <AnimatedPressable
-          onPress={goNext}
-          style={styles.navButton}
-          accessibilityLabel="Next photo"
-          scaleTo={0.9}
-        >
-          <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-        </AnimatedPressable>
+          <AnimatedPressable
+            style={styles.tapRight}
+            onPress={goNext}
+            accessibilityRole="button"
+            accessibilityLabel="Next photo"
+          />
+        </>
       ) : null}
+    </View>
+  );
+
+  return (
+    <View style={styles.wrap}>
+      {multiPhoto ? <GestureDetector gesture={panGesture}>{photoLane}</GestureDetector> : photoLane}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
+  wrap: {
     marginTop: spacing.xs,
   },
-  navButton: {
-    width: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.sm,
-  },
   lane: {
-    flex: 1,
     borderRadius: radii.card - 2,
     overflow: 'hidden',
     backgroundColor: '#111',
     position: 'relative',
-    minWidth: 0,
   },
-  scroll: {
+  segments: {
+    position: 'absolute',
+    top: 6,
+    left: 6,
+    right: 6,
+    flexDirection: 'row',
+    gap: 3,
+    zIndex: 2,
+  },
+  segment: {
     flex: 1,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255,255,255,0.35)',
   },
-  scrollContent: {
-    alignItems: 'stretch',
-  },
-  page: {
-    alignItems: 'center',
-    justifyContent: 'center',
+  segmentActive: {
+    backgroundColor: '#fff',
   },
   image: {
     width: '100%',
     height: '100%',
   },
-  dots: {
+  tapLeft: {
     position: 'absolute',
-    bottom: 6,
     left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 5,
+    top: 0,
+    bottom: 0,
+    width: '38%',
     zIndex: 1,
   },
-  dot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: 'rgba(255,255,255,0.45)',
-  },
-  dotActive: {
-    width: 14,
-    backgroundColor: '#fff',
+  tapRight: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: '38%',
+    zIndex: 1,
   },
   empty: {
-    flex: 1,
     borderRadius: radii.card - 2,
     alignItems: 'center',
     justifyContent: 'center',

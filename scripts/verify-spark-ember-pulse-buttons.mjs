@@ -45,7 +45,7 @@ async function main() {
 
     const pulseTab = page.getByRole('tab', { name: /pulse disguise mode/i });
     checks.pulse_tab_a11y = (await pulseTab.count()) === 1;
-    checks.tab_p_only = (await page.getByText('Pulse', { exact: true }).count()) === 0;
+    checks.pulse_tab_label = (await page.getByRole('tab', { name: /^pulse$/i }).count()) >= 1;
 
     checks.discover_spark_logo =
       (await page.getByRole('button', { name: /Spark\./i }).count()) >= 1 ||

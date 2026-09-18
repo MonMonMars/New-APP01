@@ -40,6 +40,18 @@ const TOPIC_FILTERS: Record<string, (item: FeedItem) => boolean> = {
     (item.type === 'news' && item.category === 'Local') ||
     item.type === 'social' ||
     item.type === 'disguised_profile',
+  '#OnDeviceAI': (item) =>
+    item.type === 'news' && (item.category === 'Tech' || item.category === 'Business'),
+  '#HeatWave': (item) =>
+    item.type === 'news' &&
+    (item.category === 'Weather' || item.headline.toLowerCase().includes('heat')),
+  '#CarFreeCities': (item) =>
+    item.type === 'news' && item.category === 'Local',
+  '#IndieBooks': (item) =>
+    item.type === 'news' && item.category === 'Culture',
+  '#SolarHome': (item) =>
+    item.type === 'news' &&
+    (item.category === 'Climate' || item.headline.toLowerCase().includes('solar')),
   '#Weather': (item) =>
     (item.type === 'news' && item.category === 'Local') ||
     item.type === 'social' ||

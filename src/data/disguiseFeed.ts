@@ -1,4 +1,5 @@
 import { disguiseClientAds } from './disguiseClientAds';
+import { disguiseNewsBatch2 } from './disguiseNewsBatch2';
 import { disguiseNewsExtra } from './disguiseNewsExtra';
 import { disguiseSocialPosts } from './disguiseSocialPosts';
 import { freeNewsLinks, pulseNewsImages } from './pulseNewsMedia';
@@ -233,7 +234,7 @@ export function findAdPostByLandingUrl(landingUrl: string): AdPost | undefined {
   return adItems.find((item) => item.landingUrl === landingUrl);
 }
 
-const allNewsItems = [...newsItems, ...disguiseNewsExtra];
+const allNewsItems = [...newsItems, ...disguiseNewsExtra, ...disguiseNewsBatch2];
 
 /** Static feed slots — disguised dating profiles are injected in buildDisguiseFeed(). */
 export const disguiseFeedItems: FeedItem[] = [
@@ -269,6 +270,23 @@ export const disguiseFeedItems: FeedItem[] = [
   allNewsItems[2],
   disguiseSocialPosts[2],
   adItems[1],
+  allNewsItems[8],
+  disguiseSocialPosts[8],
+  allNewsItems[9],
+  disguiseSocialPosts[9],
+  allNewsItems[10],
+  disguiseSocialPosts[10],
+  adItems[2],
+  allNewsItems[11],
+  disguiseSocialPosts[11],
+  allNewsItems[12],
+  disguiseSocialPosts[12],
+  allNewsItems[13],
+  adItems[0],
+  allNewsItems[4],
+  disguiseSocialPosts[4],
+  allNewsItems[7],
+  disguiseSocialPosts[7],
 ];
 
 export function findNewsPostByArticleUrl(articleUrl: string): NewsPost | undefined {
@@ -483,6 +501,52 @@ export const disguiseAlerts: DisguiseAlert[] = [
       avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80',
       overlayVariant: 'ad',
       overlayText: 'AD',
+    },
+  },
+  {
+    id: 'a21',
+    icon: 'newspaper-outline',
+    text: 'BBC: On-device AI models race to ship on phones',
+    time: '30m ago',
+    articleUrl: freeNewsLinks.bbcTechnology,
+  },
+  {
+    id: 'a22',
+    icon: 'arrow-up-outline',
+    text: 'Jade L. upvoted your solar + battery thread',
+    time: '1h ago',
+    person: {
+      name: 'Jade L.',
+      avatarUrl: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=200&q=80',
+      overlayVariant: 'news',
+      overlayText: 'LIVE',
+    },
+  },
+  {
+    id: 'a23',
+    icon: 'person-add-outline',
+    text: 'Phoenix W. started following you',
+    time: '2h ago',
+    person: {
+      name: 'Phoenix W.',
+      avatarUrl: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=200',
+    },
+  },
+  {
+    id: 'a24',
+    icon: 'newspaper-outline',
+    text: 'Guardian: Car-free weekend pilots proposed downtown',
+    time: '3h ago',
+    articleUrl: freeNewsLinks.guardianTransport,
+  },
+  {
+    id: 'a25',
+    icon: 'chatbubble-outline',
+    text: 'Iris K. replied on indie bookstore summer surge',
+    time: '4h ago',
+    person: {
+      name: 'Iris K.',
+      avatarUrl: 'https://images.pexels.com/photos/1858175/pexels-photo-1858175.jpeg?auto=compress&cs=tinysrgb&w=200',
     },
   },
 ];

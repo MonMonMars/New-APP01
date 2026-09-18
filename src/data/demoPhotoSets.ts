@@ -54,6 +54,27 @@ export const DEMO_PHOTO_SETS = {
   caleb: pSet(1043474),
   henrik: pSet(1181244),
   dorian: pSet(2379005),
+  // Batch 3 — unique Pexels portrait ids (137–156 profiles)
+  vivian: pSet(2699703),
+  malcolm: pSet(2710279),
+  selena: pSet(2723894),
+  tristan: pSet(2752802),
+  noor: pSet(2755038),
+  garrett: pSet(2760245),
+  paloma: pSet(2774556),
+  ellis: pSet(2800895),
+  marisol: pSet(2819543),
+  desmond: pSet(2835562),
+  anika: pSet(2859040),
+  willem: pSet(2867470),
+  zara: pSet(2878372),
+  matteo: pSet(2887719),
+  brielle: pSet(2896438),
+  sven: pSet(2906829),
+  naia: pSet(2916828),
+  idris: pSet(2927434),
+  leila: pSet(2938299),
+  rhys: pSet(2948298),
 } as const;
 
 /** Default face focal point for portrait crops (center-top bias). */

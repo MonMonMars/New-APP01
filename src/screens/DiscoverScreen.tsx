@@ -356,6 +356,13 @@ export function DiscoverScreen() {
             onPress={rewindLastPass}
             onUpgrade={() => navigation.getParent()?.navigate('SparkPlus')}
           />
+          <AnimatedPressable
+            style={styles.hubButton}
+            onPress={() => navigation.getParent()?.navigate('MapDiscover')}
+            accessibilityLabel={t('discover.mapA11y')}
+          >
+            <Ionicons name="map-outline" size={22} color={colors.textMuted} />
+          </AnimatedPressable>
           <AnimatedPressable style={styles.hubButton} onPress={openDiscoverHub} accessibilityLabel={t('discover.toolsA11y')}>
             <Ionicons name="options-outline" size={22} color={colors.textMuted} />
           </AnimatedPressable>

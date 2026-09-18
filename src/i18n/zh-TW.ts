@@ -160,6 +160,7 @@ export const zhTw = {
   },
   discover: {
     toolsA11y: '探索工具',
+    mapA11y: '開啟地圖探索',
     incognitoOn: '隱身模式已開啟 — 只有你喜歡的人才能看到你',
     accountPaused: '帳號已暫停',
     accountPausedHint: '在個人檔案設定中取消暫停，即可繼續探索。',
@@ -472,6 +473,9 @@ export const zhTw = {
     selectPinA11y: '選取 {name}',
     addToDeckA11y: '將 {name} 加入推薦',
     youMarkerA11y: '你的位置',
+    searchPeoplePlaceholder: '在地圖上搜尋對象',
+    searchPeopleA11y: '在地圖上搜尋對象',
+    noSearchResults: '此區域找不到符合名稱的人',
     areaLoaded: '此區域的人已加入你的推薦',
     attribution: '© Esri',
     zoomInA11y: '放大',

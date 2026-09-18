@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Modal, StyleSheet, Text, View } from 'react-native';
+import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../context/AppContext';
@@ -78,6 +78,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   });
   const [mapZoom, setMapZoom] = useState(() => zoomForRadius(currentRadius));
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
+  const [nameQuery, setNameQuery] = useState('');
   const [deckToast, setDeckToast] = useState<string | null>(null);
 
   useEffect(() => {
@@ -110,7 +111,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     }
   }, [preferences.passportCity, preferences.travelMode]);
 
-  const visiblePins = useMemo(
+  const areaPins = useMemo(
     () =>
       sortProfilesByDistance(
         filterProfilesInRadius(discoverPool, searchCenter, currentRadius),
@@ -118,6 +119,14 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
       ),
     [currentRadius, discoverPool, searchCenter],
   );
+
+  const visiblePins = useMemo(() => {
+    const query = nameQuery.trim().toLowerCase();
+    if (!query) {
+      return areaPins;
+    }
+    return areaPins.filter((profile) => profile.name.toLowerCase().includes(query));
+  }, [areaPins, nameQuery]);
 
   const selectedProfile = useMemo(
     () => visiblePins.find((profile) => profile.id === selectedPinId) ?? null,
@@ -131,6 +140,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     searchMapAt(mapCenter);
     searchMorePeople();
     setSelectedPinId(null);
+    setNameQuery('');
     setDeckToast(t('mapDiscover.areaLoaded'));
   }, [mapCenter, searchMapAt, searchMorePeople, t]);
 
@@ -178,6 +188,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         center={mapCenter}
         zoom={mapZoom}
         radiusMiles={currentRadius}
+        radiusCenter={searchCenter}
         accentColor={accent}
         pinColor={colors.heartRed}
         pins={visiblePins}
@@ -218,7 +229,32 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         </AnimatedPressable>
       </View>
 
-      <View style={[styles.zoomControls, { top: insets.top + spacing.sm + 52 }]}>
+      <View style={[styles.searchBarWrap, { top: insets.top + spacing.sm + 52 }]}>
+        <View style={[styles.searchBar, { backgroundColor: chromeBg }]}>
+          <Ionicons name="search" size={18} color={chromeMuted} />
+          <TextInput
+            value={nameQuery}
+            onChangeText={setNameQuery}
+            placeholder={t('mapDiscover.searchPeoplePlaceholder')}
+            placeholderTextColor={chromeMuted}
+            style={[styles.searchInput, { color: chromeText }]}
+            returnKeyType="search"
+            clearButtonMode="while-editing"
+            accessibilityLabel={t('mapDiscover.searchPeopleA11y')}
+          />
+          {nameQuery.length > 0 ? (
+            <AnimatedPressable
+              hitSlop={8}
+              accessibilityLabel={t('common.close')}
+              onPress={() => setNameQuery('')}
+            >
+              <Ionicons name="close-circle" size={18} color={chromeMuted} />
+            </AnimatedPressable>
+          ) : null}
+        </View>
+      </View>
+
+      <View style={[styles.zoomControls, { top: insets.top + spacing.sm + 104 }]}>
         <AnimatedPressable
           onPress={handleZoomIn}
           hitSlop={8}
@@ -238,7 +274,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
       </View>
 
       {showSearchArea ? (
-        <View style={[styles.searchAreaWrap, { top: insets.top + spacing.sm + 52 }]}>
+        <View style={[styles.searchAreaWrap, { top: insets.top + spacing.sm + 104 }]}>
           <AnimatedPressable
             style={[styles.searchAreaButton, { backgroundColor: accent }]}
             onPress={handleSearchThisArea}
@@ -289,7 +325,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
       <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
         {visiblePins.length === 0 ? (
           <Text style={[styles.emptyHint, { color: chromeText, backgroundColor: chromeBg }]}>
-            {t('mapDiscover.emptyArea')}
+            {nameQuery.trim() ? t('mapDiscover.noSearchResults') : t('mapDiscover.emptyArea')}
           </Text>
         ) : null}
         <View style={[styles.segment, { backgroundColor: chromeBg }]}>
@@ -379,6 +415,25 @@ const styles = StyleSheet.create({
   metaText: {
     fontSize: 14,
     fontWeight: '800',
+  },
+  searchBarWrap: {
+    position: 'absolute',
+    left: spacing.md,
+    right: spacing.md,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderRadius: radii.button,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '600',
+    padding: 0,
   },
   searchAreaWrap: {
     position: 'absolute',

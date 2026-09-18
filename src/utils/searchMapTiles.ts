@@ -150,8 +150,6 @@ export function layoutMapPins(
     id: string;
     latitude?: number;
     longitude?: number;
-    mapX?: number;
-    mapY?: number;
     photos?: string[];
     name?: string;
   }>,
@@ -166,45 +164,30 @@ export function layoutMapPins(
   }
 
   return profiles.slice(0, maxPins).flatMap((profile) => {
-    if (typeof profile.latitude === 'number' && typeof profile.longitude === 'number') {
-      const pixel = latLngToPixel(
-        { lat: profile.latitude, lng: profile.longitude },
-        center,
-        zoom,
-        mapWidth,
-        mapHeight,
-      );
-      if (
-        pixel.left < -24 ||
-        pixel.top < -24 ||
-        pixel.left > mapWidth + 24 ||
-        pixel.top > mapHeight + 24
-      ) {
-        return [];
-      }
-      return [
-        {
-          id: profile.id,
-          left: pixel.left,
-          top: pixel.top,
-          photoUrl: profile.photos?.[0],
-          name: profile.name,
-        },
-      ];
+    if (typeof profile.latitude !== 'number' || typeof profile.longitude !== 'number') {
+      return [];
     }
 
-    const dx = (profile.mapX ?? 50) - 50;
-    const dy = (profile.mapY ?? 50) - 50;
-    const scale = Math.min(mapWidth, mapHeight);
-    const ringDiameter = scale * 0.52;
-    const angle = Math.atan2(dy, dx);
-    const distNorm = Math.min(Math.hypot(dx, dy) / 50, 0.92);
-    const radius = distNorm * (ringDiameter / 2);
+    const pixel = latLngToPixel(
+      { lat: profile.latitude, lng: profile.longitude },
+      center,
+      zoom,
+      mapWidth,
+      mapHeight,
+    );
+    if (
+      pixel.left < -48 ||
+      pixel.top < -48 ||
+      pixel.left > mapWidth + 48 ||
+      pixel.top > mapHeight + 48
+    ) {
+      return [];
+    }
     return [
       {
         id: profile.id,
-        left: mapWidth / 2 + Math.cos(angle) * radius,
-        top: mapHeight / 2 + Math.sin(angle) * radius,
+        left: pixel.left,
+        top: pixel.top,
         photoUrl: profile.photos?.[0],
         name: profile.name,
       },

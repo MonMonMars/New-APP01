@@ -85,10 +85,12 @@ Root Stack
     │   ├── Spark Rose → SuperLikeCelebration + SuperLikeResultModal
     │   ├── Profile detail sheet (prompts, report/block)
     │   └── Full-screen match celebration
-    ├── MapDiscover (stack push from Discover Hub)
-    │   ├── Esri street map with real lat/lng + avatar pins
-    │   ├── Pan / pinch zoom + zoom +/- controls
+    ├── MapDiscover (stack push from Discover header map icon or Discover Hub)
+    │   ├── Esri street map tiles with real lat/lng + avatar pins
+    │   ├── Live pan / pinch zoom + zoom +/- controls
+    │   ├── Search bar — filter people by name on the map
     │   ├── Tap pin → preview card → add to deck
+    │   ├── Radius ring anchored to active search center (persists while panning)
     │   └── “Search this area” → filter pool + reload batch
     ├── Explore (stack push from Discover)
     │   ├── Serious daters / New members / Nearby categories

@@ -1,7 +1,13 @@
 import { Image } from 'expo-image';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Dimensions, LayoutChangeEvent, StyleSheet, View, ViewStyle } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 import type { GeoPoint } from '../utils/geoMap';
 import {
@@ -20,8 +26,6 @@ type MapProfilePin = {
   distanceMiles?: number;
   latitude?: number;
   longitude?: number;
-  mapX?: number;
-  mapY?: number;
   photos?: string[];
   name?: string;
 };
@@ -34,6 +38,8 @@ type SearchMapViewProps = {
   pinColor: string;
   pins?: MapProfilePin[];
   userLocation?: GeoPoint | null;
+  /** Geo anchor for the search-radius ring (defaults to map center). */
+  radiusCenter?: GeoPoint | null;
   showRadiusRing?: boolean;
   showYouMarker?: boolean;
   showAvatarPins?: boolean;
@@ -54,7 +60,15 @@ export const MAP_MAX_ZOOM = 16;
 const AVATAR_PIN_SIZE = 28;
 const AVATAR_PIN_SELECTED = 34;
 
-/** Esri street map with real lat/lng pins, pan, and pinch zoom. */
+function clampZoom(value: number): number {
+  return Math.round(Math.min(MAP_MAX_ZOOM, Math.max(MAP_MIN_ZOOM, value)));
+}
+
+function zoomFromPinchScale(baseZoom: number, scale: number): number {
+  return clampZoom(baseZoom + Math.log2(scale) * 1.5);
+}
+
+/** Esri street map with real lat/lng pins, live pan, and pinch zoom. */
 export function SearchMapView({
   center,
   zoom,
@@ -63,6 +77,7 @@ export function SearchMapView({
   pinColor,
   pins = [],
   userLocation = null,
+  radiusCenter = null,
   showRadiusRing = true,
   showYouMarker = true,
   showAvatarPins = true,
@@ -80,18 +95,41 @@ export function SearchMapView({
     height: windowSize.height,
   });
 
+  const panX = useSharedValue(0);
+  const panY = useSharedValue(0);
+  const pinchBaseZoom = useSharedValue(zoom);
+  const zoomRef = useRef(zoom);
+  zoomRef.current = zoom;
+
+  useEffect(() => {
+    panX.value = withTiming(0, { duration: 0 });
+    panY.value = withTiming(0, { duration: 0 });
+  }, [center.lat, center.lng, panX, panY]);
+
   const tiles = useMemo(
     () => buildMapTiles(zoom, mapSize.width, mapSize.height, center.lat, center.lng),
     [center.lat, center.lng, mapSize.height, mapSize.width, zoom],
+  );
+
+  const ringAnchor = radiusCenter ?? center;
+  const ringPixel = useMemo(
+    () => latLngToPixel(ringAnchor, center, zoom, mapSize.width, mapSize.height),
+    [center, mapSize.height, mapSize.width, ringAnchor, zoom],
   );
 
   const ringDiameter = useMemo(
     () =>
       radiusMiles >= 9999
         ? Math.min(mapSize.width, mapSize.height) * 0.92
-        : milesToPixels(radiusMiles, center.lat, zoom) * 2,
-    [center.lat, mapSize.height, mapSize.width, radiusMiles, zoom],
+        : milesToPixels(radiusMiles, ringAnchor.lat, zoom) * 2,
+    [mapSize.height, mapSize.width, radiusMiles, ringAnchor.lat, zoom],
   );
+
+  const ringVisible =
+    ringPixel.left > -ringDiameter / 2 &&
+    ringPixel.top > -ringDiameter / 2 &&
+    ringPixel.left < mapSize.width + ringDiameter / 2 &&
+    ringPixel.top < mapSize.height + ringDiameter / 2;
 
   const mapPins: MapPin[] = useMemo(
     () => layoutMapPins(pins, center, zoom, mapSize.width, mapSize.height),
@@ -105,24 +143,45 @@ export function SearchMapView({
     return latLngToPixel(userLocation, center, zoom, mapSize.width, mapSize.height);
   }, [center, mapSize.height, mapSize.width, userLocation, zoom]);
 
+  const commitPan = (dx: number, dy: number) => {
+    onCenterChange?.(moveMapCenter(center, dx, dy, zoom));
+  };
+
+  const commitZoom = (nextZoom: number) => {
+    if (nextZoom !== zoomRef.current) {
+      onZoomChange?.(nextZoom);
+    }
+  };
+
   const panGesture = Gesture.Pan()
     .enabled(interactive && Boolean(onCenterChange))
+    .onUpdate((event) => {
+      panX.value = event.translationX;
+      panY.value = event.translationY;
+    })
     .onEnd((event) => {
-      onCenterChange?.(moveMapCenter(center, event.translationX, event.translationY, zoom));
+      runOnJS(commitPan)(event.translationX, event.translationY);
+      panX.value = withTiming(0, { duration: 0 });
+      panY.value = withTiming(0, { duration: 0 });
     });
 
   const pinchGesture = Gesture.Pinch()
     .enabled(interactive && Boolean(onZoomChange))
-    .onEnd((event) => {
-      const nextZoom = Math.round(
-        Math.min(MAP_MAX_ZOOM, Math.max(MAP_MIN_ZOOM, zoom + Math.log2(event.scale) * 1.5)),
-      );
-      if (nextZoom !== zoom) {
-        onZoomChange?.(nextZoom);
+    .onBegin(() => {
+      pinchBaseZoom.value = zoomRef.current;
+    })
+    .onUpdate((event) => {
+      const nextZoom = zoomFromPinchScale(pinchBaseZoom.value, event.scale);
+      if (nextZoom !== zoomRef.current) {
+        runOnJS(commitZoom)(nextZoom);
       }
     });
 
   const mapGesture = Gesture.Simultaneous(panGesture, pinchGesture);
+
+  const layerStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: panX.value }, { translateY: panY.value }],
+  }));
 
   const onMapLayout = (event: LayoutChangeEvent) => {
     const { width, height } = event.nativeEvent.layout;
@@ -187,8 +246,8 @@ export function SearchMapView({
     );
   };
 
-  const mapBody = (
-    <View style={[styles.map, style]} onLayout={onMapLayout}>
+  const mapLayer = (
+    <>
       <View style={styles.mapFill} />
       {tiles.map((tile) => (
         <Image
@@ -200,7 +259,7 @@ export function SearchMapView({
         />
       ))}
 
-      {showRadiusRing && ringDiameter > 0 ? (
+      {showRadiusRing && ringDiameter > 0 && ringVisible ? (
         <View
           pointerEvents="none"
           style={[
@@ -208,8 +267,8 @@ export function SearchMapView({
             {
               width: ringDiameter,
               height: ringDiameter,
-              left: mapSize.width / 2 - ringDiameter / 2,
-              top: mapSize.height / 2 - ringDiameter / 2,
+              left: ringPixel.left - ringDiameter / 2,
+              top: ringPixel.top - ringDiameter / 2,
               borderColor: accentColor,
               backgroundColor: `${accentColor}22`,
             },
@@ -235,14 +294,22 @@ export function SearchMapView({
       ) : null}
 
       {mapPins.map(renderPin)}
+    </>
+  );
+
+  const mapBody = (
+    <View style={[styles.map, style]} onLayout={onMapLayout}>
+      {interactive ? (
+        <GestureDetector gesture={mapGesture}>
+          <Animated.View style={[styles.mapLayer, layerStyle]}>{mapLayer}</Animated.View>
+        </GestureDetector>
+      ) : (
+        <View style={styles.mapLayer}>{mapLayer}</View>
+      )}
     </View>
   );
 
-  if (!interactive) {
-    return mapBody;
-  }
-
-  return <GestureDetector gesture={mapGesture}>{mapBody}</GestureDetector>;
+  return mapBody;
 }
 
 const styles = StyleSheet.create({
@@ -251,6 +318,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#e6eed8',
     minHeight: 120,
+  },
+  mapLayer: {
+    ...StyleSheet.absoluteFillObject,
   },
   mapFill: {
     ...StyleSheet.absoluteFill,

@@ -46,7 +46,7 @@ export function OnboardingFlow() {
   const [bio, setBio] = useState(user.bio);
   const [age, setAge] = useState(String(user.age));
   const [intent, setIntent] = useState<RelationshipIntent>('not_sure');
-  const [gender, setGender] = useState<ProfileGender>('woman');
+  const [gender, setGender] = useState<ProfileGender>('man');
   const [orientation, setOrientation] = useState<Orientation>('straight');
   const [photos, setPhotos] = useState<string[]>(user.photos);
   const [authLoading, setAuthLoading] = useState(false);

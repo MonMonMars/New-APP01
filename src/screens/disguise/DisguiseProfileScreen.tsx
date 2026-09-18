@@ -77,8 +77,8 @@ export function DisguiseProfileScreen() {
     [user, disguiseAdCreative, preferences.sparkSection],
   );
   const savedPosts = useMemo(
-    () => resolveSavedPulsePosts(pulseSocial.savedPostIds, feedItems),
-    [pulseSocial.savedPostIds, feedItems],
+    () => resolveSavedPulsePosts(pulseSocial.savedPostIds, feedItems, user.gender),
+    [pulseSocial.savedPostIds, feedItems, user.gender],
   );
   const historyItems: PulseDetailItem[] = pulseSocial.readingHistory.map((entry, index) => ({
     id: `hist-${index}`,

@@ -1,78 +1,82 @@
-import { disguiseClientAds } from '../data/disguiseClientAds';
-import {
-  disguiseFemaleNewsItems,
-} from '../data/disguiseFemaleFeed';
 import {
   femaleBreakingNowCards,
   femaleEditorsPicks,
   femalePulseBrief,
 } from '../data/disguiseFemaleTrending';
 import { breakingNowCards, editorsPicks, pulseBrief } from '../data/disguiseTrending';
-import { disguiseNewsExtra } from '../data/disguiseNewsExtra';
-import { disguiseSocialPosts } from '../data/disguiseSocialPosts';
-import { disguiseFeedItems, FeedItem, NewsPost } from '../data/disguiseFeed';
+import { FeedItem, NewsPost } from '../data/disguiseFeed';
+import type { ProfileGender } from '../types/profile';
+import { registerDisguiseCatalogItems } from './disguiseFeedCatalog';
+import { usesFemalePulseExperience } from './genderAccountPerks';
 import {
   briefToNewsPost,
   breakingToNewsPost,
   editorsPickToNewsPost,
 } from './disguiseTrendingArticles';
 
-const catalogById = new Map<string, FeedItem>();
+type CatalogKey = 'female' | 'male';
 
-function registerItem(item: FeedItem) {
-  if (!catalogById.has(item.id)) {
-    catalogById.set(item.id, item);
+function registerInto(map: Map<string, FeedItem>, item: FeedItem) {
+  if (!map.has(item.id)) {
+    map.set(item.id, item);
   }
 }
 
-for (const item of disguiseFeedItems) {
-  registerItem(item);
-}
-for (const item of disguiseSocialPosts) {
-  registerItem(item);
-}
-for (const item of disguiseClientAds.map((campaign) => ({
-  id: campaign.id,
-  type: 'ad' as const,
-  brand: campaign.brand,
-  tagline: campaign.tagline,
-  description: campaign.description,
-  imageUrl: campaign.imageUrl,
-  cta: campaign.cta,
-  landingUrl: campaign.landingUrl,
-  sponsored: true as const,
-}))) {
-  registerItem(item);
-}
-for (const item of disguiseNewsExtra) {
-  registerItem(item);
-}
-registerItem(briefToNewsPost(pulseBrief));
-for (const card of breakingNowCards) {
-  registerItem(breakingToNewsPost(card));
-}
-for (const pick of editorsPicks) {
-  registerItem(editorsPickToNewsPost(pick));
-}
-for (const item of disguiseFemaleNewsItems) {
-  registerItem(item);
-}
-registerItem(briefToNewsPost(femalePulseBrief));
-for (const card of femaleBreakingNowCards) {
-  registerItem(breakingToNewsPost(card));
-}
-for (const pick of femaleEditorsPicks) {
-  registerItem(editorsPickToNewsPost(pick));
+function buildCatalogForGender(gender?: ProfileGender | null): Map<string, FeedItem> {
+  const catalog = new Map<string, FeedItem>();
+
+  for (const item of registerDisguiseCatalogItems(gender)) {
+    registerInto(catalog, item);
+  }
+
+  if (usesFemalePulseExperience(gender)) {
+    registerInto(catalog, briefToNewsPost(femalePulseBrief));
+    for (const card of femaleBreakingNowCards) {
+      registerInto(catalog, breakingToNewsPost(card));
+    }
+    for (const pick of femaleEditorsPicks) {
+      registerInto(catalog, editorsPickToNewsPost(pick));
+    }
+  } else {
+    registerInto(catalog, briefToNewsPost(pulseBrief));
+    for (const card of breakingNowCards) {
+      registerInto(catalog, breakingToNewsPost(card));
+    }
+    for (const pick of editorsPicks) {
+      registerInto(catalog, editorsPickToNewsPost(pick));
+    }
+  }
+
+  return catalog;
 }
 
-/** Look up a static feed item by id (news, social, ad). */
-export function findFeedItemById(id: string): FeedItem | undefined {
-  return catalogById.get(id);
+const catalogCache = new Map<CatalogKey, Map<string, FeedItem>>();
+
+function catalogKeyForGender(gender?: ProfileGender | null): CatalogKey {
+  return usesFemalePulseExperience(gender) ? 'female' : 'male';
+}
+
+function catalogForGender(gender?: ProfileGender | null): Map<string, FeedItem> {
+  const key = catalogKeyForGender(gender);
+  let catalog = catalogCache.get(key);
+  if (!catalog) {
+    catalog = buildCatalogForGender(gender);
+    catalogCache.set(key, catalog);
+  }
+  return catalog;
+}
+
+/** Look up a static feed item by id (news, social, ad) scoped to the account gender. */
+export function findFeedItemById(id: string, gender?: ProfileGender | null): FeedItem | undefined {
+  return catalogForGender(gender).get(id);
 }
 
 /** Resolve a news headline from reading history back to a catalog article when possible. */
-export function findNewsPostByHeadline(headline: string): NewsPost | undefined {
-  for (const item of catalogById.values()) {
+export function findNewsPostByHeadline(
+  headline: string,
+  gender?: ProfileGender | null,
+): NewsPost | undefined {
+  for (const item of catalogForGender(gender).values()) {
     if (item.type === 'news' && item.headline === headline) {
       return item;
     }

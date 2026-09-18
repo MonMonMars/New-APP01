@@ -9,6 +9,30 @@ import { disguiseSocialPosts } from '../data/disguiseSocialPosts';
 import type { ProfileGender } from '../types/profile';
 import { usesFemalePulseExperience } from './genderAccountPerks';
 
+export const FEMALE_ONLY_PULSE_TOPICS = ['#Zodiac', '#Tarot'] as const;
+
+export type FemaleOnlyPulseTopic = (typeof FEMALE_ONLY_PULSE_TOPICS)[number];
+
+export function isFemaleOnlyPulseTopic(topic?: string | null): topic is FemaleOnlyPulseTopic {
+  if (!topic) {
+    return false;
+  }
+  return (FEMALE_ONLY_PULSE_TOPICS as readonly string[]).includes(topic);
+}
+
+/** Cosmos / tarot articles are reserved for woman accounts in Pulse disguise. */
+export function isCosmosTarotFeedItem(item: FeedItem): boolean {
+  if (item.type !== 'news') {
+    return false;
+  }
+  return (
+    item.category === '星座' ||
+    item.category === 'Tarot' ||
+    item.source.includes('Cosmos') ||
+    item.source.includes('Tarot')
+  );
+}
+
 /** Base static feed slots before disguised profile cards are woven in. */
 export function disguiseFeedItemsForGender(gender?: ProfileGender | null): FeedItem[] {
   return usesFemalePulseExperience(gender) ? disguiseFemaleFeedItems : disguiseFeedItems;

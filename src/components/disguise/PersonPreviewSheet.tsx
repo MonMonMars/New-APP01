@@ -24,7 +24,7 @@ import { DisguiseMiniDismissStat, MiniDismissKind } from './DisguiseMiniDismissS
 import { DisguiseMiniPhotoPager } from './DisguiseMiniPhotoPager';
 import { DisguiseMiniSparkBar } from './DisguiseMiniSparkBar';
 
-const MINI_DISMISS_MS = 460;
+const MINI_DISMISS_MS = 280;
 
 type PersonPreviewSheetProps = {
   visible: boolean;
@@ -176,7 +176,11 @@ export function PersonPreviewSheet({
   };
 
   const handleLike = () => {
-    if (!linkedProfile || liked || isDismissing) {
+    if (!linkedProfile || isDismissing) {
+      return;
+    }
+    if (liked) {
+      dismissWithStat('like');
       return;
     }
     if (!guardLikeLimit()) {
@@ -189,21 +193,13 @@ export function PersonPreviewSheet({
     dismissWithStat('like');
   };
 
-  const handleUnlike = () => {
-    if (!linkedProfile || isDismissing) {
-      return;
-    }
-    unlikeProfile(linkedProfile.id);
-    dismissWithStat('unlike');
-  };
-
   const handleSuperLike = () => {
     if (!linkedProfile || isDismissing) {
       return;
     }
     if (superLiked) {
       unlikeProfile(linkedProfile.id);
-      dismissWithStat('unlike');
+      dismissWithStat('super');
       return;
     }
     if (!liked && !guardLikeLimit()) {
@@ -328,7 +324,6 @@ export function PersonPreviewSheet({
                   superLiked={superLiked}
                   passed={passed}
                   onLike={handleLike}
-                  onUnlike={handleUnlike}
                   onSuperLike={handleSuperLike}
                   onPass={handlePass}
                   disabled={isDismissing}
@@ -357,6 +352,7 @@ export function PersonPreviewSheet({
       <MatchToast
         visible={matchToastName !== null}
         profileName={matchToastName}
+        variant="mini"
         onDismiss={() => setMatchToastName(null)}
       />
     </>

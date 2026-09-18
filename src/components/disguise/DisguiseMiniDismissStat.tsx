@@ -67,24 +67,24 @@ export function DisguiseMiniDismissStat({ kind }: DisguiseMiniDismissStatProps) 
   useEffect(() => {
     ringScale.value = 0.45;
     ringOpacity.value = 0.85;
-    ringScale.value = withTiming(2.2, { duration: 420, easing: Easing.out(Easing.cubic) });
-    ringOpacity.value = withTiming(0, { duration: 420, easing: Easing.out(Easing.cubic) });
+    ringScale.value = withTiming(2.2, { duration: 260, easing: Easing.out(Easing.cubic) });
+    ringOpacity.value = withTiming(0, { duration: 260, easing: Easing.out(Easing.cubic) });
 
     badgeScale.value = 0.72;
     badgeOpacity.value = 0;
     badgeScale.value = withSequence(
-      withTiming(1.08, { duration: 160, easing: Easing.out(Easing.back(1.4)) }),
-      withTiming(1, { duration: 120 }),
-      withDelay(80, withTiming(0.88, { duration: 180 })),
+      withTiming(1.08, { duration: 110, easing: Easing.out(Easing.back(1.4)) }),
+      withTiming(1, { duration: 80 }),
+      withDelay(40, withTiming(0.88, { duration: 120 })),
     );
     badgeOpacity.value = withSequence(
-      withTiming(1, { duration: 120 }),
-      withDelay(180, withTiming(0, { duration: 200 })),
+      withTiming(1, { duration: 90 }),
+      withDelay(100, withTiming(0, { duration: 130 })),
     );
 
     labelOpacity.value = withSequence(
-      withDelay(60, withTiming(1, { duration: 140 })),
-      withDelay(160, withTiming(0, { duration: 180 })),
+      withDelay(40, withTiming(1, { duration: 100 })),
+      withDelay(90, withTiming(0, { duration: 120 })),
     );
   }, [badgeOpacity, badgeScale, kind, labelOpacity, ringOpacity, ringScale]);
 

@@ -143,12 +143,17 @@ export function ProfileScreen() {
   };
 
   const cycleTheme = () => {
-    const modes: ThemeMode[] = ['dark', 'light'];
-    const idx = modes.indexOf(themeMode === 'system' ? 'dark' : themeMode);
+    const modes: ThemeMode[] = ['dark', 'light', 'system'];
+    const idx = modes.indexOf(themeMode);
     setThemeMode(modes[(idx + 1) % modes.length]);
   };
 
-  const themeLabel = themeMode === 'light' ? t('profile.lightMode') : t('profile.darkMode');
+  const themeLabel =
+    themeMode === 'light'
+      ? t('profile.lightMode')
+      : themeMode === 'system'
+        ? t('profile.systemMode')
+        : t('profile.darkMode');
   const profileCompletion = computeProfileCompletion(user);
 
   return (

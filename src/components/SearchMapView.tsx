@@ -8,6 +8,7 @@ import {
   TILE_PX,
   type MapPin,
 } from '../utils/searchMapTiles';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type SearchMapViewProps = {
   center: { lat: number; lng: number };
@@ -18,6 +19,8 @@ type SearchMapViewProps = {
   pins?: Array<{ id: string; distanceMiles: number; mapX?: number; mapY?: number }>;
   showRadiusRing?: boolean;
   showYouMarker?: boolean;
+  selectedPinId?: string | null;
+  onPinPress?: (profileId: string) => void;
   style?: ViewStyle;
 };
 
@@ -33,6 +36,8 @@ export function SearchMapView({
   pins = [],
   showRadiusRing = true,
   showYouMarker = true,
+  selectedPinId = null,
+  onPinPress,
   style,
 }: SearchMapViewProps) {
   const [mapSize, setMapSize] = useState({
@@ -98,20 +103,32 @@ export function SearchMapView({
         </View>
       ) : null}
 
-      {mapPins.map((pin) => (
-        <View
-          key={pin.id}
-          pointerEvents="none"
-          style={[
-            styles.pin,
-            {
-              left: pin.left,
-              top: pin.top,
-              backgroundColor: pinColor,
-            },
-          ]}
-        />
-      ))}
+      {mapPins.map((pin) => {
+        const selected = selectedPinId === pin.id;
+        const pinStyle = [
+          styles.pin,
+          selected && styles.pinSelected,
+          {
+            left: pin.left,
+            top: pin.top,
+            backgroundColor: selected ? accentColor : pinColor,
+          },
+        ];
+
+        if (!onPinPress) {
+          return <View key={pin.id} pointerEvents="none" style={pinStyle} />;
+        }
+
+        return (
+          <AnimatedPressable
+            key={pin.id}
+            hitSlop={10}
+            accessibilityRole="button"
+            onPress={() => onPinPress(pin.id)}
+            style={pinStyle}
+          />
+        );
+      })}
     </View>
   );
 }
@@ -162,5 +179,14 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#fff',
     zIndex: 3,
+  },
+  pinSelected: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    marginLeft: -7,
+    marginTop: -7,
+    borderWidth: 2,
+    zIndex: 5,
   },
 });

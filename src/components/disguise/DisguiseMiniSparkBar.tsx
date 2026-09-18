@@ -88,7 +88,7 @@ export function DisguiseMiniSparkBar({
   const { t } = useTranslation();
 
   return (
-    <View style={styles.bar} onStartShouldSetResponder={() => true}>
+    <View style={styles.bar} pointerEvents="box-none">
       <View style={[styles.slot, { width: BUTTON_SIZE, height: BUTTON_SIZE }]}>
         <MiniIconButton
           icon="trash-outline"
@@ -129,15 +129,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingTop: 4,
     gap: spacing.md,
-    zIndex: 4,
+    zIndex: 6,
+    position: 'relative',
   },
   slot: {
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 6,
   },
   button: {
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
+    zIndex: 6,
   },
 });

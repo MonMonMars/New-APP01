@@ -1,4 +1,5 @@
 import { FeedItem } from '../data/disguiseFeed';
+import { getProfileById } from '../data/profiles';
 import { DisguiseAdCreative } from '../types/disguise';
 import { SparkSection } from '../types/preferences';
 import { UserProfile } from '../types/profile';
@@ -49,6 +50,39 @@ function pinFeedProfileLinks(items: FeedItem[], section?: SparkSection | string 
   });
 }
 
+/** Use linked dating profile photos so Pulse reporters match their mini-window identity. */
+function syncReporterPhotos(items: FeedItem[], section?: SparkSection | string | null): FeedItem[] {
+  return items.map((item) => {
+    if (item.type !== 'news') {
+      return item;
+    }
+    return {
+      ...item,
+      reporters: item.reporters.map((reporter) => {
+        const profileId =
+          reporter.profileId ??
+          resolveDisguiseProfileId(reporter.id) ??
+          pinnedReporterProfileId(reporter.id, section);
+        if (!profileId) {
+          return reporter;
+        }
+        const profile = getProfileById(profileId);
+        if (!profile || profile.photos.length === 0) {
+          return { ...reporter, profileId };
+        }
+        const bioSnippet = profile.bio.split('.')[0]?.trim();
+        return {
+          ...reporter,
+          profileId,
+          avatarUrl: profile.photos[0],
+          photos: profile.photos,
+          quote: bioSnippet && bioSnippet.length > 12 ? bioSnippet : reporter.quote,
+        };
+      }),
+    };
+  });
+}
+
 export function buildDisguiseFeed(
   user: UserProfile,
   creative: DisguiseAdCreative | null,
@@ -58,7 +92,7 @@ export function buildDisguiseFeed(
   const baseFeed = disguiseFeedItemsForGender(user.gender);
   const withProfiles = weaveProfileCards(baseFeed, profileCards);
 
-  const linked = pinFeedProfileLinks(withProfiles, section);
+  const linked = syncReporterPhotos(pinFeedProfileLinks(withProfiles, section), section);
 
   if (!creative) {
     return linked;
@@ -67,8 +101,11 @@ export function buildDisguiseFeed(
   const userItem = buildDisguisedProfileFeedItem(user, creative);
   const withoutUserSlot = linked.filter((item) => item.id !== 'disguised-user');
 
-  return pinFeedProfileLinks(
-    [withoutUserSlot[0], withoutUserSlot[1], userItem, ...withoutUserSlot.slice(2)],
+  return syncReporterPhotos(
+    pinFeedProfileLinks(
+      [withoutUserSlot[0], withoutUserSlot[1], userItem, ...withoutUserSlot.slice(2)],
+      section,
+    ),
     section,
   );
 }

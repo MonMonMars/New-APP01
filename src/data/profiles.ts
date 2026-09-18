@@ -4,6 +4,7 @@ import { latestRawProfiles } from './latestProfiles';
 import { moreRawProfiles } from './moreProfiles';
 import { newestRawProfiles } from './newestProfiles';
 import { nextRawProfiles } from './nextProfiles';
+import { applyLegacyProfileEnrichment } from './legacyProfileEnrichment';
 import { withDemoProfilePhotos } from '../utils/withDemoProfilePhotos';
 import {
   matchesSparkSection,
@@ -1193,9 +1194,10 @@ function withVerification(profile: Profile): Profile {
 
 export const mockProfiles: Profile[] = rawProfiles.map((profile, index) => {
   const seed = Number(profile.id) || index + 1;
+  const enriched = applyLegacyProfileEnrichment(profile);
   return withEmberFields(
     withRelationshipStatus(
-      withVerification(withIntent(withMap(withDemoProfilePhotos(profile), seed), seed)),
+      withVerification(withIntent(withMap(withDemoProfilePhotos(enriched), seed), seed)),
     ),
     seed,
   );

@@ -31,7 +31,7 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
   const { colors } = useTheme();
-  const { locale } = useTranslation();
+  const { locale, t } = useTranslation();
   const { recordPulseReading } = useApp();
   const meta = useDisguiseWorld();
   const heroHeight = disguiseReadHeroHeight(windowHeight);
@@ -71,7 +71,7 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
             </View>
             <View style={styles.toolbarActions}>
               <SavePostButton postId={post.id} />
-              <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel="Close" scaleTo={0.9}>
+              <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel={t('common.close')} scaleTo={0.9}>
                 <Ionicons name="close" size={24} color={colors.text} />
               </AnimatedPressable>
             </View>
@@ -107,9 +107,9 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
               void openExternalUrl(post.articleUrl, post.source, locale);
             }}
             scaleTo={0.97}
-            accessibilityLabel={`Read on ${post.source}`}
+            accessibilityLabel={t('newsArticle.readOnA11y', { source: post.source })}
           >
-            <Text style={styles.readOriginalText}>Read on {post.source}</Text>
+            <Text style={styles.readOriginalText}>{t('newsArticle.readOn', { source: post.source })}</Text>
             <Ionicons name="open-outline" size={16} color="#fff" />
           </AnimatedPressable>
         </View>

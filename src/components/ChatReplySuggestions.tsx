@@ -69,6 +69,7 @@ export function ChatReplySuggestions({
               scaleTo={0.97}
               style={[styles.chip, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => onSelect(option)}
+              accessibilityLabel={t('chat.suggestionA11y', { text: option })}
             >
               <Text style={[styles.chipText, { color: colors.text }]} numberOfLines={3}>
                 {option}

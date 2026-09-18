@@ -15,7 +15,7 @@ type ProfileSocialLinksProps = {
 
 export function ProfileSocialLinks({ user, compact = false }: ProfileSocialLinksProps) {
   const { colors } = useTheme();
-  const { locale } = useTranslation();
+  const { locale, t } = useTranslation();
   const hasInstagram = user.instagramConnected && user.instagramHandle;
   const hasSpotify = user.spotifyConnected && user.spotifyHandle;
 
@@ -25,7 +25,7 @@ export function ProfileSocialLinks({ user, compact = false }: ProfileSocialLinks
 
   return (
     <View style={[styles.container, compact && styles.compact]}>
-      {!compact && <Text style={[styles.title, { color: colors.textMuted }]}>Connected</Text>}
+      {!compact && <Text style={[styles.title, { color: colors.textMuted }]}>{t('profileSocial.connected')}</Text>}
       {hasInstagram ? (
         <AnimatedPressable
           style={styles.row}

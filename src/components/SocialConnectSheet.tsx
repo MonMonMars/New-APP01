@@ -4,6 +4,7 @@ import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
 
@@ -18,18 +19,14 @@ type SocialConnectSheetProps = {
   onDisconnect: () => void;
 };
 
-const PLATFORM_COPY: Record<ConnectPlatform, { title: string; icon: keyof typeof Ionicons.glyphMap; color: string; placeholder: string }> = {
+const PLATFORM_META: Record<ConnectPlatform, { icon: keyof typeof Ionicons.glyphMap; color: string }> = {
   instagram: {
-    title: 'Instagram',
     icon: 'logo-instagram',
     color: '#E4405F',
-    placeholder: '@yourhandle',
   },
   spotify: {
-    title: 'Spotify',
     icon: 'musical-notes',
     color: '#1DB954',
-    placeholder: 'Spotify username',
   },
 };
 
@@ -43,8 +40,11 @@ export function SocialConnectSheet({
 }: SocialConnectSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [username, setUsername] = useState('');
-  const meta = PLATFORM_COPY[platform];
+  const meta = PLATFORM_META[platform];
+  const platformName = t(platform === 'instagram' ? 'socialConnect.instagram' : 'socialConnect.spotify');
+  const placeholder = t(platform === 'instagram' ? 'socialConnect.instagramPlaceholder' : 'socialConnect.spotifyPlaceholder');
 
   const handleConnect = () => {
     const handle = username.trim().replace(/^@/, '');
@@ -63,7 +63,7 @@ export function SocialConnectSheet({
           <AnimatedPressable onPress={onClose}>
             <Ionicons name="close" size={24} color={colors.textMuted} />
           </AnimatedPressable>
-          <Text style={[styles.title, { color: colors.text }]}>Connect {meta.title}</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('socialConnect.connectTitle', { platform: platformName })}</Text>
           <View style={styles.headerSpacer} />
         </View>
 
@@ -73,24 +73,24 @@ export function SocialConnectSheet({
 
         {connected ? (
           <>
-            <Text style={[styles.headline, { color: colors.text }]}>Connected</Text>
+            <Text style={[styles.headline, { color: colors.text }]}>{t('socialConnect.linkedHeadline')}</Text>
             <Text style={[styles.body, { color: colors.textMuted }]}>
-              Your {meta.title} is linked. Disconnect anytime.
+              {t('socialConnect.linkedBody', { platform: platformName })}
             </Text>
             <AnimatedPressable style={[styles.disconnectBtn, { borderColor: colors.border }]} onPress={() => { onDisconnect(); onClose(); }}>
-              <Text style={[styles.disconnectText, { color: colors.text }]}>Disconnect</Text>
+              <Text style={[styles.disconnectText, { color: colors.text }]}>{t('socialConnect.disconnect')}</Text>
             </AnimatedPressable>
           </>
         ) : (
           <>
-            <Text style={[styles.headline, { color: colors.text }]}>Link your {meta.title}</Text>
+            <Text style={[styles.headline, { color: colors.text }]}>{t('socialConnect.linkHeadline', { platform: platformName })}</Text>
             <Text style={[styles.body, { color: colors.textMuted }]}>
-              Demo connect — enter a username to show on your profile. No OAuth required.
+              {t('socialConnect.linkBody')}
             </Text>
             <TextInput
               value={username}
               onChangeText={setUsername}
-              placeholder={meta.placeholder}
+              placeholder={placeholder}
               placeholderTextColor={colors.textMuted}
               autoCapitalize="none"
               style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
@@ -100,7 +100,7 @@ export function SocialConnectSheet({
               onPress={handleConnect}
               disabled={!username.trim()}
             >
-              <Text style={styles.connectText}>Connect</Text>
+              <Text style={styles.connectText}>{t('socialConnect.connect')}</Text>
             </AnimatedPressable>
           </>
         )}

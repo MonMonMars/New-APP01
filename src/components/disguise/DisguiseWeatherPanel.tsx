@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import { WeatherIcon, WeatherSnapshot } from '../../data/disguiseWeather';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
@@ -37,7 +37,7 @@ function weatherIconName(icon: WeatherIcon): keyof typeof Ionicons.glyphMap {
 
 export function DisguiseWeatherPanel({ weather, isLive = false, onPress }: DisguiseWeatherPanelProps) {
   const { colors } = useTheme();
-  const { preferences } = useApp();
+  const { t } = useTranslation();
   const accent = useDisguiseWorld().accent;
 
   return (
@@ -46,7 +46,7 @@ export function DisguiseWeatherPanel({ weather, isLive = false, onPress }: Disgu
       onPress={onPress}
       disabled={!onPress}
       accessibilityRole={onPress ? 'button' : undefined}
-      accessibilityLabel={`Weather in ${weather.city}`}
+      accessibilityLabel={t('disguiseWeather.weatherA11y', { city: weather.city })}
     >
       <View style={styles.header}>
         <View>
@@ -55,7 +55,7 @@ export function DisguiseWeatherPanel({ weather, isLive = false, onPress }: Disgu
         </View>
         <View style={[styles.livePill, { backgroundColor: `${accent}24` }]}>
           {isLive ? <View style={[styles.liveDot, { backgroundColor: accent }]} /> : null}
-          <Text style={[styles.liveText, { color: accent }]}>{isLive ? 'Live' : 'Forecast'}</Text>
+          <Text style={[styles.liveText, { color: accent }]}>{isLive ? t('disguiseWeather.live') : t('disguiseWeather.forecast')}</Text>
         </View>
       </View>
 
@@ -67,18 +67,18 @@ export function DisguiseWeatherPanel({ weather, isLive = false, onPress }: Disgu
         </View>
         <View style={styles.highLow}>
           <Text style={[styles.highLowText, { color: colors.text }]}>
-            H {weather.highC}° · L {weather.lowC}°
+            {t('disguiseWeather.highLow', { high: weather.highC, low: weather.lowC })}
           </Text>
           <Text style={[styles.feelsLike, { color: colors.textMuted }]}>
-            Feels {weather.feelsLikeC}°
+            {t('disguiseWeather.feelsLike', { temp: weather.feelsLikeC })}
           </Text>
         </View>
       </View>
 
       <View style={styles.statsRow}>
-        <Stat icon="water-outline" label="Humidity" value={`${weather.humidityPct}%`} color={accent} />
-        <Stat icon="flag-outline" label="Wind" value={`${weather.windKph} km/h`} color={accent} />
-        <Stat icon="sunny-outline" label="UV" value={`${weather.uvIndex}`} color={accent} />
+        <Stat icon="water-outline" label={t('disguiseWeather.humidity')} value={`${weather.humidityPct}%`} color={accent} />
+        <Stat icon="flag-outline" label={t('disguiseWeather.wind')} value={`${weather.windKph} km/h`} color={accent} />
+        <Stat icon="sunny-outline" label={t('disguiseWeather.uv')} value={`${weather.uvIndex}`} color={accent} />
       </View>
 
       <View style={styles.forecastRow}>

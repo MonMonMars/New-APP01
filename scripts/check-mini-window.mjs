@@ -46,22 +46,22 @@ async function openMiniWindow(page, index = 0) {
   const thumb = page.getByLabel(/view photos from/i).nth(index);
   const label = (await thumb.getAttribute('aria-label')) ?? '';
   await thumb.click();
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(600);
   return label.replace(/^View photos from\s+/i, '').trim();
 }
 
 async function waitForDismiss(page) {
-  await page.waitForTimeout(560);
+  await page.waitForTimeout(340);
 }
 
 async function statVisible(page, pattern) {
-  await page.waitForTimeout(120);
+  await page.waitForTimeout(80);
   const text = await page.locator('body').innerText();
   return pattern.test(text);
 }
 
 async function sheetClosed(page) {
-  return !(await page.getByLabel(/like profile|unlike profile|pass profile/i).first().isVisible().catch(() => false));
+  return !(await page.getByLabel(/like profile|pass profile/i).first().isVisible().catch(() => false));
 }
 
 const browser = await chromium.launch({ headless: true });
@@ -79,7 +79,7 @@ const hasNext = await page.getByLabel(/next photo/i).isVisible().catch(() => fal
 
 if (hasPhotoMeta && hasNext) {
   await page.getByLabel(/next photo/i).click();
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(400);
 }
 const afterSwipe = await page.locator('body').innerText();
 const advanced = /photo 2 of/i.test(afterSwipe);
@@ -88,7 +88,7 @@ const likeBtn = page.getByLabel(/like profile/i).first();
 const hasLike = await likeBtn.isVisible().catch(() => false);
 let likeStatVisible = false;
 let closedAfterLike = false;
-let feedStableAfterLike = false;
+let reporterRemovedAfterLike = false;
 
 if (hasLike) {
   await likeBtn.click();
@@ -96,26 +96,11 @@ if (hasLike) {
   await waitForDismiss(page);
   closedAfterLike = await sheetClosed(page);
   const feedAfterLike = await page.locator('body').innerText();
-  feedStableAfterLike = reporterName.length > 0 && feedAfterLike.includes(reporterName.split(' ')[0]);
+  reporterRemovedAfterLike =
+    reporterName.length > 0 && !feedAfterLike.includes(reporterName.split(' ')[0]);
 }
 
-let unlikeStatVisible = false;
-let closedAfterUnlike = false;
-let hasUnlike = false;
-
-if (closedAfterLike) {
-  await openMiniWindow(page, 0);
-  hasUnlike = await page.getByLabel(/unlike profile/i).first().isVisible().catch(() => false);
-}
-
-if (hasUnlike) {
-  await page.getByLabel(/unlike profile/i).first().click();
-  unlikeStatVisible = await statVisible(page, /\bREMOVED\b/i);
-  await waitForDismiss(page);
-  closedAfterUnlike = await sheetClosed(page);
-}
-
-await openMiniWindow(page, 1);
+await openMiniWindow(page, 0);
 const passBtn = page.getByLabel(/pass profile/i).first();
 const hasPass = await passBtn.isVisible().catch(() => false);
 let passStatVisible = false;
@@ -128,7 +113,7 @@ if (hasPass) {
   closedAfterPass = await sheetClosed(page);
 }
 
-await openMiniWindow(page, 2);
+await openMiniWindow(page, 0);
 const superBtn = page.getByLabel(/super like profile/i).first();
 const hasSuper = await superBtn.isVisible().catch(() => false);
 let superStatVisible = false;
@@ -150,10 +135,7 @@ console.log(JSON.stringify({
   hasLike,
   likeStatVisible,
   closedAfterLike,
-  feedStableAfterLike,
-  hasUnlike,
-  unlikeStatVisible,
-  closedAfterUnlike,
+  reporterRemovedAfterLike,
   hasPass,
   passStatVisible,
   closedAfterPass,
@@ -172,10 +154,7 @@ const ok =
   hasLike &&
   likeStatVisible &&
   closedAfterLike &&
-  feedStableAfterLike &&
-  hasUnlike &&
-  unlikeStatVisible &&
-  closedAfterUnlike &&
+  reporterRemovedAfterLike &&
   hasPass &&
   passStatVisible &&
   closedAfterPass &&

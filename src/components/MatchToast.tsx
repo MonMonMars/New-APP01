@@ -17,12 +17,20 @@ type MatchToastProps = {
   visible: boolean;
   profileName: string | null;
   onDismiss: () => void;
+  /** Mini mode: quick flash so the disguise feed stays readable. */
+  variant?: 'default' | 'mini';
 };
 
-export function MatchToast({ visible, profileName, onDismiss }: MatchToastProps) {
+const TOAST_TIMING = {
+  default: { enterMs: 280, holdMs: 2600, exitMs: 240 },
+  mini: { enterMs: 160, holdMs: 720, exitMs: 140 },
+} as const;
+
+export function MatchToast({ visible, profileName, onDismiss, variant = 'default' }: MatchToastProps) {
   const { colors } = useTheme();
   const translateY = useSharedValue(-120);
   const opacity = useSharedValue(0);
+  const timing = TOAST_TIMING[variant];
 
   useEffect(() => {
     if (!visible || !profileName) {
@@ -30,16 +38,19 @@ export function MatchToast({ visible, profileName, onDismiss }: MatchToastProps)
     }
 
     translateY.value = withSequence(
-      withTiming(0, { duration: 280 }),
-      withDelay(2600, withTiming(-120, { duration: 240 })),
+      withTiming(0, { duration: timing.enterMs }),
+      withDelay(timing.holdMs, withTiming(-120, { duration: timing.exitMs })),
     );
     opacity.value = withSequence(
-      withTiming(1, { duration: 280 }),
-      withDelay(2600, withTiming(0, { duration: 240 }, () => {
-        runOnJS(onDismiss)();
-      })),
+      withTiming(1, { duration: timing.enterMs }),
+      withDelay(
+        timing.holdMs,
+        withTiming(0, { duration: timing.exitMs }, () => {
+          runOnJS(onDismiss)();
+        }),
+      ),
     );
-  }, [visible, profileName, onDismiss, opacity, translateY]);
+  }, [visible, profileName, onDismiss, opacity, timing.enterMs, timing.exitMs, timing.holdMs, translateY]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],

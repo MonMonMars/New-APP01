@@ -12,7 +12,6 @@ type DisguiseMiniSparkBarProps = {
   passed: boolean;
   disabled?: boolean;
   onLike: () => void;
-  onUnlike: () => void;
   onSuperLike: () => void;
   onPass: () => void;
 };
@@ -83,7 +82,6 @@ export function DisguiseMiniSparkBar({
   passed,
   disabled = false,
   onLike,
-  onUnlike,
   onSuperLike,
   onPass,
 }: DisguiseMiniSparkBarProps) {
@@ -116,8 +114,8 @@ export function DisguiseMiniSparkBar({
           icon="heart"
           active={liked}
           disabled={disabled}
-          onPress={liked ? onUnlike : onLike}
-          accessibilityLabel={liked ? t('disguiseMiniWindow.unlikeA11y') : t('disguiseMiniWindow.likeA11y')}
+          onPress={onLike}
+          accessibilityLabel={t('disguiseMiniWindow.likeA11y')}
         />
       </View>
     </View>

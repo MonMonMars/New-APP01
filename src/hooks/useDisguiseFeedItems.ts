@@ -3,6 +3,7 @@ import { useMemo, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { FeedItem } from '../data/disguiseFeed';
 import { buildDisguiseFeed } from '../utils/buildDisguiseFeed';
+import { filterActionedDisguiseFeed } from '../utils/filterActionedDisguiseFeed';
 import { filterDisguiseFeed } from '../utils/disguiseFeedFilter';
 
 function disguiseFeedSignature(
@@ -14,12 +15,9 @@ function disguiseFeedSignature(
   return `${section}|${userId}|${gender ?? ''}|${creativeKey}`;
 }
 
-/**
- * Pulse feed slots stay fixed while browsing — likes/passes must not rebuild or
- * reshuffle disguised profile cards and news reporter links.
- */
+/** Pulse feed layout stays cached; liked/passed profiles are hidden without reshuffling slots. */
 export function useDisguiseFeedItems(topic?: string): FeedItem[] {
-  const { user, disguiseAdCreative, preferences, pulseSocial } = useApp();
+  const { user, disguiseAdCreative, preferences, pulseSocial, likedIds, passedIds, superLikedIds } = useApp();
   const cacheRef = useRef<{ signature: string; base: FeedItem[] } | null>(null);
 
   const creativeKey = disguiseAdCreative
@@ -44,7 +42,14 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
 
   return useMemo(() => {
     const filtered = filterDisguiseFeed(baseFeed, topic, user.gender);
-    return filtered.filter((item) => {
+    const withoutActioned = filterActionedDisguiseFeed(
+      filtered,
+      likedIds,
+      passedIds,
+      superLikedIds,
+      preferences.sparkSection,
+    );
+    return withoutActioned.filter((item) => {
       if (item.type !== 'social') {
         return true;
       }
@@ -56,6 +61,10 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
     });
   }, [
     baseFeed,
+    likedIds,
+    passedIds,
+    superLikedIds,
+    preferences.sparkSection,
     pulseSocial.mutedAuthors,
     pulseSocial.reportedPostIds,
     topic,

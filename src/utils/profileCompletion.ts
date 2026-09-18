@@ -1,3 +1,5 @@
+import { translate } from '../i18n';
+import { AppLocale } from '../types/locale';
 import { UserProfile, EMBER_PROMPT_OPTIONS } from '../types/profile';
 
 export type ProfileTip = {
@@ -7,73 +9,91 @@ export type ProfileTip = {
   suggestion?: string;
 };
 
-export function computeProfileCompletion(user: UserProfile): {
+type TipId =
+  | 'photos'
+  | 'bio'
+  | 'prompts'
+  | 'interests'
+  | 'intent'
+  | 'emberPrompt'
+  | 'photo'
+  | 'person'
+  | 'age';
+
+function tipText(locale: AppLocale, id: TipId, field: 'label' | 'suggestion'): string {
+  return translate(locale, `profileCompletion.${id}.${field}`);
+}
+
+export function computeProfileCompletion(
+  user: UserProfile,
+  locale: AppLocale = 'en',
+): {
   score: number;
   tips: ProfileTip[];
 } {
   const tips: ProfileTip[] = [
     {
       id: 'photos',
-      label: 'Add 3+ photos',
+      label: tipText(locale, 'photos', 'label'),
       done: user.photos.length >= 3,
-      suggestion: 'Profiles with 3+ photos get 2× more likes (Bumble research).',
+      suggestion: tipText(locale, 'photos', 'suggestion'),
     },
     {
       id: 'bio',
-      label: 'Write a bio (40+ chars)',
+      label: tipText(locale, 'bio', 'label'),
       done: user.bio.trim().length >= 40,
-      suggestion: 'Share a specific detail — a hobby, vibe, or what you are looking for.',
+      suggestion: tipText(locale, 'bio', 'suggestion'),
     },
     {
       id: 'prompts',
-      label: 'Answer 2+ prompts',
+      label: tipText(locale, 'prompts', 'label'),
       done: (user.prompts?.length ?? 0) >= 2,
-      suggestion: 'Hinge daters with prompts get more meaningful conversations.',
+      suggestion: tipText(locale, 'prompts', 'suggestion'),
     },
     {
       id: 'interests',
-      label: 'Add 5+ interests',
+      label: tipText(locale, 'interests', 'label'),
       done: user.interests.length >= 5,
-      suggestion: 'Interests power compatibility scores and Standouts.',
+      suggestion: tipText(locale, 'interests', 'suggestion'),
     },
     {
       id: 'intent',
-      label: 'Set relationship intent',
+      label: tipText(locale, 'intent', 'label'),
       done: Boolean(user.intent),
-      suggestion: 'Clear intent helps match with people on the same page.',
+      suggestion: tipText(locale, 'intent', 'suggestion'),
     },
     {
       id: 'emberPrompt',
-      label: 'Add an Ember prompt',
+      label: tipText(locale, 'emberPrompt', 'label'),
       done:
         user.prompts?.some(
           (prompt) =>
             EMBER_PROMPT_OPTIONS.some((question) => question === prompt.question) &&
             prompt.answer.trim().length > 12,
         ) ?? false,
-      suggestion: 'A discretion prompt tells Ember matches what this is — and isn’t.',
+      suggestion: tipText(locale, 'emberPrompt', 'suggestion'),
     },
     {
       id: 'photo',
-      label: 'Verify your photos',
+      label: tipText(locale, 'photo', 'label'),
       done: user.photoVerified === true,
-      suggestion: 'Photo verification shows your selfies match your profile.',
+      suggestion: tipText(locale, 'photo', 'suggestion'),
     },
     {
       id: 'person',
-      label: 'Verify you are a real person',
+      label: tipText(locale, 'person', 'label'),
       done: user.personVerified === true,
-      suggestion: 'Liveness checks help everyone trust who they are matching with.',
+      suggestion: tipText(locale, 'person', 'suggestion'),
     },
     {
       id: 'age',
-      label: 'Verify your age',
+      label: tipText(locale, 'age', 'label'),
       done: user.ageVerified === true,
-      suggestion: 'Age verification builds trust and unlocks the 18+ badge.',
+      suggestion: tipText(locale, 'age', 'suggestion'),
     },
   ];
 
-  const doneCount = tips.filter((t) => t.done).length;
+  const doneCount = tips.filter((tip) => tip.done).length;
   const score = Math.round((doneCount / tips.length) * 100);
   return { score, tips };
 }

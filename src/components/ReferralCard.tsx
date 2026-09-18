@@ -3,6 +3,7 @@ import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { radii, spacing } from '../theme';
 import { buildInviteLink, buildInviteMessage } from '../utils/inviteLink';
 import { shareWithFallback } from '../utils/shareWithFallback';
@@ -10,6 +11,7 @@ import { AnimatedPressable } from './AnimatedPressable';
 
 export function ReferralCard() {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const { user, userId, recordReferralShare, pulseSocial } = useApp();
   const inviteLink = buildInviteLink(userId);
 
@@ -17,16 +19,21 @@ export function ReferralCard() {
     const message = buildInviteMessage(user.name, inviteLink);
     const shared = await shareWithFallback({
       message,
-      title: 'Invite to Spark',
+      title: t('referral.shareTitle'),
       url: inviteLink,
     });
     if (shared) {
       const count = recordReferralShare();
       if (count >= 3 && count % 3 === 0) {
-        Alert.alert('Boost unlocked!', 'Three shares completed — enjoy a free 30-minute Boost.');
+        Alert.alert(t('referral.boostUnlockedTitle'), t('referral.boostUnlockedBody'));
       }
     }
   };
+
+  const progress =
+    pulseSocial.referralShareCount > 0
+      ? t('referral.sharesProgress', { count: pulseSocial.referralShareCount })
+      : '';
 
   return (
     <AnimatedPressable
@@ -37,12 +44,10 @@ export function ReferralCard() {
         <Ionicons name="gift-outline" size={22} color={colors.gradientEnd} />
       </View>
       <View style={styles.text}>
-        <Text style={[styles.title, { color: colors.text }]}>Invite friends</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('referral.title')}</Text>
         <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-          Share Spark three times to unlock a free 30-minute Boost
-          {pulseSocial.referralShareCount > 0
-            ? ` (${pulseSocial.referralShareCount}/3 shares)`
-            : ''}.
+          {t('referral.subtitle')}
+          {progress}
         </Text>
       </View>
       <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />

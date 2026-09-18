@@ -154,7 +154,7 @@ export function ProfileScreen() {
       : themeMode === 'system'
         ? t('profile.systemMode')
         : t('profile.darkMode');
-  const profileCompletion = computeProfileCompletion(user);
+  const profileCompletion = computeProfileCompletion(user, locale);
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>

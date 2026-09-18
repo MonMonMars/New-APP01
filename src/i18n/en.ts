@@ -246,6 +246,8 @@ export const en = {
     sendMessage: 'Send message',
     checkedInSafely: '✅ Checked in safely at {location}',
     homeSafeEnding: '🏠 Home safe — ending date check-in',
+    dateCheckInStarted: '📍 Date check-in: meeting at {location}{contactSuffix}',
+    dateCheckInContactSuffix: ' · Contact: {contact}',
     suggestDateSubtitle: 'Skip small talk — send {name} a clear invite to meet.',
     dateSuggestionCoffee: 'Coffee this week?',
     dateSuggestionCoffeeMsg: 'Want to grab coffee this week? I know a great spot nearby.',
@@ -464,6 +466,54 @@ export const en = {
     pinA11y: 'Add {name} to deck',
     areaLoaded: 'People in this area added to your deck',
     attribution: '© Esri',
+    zoomInA11y: 'Zoom in',
+    zoomOutA11y: 'Zoom out',
+  },
+  referral: {
+    title: 'Invite friends',
+    subtitle: 'Share Spark three times to unlock a free 30-minute Boost.',
+    sharesProgress: ' ({count}/3 shares)',
+    shareTitle: 'Invite to Spark',
+    boostUnlockedTitle: 'Boost unlocked!',
+    boostUnlockedBody: 'Three shares completed — enjoy a free 30-minute Boost.',
+  },
+  profileCompletion: {
+    photos: {
+      label: 'Add 3+ photos',
+      suggestion: 'Profiles with 3+ photos get 2× more likes (Bumble research).',
+    },
+    bio: {
+      label: 'Write a bio (40+ chars)',
+      suggestion: 'Share a specific detail — a hobby, vibe, or what you are looking for.',
+    },
+    prompts: {
+      label: 'Answer 2+ prompts',
+      suggestion: 'Hinge daters with prompts get more meaningful conversations.',
+    },
+    interests: {
+      label: 'Add 5+ interests',
+      suggestion: 'Interests power compatibility scores and Standouts.',
+    },
+    intent: {
+      label: 'Set relationship intent',
+      suggestion: 'Clear intent helps match with people on the same page.',
+    },
+    emberPrompt: {
+      label: 'Add an Ember prompt',
+      suggestion: 'A discretion prompt tells Ember matches what this is — and isn’t.',
+    },
+    photo: {
+      label: 'Verify your photos',
+      suggestion: 'Photo verification shows your selfies match your profile.',
+    },
+    person: {
+      label: 'Verify you are a real person',
+      suggestion: 'Liveness checks help everyone trust who they are matching with.',
+    },
+    age: {
+      label: 'Verify your age',
+      suggestion: 'Age verification builds trust and unlocks the 18+ badge.',
+    },
   },
   profileCoach: {
     title: 'AI profile coach',

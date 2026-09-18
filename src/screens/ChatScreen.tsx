@@ -479,8 +479,14 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         onClose={() => setShowDateCheckIn(false)}
         onStart={(payload) => {
           startDateCheckIn(profile.id, profile.name, payload);
+          const contactSuffix = payload.emergencyContact
+            ? t('chat.dateCheckInContactSuffix', { contact: payload.emergencyContact })
+            : '';
           handleSend(
-            `📍 Date check-in: meeting at ${payload.location}${payload.emergencyContact ? ` · Contact: ${payload.emergencyContact}` : ''}`,
+            t('chat.dateCheckInStarted', {
+              location: payload.location,
+              contactSuffix,
+            }),
           );
         }}
       />

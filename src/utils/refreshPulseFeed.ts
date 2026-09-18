@@ -15,6 +15,41 @@ function hashSlotId(id: string): number {
   return Math.abs(hash);
 }
 
+/** Rotate a static Pulse list so scroll-to-end reload feels like a fresh page. */
+export function rotatePulseList<T>(items: readonly T[], generation: number): T[] {
+  if (items.length === 0 || generation === 0) {
+    return [...items];
+  }
+  const offset = generation % items.length;
+  return [...items.slice(offset), ...items.slice(0, offset)];
+}
+
+function formatRefreshedTimeAgo(index: number, generation: number): string {
+  const minutes = ((index + generation * 5) % 58) + 1;
+  if (minutes <= 2) {
+    return 'Just now';
+  }
+  if (minutes < 60) {
+    return `${minutes}m ago`;
+  }
+  return `${Math.floor(minutes / 60)}h ago`;
+}
+
+/** Refresh relative timestamps on feed cards after a bottom reload. */
+export function freshenPulseFeedTimestamps(items: FeedItem[], generation: number): FeedItem[] {
+  if (generation === 0) {
+    return items;
+  }
+
+  return items.map((item, index) => {
+    const timeAgo = formatRefreshedTimeAgo(index, generation);
+    if (item.type === 'news' || item.type === 'social' || item.type === 'disguised_profile') {
+      return { ...item, timeAgo };
+    }
+    return item;
+  });
+}
+
 function buildProfilePool(
   section: SparkSection | string | null | undefined,
   excluded: Set<string>,
@@ -70,7 +105,7 @@ function renewDisguisedProfiles(
   });
 }
 
-/** Reassign every Pulse profile slot — used when the user scrolls to the feed end. */
+/** Reassign every Pulse profile slot — used when the user scrolls to the page end. */
 export function renewPulseFeedProfiles(
   items: FeedItem[],
   section?: SparkSection | string | null,
@@ -82,4 +117,15 @@ export function renewPulseFeedProfiles(
   const stripped = stripPulseProfileLinks(items);
   const withRotatedCards = renewDisguisedProfiles(stripped, section, generation);
   return syncReporterPhotos(pinFeedProfileLinks(withRotatedCards, section), section);
+}
+
+/** Full Pulse page reload — rotate stories, freshen timestamps, renew profile photos. */
+export function renewPulseFeedPage(
+  items: FeedItem[],
+  section?: SparkSection | string | null,
+  generation = 1,
+): FeedItem[] {
+  const rotated = rotatePulseList(items, generation);
+  const freshened = freshenPulseFeedTimestamps(rotated, generation);
+  return renewPulseFeedProfiles(freshened, section, generation);
 }

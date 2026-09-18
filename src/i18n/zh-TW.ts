@@ -713,8 +713,9 @@ export const zhTw = {
     emptyNoTopicBody: '稍後再回來看看 — 或前往熱門探索更多故事。',
     emptyTopicBody: '試試其他主題，或清除篩選以查看全部內容。',
     exploreTrending: '探索{tab}',
-    scrollRefreshHint: '滑到底部以重新整理個人照片',
-    refreshingProfiles: '正在重新整理個人資料…',
+    scrollRefreshHint: '滑到底部以載入最新內容',
+    refreshingFeed: '正在載入最新內容…',
+    feedUpdated: '剛剛已更新',
   },
   editProfile: {
     addPhotoFromLibrary: '從相簿新增照片',

@@ -14,6 +14,9 @@ import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { disguiseFeedItemsForGender } from '../../utils/disguiseFeedCatalog';
 import { FeedItem } from '../../data/disguiseFeed';
 import { usesFemalePulseExperience } from '../../utils/genderAccountPerks';
+import { PulseFeedRefreshFooter } from './PulseFeedRefreshFooter';
+import { useRotatedPulseContent } from '../../hooks/useRotatedPulseContent';
+import { usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type SearchResult =
@@ -57,9 +60,12 @@ export function DisguiseSearchSheet({
   const { t } = useTranslation();
   const meta = disguiseWorldMeta(preferences.sparkSection, user.gender, locale);
   const feedCatalog = disguiseFeedItemsForGender(user.gender);
-  const trendingTopics = usesFemalePulseExperience(user.gender)
+  const baseTrendingTopics = usesFemalePulseExperience(user.gender)
     ? femaleTrendingTopics
     : disguiseTrendingTopics;
+  const trendingTopics = useRotatedPulseContent(baseTrendingTopics);
+  const rotatedFeedCatalog = useRotatedPulseContent(feedCatalog);
+  const { refreshing, justUpdated, scrollViewProps } = usePulseScrollRefresh();
   const [query, setQuery] = useState('');
 
   const results = useMemo((): SearchResult[] => {
@@ -84,7 +90,7 @@ export function DisguiseSearchSheet({
 
     const articleHits: SearchResult[] = [];
     const seen = new Set<string>();
-    for (const item of feedCatalog) {
+    for (const item of rotatedFeedCatalog) {
       if (seen.has(item.id)) {
         continue;
       }
@@ -98,7 +104,7 @@ export function DisguiseSearchSheet({
     }
 
     return [...topicHits, ...articleHits];
-  }, [query, feedCatalog, trendingTopics]);
+  }, [query, rotatedFeedCatalog, trendingTopics]);
 
   const handleClose = () => {
     setQuery('');
@@ -122,7 +128,10 @@ export function DisguiseSearchSheet({
           autoFocus
           style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
         />
-        <ScrollView contentContainerStyle={styles.list}>
+        <ScrollView
+          contentContainerStyle={styles.list}
+          {...scrollViewProps}
+        >
           {results.length === 0 ? (
             <Text style={[styles.empty, { color: colors.textMuted }]}>
               {t('disguiseSearch.noResults', { query })}
@@ -158,6 +167,7 @@ export function DisguiseSearchSheet({
               </AnimatedPressable>
             ))
           )}
+          <PulseFeedRefreshFooter refreshing={refreshing} justUpdated={justUpdated} />
         </ScrollView>
       </View>
     </Modal>

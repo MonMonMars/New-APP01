@@ -42,6 +42,7 @@ import { usesFemalePulseExperience } from '../../utils/genderAccountPerks';
 import { briefToNewsPost, breakingToNewsPost, editorsPickToNewsPost } from '../../utils/disguiseTrendingArticles';
 import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefreshFooter';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
+import { useRotatedPulseContent } from '../../hooks/useRotatedPulseContent';
 import { usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
 
 function trendIcon(direction: TrendDirection): keyof typeof Ionicons.glyphMap {
@@ -130,18 +131,24 @@ export function DisguiseTrendingScreen() {
   const meta = disguiseWorldMeta(preferences.sparkSection, user.gender, locale);
   const isFemalePulse = usesFemalePulseExperience(user.gender);
   const brief = isFemalePulse ? femalePulseBrief : pulseBrief;
-  const categoryChips = isFemalePulse ? femaleTrendingCategoryChips : trendingCategoryChips;
-  const breakingCards = isFemalePulse ? femaleBreakingNowCards : breakingNowCards;
-  const radarItems = isFemalePulse ? femaleCosmosRadarItems : localRadarItems;
-  const trendingTopics = isFemalePulse ? femaleTrendingTopics : disguiseTrendingTopics;
-  const editorPicks = isFemalePulse ? femaleEditorsPicks : editorsPicks;
+  const categoryChips = useRotatedPulseContent(
+    isFemalePulse ? femaleTrendingCategoryChips : trendingCategoryChips,
+  );
+  const breakingCards = useRotatedPulseContent(
+    isFemalePulse ? femaleBreakingNowCards : breakingNowCards,
+  );
+  const radarItems = useRotatedPulseContent(isFemalePulse ? femaleCosmosRadarItems : localRadarItems);
+  const trendingTopics = useRotatedPulseContent(
+    isFemalePulse ? femaleTrendingTopics : disguiseTrendingTopics,
+  );
+  const editorPicks = useRotatedPulseContent(isFemalePulse ? femaleEditorsPicks : editorsPicks);
   const [articlePost, setArticlePost] = useState<NewsPost | null>(null);
   const weatherCity =
     preferences.travelMode && preferences.passportCity
       ? preferences.passportCity
       : preferences.passportCity ?? 'New York, NY';
   const { weather, isLive } = useDisguiseWeather(weatherCity);
-  const { refreshing, scrollViewProps } = usePulseScrollRefresh();
+  const { refreshing, justUpdated, scrollViewProps } = usePulseScrollRefresh();
 
   const openTopic = (topic?: string) => {
     navigateDisguiseFeedTopic(navigation, topic);
@@ -337,7 +344,7 @@ export function DisguiseTrendingScreen() {
           </AnimatedPressable>
         ))}
 
-        <PulseFeedRefreshFooter refreshing={refreshing} />
+        <PulseFeedRefreshFooter refreshing={refreshing} justUpdated={justUpdated} />
       </ScrollView>
 
       <NewsArticleSheet

@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 
 import { MOTION } from '../motion/presets';
@@ -38,10 +38,35 @@ type UsePulseScrollRefreshOptions = {
 export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}) {
   const { onRefreshed } = options;
   const [refreshing, setRefreshing] = useState(false);
+  const [justUpdated, setJustUpdated] = useState(false);
   const gateRef = useRef(false);
+  const readyRef = useRef(false);
+  const hasScrolledRef = useRef(false);
+  const refreshGeneration = usePulseFeedRefreshGeneration();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      readyRef.current = true;
+    }, 900);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!justUpdated) {
+      return;
+    }
+    const timer = setTimeout(() => setJustUpdated(false), 2400);
+    return () => clearTimeout(timer);
+  }, [justUpdated]);
+
+  const noteScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (event.nativeEvent.contentOffset.y > 32) {
+      hasScrolledRef.current = true;
+    }
+  }, []);
 
   const refresh = useCallback(async () => {
-    if (gateRef.current || refreshing) {
+    if (!readyRef.current || !hasScrolledRef.current || gateRef.current || refreshing) {
       return false;
     }
 
@@ -50,10 +75,11 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
     bumpPulseFeedRefreshGeneration();
 
     await new Promise((resolve) => {
-      setTimeout(resolve, MOTION.duration.normal);
+      setTimeout(resolve, MOTION.duration.slow);
     });
 
     setRefreshing(false);
+    setJustUpdated(true);
     gateRef.current = false;
     onRefreshed?.();
     return true;
@@ -63,21 +89,31 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
     void refresh();
   }, [refresh]);
 
-  const flatListProps = {
-    onEndReached: triggerRefresh,
-    onEndReachedThreshold: 0.15 as const,
-  };
-
   const handleScrollViewScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      noteScroll(event);
       const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
       const distanceFromBottom = contentSize.height - (layoutMeasurement.height + contentOffset.y);
-      if (distanceFromBottom <= 72) {
+      if (distanceFromBottom <= 96) {
         triggerRefresh();
       }
     },
-    [triggerRefresh],
+    [noteScroll, triggerRefresh],
   );
+
+  const handleFlatListScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      noteScroll(event);
+    },
+    [noteScroll],
+  );
+
+  const flatListProps = {
+    onEndReached: triggerRefresh,
+    onEndReachedThreshold: 0.08 as const,
+    onScroll: handleFlatListScroll,
+    scrollEventThrottle: 16 as const,
+  };
 
   const scrollViewProps = {
     onScroll: handleScrollViewScroll,
@@ -86,6 +122,8 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
 
   return {
     refreshing,
+    justUpdated,
+    refreshGeneration,
     refresh,
     triggerRefresh,
     flatListProps,

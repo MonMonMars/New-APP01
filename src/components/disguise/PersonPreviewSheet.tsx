@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import { NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { emberLocationLine, emberRelationshipLabel } from '../../types/profile';
@@ -41,6 +42,8 @@ export function PersonPreviewSheet({
   const insets = useSafeAreaInsets();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const { colors } = useTheme();
+  const { t } = useTranslation();
+  const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const {
     likeProfile,
     passProfile,
@@ -71,6 +74,15 @@ export function PersonPreviewSheet({
     }
   }, [visible, initialPhotoIndex, reporter?.id, cardOpacity, cardScale]);
 
+  useEffect(
+    () => () => {
+      if (dismissTimerRef.current) {
+        clearTimeout(dismissTimerRef.current);
+      }
+    },
+    [],
+  );
+
   const dismissWithStat = useCallback(
     (kind: MiniDismissKind) => {
       if (isDismissing) {
@@ -86,7 +98,11 @@ export function PersonPreviewSheet({
         duration: MINI_DISMISS_MS - 70,
         easing: Easing.out(Easing.cubic),
       });
-      setTimeout(() => {
+      if (dismissTimerRef.current) {
+        clearTimeout(dismissTimerRef.current);
+      }
+      dismissTimerRef.current = setTimeout(() => {
+        dismissTimerRef.current = null;
         setDismissKind(null);
         setIsDismissing(false);
         cardOpacity.value = 1;
@@ -97,9 +113,12 @@ export function PersonPreviewSheet({
     [cardOpacity, cardScale, isDismissing, onClose],
   );
 
-  const cardAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: cardOpacity.value,
+  const cardScaleStyle = useAnimatedStyle(() => ({
     transform: [{ scale: cardScale.value }],
+  }));
+
+  const cardFadeStyle = useAnimatedStyle(() => ({
+    opacity: cardOpacity.value,
   }));
 
   const linkedProfile = reporter ? resolveReporterSparkProfile(reporter, preferences.sparkSection) : null;
@@ -139,7 +158,7 @@ export function PersonPreviewSheet({
 
   const guardLikeLimit = (): boolean => {
     if (!canLike) {
-      Alert.alert('Daily limit', 'You have used all your likes for today.');
+      Alert.alert(t('discoverHub.likeLimitTitle'), t('discoverHub.likeLimitBody'));
       return false;
     }
     return true;
@@ -191,14 +210,14 @@ export function PersonPreviewSheet({
   };
 
   const handlePass = () => {
-    if (!linkedProfile) {
+    if (!linkedProfile || isDismissing) {
       return;
     }
     if (liked || superLiked) {
       unlikeProfile(linkedProfile.id);
     }
     passProfile(linkedProfile);
-    onClose();
+    dismissWithStat('pass');
   };
 
   return (
@@ -207,7 +226,7 @@ export function PersonPreviewSheet({
         <Animated.View
           style={[
             styles.card,
-            cardAnimatedStyle,
+            cardScaleStyle,
             {
               backgroundColor: colors.surface,
               borderColor: colors.border,
@@ -220,7 +239,7 @@ export function PersonPreviewSheet({
           {...webClass('spark-sheet-in')}
         >
           {dismissKind ? <DisguiseMiniDismissStat kind={dismissKind} accent={worldMeta.accent} /> : null}
-          <View style={styles.cardInner}>
+          <Animated.View style={[styles.cardInner, cardFadeStyle]}>
           <FadeSlideIn replayKey={visible} index={0}>
             <View style={styles.header}>
               <View style={[styles.headerIcon, { backgroundColor: worldMeta.accentSoft }]}>
@@ -239,7 +258,12 @@ export function PersonPreviewSheet({
                   </Text>
                 ) : null}
               </View>
-              <AnimatedPressable onPress={onClose} hitSlop={10} accessibilityLabel="Close" scaleTo={0.88}>
+              <AnimatedPressable
+                onPress={isDismissing ? undefined : onClose}
+                hitSlop={10}
+                accessibilityLabel={t('disguiseMiniWindow.closeA11y')}
+                scaleTo={isDismissing ? 1 : 0.88}
+              >
                 <Ionicons name="close" size={20} color={colors.textMuted} />
               </AnimatedPressable>
             </View>
@@ -284,7 +308,7 @@ export function PersonPreviewSheet({
           {photoCount > 1 ? (
             <FadeSlideIn replayKey={visible} index={4}>
               <Text style={[styles.photoMeta, { color: colors.textMuted }]}>
-                Photo {photoIndex + 1} of {photoCount}
+                {t('disguiseMiniWindow.photoMeta', { current: photoIndex + 1, total: photoCount })}
               </Text>
             </FadeSlideIn>
           ) : null}
@@ -303,22 +327,22 @@ export function PersonPreviewSheet({
               />
               <Text style={[styles.hint, { color: colors.textMuted }]}>
                 {superLiked
-                  ? `Super liked — saved to ${worldName}`
+                  ? t('disguiseMiniWindow.superLikedHint', { world: worldName })
                   : liked
-                    ? 'Saved to Likes'
+                    ? t('disguiseMiniWindow.savedToLikes')
                     : passed
-                      ? 'Passed — hidden from deck'
-                      : `Actions sync to ${worldName}`}
+                      ? t('disguiseMiniWindow.passedHint')
+                      : t('disguiseMiniWindow.actionsSync', { world: worldName })}
               </Text>
             </FadeSlideIn>
           ) : (
             <FadeSlideIn replayKey={visible} index={5}>
               <Text style={[styles.hint, { color: colors.textMuted }]}>
-                This is your sponsored profile preview.
+                {t('disguiseMiniWindow.sponsoredPreview')}
               </Text>
             </FadeSlideIn>
           )}
-          </View>
+          </Animated.View>
         </Animated.View>
       </AnimatedOverlay>
 

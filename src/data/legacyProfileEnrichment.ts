@@ -1,6 +1,6 @@
 import { Profile } from '../types/profile';
 
-export type LegacyProfileEnrichment = Pick<Profile, 'bio' | 'name' | 'openingMove' | 'prompts' | 'interests'>;
+export type LegacyProfileEnrichment = Partial<Pick<Profile, 'bio' | 'name' | 'openingMove' | 'prompts' | 'interests'>>;
 
 /** Realistic copy overrides for legacy demo profiles (ids 1–88). */
 export const LEGACY_PROFILE_ENRICHMENT: Record<string, LegacyProfileEnrichment> = {

@@ -120,7 +120,7 @@ export function DisguiseMiniDismissStat({ kind }: DisguiseMiniDismissStatProps) 
 
 const styles = StyleSheet.create({
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 8,

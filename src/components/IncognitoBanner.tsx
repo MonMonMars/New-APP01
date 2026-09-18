@@ -2,17 +2,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { radii, spacing } from '../theme';
 
 export function IncognitoBanner() {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <View style={[styles.banner, { backgroundColor: colors.surface, borderColor: colors.gradientEnd }]}>
       <Ionicons name="eye-off" size={16} color={colors.gradientEnd} />
-      <Text style={[styles.text, { color: colors.text }]}>
-        Incognito on — only people you like can see you
-      </Text>
+      <Text style={[styles.text, { color: colors.text }]}>{t('discover.incognitoOn')}</Text>
     </View>
   );
 }

@@ -78,7 +78,7 @@ import {
 } from '../types/settings';
 import { defaultSecuritySettings, SecuritySettings } from '../types/security';
 import { BoostActivationResult, getIsoWeekKey } from '../utils/boostQuota';
-import { EntitlementGrant, PurchaseProductId, PurchaseResult } from '../types/purchases';
+import { EntitlementGrant, PurchaseProductId, PurchaseResult, PurchaseRestoreResult } from '../types/purchases';
 import { BOOST_DURATION_MS, SparkPlusPlan } from '../types/subscription';
 import { entitlementPatchFromGrant, isSubscriptionActive } from '../utils/applyEntitlementGrant';
 import {
@@ -109,6 +109,7 @@ import {
   sanitizeReportReason,
 } from '../utils/securityGuards';
 import { clearVaultKey } from '../utils/secureStorage';
+import { translate } from '../i18n';
 import { resolveAppLocale } from '../types/locale';
 import { messagePreviewText, sentPhotoContext } from '../utils/messageFormat';
 import { disguiseWorldMeta } from '../utils/disguiseWorld';
@@ -385,7 +386,7 @@ type AppContextValue = {
   recordReferralShare: () => number;
   activateSparkPlus: () => void;
   purchaseProduct: (productId: PurchaseProductId) => Promise<PurchaseResult>;
-  restorePurchases: () => Promise<PurchaseResult | { ok: false; message: string }>;
+  restorePurchases: () => Promise<PurchaseRestoreResult>;
   openManageSubscriptions: () => void;
   activateBoost: (options?: { purchased?: boolean }) => BoostActivationResult;
   addBonusBoosts: (count: number) => void;
@@ -767,7 +768,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (await isUnlockLockedOut()) {
       const remaining = await getUnlockLockoutRemainingMs();
       const minutes = Math.ceil(remaining / 60_000);
-      setUnlockError(`Too many failed attempts. Try again in ${minutes} min.`);
+      setUnlockError(
+        translate(resolveAppLocale(preferences.appLocale), 'security.unlockLockoutMinutes', { minutes }),
+      );
       setUnlockModalVisible(true);
       return false;
     }
@@ -796,7 +799,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (await isUnlockLockedOut()) {
         const remaining = await getUnlockLockoutRemainingMs();
         const minutes = Math.ceil(remaining / 60_000);
-        setUnlockError(`Too many failed attempts. Try again in ${minutes} min.`);
+        setUnlockError(
+          translate(resolveAppLocale(preferences.appLocale), 'security.unlockLockoutMinutes', { minutes }),
+        );
         return;
       }
 
@@ -815,13 +820,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const lockout = await recordFailedUnlockAttempt();
       void logSecurityEvent(userId, 'spark_unlock_failed', { method: 'pin' });
       if (lockout.locked) {
-        setUnlockError('Too many failed attempts. Locked for 5 minutes.');
+        setUnlockError(
+          translate(resolveAppLocale(preferences.appLocale), 'security.unlockLockoutLocked'),
+        );
         setUnlockModalVisible(false);
         unlockResolverRef.current?.(false);
         unlockResolverRef.current = null;
         return;
       }
-      setUnlockError(`Incorrect PIN. ${lockout.remainingAttempts} attempts left.`);
+      setUnlockError(
+        translate(resolveAppLocale(preferences.appLocale), 'security.incorrectPin', {
+          remaining: lockout.remainingAttempts,
+        }),
+      );
     },
     [securitySettings, userId, preferences.sparkSection, preferences.appLocale, user.gender],
   );
@@ -2195,9 +2206,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const result = await runRestorePurchases();
     if (result.ok && result.grant) {
       applyEntitlementGrant(result.grant);
-      return { ok: true as const, message: result.message };
     }
-    return { ok: false as const, message: result.message };
+    return result;
   }, [applyEntitlementGrant]);
 
   const openManageSubscriptions = useCallback(() => {

@@ -18,7 +18,7 @@ function disguiseFeedSignature(
 
 /** Pulse feed layout stays cached; liked/passed profiles fade into fresh replacements in-place. */
 export function useDisguiseFeedItems(topic?: string): FeedItem[] {
-  const { user, disguiseAdCreative, preferences, pulseSocial, likedIds, passedIds, superLikedIds } = useApp();
+  const { user, userId, disguiseAdCreative, preferences, pulseSocial, likedIds, passedIds, superLikedIds } = useApp();
   const refreshGeneration = usePulseFeedRefreshGeneration();
   const cacheRef = useRef<{ signature: string; base: FeedItem[] } | null>(null);
 
@@ -27,7 +27,7 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
     : '';
 
   const signature = `${disguiseFeedSignature(
-    user.id,
+    userId ?? 'local-user',
     user.gender,
     preferences.sparkSection ?? 'spark',
     creativeKey,

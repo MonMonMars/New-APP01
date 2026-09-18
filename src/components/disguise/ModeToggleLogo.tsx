@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { BrandMark } from '../brand/BrandMark';
+import { useTranslation } from '../../i18n';
 import { useApp } from '../../context/AppContext';
 import { resolveSparkSection } from '../../types/preferences';
 
@@ -18,8 +19,9 @@ export function PulseTabIcon({
   size?: number;
   focused?: boolean;
 }) {
+  const { t } = useTranslation();
   return (
-    <View accessibilityRole="image" accessibilityLabel="Pulse">
+    <View accessibilityRole="image" accessibilityLabel={t('tabs.pulse')}>
       <BrandMark world="pulse" size={size} muted={!focused} />
     </View>
   );

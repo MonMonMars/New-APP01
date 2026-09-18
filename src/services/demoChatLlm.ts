@@ -143,7 +143,7 @@ export function isDemoLlmEnabled(): boolean {
   return getGroqApiKey() !== null;
 }
 
-function buildLocalMatchOpener(profile: Profile): string {
+export function buildLocalMatchOpener(profile: Profile): string {
   const persona = getAiPersonaConfig(profile);
   if (persona) {
     return persona.openerMessages[0] ?? `Hey! I'm ${profile.name} — how's your week going?`;

@@ -121,6 +121,7 @@ import {
 } from '../types/privacy';
 import { generateDemoReply, generateMatchOpener } from '../services/demoChatLlm';
 import { isDemoChatProfile } from '../utils/demoProfileChat';
+import { filterProfilesInRadius } from '../utils/geoMap';
 import { buildUserDataExport, shareUserDataExport } from '../utils/dataExport';
 import {
   clearPersistedState,
@@ -357,6 +358,7 @@ type AppContextValue = {
   toggleDiscoverFilter: (filter: DiscoverFilter) => void;
   searchMorePeople: () => void;
   expandSearchRadius: (miles: number) => void;
+  searchMapAt: (center: { lat: number; lng: number }) => void;
   prioritizeProfileInDeck: (profileId: string) => void;
   holdProfile: (profileId: string) => void;
   unholdProfile: (profileId: string) => void;
@@ -1011,6 +1013,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
           stableIncognitoVisible(profile.id),
       );
     }
+    if (
+      preferences.mapSearchLat != null &&
+      preferences.mapSearchLng != null &&
+      !preferences.travelMode
+    ) {
+      filtered = filterProfilesInRadius(
+        filtered,
+        { lat: preferences.mapSearchLat, lng: preferences.mapSearchLng },
+        preferences.maxDistanceMiles,
+      );
+    }
     return filtered;
   }, [
     excludedIds,
@@ -1323,6 +1336,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const expandSearchRadius = useCallback((miles: number) => {
     setPreferences((prev) => ({ ...prev, maxDistanceMiles: miles }));
+    setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
+    setPriorityProfileId(null);
+  }, []);
+
+  const searchMapAt = useCallback((center: { lat: number; lng: number }) => {
+    setPreferences((prev) => ({
+      ...prev,
+      mapSearchLat: center.lat,
+      mapSearchLng: center.lng,
+    }));
     setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
     setPriorityProfileId(null);
   }, []);
@@ -2374,7 +2397,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setSuperLikedIds(new Set());
     setBlockedIds(new Set());
     setMatches([]);
-    setConversations(seedConversations);
+    setConversations(buildSeedConversations(buildSeedMatches()));
     setSparkNotes({});
     setDailyLikesUsed(0);
     setEmberDailyLikesUsed(0);
@@ -2481,6 +2504,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       toggleDiscoverFilter,
       searchMorePeople,
       expandSearchRadius,
+      searchMapAt,
       prioritizeProfileInDeck,
       holdProfile,
       unholdProfile,
@@ -2609,6 +2633,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       toggleDiscoverFilter,
       searchMorePeople,
       expandSearchRadius,
+      searchMapAt,
       prioritizeProfileInDeck,
       holdProfile,
       unholdProfile,

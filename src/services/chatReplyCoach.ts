@@ -1,4 +1,5 @@
 import { Message } from '../types/match';
+import { AppLocale } from '../types/locale';
 import { Profile, UserProfile } from '../types/profile';
 
 import { getAiPersonaConfig } from '../data/aiPersonas';
@@ -29,7 +30,28 @@ function normalizeOptions(values: string[]): [string, string, string] | null {
   return [cleaned[0], cleaned[1], cleaned[2]];
 }
 
-function buildLocalOpeners(profile: Profile, user: UserProfile): ChatCoachSuggestions {
+const LOCAL_OPENERS_ZH: string[] = [
+  '週末通常會做什麼？',
+  '城裡有什麼私房好去處？',
+  '第一次約會喝咖啡還是小酌？',
+];
+
+function buildLocalOpeners(
+  profile: Profile,
+  user: UserProfile,
+  locale: AppLocale,
+): ChatCoachSuggestions {
+  if (locale === 'zh-TW') {
+    const interest = profile.interests[0] ?? '週末';
+    return {
+      options: [
+        LOCAL_OPENERS_ZH[0],
+        LOCAL_OPENERS_ZH[1],
+        `你也喜歡${interest}嗎？`,
+      ],
+      source: 'local',
+    };
+  }
   const base = getIcebreakerSuggestions(profile, user);
   while (base.length < 3) {
     base.push(`What's your take on ${profile.interests[0] ?? 'weekend plans'}?`);
@@ -44,14 +66,27 @@ function buildLocalReplies(
   profile: Profile,
   user: UserProfile,
   recentMessages: Message[],
+  locale: AppLocale,
 ): ChatCoachSuggestions {
+  const interest = profile.interests[0]?.toLowerCase() ?? 'that';
+  const firstName = user.name.split(' ')[0];
+  if (locale === 'zh-TW') {
+    const interestLabel = profile.interests[0] ?? '聊天';
+    return {
+      options: [
+        `哈哈，我也對${interestLabel}很有興趣 — 你是怎麼入坑的？`,
+        `感覺聊得來 ☕ 要不要找時間喝杯咖啡？`,
+        `${firstName} 在這 — 你理想的週日會怎麼過？`,
+      ],
+      source: 'local',
+    };
+  }
   const lastTheirs = [...recentMessages].reverse().find((message) => !message.isMine);
   const snippet = lastTheirs?.text?.slice(0, 60) ?? 'your message';
-  const interest = profile.interests[0]?.toLowerCase() ?? 'that';
   const options: [string, string, string] = [
     `Ha — ${snippet.toLowerCase().includes('?') ? 'great question. ' : ''}I'm into ${interest} too. What got you into it?`,
     `Love that energy. Want to grab coffee and talk ${interest} sometime?`,
-    `Ha, fair. ${user.name.split(' ')[0]} here — what would your perfect Sunday look like?`,
+    `Ha, fair. ${firstName} here — what would your perfect Sunday look like?`,
   ];
   return { options, source: 'local' };
 }
@@ -136,6 +171,7 @@ function recentTranscript(messages: Message[], userName: string, matchName: stri
 export async function generateOpenerSuggestions(
   profile: Profile,
   user: UserProfile,
+  locale: AppLocale = 'en',
 ): Promise<ChatCoachSuggestions> {
   const prompt = [
     'You are a dating chat coach for Spark.',
@@ -151,7 +187,7 @@ export async function generateOpenerSuggestions(
   if (normalized) {
     return { options: normalized, source: 'llm' };
   }
-  return buildLocalOpeners(profile, user);
+  return buildLocalOpeners(profile, user, locale);
 }
 
 /** Three AI reply options after their last message. */
@@ -159,6 +195,7 @@ export async function generateReplySuggestions(
   profile: Profile,
   user: UserProfile,
   recentMessages: Message[],
+  locale: AppLocale = 'en',
 ): Promise<ChatCoachSuggestions> {
   const prompt = [
     'You are a dating chat coach for Spark.',
@@ -176,5 +213,5 @@ export async function generateReplySuggestions(
   if (normalized) {
     return { options: normalized, source: 'llm' };
   }
-  return buildLocalReplies(profile, user, recentMessages);
+  return buildLocalReplies(profile, user, recentMessages, locale);
 }

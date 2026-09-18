@@ -36,6 +36,7 @@ import { PurchaseHistoryScreen } from '../screens/PurchaseHistoryScreen';
 import { SparkPlusScreen } from '../screens/SparkPlusScreen';
 import { OnboardingFlow } from '../screens/onboarding/OnboardingFlow';
 import { TabBarButton } from '../components/TabBarButton';
+import { pulseBrand } from '../theme/pulseBrand';
 import { WorldSwitchVeil } from '../components/motion/WorldSwitchVeil';
 import { DisguiseNavigator } from './DisguiseNavigator';
 import { MainTabParamList, RootStackParamList } from '../types/navigation';
@@ -143,6 +144,7 @@ function MainTabs() {
         options={{
           tabBarLabel: t('tabs.pulse'),
           tabBarAccessibilityLabel: t('pulseEntry.tabA11y'),
+          tabBarActiveTintColor: pulseBrand.accent,
         }}
       />
       <Tab.Screen

@@ -51,6 +51,8 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     preferences,
     discoverPool,
     expandSearchRadius,
+    searchMapAt,
+    searchMorePeople,
     prioritizeProfileInDeck,
   } = useApp();
 
@@ -64,7 +66,12 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
       ? mapCenterForCity(preferences.passportCity)
       : mapCenterForCity(null),
   );
-  const [searchCenter, setSearchCenter] = useState<GeoPoint>(mapCenter);
+  const [searchCenter, setSearchCenter] = useState<GeoPoint>(() => {
+    if (preferences.mapSearchLat != null && preferences.mapSearchLng != null) {
+      return { lat: preferences.mapSearchLat, lng: preferences.mapSearchLng };
+    }
+    return mapCenter;
+  });
   const [mapZoom, setMapZoom] = useState(() => zoomForRadius(currentRadius));
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
   const [deckToast, setDeckToast] = useState<string | null>(null);
@@ -117,8 +124,11 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
 
   const handleSearchThisArea = useCallback(() => {
     setSearchCenter(mapCenter);
+    searchMapAt(mapCenter);
+    searchMorePeople();
     setSelectedPinId(null);
-  }, [mapCenter]);
+    setDeckToast(t('mapDiscover.areaLoaded'));
+  }, [mapCenter, searchMapAt, searchMorePeople, t]);
 
   const handleRecenter = useCallback(() => {
     const target = userLocation ?? mapCenterForCity(preferences.passportCity);

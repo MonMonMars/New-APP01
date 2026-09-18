@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { VideoPreviewSheet } from './VideoPreviewSheet';
@@ -15,6 +16,7 @@ type VideoProfileOverlayProps = {
 
 export function VideoProfileOverlay({ visible, profile }: VideoProfileOverlayProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [sheetOpen, setSheetOpen] = useState(false);
 
   if (!visible) {
@@ -29,7 +31,7 @@ export function VideoProfileOverlay({ visible, profile }: VideoProfileOverlayPro
         </View>
         <View style={[styles.badge, { backgroundColor: colors.surface }]}>
           <Ionicons name="videocam" size={12} color={colors.gradientEnd} />
-          <Text style={[styles.badgeText, { color: colors.text }]}>Video</Text>
+          <Text style={[styles.badgeText, { color: colors.text }]}>{t('videoProfile.badge')}</Text>
         </View>
       </AnimatedPressable>
 

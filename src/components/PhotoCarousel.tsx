@@ -4,6 +4,7 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type PhotoCarouselProps = {
@@ -20,6 +21,7 @@ export function PhotoCarousel({
   height = 280,
 }: PhotoCarouselProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [index, setIndex] = useState(0);
   const safeIndex = photos.length > 0 ? Math.min(index, photos.length - 1) : 0;
   const currentPhoto = photos[safeIndex];
@@ -42,7 +44,7 @@ export function PhotoCarousel({
     return (
       <AnimatedPressable style={[styles.empty, { height }]} onPress={onAddPhoto}>
         <Ionicons name="camera" size={32} color={colors.textMuted} />
-        <Text style={styles.emptyText}>Add a photo</Text>
+        <Text style={styles.emptyText}>{t('photoCarousel.addPhoto')}</Text>
       </AnimatedPressable>
     );
   }

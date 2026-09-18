@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import {
   marketCryptoForex,
   marketIndexQuotes,
@@ -41,7 +41,7 @@ function QuoteRow({ quote, colors, onPress }: { quote: MarketQuote; colors: { te
 
 export function DisguiseMarketsPanel({ onQuotePress }: DisguiseMarketsPanelProps) {
   const { colors } = useTheme();
-  const { preferences } = useApp();
+  const { t } = useTranslation();
   const meta = useDisguiseWorld();
 
   return (
@@ -51,7 +51,7 @@ export function DisguiseMarketsPanel({ onQuotePress }: DisguiseMarketsPanelProps
         <Text style={[styles.sessionText, { color: colors.textMuted }]}>{marketSessionLabel}</Text>
       </View>
 
-      <Text style={[styles.subheading, { color: colors.textMuted }]}>Indices</Text>
+      <Text style={[styles.subheading, { color: colors.textMuted }]}>{t('disguiseMarkets.indices')}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.indexRow}>
         {marketIndexQuotes.map((quote) => (
           <AnimatedPressable
@@ -69,7 +69,7 @@ export function DisguiseMarketsPanel({ onQuotePress }: DisguiseMarketsPanelProps
       </ScrollView>
 
       <View style={[styles.tableCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Text style={[styles.tableTitle, { color: colors.text }]}>Stocks</Text>
+        <Text style={[styles.tableTitle, { color: colors.text }]}>{t('disguiseMarkets.stocks')}</Text>
         {marketStockQuotes.map((quote) => (
           <QuoteRow
             key={quote.id}
@@ -81,7 +81,7 @@ export function DisguiseMarketsPanel({ onQuotePress }: DisguiseMarketsPanelProps
       </View>
 
       <View style={[styles.tableCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Text style={[styles.tableTitle, { color: colors.text }]}>Crypto & FX</Text>
+        <Text style={[styles.tableTitle, { color: colors.text }]}>{t('disguiseMarkets.cryptoFx')}</Text>
         {marketCryptoForex.map((quote) => (
           <QuoteRow
             key={quote.id}
@@ -92,7 +92,7 @@ export function DisguiseMarketsPanel({ onQuotePress }: DisguiseMarketsPanelProps
         ))}
       </View>
 
-      <Text style={[styles.subheading, { color: colors.textMuted }]}>Top movers</Text>
+      <Text style={[styles.subheading, { color: colors.textMuted }]}>{t('disguiseMarkets.topMovers')}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.moverRow}>
         {marketTopMovers.map((mover) => (
           <AnimatedPressable

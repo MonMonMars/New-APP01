@@ -11,6 +11,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -24,6 +25,7 @@ type VideoPreviewSheetProps = {
 export function VideoPreviewSheet({ visible, profile, onClose }: VideoPreviewSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [playing, setPlaying] = useState(false);
   const kenBurns = useSharedValue(1);
 
@@ -61,7 +63,7 @@ export function VideoPreviewSheet({ visible, profile, onClose }: VideoPreviewShe
           <AnimatedPressable onPress={onClose} hitSlop={12}>
             <Ionicons name="close" size={24} color={colors.text} />
           </AnimatedPressable>
-          <Text style={[styles.title, { color: colors.text }]}>Video intro</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('videoProfile.title')}</Text>
           <View style={styles.headerSpacer} />
         </View>
 
@@ -69,7 +71,7 @@ export function VideoPreviewSheet({ visible, profile, onClose }: VideoPreviewShe
           style={styles.player}
           onPress={() => setPlaying((value) => !value)}
           accessibilityRole="button"
-          accessibilityLabel={playing ? 'Pause video' : 'Play video'}
+          accessibilityLabel={playing ? t('videoProfile.pauseA11y') : t('videoProfile.playA11y')}
         >
           <Animated.View style={[styles.imageWrap, imageStyle]}>
             <Image source={{ uri: profile.photos[0] }} style={styles.previewImage} resizeMode="cover" />
@@ -79,12 +81,12 @@ export function VideoPreviewSheet({ visible, profile, onClose }: VideoPreviewShe
               <View style={[styles.playButton, { backgroundColor: colors.overlay }]}>
                 <Ionicons name="play" size={36} color={colors.text} />
               </View>
-              <Text style={[styles.playLabel, { color: colors.text }]}>Tap to play</Text>
+              <Text style={[styles.playLabel, { color: colors.text }]}>{t('videoProfile.tapToPlay')}</Text>
             </View>
           ) : (
             <View style={styles.playingBadge}>
               <Ionicons name="pause" size={16} color="#fff" />
-              <Text style={styles.playingText}>Playing preview</Text>
+              <Text style={styles.playingText}>{t('videoProfile.playingPreview')}</Text>
             </View>
           )}
         </AnimatedPressable>
@@ -92,7 +94,7 @@ export function VideoPreviewSheet({ visible, profile, onClose }: VideoPreviewShe
         <View style={styles.meta}>
           <Text style={[styles.name, { color: colors.text }]}>{profile.name}, {profile.age}</Text>
           <Text style={[styles.bio, { color: colors.textMuted }]}>
-            {profile.bio || 'Short video intros help you stand out and start better conversations.'}
+            {profile.bio || t('videoProfile.fallbackBio')}
           </Text>
         </View>
       </View>

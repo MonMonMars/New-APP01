@@ -4,6 +4,7 @@ import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { Profile, ProfilePrompt } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { modalFill } from '../theme/modalFill';
@@ -21,6 +22,7 @@ type PromptLikeSheetProps = {
 export function PromptLikeSheet({ visible, profile, prompt, onClose, onSend }: PromptLikeSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [comment, setComment] = useState('');
 
   if (!profile || !prompt) {
@@ -32,7 +34,7 @@ export function PromptLikeSheet({ visible, profile, prompt, onClose, onSend }: P
       <View style={[styles.backdrop, modalFill]}>
         <View style={[styles.sheet, { backgroundColor: colors.background, paddingBottom: insets.bottom + spacing.md }]}>
           <View style={styles.handleRow}>
-            <Text style={[styles.title, { color: colors.text }]}>Like {profile.name}&apos;s answer</Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('promptLike.title', { name: profile.name })}</Text>
             <AnimatedPressable onPress={onClose}>
               <Ionicons name="close" size={24} color={colors.textMuted} />
             </AnimatedPressable>
@@ -44,7 +46,7 @@ export function PromptLikeSheet({ visible, profile, prompt, onClose, onSend }: P
           <TextInput
             value={comment}
             onChangeText={setComment}
-            placeholder="Add a comment (optional)..."
+            placeholder={t('promptLike.placeholder')}
             placeholderTextColor={colors.textMuted}
             style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]}
             multiline
@@ -57,7 +59,7 @@ export function PromptLikeSheet({ visible, profile, prompt, onClose, onSend }: P
             }}
           >
             <Ionicons name="heart" size={18} color="#fff" />
-            <Text style={styles.sendText}>Send Like</Text>
+            <Text style={styles.sendText}>{t('promptLike.sendLike')}</Text>
           </AnimatedPressable>
         </View>
       </View>

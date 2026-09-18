@@ -18,11 +18,12 @@ import {
 } from '../types/settings';
 import { DateCheckIn } from '../types/safetyCheckIn';
 import { defaultSecuritySettings, SecuritySettings } from '../types/security';
+import { SparkPlusPlan } from '../types/subscription';
 import { decryptLocalPayload, encryptLocalPayload } from './localEncryption';
 
 const STORAGE_KEY = '@spark/app_state';
 const SENSITIVE_VAULT_KEY = '@spark/sensitive_vault';
-const STORAGE_VERSION = 18;
+const STORAGE_VERSION = 19;
 
 type SensitiveVault = {
   conversations: Conversation[];
@@ -47,6 +48,8 @@ export type PersistedAppState = {
   conversations: Conversation[];
   dailyLikesUsed: number;
   isSparkPlus: boolean;
+  subscriptionPlan: SparkPlusPlan | null;
+  subscriptionExpiresAt: string | null;
   sparkNotes: Record<string, string>;
   boostActiveUntil: string | null;
   freeBoostWeekKey: string | null;
@@ -107,6 +110,8 @@ export function createDefaultPersistedState(): PersistedAppState {
     conversations: [],
     dailyLikesUsed: 0,
     isSparkPlus: false,
+    subscriptionPlan: null,
+    subscriptionExpiresAt: null,
     sparkNotes: {},
     boostActiveUntil: null,
     freeBoostWeekKey: null,
@@ -215,6 +220,8 @@ export async function loadPersistedState(): Promise<PersistedAppState | null> {
       },
       freeBoostWeekKey: parsed.freeBoostWeekKey ?? null,
       bonusBoosts: parsed.bonusBoosts ?? 0,
+      subscriptionPlan: parsed.subscriptionPlan ?? null,
+      subscriptionExpiresAt: parsed.subscriptionExpiresAt ?? null,
       pulseSocial: {
         ...defaultPulseSocialState,
         ...parsed.pulseSocial,

@@ -3,11 +3,12 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
 import { SparkPlusComparisonTable } from '../components/SparkPlusComparisonTable';
+import { formatProductPrice, PRODUCT_CATALOG, sparkPlusProductForPlan } from '../constants/products';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { getLegalUiStrings } from '../content/legal';
@@ -23,33 +24,79 @@ type SparkPlusScreenProps = {
   onClose: () => void;
 };
 
+function formatExpiryDate(iso: string, locale: string): string {
+  try {
+    return new Date(iso).toLocaleDateString(locale === 'zh-TW' ? 'zh-TW' : 'en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  } catch {
+    return iso;
+  }
+}
+
 export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { colors } = useTheme();
-  const { activateSparkPlus, restorePurchases, user } = useApp();
+  const {
+    purchaseProduct,
+    restorePurchases,
+    openManageSubscriptions,
+    user,
+    isSubscriptionActive,
+    subscriptionPlan,
+    subscriptionExpiresAt,
+  } = useApp();
   const { t, locale } = useTranslation();
   const legalUi = getLegalUiStrings(locale);
   const features = sparkPlusFeatureDescriptions(user.gender);
-  const [selectedPlan, setSelectedPlan] = useState<SparkPlusPlan>('annual');
+  const [selectedPlan, setSelectedPlan] = useState<SparkPlusPlan>(subscriptionPlan ?? 'annual');
   const [restoring, setRestoring] = useState(false);
+  const [purchasing, setPurchasing] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
 
-  const handleSubscribe = () => {
-    activateSparkPlus();
-    onClose();
+  const handleSubscribe = async () => {
+    setPurchasing(true);
+    setPurchaseError(null);
+    const productId = sparkPlusProductForPlan(selectedPlan);
+    const result = await purchaseProduct(productId);
+    setPurchasing(false);
+
+    if (result.ok) {
+      setShowConfirm(false);
+      Alert.alert(t('payments.purchaseSuccess'), t('payments.subscriptionActivated'));
+      onClose();
+      return;
+    }
+
+    if (result.code === 'cancelled') {
+      return;
+    }
+
+    setPurchaseError(result.message);
   };
 
   const handleRestore = async () => {
     setRestoring(true);
-    const restored = await restorePurchases();
+    const result = await restorePurchases();
     setRestoring(false);
-    if (restored) {
+    if (result.ok) {
       Alert.alert(t('sparkPlus.restored'), t('sparkPlus.restoredBody'));
       onClose();
     } else {
-      Alert.alert(t('sparkPlus.noneFound'), t('sparkPlus.noneFoundBody'));
+      Alert.alert(t('sparkPlus.noneFound'), result.message ?? t('sparkPlus.noneFoundBody'));
     }
+  };
+
+  const handleManageSubscription = () => {
+    if (Platform.OS === 'web') {
+      Alert.alert(t('sparkPlus.manageSubscription'), t('payments.manageOnWeb'));
+      return;
+    }
+    openManageSubscriptions();
   };
 
   return (
@@ -63,9 +110,12 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
         </View>
         <Ionicons name="diamond" size={48} color={colors.text} />
         <Text style={styles.heroTitle}>{t('sparkPlus.title')}</Text>
-        <Text style={styles.heroSubtitle}>
-          {t('sparkPlus.hero')}
-        </Text>
+        <Text style={styles.heroSubtitle}>{t('sparkPlus.hero')}</Text>
+        {isSubscriptionActive && subscriptionExpiresAt ? (
+          <Text style={styles.activeBadge}>
+            {t('sparkPlus.activeUntil', { date: formatExpiryDate(subscriptionExpiresAt, locale) })}
+          </Text>
+        ) : null}
       </LinearGradient>
 
       <ScrollView contentContainerStyle={styles.content}>
@@ -82,51 +132,75 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
             </View>
             <View style={styles.featureText}>
               <Text style={[styles.featureTitle, { color: colors.text }]}>{feature.title}</Text>
-              <Text style={[styles.featureDescription, { color: colors.textMuted }]}>{feature.description}</Text>
+              <Text style={[styles.featureDescription, { color: colors.textMuted }]}>
+                {feature.description}
+              </Text>
             </View>
           </View>
         ))}
 
-        <Text style={[styles.planTitle, { color: colors.text }]}>{t('sparkPlus.choosePlan')}</Text>
-        {(Object.keys(SPARK_PLUS_PRICING) as SparkPlusPlan[]).map((plan) => {
-          const pricing = SPARK_PLUS_PRICING[plan];
-          const isSelected = selectedPlan === plan;
-          return (
-            <AnimatedPressable
-              key={plan}
-              style={[
-                styles.planCard,
-                { backgroundColor: colors.surface },
-                isSelected && { borderColor: colors.gradientEnd },
-              ]}
-              onPress={() => setSelectedPlan(plan)}
-            >
-              <View>
-                <Text style={[styles.planLabel, { color: colors.text }]}>{pricing.label}</Text>
-                {plan === 'annual' && (
-                  <Text style={[styles.planBadge, { color: colors.gradientEnd }]}>
-                    {t('sparkPlus.bestValue')}
-                  </Text>
-                )}
-              </View>
-              <View style={styles.planPriceCol}>
-                <Text style={[styles.planPrice, { color: colors.text }]}>{pricing.price}</Text>
-                {pricing.perMonth !== '—' && (
-                  <Text style={[styles.planPerMonth, { color: colors.textMuted }]}>{pricing.perMonth}</Text>
-                )}
-              </View>
-            </AnimatedPressable>
-          );
-        })}
+        {!isSubscriptionActive ? (
+          <>
+            <Text style={[styles.planTitle, { color: colors.text }]}>{t('sparkPlus.choosePlan')}</Text>
+            {(Object.keys(SPARK_PLUS_PRICING) as SparkPlusPlan[]).map((plan) => {
+              const pricing = SPARK_PLUS_PRICING[plan];
+              const product = PRODUCT_CATALOG[sparkPlusProductForPlan(plan)];
+              const displayPrice = formatProductPrice(product.displayPriceUsd);
+              const isSelected = selectedPlan === plan;
+              return (
+                <AnimatedPressable
+                  key={plan}
+                  style={[
+                    styles.planCard,
+                    { backgroundColor: colors.surface },
+                    isSelected && { borderColor: colors.gradientEnd },
+                  ]}
+                  onPress={() => setSelectedPlan(plan)}
+                >
+                  <View>
+                    <Text style={[styles.planLabel, { color: colors.text }]}>{pricing.label}</Text>
+                    {plan === 'annual' && (
+                      <Text style={[styles.planBadge, { color: colors.gradientEnd }]}>
+                        {t('sparkPlus.bestValue')}
+                      </Text>
+                    )}
+                  </View>
+                  <View style={styles.planPriceCol}>
+                    <Text style={[styles.planPrice, { color: colors.text }]}>{displayPrice}</Text>
+                    {pricing.perMonth !== '—' && (
+                      <Text style={[styles.planPerMonth, { color: colors.textMuted }]}>{pricing.perMonth}</Text>
+                    )}
+                  </View>
+                </AnimatedPressable>
+              );
+            })}
 
-        <AnimatedPressable
-          style={[styles.subscribeButton, { backgroundColor: colors.gradientEnd }]}
-          onPress={() => setShowConfirm(true)}
-        >
-          <Text style={[styles.subscribeText, { color: colors.text }]}>
-            {t('sparkPlus.continuePrice', { price: SPARK_PLUS_PRICING[selectedPlan].price })}
-          </Text>
-        </AnimatedPressable>
+            <AnimatedPressable
+              style={[styles.subscribeButton, { backgroundColor: colors.gradientEnd }]}
+              onPress={() => {
+                setPurchaseError(null);
+                setShowConfirm(true);
+              }}
+            >
+              <Text style={[styles.subscribeText, { color: colors.text }]}>
+                {t('sparkPlus.continuePrice', {
+                  price: formatProductPrice(
+                    PRODUCT_CATALOG[sparkPlusProductForPlan(selectedPlan)].displayPriceUsd,
+                  ),
+                })}
+              </Text>
+            </AnimatedPressable>
+          </>
+        ) : (
+          <AnimatedPressable
+            style={[styles.subscribeButton, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]}
+            onPress={handleManageSubscription}
+          >
+            <Text style={[styles.subscribeText, { color: colors.text }]}>
+              {t('sparkPlus.manageSubscription')}
+            </Text>
+          </AnimatedPressable>
+        )}
 
         <AnimatedPressable style={styles.restoreButton} onPress={handleRestore} disabled={restoring}>
           {restoring ? (
@@ -153,10 +227,23 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
         visible={showConfirm}
         title={`Spark+ ${SPARK_PLUS_PRICING[selectedPlan].label}`}
         description={t('sparkPlus.confirmDesc')}
-        price={SPARK_PLUS_PRICING[selectedPlan].price}
-        quantity={SPARK_PLUS_PRICING[selectedPlan].perMonth !== '—' ? SPARK_PLUS_PRICING[selectedPlan].perMonth : undefined}
+        price={formatProductPrice(
+          PRODUCT_CATALOG[sparkPlusProductForPlan(selectedPlan)].displayPriceUsd,
+        )}
+        quantity={
+          SPARK_PLUS_PRICING[selectedPlan].perMonth !== '—'
+            ? SPARK_PLUS_PRICING[selectedPlan].perMonth
+            : undefined
+        }
         icon="diamond"
-        onClose={() => setShowConfirm(false)}
+        confirmLoading={purchasing}
+        errorMessage={purchaseError}
+        onClose={() => {
+          if (!purchasing) {
+            setShowConfirm(false);
+            setPurchaseError(null);
+          }
+        }}
         onConfirm={handleSubscribe}
         onOpenSubscriptionTerms={() => navigation.navigate('LegalDocument', { documentId: 'subscription' })}
       />
@@ -198,6 +285,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: spacing.sm,
     opacity: 0.9,
+  },
+  activeBadge: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+    marginTop: spacing.sm,
+    opacity: 0.95,
   },
   content: {
     padding: spacing.lg,

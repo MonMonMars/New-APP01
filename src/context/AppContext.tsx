@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { AppState, type AppStateStatus } from 'react-native';
+import { AppState, Linking, type AppStateStatus } from 'react-native';
 
 import { seedConversations } from '../data/conversations';
 import { getAiPersonaConfig } from '../data/aiPersonas';
@@ -37,6 +37,13 @@ import {
   buildSeedMatches,
   buildSeedSwipeState,
 } from '../data/seedState';
+import {
+  getActiveSubscriptionFromHistory,
+  getManageSubscriptionsUrl,
+  getPurchasesMode,
+  purchaseProduct as runPurchaseProduct,
+  restorePurchases as runRestorePurchases,
+} from '../services/purchases';
 import { uploadPhotosToCloud } from '../services/cloudStorage';
 import { generateDisguiseAdImage } from '../services/disguiseImageGeneration';
 import { registerCloudPushToken } from '../services/pushCloud';
@@ -72,7 +79,9 @@ import {
 } from '../types/settings';
 import { defaultSecuritySettings, SecuritySettings } from '../types/security';
 import { BoostActivationResult, getIsoWeekKey } from '../utils/boostQuota';
-import { BOOST_DURATION_MS } from '../types/subscription';
+import { EntitlementGrant, PurchaseProductId, PurchaseResult } from '../types/purchases';
+import { BOOST_DURATION_MS, SparkPlusPlan } from '../types/subscription';
+import { entitlementPatchFromGrant, isSubscriptionActive } from '../utils/applyEntitlementGrant';
 import {
   dailyLikeLimitForGender,
   dailySparkNoteLimitForGender,
@@ -308,6 +317,10 @@ type AppContextValue = {
   likesTabBadge: number;
   matchesTabBadge: number;
   isSparkPlus: boolean;
+  subscriptionPlan: SparkPlusPlan | null;
+  subscriptionExpiresAt: string | null;
+  isSubscriptionActive: boolean;
+  purchasesMode: 'demo' | 'store';
   isBoosted: boolean;
   boostActiveUntil: string | null;
   bonusBoosts: number;
@@ -367,7 +380,9 @@ type AppContextValue = {
   getPulseComments: (postId: string) => PulseComment[];
   recordReferralShare: () => number;
   activateSparkPlus: () => void;
-  restorePurchases: () => Promise<boolean>;
+  purchaseProduct: (productId: PurchaseProductId) => Promise<PurchaseResult>;
+  restorePurchases: () => Promise<PurchaseResult | { ok: false; message: string }>;
+  openManageSubscriptions: () => void;
   activateBoost: (options?: { purchased?: boolean }) => BoostActivationResult;
   addBonusBoosts: (count: number) => void;
   recordPulseReading: (title: string, source: string) => void;
@@ -429,6 +444,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [sparkNotes, setSparkNotes] = useState<Record<string, string>>({});
   const [dailyLikesUsed, setDailyLikesUsed] = useState(0);
   const [isSparkPlus, setIsSparkPlus] = useState(false);
+  const [subscriptionPlan, setSubscriptionPlan] = useState<SparkPlusPlan | null>(null);
+  const [subscriptionExpiresAt, setSubscriptionExpiresAt] = useState<string | null>(null);
   const [showMomentumUpsell, setShowMomentumUpsell] = useState(false);
   const [momentumUpsellDismissed, setMomentumUpsellDismissed] = useState(false);
   const [boostActiveUntil, setBoostActiveUntil] = useState<string | null>(null);
@@ -532,7 +549,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
         setSparkNotes(saved.sparkNotes);
         setDailyLikesUsed(saved.dailyLikesUsed);
-        setIsSparkPlus(saved.isSparkPlus);
+        let sparkPlusActive = saved.isSparkPlus;
+        let plan = saved.subscriptionPlan ?? null;
+        let expiresAt = saved.subscriptionExpiresAt ?? null;
+        if (sparkPlusActive && expiresAt && new Date(expiresAt).getTime() <= Date.now()) {
+          sparkPlusActive = false;
+          plan = null;
+          expiresAt = null;
+        }
+        setIsSparkPlus(sparkPlusActive);
+        setSubscriptionPlan(plan);
+        setSubscriptionExpiresAt(expiresAt);
+        if (!sparkPlusActive) {
+          const historyGrant = await getActiveSubscriptionFromHistory();
+          if (historyGrant?.sparkPlus && !cancelled) {
+            setIsSparkPlus(true);
+            setSubscriptionPlan(historyGrant.sparkPlus.plan);
+            setSubscriptionExpiresAt(historyGrant.sparkPlus.expiresAt);
+          }
+        }
         setBoostActiveUntil(saved.boostActiveUntil);
         setFreeBoostWeekKey(saved.freeBoostWeekKey ?? null);
         setBonusBoosts(saved.bonusBoosts ?? 0);
@@ -646,6 +681,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       conversations,
       dailyLikesUsed,
       isSparkPlus,
+      subscriptionPlan,
+      subscriptionExpiresAt,
       sparkNotes,
       boostActiveUntil,
       freeBoostWeekKey,
@@ -691,6 +728,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     dateCheckIns,
     dailyLikesUsed,
     isSparkPlus,
+    subscriptionPlan,
+    subscriptionExpiresAt,
     sparkNotes,
     boostActiveUntil,
     freeBoostWeekKey,
@@ -711,6 +750,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     disguiseAdCreative,
     securitySettings,
   ]);
+
+  const subscriptionActive = useMemo(
+    () => isSubscriptionActive(isSparkPlus, subscriptionExpiresAt),
+    [isSparkPlus, subscriptionExpiresAt],
+  );
+
+  const purchasesMode = useMemo(() => getPurchasesMode(), []);
 
   const runSparkUnlockFlow = useCallback(async (): Promise<boolean> => {
     const leaveLabel = disguiseWorldMeta(preferences.sparkSection, user.gender, resolveAppLocale(preferences.appLocale)).unlockLabel;
@@ -1853,16 +1899,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [sendMessage],
   );
 
-  const activateSparkPlus = useCallback(() => {
-    setIsSparkPlus(true);
-  }, []);
-
-  const restorePurchases = useCallback(async (): Promise<boolean> => {
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-    setIsSparkPlus(true);
-    return true;
-  }, []);
-
   const canUseFreeWeeklyBoost = useMemo(() => {
     if (!isSparkPlus) {
       return false;
@@ -2044,6 +2080,61 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const purchaseSparkNotes = useCallback((count: number) => {
     setBonusSparkNotes((prev) => prev + count);
+  }, []);
+
+  const applyEntitlementGrant = useCallback(
+    (grant: EntitlementGrant) => {
+      const patch = entitlementPatchFromGrant(grant);
+      if (patch.isSparkPlus) {
+        setIsSparkPlus(true);
+        setSubscriptionPlan(patch.subscriptionPlan ?? null);
+        setSubscriptionExpiresAt(patch.subscriptionExpiresAt ?? null);
+      }
+      if (patch.bonusBoostsDelta) {
+        setBonusBoosts((prev) => prev + patch.bonusBoostsDelta!);
+      }
+      if (patch.bonusSparkNotesDelta) {
+        setBonusSparkNotes((prev) => prev + patch.bonusSparkNotesDelta!);
+      }
+      if (patch.activateBoost) {
+        const result = activateBoost({ purchased: true });
+        if (!result.ok) {
+          setBonusBoosts((prev) => prev + 1);
+        }
+      }
+    },
+    [activateBoost],
+  );
+
+  const activateSparkPlus = useCallback(() => {
+    setIsSparkPlus(true);
+  }, []);
+
+  const purchaseProduct = useCallback(
+    async (productId: PurchaseProductId): Promise<PurchaseResult> => {
+      const result = await runPurchaseProduct(productId);
+      if (result.ok) {
+        applyEntitlementGrant(result.grant);
+      }
+      return result;
+    },
+    [applyEntitlementGrant],
+  );
+
+  const restorePurchases = useCallback(async () => {
+    const result = await runRestorePurchases();
+    if (result.ok && result.grant) {
+      applyEntitlementGrant(result.grant);
+      return { ok: true as const, message: result.message };
+    }
+    return { ok: false as const, message: result.message };
+  }, [applyEntitlementGrant]);
+
+  const openManageSubscriptions = useCallback(() => {
+    const url = getManageSubscriptionsUrl();
+    if (url) {
+      void Linking.openURL(url);
+    }
   }, []);
 
   const enableNotifications = useCallback(async () => {
@@ -2316,6 +2407,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       likesTabBadge,
       matchesTabBadge,
       isSparkPlus,
+      subscriptionPlan,
+      subscriptionExpiresAt,
+      isSubscriptionActive: subscriptionActive,
+      purchasesMode,
       isBoosted,
       boostActiveUntil,
       bonusBoosts,
@@ -2375,7 +2470,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       getPulseComments,
       recordReferralShare,
       activateSparkPlus,
+      purchaseProduct,
       restorePurchases,
+      openManageSubscriptions,
       activateBoost,
       addBonusBoosts,
       recordPulseReading,
@@ -2438,6 +2535,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       likesTabBadge,
       matchesTabBadge,
       isSparkPlus,
+      subscriptionPlan,
+      subscriptionExpiresAt,
+      subscriptionActive,
+      purchasesMode,
       isBoosted,
       boostActiveUntil,
       bonusBoosts,
@@ -2496,7 +2597,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       getPulseComments,
       recordReferralShare,
       activateSparkPlus,
+      purchaseProduct,
       restorePurchases,
+      openManageSubscriptions,
       activateBoost,
       addBonusBoosts,
       recordPulseReading,

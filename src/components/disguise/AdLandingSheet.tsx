@@ -1,8 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { AdPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
@@ -11,6 +10,11 @@ import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
 import { FadeSlideIn } from '../motion/FadeSlideIn';
 import { AnimatedPressable } from '../AnimatedPressable';
+import {
+  disguiseReadHeroHeight,
+  disguiseReadSheetHeight,
+  disguiseReadSheetStyles,
+} from './disguiseReadSheetLayout';
 
 type AdLandingSheetProps = {
   visible: boolean;
@@ -20,9 +24,11 @@ type AdLandingSheetProps = {
 
 export function AdLandingSheet({ visible, ad, onClose }: AdLandingSheetProps) {
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
   const { colors } = useTheme();
-  const { preferences } = useApp();
   const meta = useDisguiseWorld();
+  const heroHeight = disguiseReadHeroHeight(windowHeight);
+  const sheetHeight = disguiseReadSheetHeight(windowHeight);
 
   if (!ad) {
     return null;
@@ -38,16 +44,18 @@ export function AdLandingSheet({ visible, ad, onClose }: AdLandingSheetProps) {
     <AnimatedOverlay visible={visible} onClose={onClose} variant="bottom">
       <View
         style={[
-          styles.sheet,
+          disguiseReadSheetStyles.sheet,
           {
             backgroundColor: colors.background,
             borderColor: colors.border,
+            height: sheetHeight,
+            maxHeight: sheetHeight,
             paddingBottom: insets.bottom + spacing.md,
           },
         ]}
       >
         <FadeSlideIn replayKey={visible} index={0}>
-          <View style={[styles.toolbar, { borderBottomColor: colors.border }]}>
+          <View style={[disguiseReadSheetStyles.toolbar, { borderBottomColor: colors.border }]}>
             <Text style={styles.sponsored}>Sponsored</Text>
             <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel="Close" scaleTo={0.9}>
               <Ionicons name="close" size={24} color={colors.text} />
@@ -56,12 +64,16 @@ export function AdLandingSheet({ visible, ad, onClose }: AdLandingSheetProps) {
         </FadeSlideIn>
 
         <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.content}
+          style={disguiseReadSheetStyles.scroll}
+          contentContainerStyle={disguiseReadSheetStyles.content}
           showsVerticalScrollIndicator={false}
         >
           <FadeSlideIn replayKey={visible} index={1}>
-            <Image source={{ uri: ad.imageUrl }} style={styles.hero} resizeMode="cover" />
+            <Image
+              source={{ uri: ad.imageUrl }}
+              style={[styles.hero, { height: heroHeight }]}
+              resizeMode="cover"
+            />
           </FadeSlideIn>
           <FadeSlideIn replayKey={visible} index={2}>
             <Text style={[styles.brand, { color: colors.text }]}>{ad.brand}</Text>
@@ -73,7 +85,7 @@ export function AdLandingSheet({ visible, ad, onClose }: AdLandingSheetProps) {
             </FadeSlideIn>
           ))}
         </ScrollView>
-        <View style={[styles.footer, { borderTopColor: colors.border }]}>
+        <View style={[disguiseReadSheetStyles.footer, { borderTopColor: colors.border }]}>
           <AnimatedPressable
             style={[styles.cta, { backgroundColor: meta.accent }]}
             onPress={handleVisit}
@@ -90,24 +102,6 @@ export function AdLandingSheet({ visible, ad, onClose }: AdLandingSheetProps) {
 }
 
 const styles = StyleSheet.create({
-  sheet: {
-    maxHeight: '78%',
-    borderTopLeftRadius: radii.card + 4,
-    borderTopRightRadius: radii.card + 4,
-    borderWidth: StyleSheet.hairlineWidth,
-    overflow: 'hidden',
-  },
-  scroll: {
-    maxHeight: 440,
-  },
-  toolbar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
   sponsored: {
     fontSize: 11,
     fontWeight: '800',
@@ -115,35 +109,25 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     color: '#888',
   },
-  content: {
-    padding: spacing.md,
-    paddingBottom: spacing.xl,
-  },
   hero: {
     width: '100%',
-    height: 160,
     borderRadius: radii.card,
     marginBottom: spacing.md,
   },
   brand: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '800',
     marginBottom: spacing.xs,
   },
   tagline: {
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: 16,
+    lineHeight: 24,
     marginBottom: spacing.md,
   },
   paragraph: {
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: 16,
+    lineHeight: 26,
     marginBottom: spacing.md,
-  },
-  footer: {
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
-    borderTopWidth: StyleSheet.hairlineWidth,
   },
   cta: {
     flexDirection: 'row',

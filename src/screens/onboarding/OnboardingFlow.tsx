@@ -20,6 +20,9 @@ import { signInWithApple } from '../../utils/appleAuth';
 import { pickProfilePhoto } from '../../utils/photoPicker';
 import { colors, radii, spacing } from '../../theme';
 import { pulseBrand } from '../../theme/pulseBrand';
+import { SearchMapView } from '../../components/SearchMapView';
+import { deriveShowMe } from '../../utils/deriveShowMe';
+import { mapCenterForCity, zoomForRadius } from '../../utils/searchMapTiles';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 
 type Step = 'welcome' | 'rules' | 'location' | 'intent' | 'identity' | 'profile';
@@ -111,6 +114,12 @@ export function OnboardingFlow() {
     const nextAge = Number.isFinite(parsedAge) && parsedAge >= 18 && parsedAge <= 99
       ? parsedAge
       : user.age;
+
+    updatePreferences({
+      ...preferences,
+      showMe: deriveShowMe(gender, orientation),
+      passportCity: preferences.passportCity ?? 'New York, NY',
+    });
 
     completeOnboarding({
       ...user,
@@ -246,14 +255,27 @@ export function OnboardingFlow() {
           <Text style={styles.subtitle}>
             {t('onboarding.locationSubtitle')}
           </Text>
-          <View style={styles.mapPlaceholder}>
-            <Text style={styles.mapEmoji}>📍</Text>
-            <Text style={styles.mapText}>{t('onboarding.topStoriesNearYou')}</Text>
+          <View style={styles.mapPreview}>
+            <SearchMapView
+              center={mapCenterForCity(preferences.passportCity ?? 'New York, NY')}
+              zoom={zoomForRadius(preferences.maxDistanceMiles)}
+              radiusMiles={preferences.maxDistanceMiles}
+              accentColor={pulseBrand.accent}
+              pinColor={pulseBrand.accent}
+              showRadiusRing={false}
+              style={styles.mapPreviewInner}
+            />
+            <View style={styles.mapPreviewScrim} />
+            <Text style={styles.mapPreviewLabel}>{t('onboarding.topStoriesNearYou')}</Text>
           </View>
           <AnimatedPressable
             style={styles.primaryButton}
             onPress={() => {
-              updatePreferences({ ...preferences, passportCity: 'New York, NY' });
+              updatePreferences({
+                ...preferences,
+                passportCity: preferences.passportCity ?? 'New York, NY',
+                travelMode: false,
+              });
               setStep('intent');
             }}
           >
@@ -525,20 +547,28 @@ const styles = StyleSheet.create({
   primaryButtonDisabled: {
     opacity: 0.45,
   },
-  mapPlaceholder: {
-    backgroundColor: colors.surface,
+  mapPreview: {
     borderRadius: radii.card,
-    padding: spacing.xl,
-    alignItems: 'center',
+    overflow: 'hidden',
     marginBottom: spacing.xl,
+    minHeight: 200,
+    justifyContent: 'flex-end',
   },
-  mapEmoji: {
-    fontSize: 40,
-    marginBottom: spacing.sm,
+  mapPreviewInner: {
+    ...StyleSheet.absoluteFill,
+    minHeight: 200,
   },
-  mapText: {
-    color: colors.textMuted,
+  mapPreviewScrim: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: 'rgba(15,15,16,0.28)',
+  },
+  mapPreviewLabel: {
+    color: '#fff',
     fontSize: 15,
+    fontWeight: '700',
+    textAlign: 'center',
+    padding: spacing.md,
+    zIndex: 1,
   },
   intentCard: {
     backgroundColor: colors.surface,

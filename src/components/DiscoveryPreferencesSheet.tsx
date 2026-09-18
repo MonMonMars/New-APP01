@@ -178,7 +178,7 @@ export function DiscoveryPreferencesSheet({
             value={preferences.maxDistanceMiles}
             suffix={t('preferences.discoveryMilesSuffix')}
             min={1}
-            max={100}
+            max={250}
             step={5}
             onChange={(maxDistanceMiles) =>
               onChange({ ...preferences, maxDistanceMiles })

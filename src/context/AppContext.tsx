@@ -290,6 +290,7 @@ type AppContextValue = {
   user: UserProfile;
   preferences: DiscoveryPreferences;
   discoverQueue: Profile[];
+  discoverPool: Profile[];
   discoverPoolTotal: number;
   hasMoreInPool: boolean;
   passedIds: Set<string>;
@@ -2380,6 +2381,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       user,
       preferences,
       discoverQueue,
+      discoverPool,
       discoverPoolTotal,
       hasMoreInPool,
       passedIds,
@@ -2508,6 +2510,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       user,
       preferences,
       discoverQueue,
+      discoverPool,
       discoverPoolTotal,
       hasMoreInPool,
       passedIds,

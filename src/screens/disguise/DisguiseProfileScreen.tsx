@@ -30,15 +30,15 @@ import { AnimatedPressable } from '../../components/AnimatedPressable';
 
 type DetailSheetKey = 'saved' | 'history' | 'settings' | 'help' | null;
 
-function formatReadAge(iso: string): string {
+function formatReadAge(iso: string, t: (key: string, params?: Record<string, string | number>) => string): string {
   const days = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86400000));
   if (days === 0) {
-    return 'Today';
+    return t('disguiseProfile.readToday');
   }
   if (days === 1) {
-    return 'Yesterday';
+    return t('disguiseProfile.readYesterday');
   }
-  return `${days}d ago`;
+  return t('disguiseProfile.readDaysAgo', { days });
 }
 
 export function DisguiseProfileScreen() {
@@ -85,7 +85,7 @@ export function DisguiseProfileScreen() {
   const historyItems: PulseDetailItem[] = pulseSocial.readingHistory.map((entry, index) => ({
     id: `hist-${index}`,
     title: entry.title,
-    subtitle: `${entry.source} · ${formatReadAge(entry.readAt)}`,
+    subtitle: `${entry.source} · ${formatReadAge(entry.readAt, t)}`,
     icon: 'newspaper-outline',
   }));
   const postCount = recentPosts.length + pulseSocial.readingHistory.length;
@@ -94,82 +94,117 @@ export function DisguiseProfileScreen() {
 
   const detailConfig = {
     saved: {
-      title: 'Saved posts',
+      title: t('disguiseProfile.savedTitle'),
       items:
         savedPosts.length > 0
           ? savedPosts
-          : [{ id: 'empty-saved', title: 'No saved posts yet', subtitle: 'Tap bookmark on any post in your feed', icon: 'bookmark-outline' as const }],
+          : [{
+              id: 'empty-saved',
+              title: t('disguiseProfile.savedEmptyTitle'),
+              subtitle: t('disguiseProfile.savedEmptySubtitle'),
+              icon: 'bookmark-outline' as const,
+            }],
     },
     history: {
-      title: 'Reading history',
+      title: t('disguiseProfile.historyTitle'),
       items:
         historyItems.length > 0
           ? historyItems
-          : [{ id: 'empty-history', title: 'No reading history yet', subtitle: 'Open articles from your feed to track them here', icon: 'newspaper-outline' as const }],
+          : [{
+              id: 'empty-history',
+              title: t('disguiseProfile.historyEmptyTitle'),
+              subtitle: t('disguiseProfile.historyEmptySubtitle'),
+              icon: 'newspaper-outline' as const,
+            }],
     },
     settings: {
-      title: 'Settings',
+      title: t('disguiseProfile.settingsTitle'),
       items: [
-        { id: 'st1', title: 'Notifications', subtitle: `Matches, messages, and ${meta.name} alerts`, icon: 'notifications-outline' as const },
-        { id: 'st2', title: 'Appearance', subtitle: 'Light, dark, or system', icon: 'moon-outline' as const },
+        {
+          id: 'st1',
+          title: t('disguiseProfile.notifications'),
+          subtitle: t('disguiseProfile.notificationsHint', { appName: meta.name }),
+          icon: 'notifications-outline' as const,
+        },
+        {
+          id: 'st2',
+          title: t('disguiseProfile.appearance'),
+          subtitle: t('disguiseProfile.appearanceHint'),
+          icon: 'moon-outline' as const,
+        },
         {
           id: 'st3',
-          title: 'Region',
+          title: t('disguiseProfile.region'),
           subtitle: preferences.passportCity ?? 'United Kingdom',
           icon: 'globe-outline' as const,
         },
-        { id: 'st4', title: 'Data & privacy', subtitle: `Download or delete your ${meta.name} data`, icon: 'shield-outline' as const },
+        {
+          id: 'st4',
+          title: t('disguiseProfile.dataPrivacy'),
+          subtitle: t('disguiseProfile.dataPrivacyHint', { appName: meta.name }),
+          icon: 'shield-outline' as const,
+        },
       ],
     },
     help: {
-      title: 'Help center',
+      title: t('disguiseProfile.helpTitle'),
       items: [
         {
           id: 'h1',
-          title: 'How disguise mode works',
-          subtitle: `Switch between ${meta.name} and ${meta.unlockLabel} safely`,
+          title: t('disguiseProfile.disguiseHelp'),
+          subtitle: t('disguiseProfile.disguiseHelpHint', { appName: meta.name, unlockLabel: meta.unlockLabel }),
           icon: 'eye-off-outline' as const,
         },
-        { id: 'h2', title: 'Report a post', subtitle: 'Flag misleading or harmful content', icon: 'flag-outline' as const },
-        { id: 'h3', title: 'Contact support', subtitle: 'support@spark.app', icon: 'mail-outline' as const },
+        {
+          id: 'h2',
+          title: t('disguiseProfile.reportPost'),
+          subtitle: t('disguiseProfile.reportPostHint'),
+          icon: 'flag-outline' as const,
+        },
+        {
+          id: 'h3',
+          title: t('disguiseProfile.contactSupport'),
+          subtitle: LEGAL_ENTITY.supportEmail,
+          icon: 'mail-outline' as const,
+        },
       ],
     },
   };
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
-      <DisguiseHeader title="Profile" showSearch={false} />
+      <DisguiseHeader title={t('disguiseProfile.title')} showSearch={false} />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.hero}>
           <DisguisedProfileCard post={profileFeedItem} />
           <Text style={[styles.name, { color: colors.text }]}>{user.name}</Text>
           <Text style={[styles.bio, { color: colors.textMuted }]}>
-            {user.bio || 'News reader · Design · Always catching up on the feed'}
+            {user.bio || t('disguiseProfile.defaultBio')}
           </Text>
           <View style={styles.stats}>
             <View style={styles.stat}>
               <Text style={[styles.statNum, { color: colors.text }]}>{postCount}</Text>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Posts</Text>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('disguiseProfile.posts')}</Text>
             </View>
             <View style={styles.stat}>
               <Text style={[styles.statNum, { color: colors.text }]}>{followerCount}</Text>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Followers</Text>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('disguiseProfile.followers')}</Text>
             </View>
             <View style={styles.stat}>
               <Text style={[styles.statNum, { color: colors.text }]}>{followingCount}</Text>
-              <Text style={[styles.statLabel, { color: colors.textMuted }]}>Following</Text>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('disguiseProfile.following')}</Text>
             </View>
           </View>
         </View>
 
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Recent posts</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('disguiseProfile.recentPosts')}</Text>
         {recentPosts.map((post) => (
           <DisguisedProfileCard key={`profile-recent-${post.id}`} post={post} />
         ))}
 
         {historyItems.length > 0 ? (
           <>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Reading history</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('disguiseProfile.readingHistory')}</Text>
             <View style={[styles.menuSection, { backgroundColor: colors.surface }]}>
               {historyItems.slice(0, 5).map((item) => (
                 <MenuRow
@@ -188,23 +223,27 @@ export function DisguiseProfileScreen() {
         <View style={[styles.menuSection, { backgroundColor: colors.surface, marginTop: spacing.md }]}>
           <MenuRow
             icon="bookmark-outline"
-            label={`Saved posts${savedPosts.length > 0 ? ` (${savedPosts.length})` : ''}`}
+            label={
+              savedPosts.length > 0
+                ? t('disguiseProfile.savedPostsCount', { count: savedPosts.length })
+                : t('disguiseProfile.savedPosts')
+            }
             colors={colors}
             accent={meta.accent}
             onPress={() => setDetailSheet('saved')}
           />
-          <MenuRow icon="time-outline" label="Reading history" colors={colors} accent={meta.accent} onPress={() => setDetailSheet('history')} />
-          <MenuRow icon="settings-outline" label="Settings" colors={colors} accent={meta.accent} onPress={() => setDetailSheet('settings')} />
-          <MenuRow icon="help-circle-outline" label="Help center" colors={colors} accent={meta.accent} onPress={() => setDetailSheet('help')} />
+          <MenuRow icon="time-outline" label={t('disguiseProfile.readingHistory')} colors={colors} accent={meta.accent} onPress={() => setDetailSheet('history')} />
+          <MenuRow icon="settings-outline" label={t('disguiseProfile.settings')} colors={colors} accent={meta.accent} onPress={() => setDetailSheet('settings')} />
+          <MenuRow icon="help-circle-outline" label={t('disguiseProfile.helpCenter')} colors={colors} accent={meta.accent} onPress={() => setDetailSheet('help')} />
         </View>
 
         <View style={[styles.privacyCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={styles.privacyRow}>
             <Ionicons name="eye-off-outline" size={22} color={meta.accent} />
             <View style={styles.privacyText}>
-              <Text style={[styles.privacyTitle, { color: colors.text }]}>Disguise mode</Text>
+              <Text style={[styles.privacyTitle, { color: colors.text }]}>{t('profile.disguiseMode')}</Text>
               <Text style={[styles.privacyDesc, { color: colors.textMuted }]}>
-                Show {meta.name} instead of {meta.unlockLabel} in public
+                {t('profile.disguiseHint', { appName: meta.name, unlockLabel: meta.unlockLabel })}
               </Text>
             </View>
             <Switch
@@ -217,7 +256,7 @@ export function DisguiseProfileScreen() {
             />
           </View>
           <Text style={[styles.hint, { color: colors.textMuted }]}>
-            Turn off disguise here, or tap the {meta.name} logo in the header to leave {meta.unlockLabel}.
+            {t('disguiseProfile.disguiseToggleHint', { appName: meta.name, unlockLabel: meta.unlockLabel })}
           </Text>
         </View>
 
@@ -227,11 +266,11 @@ export function DisguiseProfileScreen() {
         >
           <Ionicons name="sparkles" size={22} color={meta.accent} />
           <View style={styles.generatorText}>
-            <Text style={[styles.generatorTitle, { color: colors.text }]}>AI disguise ad image</Text>
+            <Text style={[styles.generatorTitle, { color: colors.text }]}>{t('profile.aiDisguiseAd')}</Text>
             <Text style={[styles.generatorDesc, { color: colors.textMuted }]}>
               {disguiseAdCreative
-                ? `Using: ${disguiseAdCreative.overlayText}`
-                : 'Generate a sponsored post from your photo'}
+                ? t('profile.aiDisguiseReady', { text: disguiseAdCreative.overlayText })
+                : t('profile.aiDisguiseEmpty')}
             </Text>
           </View>
           <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
@@ -304,9 +343,9 @@ export function DisguiseProfileScreen() {
             }
             if (item.id === 'h2') {
               Alert.alert(
-                'Report a post',
-                'Tap the ••• menu on any post in your feed, then choose Report. We review reports within 24 hours.',
-                [{ text: 'Got it' }],
+                t('disguiseProfile.reportAlertTitle'),
+                t('disguiseProfile.reportAlertBody'),
+                [{ text: t('common.gotIt') }],
               );
               return;
             }
@@ -328,11 +367,11 @@ export function DisguiseProfileScreen() {
 
       <PulseListPickerSheet
         visible={themePickerOpen}
-        title="Appearance"
+        title={t('disguiseProfile.appearancePickerTitle')}
         items={[
-          { id: 'light', label: 'Light', selected: themeMode === 'light' },
-          { id: 'dark', label: 'Dark', selected: themeMode === 'dark' },
-          { id: 'system', label: 'System default', selected: themeMode === 'system' },
+          { id: 'light', label: t('disguiseProfile.appearanceLight'), selected: themeMode === 'light' },
+          { id: 'dark', label: t('disguiseProfile.appearanceDark'), selected: themeMode === 'dark' },
+          { id: 'system', label: t('disguiseProfile.appearanceSystem'), selected: themeMode === 'system' },
         ]}
         onClose={() => setThemePickerOpen(false)}
         onSelect={(id) => setThemeMode(id as ThemeMode)}
@@ -340,7 +379,7 @@ export function DisguiseProfileScreen() {
 
       <PulseListPickerSheet
         visible={regionPickerOpen}
-        title="Region"
+        title={t('disguiseProfile.regionPickerTitle')}
         items={PASSPORT_CITIES.map((city) => ({
           id: `city:${city}`,
           label: city,

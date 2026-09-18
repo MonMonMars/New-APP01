@@ -1,38 +1,42 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
-import { mockProfiles } from '../data/profiles';
-import {
-  formatSearchRadius,
-  matchesSparkSection,
-  resolveSparkSection,
-} from '../types/preferences';
+import { useTranslation } from '../i18n';
+import { formatSearchRadiusLocalized } from '../i18n/labels';
+import { resolveSparkSection } from '../types/preferences';
 import { mapCenterForCity, zoomForRadius } from '../utils/searchMapTiles';
 import { radii, spacing } from '../theme';
+import { ActionToast } from './ActionToast';
 import { AnimatedPressable } from './AnimatedPressable';
 import { SearchMapView } from './SearchMapView';
 
 const RADIUS_CHIPS = [
-  { label: '25', value: 25 },
-  { label: '50', value: 50 },
-  { label: '100', value: 100 },
-  { label: '250', value: 250 },
-  { label: 'Any', value: 9999 },
+  { labelKey: '25', value: 25 },
+  { labelKey: '50', value: 50 },
+  { labelKey: '100', value: 100 },
+  { labelKey: '250', value: 250 },
+  { labelKey: 'any', value: 9999 },
 ] as const;
 
 type ExpandSearchMapProps = {
   onClose: () => void;
 };
 
-/** Full-bleed map. Radius chips zoom the map. No extra tools. */
+/** Full-bleed map. Radius chips zoom the map. Tap pins to add people to your deck. */
 export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { preferences, blockedIds, likedIds, passedIds, expandSearchRadius } = useApp();
+  const { t, locale } = useTranslation();
+  const {
+    preferences,
+    discoverPool,
+    expandSearchRadius,
+    prioritizeProfileInDeck,
+  } = useApp();
 
   const section = resolveSparkSection(preferences.sparkSection);
   const accent = section === 'ember' ? colors.ember : colors.gradientEnd;
@@ -46,15 +50,34 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     [preferences.passportCity, preferences.travelMode],
   );
 
-  const pins = useMemo(() => {
-    const excluded = new Set([...passedIds, ...likedIds, ...blockedIds]);
-    return mockProfiles.filter(
-      (profile) =>
-        !excluded.has(profile.id) &&
-        profile.distanceMiles <= currentRadius &&
-        matchesSparkSection(profile, section),
-    );
-  }, [blockedIds, currentRadius, likedIds, passedIds, section]);
+  const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
+  const [deckToast, setDeckToast] = useState<string | null>(null);
+
+  const pins = discoverPool;
+
+  const handlePinPress = (profileId: string) => {
+    setSelectedPinId(profileId);
+    const profile = pins.find((item) => item.id === profileId);
+    if (!profile) {
+      return;
+    }
+    prioritizeProfileInDeck(profileId);
+    setDeckToast(t('discoverHub.addedToDeck', { name: profile.name }));
+  };
+
+  const radiusChipLabel = (key: (typeof RADIUS_CHIPS)[number]['labelKey']) => {
+    if (key === 'any') {
+      return t('mapDiscover.any');
+    }
+    return key;
+  };
+
+  const radiusA11y = (key: (typeof RADIUS_CHIPS)[number]['labelKey']) => {
+    if (key === 'any') {
+      return t('mapDiscover.searchAnywhereA11y');
+    }
+    return t('mapDiscover.searchMilesA11y', { miles: key });
+  };
 
   return (
     <View style={styles.screen}>
@@ -65,6 +88,8 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         accentColor={accent}
         pinColor={colors.heartRed}
         pins={pins}
+        selectedPinId={selectedPinId}
+        onPinPress={handlePinPress}
         style={styles.fullMap}
       />
 
@@ -72,40 +97,51 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         <AnimatedPressable
           onPress={onClose}
           hitSlop={12}
-          accessibilityLabel="Close"
+          accessibilityLabel={t('common.close')}
           style={styles.closeButton}
         >
           <Ionicons name="close" size={22} color="#111" />
         </AnimatedPressable>
         <View style={styles.metaPill}>
           <Text style={styles.metaText}>
-            {formatSearchRadius(currentRadius)} · {pins.length} people
+            {t('mapDiscover.meta', {
+              radius: formatSearchRadiusLocalized(locale, currentRadius),
+              count: pins.length,
+            })}
           </Text>
         </View>
         <View style={styles.closeSlot} />
       </View>
 
       <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
-        {pins.length === 0 ? <Text style={styles.emptyHint}>No one in this area</Text> : null}
+        {pins.length === 0 ? (
+          <Text style={styles.emptyHint}>{t('mapDiscover.emptyArea')}</Text>
+        ) : null}
         <View style={styles.segment}>
           {RADIUS_CHIPS.map((preset) => {
             const isActive = currentRadius === preset.value;
             return (
               <AnimatedPressable
-                key={preset.label}
-                accessibilityLabel={`Search ${preset.label === 'Any' ? 'Anywhere' : `${preset.label} miles`}`}
+                key={preset.labelKey}
+                accessibilityLabel={radiusA11y(preset.labelKey)}
                 style={[styles.segmentItem, isActive ? { backgroundColor: accent } : null]}
                 onPress={() => expandSearchRadius(preset.value)}
               >
                 <Text style={[styles.segmentText, { color: isActive ? '#fff' : '#111' }]}>
-                  {preset.label}
+                  {radiusChipLabel(preset.labelKey)}
                 </Text>
               </AnimatedPressable>
             );
           })}
         </View>
-        <Text style={styles.attrib}>© Esri</Text>
+        <Text style={styles.attrib}>{t('mapDiscover.attribution')}</Text>
       </View>
+
+      <ActionToast
+        visible={deckToast !== null}
+        message={deckToast ?? ''}
+        onDismiss={() => setDeckToast(null)}
+      />
     </View>
   );
 }

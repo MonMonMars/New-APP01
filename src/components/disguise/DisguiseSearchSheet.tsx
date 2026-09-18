@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../../context/AppContext';
 import { useAppLocale } from '../../hooks/useAppLocale';
+import { useTranslation } from '../../i18n';
 import { useTheme } from '../../context/ThemeContext';
 import { femaleTrendingTopics } from '../../data/disguiseFemaleTrending';
 import { disguiseTrendingTopics } from '../../data/disguiseTrending';
@@ -53,6 +54,7 @@ export function DisguiseSearchSheet({
   const { colors } = useTheme();
   const { user, preferences } = useApp();
   const { locale } = useAppLocale();
+  const { t } = useTranslation();
   const meta = disguiseWorldMeta(preferences.sparkSection, user.gender, locale);
   const feedCatalog = disguiseFeedItemsForGender(user.gender);
   const trendingTopics = usesFemalePulseExperience(user.gender)
@@ -115,14 +117,16 @@ export function DisguiseSearchSheet({
         <TextInput
           value={query}
           onChangeText={setQuery}
-          placeholder="Topics, headlines, sources…"
+          placeholder={t('disguiseSearch.placeholder')}
           placeholderTextColor={colors.textMuted}
           autoFocus
           style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
         />
         <ScrollView contentContainerStyle={styles.list}>
           {results.length === 0 ? (
-            <Text style={[styles.empty, { color: colors.textMuted }]}>No results for “{query}”</Text>
+            <Text style={[styles.empty, { color: colors.textMuted }]}>
+              {t('disguiseSearch.noResults', { query })}
+            </Text>
           ) : (
             results.map((result, index) => (
               <AnimatedPressable

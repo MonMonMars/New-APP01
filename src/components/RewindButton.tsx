@@ -10,9 +10,17 @@ type RewindButtonProps = {
   onPress: () => void;
   onUpgrade: () => void;
   isSparkPlus: boolean;
+  /** Header chip — sits next to Discover tools, clear of profile name. */
+  variant?: 'header' | 'overlay';
 };
 
-export function RewindButton({ visible, onPress, onUpgrade, isSparkPlus }: RewindButtonProps) {
+export function RewindButton({
+  visible,
+  onPress,
+  onUpgrade,
+  isSparkPlus,
+  variant = 'overlay',
+}: RewindButtonProps) {
   const { colors } = useTheme();
 
   if (!visible) {
@@ -27,14 +35,20 @@ export function RewindButton({ visible, onPress, onUpgrade, isSparkPlus }: Rewin
     onUpgrade();
   };
 
+  const isHeader = variant === 'header';
+
   return (
     <AnimatedPressable
-      style={[styles.button, { backgroundColor: colors.surface, borderColor: colors.rewind }]}
+      style={[
+        styles.button,
+        isHeader ? styles.headerButton : styles.overlayButton,
+        { backgroundColor: colors.surface, borderColor: colors.rewind },
+      ]}
       onPress={handlePress}
       accessibilityLabel="Rewind last pass"
     >
-      <Ionicons name="refresh" size={18} color={colors.rewind} />
-      <Text style={[styles.label, { color: colors.rewind }]}>Rewind</Text>
+      <Ionicons name="refresh" size={isHeader ? 16 : 18} color={colors.rewind} />
+      {!isHeader ? <Text style={[styles.label, { color: colors.rewind }]}>Rewind</Text> : null}
       {!isSparkPlus && (
         <View style={[styles.plusDot, { backgroundColor: colors.gradientEnd }]}>
           <Ionicons name="diamond" size={8} color={colors.text} />
@@ -46,22 +60,29 @@ export function RewindButton({ visible, onPress, onUpgrade, isSparkPlus }: Rewin
 
 const styles = StyleSheet.create({
   button: {
-    position: 'absolute',
-    left: spacing.md,
-    bottom: spacing.lg + 88,
-    zIndex: 25,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
     borderRadius: radii.button,
     borderWidth: 1.5,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
     shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
     elevation: 4,
+  },
+  headerButton: {
+    height: 40,
+    paddingHorizontal: spacing.sm + 2,
+    borderRadius: 20,
+  },
+  overlayButton: {
+    position: 'absolute',
+    right: spacing.md,
+    top: spacing.md,
+    zIndex: 25,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
   },
   label: {
     fontSize: 13,

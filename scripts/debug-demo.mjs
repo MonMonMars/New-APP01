@@ -177,7 +177,7 @@ async function main() {
       issue('discover', 'Pass button not found on Discover');
     }
 
-    const rewind = page.getByText(/rewind/i).first();
+    const rewind = page.getByLabel(/rewind last pass/i).first();
     if (await rewind.isVisible({ timeout: 3000 }).catch(() => false)) {
       log('Rewind button visible after pass');
     } else {

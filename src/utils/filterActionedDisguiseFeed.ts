@@ -139,7 +139,7 @@ export function filterActionedDisguiseFeed(
 
   const pool = buildReplacementPool(section, actioned);
 
-  return items.flatMap((item) => {
+  return items.flatMap((item): FeedItem[] => {
     if (item.type === 'disguised_profile') {
       if (item.id === 'disguised-user') {
         return [item];

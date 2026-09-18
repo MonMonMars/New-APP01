@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
     minHeight: 120,
   },
   mapLayer: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   mapFill: {
     ...StyleSheet.absoluteFill,

@@ -9,6 +9,7 @@ import { isDisguiseAiConfigured } from '../../services/disguiseImageGeneration';
 import { DisguiseOverlayVariant } from '../../types/disguise';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
+import { useTranslation } from '../../i18n';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -17,14 +18,15 @@ type DisguiseAdGeneratorSheetProps = {
   onClose: () => void;
 };
 
-const VARIANTS: { id: DisguiseOverlayVariant; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { id: 'ad', label: 'Sponsored ad', icon: 'megaphone-outline' },
-  { id: 'news', label: 'Breaking news', icon: 'newspaper-outline' },
+const VARIANTS: { id: DisguiseOverlayVariant; labelKey: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { id: 'ad', labelKey: 'disguiseAd.sponsoredAd', icon: 'megaphone-outline' },
+  { id: 'news', labelKey: 'disguiseAd.breakingNews', icon: 'newspaper-outline' },
 ];
 
 export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGeneratorSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const {
     user,
     disguiseAdCreative,
@@ -111,7 +113,7 @@ export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGenerat
                     color={selected ? accent : colors.textMuted}
                   />
                   <Text style={[styles.variantLabel, { color: selected ? colors.text : colors.textMuted }]}>
-                    {item.label}
+                    {t(item.labelKey)}
                   </Text>
                 </AnimatedPressable>
               );
@@ -158,22 +160,21 @@ export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGenerat
               <>
                 <Ionicons name="sparkles" size={18} color="#fff" />
                 <Text style={styles.primaryBtnText}>
-                  {aiReady ? 'Generate with AI' : 'Generate disguise image'}
+                  {aiReady ? t('disguiseAd.generateWithAi') : t('disguiseAd.generateDisguise')}
                 </Text>
               </>
             )}
           </AnimatedPressable>
 
           {!aiReady && (
-            <Text style={[styles.hint, { color: colors.textMuted }]}>
-              Tip: add EXPO_PUBLIC_OPENAI_API_KEY for full DALL·E generation. Without it, Spark bakes
-              your photo with ad/news text locally.
-            </Text>
+            <Text style={[styles.hint, { color: colors.textMuted }]}>{t('disguiseAd.offlineHint')}</Text>
           )}
 
           {previewCreative && (
             <AnimatedPressable onPress={clearDisguiseAd} style={styles.secondaryBtn}>
-              <Text style={[styles.secondaryBtnText, { color: colors.textMuted }]}>Remove generated image</Text>
+              <Text style={[styles.secondaryBtnText, { color: colors.textMuted }]}>
+                {t('disguiseAd.removeGenerated')}
+              </Text>
             </AnimatedPressable>
           )}
         </ScrollView>

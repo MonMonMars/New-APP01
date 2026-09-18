@@ -59,34 +59,34 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
   const handleSave = () => {
     if (isSaved) {
       unsavePulsePost(post.id);
-      Alert.alert('Removed', 'Post removed from saved.');
+      Alert.alert(t('pulseSocial.removedTitle'), t('pulseSocial.removedBody'));
       return;
     }
     savePulsePost(post.id);
-    Alert.alert('Saved', 'Post added to your saved list.');
+    Alert.alert(t('pulseSocial.savedTitle'), t('pulseSocial.savedBody'));
   };
 
   const handleMute = () => {
     mutePulseAuthor(post.handle);
-    Alert.alert('Muted', `${post.author} will no longer appear in your feed.`);
+    Alert.alert(t('pulseSocial.mutedTitle'), t('pulseSocial.mutedBody', { author: post.author }));
   };
 
   const handleReport = () => {
-    Alert.alert('Report post', 'Why are you reporting this post?', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('pulseSocial.reportTitle'), t('pulseSocial.reportPrompt'), [
+      { text: t('pulseSocial.cancel'), style: 'cancel' },
       {
-        text: 'Misleading',
+        text: t('pulseSocial.reportMisleading'),
         onPress: () => {
           reportPulsePost(post.id, 'Misleading content');
-          Alert.alert('Reported', 'Thanks — we will review this post.');
+          Alert.alert(t('pulseSocial.reportedTitle'), t('pulseSocial.reportedBody'));
         },
       },
       {
-        text: 'Harmful',
+        text: t('pulseSocial.reportHarmful'),
         style: 'destructive',
         onPress: () => {
           reportPulsePost(post.id, 'Harmful content');
-          Alert.alert('Reported', 'Thanks — we will review this post.');
+          Alert.alert(t('pulseSocial.reportedTitle'), t('pulseSocial.reportedBody'));
         },
       },
     ]);

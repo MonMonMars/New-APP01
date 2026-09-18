@@ -1,10 +1,9 @@
 import { ScrollView, StyleSheet, Text } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
-import {
-  DISCOVER_FILTER_LABELS,
-  DiscoverFilter,
-} from '../types/preferences';
+import { useTranslation } from '../i18n';
+import { getDiscoverFilterLabel } from '../i18n/labels';
+import { DiscoverFilter } from '../types/preferences';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
 
@@ -18,6 +17,7 @@ const FILTER_OPTIONS: DiscoverFilter[] = ['active_today', 'new_here', 'has_bio',
 
 export function DiscoverFilterChips({ activeFilters, onToggle, compact = false }: DiscoverFilterChipsProps) {
   const { colors } = useTheme();
+  const { locale } = useTranslation();
 
   return (
     <ScrollView
@@ -39,7 +39,7 @@ export function DiscoverFilterChips({ activeFilters, onToggle, compact = false }
             onPress={() => onToggle(filter)}
           >
             <Text style={[styles.chipText, compact && styles.chipTextCompact, { color: selected ? colors.text : colors.textMuted }]}>
-              {DISCOVER_FILTER_LABELS[filter]}
+              {getDiscoverFilterLabel(locale, filter)}
             </Text>
           </AnimatedPressable>
         );

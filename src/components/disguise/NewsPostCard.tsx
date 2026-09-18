@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import { NewsPost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
@@ -19,6 +20,7 @@ type NewsPostCardProps = {
 
 export function NewsPostCard({ post }: NewsPostCardProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const { preferences } = useApp();
   const accent = useDisguiseWorld().accent;
   const [articleOpen, setArticleOpen] = useState(false);
@@ -65,7 +67,7 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
                   imageUrl={reporter.avatarUrl}
                   caption={reporter.quote}
                   onPress={() => openReporter(reporter)}
-                  accessibilityLabel={`View photos from ${reporter.name}`}
+                  accessibilityLabel={t('disguiseMiniWindow.viewPhotosFrom', { name: reporter.name })}
                   style={styles.reporterRow}
                 />
               ))}

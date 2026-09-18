@@ -44,6 +44,7 @@ export function PersonPreviewSheet({
   const { colors } = useTheme();
   const { t } = useTranslation();
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingMatchRef = useRef<string | null>(null);
   const {
     likeProfile,
     passProfile,
@@ -67,6 +68,7 @@ export function PersonPreviewSheet({
     if (visible) {
       setPhotoIndex(initialPhotoIndex);
       setMatchToastName(null);
+      pendingMatchRef.current = null;
       setDismissKind(null);
       setIsDismissing(false);
       cardOpacity.value = 1;
@@ -108,6 +110,11 @@ export function PersonPreviewSheet({
         cardOpacity.value = 1;
         cardScale.value = 1;
         onClose();
+        const matchName = pendingMatchRef.current;
+        pendingMatchRef.current = null;
+        if (matchName) {
+          setMatchToastName(matchName);
+        }
       }, MINI_DISMISS_MS);
     },
     [cardOpacity, cardScale, isDismissing, onClose],
@@ -165,7 +172,7 @@ export function PersonPreviewSheet({
   };
 
   const notifyMatch = (name: string) => {
-    setMatchToastName(name);
+    pendingMatchRef.current = name;
   };
 
   const handleLike = () => {
@@ -241,108 +248,108 @@ export function PersonPreviewSheet({
           {dismissKind ? <DisguiseMiniDismissStat kind={dismissKind} /> : null}
           <Animated.View style={[styles.cardInner, cardFadeStyle]}>
             <FadeSlideIn replayKey={visible} index={0}>
-            <View style={styles.header}>
-              <View style={[styles.headerIcon, { backgroundColor: worldMeta.accentSoft }]}>
-                <ContentTypeIcon kind="profile" size={12} />
-              </View>
-              <View style={styles.headerText}>
-                <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
-                  {reporter.name}
-                  {linkedProfile ? `, ${linkedProfile.age}` : ''}
-                </Text>
-                {linkedProfile ? (
-                  <Text style={[styles.meta, { color: colors.textMuted }]} numberOfLines={1}>
-                    {emberStatus
-                      ? emberLocationLine(linkedProfile)
-                      : `${linkedProfile.distanceMiles} mi away${linkedProfile.job ? ` · ${linkedProfile.job}` : ''}`}
+              <View style={styles.header}>
+                <View style={[styles.headerIcon, { backgroundColor: worldMeta.accentSoft }]}>
+                  <ContentTypeIcon kind="profile" size={12} />
+                </View>
+                <View style={styles.headerText}>
+                  <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
+                    {reporter.name}
+                    {linkedProfile ? `, ${linkedProfile.age}` : ''}
                   </Text>
-                ) : null}
+                  {linkedProfile ? (
+                    <Text style={[styles.meta, { color: colors.textMuted }]} numberOfLines={1}>
+                      {emberStatus
+                        ? emberLocationLine(linkedProfile)
+                        : `${t('likes.milesAway', { n: linkedProfile.distanceMiles })}${linkedProfile.job ? ` · ${linkedProfile.job}` : ''}`}
+                    </Text>
+                  ) : null}
+                </View>
+                <AnimatedPressable
+                  onPress={isDismissing ? undefined : onClose}
+                  hitSlop={10}
+                  accessibilityLabel={t('disguiseMiniWindow.closeA11y')}
+                  scaleTo={isDismissing ? 1 : 0.88}
+                >
+                  <Ionicons name="close" size={20} color={colors.textMuted} />
+                </AnimatedPressable>
               </View>
-              <AnimatedPressable
-                onPress={isDismissing ? undefined : onClose}
-                hitSlop={10}
-                accessibilityLabel={t('disguiseMiniWindow.closeA11y')}
-                scaleTo={isDismissing ? 1 : 0.88}
-              >
-                <Ionicons name="close" size={20} color={colors.textMuted} />
-              </AnimatedPressable>
-            </View>
-          </FadeSlideIn>
-
-          {linkedProfile ? (
-            <FadeSlideIn replayKey={visible} index={1}>
-              <EmberStatusChips profile={linkedProfile} compact />
             </FadeSlideIn>
-          ) : null}
 
-          {showQuote ? (
-            <FadeSlideIn replayKey={visible} index={2}>
-              <Text style={[styles.quote, { color: colors.text }]} numberOfLines={2}>
-                &ldquo;{trimmedQuote}&rdquo;
-              </Text>
-            </FadeSlideIn>
-          ) : null}
+            {linkedProfile ? (
+              <FadeSlideIn replayKey={visible} index={1}>
+                <EmberStatusChips profile={linkedProfile} compact />
+              </FadeSlideIn>
+            ) : null}
 
-          {linkedProfile?.bio ? (
-            <FadeSlideIn replayKey={visible} index={2}>
-              <Text style={[styles.bio, { color: colors.textMuted }]} numberOfLines={1}>
-                {linkedProfile.bio}
-              </Text>
-            </FadeSlideIn>
-          ) : !showQuote && trimmedQuote ? (
-            <FadeSlideIn replayKey={visible} index={2}>
-              <Text style={[styles.bio, { color: colors.textMuted }]} numberOfLines={3}>
-                {trimmedQuote}
-              </Text>
-            </FadeSlideIn>
-          ) : null}
+            {showQuote ? (
+              <FadeSlideIn replayKey={visible} index={2}>
+                <Text style={[styles.quote, { color: colors.text }]} numberOfLines={2}>
+                  &ldquo;{trimmedQuote}&rdquo;
+                </Text>
+              </FadeSlideIn>
+            ) : null}
 
-          <FadeSlideIn replayKey={visible} index={3}>
-            <DisguiseMiniPhotoPager
-              photos={displayPhotos}
-              index={photoIndex}
-              onIndexChange={setPhotoIndex}
-              disabled={isDismissing}
-            />
-          </FadeSlideIn>
+            {linkedProfile?.bio ? (
+              <FadeSlideIn replayKey={visible} index={2}>
+                <Text style={[styles.bio, { color: colors.textMuted }]} numberOfLines={1}>
+                  {linkedProfile.bio}
+                </Text>
+              </FadeSlideIn>
+            ) : !showQuote && trimmedQuote ? (
+              <FadeSlideIn replayKey={visible} index={2}>
+                <Text style={[styles.bio, { color: colors.textMuted }]} numberOfLines={3}>
+                  {trimmedQuote}
+                </Text>
+              </FadeSlideIn>
+            ) : null}
 
-          {photoCount > 1 ? (
-            <FadeSlideIn replayKey={visible} index={4}>
-              <Text style={[styles.photoMeta, { color: colors.textMuted }]}>
-                {t('disguiseMiniWindow.photoMeta', { current: photoIndex + 1, total: photoCount })}
-              </Text>
-            </FadeSlideIn>
-          ) : null}
-
-          {sparkActionsEnabled ? (
-            <FadeSlideIn replayKey={visible} index={5}>
-              <DisguiseMiniSparkBar
-                liked={liked}
-                superLiked={superLiked}
-                passed={passed}
-                onLike={handleLike}
-                onUnlike={handleUnlike}
-                onSuperLike={handleSuperLike}
-                onPass={handlePass}
+            <FadeSlideIn replayKey={visible} index={3}>
+              <DisguiseMiniPhotoPager
+                photos={displayPhotos}
+                index={photoIndex}
+                onIndexChange={setPhotoIndex}
                 disabled={isDismissing}
               />
-              <Text style={[styles.hint, { color: colors.textMuted }]}>
-                {superLiked
-                  ? t('disguiseMiniWindow.superLikedHint', { world: worldName })
-                  : liked
-                    ? t('disguiseMiniWindow.savedToLikes')
-                    : passed
-                      ? t('disguiseMiniWindow.passedHint')
-                      : t('disguiseMiniWindow.actionsSync', { world: worldName })}
-              </Text>
             </FadeSlideIn>
-          ) : (
-            <FadeSlideIn replayKey={visible} index={5}>
-              <Text style={[styles.hint, { color: colors.textMuted }]}>
-                {t('disguiseMiniWindow.sponsoredPreview')}
-              </Text>
-            </FadeSlideIn>
-          )}
+
+            {photoCount > 1 ? (
+              <FadeSlideIn replayKey={visible} index={4}>
+                <Text style={[styles.photoMeta, { color: colors.textMuted }]}>
+                  {t('disguiseMiniWindow.photoMeta', { current: photoIndex + 1, total: photoCount })}
+                </Text>
+              </FadeSlideIn>
+            ) : null}
+
+            {sparkActionsEnabled ? (
+              <FadeSlideIn replayKey={visible} index={5}>
+                <DisguiseMiniSparkBar
+                  liked={liked}
+                  superLiked={superLiked}
+                  passed={passed}
+                  onLike={handleLike}
+                  onUnlike={handleUnlike}
+                  onSuperLike={handleSuperLike}
+                  onPass={handlePass}
+                  disabled={isDismissing}
+                />
+                <Text style={[styles.hint, { color: colors.textMuted }]}>
+                  {superLiked
+                    ? t('disguiseMiniWindow.superLikedHint', { world: worldName })
+                    : liked
+                      ? t('disguiseMiniWindow.savedToLikes')
+                      : passed
+                        ? t('disguiseMiniWindow.passedHint')
+                        : t('disguiseMiniWindow.actionsSync', { world: worldName })}
+                </Text>
+              </FadeSlideIn>
+            ) : (
+              <FadeSlideIn replayKey={visible} index={5}>
+                <Text style={[styles.hint, { color: colors.textMuted }]}>
+                  {t('disguiseMiniWindow.sponsoredPreview')}
+                </Text>
+              </FadeSlideIn>
+            )}
           </Animated.View>
         </Animated.View>
       </AnimatedOverlay>

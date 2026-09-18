@@ -658,6 +658,8 @@ export const zhTw = {
     actionsSync: '操作會同步至 {world}',
     sponsoredPreview: '這是你的贊助個人檔案預覽。',
     closeA11y: '關閉',
+    viewPhotosFrom: '查看 {name} 的照片',
+    viewProfile: '查看個人檔案：{name}',
   },
   momentum: {
     title: '勢如破竹！',

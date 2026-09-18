@@ -126,8 +126,7 @@ export function DisguiseTrendingScreen() {
   const { user, preferences } = useApp();
   const { locale } = useAppLocale();
   const meta = disguiseWorldMeta(preferences.sparkSection, user.gender, locale);
-  const isHarbor = meta.world === 'harbor';
-  const isFemalePulse = !isHarbor && usesFemalePulseExperience(user.gender);
+  const isFemalePulse = usesFemalePulseExperience(user.gender);
   const brief = isFemalePulse ? femalePulseBrief : pulseBrief;
   const categoryChips = isFemalePulse ? femaleTrendingCategoryChips : trendingCategoryChips;
   const breakingCards = isFemalePulse ? femaleBreakingNowCards : breakingNowCards;
@@ -158,22 +157,13 @@ export function DisguiseTrendingScreen() {
       <DisguiseHeader title={meta.trendingTab} showSearch={false} />
       <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
         <Text style={[styles.pageTitle, { color: colors.text }]}>
-          {isHarbor ? 'Markets & briefing' : isFemalePulse ? 'Cosmos & culture' : 'Trending & useful'}
+          {isFemalePulse ? 'Cosmos & culture' : 'Trending & useful'}
         </Text>
         <Text style={[styles.pageSubtitle, { color: colors.textMuted }]}>
-          {isHarbor
-            ? 'Quotes first, then weather and a quiet local brief'
-            : isFemalePulse
-              ? '星座, tarot pulls, and entertainment worth your scroll today'
-              : 'Weather, markets, local radar, and topics worth your time today'}
+          {isFemalePulse
+            ? '星座, tarot pulls, and entertainment worth your scroll today'
+            : 'Weather, markets, local radar, and topics worth your time today'}
         </Text>
-
-        {isHarbor ? (
-          <>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Stock market</Text>
-            <DisguiseMarketsPanel onQuotePress={() => openTopic('#MarketWatch')} />
-          </>
-        ) : null}
 
         <AnimatedPressable
           style={[styles.briefCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
@@ -187,7 +177,7 @@ export function DisguiseTrendingScreen() {
               <View style={[styles.livePill, { backgroundColor: meta.accentSoft }]}>
                 <View style={[styles.liveDot, { backgroundColor: meta.accent }]} />
                 <Text style={[styles.liveText, { color: meta.accent }]}>
-                  {isHarbor ? 'Harbor Brief' : isFemalePulse ? 'Cosmos Brief' : 'Pulse Brief'}
+                  {isFemalePulse ? 'Cosmos Brief' : 'Pulse Brief'}
                 </Text>
               </View>
               <Text style={[styles.briefSource, { color: colors.textMuted }]}>
@@ -231,7 +221,7 @@ export function DisguiseTrendingScreen() {
           </>
         )}
 
-        {isHarbor || isFemalePulse ? null : (
+        {isFemalePulse ? null : (
           <>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Stock market</Text>
             <DisguiseMarketsPanel onQuotePress={() => openTopic('#MarketWatch')} />

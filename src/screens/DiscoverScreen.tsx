@@ -351,18 +351,21 @@ export function DiscoverScreen() {
             variant="title"
           />
         </View>
-        <AnimatedPressable style={styles.hubButton} onPress={openDiscoverHub} accessibilityLabel={t('discover.toolsA11y')}>
-          <Ionicons name="options-outline" size={22} color={colors.textMuted} />
-        </AnimatedPressable>
+        <View style={styles.headerActions}>
+          <RewindButton
+            variant="header"
+            visible={hasRewindablePass && !isPaused}
+            isSparkPlus={isSparkPlus}
+            onPress={rewindLastPass}
+            onUpgrade={() => navigation.getParent()?.navigate('SparkPlus')}
+          />
+          <AnimatedPressable style={styles.hubButton} onPress={openDiscoverHub} accessibilityLabel={t('discover.toolsA11y')}>
+            <Ionicons name="options-outline" size={22} color={colors.textMuted} />
+          </AnimatedPressable>
+        </View>
       </View>
       {isIncognitoActive && <IncognitoBanner />}
       <BoostBanner visible={isBoosted} />
-      <RewindButton
-        visible={hasRewindablePass && !isPaused}
-        isSparkPlus={isSparkPlus}
-        onPress={rewindLastPass}
-        onUpgrade={() => navigation.getParent()?.navigate('SparkPlus')}
-      />
       <View
         style={[
           styles.deckContainer,
@@ -561,6 +564,12 @@ const styles = StyleSheet.create({
   sectionToggle: {
     flex: 1,
     alignItems: 'center',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    flexShrink: 0,
   },
   hubButton: {
     width: 40,

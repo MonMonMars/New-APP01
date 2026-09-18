@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 /** Pulse disguise-mode brand tokens — sampled from the P3 lettermark. */
 export const pulseBrand = {
   navy: '#0B1F33',
@@ -9,4 +11,14 @@ export const pulseBrand = {
   live: '#DC2626',
   up: '#16A34A',
   down: '#DC2626',
+  /** Masthead wordmark on Pulse navy headers. */
+  mastheadText: '#FFFFFF',
 } as const;
+
+/** Times serif for Pulse masthead lockups (web + native). */
+export const pulseTimesFontFamily = Platform.select({
+  ios: 'Times New Roman',
+  android: 'serif',
+  web: '"Times New Roman", Times, serif',
+  default: 'serif',
+});

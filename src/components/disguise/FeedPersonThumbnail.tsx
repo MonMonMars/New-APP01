@@ -2,7 +2,12 @@ import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-na
 
 import { useTheme } from '../../context/ThemeContext';
 import { spacing } from '../../theme';
-import { ContentTypeIcon, ContentTypeKind, ContentTypeLabel } from './ContentTypeIcon';
+import {
+  ContentTypeIcon,
+  ContentTypeKind,
+  ContentTypeLabel,
+  PROFILE_THUMB_ICON_SIZE,
+} from './ContentTypeIcon';
 import { DisguiseOverlayAvatar, DisguiseOverlayVariant, PROFILE_AVATAR_SIZE } from './DisguiseOverlayAvatar';
 import { FaceCenteredImage } from './FaceCenteredImage';
 import { AnimatedPressable } from '../AnimatedPressable';
@@ -57,24 +62,30 @@ export function FeedPersonThumbnail({
   );
 
   const trimmedCaption = caption?.trim();
+  const isProfile = contentKind === 'profile';
+  const badgeKind = isProfile ? 'profile' : contentKind;
+  const showProfileBadge = isProfile || showIconBadge;
   const showCaption = Boolean(trimmedCaption);
-  const showTypeLabel = !hideLabel && !showCaption && !showIconBadge;
+  const showCaptionIcon = showCaption && !isProfile;
+  const showTypeLabel = !hideLabel && !showCaption && !showProfileBadge;
 
   const content = (
     <View style={[styles.row, onPress ? undefined : style]}>
       <View style={styles.avatarCol}>
         {avatar}
-        {showIconBadge ? (
+        {showProfileBadge ? (
           <View style={styles.iconBadge}>
-            <ContentTypeIcon kind={contentKind} size={12} />
+            <ContentTypeIcon kind={badgeKind} size={PROFILE_THUMB_ICON_SIZE} />
           </View>
         ) : null}
       </View>
       {showCaption ? (
         <View style={styles.captionCol}>
-          <View style={styles.captionIcon}>
-            <ContentTypeIcon kind={contentKind} size={13} />
-          </View>
+          {showCaptionIcon ? (
+            <View style={styles.captionIcon}>
+              <ContentTypeIcon kind={contentKind} size={13} />
+            </View>
+          ) : null}
           <Text style={[styles.caption, { color: colors.text }]} numberOfLines={2}>
             {trimmedCaption}
           </Text>

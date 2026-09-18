@@ -64,6 +64,7 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
                   key={reporter.id}
                   plainAvatar
                   contentKind="profile"
+                  hideLabel
                   imageUrl={reporter.avatarUrl}
                   caption={reporter.quote}
                   onPress={() => openReporter(reporter)}

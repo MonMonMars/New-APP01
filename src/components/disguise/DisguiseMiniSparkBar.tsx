@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { GestureResponderEvent, StyleSheet, View } from 'react-native';
 
+import { useTranslation } from '../../i18n';
 import { pulseBrand } from '../../theme/pulseBrand';
 import { spacing } from '../../theme';
 import { ScalePressable } from '../motion/ScalePressable';
@@ -86,6 +87,8 @@ export function DisguiseMiniSparkBar({
   onSuperLike,
   onPass,
 }: DisguiseMiniSparkBarProps) {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.bar} onStartShouldSetResponder={() => true}>
       <View style={[styles.slot, { width: BUTTON_SIZE, height: BUTTON_SIZE }]}>
@@ -94,7 +97,7 @@ export function DisguiseMiniSparkBar({
           active={passed}
           disabled={disabled}
           onPress={onPass}
-          accessibilityLabel="Pass profile"
+          accessibilityLabel={t('disguiseMiniWindow.passA11y')}
         />
       </View>
       <View style={[styles.slot, { width: STAR_SIZE, height: STAR_SIZE }]}>
@@ -105,7 +108,7 @@ export function DisguiseMiniSparkBar({
           size={STAR_SIZE}
           iconSize={STAR_ICON_SIZE}
           onPress={onSuperLike}
-          accessibilityLabel="Super like profile"
+          accessibilityLabel={t('disguiseMiniWindow.superLikeA11y')}
         />
       </View>
       <View style={[styles.slot, { width: BUTTON_SIZE, height: BUTTON_SIZE }]}>
@@ -114,7 +117,7 @@ export function DisguiseMiniSparkBar({
           active={liked}
           disabled={disabled}
           onPress={liked ? onUnlike : onLike}
-          accessibilityLabel={liked ? 'Unlike profile' : 'Like profile'}
+          accessibilityLabel={liked ? t('disguiseMiniWindow.unlikeA11y') : t('disguiseMiniWindow.likeA11y')}
         />
       </View>
     </View>

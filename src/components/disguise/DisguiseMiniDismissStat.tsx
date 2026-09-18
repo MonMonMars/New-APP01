@@ -18,8 +18,26 @@ export type MiniDismissKind = 'like' | 'unlike' | 'super' | 'pass';
 
 type DisguiseMiniDismissStatProps = {
   kind: MiniDismissKind;
-  accent: string;
 };
+
+function ringAccentForKind(
+  kind: MiniDismissKind,
+  colors: { heartRed: string; superLike: string; textMuted: string },
+): string {
+  switch (kind) {
+    case 'like':
+      return colors.heartRed;
+    case 'super':
+      return colors.superLike;
+    case 'unlike':
+    case 'pass':
+      return colors.textMuted;
+    default: {
+      const _exhaustive: never = kind;
+      return _exhaustive;
+    }
+  }
+}
 
 const STAT_META: Record<
   MiniDismissKind,
@@ -32,12 +50,13 @@ const STAT_META: Record<
 };
 
 /** Brief pulse + icon flash while the mini window fades out after a Spark action. */
-export function DisguiseMiniDismissStat({ kind, accent }: DisguiseMiniDismissStatProps) {
+export function DisguiseMiniDismissStat({ kind }: DisguiseMiniDismissStatProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const meta = STAT_META[kind];
   const iconColor = colors[meta.iconColorKey];
   const label = t(meta.labelKey);
+  const ringAccent = ringAccentForKind(kind, colors);
 
   const ringScale = useSharedValue(0.45);
   const ringOpacity = useSharedValue(0);
@@ -84,9 +103,14 @@ export function DisguiseMiniDismissStat({ kind, accent }: DisguiseMiniDismissSta
   }));
 
   return (
-    <View style={styles.overlay} pointerEvents="none" accessibilityLiveRegion="polite">
-      <Animated.View style={[styles.ring, { borderColor: accent }, ringStyle]} />
-      <Animated.View style={[styles.badge, { backgroundColor: colors.surface, borderColor: accent }, badgeStyle]}>
+    <View
+      style={styles.overlay}
+      pointerEvents="none"
+      accessibilityLiveRegion="polite"
+      accessibilityLabel={label}
+    >
+      <Animated.View style={[styles.ring, { borderColor: ringAccent }, ringStyle]} />
+      <Animated.View style={[styles.badge, { backgroundColor: colors.surface, borderColor: ringAccent }, badgeStyle]}>
         <Ionicons name={meta.icon} size={kind === 'super' ? 22 : 20} color={iconColor} />
       </Animated.View>
       <Animated.Text style={[styles.label, { color: colors.text }, labelStyle]}>{label}</Animated.Text>

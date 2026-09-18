@@ -42,15 +42,33 @@ async function completeOnboarding(page) {
   }
 }
 
+async function openMiniWindow(page, index = 0) {
+  const thumb = page.getByLabel(/view photos from/i).nth(index);
+  await thumb.click();
+  await page.waitForTimeout(800);
+}
+
+async function waitForDismiss(page) {
+  await page.waitForTimeout(560);
+}
+
+async function statVisible(page, pattern) {
+  await page.waitForTimeout(120);
+  const text = await page.locator('body').innerText();
+  return pattern.test(text);
+}
+
+async function sheetClosed(page) {
+  return !(await page.getByLabel(/like profile|unlike profile|pass profile/i).first().isVisible().catch(() => false));
+}
+
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
 await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
 await completeOnboarding(page);
 await dismissCookies(page);
 
-const thumb = page.getByLabel(/view photos from/i).first();
-await thumb.click();
-await page.waitForTimeout(800);
+await openMiniWindow(page, 0);
 
 const body = await page.locator('body').innerText();
 const hasPhotoMeta = /photo 1 of \d+/i.test(body);
@@ -66,16 +84,40 @@ const advanced = /photo 2 of/i.test(afterSwipe);
 
 const likeBtn = page.getByLabel(/like profile/i).first();
 const hasLike = await likeBtn.isVisible().catch(() => false);
-let dismissStatVisible = false;
-let closedAfterDismiss = false;
+let likeStatVisible = false;
+let closedAfterLike = false;
 
 if (hasLike) {
   await likeBtn.click();
-  await page.waitForTimeout(120);
-  const duringDismiss = await page.locator('body').innerText();
-  dismissStatVisible = /\bSAVED\b/i.test(duringDismiss);
-  await page.waitForTimeout(520);
-  closedAfterDismiss = !(await page.getByLabel(/like profile|unlike profile/i).first().isVisible().catch(() => false));
+  likeStatVisible = await statVisible(page, /\bSAVED\b/i);
+  await waitForDismiss(page);
+  closedAfterLike = await sheetClosed(page);
+}
+
+await openMiniWindow(page, 1);
+const passBtn = page.getByLabel(/pass profile/i).first();
+const hasPass = await passBtn.isVisible().catch(() => false);
+let passStatVisible = false;
+let closedAfterPass = false;
+
+if (hasPass) {
+  await passBtn.click();
+  passStatVisible = await statVisible(page, /\bPASSED\b/i);
+  await waitForDismiss(page);
+  closedAfterPass = await sheetClosed(page);
+}
+
+await openMiniWindow(page, 2);
+const superBtn = page.getByLabel(/super like profile/i).first();
+const hasSuper = await superBtn.isVisible().catch(() => false);
+let superStatVisible = false;
+let closedAfterSuper = false;
+
+if (hasSuper) {
+  await superBtn.click();
+  superStatVisible = await statVisible(page, /super liked/i);
+  await waitForDismiss(page);
+  closedAfterSuper = await sheetClosed(page);
 }
 
 console.log(JSON.stringify({
@@ -84,14 +126,31 @@ console.log(JSON.stringify({
   advanced,
   hasProfileWord,
   hasLike,
-  dismissStatVisible,
-  closedAfterDismiss,
-  sample: afterSwipe.slice(0, 600),
+  likeStatVisible,
+  closedAfterLike,
+  hasPass,
+  passStatVisible,
+  closedAfterPass,
+  hasSuper,
+  superStatVisible,
+  closedAfterSuper,
 }, null, 2));
 
 await browser.close();
-process.exit(
-  hasPhotoMeta && hasNext && advanced && !hasProfileWord && hasLike && dismissStatVisible && closedAfterDismiss
-    ? 0
-    : 1,
-);
+
+const ok =
+  hasPhotoMeta &&
+  hasNext &&
+  advanced &&
+  !hasProfileWord &&
+  hasLike &&
+  likeStatVisible &&
+  closedAfterLike &&
+  hasPass &&
+  passStatVisible &&
+  closedAfterPass &&
+  hasSuper &&
+  superStatVisible &&
+  closedAfterSuper;
+
+process.exit(ok ? 0 : 1);

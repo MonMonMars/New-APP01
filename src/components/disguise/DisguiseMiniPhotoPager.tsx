@@ -6,6 +6,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
 
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import { radii, spacing } from '../../theme';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -14,6 +15,7 @@ type DisguiseMiniPhotoPagerProps = {
   index: number;
   onIndexChange: (index: number) => void;
   height?: number;
+  disabled?: boolean;
 };
 
 const SWIPE_THRESHOLD = 36;
@@ -24,8 +26,10 @@ export function DisguiseMiniPhotoPager({
   index,
   onIndexChange,
   height = 140,
+  disabled = false,
 }: DisguiseMiniPhotoPagerProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const safeIndex = photos.length > 0 ? Math.min(index, photos.length - 1) : 0;
   const multiPhoto = photos.length > 1;
   const currentUri = photos[safeIndex];
@@ -33,24 +37,25 @@ export function DisguiseMiniPhotoPager({
   indexRef.current = safeIndex;
 
   const goPrev = useCallback(() => {
-    if (photos.length <= 1) {
+    if (disabled || photos.length <= 1) {
       return;
     }
     const current = indexRef.current;
     onIndexChange((current - 1 + photos.length) % photos.length);
-  }, [onIndexChange, photos.length]);
+  }, [disabled, onIndexChange, photos.length]);
 
   const goNext = useCallback(() => {
-    if (photos.length <= 1) {
+    if (disabled || photos.length <= 1) {
       return;
     }
     const current = indexRef.current;
     onIndexChange((current + 1) % photos.length);
-  }, [onIndexChange, photos.length]);
+  }, [disabled, onIndexChange, photos.length]);
 
   const panGesture = useMemo(
     () =>
       Gesture.Pan()
+        .enabled(!disabled)
         .activeOffsetX([-14, 14])
         .failOffsetY([-10, 10])
         .onEnd((event) => {
@@ -61,7 +66,7 @@ export function DisguiseMiniPhotoPager({
             runOnJS(goPrev)();
           }
         }),
-    [goNext, goPrev],
+    [disabled, goNext, goPrev],
   );
 
   if (photos.length === 0) {
@@ -83,10 +88,13 @@ export function DisguiseMiniPhotoPager({
                 styles.segment,
                 segmentIndex === safeIndex && styles.segmentActive,
               ]}
-              onPress={() => onIndexChange(segmentIndex)}
+              onPress={disabled ? undefined : () => onIndexChange(segmentIndex)}
               accessibilityRole="button"
-              accessibilityLabel={`Photo ${segmentIndex + 1} of ${photos.length}`}
-              scaleTo={0.98}
+              accessibilityLabel={t('disguiseMiniWindow.photoA11y', {
+                current: segmentIndex + 1,
+                total: photos.length,
+              })}
+              scaleTo={disabled ? 1 : 0.98}
             />
           ))}
         </View>
@@ -97,22 +105,25 @@ export function DisguiseMiniPhotoPager({
         style={styles.image}
         contentFit="contain"
         transition={120}
-        accessibilityLabel={`Photo ${safeIndex + 1} of ${photos.length}`}
+        accessibilityLabel={t('disguiseMiniWindow.photoA11y', {
+          current: safeIndex + 1,
+          total: photos.length,
+        })}
       />
 
       {multiPhoto ? (
         <>
           <AnimatedPressable
             style={styles.tapLeft}
-            onPress={goPrev}
+            onPress={disabled ? undefined : goPrev}
             accessibilityRole="button"
-            accessibilityLabel="Previous photo"
+            accessibilityLabel={t('disguiseMiniWindow.previousPhotoA11y')}
           />
           <AnimatedPressable
             style={styles.tapRight}
-            onPress={goNext}
+            onPress={disabled ? undefined : goNext}
             accessibilityRole="button"
-            accessibilityLabel="Next photo"
+            accessibilityLabel={t('disguiseMiniWindow.nextPhotoA11y')}
           />
         </>
       ) : null}

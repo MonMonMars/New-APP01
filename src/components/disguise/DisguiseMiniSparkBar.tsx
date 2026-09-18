@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, View } from 'react-native';
+import { GestureResponderEvent, StyleSheet, View } from 'react-native';
 
 import { pulseBrand } from '../../theme/pulseBrand';
 import { spacing } from '../../theme';
@@ -29,6 +29,10 @@ type MiniIconButtonProps = {
   accessibilityLabel: string;
 };
 
+function stopMiniActionPropagation(event?: GestureResponderEvent) {
+  event?.stopPropagation?.();
+}
+
 /** Same Ionicons as Spark discover — pass / super like / like — in Pulse blue. */
 function MiniIconButton({
   icon,
@@ -42,7 +46,10 @@ function MiniIconButton({
 
   return (
     <ScalePressable
-      onPress={onPress}
+      onPress={(event) => {
+        stopMiniActionPropagation(event);
+        onPress();
+      }}
       active={false}
       accessibilityLabel={accessibilityLabel}
       scaleTo={0.86}
@@ -72,7 +79,7 @@ export function DisguiseMiniSparkBar({
   onPass,
 }: DisguiseMiniSparkBarProps) {
   return (
-    <View style={styles.bar}>
+    <View style={styles.bar} onStartShouldSetResponder={() => true}>
       <View style={[styles.slot, { width: BUTTON_SIZE, height: BUTTON_SIZE }]}>
         <MiniIconButton
           icon="trash-outline"

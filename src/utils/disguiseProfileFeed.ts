@@ -71,6 +71,7 @@ function toDisguisedProfilePost(
   return {
     id: `disguised-profile-${idSuffix}`,
     type: 'disguised_profile',
+    profileId: profile.id,
     name: disguiseDisplayName(profile.name),
     avatarUrl: profile.photos[0],
     variant,
@@ -112,6 +113,7 @@ export function buildDisguisedProfileFeedItem(
   return {
     id: 'disguised-user',
     type: 'disguised_profile',
+    profileId: undefined,
     name: disguiseDisplayName(user.name),
     avatarUrl: user.photos[0] ?? creative.sourcePhotoUrl,
     variant: creative.variant,
@@ -140,6 +142,7 @@ export function profileToDisguisedProfilePost(
   return {
     id: `disguised-${profile.id}`,
     type: 'disguised_profile',
+    profileId: profile.id,
     name: disguiseDisplayName(profile.name),
     avatarUrl: profile.photos[0],
     variant,

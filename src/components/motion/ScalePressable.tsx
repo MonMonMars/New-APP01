@@ -1,6 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { ReactNode, useEffect } from 'react';
-import { Platform, Pressable, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  Platform,
+  Pressable,
+  StyleSheet,
+  type GestureResponderEvent,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   useAnimatedStyle,
@@ -16,7 +23,7 @@ import { webClass } from '../../motion/webMotion';
 const AnimatedPressableBase = Animated.createAnimatedComponent(Pressable);
 
 type ScalePressableProps = {
-  onPress?: () => void;
+  onPress?: (event?: GestureResponderEvent) => void;
   children?: ReactNode;
   style?: StyleProp<ViewStyle>;
   active?: boolean;

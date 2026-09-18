@@ -66,6 +66,8 @@ export function ProfileScreen() {
     updatePreferences,
     updateUser,
     isSparkPlus,
+    isSubscriptionActive,
+    subscriptionExpiresAt,
     boostActiveUntil,
     bonusBoosts,
     canUseFreeWeeklyBoost,
@@ -216,10 +218,24 @@ export function ProfileScreen() {
           <VoicePromptCard voicePrompt={user.voicePrompt} profileName={user.name} compact />
         )}
 
-        {isSparkPlus && (
+        {isSubscriptionActive && (
           <View style={[styles.sparkPlusBadge, { backgroundColor: colors.surface }]}>
             <Ionicons name="diamond" size={16} color={colors.gradientEnd} />
-            <Text style={[styles.sparkPlusText, { color: colors.gradientEnd }]}>Spark+ member</Text>
+            <View>
+              <Text style={[styles.sparkPlusText, { color: colors.gradientEnd }]}>
+                {t('sparkPlus.memberBadge')}
+              </Text>
+              {subscriptionExpiresAt ? (
+                <Text style={[styles.sparkPlusExpiry, { color: colors.textMuted }]}>
+                  {t('sparkPlus.activeUntil', {
+                    date: new Date(subscriptionExpiresAt).toLocaleDateString(
+                      locale === 'zh-TW' ? 'zh-TW' : 'en-US',
+                      { month: 'short', day: 'numeric', year: 'numeric' },
+                    ),
+                  })}
+                </Text>
+              ) : null}
+            </View>
           </View>
         )}
 
@@ -483,6 +499,10 @@ const styles = StyleSheet.create({
   sparkPlusText: {
     fontSize: 13,
     fontWeight: '700',
+  },
+  sparkPlusExpiry: {
+    fontSize: 11,
+    marginTop: 2,
   },
   syncBadge: {
     flexDirection: 'row',

@@ -2,7 +2,7 @@
 
 ## Demo link (verified working)
 
-**https://imaging-borders-explore-podcast.trycloudflare.com**
+**https://cordless-somewhat-interesting-involve.trycloudflare.com**
 
 - **Build:** i18n (English + 繁體中文), root-hosted web export
 - **Verified:** 2026-09-17 — HTTP 200, JS bundle loads, onboarding + Spark discover work

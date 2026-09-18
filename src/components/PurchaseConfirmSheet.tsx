@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Modal, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { getLegalUiStrings } from '../content/legal';
+import { isDemoPurchases } from '../services/purchases';
 import { useAppLocale } from '../hooks/useAppLocale';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { radii, spacing } from '../theme';
 import { modalFill } from '../theme/modalFill';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -17,7 +19,9 @@ type PurchaseConfirmSheetProps = {
   quantity?: string;
   icon?: keyof typeof Ionicons.glyphMap;
   iconColor?: string;
-  onConfirm: () => void;
+  confirmLoading?: boolean;
+  errorMessage?: string | null;
+  onConfirm: () => void | Promise<void>;
   onClose: () => void;
   onOpenSubscriptionTerms?: () => void;
 };
@@ -30,6 +34,8 @@ export function PurchaseConfirmSheet({
   quantity,
   icon = 'bag-outline',
   iconColor,
+  confirmLoading = false,
+  errorMessage = null,
   onConfirm,
   onClose,
   onOpenSubscriptionTerms,
@@ -37,8 +43,10 @@ export function PurchaseConfirmSheet({
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { locale } = useAppLocale();
+  const { t } = useTranslation();
   const legalUi = getLegalUiStrings(locale);
   const accent = iconColor ?? colors.gradientEnd;
+  const demoNote = isDemoPurchases() ? t('payments.demoNote') : legalUi.purchaseDemoNote;
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -53,8 +61,11 @@ export function PurchaseConfirmSheet({
             <Text style={[styles.quantity, { color: accent }]}>{quantity}</Text>
           ) : null}
           <Text style={[styles.price, { color: colors.text }]}>{price}</Text>
+          {errorMessage ? (
+            <Text style={[styles.error, { color: '#ef4444' }]}>{errorMessage}</Text>
+          ) : null}
           <Text style={[styles.legal, { color: colors.textMuted }]}>
-            {legalUi.purchaseDemoNote} {legalUi.purchaseAutoRenew}
+            {demoNote} {legalUi.purchaseAutoRenew}
             {onOpenSubscriptionTerms ? (
               <>
                 {' '}
@@ -65,16 +76,21 @@ export function PurchaseConfirmSheet({
             ) : null}
           </Text>
           <AnimatedPressable
-            style={[styles.confirmButton, { backgroundColor: colors.gradientEnd }]}
-            onPress={() => {
-              onConfirm();
-              onClose();
-            }}
+            style={[
+              styles.confirmButton,
+              { backgroundColor: colors.gradientEnd, opacity: confirmLoading ? 0.7 : 1 },
+            ]}
+            disabled={confirmLoading}
+            onPress={() => void onConfirm()}
           >
-            <Text style={styles.confirmText}>Confirm purchase</Text>
+            {confirmLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.confirmText}>{t('payments.confirmPurchase')}</Text>
+            )}
           </AnimatedPressable>
-          <AnimatedPressable style={styles.cancelButton} onPress={onClose}>
-            <Text style={[styles.cancelText, { color: colors.textMuted }]}>Cancel</Text>
+          <AnimatedPressable style={styles.cancelButton} onPress={onClose} disabled={confirmLoading}>
+            <Text style={[styles.cancelText, { color: colors.textMuted }]}>{t('common.cancel')}</Text>
           </AnimatedPressable>
         </View>
       </View>
@@ -124,6 +140,12 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     marginBottom: spacing.md,
   },
+  error: {
+    fontSize: 13,
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+    fontWeight: '600',
+  },
   legal: {
     fontSize: 11,
     lineHeight: 16,
@@ -140,6 +162,8 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     alignItems: 'center',
     marginBottom: spacing.sm,
+    minHeight: 48,
+    justifyContent: 'center',
   },
   confirmText: {
     color: '#fff',

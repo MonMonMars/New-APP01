@@ -7,10 +7,16 @@ import { useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseModeButton } from '../components/disguise/ModeToggleButtons';
+import {
+  formatProductPrice,
+  PRODUCT_CATALOG,
+  SHOP_PACK_TO_PRODUCT,
+} from '../constants/products';
 import { useApp } from '../context/AppContext';
 import { getLegalUiStrings } from '../content/legal';
 import { useTranslation } from '../i18n';
 import { RootStackParamList } from '../types/navigation';
+import { PurchaseProductId } from '../types/purchases';
 import { useTheme } from '../context/ThemeContext';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -22,6 +28,7 @@ type ConsumablesShopScreenProps = {
 
 type Pack = {
   id: string;
+  productId: PurchaseProductId;
   icon: keyof typeof Ionicons.glyphMap;
   title: string;
   description: string;
@@ -33,73 +40,103 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { colors } = useTheme();
-  const { activateBoost, addBonusBoosts, purchaseSparkNotes } = useApp();
+  const { purchaseProduct } = useApp();
   const { t, locale } = useTranslation();
   const legalUi = getLegalUiStrings(locale);
   const [pendingPack, setPendingPack] = useState<Pack | null>(null);
+  const [purchasing, setPurchasing] = useState(false);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
 
   const packs: Pack[] = useMemo(
     () => [
       {
         id: 'boost-3',
+        productId: 'boost_3',
         icon: 'flash',
         title: t('shop.boostPack'),
         description: t('shop.boostPackDesc'),
-        price: '$9.99',
+        price: formatProductPrice(PRODUCT_CATALOG.boost_3.displayPriceUsd),
         quantity: t('shop.boostPackQty'),
       },
       {
         id: 'boost-1',
+        productId: 'boost_1',
         icon: 'flash',
         title: t('shop.singleBoost'),
         description: t('shop.singleBoostDesc'),
-        price: '$3.99',
+        price: formatProductPrice(PRODUCT_CATALOG.boost_1.displayPriceUsd),
         quantity: t('shop.singleBoostQty'),
       },
       {
         id: 'notes-5',
+        productId: 'spark_notes_5',
         icon: 'chatbubble-ellipses',
         title: t('shop.notesPack'),
         description: t('shop.notesPackDesc'),
-        price: '$4.99',
+        price: formatProductPrice(PRODUCT_CATALOG.spark_notes_5.displayPriceUsd),
         quantity: t('shop.notesPackQty'),
       },
       {
         id: 'notes-1',
+        productId: 'spark_notes_1',
         icon: 'chatbubble-ellipses',
         title: t('shop.singleNote'),
         description: t('shop.singleNoteDesc'),
-        price: '$1.99',
+        price: formatProductPrice(PRODUCT_CATALOG.spark_notes_1.displayPriceUsd),
         quantity: t('shop.singleNoteQty'),
       },
     ],
     [t],
   );
 
-  const handlePurchase = (pack: Pack) => {
-    if (pack.id.startsWith('boost')) {
-      const totalBoosts = pack.id === 'boost-3' ? 3 : 1;
-      const result = activateBoost({ purchased: true });
-      if (!result.ok) {
-        addBonusBoosts(totalBoosts);
-        Alert.alert('Boost added!', `${pack.quantity} saved to your account. Activate from Profile when ready.`);
+  const handlePurchase = async (pack: Pack) => {
+    setPurchasing(true);
+    setPurchaseError(null);
+    const productId = SHOP_PACK_TO_PRODUCT[pack.id] ?? pack.productId;
+    const result = await purchaseProduct(productId);
+    setPurchasing(false);
+
+    if (!result.ok) {
+      if (result.code !== 'cancelled') {
+        setPurchaseError(result.message);
+      }
+      return;
+    }
+
+    setPendingPack(null);
+    const grant = result.grant;
+    const product = PRODUCT_CATALOG[productId];
+
+    if (product.boostCount) {
+      const saved = grant.bonusBoosts ?? 0;
+
+      if (grant.activateBoost && saved > 0) {
+        Alert.alert(
+          t('payments.boostActivated'),
+          t('payments.boostActivatedWithSaved', { count: saved }),
+        );
         return;
       }
-      const saved = totalBoosts - 1;
-      if (saved > 0) {
-        addBonusBoosts(saved);
+
+      if (grant.activateBoost) {
+        Alert.alert(t('payments.boostActivated'), t('payments.boostActivated'));
+        return;
       }
+
       Alert.alert(
-        'Boost activated!',
-        saved > 0
-          ? `Boost is live for 30 minutes. ${saved} more saved for later.`
-          : `You purchased ${pack.quantity}. Boost is now active for 30 minutes.`,
+        t('payments.boostAdded'),
+        t('payments.boostAddedBody', { quantity: pack.quantity }),
       );
-    } else {
-      const count = pack.id === 'notes-5' ? 5 : 1;
-      purchaseSparkNotes(count);
-      Alert.alert('Spark Notes added!', `${count} Spark Note${count > 1 ? 's' : ''} added to your account.`);
+      return;
     }
+
+    const noteCount = grant.bonusSparkNotes ?? product.sparkNoteCount ?? 1;
+    Alert.alert(
+      t('payments.notesAdded'),
+      noteCount > 1
+        ? t('payments.notesAddedBodyMany', { count: noteCount })
+        : t('payments.notesAddedBody', { count: noteCount }),
+    );
   };
 
   return (
@@ -124,21 +161,24 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
         {packs.map((pack) => {
           const packAccent = colors.gradientEnd;
           return (
-          <AnimatedPressable
-            key={pack.id}
-            style={[styles.packCard, { backgroundColor: colors.surface }]}
-            onPress={() => setPendingPack(pack)}
-          >
-            <View style={[styles.packIcon, { backgroundColor: `${packAccent}22` }]}>
-              <Ionicons name={pack.icon} size={24} color={packAccent} />
-            </View>
-            <View style={styles.packInfo}>
-              <Text style={[styles.packTitle, { color: colors.text }]}>{pack.title}</Text>
-              <Text style={[styles.packDesc, { color: colors.textMuted }]}>{pack.description}</Text>
-              <Text style={[styles.packQty, { color: packAccent }]}>{pack.quantity}</Text>
-            </View>
-            <Text style={[styles.packPrice, { color: colors.text }]}>{pack.price}</Text>
-          </AnimatedPressable>
+            <AnimatedPressable
+              key={pack.id}
+              style={[styles.packCard, { backgroundColor: colors.surface }]}
+              onPress={() => {
+                setPurchaseError(null);
+                setPendingPack(pack);
+              }}
+            >
+              <View style={[styles.packIcon, { backgroundColor: `${packAccent}22` }]}>
+                <Ionicons name={pack.icon} size={24} color={packAccent} />
+              </View>
+              <View style={styles.packInfo}>
+                <Text style={[styles.packTitle, { color: colors.text }]}>{pack.title}</Text>
+                <Text style={[styles.packDesc, { color: colors.textMuted }]}>{pack.description}</Text>
+                <Text style={[styles.packQty, { color: packAccent }]}>{pack.quantity}</Text>
+              </View>
+              <Text style={[styles.packPrice, { color: colors.text }]}>{pack.price}</Text>
+            </AnimatedPressable>
           );
         })}
 
@@ -161,10 +201,17 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
         quantity={pendingPack?.quantity}
         icon={pendingPack?.icon}
         iconColor={colors.gradientEnd}
-        onClose={() => setPendingPack(null)}
+        confirmLoading={purchasing}
+        errorMessage={purchaseError}
+        onClose={() => {
+          if (!purchasing) {
+            setPendingPack(null);
+            setPurchaseError(null);
+          }
+        }}
         onConfirm={() => {
           if (pendingPack) {
-            handlePurchase(pendingPack);
+            return handlePurchase(pendingPack);
           }
         }}
         onOpenSubscriptionTerms={() => navigation.navigate('LegalDocument', { documentId: 'subscription' })}

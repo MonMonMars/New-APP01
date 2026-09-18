@@ -8,16 +8,18 @@ import { AnimatedPressable } from '../AnimatedPressable';
 
 type LocaleToggleProps = {
   compact?: boolean;
+  /** Align chips to the end for inline settings rows. */
+  inline?: boolean;
 };
 
-export function LocaleToggle({ compact }: LocaleToggleProps) {
+export function LocaleToggle({ compact, inline }: LocaleToggleProps) {
   const { colors } = useTheme();
   const { locale, setLocale } = useAppLocale();
 
   const options: AppLocale[] = ['en', 'zh-TW'];
 
   return (
-    <View style={[styles.row, compact && styles.rowCompact]}>
+    <View style={[styles.row, compact && styles.rowCompact, inline && styles.rowInline]}>
       {options.map((option) => {
         const selected = locale === option;
         return (
@@ -51,6 +53,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   rowCompact: {
+    marginBottom: 0,
+  },
+  rowInline: {
+    justifyContent: 'flex-end',
     marginBottom: 0,
   },
   chip: {

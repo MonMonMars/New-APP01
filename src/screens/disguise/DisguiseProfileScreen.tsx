@@ -7,10 +7,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DisguisedProfileCard } from '../../components/disguise/DisguisedProfileCard';
 import { DisguiseAdGeneratorSheet } from '../../components/disguise/DisguiseAdGeneratorSheet';
 import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
+import { LocaleToggle } from '../../components/legal/LocaleToggle';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
-import { APP_LOCALE_LABELS, AppLocale, resolveAppLocale } from '../../types/locale';
+import { useTranslation } from '../../i18n';
 import { PASSPORT_CITIES } from '../../types/preferences';
 import { ThemeMode } from '../../types/settings';
 import { LEGAL_ENTITY } from '../../constants/legalEntity';
@@ -56,6 +57,7 @@ export function DisguiseProfileScreen() {
     pulseSocial,
   } = useApp();
   const meta = useDisguiseWorld();
+  const { t } = useTranslation();
   const [showGenerator, setShowGenerator] = useState(false);
   const [detailSheet, setDetailSheet] = useState<DetailSheetKey>(null);
   const [viewerItemId, setViewerItemId] = useState<string | null>(null);
@@ -112,8 +114,8 @@ export function DisguiseProfileScreen() {
         { id: 'st2', title: 'Appearance', subtitle: 'Light, dark, or system', icon: 'moon-outline' as const },
         {
           id: 'st3',
-          title: 'Region & language',
-          subtitle: `${preferences.passportCity ?? 'United Kingdom'} · ${preferences.appLocale === 'zh-TW' ? '繁體中文' : 'English'}`,
+          title: 'Region',
+          subtitle: preferences.passportCity ?? 'United Kingdom',
           icon: 'globe-outline' as const,
         },
         { id: 'st4', title: 'Data & privacy', subtitle: `Download or delete your ${meta.name} data`, icon: 'shield-outline' as const },
@@ -242,6 +244,17 @@ export function DisguiseProfileScreen() {
           visible
           title={detailConfig[detailSheet].title}
           items={detailConfig[detailSheet].items}
+          headerExtra={
+            detailSheet === 'settings' ? (
+              <View style={[styles.languageBlock, { borderBottomColor: colors.border }]}>
+                <View style={styles.languageText}>
+                  <Text style={[styles.languageTitle, { color: colors.text }]}>{t('profile.language')}</Text>
+                  <Text style={[styles.languageHint, { color: colors.textMuted }]}>{t('profile.languageHint')}</Text>
+                </View>
+                <LocaleToggle compact inline />
+              </View>
+            ) : undefined
+          }
           onClose={() => setDetailSheet(null)}
           onItemPress={(item) => {
             if (detailSheet === 'saved' && !item.id.startsWith('empty-')) {
@@ -327,27 +340,14 @@ export function DisguiseProfileScreen() {
 
       <PulseListPickerSheet
         visible={regionPickerOpen}
-        title="Region & language"
-        items={[
-          ...(['en', 'zh-TW'] as AppLocale[]).map((loc) => ({
-            id: `lang:${loc}`,
-            label: APP_LOCALE_LABELS[loc],
-            subtitle: resolveAppLocale(preferences.appLocale) === loc ? 'Selected' : undefined,
-            selected: resolveAppLocale(preferences.appLocale) === loc,
-          })),
-          ...PASSPORT_CITIES.map((city) => ({
-            id: `city:${city}`,
-            label: city,
-            subtitle: 'Region',
-            selected: preferences.passportCity === city,
-          })),
-        ]}
+        title="Region"
+        items={PASSPORT_CITIES.map((city) => ({
+          id: `city:${city}`,
+          label: city,
+          selected: preferences.passportCity === city,
+        }))}
         onClose={() => setRegionPickerOpen(false)}
         onSelect={(id) => {
-          if (id.startsWith('lang:')) {
-            updatePreferences({ ...preferences, appLocale: id.replace('lang:', '') as AppLocale });
-            return;
-          }
           if (id.startsWith('city:')) {
             updatePreferences({ ...preferences, passportCity: id.replace('city:', '') });
           }
@@ -491,5 +491,25 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 2,
     lineHeight: 17,
+  },
+  languageBlock: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.sm,
+    paddingBottom: spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  languageText: {
+    flex: 1,
+  },
+  languageTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  languageHint: {
+    fontSize: 12,
+    marginTop: 2,
   },
 });

@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { ReactNode } from 'react';
 import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -21,6 +22,7 @@ type PulseDetailSheetProps = {
   items: PulseDetailItem[];
   onClose: () => void;
   onItemPress?: (item: PulseDetailItem) => void;
+  headerExtra?: ReactNode;
 };
 
 export function PulseDetailSheet({
@@ -29,6 +31,7 @@ export function PulseDetailSheet({
   items,
   onClose,
   onItemPress,
+  headerExtra,
 }: PulseDetailSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
@@ -45,6 +48,7 @@ export function PulseDetailSheet({
           <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
           <View style={styles.headerSpacer} />
         </View>
+        {headerExtra}
         <ScrollView contentContainerStyle={styles.list}>
           {items.map((item) => {
             const isPlaceholder = item.id.startsWith('empty-');

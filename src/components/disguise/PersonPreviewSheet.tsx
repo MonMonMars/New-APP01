@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../../context/AppContext';
@@ -18,8 +19,11 @@ import { AnimatedOverlay } from '../motion/AnimatedOverlay';
 import { FadeSlideIn } from '../motion/FadeSlideIn';
 import { AnimatedPressable } from '../AnimatedPressable';
 import { ContentTypeIcon } from './ContentTypeIcon';
+import { DisguiseMiniDismissStat, MiniDismissKind } from './DisguiseMiniDismissStat';
 import { DisguiseMiniPhotoPager } from './DisguiseMiniPhotoPager';
 import { DisguiseMiniSparkBar } from './DisguiseMiniSparkBar';
+
+const MINI_DISMISS_MS = 460;
 
 type PersonPreviewSheetProps = {
   visible: boolean;
@@ -51,13 +55,52 @@ export function PersonPreviewSheet({
 
   const [photoIndex, setPhotoIndex] = useState(initialPhotoIndex);
   const [matchToastName, setMatchToastName] = useState<string | null>(null);
+  const [dismissKind, setDismissKind] = useState<MiniDismissKind | null>(null);
+  const [isDismissing, setIsDismissing] = useState(false);
+  const cardOpacity = useSharedValue(1);
+  const cardScale = useSharedValue(1);
 
   useEffect(() => {
     if (visible) {
       setPhotoIndex(initialPhotoIndex);
       setMatchToastName(null);
+      setDismissKind(null);
+      setIsDismissing(false);
+      cardOpacity.value = 1;
+      cardScale.value = 1;
     }
-  }, [visible, initialPhotoIndex, reporter?.id]);
+  }, [visible, initialPhotoIndex, reporter?.id, cardOpacity, cardScale]);
+
+  const dismissWithStat = useCallback(
+    (kind: MiniDismissKind) => {
+      if (isDismissing) {
+        return;
+      }
+      setIsDismissing(true);
+      setDismissKind(kind);
+      cardOpacity.value = withTiming(0, {
+        duration: MINI_DISMISS_MS - 70,
+        easing: Easing.out(Easing.cubic),
+      });
+      cardScale.value = withTiming(0.93, {
+        duration: MINI_DISMISS_MS - 70,
+        easing: Easing.out(Easing.cubic),
+      });
+      setTimeout(() => {
+        setDismissKind(null);
+        setIsDismissing(false);
+        cardOpacity.value = 1;
+        cardScale.value = 1;
+        onClose();
+      }, MINI_DISMISS_MS);
+    },
+    [cardOpacity, cardScale, isDismissing, onClose],
+  );
+
+  const cardAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: cardOpacity.value,
+    transform: [{ scale: cardScale.value }],
+  }));
 
   const linkedProfile = reporter ? resolveReporterSparkProfile(reporter, preferences.sparkSection) : null;
 
@@ -107,7 +150,7 @@ export function PersonPreviewSheet({
   };
 
   const handleLike = () => {
-    if (!linkedProfile || liked) {
+    if (!linkedProfile || liked || isDismissing) {
       return;
     }
     if (!guardLikeLimit()) {
@@ -117,21 +160,24 @@ export function PersonPreviewSheet({
     if (match) {
       notifyMatch(linkedProfile.name);
     }
+    dismissWithStat('like');
   };
 
   const handleUnlike = () => {
-    if (!linkedProfile) {
+    if (!linkedProfile || isDismissing) {
       return;
     }
     unlikeProfile(linkedProfile.id);
+    dismissWithStat('unlike');
   };
 
   const handleSuperLike = () => {
-    if (!linkedProfile) {
+    if (!linkedProfile || isDismissing) {
       return;
     }
     if (superLiked) {
       unlikeProfile(linkedProfile.id);
+      dismissWithStat('unlike');
       return;
     }
     if (!liked && !guardLikeLimit()) {
@@ -141,6 +187,7 @@ export function PersonPreviewSheet({
     if (match) {
       notifyMatch(linkedProfile.name);
     }
+    dismissWithStat('super');
   };
 
   const handlePass = () => {
@@ -156,10 +203,11 @@ export function PersonPreviewSheet({
 
   return (
     <>
-      <AnimatedOverlay visible={visible} onClose={onClose} variant="center">
-        <View
+      <AnimatedOverlay visible={visible} onClose={isDismissing ? () => {} : onClose} variant="center">
+        <Animated.View
           style={[
             styles.card,
+            cardAnimatedStyle,
             {
               backgroundColor: colors.surface,
               borderColor: colors.border,
@@ -171,6 +219,7 @@ export function PersonPreviewSheet({
           onStartShouldSetResponder={() => true}
           {...webClass('spark-sheet-in')}
         >
+          {dismissKind ? <DisguiseMiniDismissStat kind={dismissKind} accent={worldMeta.accent} /> : null}
           <View style={styles.cardInner}>
           <FadeSlideIn replayKey={visible} index={0}>
             <View style={styles.header}>
@@ -250,6 +299,7 @@ export function PersonPreviewSheet({
                 onUnlike={handleUnlike}
                 onSuperLike={handleSuperLike}
                 onPass={handlePass}
+                disabled={isDismissing}
               />
               <Text style={[styles.hint, { color: colors.textMuted }]}>
                 {superLiked
@@ -269,7 +319,7 @@ export function PersonPreviewSheet({
             </FadeSlideIn>
           )}
           </View>
-        </View>
+        </Animated.View>
       </AnimatedOverlay>
 
       <MatchToast

@@ -142,3 +142,84 @@ export async function generateDemoReply(ctx: DemoReplyContext): Promise<DemoRepl
 export function isDemoLlmEnabled(): boolean {
   return getGroqApiKey() !== null;
 }
+
+function buildLocalMatchOpener(profile: Profile): string {
+  const persona = getAiPersonaConfig(profile);
+  if (persona) {
+    return persona.openerMessages[0] ?? `Hey! I'm ${profile.name} — how's your week going?`;
+  }
+  if (profile.openingMove?.trim()) {
+    return profile.openingMove.trim();
+  }
+  const interest = profile.interests[0]?.toLowerCase() ?? 'good conversation';
+  const templates = [
+    `Hey! ${profile.name} here — your profile caught my eye. Into ${interest} too?`,
+    `Hi! I liked your vibe. What's been the highlight of your week?`,
+    `Hey — ${profile.name} 👋 Saw we both like ${interest}. Tell me more?`,
+  ];
+  const index = Number.parseInt(profile.id, 10) % templates.length;
+  return templates[Number.isNaN(index) ? 0 : index];
+}
+
+async function fetchGroqMatchOpener(profile: Profile): Promise<string | null> {
+  const apiKey = getGroqApiKey();
+  if (!apiKey) {
+    return null;
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), LLM_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(GROQ_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages: [
+          {
+            role: 'system',
+            content: buildSystemPrompt(profile),
+          },
+          {
+            role: 'user',
+            content:
+              'You just matched with someone on Spark. Send your opening text — 1-2 casual sentences, warm and specific. No hashtags.',
+          },
+        ],
+        max_tokens: 70,
+        temperature: 0.92,
+      }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const payload = (await response.json()) as {
+      choices?: { message?: { content?: string } }[];
+    };
+    const text = payload.choices?.[0]?.message?.content?.trim();
+    if (!text || text.length < 2) {
+      return null;
+    }
+    return text.replace(/^["']|["']$/g, '').slice(0, 200);
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+/** First message a demo match sends when the conversation opens. */
+export async function generateMatchOpener(profile: Profile): Promise<DemoReplyResult> {
+  const llmText = await fetchGroqMatchOpener(profile);
+  if (llmText) {
+    return { text: llmText, source: 'llm' };
+  }
+  return { text: buildLocalMatchOpener(profile), source: 'local' };
+}

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useCloudConversation } from '../hooks/useCloudConversation';
 import { Alert, FlatList, Image, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
@@ -10,6 +10,7 @@ import { AiPersonaBadge } from '../components/AiPersonaBadge';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { EmberStatusChips } from '../components/EmberStatusChips';
 import { ChatComposer } from '../components/ChatComposer';
+import { ChatReplySuggestions } from '../components/ChatReplySuggestions';
 import { GifPickerSheet } from '../components/GifPickerSheet';
 import { MessageReactionPicker } from '../components/MessageReactionPicker';
 import { VerificationBadges } from '../components/VerificationBadges';
@@ -30,7 +31,10 @@ import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
 import { useLiveExpiry } from '../hooks/useLiveExpiry';
 import { Message, MessageStatus } from '../types/match';
-import { getIcebreakerSuggestions } from '../utils/openingMove';
+import {
+  generateOpenerSuggestions,
+  generateReplySuggestions,
+} from '../services/chatReplyCoach';
 import { pickProfilePhoto } from '../utils/photoPicker';
 import { radii, spacing } from '../theme';
 
@@ -69,6 +73,9 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const [showProfile, setShowProfile] = useState(false);
   const [showDateCheckIn, setShowDateCheckIn] = useState(false);
   const [showVoiceNote, setShowVoiceNote] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+  const [aiSuggestionsLoading, setAiSuggestionsLoading] = useState(false);
+  const [aiSuggestionSource, setAiSuggestionSource] = useState<'llm' | 'local'>('local');
 
   const conversation = useMemo(
     () => conversations.find((c) => c.id === conversationId),
@@ -159,7 +166,28 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
     return status;
   };
 
-  const icebreakers = getIcebreakerSuggestions(profile, user);
+  const showAiSuggestions =
+    conversation.messages.length === 0 || (conversation.yourTurn && conversation.messages.length > 0);
+
+  const loadAiSuggestions = useCallback(() => {
+    setAiSuggestionsLoading(true);
+    const task =
+      conversation.messages.length === 0
+        ? generateOpenerSuggestions(profile, user)
+        : generateReplySuggestions(profile, user, conversation.messages);
+    void task.then((result) => {
+      setAiSuggestions([...result.options]);
+      setAiSuggestionSource(result.source);
+      setAiSuggestionsLoading(false);
+    });
+  }, [conversation.messages, profile, user]);
+
+  useEffect(() => {
+    if (!showAiSuggestions) {
+      return;
+    }
+    loadAiSuggestions();
+  }, [loadAiSuggestions, showAiSuggestions, conversation.messages.length, conversation.yourTurn]);
 
   const renderMessage = ({ item }: { item: Message }) => (
     <View style={[styles.bubbleRow, item.isMine ? styles.bubbleRowMine : styles.bubbleRowTheirs]}>
@@ -300,24 +328,24 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
                 : t('chat.expireHintSpark')}
           </Text>
           <View style={styles.icebreakers}>
-            <Text style={[styles.icebreakerTitle, { color: colors.textMuted }]}>
-              {profile.openingMove ? t('chat.openingMoveLabel', { name: profile.name }) : t('chat.breakTheIce')}
-            </Text>
             {profile.openingMove && (
-              <Text style={[styles.openingMovePreview, { color: colors.text }]}>
-                {profile.openingMove}
-              </Text>
+              <>
+                <Text style={[styles.icebreakerTitle, { color: colors.textMuted }]}>
+                  {t('chat.openingMoveLabel', { name: profile.name })}
+                </Text>
+                <Text style={[styles.openingMovePreview, { color: colors.text }]}>
+                  {profile.openingMove}
+                </Text>
+              </>
             )}
-            {icebreakers.map((prompt) => (
-              <AnimatedPressable
-                key={prompt}
-                scaleTo={0.96}
-                style={[styles.icebreakerChip, { backgroundColor: colors.surface }]}
-                onPress={() => handleSend(prompt)}
-              >
-                <Text style={[styles.icebreakerText, { color: colors.text }]}>{prompt}</Text>
-              </AnimatedPressable>
-            ))}
+            <ChatReplySuggestions
+              title={t('chat.aiSuggestOpener')}
+              options={aiSuggestions}
+              loading={aiSuggestionsLoading}
+              source={aiSuggestionSource}
+              onSelect={handleSend}
+              onRefresh={loadAiSuggestions}
+            />
             {!isSparkPlus && (
               <AnimatedPressable
                 scaleTo={0.96}
@@ -371,6 +399,17 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         }}
         onClose={() => setReactionMessageId(null)}
       />
+
+      {showAiSuggestions && conversation.messages.length > 0 ? (
+        <ChatReplySuggestions
+          title={t('chat.aiSuggestReply')}
+          options={aiSuggestions}
+          loading={aiSuggestionsLoading}
+          source={aiSuggestionSource}
+          onSelect={handleSend}
+          onRefresh={loadAiSuggestions}
+        />
+      ) : null}
 
       <ChatComposer
         draft={draft}

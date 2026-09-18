@@ -21,7 +21,6 @@ type LogoButtonProps = {
   children: ReactNode;
 };
 
-/** Brand-tile tap target for Spark/Ember ↔ disguise switching. */
 function LogoButton({
   compact = false,
   onPress,
@@ -46,18 +45,17 @@ function LogoButton({
   );
 }
 
-/** Spark/Ember: tap the S5 / E1e mark to enter that world’s disguise. */
-export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps) {
-  const { disguiseMode, setDisguiseMode, preferences } = useApp();
+/** Pulse P3 top-left — grey in Spark/Ember, tap to enter disguise. Hidden while disguised. */
+export function PulseDisguiseLogo({ compact = false }: { compact?: boolean }) {
+  const { disguiseMode, setDisguiseMode } = useApp();
   const meta = useDisguiseWorld();
-  const section = resolveSparkSection(preferences.sparkSection);
   const markSize = compact ? 36 : 40;
 
   const enterDisguise = useCallback(() => {
     setDisguiseMode(true);
   }, [setDisguiseMode]);
 
-  if (disguiseMode || variant !== 'spark') {
+  if (disguiseMode) {
     return <View style={[styles.placeholder, compact && styles.placeholderCompact]} />;
   }
 
@@ -68,13 +66,42 @@ export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps
       accessibilityLabel={`Emergency — switch to ${meta.name} disguise mode`}
       accessibilityHint={`Tap to hide ${meta.unlockLabel} behind ${meta.name}`}
     >
-      <BrandMark world={section} size={markSize} />
+      <BrandMark world="pulse" size={markSize} muted />
     </LogoButton>
   );
 }
 
+/** Spark S5 / Ember E1e centered while in dating mode. */
+export function SectionCenterLogo({ compact = false }: { compact?: boolean }) {
+  const { disguiseMode, preferences } = useApp();
+  const section = resolveSparkSection(preferences.sparkSection);
+  const markSize = compact ? 36 : 40;
+
+  if (disguiseMode) {
+    return null;
+  }
+
+  return (
+    <View style={styles.centerMark} accessibilityRole="image" accessibilityLabel={section === 'ember' ? 'Ember' : 'Spark'}>
+      <BrandMark world={section} size={markSize} />
+    </View>
+  );
+}
+
+/** @deprecated Use PulseDisguiseLogo (left) + SectionCenterLogo (center). */
+export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps) {
+  if (variant === 'pulse') {
+    return null;
+  }
+  return <PulseDisguiseLogo compact={compact} />;
+}
+
 const styles = StyleSheet.create({
   button: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  centerMark: {
     alignItems: 'center',
     justifyContent: 'center',
   },

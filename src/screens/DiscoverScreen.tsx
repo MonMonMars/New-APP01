@@ -12,7 +12,7 @@ import { LikeLimitModal } from '../components/LikeLimitModal';
 import { PostMatchMomentumModal } from '../components/PostMatchMomentumModal';
 import { MatchModal } from '../components/MatchModal';
 import { MatchToast } from '../components/MatchToast';
-import { ModeToggleLogo } from '../components/disguise/ModeToggleLogo';
+import { PulseDisguiseLogo } from '../components/disguise/ModeToggleLogo';
 import { PromptLikeSheet } from '../components/PromptLikeSheet';
 import { SuperLikeResultModal } from '../components/SuperLikeResultModal';
 import { SparkSectionToggle } from '../components/SparkSectionToggle';
@@ -343,7 +343,7 @@ export function DiscoverScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <View style={[styles.emergencyBar, { paddingTop: insets.top }]}>
-        <ModeToggleLogo variant="spark" compact />
+        <PulseDisguiseLogo compact />
         <View style={styles.sectionToggle}>
           <SparkSectionToggle
             section={resolveSparkSection(preferences.sparkSection)}

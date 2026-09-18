@@ -25,7 +25,7 @@ type SparkSectionToggleProps = {
 const SECTIONS: SparkSection[] = ['spark', 'ember'];
 
 const SECTION_MARK_SIZE: Record<'title' | 'chip' | 'row', number> = {
-  title: 22,
+  title: 36,
   chip: 16,
   row: 40,
 };
@@ -239,10 +239,7 @@ function WorldTrigger({
           scaleTo={0.94}
         >
           <BrandMark world={section} size={SECTION_MARK_SIZE.title} />
-          <Text style={[styles.titleLabel, { color: section === 'ember' ? colors.ember : colors.text }]}>
-            {label}
-          </Text>
-          <Ionicons name="chevron-down" size={18} color={section === 'ember' ? colors.ember : colors.textMuted} />
+          <Ionicons name="chevron-down" size={14} color={section === 'ember' ? colors.ember : colors.textMuted} />
         </AnimatedPressable>
       );
     default: {

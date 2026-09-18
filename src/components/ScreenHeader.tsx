@@ -5,7 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 import { spacing } from '../theme';
 import { IconButton } from './Button';
 import { DisguiseModeButton } from './disguise/ModeToggleButtons';
-import { ModeToggleLogo } from './disguise/ModeToggleLogo';
+import { PulseDisguiseLogo, SectionCenterLogo } from './disguise/ModeToggleLogo';
 
 type ScreenHeaderProps = {
   title?: string;
@@ -37,7 +37,9 @@ export function ScreenHeader({
   return (
     <View style={[styles.header, compact && styles.headerCompact]}>
       <View style={styles.leftSlot}>
-        {leftIcon ? (
+        {showLogo ? (
+          <PulseDisguiseLogo compact={compact} />
+        ) : leftIcon ? (
           <IconButton icon={leftIcon} onPress={onLeftPress} backgroundColor={colors.surface} />
         ) : (
           <View style={styles.iconButtonPlaceholder} />
@@ -46,7 +48,7 @@ export function ScreenHeader({
 
       <View style={styles.centerSlot}>
         {showLogo ? (
-          <ModeToggleLogo variant="spark" compact={compact} />
+          <SectionCenterLogo compact={compact} />
         ) : (
           <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
             {title}

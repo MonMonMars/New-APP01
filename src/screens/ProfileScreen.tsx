@@ -29,6 +29,8 @@ import { useDisguiseWorld } from '../hooks/useDisguiseWorld';
 import { canRevealProfileViews } from '../utils/genderAccountPerks';
 import { resolveSparkSection } from '../types/preferences';
 import { radii, spacing } from '../theme';
+import { LocaleToggle } from '../components/legal/LocaleToggle';
+import { APP_LOCALE_LABELS } from '../types/locale';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 
 type SettingsRoute =
@@ -279,6 +281,17 @@ export function ProfileScreen() {
           <AnimatedPressable onPress={cycleTheme}>
             <Text style={[styles.themeToggle, { color: colors.gradientEnd }]}>{themeLabel}</Text>
           </AnimatedPressable>
+        </View>
+
+        <View style={[styles.toggleRow, { borderBottomColor: colors.border }]}>
+          <Ionicons name="language-outline" size={22} color={colors.textMuted} />
+          <View style={styles.toggleText}>
+            <Text style={[styles.toggleLabel, { color: colors.text }]}>{t('profile.language')}</Text>
+            <Text style={[styles.toggleDesc, { color: colors.textMuted }]}>
+              {APP_LOCALE_LABELS[locale]}
+            </Text>
+          </View>
+          <LocaleToggle compact inline />
         </View>
 
         <View style={[styles.toggleRow, { borderBottomColor: colors.border }]}>

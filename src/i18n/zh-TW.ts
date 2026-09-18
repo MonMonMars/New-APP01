@@ -90,6 +90,8 @@ export const zhTw = {
     pauseAccount: '暫停帳號',
     pauseHint: '從推薦列表中隱藏你的個人檔案',
     appearance: '外觀',
+    language: '語言',
+    languageHint: '應用程式顯示語言',
     lightMode: '淺色模式',
     darkMode: '深色模式',
     disguiseMode: '偽裝模式',

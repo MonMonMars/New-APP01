@@ -90,6 +90,8 @@ export const en = {
     pauseAccount: 'Pause account',
     pauseHint: 'Hide your profile from the deck',
     appearance: 'Appearance',
+    language: 'Language',
+    languageHint: 'App display language',
     lightMode: 'Light mode',
     darkMode: 'Dark mode',
     disguiseMode: 'Disguise mode',

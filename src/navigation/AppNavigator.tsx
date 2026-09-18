@@ -8,9 +8,10 @@ import {
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
 import { type ReactNode, useEffect, useRef } from 'react';
+import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
-import { BrandMark } from '../components/brand/BrandMark';
+import { PulseDisguiseWordmark } from '../components/disguise/ModeToggleLogo';
 import { useTranslation } from '../i18n';
 import { CookieConsentBanner } from '../components/legal/CookieConsentBanner';
 import { useApp } from '../context/AppContext';
@@ -39,6 +40,24 @@ import { WorldSwitchVeil } from '../components/motion/WorldSwitchVeil';
 import { DisguiseNavigator } from './DisguiseNavigator';
 import { MainTabParamList, RootStackParamList } from '../types/navigation';
 import { resolveSparkSection } from '../types/preferences';
+
+function DiscoverTabButton(props: BottomTabBarButtonProps) {
+  const { setDisguiseMode } = useApp();
+  const selected = props.accessibilityState?.selected ?? false;
+
+  return (
+    <TabBarButton
+      {...props}
+      onPress={(event) => {
+        if (selected) {
+          setDisguiseMode(true);
+          return;
+        }
+        props.onPress?.(event);
+      }}
+    />
+  );
+}
 
 function HydrationGate({ children }: { children: ReactNode }) {
   const { isHydrated } = useApp();
@@ -71,10 +90,9 @@ function MatchesTabScreen() {
 }
 
 function MainTabs() {
-  const { likesTabBadge, matchesTabBadge, preferences } = useApp();
+  const { likesTabBadge, matchesTabBadge } = useApp();
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const discoverWorld = resolveSparkSection(preferences.sparkSection);
 
   return (
     <Tab.Navigator
@@ -83,7 +101,8 @@ function MainTabs() {
         lazy: true,
         animation: 'fade',
         animationDuration: 220,
-        tabBarButton: (props) => <TabBarButton {...props} />,
+        tabBarButton: (props) =>
+          route.name === 'Discover' ? <DiscoverTabButton {...props} /> : <TabBarButton {...props} />,
         tabBarStyle: {
           backgroundColor: colors.background,
           borderTopColor: colors.border,
@@ -99,7 +118,7 @@ function MainTabs() {
         },
         tabBarIcon: ({ color, size }) => {
           if (route.name === 'Discover') {
-            return <BrandMark world={discoverWorld} size={size} />;
+            return <PulseDisguiseWordmark markSize={size} />;
           }
           const icons: Record<
             Exclude<keyof MainTabParamList, 'Discover'>,
@@ -117,7 +136,10 @@ function MainTabs() {
       <Tab.Screen
         name="Discover"
         component={DiscoverScreen}
-        options={{ tabBarLabel: t('tabs.discover') }}
+        options={{
+          tabBarLabel: 'Pulse',
+          tabBarAccessibilityLabel: 'Pulse disguise mode',
+        }}
       />
       <Tab.Screen
         name="Likes"

@@ -1,10 +1,12 @@
 import { ReactNode, useCallback } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { BrandMark } from '../brand/BrandMark';
 import { useApp } from '../../context/AppContext';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
+import { pulseTimesFontFamily } from '../../theme/pulseBrand';
 import { resolveSparkSection } from '../../types/preferences';
+import { useTheme } from '../../context/ThemeContext';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type ModeToggleLogoProps = {
@@ -45,7 +47,32 @@ function LogoButton({
   );
 }
 
-/** Pulse P3 top-left — grey in Spark/Ember, tap to enter disguise. Hidden while disguised. */
+/** Grey P + “Pulse” wordmark — lower-left tab bar entry in Spark/Ember. */
+export function PulseDisguiseWordmark({ markSize = 22 }: { markSize?: number }) {
+  const { colors } = useTheme();
+  const wordSize = Math.max(11, Math.round(markSize * 0.58));
+
+  return (
+    <View style={styles.wordmarkRow} accessibilityRole="image" accessibilityLabel="Pulse">
+      <BrandMark world="pulse" size={markSize} muted />
+      <Text
+        style={[
+          styles.pulseWord,
+          {
+            fontSize: wordSize,
+            lineHeight: wordSize + 2,
+            color: colors.textMuted,
+            fontFamily: pulseTimesFontFamily,
+          },
+        ]}
+      >
+        Pulse
+      </Text>
+    </View>
+  );
+}
+
+/** Pulse P3 top-left — grey P only in Spark/Ember, tap to enter disguise. Hidden while disguised. */
 export function PulseDisguiseLogo({ compact = false }: { compact?: boolean }) {
   const { disguiseMode, setDisguiseMode } = useApp();
   const meta = useDisguiseWorld();
@@ -97,6 +124,15 @@ export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps
 }
 
 const styles = StyleSheet.create({
+  wordmarkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  pulseWord: {
+    fontWeight: '600',
+    letterSpacing: -0.2,
+  },
   button: {
     alignItems: 'center',
     justifyContent: 'center',

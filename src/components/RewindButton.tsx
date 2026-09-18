@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
 
@@ -22,6 +23,7 @@ export function RewindButton({
   variant = 'overlay',
 }: RewindButtonProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   if (!visible) {
     return null;
@@ -45,10 +47,10 @@ export function RewindButton({
         { backgroundColor: colors.surface, borderColor: colors.rewind },
       ]}
       onPress={handlePress}
-      accessibilityLabel="Rewind last pass"
+      accessibilityLabel={t('discover.rewindA11y')}
     >
       <Ionicons name="refresh" size={isHeader ? 16 : 18} color={colors.rewind} />
-      {!isHeader ? <Text style={[styles.label, { color: colors.rewind }]}>Rewind</Text> : null}
+      {!isHeader ? <Text style={[styles.label, { color: colors.rewind }]}>{t('discover.rewind')}</Text> : null}
       {!isSparkPlus && (
         <View style={[styles.plusDot, { backgroundColor: colors.gradientEnd }]}>
           <Ionicons name="diamond" size={8} color={colors.text} />

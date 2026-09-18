@@ -1,20 +1,23 @@
+import { translate } from '../i18n';
+import { AppLocale } from '../types/locale';
+
 /** Hinge Prompt Feedback–inspired tips (rule-based, no AI). */
-export function getPromptFeedback(answer: string): string | null {
+export function getPromptFeedback(answer: string, locale: AppLocale): string | null {
   const trimmed = answer.trim();
   if (trimmed.length === 0) {
-    return 'Add a specific answer — vague replies are easy to skip.';
+    return translate(locale, 'promptFeedback.empty');
   }
   if (trimmed.length < 12) {
-    return 'Try a bit more detail. A sentence or two helps you stand out.';
+    return translate(locale, 'promptFeedback.tooShort');
   }
   if (/^(yes|no|idk|nothing|n\/a)$/i.test(trimmed)) {
-    return 'One-word answers rarely spark conversation. What is the story behind it?';
+    return translate(locale, 'promptFeedback.oneWord');
   }
   if (!/[.!?]/.test(trimmed) && trimmed.length < 40) {
-    return 'Consider ending with something playful or a question they can reply to.';
+    return translate(locale, 'promptFeedback.noPunctuation');
   }
   if (/^(i like|i love|i enjoy)/i.test(trimmed) && trimmed.split(' ').length < 8) {
-    return 'Nice start — add why it matters to you or a funny detail.';
+    return translate(locale, 'promptFeedback.genericStart');
   }
   return null;
 }

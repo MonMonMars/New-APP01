@@ -2,8 +2,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { verificationHowItWorksSteps } from '../content/verificationPolicy';
+import { getVerificationHowItWorksSteps } from '../content/verificationPolicy';
+import { useAppLocale } from '../hooks/useAppLocale';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { UserProfile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { VerificationBadges } from './VerificationBadges';
@@ -26,33 +28,36 @@ type TrustItem = {
 
 export function ProfileTrustSection({ user, onUpdate, onOpenPolicy }: ProfileTrustSectionProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
+  const { locale } = useAppLocale();
   const [activeKind, setActiveKind] = useState<'photo' | 'person' | 'age' | null>(null);
 
   const items: TrustItem[] = [
     {
       id: 'photo',
       icon: 'camera',
-      title: 'Photo verified',
-      description: 'Live selfie matches your profile photos',
+      title: t('profileTrust.photoTitle'),
+      description: t('profileTrust.photoDesc'),
       done: user.photoVerified === true,
     },
     {
       id: 'person',
       icon: 'person',
-      title: 'Real person',
-      description: 'Liveness scan — confirms a real human',
+      title: t('profileTrust.personTitle'),
+      description: t('profileTrust.personDesc'),
       done: user.personVerified === true,
     },
     {
       id: 'age',
       icon: 'shield-checkmark',
-      title: 'Age 18+',
-      description: 'Government ID confirms you are an adult',
+      title: t('profileTrust.ageTitle'),
+      description: t('profileTrust.ageDesc'),
       done: user.ageVerified === true,
     },
   ];
 
   const completed = items.filter((item) => item.done).length;
+  const howItWorksSteps = getVerificationHowItWorksSteps(locale);
 
   const handleComplete = (kind: 'photo' | 'person' | 'age') => {
     if (kind === 'photo') {
@@ -70,9 +75,9 @@ export function ProfileTrustSection({ user, onUpdate, onOpenPolicy }: ProfileTru
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={styles.header}>
         <View style={styles.headerText}>
-          <Text style={[styles.title, { color: colors.text }]}>Trust & verification</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('profileTrust.title')}</Text>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-            {completed}/{items.length} complete
+            {t('profileTrust.progress', { completed, total: items.length })}
           </Text>
           <VerificationBadges
             photoVerified={user.photoVerified}
@@ -109,14 +114,14 @@ export function ProfileTrustSection({ user, onUpdate, onOpenPolicy }: ProfileTru
           {item.done ? (
             <Ionicons name="checkmark-circle" size={22} color={colors.like} />
           ) : (
-            <Text style={[styles.verifyCta, { color: colors.gradientEnd }]}>Verify</Text>
+            <Text style={[styles.verifyCta, { color: colors.gradientEnd }]}>{t('profileTrust.verify')}</Text>
           )}
         </AnimatedPressable>
       ))}
 
       <View style={[styles.stepsBox, { backgroundColor: colors.background }]}>
-        <Text style={[styles.stepsTitle, { color: colors.textMuted }]}>How it works</Text>
-        {verificationHowItWorksSteps.slice(0, 2).map((step) => (
+        <Text style={[styles.stepsTitle, { color: colors.textMuted }]}>{t('profileTrust.howItWorks')}</Text>
+        {howItWorksSteps.slice(0, 2).map((step) => (
           <Text key={step.step} style={[styles.stepLine, { color: colors.textMuted }]}>
             {step.step}. {step.title} — {step.body}
           </Text>

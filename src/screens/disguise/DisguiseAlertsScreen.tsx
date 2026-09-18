@@ -11,6 +11,7 @@ import { FeedPersonThumbnail } from '../../components/disguise/FeedPersonThumbna
 import { NewsArticleSheet } from '../../components/disguise/NewsArticleSheet';
 import { PersonPreviewSheet } from '../../components/disguise/PersonPreviewSheet';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import {
   AdPost,
   DisguiseAlert,
@@ -35,6 +36,7 @@ import { profileIntroCaption } from '../../utils/profileIntroCaption';
 export function DisguiseAlertsScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const { markActivityAlertsRead, preferences } = useApp();
   const meta = useDisguiseWorld();
   const refreshGeneration = usePulseFeedRefreshGeneration();
@@ -60,7 +62,7 @@ export function DisguiseAlertsScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
-      <DisguiseHeader title="Activity" showSearch={false} />
+      <DisguiseHeader title={t('tabs.activity')} showSearch={false} />
       <FlatList
         data={alerts}
         extraData={refreshGeneration}
@@ -97,7 +99,7 @@ export function DisguiseAlertsScreen() {
                   <PulseProfileSwap profileKey={profileKey} style={styles.avatarSlot}>
                     <FeedPersonThumbnail
                       imageUrl={avatarUrl}
-                      overlayText={item.person.overlayText ?? 'LIVE'}
+                      overlayText={item.person.overlayText ?? t('profile.live')}
                       overlayVariant={item.person.overlayVariant ?? 'news'}
                       plainAvatar={!item.person.overlayVariant}
                       contentKind="profile"
@@ -105,7 +107,7 @@ export function DisguiseAlertsScreen() {
                       hideLabel
                       showIconBadge
                       onPress={() => openPersonPreview(item)}
-                      accessibilityLabel={`View profile: ${item.person.name}`}
+                      accessibilityLabel={t('disguiseMiniWindow.viewProfile', { name: item.person.name })}
                     />
                   </PulseProfileSwap>
                   <View style={styles.textWrap}>

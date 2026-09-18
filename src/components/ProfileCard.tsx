@@ -155,13 +155,13 @@ export function ProfileCard({
 
       {profile.mostCompatible && isTop && (
         <View style={[styles.compatibleBadge, { backgroundColor: colors.boost }]}>
-          <Text style={styles.compatibleBadgeText}>Most Compatible</Text>
+          <Text style={styles.compatibleBadgeText}>{t('discover.mostCompatibleBadge')}</Text>
         </View>
       )}
 
       {profile.spotlight && isTop && (
         <View style={[styles.crushBadge, { backgroundColor: colors.heartRed }]}>
-          <Text style={styles.crushBadgeText}>Crush</Text>
+          <Text style={styles.crushBadgeText}>{t('discover.crushBadge')}</Text>
         </View>
       )}
 
@@ -193,7 +193,7 @@ export function ProfileCard({
           {visiblePhotoCount < photoCount ? (
             <View style={styles.privateBadge}>
               <Ionicons name="lock-closed" size={11} color={colors.ember} />
-              <Text style={styles.privateBadgeText}>Private photos</Text>
+              <Text style={styles.privateBadgeText}>{t('discover.privatePhotos')}</Text>
             </View>
           ) : null}
           <View style={styles.tapZones}>

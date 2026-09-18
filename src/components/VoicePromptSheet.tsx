@@ -4,6 +4,7 @@ import { Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { VOICE_PROMPT_QUESTIONS, VoicePrompt } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { modalFill } from '../theme/modalFill';
@@ -26,6 +27,7 @@ export function VoicePromptSheet({
 }: VoicePromptSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [question, setQuestion] = useState(existing?.question ?? VOICE_PROMPT_QUESTIONS[0]);
   const [recording, setRecording] = useState(false);
   const [elapsed, setElapsed] = useState(0);
@@ -89,12 +91,10 @@ export function VoicePromptSheet({
           onPress={(event) => event.stopPropagation()}
         >
           <View style={styles.handle} />
-          <Text style={[styles.title, { color: colors.text }]}>Voice prompt</Text>
-          <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-            Record a short intro — like Hinge voice prompts. Tap record, then save to your profile.
-          </Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('editProfile.voicePromptLabel')}</Text>
+          <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('voicePrompt.subtitle')}</Text>
 
-          <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>Choose a prompt</Text>
+          <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>{t('voicePrompt.choosePrompt')}</Text>
           <View style={styles.chipRow}>
             {VOICE_PROMPT_QUESTIONS.map((option) => {
               const selected = question === option;
@@ -130,7 +130,11 @@ export function VoicePromptSheet({
             <Ionicons name={recording ? 'stop' : 'mic'} size={28} color={colors.text} />
           </AnimatedPressable>
           <Text style={[styles.timer, { color: colors.text }]}>
-            {recording ? `Recording… ${elapsed}s` : hasRecording ? `${elapsed}s recorded` : 'Tap to record (max 30s)'}
+            {recording
+              ? t('voicePrompt.recording', { seconds: elapsed })
+              : hasRecording
+                ? t('voicePrompt.recorded', { seconds: elapsed })
+                : t('voicePrompt.tapToRecord')}
           </Text>
 
           <AnimatedPressable
@@ -138,12 +142,12 @@ export function VoicePromptSheet({
             onPress={handleSave}
             disabled={!hasRecording}
           >
-            <Text style={[styles.saveText, { color: colors.text }]}>Save voice prompt</Text>
+            <Text style={[styles.saveText, { color: colors.text }]}>{t('voicePrompt.save')}</Text>
           </AnimatedPressable>
 
           {existing && (
             <AnimatedPressable style={styles.removeButton} onPress={onRemove}>
-              <Text style={[styles.removeText, { color: colors.nope }]}>Remove voice prompt</Text>
+              <Text style={[styles.removeText, { color: colors.nope }]}>{t('voicePrompt.remove')}</Text>
             </AnimatedPressable>
           )}
         </AnimatedPressable>

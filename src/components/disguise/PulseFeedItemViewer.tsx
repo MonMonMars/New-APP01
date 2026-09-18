@@ -3,6 +3,8 @@ import { useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { FeedItem } from '../../data/disguiseFeed';
 import { buildDisguiseFeed } from '../../utils/buildDisguiseFeed';
+import { isCosmosTarotFeedItem } from '../../utils/disguiseFeedCatalog';
+import { usesFemalePulseExperience } from '../../utils/genderAccountPerks';
 import { findFeedItemById, findNewsPostByHeadline } from '../../utils/findFeedItem';
 import { profileIdFromPostId } from '../../utils/resolveDisguiseProfile';
 import { AdLandingSheet } from './AdLandingSheet';
@@ -22,21 +24,25 @@ export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItem
   const { user, disguiseAdCreative, preferences } = useApp();
 
   const feedItem = useMemo((): FeedItem | null => {
+    const allowItem = (item: FeedItem | undefined): FeedItem | null => {
+      if (!item) {
+        return null;
+      }
+      if (!usesFemalePulseExperience(user.gender) && isCosmosTarotFeedItem(item)) {
+        return null;
+      }
+      return item;
+    };
+
     if (itemId && !itemId.startsWith('empty-') && !itemId.startsWith('hist-')) {
       const fromFeed = buildDisguiseFeed(user, disguiseAdCreative, preferences.sparkSection).find((item) => item.id === itemId);
-      if (fromFeed) {
-        return fromFeed;
-      }
-      const fromCatalog = findFeedItemById(itemId);
-      if (fromCatalog) {
-        return fromCatalog;
+      const resolved = allowItem(fromFeed) ?? allowItem(findFeedItemById(itemId, user.gender));
+      if (resolved) {
+        return resolved;
       }
     }
     if (headline) {
-      const news = findNewsPostByHeadline(headline);
-      if (news) {
-        return news;
-      }
+      return allowItem(findNewsPostByHeadline(headline, user.gender));
     }
     return null;
   }, [itemId, headline, user, disguiseAdCreative, preferences.sparkSection]);

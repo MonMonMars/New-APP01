@@ -61,7 +61,7 @@ export function DisguiseFeedScreen() {
 
   const feedItems = useMemo(() => {
     const base = buildDisguiseFeed(user, disguiseAdCreative, preferences.sparkSection);
-    const filtered = filterDisguiseFeed(base, topic);
+    const filtered = filterDisguiseFeed(base, topic, user.gender);
     return filtered.filter((item) => {
       if (item.type !== 'social') {
         return true;

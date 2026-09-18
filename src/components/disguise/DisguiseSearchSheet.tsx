@@ -11,7 +11,6 @@ import { disguiseTrendingTopics } from '../../data/disguiseTrending';
 import { radii, spacing } from '../../theme';
 import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { disguiseFeedItemsForGender } from '../../utils/disguiseFeedCatalog';
-import { findFeedItemById } from '../../utils/findFeedItem';
 import { FeedItem } from '../../data/disguiseFeed';
 import { usesFemalePulseExperience } from '../../utils/genderAccountPerks';
 import { AnimatedPressable } from '../AnimatedPressable';
@@ -89,7 +88,7 @@ export function DisguiseSearchSheet({
       }
       if (searchableText(item).toLowerCase().includes(q)) {
         seen.add(item.id);
-        articleHits.push({ kind: 'article', item: findFeedItemById(item.id) ?? item });
+        articleHits.push({ kind: 'article', item });
       }
       if (articleHits.length >= 8) {
         break;

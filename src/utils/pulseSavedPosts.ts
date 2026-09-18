@@ -1,6 +1,9 @@
 import { FeedItem } from '../data/disguiseFeed';
 import { PulseDetailItem } from '../components/disguise/PulseDetailSheet';
+import type { ProfileGender } from '../types/profile';
+import { isCosmosTarotFeedItem } from './disguiseFeedCatalog';
 import { findFeedItemById } from './findFeedItem';
+import { usesFemalePulseExperience } from './genderAccountPerks';
 
 function feedItemToDetail(item: FeedItem): PulseDetailItem | null {
   switch (item.type) {
@@ -39,7 +42,11 @@ function feedItemToDetail(item: FeedItem): PulseDetailItem | null {
   }
 }
 
-export function resolveSavedPulsePosts(savedIds: string[], feed: FeedItem[]): PulseDetailItem[] {
+export function resolveSavedPulsePosts(
+  savedIds: string[],
+  feed: FeedItem[],
+  gender?: ProfileGender | null,
+): PulseDetailItem[] {
   if (savedIds.length === 0) {
     return [];
   }
@@ -48,8 +55,11 @@ export function resolveSavedPulsePosts(savedIds: string[], feed: FeedItem[]): Pu
   const resolved: PulseDetailItem[] = [];
 
   for (const id of savedIds) {
-    const item = byId.get(id) ?? findFeedItemById(id);
+    const item = byId.get(id) ?? findFeedItemById(id, gender);
     if (!item) {
+      continue;
+    }
+    if (!usesFemalePulseExperience(gender) && isCosmosTarotFeedItem(item)) {
       continue;
     }
     const detail = feedItemToDetail(item);

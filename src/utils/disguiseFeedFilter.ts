@@ -1,4 +1,7 @@
 import { FeedItem } from '../data/disguiseFeed';
+import type { ProfileGender } from '../types/profile';
+import { isCosmosTarotFeedItem, isFemaleOnlyPulseTopic } from './disguiseFeedCatalog';
+import { usesFemalePulseExperience } from './genderAccountPerks';
 
 const TOPIC_FILTERS: Record<string, (item: FeedItem) => boolean> = {
   '#WeekendPlans': (item) =>
@@ -75,9 +78,22 @@ const TOPIC_FILTERS: Record<string, (item: FeedItem) => boolean> = {
       item.headline.toLowerCase().includes('fashion')),
 };
 
-export function filterDisguiseFeed(items: FeedItem[], topic?: string): FeedItem[] {
+function newsWithoutCosmos(items: FeedItem[]): FeedItem[] {
+  return items.filter((item) => item.type === 'news' && !isCosmosTarotFeedItem(item));
+}
+
+export function filterDisguiseFeed(
+  items: FeedItem[],
+  topic?: string,
+  gender?: ProfileGender | null,
+): FeedItem[] {
   if (!topic) {
     return items;
+  }
+
+  if (isFemaleOnlyPulseTopic(topic) && !usesFemalePulseExperience(gender)) {
+    const newsItems = newsWithoutCosmos(items);
+    return newsItems.length > 0 ? newsItems.slice(0, 8) : items.slice(0, 6);
   }
 
   const predicate = TOPIC_FILTERS[topic];

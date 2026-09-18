@@ -61,16 +61,37 @@ if (hasPhotoMeta && hasNext) {
   await page.getByLabel(/next photo/i).click();
   await page.waitForTimeout(500);
 }
-const after = await page.locator('body').innerText();
-const advanced = /photo 2 of/i.test(after);
+const afterSwipe = await page.locator('body').innerText();
+const advanced = /photo 2 of/i.test(afterSwipe);
+
+const likeBtn = page.getByLabel(/like profile/i).first();
+const hasLike = await likeBtn.isVisible().catch(() => false);
+let dismissStatVisible = false;
+let closedAfterDismiss = false;
+
+if (hasLike) {
+  await likeBtn.click();
+  await page.waitForTimeout(120);
+  const duringDismiss = await page.locator('body').innerText();
+  dismissStatVisible = /\bSAVED\b/i.test(duringDismiss);
+  await page.waitForTimeout(520);
+  closedAfterDismiss = !(await page.getByLabel(/like profile|unlike profile/i).first().isVisible().catch(() => false));
+}
 
 console.log(JSON.stringify({
   hasPhotoMeta,
   hasNext,
   advanced,
   hasProfileWord,
-  sample: after.slice(0, 600),
+  hasLike,
+  dismissStatVisible,
+  closedAfterDismiss,
+  sample: afterSwipe.slice(0, 600),
 }, null, 2));
 
 await browser.close();
-process.exit(hasPhotoMeta && hasNext && advanced && !hasProfileWord ? 0 : 1);
+process.exit(
+  hasPhotoMeta && hasNext && advanced && !hasProfileWord && hasLike && dismissStatVisible && closedAfterDismiss
+    ? 0
+    : 1,
+);

@@ -637,6 +637,21 @@ export const zhTw = {
     leaveA11y: '離開 · {unlockLabel}',
     leaveHint: '開啟 {unlockLabel}',
   },
+  disguiseMiniDismiss: {
+    like: '已儲存',
+    unlike: '已移除',
+    super: '超級喜歡',
+    pass: '已略過',
+  },
+  disguiseMiniWindow: {
+    photoMeta: '照片 {current} / {total}',
+    superLikedHint: '超級喜歡 — 已存入 {world}',
+    savedToLikes: '已存入喜歡列表',
+    passedHint: '已略過 — 不會出現在推薦列表',
+    actionsSync: '操作會同步至 {world}',
+    sponsoredPreview: '這是你的贊助個人檔案預覽。',
+    closeA11y: '關閉',
+  },
   momentum: {
     title: '勢如破竹！',
     subtitle: '已有三個配對 — Spark+ 讓你查看誰喜歡你、依意圖篩選，並以無限喜歡保持動能。',

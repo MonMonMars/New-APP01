@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -11,29 +11,33 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import { spacing } from '../../theme';
 
-export type MiniDismissKind = 'like' | 'unlike' | 'super';
+export type MiniDismissKind = 'like' | 'unlike' | 'super' | 'pass';
 
 type DisguiseMiniDismissStatProps = {
   kind: MiniDismissKind;
   accent: string;
 };
 
-const STAT_COPY: Record<
+const STAT_META: Record<
   MiniDismissKind,
-  { icon: keyof typeof Ionicons.glyphMap; label: string; iconColorKey: 'heartRed' | 'textMuted' | 'superLike' }
+  { icon: keyof typeof Ionicons.glyphMap; labelKey: `disguiseMiniDismiss.${MiniDismissKind}`; iconColorKey: 'heartRed' | 'textMuted' | 'superLike' }
 > = {
-  like: { icon: 'heart', label: 'Saved', iconColorKey: 'heartRed' },
-  unlike: { icon: 'heart-dislike-outline', label: 'Removed', iconColorKey: 'textMuted' },
-  super: { icon: 'star', label: 'Super liked', iconColorKey: 'superLike' },
+  like: { icon: 'heart', labelKey: 'disguiseMiniDismiss.like', iconColorKey: 'heartRed' },
+  unlike: { icon: 'heart-dislike-outline', labelKey: 'disguiseMiniDismiss.unlike', iconColorKey: 'textMuted' },
+  super: { icon: 'star', labelKey: 'disguiseMiniDismiss.super', iconColorKey: 'superLike' },
+  pass: { icon: 'trash-outline', labelKey: 'disguiseMiniDismiss.pass', iconColorKey: 'textMuted' },
 };
 
 /** Brief pulse + icon flash while the mini window fades out after a Spark action. */
 export function DisguiseMiniDismissStat({ kind, accent }: DisguiseMiniDismissStatProps) {
   const { colors } = useTheme();
-  const copy = STAT_COPY[kind];
-  const iconColor = colors[copy.iconColorKey];
+  const { t } = useTranslation();
+  const meta = STAT_META[kind];
+  const iconColor = colors[meta.iconColorKey];
+  const label = t(meta.labelKey);
 
   const ringScale = useSharedValue(0.45);
   const ringOpacity = useSharedValue(0);
@@ -80,14 +84,12 @@ export function DisguiseMiniDismissStat({ kind, accent }: DisguiseMiniDismissSta
   }));
 
   return (
-    <View style={styles.overlay} pointerEvents="none">
-      <Animated.View
-        style={[styles.ring, { borderColor: accent }, ringStyle]}
-      />
+    <View style={styles.overlay} pointerEvents="none" accessibilityLiveRegion="polite">
+      <Animated.View style={[styles.ring, { borderColor: accent }, ringStyle]} />
       <Animated.View style={[styles.badge, { backgroundColor: colors.surface, borderColor: accent }, badgeStyle]}>
-        <Ionicons name={copy.icon} size={kind === 'super' ? 22 : 20} color={iconColor} />
+        <Ionicons name={meta.icon} size={kind === 'super' ? 22 : 20} color={iconColor} />
       </Animated.View>
-      <Animated.Text style={[styles.label, { color: colors.text }, labelStyle]}>{copy.label}</Animated.Text>
+      <Animated.Text style={[styles.label, { color: colors.text }, labelStyle]}>{label}</Animated.Text>
     </View>
   );
 }

@@ -638,6 +638,21 @@ export const en = {
     leaveA11y: 'Leave {unlockLabel}',
     leaveHint: 'Opens {unlockLabel}',
   },
+  disguiseMiniDismiss: {
+    like: 'Saved',
+    unlike: 'Removed',
+    super: 'Super liked',
+    pass: 'Passed',
+  },
+  disguiseMiniWindow: {
+    photoMeta: 'Photo {current} of {total}',
+    superLikedHint: 'Super liked — saved to {world}',
+    savedToLikes: 'Saved to Likes',
+    passedHint: 'Passed — hidden from deck',
+    actionsSync: 'Actions sync to {world}',
+    sponsoredPreview: 'This is your sponsored profile preview.',
+    closeA11y: 'Close',
+  },
   momentum: {
     title: "You're on a roll!",
     subtitle: 'Three matches in — Spark+ lets you see who already likes you, filter by intent, and keep the momentum going with unlimited likes.',

@@ -120,6 +120,7 @@ import {
   LegalConsentRecord,
   PrivacyPreferences,
 } from '../types/privacy';
+import { buildMatchOpenerMessage } from '../services/demoChatOpener';
 import { generateDemoReply } from '../services/demoChatLlm';
 import { buildUserDataExport, shareUserDataExport } from '../utils/dataExport';
 import {
@@ -1658,12 +1659,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (prev.some((item) => item.match.profile.id === profile.id)) {
           return prev;
         }
+        const opener = buildMatchOpenerMessage(profile);
+        const openerMessage = opener
+          ? {
+              id: `m-open-${profile.id}`,
+              text: opener,
+              sentAt: new Date().toISOString(),
+              isMine: false,
+            }
+          : null;
         const conversation: Conversation = {
           id: `conv-${profile.id}`,
           match,
-          messages: [],
+          messages: openerMessage ? [openerMessage] : [],
+          lastMessage: openerMessage?.text,
+          lastMessageAt: openerMessage?.sentAt,
           yourTurn: true,
-          unread: false,
+          unread: Boolean(openerMessage),
         };
         return [conversation, ...prev];
       });

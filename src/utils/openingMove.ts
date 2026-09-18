@@ -7,6 +7,12 @@ export const OPENING_MOVE_SUGGESTIONS = [
   'Two truths and a lie?',
   "Best meal you've had lately?",
   'What are you passionate about right now?',
+  'Window seat or aisle seat — settle this for me.',
+  'Team early morning or late-night adventures?',
+  'What is a green flag you look for?',
+  'Describe your perfect lazy Sunday.',
+  'Last song that got stuck in your head?',
+  'Sweet or savory brunch person?',
 ] as const;
 
 export function pickOpeningMove(profile: Profile): string {

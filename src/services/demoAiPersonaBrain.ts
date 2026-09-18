@@ -161,7 +161,7 @@ export function generateAiPersonaReply(ctx: DemoReplyContext): string {
   );
 
   const pickUnique = (pool: string[]): string => {
-    for (let i = 0; i < 5; i += 1) {
+    for (let i = 0; i < 8; i += 1) {
       const candidate = pick(pool);
       if (!used.has(normalize(candidate))) {
         return candidate;

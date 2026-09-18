@@ -127,6 +127,19 @@ function openingMoveReply(profile: Profile): string | null {
   ]);
 }
 
+function cityPersonalReply(profile: Profile): string | null {
+  const cityLabel = profile.city?.split(',')[0]?.trim();
+  if (!cityLabel) {
+    return null;
+  }
+  return pick([
+    `${cityLabel} has some great spots — I can share recs.`,
+    `I am usually around ${cityLabel} if that helps.`,
+    `There is a hidden gem in ${cityLabel} I swear by.`,
+    `${cityLabel} dates are underrated honestly.`,
+  ]);
+}
+
 function bioReply(profile: Profile, text: string): string | null {
   const bio = profile.bio.toLowerCase();
   const bioWords = bio.split(/\s+/).filter((w) => w.length > 5);
@@ -147,7 +160,7 @@ function contextualReply(ctx: DemoReplyContext): string {
   const text = normalize(ctx.userMessage);
   const name = ctx.profile.name;
 
-  if (!text || text === 'photo') {
+  if (!text || text === 'photo' || text.includes('sent a photo')) {
     return pick(PHOTO_REPLIES);
   }
 
@@ -278,6 +291,10 @@ function contextualReply(ctx: DemoReplyContext): string {
   }
 
   if (matchesAny(text, ['city', 'neighborhood', 'borough', 'area', 'live near', 'where do you live'])) {
+    const personalCity = cityPersonalReply(ctx.profile);
+    if (personalCity && Math.random() < 0.45) {
+      return personalCity;
+    }
     return pick(CITY_REPLIES);
   }
 
@@ -394,7 +411,10 @@ function contextualReply(ctx: DemoReplyContext): string {
   }
 
   const personalized = pick(FALLBACK_REPLIES);
-  if (Math.random() < 0.35) {
+  if (Math.random() < 0.2 && ctx.userName.trim()) {
+    return `${personalized} — ${ctx.userName.trim()}`;
+  }
+  if (Math.random() < 0.25) {
     return `${personalized} — ${name}`;
   }
   return personalized;

@@ -53,7 +53,8 @@
     "verify:mini-window": "node scripts/check-mini-window.mjs http://127.0.0.1:8090",
     "verify:activity-preview": "node scripts/check-activity-preview.mjs http://127.0.0.1:8090",
     "verify:compact-mini": "node scripts/verify-compact-mini.mjs",
-    "validate:profiles": "npx --yes tsx scripts/validate-demo-profiles.ts"
+    "validate:profiles": "npx --yes tsx scripts/validate-demo-profiles.ts",
+    "validate:chat": "npx --yes tsx scripts/validate-demo-chat.ts"
   },
   "private": true
 }

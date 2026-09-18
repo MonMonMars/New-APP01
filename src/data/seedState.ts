@@ -1,4 +1,6 @@
-import { Conversation, Match } from '../types/match';
+import { Conversation, Match, Message } from '../types/match';
+import { Profile } from '../types/profile';
+import { buildLocalMatchOpener } from '../services/demoChatLlm';
 import {
   getProfileById,
   MUTUAL_MATCH_IDS,
@@ -39,6 +41,34 @@ export function buildSeedMatches(): Match[] {
 
 function findMatch(matches: Match[], profileId: string): Match | undefined {
   return matches.find((m) => m.profile.id === profileId);
+}
+
+function demoOpener(profile: Profile, minutesAgo = 8): Message {
+  const text = buildLocalMatchOpener(profile);
+  return {
+    id: `seed-opener-${profile.id}`,
+    text,
+    sentAt: new Date(Date.now() - minutesAgo * 60_000).toISOString(),
+    isMine: false,
+  };
+}
+
+function newMatchConversation(
+  id: string,
+  match: Match,
+  unread = true,
+  minutesAgo = 8,
+): Conversation {
+  const opener = demoOpener(match.profile, minutesAgo);
+  return {
+    id,
+    match,
+    messages: [opener],
+    yourTurn: true,
+    unread,
+    lastMessage: opener.text,
+    lastMessageAt: opener.sentAt,
+  };
 }
 
 /** Pre-seeded conversations — mix of active chats, your turn, and empty new matches */
@@ -159,24 +189,12 @@ export function buildSeedConversations(matches: Match[]): Conversation[] {
 
   const sofia = findMatch(matches, '5');
   if (sofia) {
-    conversations.push({
-      id: 'conv-5',
-      match: sofia,
-      messages: [],
-      yourTurn: true,
-      unread: false,
-    });
+    conversations.push(newMatchConversation('conv-5', sofia, true, 12));
   }
 
   const isabella = findMatch(matches, '27');
   if (isabella) {
-    conversations.push({
-      id: 'conv-27',
-      match: isabella,
-      messages: [],
-      yourTurn: true,
-      unread: false,
-    });
+    conversations.push(newMatchConversation('conv-27', isabella, true, 6));
   }
 
   const camille = findMatch(matches, '30');
@@ -201,13 +219,7 @@ export function buildSeedConversations(matches: Match[]): Conversation[] {
 
   const olivia = findMatch(matches, '33');
   if (olivia) {
-    conversations.push({
-      id: 'conv-33',
-      match: olivia,
-      messages: [],
-      yourTurn: true,
-      unread: false,
-    });
+    conversations.push(newMatchConversation('conv-33', olivia, true, 4));
   }
 
   const kai = findMatch(matches, '42');
@@ -443,13 +455,7 @@ export function buildEmberSeedConversations(matches: Match[]): Conversation[] {
 
   const sam = findMatch(matches, '40');
   if (sam) {
-    conversations.push({
-      id: 'conv-40',
-      match: sam,
-      messages: [],
-      yourTurn: true,
-      unread: false,
-    });
+    conversations.push(newMatchConversation('conv-40', sam, true, 10));
   }
 
   return conversations;

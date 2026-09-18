@@ -110,6 +110,9 @@ export type DiscoveryPreferences = {
   sparkSection?: SparkSection;
   /** In-app language for legal docs and policy UI */
   appLocale?: AppLocale;
+  /** Map "search this area" center — filters discover pool by geo radius */
+  mapSearchLat?: number;
+  mapSearchLng?: number;
 };
 
 export const SEARCH_RADIUS_PRESETS = [

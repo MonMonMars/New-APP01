@@ -22,6 +22,7 @@ type ChatComposerProps = {
   onVibeGame: () => void;
   onVoiceNote?: () => void;
   onPickGif?: () => void;
+  onAiSuggest?: () => void;
   paddingBottom: number;
 };
 
@@ -41,6 +42,7 @@ export function ChatComposer({
   onVibeGame,
   onVoiceNote,
   onPickGif,
+  onAiSuggest,
   paddingBottom,
 }: ChatComposerProps) {
   const { colors } = useTheme();
@@ -110,6 +112,16 @@ export function ChatComposer({
       </Animated.View>
 
       <View style={styles.composer}>
+        {onAiSuggest ? (
+          <AnimatedPressable
+            scaleTo={0.9}
+            onPress={onAiSuggest}
+            style={[styles.plusButton, { backgroundColor: colors.surface }]}
+            accessibilityLabel={t('chat.refreshSuggestions')}
+          >
+            <Ionicons name="sparkles" size={20} color={colors.gradientEnd} />
+          </AnimatedPressable>
+        ) : null}
         <AnimatedPressable
           scaleTo={0.9}
           onPress={toggleExtras}

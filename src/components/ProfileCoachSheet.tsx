@@ -4,6 +4,7 @@ import { ActivityIndicator, Modal, ScrollView, StyleSheet, Text, View } from 're
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { generateProfileCoachSuggestions } from '../services/profileCoach';
 import { UserProfile } from '../types/profile';
 import { radii, spacing } from '../theme';
@@ -26,6 +27,7 @@ export function ProfileCoachSheet({
 }: ProfileCoachSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [bios, setBios] = useState<string[]>([]);
   const [openingMoves, setOpeningMoves] = useState<string[]>([]);
@@ -37,12 +39,15 @@ export function ProfileCoachSheet({
     }
 
     setLoading(true);
-    void generateProfileCoachSuggestions(user).then((result) => {
-      setBios(result.bios);
-      setOpeningMoves(result.openingMoves);
-      setSource(result.source);
-      setLoading(false);
-    });
+    void generateProfileCoachSuggestions(user)
+      .then((result) => {
+        setBios(result.bios);
+        setOpeningMoves(result.openingMoves);
+        setSource(result.source);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [user, visible]);
 
   return (
@@ -52,21 +57,23 @@ export function ProfileCoachSheet({
           <AnimatedPressable onPress={onClose}>
             <Ionicons name="close" size={28} color={colors.text} />
           </AnimatedPressable>
-          <Text style={[styles.title, { color: colors.text }]}>AI profile coach</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('profileCoach.title')}</Text>
           <View style={styles.headerSpacer} />
         </View>
 
         <ScrollView contentContainerStyle={styles.content}>
           <Text style={[styles.intro, { color: colors.textMuted }]}>
-            Hinge-style suggestions to sharpen your bio and opening move.
-            {source === 'llm' ? ' Powered by Groq.' : ''}
+            {t('profileCoach.intro')}
+            {source === 'llm' ? t('profileCoach.poweredByGroq') : ''}
           </Text>
 
           {loading ? (
             <ActivityIndicator size="large" color={colors.gradientEnd} style={styles.loader} />
           ) : (
             <>
-              <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Bio ideas</Text>
+              <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
+                {t('profileCoach.bioIdeas')}
+              </Text>
               {bios.map((bio) => (
                 <AnimatedPressable
                   key={bio}
@@ -77,11 +84,15 @@ export function ProfileCoachSheet({
                   }}
                 >
                   <Text style={[styles.suggestionText, { color: colors.text }]}>{bio}</Text>
-                  <Text style={[styles.applyLabel, { color: colors.gradientEnd }]}>Use this</Text>
+                  <Text style={[styles.applyLabel, { color: colors.gradientEnd }]}>
+                    {t('profileCoach.useThis')}
+                  </Text>
                 </AnimatedPressable>
               ))}
 
-              <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Opening moves</Text>
+              <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
+                {t('profileCoach.openingMoves')}
+              </Text>
               {openingMoves.map((move) => (
                 <AnimatedPressable
                   key={move}
@@ -92,7 +103,9 @@ export function ProfileCoachSheet({
                   }}
                 >
                   <Text style={[styles.suggestionText, { color: colors.text }]}>{move}</Text>
-                  <Text style={[styles.applyLabel, { color: colors.gradientEnd }]}>Use this</Text>
+                  <Text style={[styles.applyLabel, { color: colors.gradientEnd }]}>
+                    {t('profileCoach.useThis')}
+                  </Text>
                 </AnimatedPressable>
               ))}
             </>

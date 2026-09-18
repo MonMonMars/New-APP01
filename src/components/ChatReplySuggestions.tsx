@@ -10,6 +10,8 @@ type ChatReplySuggestionsProps = {
   title: string;
   options: string[];
   loading?: boolean;
+  failed?: boolean;
+  hint?: string;
   source?: 'llm' | 'local';
   onSelect: (text: string) => void;
   onRefresh?: () => void;
@@ -20,6 +22,8 @@ export function ChatReplySuggestions({
   title,
   options,
   loading = false,
+  failed = false,
+  hint,
   source,
   onSelect,
   onRefresh,
@@ -49,8 +53,14 @@ export function ChatReplySuggestions({
         ) : null}
       </View>
 
+      {hint ? (
+        <Text style={[styles.hint, { color: colors.textMuted }]}>{hint}</Text>
+      ) : null}
+
       {loading ? (
         <ActivityIndicator size="small" color={colors.gradientEnd} style={styles.loader} />
+      ) : failed ? (
+        <Text style={[styles.hint, { color: colors.textMuted }]}>{t('chat.suggestionsFailed')}</Text>
       ) : (
         <View style={styles.options}>
           {options.map((option) => (
@@ -103,6 +113,10 @@ const styles = StyleSheet.create({
   loader: {
     alignSelf: 'flex-start',
     marginVertical: spacing.xs,
+  },
+  hint: {
+    fontSize: 12,
+    lineHeight: 17,
   },
   options: {
     gap: spacing.xs,

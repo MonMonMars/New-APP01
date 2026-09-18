@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useCloudConversation } from '../hooks/useCloudConversation';
 import { Alert, FlatList, Image, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
@@ -47,7 +47,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const {
     conversations,
     sendMessage,
@@ -76,6 +76,8 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
   const [aiSuggestionsLoading, setAiSuggestionsLoading] = useState(false);
   const [aiSuggestionSource, setAiSuggestionSource] = useState<'llm' | 'local'>('local');
+  const [aiSuggestionsFailed, setAiSuggestionsFailed] = useState(false);
+  const suggestRequestRef = useRef(0);
 
   const conversation = useMemo(
     () => conversations.find((c) => c.id === conversationId),
@@ -169,18 +171,40 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const showAiSuggestions =
     conversation.messages.length === 0 || (conversation.yourTurn && conversation.messages.length > 0);
 
+  const handleApplySuggestion = (text: string) => {
+    setDraft(text);
+  };
+
   const loadAiSuggestions = useCallback(() => {
+    const requestId = suggestRequestRef.current + 1;
+    suggestRequestRef.current = requestId;
     setAiSuggestionsLoading(true);
+    setAiSuggestionsFailed(false);
     const task =
       conversation.messages.length === 0
-        ? generateOpenerSuggestions(profile, user)
-        : generateReplySuggestions(profile, user, conversation.messages);
-    void task.then((result) => {
-      setAiSuggestions([...result.options]);
-      setAiSuggestionSource(result.source);
-      setAiSuggestionsLoading(false);
-    });
-  }, [conversation.messages, profile, user]);
+        ? generateOpenerSuggestions(profile, user, locale)
+        : generateReplySuggestions(profile, user, conversation.messages, locale);
+    void task
+      .then((result) => {
+        if (requestId !== suggestRequestRef.current) {
+          return;
+        }
+        setAiSuggestions([...result.options]);
+        setAiSuggestionSource(result.source);
+      })
+      .catch(() => {
+        if (requestId !== suggestRequestRef.current) {
+          return;
+        }
+        setAiSuggestionsFailed(true);
+      })
+      .finally(() => {
+        if (requestId !== suggestRequestRef.current) {
+          return;
+        }
+        setAiSuggestionsLoading(false);
+      });
+  }, [conversation.messages, locale, profile, user]);
 
   useEffect(() => {
     if (!showAiSuggestions) {
@@ -342,8 +366,10 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
               title={t('chat.aiSuggestOpener')}
               options={aiSuggestions}
               loading={aiSuggestionsLoading}
+              failed={aiSuggestionsFailed}
+              hint={t('chat.applySuggestionHint')}
               source={aiSuggestionSource}
-              onSelect={handleSend}
+              onSelect={handleApplySuggestion}
               onRefresh={loadAiSuggestions}
             />
             {!isSparkPlus && (
@@ -405,8 +431,10 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
           title={t('chat.aiSuggestReply')}
           options={aiSuggestions}
           loading={aiSuggestionsLoading}
+          failed={aiSuggestionsFailed}
+          hint={t('chat.applySuggestionHint')}
           source={aiSuggestionSource}
-          onSelect={handleSend}
+          onSelect={handleApplySuggestion}
           onRefresh={loadAiSuggestions}
         />
       ) : null}
@@ -420,6 +448,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         onSuggestDate={() => setShowSuggestDate(true)}
         onVibeGame={() => setShowVibeGame(true)}
         onVoiceNote={() => setShowVoiceNote(true)}
+        onAiSuggest={showAiSuggestions ? loadAiSuggestions : undefined}
         paddingBottom={insets.bottom + spacing.sm}
       />
 

@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -16,6 +17,7 @@ type HeldProfilesRowProps = {
 /** LoveJack-inspired Hold — bookmark without liking or passing. */
 export function HeldProfilesRow({ profiles, onSelect, onRemove }: HeldProfilesRowProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   if (profiles.length === 0) {
     return null;
@@ -25,8 +27,8 @@ export function HeldProfilesRow({ profiles, onSelect, onRemove }: HeldProfilesRo
     <View style={styles.section}>
       <View style={styles.header}>
         <Ionicons name="bookmark" size={15} color={colors.gradientEnd} />
-        <Text style={[styles.title, { color: colors.text }]}>On Hold</Text>
-        <Text style={[styles.subtitle, { color: colors.textMuted }]}>Saved for later</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('discoverHub.onHold')}</Text>
+        <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('discoverHub.onHoldSaved')}</Text>
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {profiles.map((profile) => (

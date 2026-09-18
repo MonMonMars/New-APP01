@@ -5,23 +5,23 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
+import { useAppLocale } from '../hooks/useAppLocale';
+import {
+  getGenderLabel,
+  getOrientationLabel,
+  getProfileIntentLabel,
+} from '../i18n/labels';
+import { useTranslation } from '../i18n';
 import {
   EmberAvailability,
   EmberDiscretion,
   EmberSeeking,
-  EMBER_AVAILABILITY_LABELS,
-  EMBER_DISCRETION_HINTS,
-  EMBER_DISCRETION_LABELS,
-  EMBER_SEEKING_LABELS,
   EMBER_PROMPT_OPTIONS,
-  GENDER_LABELS,
   HINGE_PROMPT_OPTIONS,
-  ORIENTATION_LABELS,
   Orientation,
   ProfileGender,
   RelationshipIntent,
   RelationshipStatus,
-  RELATIONSHIP_STATUS_LABELS,
   UserProfile,
   VoicePrompt,
 } from '../types/profile';
@@ -45,16 +45,6 @@ type EditProfileSheetProps = {
   onSave: (user: UserProfile) => void;
 };
 
-const intentOptions: { value: RelationshipIntent; label: string }[] = [
-  { value: 'long_term', label: 'Long-term partner' },
-  { value: 'short_term', label: 'Something casual' },
-  { value: 'new_friends', label: 'New friends' },
-  { value: 'not_sure', label: 'Still figuring it out' },
-];
-
-const statusOptions: { value: RelationshipStatus; label: string }[] = (
-  ['single', 'married', 'divorced'] as const
-).map((value) => ({ value, label: RELATIONSHIP_STATUS_LABELS[value] }));
 const discretionOptions: EmberDiscretion[] = ['open', 'careful', 'hidden'];
 const seekingOptions: EmberSeeking[] = ['online', 'travel', 'ongoing', 'light'];
 const availabilityOptions: EmberAvailability[] = ['evenings', 'weekends', 'flexible'];
@@ -74,7 +64,37 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { preferences } = useApp();
+  const { locale } = useAppLocale();
+  const { t } = useTranslation();
   const isEmber = resolveSparkSection(preferences.sparkSection) === 'ember';
+
+  const intentOptions: RelationshipIntent[] = ['long_term', 'short_term', 'new_friends', 'not_sure'];
+  const statusOptions: { value: RelationshipStatus; label: string }[] = [
+    { value: 'single', label: t('editProfile.statusSingle') },
+    { value: 'married', label: t('editProfile.statusMarried') },
+    { value: 'divorced', label: t('editProfile.statusDivorced') },
+  ];
+  const emberDiscretionLabels: Record<EmberDiscretion, string> = {
+    open: t('editProfile.emberDiscretionOpen'),
+    careful: t('editProfile.emberDiscretionCareful'),
+    hidden: t('editProfile.emberDiscretionHidden'),
+  };
+  const emberDiscretionHints: Record<EmberDiscretion, string> = {
+    open: t('editProfile.emberDiscretionOpenHint'),
+    careful: t('editProfile.emberDiscretionCarefulHint'),
+    hidden: t('editProfile.emberDiscretionHiddenHint'),
+  };
+  const emberSeekingLabels: Record<EmberSeeking, string> = {
+    online: t('editProfile.emberSeekingOnline'),
+    travel: t('editProfile.emberSeekingTravel'),
+    ongoing: t('editProfile.emberSeekingOngoing'),
+    light: t('editProfile.emberSeekingLight'),
+  };
+  const emberAvailabilityLabels: Record<EmberAvailability, string> = {
+    evenings: t('editProfile.emberAvailEvenings'),
+    weekends: t('editProfile.emberAvailWeekends'),
+    flexible: t('editProfile.emberAvailFlexible'),
+  };
   const [name, setName] = useState(user.name);
   const [bio, setBio] = useState(user.bio);
   const [age, setAge] = useState(String(user.age));
@@ -178,11 +198,11 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top + spacing.md }]}>
         <View style={styles.header}>
           <AnimatedPressable onPress={onClose}>
-            <Text style={[styles.cancel, { color: colors.textMuted }]}>Cancel</Text>
+            <Text style={[styles.cancel, { color: colors.textMuted }]}>{t('common.cancel')}</Text>
           </AnimatedPressable>
-          <Text style={[styles.title, { color: colors.text }]}>Edit profile</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('profile.editProfile')}</Text>
           <AnimatedPressable onPress={handleSave}>
-            <Text style={[styles.save, { color: colors.gradientEnd }]}>Save</Text>
+            <Text style={[styles.save, { color: colors.gradientEnd }]}>{t('common.save')}</Text>
           </AnimatedPressable>
         </View>
 
@@ -196,7 +216,9 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
 
           <AnimatedPressable style={styles.addPhotoRow} onPress={handleAddPhoto}>
             <Ionicons name="images-outline" size={20} color={colors.gradientEnd} />
-            <Text style={[styles.addPhotoText, { color: colors.gradientEnd }]}>Add photo from library</Text>
+            <Text style={[styles.addPhotoText, { color: colors.gradientEnd }]}>
+              {t('editProfile.addPhotoFromLibrary')}
+            </Text>
           </AnimatedPressable>
 
           <AnimatedPressable
@@ -206,7 +228,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
           >
             <Ionicons name="camera" size={20} color={photoVerified ? colors.like : colors.textMuted} />
             <Text style={[styles.verifyText, { color: colors.text }]}>
-              {photoVerified ? 'Photo verified' : 'Verify your photos'}
+              {photoVerified ? t('editProfile.photoVerified') : t('editProfile.verifyPhotos')}
             </Text>
             {photoVerified && <Ionicons name="checkmark-circle" size={18} color={colors.like} />}
           </AnimatedPressable>
@@ -218,7 +240,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
           >
             <Ionicons name="person" size={20} color={personVerified ? colors.like : colors.textMuted} />
             <Text style={[styles.verifyText, { color: colors.text }]}>
-              {personVerified ? 'Real person verified' : 'Verify you are a real person'}
+              {personVerified ? t('editProfile.personVerified') : t('editProfile.verifyPerson')}
             </Text>
             {personVerified && <Ionicons name="checkmark-circle" size={18} color={colors.like} />}
           </AnimatedPressable>
@@ -230,33 +252,33 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
           >
             <Ionicons name="shield-checkmark" size={20} color={ageVerified ? colors.like : colors.textMuted} />
             <Text style={[styles.verifyText, { color: colors.text }]}>
-              {ageVerified ? 'Age verified (18+)' : 'Verify your age'}
+              {ageVerified ? t('editProfile.ageVerified') : t('editProfile.verifyAge')}
             </Text>
             {ageVerified && <Ionicons name="checkmark-circle" size={18} color={colors.like} />}
           </AnimatedPressable>
 
-          <Text style={[styles.label, { color: colors.textMuted }]}>Name</Text>
+          <Text style={[styles.label, { color: colors.textMuted }]}>{t('onboarding.nameLabel')}</Text>
           <TextInput
             value={name}
             onChangeText={setName}
             style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]}
-            placeholder="Your first name"
+            placeholder={t('onboarding.namePlaceholder')}
             placeholderTextColor={colors.textMuted}
           />
 
-          <Text style={[styles.label, { color: colors.textMuted }]}>Age</Text>
+          <Text style={[styles.label, { color: colors.textMuted }]}>{t('onboarding.ageLabel')}</Text>
           <TextInput
             value={age}
             onChangeText={setAge}
             style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]}
             keyboardType="number-pad"
-            placeholder="18+"
+            placeholder={t('onboarding.agePlaceholder')}
             placeholderTextColor={colors.textMuted}
           />
 
-          <Text style={[styles.label, { color: colors.textMuted }]}>I am a</Text>
+          <Text style={[styles.label, { color: colors.textMuted }]}>{t('editProfile.iAmA')}</Text>
           <Text style={[styles.openingMoveHint, { color: colors.textMuted }]}>
-            Affects free perks and your Pulse disguise feed (Cosmos for women).
+            {t('editProfile.genderHint')}
           </Text>
           <View style={styles.intentRow}>
             {genderOptions.map((option) => {
@@ -274,14 +296,14 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
                   onPress={() => setGender(option)}
                 >
                   <Text style={[styles.intentChipText, { color: selected ? '#fff' : colors.text }]}>
-                    {GENDER_LABELS[option]}
+                    {getGenderLabel(locale, option)}
                   </Text>
                 </AnimatedPressable>
               );
             })}
           </View>
 
-          <Text style={[styles.label, { color: colors.textMuted }]}>My orientation</Text>
+          <Text style={[styles.label, { color: colors.textMuted }]}>{t('editProfile.myOrientation')}</Text>
           <View style={styles.intentRow}>
             {orientationOptions.map((option) => {
               const selected = orientation === option;
@@ -298,7 +320,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
                   onPress={() => setOrientation(option)}
                 >
                   <Text style={[styles.intentChipText, { color: selected ? '#fff' : colors.text }]}>
-                    {ORIENTATION_LABELS[option]}
+                    {getOrientationLabel(locale, option)}
                   </Text>
                 </AnimatedPressable>
               );
@@ -306,23 +328,23 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
           </View>
 
           <View style={styles.labelRow}>
-            <Text style={[styles.label, { color: colors.textMuted }]}>Bio</Text>
+            <Text style={[styles.label, { color: colors.textMuted }]}>{t('onboarding.bioLabel')}</Text>
             <AnimatedPressable onPress={() => setShowProfileCoach(true)}>
-              <Text style={[styles.coachLink, { color: colors.gradientEnd }]}>AI coach ✨</Text>
+              <Text style={[styles.coachLink, { color: colors.gradientEnd }]}>{t('editProfile.aiCoach')}</Text>
             </AnimatedPressable>
           </View>
           <TextInput
             value={bio}
             onChangeText={setBio}
             style={[styles.input, styles.inputMultiline, { backgroundColor: colors.surface, color: colors.text }]}
-            placeholder="Tell people what you're about"
+            placeholder={t('editProfile.bioPlaceholder')}
             placeholderTextColor={colors.textMuted}
             multiline
           />
 
-          <Text style={[styles.label, { color: colors.textMuted }]}>Status</Text>
+          <Text style={[styles.label, { color: colors.textMuted }]}>{t('editProfile.statusLabel')}</Text>
           <Text style={[styles.openingMoveHint, { color: colors.textMuted }]}>
-            Optional — shown as Married or Divorced on Ember only. Hidden on Spark. Does not lock which world you can join.
+            {t('editProfile.statusHint')}
           </Text>
           <View style={styles.intentRow}>
             {statusOptions.map((option) => {
@@ -350,9 +372,9 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
             })}
           </View>
 
-          <Text style={[styles.label, { color: colors.ember }]}>Ember — discretion</Text>
+          <Text style={[styles.label, { color: colors.ember }]}>{t('editProfile.emberDiscretion')}</Text>
           <Text style={[styles.openingMoveHint, { color: colors.textMuted }]}>
-            Learned from discreet dating apps: you choose how visible you are. Spark never shows this.
+            {t('editProfile.emberDiscretionHint')}
           </Text>
           <View style={styles.intentRow}>
             {discretionOptions.map((value) => {
@@ -370,20 +392,20 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
                   onPress={() => setEmberDiscretion(value)}
                   accessibilityRole="button"
                   accessibilityState={{ selected }}
-                  accessibilityLabel={EMBER_DISCRETION_LABELS[value]}
+                  accessibilityLabel={emberDiscretionLabels[value]}
                 >
                   <Text style={[styles.intentChipText, { color: selected ? '#111' : colors.text }]}>
-                    {EMBER_DISCRETION_LABELS[value]}
+                    {emberDiscretionLabels[value]}
                   </Text>
                 </AnimatedPressable>
               );
             })}
           </View>
           <Text style={[styles.openingMoveHint, { color: colors.textMuted }]}>
-            {EMBER_DISCRETION_HINTS[emberDiscretion]}
+            {emberDiscretionHints[emberDiscretion]}
           </Text>
 
-          <Text style={[styles.label, { color: colors.ember }]}>Ember — looking for</Text>
+          <Text style={[styles.label, { color: colors.ember }]}>{t('editProfile.emberLookingFor')}</Text>
           <View style={styles.intentRow}>
             {seekingOptions.map((value) => {
               const selected = emberSeeking === value;
@@ -400,17 +422,17 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
                   onPress={() => setEmberSeeking(value)}
                   accessibilityRole="button"
                   accessibilityState={{ selected }}
-                  accessibilityLabel={EMBER_SEEKING_LABELS[value]}
+                  accessibilityLabel={emberSeekingLabels[value]}
                 >
                   <Text style={[styles.intentChipText, { color: selected ? '#111' : colors.text }]}>
-                    {EMBER_SEEKING_LABELS[value]}
+                    {emberSeekingLabels[value]}
                   </Text>
                 </AnimatedPressable>
               );
             })}
           </View>
 
-          <Text style={[styles.label, { color: colors.ember }]}>Ember — availability</Text>
+          <Text style={[styles.label, { color: colors.ember }]}>{t('editProfile.emberAvailability')}</Text>
           <View style={styles.intentRow}>
             {availabilityOptions.map((value) => {
               const selected = emberAvailability === value;
@@ -427,10 +449,10 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
                   onPress={() => setEmberAvailability(value)}
                   accessibilityRole="button"
                   accessibilityState={{ selected }}
-                  accessibilityLabel={EMBER_AVAILABILITY_LABELS[value]}
+                  accessibilityLabel={emberAvailabilityLabels[value]}
                 >
                   <Text style={[styles.intentChipText, { color: selected ? '#111' : colors.text }]}>
-                    {EMBER_AVAILABILITY_LABELS[value]}
+                    {emberAvailabilityLabels[value]}
                   </Text>
                 </AnimatedPressable>
               );
@@ -439,13 +461,13 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
 
           {!isEmber ? (
             <>
-          <Text style={[styles.label, { color: colors.textMuted }]}>Looking for</Text>
+          <Text style={[styles.label, { color: colors.textMuted }]}>{t('editProfile.lookingFor')}</Text>
           <View style={styles.intentRow}>
             {intentOptions.map((option) => {
-              const selected = intent === option.value;
+              const selected = intent === option;
               return (
                 <AnimatedPressable
-                  key={option.value}
+                  key={option}
                   style={[
                     styles.intentChip,
                     {
@@ -453,10 +475,10 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
                       borderColor: selected ? colors.gradientEnd : colors.border,
                     },
                   ]}
-                  onPress={() => setIntent(option.value)}
+                  onPress={() => setIntent(option)}
                 >
                   <Text style={[styles.intentChipText, { color: selected ? '#fff' : colors.text }]}>
-                    {option.label}
+                    {getProfileIntentLabel(locale, option)}
                   </Text>
                 </AnimatedPressable>
               );
@@ -473,15 +495,15 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
             questionOptions={isEmber ? [...EMBER_PROMPT_OPTIONS, ...HINGE_PROMPT_OPTIONS] : [...HINGE_PROMPT_OPTIONS, ...EMBER_PROMPT_OPTIONS]}
           />
 
-          <Text style={[styles.label, { color: colors.textMuted }]}>Opening Move</Text>
+          <Text style={[styles.label, { color: colors.textMuted }]}>{t('editProfile.openingMoveLabel')}</Text>
           <Text style={[styles.openingMoveHint, { color: colors.textMuted }]}>
-            Pick a conversation starter matches see when you connect — like Bumble&apos;s Opening Move.
+            {t('editProfile.openingMoveHint')}
           </Text>
           <TextInput
             value={openingMove}
             onChangeText={setOpeningMove}
             style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]}
-            placeholder="Ask something fun to break the ice..."
+            placeholder={t('editProfile.openingMovePlaceholder')}
             placeholderTextColor={colors.textMuted}
             maxLength={120}
           />
@@ -508,14 +530,14 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
             })}
           </View>
 
-          <Text style={[styles.label, { color: colors.textMuted }]}>Voice prompt</Text>
+          <Text style={[styles.label, { color: colors.textMuted }]}>{t('editProfile.voicePromptLabel')}</Text>
           <AnimatedPressable
             style={[styles.verifyRow, { backgroundColor: colors.surface }]}
             onPress={() => setShowVoicePrompt(true)}
           >
             <Ionicons name="mic" size={20} color={colors.gradientEnd} />
             <Text style={[styles.verifyText, { color: colors.text }]}>
-              {voicePrompt ? 'Edit voice prompt' : 'Add a voice prompt'}
+              {voicePrompt ? t('editProfile.editVoicePrompt') : t('editProfile.addVoicePrompt')}
             </Text>
             <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
           </AnimatedPressable>

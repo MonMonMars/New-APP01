@@ -1,5 +1,6 @@
 import { Modal, Platform, StyleSheet, Text, View } from 'react-native';
 
+import { useTranslation } from '../../i18n';
 import { radii, spacing } from '../../theme';
 import { modalFill } from '../../theme/modalFill';
 import { AnimatedPressable } from '../AnimatedPressable';
@@ -22,6 +23,7 @@ export function DisguiseUnlockConfirm({
   onConfirm,
   onCancel,
 }: DisguiseUnlockConfirmProps) {
+  const { t } = useTranslation();
   return (
     <Modal
       visible={visible}
@@ -32,25 +34,25 @@ export function DisguiseUnlockConfirm({
     >
       <View style={[styles.overlay, modalFill]}>
         <View style={styles.card}>
-          <Text style={styles.title}>Leave {disguiseName}?</Text>
-          <Text style={styles.body}>Opens {unlockLabel}. Stay if someone can see your screen.</Text>
+          <Text style={styles.title}>{t('disguiseConfirm.leaveTitle', { name: disguiseName })}</Text>
+          <Text style={styles.body}>{t('disguiseConfirm.body', { unlockLabel })}</Text>
           <View style={styles.actions}>
             <AnimatedPressable
               style={styles.stay}
               onPress={onCancel}
               scaleTo={0.97}
-              accessibilityLabel={`Stay in ${disguiseName}`}
+              accessibilityLabel={t('disguiseConfirm.stayA11y', { name: disguiseName })}
             >
-              <Text style={styles.stayText}>Stay</Text>
+              <Text style={styles.stayText}>{t('disguiseConfirm.stay')}</Text>
             </AnimatedPressable>
             <AnimatedPressable
               style={[styles.unlock, { backgroundColor: accent }]}
               onPress={onConfirm}
               scaleTo={0.97}
-              accessibilityLabel={`Leave ${unlockLabel}`}
-              accessibilityHint={`Opens ${unlockLabel}`}
+              accessibilityLabel={t('disguiseConfirm.leaveA11y', { unlockLabel })}
+              accessibilityHint={t('disguiseConfirm.leaveHint', { unlockLabel })}
             >
-              <Text style={styles.unlockText}>Leave {unlockLabel}</Text>
+              <Text style={styles.unlockText}>{t('disguiseConfirm.leaveUnlock', { unlockLabel })}</Text>
             </AnimatedPressable>
           </View>
         </View>

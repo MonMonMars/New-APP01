@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Modal, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { radii, spacing } from '../theme';
 import { modalFill } from '../theme/modalFill';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -18,25 +19,25 @@ export function PostMatchMomentumModal({
   onUpgrade,
 }: PostMatchMomentumModalProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <Modal visible={visible} animationType="fade" transparent>
       <View style={[styles.overlay, modalFill]}>
         <View style={[styles.sheet, { backgroundColor: colors.surface }]}>
           <Ionicons name="trending-up" size={40} color={colors.gradientEnd} />
-          <Text style={[styles.title, { color: colors.text }]}>You&apos;re on a roll!</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('momentum.title')}</Text>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-            Three matches in — Spark+ lets you see who already likes you, filter by intent, and
-            keep the momentum going with unlimited likes.
+            {t('momentum.subtitle')}
           </Text>
           <AnimatedPressable
             style={[styles.primaryButton, { backgroundColor: colors.gradientEnd }]}
             onPress={onUpgrade}
           >
-            <Text style={[styles.primaryText, { color: colors.text }]}>Try Spark+</Text>
+            <Text style={[styles.primaryText, { color: colors.text }]}>{t('momentum.trySparkPlus')}</Text>
           </AnimatedPressable>
           <AnimatedPressable style={styles.secondaryButton} onPress={onClose}>
-            <Text style={[styles.secondaryText, { color: colors.textMuted }]}>Keep matching</Text>
+            <Text style={[styles.secondaryText, { color: colors.textMuted }]}>{t('momentum.keepMatching')}</Text>
           </AnimatedPressable>
         </View>
       </View>

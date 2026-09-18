@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type BoostCardProps = {
@@ -29,6 +30,7 @@ export function BoostCard({
   onActivate,
 }: BoostCardProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
@@ -46,18 +48,20 @@ export function BoostCard({
 
   const subtitle = (() => {
     if (isActive) {
-      return `Top profile for ${formatRemaining(remaining)} remaining`;
+      return t('boost.topProfileRemaining', { time: formatRemaining(remaining) });
     }
     if (bonusBoosts > 0) {
-      return `${bonusBoosts} Boost${bonusBoosts === 1 ? '' : 's'} ready to use`;
+      return bonusBoosts === 1
+        ? t('boost.boostsReadyOne')
+        : t('boost.boostsReadyMany', { count: bonusBoosts });
     }
     if (isSparkPlus && canUseFreeWeeklyBoost) {
-      return '1 free Boost per week with Spark+';
+      return t('boost.freeWeekly');
     }
     if (isSparkPlus) {
-      return 'Free weekly Boost used — get more in Shop';
+      return t('boost.weeklyUsed');
     }
-    return 'Be seen by more people for 30 minutes';
+    return t('boost.beSeen');
   })();
 
   return (
@@ -67,7 +71,7 @@ export function BoostCard({
       </View>
       <View style={styles.body}>
         <Text style={styles.title}>
-          {isActive ? 'Boost active' : 'Boost your profile'}
+          {isActive ? t('boost.active') : t('boost.boostProfile')}
         </Text>
         <Text style={styles.subtitle}>{subtitle}</Text>
       </View>
@@ -80,12 +84,12 @@ export function BoostCard({
           ]}
           onPress={onActivate}
         >
-          <Text style={styles.buttonText}>{canActivate || !isSparkPlus ? 'Boost' : 'Shop'}</Text>
+          <Text style={styles.buttonText}>{canActivate || !isSparkPlus ? t('profile.boost') : t('common.shop')}</Text>
         </AnimatedPressable>
       )}
       {isActive && (
             <View style={[styles.activeBadge, { backgroundColor: colors.boost }]}>
-          <Text style={styles.activeBadgeText}>LIVE</Text>
+          <Text style={styles.activeBadgeText}>{t('boost.live')}</Text>
         </View>
       )}
     </View>

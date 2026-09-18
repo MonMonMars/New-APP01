@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { Profile } from '../types/profile';
 import { spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -14,16 +15,17 @@ type RecentlyActiveStripProps = {
 
 export function RecentlyActiveStrip({ profiles, onSelect }: RecentlyActiveStripProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   if (profiles.length === 0) {
     return (
       <View style={styles.section}>
         <View style={styles.header}>
           <View style={[styles.liveDot, { backgroundColor: colors.like }]} />
-          <Text style={[styles.title, { color: colors.text }]}>Recently active</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('discoverHub.recentlyActive')}</Text>
         </View>
         <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-          No one active nearby right now — check back later today.
+          {t('discoverHub.recentlyActiveEmpty')}
         </Text>
       </View>
     );
@@ -33,7 +35,7 @@ export function RecentlyActiveStrip({ profiles, onSelect }: RecentlyActiveStripP
     <View style={styles.section}>
       <View style={styles.header}>
         <View style={[styles.liveDot, { backgroundColor: colors.like }]} />
-        <Text style={[styles.title, { color: colors.text }]}>Recently active</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('discoverHub.recentlyActive')}</Text>
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {profiles.map((profile) => (

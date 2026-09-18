@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -14,16 +15,17 @@ type StandoutsRowProps = {
 
 export function StandoutsRow({ profiles, onSelect }: StandoutsRowProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   if (profiles.length === 0) {
     return (
       <View style={styles.section}>
         <View style={styles.header}>
           <Ionicons name="star" size={16} color={colors.superLike} />
-          <Text style={[styles.title, { color: colors.text }]}>Standouts</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('discoverHub.standouts')}</Text>
         </View>
         <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-          Top Picks refresh daily — check back tomorrow for curated standouts.
+          {t('discoverHub.standoutsEmpty')}
         </Text>
       </View>
     );
@@ -33,8 +35,8 @@ export function StandoutsRow({ profiles, onSelect }: StandoutsRowProps) {
     <View style={styles.section}>
       <View style={styles.header}>
         <Ionicons name="star" size={16} color={colors.superLike} />
-        <Text style={[styles.title, { color: colors.text }]}>Standouts</Text>
-        <Text style={[styles.subtitle, { color: colors.textMuted }]}>Top Picks today</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('discoverHub.standouts')}</Text>
+        <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('discoverHub.standoutsToday')}</Text>
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {profiles.map((profile) => (

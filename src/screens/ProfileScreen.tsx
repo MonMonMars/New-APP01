@@ -104,7 +104,7 @@ export function ProfileScreen() {
     const result = activateBoost();
     if (!result.ok) {
       if (result.reason === 'already_active') {
-        Alert.alert('Boost already active', 'Your Boost is still running.');
+        Alert.alert(t('alerts.boostAlreadyActive'), t('alerts.boostRunning'));
         return;
       }
       navigation.getParent()?.navigate('ConsumablesShop');
@@ -112,21 +112,21 @@ export function ProfileScreen() {
     }
     const message =
       result.source === 'free_weekly'
-        ? 'Your free weekly Spark+ Boost is now active for 30 minutes.'
+        ? t('alerts.boostActivatedFreeWeekly')
         : result.source === 'bonus'
-          ? `Boost activated! ${Math.max(0, bonusBoosts - 1)} remaining in your inventory.`
-          : 'You are now a top profile for 30 minutes.';
-    Alert.alert('Boost activated!', message);
+          ? t('alerts.boostActivatedBonus', { remaining: Math.max(0, bonusBoosts - 1) })
+          : t('alerts.boostActivatedDefault');
+    Alert.alert(t('alerts.boostActivated'), message);
   };
 
   const handleDeleteAccount = () => {
     Alert.alert(
-      'Delete account?',
-      'This permanently removes your profile, matches, and messages. This cannot be undone.',
+      t('alerts.deleteAccountTitle'),
+      t('alerts.deleteAccountBody'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: () => {
             void deleteAccount();

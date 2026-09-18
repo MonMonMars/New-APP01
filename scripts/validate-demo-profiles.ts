@@ -33,6 +33,9 @@ for (const profile of humanProfiles) {
 }
 
 const duplicateNames = [...nameCounts.entries()].filter(([, count]) => count > 1);
+const legacyShortBios = humanProfiles.filter(
+  (p) => Number(p.id) < 97 && (p.bio?.length ?? 0) < 80,
+);
 const duplicatePhotos = [...photoCounts.entries()].filter(([, count]) => count > 1);
 
 const missingIncoming = INCOMING_LIKE_IDS.filter((id) => getProfileById(id) === undefined);
@@ -66,6 +69,7 @@ console.log(
       latestBatchCount: humanProfiles.filter((p) => Number(p.id) >= 137 && Number(p.id) <= 156).length,
       newestBatchCount: humanProfiles.filter((p) => Number(p.id) >= 157 && Number(p.id) <= 176).length,
       duplicateNameCount: duplicateNames.length,
+      legacyShortBioCount: legacyShortBios.length,
       duplicatePrimaryPhotoCount: duplicatePhotos.length,
       picsumProfileCount: picsumProfiles.length,
       mixedPexelsPhotoProfileCount: mixedPhotoProfiles.length,
@@ -91,6 +95,11 @@ if (picsumProfiles.length > 0) {
 
 if (mixedPhotoProfiles.length > 0) {
   console.error('Profiles with mixed Pexels identities:', mixedPhotoProfiles);
+  process.exit(1);
+}
+
+if (legacyShortBios.length > 0) {
+  console.error('Legacy profiles still have short bios:', legacyShortBios.map((p) => p.id).join(', '));
   process.exit(1);
 }
 

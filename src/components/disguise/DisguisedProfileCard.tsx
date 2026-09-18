@@ -17,6 +17,7 @@ import { SocialCommentSheet } from './SocialCommentSheet';
 import { getProfileById } from '../../data/profiles';
 import { profileIntroCaption } from '../../utils/profileIntroCaption';
 import { profileIdFromPostId } from '../../utils/resolveDisguiseProfile';
+import { PulseProfileSwap } from '../motion/PulseProfileSwap';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type DisguisedProfileCardProps = {
@@ -68,34 +69,38 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   );
 
   const avatarRow = (
-    <FeedPersonThumbnail
-      imageUrl={post.avatarUrl}
-      overlayText={maskSnippet}
-      overlayVariant={maskVariant}
-      contentKind="profile"
-      caption={profileCaption}
-      hideLabel
-      size={PROFILE_AVATAR_SIZE}
-      onPress={openPreview}
-      accessibilityLabel={t('disguiseMiniWindow.viewProfile', { name: post.name })}
-    />
+    <PulseProfileSwap profileKey={linkedProfileId ?? post.id}>
+      <FeedPersonThumbnail
+        imageUrl={post.avatarUrl}
+        overlayText={maskSnippet}
+        overlayVariant={maskVariant}
+        contentKind="profile"
+        caption={profileCaption}
+        hideLabel
+        size={PROFILE_AVATAR_SIZE}
+        onPress={openPreview}
+        accessibilityLabel={t('disguiseMiniWindow.viewProfile', { name: post.name })}
+      />
+    </PulseProfileSwap>
   );
 
   if (post.variant === 'social') {
     return (
       <>
         <View style={[styles.socialCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <FeedPersonThumbnail
-            imageUrl={post.avatarUrl}
-            overlayText={maskSnippet}
-            overlayVariant={maskVariant}
-            contentKind="profile"
-            caption={linkedProfile ? linkedProfile.bio.trim() : post.summary}
-            hideLabel
-            size={PROFILE_AVATAR_SIZE}
-            onPress={openPreview}
-            accessibilityLabel={t('disguiseMiniWindow.viewProfile', { name: post.name })}
-          />
+          <PulseProfileSwap profileKey={linkedProfileId ?? post.id}>
+            <FeedPersonThumbnail
+              imageUrl={post.avatarUrl}
+              overlayText={maskSnippet}
+              overlayVariant={maskVariant}
+              contentKind="profile"
+              caption={linkedProfile ? linkedProfile.bio.trim() : post.summary}
+              hideLabel
+              size={PROFILE_AVATAR_SIZE}
+              onPress={openPreview}
+              accessibilityLabel={t('disguiseMiniWindow.viewProfile', { name: post.name })}
+            />
+          </PulseProfileSwap>
           <View style={styles.socialActions}>
             <AnimatedPressable style={styles.socialAction} onPress={() => togglePulseLike(post.id)}>
               <Ionicons

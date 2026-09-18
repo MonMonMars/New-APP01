@@ -18,6 +18,7 @@ import { PersonPreviewSheet } from './PersonPreviewSheet';
 import { SocialCommentSheet } from './SocialCommentSheet';
 import { SavePostButton } from './SavePostButton';
 import { shareWithFallback } from '../../utils/shareWithFallback';
+import { PulseProfileSwap } from '../motion/PulseProfileSwap';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type SocialPostCardProps = {
@@ -95,7 +96,10 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={styles.header}>
         <View style={styles.headerMain}>
-          <View style={styles.avatarSlot}>
+          <PulseProfileSwap
+            profileKey={linkedAuthorProfile?.id ?? post.id}
+            style={styles.avatarSlot}
+          >
             {post.maskAvatar !== false && post.avatarMask ? (
               <FeedPersonThumbnail
                 imageUrl={post.avatarUrl}
@@ -120,7 +124,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
                 accessibilityLabel={t('disguiseMiniWindow.viewProfile', { name: post.author })}
               />
             )}
-          </View>
+          </PulseProfileSwap>
           <View style={styles.authorMeta}>
             <Text style={[styles.authorName, { color: colors.text }]} numberOfLines={1}>
               {post.author}

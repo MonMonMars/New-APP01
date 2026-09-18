@@ -88,7 +88,11 @@ export function ChatComposer({
       id: 'voice',
       icon: 'mic-outline',
       label: t('chat.voice'),
-      onPress: () => (onVoiceNote ? onVoiceNote() : onSend('🎤 Voice note: Hey!')),
+      onPress: () => {
+        if (onVoiceNote) {
+          onVoiceNote();
+        }
+      },
     },
   ];
 

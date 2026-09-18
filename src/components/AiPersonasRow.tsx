@@ -3,6 +3,7 @@ import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { aiPersonaProfiles, getAiPersonaConfig } from '../data/aiPersonas';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { AiPersonaBadge } from './AiPersonaBadge';
@@ -14,16 +15,17 @@ type AiPersonasRowProps = {
 
 export function AiPersonasRow({ onSelect }: AiPersonasRowProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <View style={styles.wrap}>
       <View style={styles.header}>
         <Ionicons name="sparkles" size={18} color={colors.gradientEnd} />
-        <Text style={[styles.title, { color: colors.text }]}>AI practice matches</Text>
-        <Text style={[styles.hint, { color: colors.textMuted }]}>Instant match · LLM replies</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('discoverHub.aiPersonasTitle')}</Text>
+        <Text style={[styles.hint, { color: colors.textMuted }]}>{t('discoverHub.aiPersonasHint')}</Text>
       </View>
       <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-        Chat with AI personas to practice before real matches. Always labeled, always safe.
+        {t('discoverHub.aiPersonasSubtitle')}
       </Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {aiPersonaProfiles.map((profile) => {
@@ -33,12 +35,14 @@ export function AiPersonasRow({ onSelect }: AiPersonasRowProps) {
               key={profile.id}
               style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => onSelect(profile)}
+              accessibilityRole="button"
+              accessibilityLabel={t('discoverHub.viewProfileA11y', { name: profile.name })}
             >
               <Image source={{ uri: profile.photos[0] }} style={styles.photo} />
               <AiPersonaBadge profile={profile} compact />
               <Text style={[styles.name, { color: colors.text }]}>{profile.name}</Text>
               <Text style={[styles.tagline, { color: colors.textMuted }]} numberOfLines={2}>
-                {config?.tagline ?? 'AI persona'}
+                {config?.tagline ?? t('discoverHub.aiPersonaFallback')}
               </Text>
             </AnimatedPressable>
           );

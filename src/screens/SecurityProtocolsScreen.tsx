@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LEGAL_ENTITY } from '../constants/legalEntity';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 
@@ -11,96 +12,68 @@ type SecurityProtocolsScreenProps = {
   onClose: () => void;
 };
 
-const protocols = [
-  {
-    icon: 'key-outline' as const,
-    title: 'Strong app lock',
-    body:
-      'Use Face ID, Touch ID, or a 4–6 digit PIN before leaving Pulse. Failed attempts lock out for 5 minutes after 5 tries.',
-  },
-  {
-    icon: 'eye-off-outline' as const,
-    title: 'Disguise by default',
-    body:
-      'Pulse hides dating UI on your lock screen and in the app switcher. Enable auto-disguise when you background the app.',
-  },
-  {
-    icon: 'shield-checkmark-outline' as const,
-    title: 'Encrypted local storage',
-    body:
-      'PIN hashes and sensitive chat data use device secure storage. Messages are obfuscated on disk — never share your device passcode.',
-  },
-  {
-    icon: 'camera-outline' as const,
-    title: 'Screenshot protection',
-    body:
-      'On iOS and Android, Spark blocks screenshots and screen recording on dating screens. Web previews cannot enforce this — use native apps for sensitive sessions.',
-  },
-  {
-    icon: 'warning-outline' as const,
-    title: 'Report suspicious activity',
-    body:
-      'Block and report profiles from any card or chat. We log abuse reports for review. Email security@spark.app for urgent safety issues.',
-  },
-  {
-    icon: 'link-outline' as const,
-    title: 'Never share login links',
-    body:
-      'Spark will never ask for your password in chat. Ignore messages with external login links, gift-card scams, or requests to move to encrypted apps immediately.',
-  },
-  {
-    icon: 'cloud-offline-outline' as const,
-    title: 'No client-side API keys',
-    body:
-      'Production builds proxy AI and payment calls through our backend. Never paste API keys into the app or share debug builds publicly.',
-  },
-  {
-    icon: 'refresh-outline' as const,
-    title: 'Session timeout',
-    body:
-      'After 5 minutes in the background, Spark re-locks and returns to Pulse. Short timeouts reduce risk if your phone is unattended.',
-  },
-];
+const PROTOCOL_IDS = [
+  'appLock',
+  'disguise',
+  'encryption',
+  'screenshot',
+  'report',
+  'loginLinks',
+  'apiKeys',
+  'sessionTimeout',
+] as const;
+
+const PROTOCOL_ICONS: Record<(typeof PROTOCOL_IDS)[number], keyof typeof Ionicons.glyphMap> = {
+  appLock: 'key-outline',
+  disguise: 'eye-off-outline',
+  encryption: 'shield-checkmark-outline',
+  screenshot: 'camera-outline',
+  report: 'warning-outline',
+  loginLinks: 'link-outline',
+  apiKeys: 'cloud-offline-outline',
+  sessionTimeout: 'refresh-outline',
+};
 
 export function SecurityProtocolsScreen({ onClose }: SecurityProtocolsScreenProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <View style={styles.header}>
-        <AnimatedPressable onPress={onClose} style={styles.back}>
+        <AnimatedPressable onPress={onClose} style={styles.back} accessibilityLabel={t('common.close')}>
           <Ionicons name="chevron-back" size={28} color={colors.text} />
         </AnimatedPressable>
-        <Text style={[styles.title, { color: colors.text }]}>Security protocols</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('securityProtocols.title')}</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={[styles.banner, { backgroundColor: colors.surface }]}>
           <Ionicons name="lock-closed" size={28} color={colors.gradientEnd} />
-          <Text style={[styles.bannerTitle, { color: colors.text }]}>Stay safe from hackers</Text>
-          <Text style={[styles.bannerBody, { color: colors.textMuted }]}>
-            Spark layers device security, disguise mode, and abuse reporting to reduce phishing,
-            shoulder-surfing, and account takeover risk.
-          </Text>
+          <Text style={[styles.bannerTitle, { color: colors.text }]}>{t('securityProtocols.bannerTitle')}</Text>
+          <Text style={[styles.bannerBody, { color: colors.textMuted }]}>{t('securityProtocols.bannerBody')}</Text>
         </View>
 
-        {protocols.map((item) => (
+        {PROTOCOL_IDS.map((id) => (
           <View
-            key={item.title}
+            key={id}
             style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
           >
-            <Ionicons name={item.icon} size={22} color={colors.gradientEnd} />
+            <Ionicons name={PROTOCOL_ICONS[id]} size={22} color={colors.gradientEnd} />
             <View style={styles.cardText}>
-              <Text style={[styles.cardTitle, { color: colors.text }]}>{item.title}</Text>
-              <Text style={[styles.cardBody, { color: colors.textMuted }]}>{item.body}</Text>
+              <Text style={[styles.cardTitle, { color: colors.text }]}>
+                {t(`securityProtocols.${id}.title`)}
+              </Text>
+              <Text style={[styles.cardBody, { color: colors.textMuted }]}>
+                {t(`securityProtocols.${id}.body`)}
+              </Text>
             </View>
           </View>
         ))}
 
         <Text style={[styles.footer, { color: colors.textMuted }]}>
-          Security contact: {LEGAL_ENTITY.securityEmail} · Include screenshots and profile IDs when
-          reporting abuse.
+          {t('securityProtocols.footer', { email: LEGAL_ENTITY.securityEmail })}
         </Text>
       </ScrollView>
     </View>
@@ -118,25 +91,25 @@ const styles = StyleSheet.create({
   },
   back: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 18, fontWeight: '700' },
-  content: { padding: spacing.lg, paddingBottom: spacing.xl * 2 },
+  content: { padding: spacing.md, paddingBottom: spacing.xl, gap: spacing.sm },
   banner: {
     borderRadius: radii.card,
     padding: spacing.lg,
     alignItems: 'center',
-    marginBottom: spacing.lg,
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
   },
-  bannerTitle: { fontSize: 18, fontWeight: '800', marginTop: spacing.sm },
-  bannerBody: { fontSize: 14, lineHeight: 20, textAlign: 'center', marginTop: spacing.sm },
+  bannerTitle: { fontSize: 18, fontWeight: '800', textAlign: 'center' },
+  bannerBody: { fontSize: 14, lineHeight: 20, textAlign: 'center' },
   card: {
     flexDirection: 'row',
     gap: spacing.md,
     borderRadius: radii.card,
     borderWidth: StyleSheet.hairlineWidth,
     padding: spacing.md,
-    marginBottom: spacing.sm,
   },
-  cardText: { flex: 1 },
-  cardTitle: { fontSize: 15, fontWeight: '700', marginBottom: 4 },
-  cardBody: { fontSize: 13, lineHeight: 19 },
-  footer: { fontSize: 12, lineHeight: 18, textAlign: 'center', marginTop: spacing.md },
+  cardText: { flex: 1, gap: 4 },
+  cardTitle: { fontSize: 15, fontWeight: '800' },
+  cardBody: { fontSize: 13, lineHeight: 18 },
+  footer: { fontSize: 12, lineHeight: 17, textAlign: 'center', marginTop: spacing.md },
 });

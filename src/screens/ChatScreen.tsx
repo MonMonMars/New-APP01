@@ -25,6 +25,7 @@ import { VoiceNoteSheet } from '../components/VoiceNoteSheet';
 import { TypingIndicator } from '../components/TypingIndicator';
 import { VibeGameSheet } from '../components/VibeGameSheet';
 import { isAiPersonaProfile } from '../data/aiPersonas';
+import { messageHasCaption } from '../utils/messageFormat';
 import { emberRelationshipLabel } from '../types/profile';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
@@ -231,9 +232,9 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
           {item.isVoiceNote && item.voiceDurationSeconds ? (
             <VoiceMessageBubble durationSeconds={item.voiceDurationSeconds} isMine={item.isMine} />
           ) : null}
-          {item.text && item.text !== '📷 Photo' && item.text !== 'GIF' && !item.isVoiceNote && (
+          {messageHasCaption(item) ? (
             <Text style={[styles.bubbleText, { color: colors.text }]}>{item.text}</Text>
-          )}
+          ) : null}
           {item.isMine && (
             <View style={styles.statusRow}>
               <MessageStatusIcon status={displayStatus(item.status)} size={13} />

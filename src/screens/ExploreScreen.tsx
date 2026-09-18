@@ -7,6 +7,7 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { EXPLORE_CATEGORY_MAP, mockProfiles } from '../data/profiles';
+import { useTranslation } from '../i18n';
 import { matchesSparkSection, resolveSparkSection, SparkSection } from '../types/preferences';
 import { emberLocationLine, emberRelationshipLabel, Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
@@ -15,31 +16,13 @@ import { EmberStatusChips } from '../components/EmberStatusChips';
 
 type ExploreCategory = 'serious' | 'new' | 'nearby';
 
-const CATEGORIES: { id: ExploreCategory; label: string; emberLabel: string; icon: keyof typeof Ionicons.glyphMap; description: string; emberDescription: string }[] = [
-  {
-    id: 'serious',
-    label: 'Serious daters',
-    emberLabel: 'Ongoing',
-    icon: 'heart-circle',
-    description: 'Looking for something real',
-    emberDescription: 'Looking for something ongoing',
-  },
-  {
-    id: 'new',
-    label: 'New members',
-    emberLabel: 'New in Ember',
-    icon: 'sparkles',
-    description: 'Just joined Spark',
-    emberDescription: 'Just joined Ember',
-  },
-  {
-    id: 'nearby',
-    label: 'Nearby',
-    emberLabel: 'Nearby',
-    icon: 'location',
-    description: 'Within 10 miles',
-    emberDescription: 'Close by — city hidden when they choose Hidden',
-  },
+const CATEGORY_META: {
+  id: ExploreCategory;
+  icon: keyof typeof Ionicons.glyphMap;
+}[] = [
+  { id: 'serious', icon: 'heart-circle' },
+  { id: 'new', icon: 'sparkles' },
+  { id: 'nearby', icon: 'location' },
 ];
 
 type ExploreScreenProps = {
@@ -66,6 +49,7 @@ export function ExploreScreen({ onClose }: ExploreScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const { passedIds, likedIds, blockedIds, prioritizeProfileInDeck, preferences } = useApp();
 
   const excluded = new Set([...passedIds, ...likedIds, ...blockedIds]);
@@ -80,37 +64,36 @@ export function ExploreScreen({ onClose }: ExploreScreenProps) {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
-      <ScreenHeader title="Explore" leftIcon="close" onLeftPress={onClose} showLogo />
+      <ScreenHeader title={t('explore.title')} leftIcon="close" onLeftPress={onClose} showLogo />
 
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={[styles.lead, { color: colors.textMuted }]}>
-          {isEmber
-            ? 'Curated Ember stacks — discretion first, same people as your Ember deck.'
-            : 'Curated stacks inspired by Hinge Standouts & Bumble For You'}
+          {isEmber ? t('explore.leadEmber') : t('explore.leadSpark')}
         </Text>
 
-        {CATEGORIES.map((category) => {
-          const profiles = profilesForCategory(
-            category.id,
-            excluded,
-            section,
-          );
+        {CATEGORY_META.map((category) => {
+          const profiles = profilesForCategory(category.id, excluded, section);
+          const labelKey = `explore.categories.${category.id}.label` as const;
+          const emberLabelKey = `explore.categories.${category.id}.emberLabel` as const;
+          const descKey = `explore.categories.${category.id}.description` as const;
+          const emberDescKey = `explore.categories.${category.id}.emberDescription` as const;
+
           return (
             <View key={category.id} style={styles.section}>
               <View style={styles.sectionHeader}>
                 <Ionicons name={category.icon} size={20} color={colors.gradientEnd} />
                 <View>
                   <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                    {isEmber ? category.emberLabel : category.label}
+                    {t(isEmber ? emberLabelKey : labelKey)}
                   </Text>
                   <Text style={[styles.sectionDesc, { color: colors.textMuted }]}>
-                    {isEmber ? category.emberDescription : category.description}
+                    {t(isEmber ? emberDescKey : descKey)}
                   </Text>
                 </View>
               </View>
 
               {profiles.length === 0 ? (
-                <Text style={[styles.empty, { color: colors.textMuted }]}>No profiles in this stack right now</Text>
+                <Text style={[styles.empty, { color: colors.textMuted }]}>{t('explore.emptyStack')}</Text>
               ) : (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
                   {profiles.map((profile) => (
@@ -118,6 +101,8 @@ export function ExploreScreen({ onClose }: ExploreScreenProps) {
                       key={profile.id}
                       style={[styles.card, { backgroundColor: colors.surface }]}
                       onPress={() => openInDeck(profile.id)}
+                      accessibilityRole="button"
+                      accessibilityLabel={t('explore.viewProfileA11y', { name: profile.name })}
                     >
                       <Image source={{ uri: profile.photos[0] }} style={styles.photo} />
                       <Text style={[styles.name, { color: colors.text }]}>{profile.name}, {profile.age}</Text>
@@ -132,7 +117,7 @@ export function ExploreScreen({ onClose }: ExploreScreenProps) {
                         </>
                       ) : (
                         <Text style={[styles.distance, { color: colors.textMuted }]}>
-                          {`${profile.distanceMiles} mi`}
+                          {t('likes.milesAway', { n: profile.distanceMiles })}
                         </Text>
                       )}
                     </AnimatedPressable>

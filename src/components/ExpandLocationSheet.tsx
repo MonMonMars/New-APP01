@@ -186,7 +186,8 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         onCenterChange={setMapCenter}
         onZoomChange={setMapZoom}
         onPinPress={handlePinPress}
-        pinAccessibilityLabel={(name) => t('mapDiscover.pinA11y', { name })}
+        pinAccessibilityLabel={(name) => t('mapDiscover.selectPinA11y', { name })}
+        youMarkerA11y={t('mapDiscover.youMarkerA11y')}
         style={styles.fullMap}
       />
 
@@ -277,7 +278,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
           </View>
           <AnimatedPressable
             style={[styles.previewAction, { backgroundColor: accent }]}
-            accessibilityLabel={t('mapDiscover.pinA11y', { name: selectedProfile.name })}
+            accessibilityLabel={t('mapDiscover.addToDeckA11y', { name: selectedProfile.name })}
             onPress={() => handleAddToDeck(selectedProfile)}
           >
             <Ionicons name="add" size={22} color={onAccentText} />

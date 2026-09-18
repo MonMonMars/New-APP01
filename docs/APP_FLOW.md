@@ -109,9 +109,9 @@ Root Stack
     │   └── Settings → Safety, Spark+
     ├── Chat (stack push)
     │   ├── Header (avatar, expiry, safety menu)
-    │   ├── AI opener/reply suggestions (prefill composer)
+    │   ├── AI opener/reply suggestions (prefill composer — primary empty-thread UX)
     │   ├── Demo profiles: AI opening message + auto-reply
-    │   ├── Icebreakers (empty state fallback)
+    │   ├── Icebreakers (secondary fallback chips)
     │   └── Composer
     ├── SparkPlus (modal)
     └── Safety (stack push)

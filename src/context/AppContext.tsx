@@ -110,6 +110,7 @@ import {
 } from '../utils/securityGuards';
 import { clearVaultKey } from '../utils/secureStorage';
 import { resolveAppLocale } from '../types/locale';
+import { messagePreviewText, sentPhotoContext } from '../utils/messageFormat';
 import { disguiseWorldMeta } from '../utils/disguiseWorld';
 import { DisguiseUnlockConfirm } from '../components/disguise/DisguiseUnlockConfirm';
 import { SparkUnlockModal } from '../components/security/SparkUnlockModal';
@@ -1791,9 +1792,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return;
       }
 
+      const locale = resolveAppLocale(preferences.appLocale);
+
       const message: Message = {
         id: `msg-${Date.now()}`,
-        text: trimmed || (isGif ? 'GIF' : '📷 Photo'),
+        text: trimmed,
         sentAt: new Date().toISOString(),
         isMine: true,
         imageUrl,
@@ -1801,6 +1804,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         status: 'sent',
       };
 
+      const preview = messagePreviewText(message, locale);
       const targetConversation = conversations.find((item) => item.id === conversationId);
 
       setConversations((prev) =>
@@ -1812,7 +1816,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           return {
             ...conversation,
             messages: updatedMessages,
-            lastMessage: trimmed || 'Photo',
+            lastMessage: preview,
             lastMessageAt: message.sentAt,
             yourTurn: false,
             unread: false,
@@ -1887,7 +1891,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           void (async () => {
             const result = await generateDemoReply({
               profile: replyProfile,
-              userMessage: trimmed || (imageUrl ? 'sent a photo' : ''),
+              userMessage: trimmed || (imageUrl ? sentPhotoContext(locale) : ''),
               recentMessages: replyHistory,
               userName: user.name,
             });
@@ -1926,34 +1930,43 @@ export function AppProvider({ children }: { children: ReactNode }) {
       notificationsEnabled,
       securitySettings.disguiseSafeNotifications,
       user.name,
+      preferences.appLocale,
     ],
   );
 
   const sendVoiceNote = useCallback(
     (conversationId: string, durationSeconds: number) => {
       const seconds = Math.max(1, Math.min(30, Math.round(durationSeconds)));
-      sendMessage(conversationId, `Voice note (${seconds}s)`, undefined, false);
+      const locale = resolveAppLocale(preferences.appLocale);
+      const voiceMessage: Message = {
+        id: `msg-${Date.now()}`,
+        text: '',
+        sentAt: new Date().toISOString(),
+        isMine: true,
+        isVoiceNote: true,
+        voiceDurationSeconds: seconds,
+        status: 'sent',
+      };
+      const preview = messagePreviewText(voiceMessage, locale);
+
       setConversations((prev) =>
         prev.map((conversation) => {
           if (conversation.id !== conversationId) {
             return conversation;
           }
-          const messages = [...conversation.messages];
-          const last = messages[messages.length - 1];
-          if (!last || !last.isMine) {
-            return conversation;
-          }
-          messages[messages.length - 1] = {
-            ...last,
-            text: '',
-            isVoiceNote: true,
-            voiceDurationSeconds: seconds,
+          return {
+            ...conversation,
+            messages: [...conversation.messages, voiceMessage],
+            lastMessage: preview,
+            lastMessageAt: voiceMessage.sentAt,
+            yourTurn: false,
+            unread: false,
+            isTyping: false,
           };
-          return { ...conversation, messages, lastMessage: `Voice note (${seconds}s)` };
         }),
       );
     },
-    [sendMessage],
+    [preferences.appLocale],
   );
 
   const canUseFreeWeeklyBoost = useMemo(() => {

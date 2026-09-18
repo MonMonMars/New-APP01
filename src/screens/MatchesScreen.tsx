@@ -12,6 +12,7 @@ import { resolveSparkSection } from '../types/preferences';
 import { emberRelationshipLabel, type RelationshipStatus } from '../types/profile';
 import { useLiveExpiry } from '../hooks/useLiveExpiry';
 import { Conversation } from '../types/match';
+import { messagePreviewText } from '../utils/messageFormat';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { EmberStatusChips } from '../components/EmberStatusChips';
@@ -28,14 +29,16 @@ function ConversationRow({
   onPress: () => void;
 }) {
   const { colors } = useTheme();
-  const { t } = useTranslation();
-  const { match, lastMessage, yourTurn, unread } = conversation;
+  const { t, locale } = useTranslation();
+  const { match, lastMessage, yourTurn, unread, messages } = conversation;
+  const lastMsg = messages[messages.length - 1];
+  const preview = lastMsg ? messagePreviewText(lastMsg, locale) : lastMessage;
   const profile = match.profile;
   const expiryLabel = useLiveExpiry(match.expiresAt);
 
   const turnLabel = yourTurn
     ? t('matches.yourTurn')
-    : lastMessage
+    : preview
       ? t('matches.waitingReply')
       : null;
 
@@ -56,7 +59,7 @@ function ConversationRow({
         </View>
         <EmberStatusChips profile={profile} compact />
         <Text style={[styles.preview, { color: unread ? colors.text : colors.textMuted }, unread && styles.previewUnread]} numberOfLines={1}>
-          {lastMessage ?? t('matches.saySomethingNice')}
+          {preview ?? t('matches.saySomethingNice')}
         </Text>
         {expiryLabel && (
           <Text style={[styles.expiryText, { color: colors.rewind }]}>{expiryLabel}</Text>

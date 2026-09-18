@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { HINGE_PROMPT_OPTIONS, ProfilePrompt } from '../types/profile';
 import { getPromptFeedback } from '../utils/promptFeedback';
 import { radii, spacing } from '../theme';
@@ -21,6 +22,7 @@ export function PromptsEditor({
   questionOptions = HINGE_PROMPT_OPTIONS,
 }: PromptsEditorProps) {
   const { colors } = useTheme();
+  const { t, locale } = useTranslation();
   const options = questionOptions.length > 0 ? questionOptions : HINGE_PROMPT_OPTIONS;
 
   const addPrompt = () => {
@@ -50,8 +52,12 @@ export function PromptsEditor({
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.title, { color: colors.textMuted }]}>Prompts (up to {MAX_PROMPTS})</Text>
-      {prompts.map((prompt, index) => (
+      <Text style={[styles.title, { color: colors.textMuted }]}>
+        {t('promptsEditor.title', { max: MAX_PROMPTS })}
+      </Text>
+      {prompts.map((prompt, index) => {
+        const feedback = getPromptFeedback(prompt.answer, locale);
+        return (
         <View key={`prompt-${index}`} style={[styles.card, { backgroundColor: colors.surface }]}>
           <AnimatedPressable style={styles.questionRow} onPress={() => cycleQuestion(index)}>
             <Text style={[styles.question, { color: colors.gradientEnd }]}>{prompt.question}</Text>
@@ -60,26 +66,27 @@ export function PromptsEditor({
           <TextInput
             value={prompt.answer}
             onChangeText={(text) => updatePrompt(index, 'answer', text)}
-            placeholder="Your answer..."
+            placeholder={t('promptsEditor.answerPlaceholder')}
             placeholderTextColor={colors.textMuted}
             style={[styles.answer, { color: colors.text }]}
             multiline
           />
-          {getPromptFeedback(prompt.answer) && (
+          {feedback ? (
             <Text style={[styles.feedback, { color: colors.gradientEnd }]}>
-              💡 {getPromptFeedback(prompt.answer)}
+              💡 {feedback}
             </Text>
-          )}
+          ) : null}
           <AnimatedPressable onPress={() => removePrompt(index)} style={styles.remove}>
             <Ionicons name="trash-outline" size={16} color={colors.nope} />
-            <Text style={[styles.removeText, { color: colors.nope }]}>Remove</Text>
+            <Text style={[styles.removeText, { color: colors.nope }]}>{t('promptsEditor.remove')}</Text>
           </AnimatedPressable>
         </View>
-      ))}
+      );
+      })}
       {prompts.length < MAX_PROMPTS && (
         <AnimatedPressable style={[styles.addButton, { borderColor: colors.gradientEnd }]} onPress={addPrompt}>
           <Ionicons name="add-circle-outline" size={20} color={colors.gradientEnd} />
-          <Text style={[styles.addText, { color: colors.gradientEnd }]}>Add a prompt</Text>
+          <Text style={[styles.addText, { color: colors.gradientEnd }]}>{t('promptsEditor.addPrompt')}</Text>
         </AnimatedPressable>
       )}
     </View>

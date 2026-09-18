@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Image, Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -7,6 +7,7 @@ import { getLegalUiStrings } from '../content/legal';
 import { useApp } from '../context/AppContext';
 import { useAppLocale } from '../hooks/useAppLocale';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
 
@@ -24,24 +25,6 @@ type VerificationSheetProps = {
 const STEPS = ['intro', 'capture', 'review', 'done'] as const;
 type Step = (typeof STEPS)[number];
 
-const COPY: Record<VerificationKind, { title: string; body: string; success: string }> = {
-  photo: {
-    title: 'Photo verification',
-    body: 'Take a quick selfie so others know your photos are really you.',
-    success: 'Photo verified — badge added to your profile.',
-  },
-  person: {
-    title: 'Identity check',
-    body: 'We compare your selfie to your profile photos. Demo mode simulates a liveness scan.',
-    success: 'Identity verified — you are a verified member.',
-  },
-  age: {
-    title: 'Age verification',
-    body: 'Confirm you are 18+. Demo mode skips a real ID scan.',
-    success: 'Age verified — your profile shows an 18+ badge.',
-  },
-};
-
 export function VerificationSheet({
   visible,
   kind,
@@ -54,10 +37,37 @@ export function VerificationSheet({
   const { colors } = useTheme();
   const { acceptVerificationPolicy } = useApp();
   const { locale } = useAppLocale();
+  const { t } = useTranslation();
   const ui = getLegalUiStrings(locale);
   const [step, setStep] = useState<Step>('intro');
   const [policyAccepted, setPolicyAccepted] = useState(false);
-  const copy = COPY[kind];
+
+  const copy = useMemo(() => {
+    switch (kind) {
+      case 'photo':
+        return {
+          title: t('verification.photoTitle'),
+          body: t('verification.photoBody'),
+          success: t('verification.photoSuccess'),
+        };
+      case 'person':
+        return {
+          title: t('verification.personTitle'),
+          body: t('verification.personBody'),
+          success: t('verification.personSuccess'),
+        };
+      case 'age':
+        return {
+          title: t('verification.ageTitle'),
+          body: t('verification.ageBody'),
+          success: t('verification.ageSuccess'),
+        };
+      default: {
+        const _exhaustive: never = kind;
+        return _exhaustive;
+      }
+    }
+  }, [kind, t]);
 
   const handleClose = () => {
     setStep('intro');
@@ -116,7 +126,7 @@ export function VerificationSheet({
                 />
                 <Text style={[styles.checkboxLabel, { color: colors.textMuted }]}>{ui.verificationConsent}</Text>
               </AnimatedPressable>
-              <Text style={[styles.demoNote, { color: colors.textMuted }]}>Demo mode — no real ID vendor connected.</Text>
+              <Text style={[styles.demoNote, { color: colors.textMuted }]}>{t('verification.demoNote')}</Text>
               <AnimatedPressable
                 style={[
                   styles.primaryBtn,
@@ -126,7 +136,7 @@ export function VerificationSheet({
                 onPress={handleContinueFromIntro}
                 disabled={!policyAccepted}
               >
-                <Text style={styles.primaryText}>Continue</Text>
+                <Text style={styles.primaryText}>{t('common.continue')}</Text>
               </AnimatedPressable>
             </>
           )}
@@ -140,9 +150,9 @@ export function VerificationSheet({
                   <Ionicons name="scan-outline" size={56} color={colors.textMuted} />
                 )}
               </View>
-              <Text style={[styles.bodyText, { color: colors.textMuted }]}>Hold still — simulating liveness scan…</Text>
+              <Text style={[styles.bodyText, { color: colors.textMuted }]}>{t('verification.livenessScan')}</Text>
               <AnimatedPressable style={[styles.primaryBtn, { backgroundColor: colors.gradientEnd }]} onPress={() => setStep('review')}>
-                <Text style={styles.primaryText}>Capture selfie</Text>
+                <Text style={styles.primaryText}>{t('verification.captureSelfie')}</Text>
               </AnimatedPressable>
             </>
           )}
@@ -150,10 +160,10 @@ export function VerificationSheet({
           {step === 'review' && (
             <>
               <Ionicons name="hourglass-outline" size={40} color={colors.gradientEnd} />
-              <Text style={[styles.headline, { color: colors.text }]}>Reviewing…</Text>
-              <Text style={[styles.bodyText, { color: colors.textMuted }]}>Usually takes a few seconds in production. Tap confirm to finish the demo check.</Text>
+              <Text style={[styles.headline, { color: colors.text }]}>{t('verification.reviewing')}</Text>
+              <Text style={[styles.bodyText, { color: colors.textMuted }]}>{t('verification.reviewBody')}</Text>
               <AnimatedPressable style={[styles.primaryBtn, { backgroundColor: colors.gradientEnd }]} onPress={() => setStep('done')}>
-                <Text style={styles.primaryText}>Confirm</Text>
+                <Text style={styles.primaryText}>{t('verification.confirm')}</Text>
               </AnimatedPressable>
             </>
           )}
@@ -161,10 +171,10 @@ export function VerificationSheet({
           {step === 'done' && (
             <>
               <Ionicons name="checkmark-circle" size={52} color={colors.like} />
-              <Text style={[styles.headline, { color: colors.text }]}>Verified</Text>
+              <Text style={[styles.headline, { color: colors.text }]}>{t('verification.verified')}</Text>
               <Text style={[styles.bodyText, { color: colors.textMuted }]}>{copy.success}</Text>
               <AnimatedPressable style={[styles.primaryBtn, { backgroundColor: colors.gradientEnd }]} onPress={handleFinish}>
-                <Text style={styles.primaryText}>Done</Text>
+                <Text style={styles.primaryText}>{t('common.done')}</Text>
               </AnimatedPressable>
             </>
           )}

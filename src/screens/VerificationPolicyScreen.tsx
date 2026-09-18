@@ -11,6 +11,7 @@ import {
 } from '../content/verificationPolicy';
 import { useAppLocale } from '../hooks/useAppLocale';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 
@@ -22,16 +23,11 @@ export function VerificationPolicyScreen({ onClose }: VerificationPolicyScreenPr
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { locale } = useAppLocale();
+  const { t } = useTranslation();
   const title = getVerificationPolicyTitle(locale);
   const effective = getVerificationPolicyEffective(locale);
   const steps = getVerificationHowItWorksSteps(locale);
   const sections = getVerificationPolicySections(locale);
-  const howToLabel = locale === 'zh-TW' ? '如何取得驗證' : 'How to get verified';
-  const legalLabel = locale === 'zh-TW' ? '法律政策' : 'Legal policy';
-  const footer =
-    locale === 'zh-TW'
-      ? '問題或申訴：support@spark.app — 主旨請包含「Verification」。'
-      : 'Questions or appeals: support@spark.app — include "Verification" in the subject line.';
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
@@ -40,7 +36,7 @@ export function VerificationPolicyScreen({ onClose }: VerificationPolicyScreenPr
           <Ionicons name="chevron-back" size={28} color={colors.text} />
         </AnimatedPressable>
         <Text style={[styles.headerTitle, { color: colors.text }]} numberOfLines={1}>
-          {locale === 'zh-TW' ? '驗證政策' : 'Verification policy'}
+          {t('verificationPolicy.headerTitle')}
         </Text>
       </View>
 
@@ -53,7 +49,9 @@ export function VerificationPolicyScreen({ onClose }: VerificationPolicyScreenPr
           <Text style={[styles.effective, { color: colors.textMuted }]}>{effective}</Text>
         </View>
 
-        <Text style={[styles.sectionHeading, { color: colors.textMuted }]}>{howToLabel}</Text>
+        <Text style={[styles.sectionHeading, { color: colors.textMuted }]}>
+          {t('verificationPolicy.howToGetVerified')}
+        </Text>
         {steps.map((item) => (
           <View key={item.step} style={[styles.stepCard, { backgroundColor: colors.surface }]}>
             <View style={[styles.stepBadge, { backgroundColor: colors.gradientEnd }]}>
@@ -66,7 +64,9 @@ export function VerificationPolicyScreen({ onClose }: VerificationPolicyScreenPr
           </View>
         ))}
 
-        <Text style={[styles.sectionHeading, { color: colors.textMuted }]}>{legalLabel}</Text>
+        <Text style={[styles.sectionHeading, { color: colors.textMuted }]}>
+          {t('verificationPolicy.legalPolicy')}
+        </Text>
         {sections.map((section) => (
           <View key={section.id} style={[styles.policyBlock, { borderColor: colors.border }]}>
             <Text style={[styles.policyTitle, { color: colors.text }]}>{section.title}</Text>
@@ -74,7 +74,7 @@ export function VerificationPolicyScreen({ onClose }: VerificationPolicyScreenPr
           </View>
         ))}
 
-        <Text style={[styles.footer, { color: colors.textMuted }]}>{footer}</Text>
+        <Text style={[styles.footer, { color: colors.textMuted }]}>{t('verificationPolicy.footer')}</Text>
       </ScrollView>
     </View>
   );

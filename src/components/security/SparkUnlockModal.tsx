@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import { radii, spacing } from '../../theme';
 import { modalFill } from '../../theme/modalFill';
 import { AnimatedPressable } from '../AnimatedPressable';
@@ -27,6 +28,7 @@ export function SparkUnlockModal({
   showBiometricRetry = false,
 }: SparkUnlockModalProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [pin, setPin] = useState('');
 
   useEffect(() => {
@@ -40,10 +42,10 @@ export function SparkUnlockModal({
       <View style={[styles.overlay, modalFill]}>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <Ionicons name="lock-closed" size={32} color={colors.gradientEnd} />
-          <Text style={[styles.title, { color: colors.text }]}>Leave {unlockLabel}</Text>
-          <Text style={[styles.body, { color: colors.textMuted }]}>
-            Confirm it&apos;s you before opening private dating content.
+          <Text style={[styles.title, { color: colors.text }]}>
+            {t('security.unlockLeaveTitle', { unlockLabel })}
           </Text>
+          <Text style={[styles.body, { color: colors.textMuted }]}>{t('security.unlockBody')}</Text>
 
           {showBiometricRetry && onRetryBiometric && (
             <AnimatedPressable
@@ -51,7 +53,7 @@ export function SparkUnlockModal({
               onPress={onRetryBiometric}
             >
               <Ionicons name="finger-print" size={20} color={colors.gradientEnd} />
-              <Text style={[styles.biometricText, { color: colors.text }]}>Use Face ID / Touch ID</Text>
+              <Text style={[styles.biometricText, { color: colors.text }]}>{t('security.useBiometric')}</Text>
             </AnimatedPressable>
           )}
 
@@ -68,25 +70,25 @@ export function SparkUnlockModal({
             onChangeText={(value) => setPin(value.replace(/\D/g, '').slice(0, 6))}
             keyboardType="number-pad"
             secureTextEntry
-            placeholder="PIN"
+            placeholder={t('security.unlockPinPlaceholder')}
             placeholderTextColor={colors.textMuted}
             maxLength={6}
-            accessibilityLabel="App lock PIN"
+            accessibilityLabel={t('security.unlockPinA11y')}
           />
 
           {error && <Text style={styles.error}>{error}</Text>}
 
           <View style={styles.actions}>
             <AnimatedPressable style={styles.cancel} onPress={onCancel}>
-              <Text style={[styles.cancelText, { color: colors.textMuted }]}>Cancel</Text>
+              <Text style={[styles.cancelText, { color: colors.textMuted }]}>{t('common.cancel')}</Text>
             </AnimatedPressable>
             <AnimatedPressable
               style={[styles.unlock, { backgroundColor: colors.gradientEnd }]}
               onPress={() => onSubmitPin(pin)}
               disabled={pin.length < 4}
-              accessibilityLabel={`Leave ${unlockLabel}`}
+              accessibilityLabel={t('disguiseConfirm.leaveA11y', { unlockLabel })}
             >
-              <Text style={styles.unlockText}>Leave {unlockLabel}</Text>
+              <Text style={styles.unlockText}>{t('disguiseConfirm.leaveUnlock', { unlockLabel })}</Text>
             </AnimatedPressable>
           </View>
         </View>

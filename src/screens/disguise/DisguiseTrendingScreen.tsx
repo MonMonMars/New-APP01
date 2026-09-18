@@ -14,6 +14,7 @@ import { NewsHeroImage } from '../../components/disguise/NewsHeroImage';
 import { useApp } from '../../context/AppContext';
 import { useAppLocale } from '../../hooks/useAppLocale';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import { NewsPost } from '../../data/disguiseFeed';
 import {
   femaleBreakingNowCards,
@@ -128,6 +129,7 @@ export function DisguiseTrendingScreen() {
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
   const { user, preferences } = useApp();
   const { locale } = useAppLocale();
+  const { t } = useTranslation();
   const meta = disguiseWorldMeta(preferences.sparkSection, user.gender, locale);
   const isFemalePulse = usesFemalePulseExperience(user.gender);
   const brief = isFemalePulse ? femalePulseBrief : pulseBrief;
@@ -171,19 +173,17 @@ export function DisguiseTrendingScreen() {
         {...scrollViewProps}
       >
         <Text style={[styles.pageTitle, { color: colors.text }]}>
-          {isFemalePulse ? 'Cosmos & culture' : 'Trending & useful'}
+          {isFemalePulse ? t('disguiseTrending.cosmosTitle') : t('disguiseTrending.trendingTitle')}
         </Text>
         <Text style={[styles.pageSubtitle, { color: colors.textMuted }]}>
-          {isFemalePulse
-            ? '星座, tarot pulls, and entertainment worth your scroll today'
-            : 'Weather, markets, local radar, and topics worth your time today'}
+          {isFemalePulse ? t('disguiseTrending.cosmosSubtitle') : t('disguiseTrending.trendingSubtitle')}
         </Text>
 
         <AnimatedPressable
           style={[styles.briefCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
           onPress={openBrief}
           accessibilityRole="button"
-          accessibilityLabel={`Read brief: ${brief.headline}`}
+          accessibilityLabel={t('disguiseTrending.readBriefA11y', { headline: brief.headline })}
         >
           <NewsHeroImage uri={brief.imageUrl} style={styles.briefImage} accessibilityLabel={brief.headline} />
           <View style={styles.briefBody}>
@@ -191,11 +191,11 @@ export function DisguiseTrendingScreen() {
               <View style={[styles.livePill, { backgroundColor: meta.accentSoft }]}>
                 <View style={[styles.liveDot, { backgroundColor: meta.accent }]} />
                 <Text style={[styles.liveText, { color: meta.accent }]}>
-                  {isFemalePulse ? 'Cosmos Brief' : 'Pulse Brief'}
+                  {isFemalePulse ? t('disguiseTrending.cosmosBrief') : t('disguiseTrending.pulseBrief')}
                 </Text>
               </View>
               <Text style={[styles.briefSource, { color: colors.textMuted }]}>
-                {brief.source} · {brief.readMinutes} min
+                {brief.source} · {t('disguiseTrending.readMinutes', { minutes: brief.readMinutes })}
               </Text>
             </View>
             <Text style={[styles.briefHeadline, { color: colors.text }]} numberOfLines={3}>
@@ -226,7 +226,7 @@ export function DisguiseTrendingScreen() {
 
         {isFemalePulse ? null : (
           <>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Weather</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('disguiseTrending.weather')}</Text>
             <DisguiseWeatherPanel
               weather={weather}
               isLive={isLive}
@@ -237,13 +237,13 @@ export function DisguiseTrendingScreen() {
 
         {isFemalePulse ? null : (
           <>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Stock market</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('disguiseTrending.stockMarket')}</Text>
             <DisguiseMarketsPanel onQuotePress={() => openTopic('#MarketWatch')} />
           </>
         )}
 
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          {isFemalePulse ? 'Tonight for you' : 'Local radar'}
+          {isFemalePulse ? t('disguiseTrending.tonightForYou') : t('disguiseTrending.localRadar')}
         </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.radarRow}>
           {radarItems.map((item) => (
@@ -261,7 +261,7 @@ export function DisguiseTrendingScreen() {
           ))}
         </ScrollView>
 
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Breaking now</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('disguiseTrending.breakingNow')}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.breakingRow}>
           {breakingCards.map((card) => (
             <AnimatedPressable
@@ -284,7 +284,7 @@ export function DisguiseTrendingScreen() {
           ))}
         </ScrollView>
 
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Trending topics</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('disguiseTrending.trendingTopics')}</Text>
         {trendingTopics.map((item, index) => (
           <AnimatedPressable
             key={item.id}
@@ -321,14 +321,14 @@ export function DisguiseTrendingScreen() {
                 {item.preview}
               </Text>
               <Text style={[styles.posts, { color: colors.textMuted }]}>
-                {item.posts} posts · {item.category}
+                {t('disguiseTrending.postsInCategory', { posts: item.posts, category: item.category })}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
           </AnimatedPressable>
         ))}
 
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Editor&apos;s picks</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('disguiseTrending.editorsPicks')}</Text>
         {editorPicks.map((pick) => (
           <AnimatedPressable
             key={pick.id}

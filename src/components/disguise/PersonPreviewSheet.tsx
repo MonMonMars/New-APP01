@@ -238,9 +238,9 @@ export function PersonPreviewSheet({
           onStartShouldSetResponder={() => true}
           {...webClass('spark-sheet-in')}
         >
-          {dismissKind ? <DisguiseMiniDismissStat kind={dismissKind} accent={worldMeta.accent} /> : null}
+          {dismissKind ? <DisguiseMiniDismissStat kind={dismissKind} /> : null}
           <Animated.View style={[styles.cardInner, cardFadeStyle]}>
-          <FadeSlideIn replayKey={visible} index={0}>
+            <FadeSlideIn replayKey={visible} index={0}>
             <View style={styles.header}>
               <View style={[styles.headerIcon, { backgroundColor: worldMeta.accentSoft }]}>
                 <ContentTypeIcon kind="profile" size={12} />
@@ -302,6 +302,7 @@ export function PersonPreviewSheet({
               photos={displayPhotos}
               index={photoIndex}
               onIndexChange={setPhotoIndex}
+              disabled={isDismissing}
             />
           </FadeSlideIn>
 

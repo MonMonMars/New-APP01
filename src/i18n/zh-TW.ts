@@ -645,6 +645,13 @@ export const zhTw = {
   },
   disguiseMiniWindow: {
     photoMeta: '照片 {current} / {total}',
+    photoA11y: '照片 {current} / {total}',
+    previousPhotoA11y: '上一張照片',
+    nextPhotoA11y: '下一張照片',
+    passA11y: '略過個人檔案',
+    superLikeA11y: 'Super Like 個人檔案',
+    likeA11y: '喜歡個人檔案',
+    unlikeA11y: '取消喜歡',
     superLikedHint: '超級喜歡 — 已存入 {world}',
     savedToLikes: '已存入喜歡列表',
     passedHint: '已略過 — 不會出現在推薦列表',

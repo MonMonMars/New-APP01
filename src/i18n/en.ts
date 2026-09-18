@@ -646,6 +646,13 @@ export const en = {
   },
   disguiseMiniWindow: {
     photoMeta: 'Photo {current} of {total}',
+    photoA11y: 'Photo {current} of {total}',
+    previousPhotoA11y: 'Previous photo',
+    nextPhotoA11y: 'Next photo',
+    passA11y: 'Pass profile',
+    superLikeA11y: 'Super like profile',
+    likeA11y: 'Like profile',
+    unlikeA11y: 'Unlike profile',
     superLikedHint: 'Super liked — saved to {world}',
     savedToLikes: 'Saved to Likes',
     passedHint: 'Passed — hidden from deck',

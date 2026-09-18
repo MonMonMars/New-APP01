@@ -4,8 +4,10 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
+import { getProfileById } from '../../data/profiles';
 import { NewsPost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { profileIntroCaption } from '../../utils/profileIntroCaption';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { MediaWithContentBadge } from './ContentTypeIcon';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
@@ -32,6 +34,16 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
 
   const closeReporter = () => {
     setSelectedReporter(null);
+  };
+
+  const reporterCaption = (reporter: NewsReporter): string => {
+    if (reporter.profileId) {
+      const profile = getProfileById(reporter.profileId);
+      if (profile) {
+        return profileIntroCaption(profile);
+      }
+    }
+    return reporter.quote;
   };
 
   return (
@@ -66,7 +78,7 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
                   contentKind="profile"
                   hideLabel
                   imageUrl={reporter.avatarUrl}
-                  caption={reporter.quote}
+                  caption={reporterCaption(reporter)}
                   onPress={() => openReporter(reporter)}
                   accessibilityLabel={t('disguiseMiniWindow.viewPhotosFrom', { name: reporter.name })}
                   style={styles.reporterRow}

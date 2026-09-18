@@ -14,6 +14,8 @@ import { PROFILE_AVATAR_SIZE } from './DisguiseOverlayAvatar';
 import { NewsHeroImage } from './NewsHeroImage';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
 import { SocialCommentSheet } from './SocialCommentSheet';
+import { getProfileById } from '../../data/profiles';
+import { profileIntroCaption } from '../../utils/profileIntroCaption';
 import { profileIdFromPostId } from '../../utils/resolveDisguiseProfile';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -39,13 +41,17 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   const [commentsOpen, setCommentsOpen] = useState(false);
   const upvoted = pulseSocial.likedPostIds.includes(post.id);
 
+  const linkedProfileId = post.profileId ?? profileIdFromPostId(post.id);
+  const linkedProfile = linkedProfileId ? getProfileById(linkedProfileId) : undefined;
+  const profileCaption = linkedProfile ? profileIntroCaption(linkedProfile) : post.overlayText;
+
   const reporter: NewsReporter = {
     id: post.id,
     name: post.name,
     avatarUrl: post.avatarUrl,
-    quote: post.overlayText,
+    quote: profileCaption,
     photos: post.photos,
-    profileId: post.profileId ?? profileIdFromPostId(post.id),
+    profileId: linkedProfileId,
   };
 
   const maskVariant = post.variant === 'ad' ? 'ad' : 'news';
@@ -67,7 +73,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
       overlayText={maskSnippet}
       overlayVariant={maskVariant}
       contentKind="profile"
-      caption={post.overlayText}
+      caption={profileCaption}
       hideLabel
       size={PROFILE_AVATAR_SIZE}
       onPress={openPreview}
@@ -84,7 +90,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
             overlayText={maskSnippet}
             overlayVariant={maskVariant}
             contentKind="profile"
-            caption={post.summary}
+            caption={linkedProfile ? linkedProfile.bio.trim() : post.summary}
             hideLabel
             size={PROFILE_AVATAR_SIZE}
             onPress={openPreview}

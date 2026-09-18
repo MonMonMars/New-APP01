@@ -135,6 +135,5 @@ export function resolveReporterSparkProfile(
   return {
     ...base,
     photos: reporter.photos.length > 0 ? reporter.photos : base.photos,
-    bio: reporter.quote.trim() ? reporter.quote : base.bio,
   };
 }

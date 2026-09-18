@@ -5,6 +5,7 @@ import { SparkSection } from '../types/preferences';
 import { UserProfile } from '../types/profile';
 import { disguiseFeedItemsForGender } from './disguiseFeedCatalog';
 import { buildDisguisedProfileFeedItem, buildDisguisedProfileFeedItems } from './disguiseProfileFeed';
+import { profileIntroCaption } from './profileIntroCaption';
 import { pinnedReporterProfileId, resolveDisguiseProfileId } from './resolveDisguiseProfile';
 
 function weaveProfileCards(base: FeedItem[], profileCards: FeedItem[]): FeedItem[] {
@@ -70,13 +71,13 @@ function syncReporterPhotos(items: FeedItem[], section?: SparkSection | string |
         if (!profile || profile.photos.length === 0) {
           return { ...reporter, profileId };
         }
-        const bioSnippet = profile.bio.split('.')[0]?.trim();
+        const intro = profileIntroCaption(profile);
         return {
           ...reporter,
           profileId,
           avatarUrl: profile.photos[0],
           photos: profile.photos,
-          quote: bioSnippet && bioSnippet.length > 12 ? bioSnippet : reporter.quote,
+          quote: intro || reporter.quote,
         };
       }),
     };

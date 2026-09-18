@@ -160,6 +160,7 @@ export const en = {
   },
   discover: {
     toolsA11y: 'Discover tools',
+    mapA11y: 'Open map discover',
     incognitoOn: 'Incognito on — only people you like can see you',
     accountPaused: 'Account paused',
     accountPausedHint: 'Unpause in Profile settings to start discovering again.',
@@ -472,6 +473,9 @@ export const en = {
     selectPinA11y: 'Select {name}',
     addToDeckA11y: 'Add {name} to deck',
     youMarkerA11y: 'Your location',
+    searchPeoplePlaceholder: 'Search people on map',
+    searchPeopleA11y: 'Search people on map',
+    noSearchResults: 'No one matches that name in this area',
     areaLoaded: 'People in this area added to your deck',
     attribution: '© Esri',
     zoomInA11y: 'Zoom in',

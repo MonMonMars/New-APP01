@@ -350,6 +350,7 @@ function HubTile({
             pinColor={mapAccent}
             showYouMarker
             showRadiusRing
+            interactive={false}
             style={styles.hubMapPreview}
           />
           <View style={styles.hubMapScrim} />

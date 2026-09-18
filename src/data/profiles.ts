@@ -5,6 +5,7 @@ import { moreRawProfiles } from './moreProfiles';
 import { newestRawProfiles } from './newestProfiles';
 import { nextRawProfiles } from './nextProfiles';
 import { applyLegacyProfileEnrichment } from './legacyProfileEnrichment';
+import { profileGeoLocation } from '../utils/geoMap';
 import { withDemoProfilePhotos } from '../utils/withDemoProfilePhotos';
 import {
   matchesSparkSection,
@@ -185,23 +186,13 @@ export const EXPLORE_CATEGORY_MAP: Record<string, 'serious' | 'new' | 'nearby'> 
   '176': 'new',
 };
 
-function mapPin(distanceMiles: number, seed: number): { mapX: number; mapY: number } {
-  const angle = (seed * 137.508) % 360;
-  const radius = Math.min(distanceMiles / 250, 1) * 38 + 8;
-  const mapX = 50 + radius * Math.cos((angle * Math.PI) / 180);
-  const mapY = 50 + radius * Math.sin((angle * Math.PI) / 180);
+function withMap(profile: Profile, seed: number): Profile {
+  const { lat, lng } = profileGeoLocation(profile, seed);
   return {
-    mapX: Math.round(Math.min(92, Math.max(8, mapX))),
-    mapY: Math.round(Math.min(88, Math.max(12, mapY))),
+    ...profile,
+    latitude: lat,
+    longitude: lng,
   };
-}
-
-function withMap(
-  profile: Profile,
-  seed: number,
-): Profile {
-  const { mapX, mapY } = mapPin(profile.distanceMiles, seed);
-  return { ...profile, mapX, mapY };
 }
 
 function withIntent(profile: Profile, seed: number): Profile {

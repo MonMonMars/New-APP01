@@ -263,6 +263,7 @@ export function OnboardingFlow() {
               accentColor={pulseBrand.accent}
               pinColor={pulseBrand.accent}
               showRadiusRing={false}
+              interactive={false}
               style={styles.mapPreviewInner}
             />
             <View style={styles.mapPreviewScrim} />

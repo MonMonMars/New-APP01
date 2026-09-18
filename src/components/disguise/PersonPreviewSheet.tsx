@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -61,8 +61,10 @@ export function PersonPreviewSheet({
   const [matchToastName, setMatchToastName] = useState<string | null>(null);
   const [dismissKind, setDismissKind] = useState<MiniDismissKind | null>(null);
   const [isDismissing, setIsDismissing] = useState(false);
+  const [showLikeLimitHint, setShowLikeLimitHint] = useState(false);
   const cardOpacity = useSharedValue(1);
   const cardScale = useSharedValue(1);
+  const worldMeta = useDisguiseWorld();
 
   useEffect(() => {
     if (visible) {
@@ -71,6 +73,7 @@ export function PersonPreviewSheet({
       pendingMatchRef.current = null;
       setDismissKind(null);
       setIsDismissing(false);
+      setShowLikeLimitHint(false);
       cardOpacity.value = 1;
       cardScale.value = 1;
     }
@@ -143,39 +146,35 @@ export function PersonPreviewSheet({
     }
   }, [displayPhotos.length, photoIndex]);
 
-  if (!reporter) {
-    return null;
-  }
-
   const sparkActionsEnabled = linkedProfile !== null;
   const profileId = linkedProfile?.id;
   const liked = profileId ? likedIds.has(profileId) : false;
   const superLiked = profileId ? superLikedIds.has(profileId) : false;
   const passed = profileId ? passedIds.has(profileId) : false;
-  const worldMeta = useDisguiseWorld();
   const worldName = worldMeta.unlockLabel;
   const emberStatus = linkedProfile ? emberRelationshipLabel(linkedProfile.relationshipStatus) : null;
 
   const photoCount = displayPhotos.length;
-  const trimmedQuote = reporter.quote.trim();
+  const trimmedQuote = reporter?.quote.trim() ?? '';
   const showQuote =
     trimmedQuote.length > 0 &&
     trimmedQuote !== linkedProfile?.bio?.trim() &&
     !(trimmedQuote.length > 120 && linkedProfile?.bio);
 
-  const guardLikeLimit = (): boolean => {
+  const guardLikeLimit = useCallback((): boolean => {
     if (!canLike) {
-      Alert.alert(t('discoverHub.likeLimitTitle'), t('discoverHub.likeLimitBody'));
+      setShowLikeLimitHint(true);
       return false;
     }
+    setShowLikeLimitHint(false);
     return true;
-  };
+  }, [canLike]);
 
-  const notifyMatch = (name: string) => {
+  const notifyMatch = useCallback((name: string) => {
     pendingMatchRef.current = name;
-  };
+  }, []);
 
-  const handleLike = () => {
+  const handleLike = useCallback(() => {
     if (!linkedProfile || isDismissing) {
       return;
     }
@@ -191,9 +190,9 @@ export function PersonPreviewSheet({
       notifyMatch(linkedProfile.name);
     }
     dismissWithStat('like');
-  };
+  }, [dismissWithStat, guardLikeLimit, isDismissing, likeProfile, liked, linkedProfile, notifyMatch]);
 
-  const handleSuperLike = () => {
+  const handleSuperLike = useCallback(() => {
     if (!linkedProfile || isDismissing) {
       return;
     }
@@ -210,18 +209,33 @@ export function PersonPreviewSheet({
       notifyMatch(linkedProfile.name);
     }
     dismissWithStat('super');
-  };
+  }, [
+    dismissWithStat,
+    guardLikeLimit,
+    isDismissing,
+    liked,
+    linkedProfile,
+    notifyMatch,
+    superLikeProfile,
+    superLiked,
+    unlikeProfile,
+  ]);
 
-  const handlePass = () => {
+  const handlePass = useCallback(() => {
     if (!linkedProfile || isDismissing) {
       return;
     }
+    setShowLikeLimitHint(false);
     if (liked || superLiked) {
       unlikeProfile(linkedProfile.id);
     }
     passProfile(linkedProfile);
     dismissWithStat('pass');
-  };
+  }, [dismissWithStat, isDismissing, liked, linkedProfile, passProfile, superLiked, unlikeProfile]);
+
+  if (!reporter) {
+    return null;
+  }
 
   return (
     <>
@@ -238,7 +252,6 @@ export function PersonPreviewSheet({
               maxHeight: Math.min(windowHeight * 0.52, 360),
             },
           ]}
-          onStartShouldSetResponder={() => true}
           {...webClass('spark-sheet-in')}
         >
           {dismissKind ? <DisguiseMiniDismissStat kind={dismissKind} /> : null}
@@ -318,7 +331,7 @@ export function PersonPreviewSheet({
             ) : null}
 
             {sparkActionsEnabled ? (
-              <FadeSlideIn replayKey={visible} index={5}>
+              <View style={styles.actionsWrap}>
                 <DisguiseMiniSparkBar
                   liked={liked}
                   superLiked={superLiked}
@@ -328,16 +341,22 @@ export function PersonPreviewSheet({
                   onPass={handlePass}
                   disabled={isDismissing}
                 />
-                <Text style={[styles.hint, { color: colors.textMuted }]}>
-                  {superLiked
-                    ? t('disguiseMiniWindow.superLikedHint', { world: worldName })
-                    : liked
-                      ? t('disguiseMiniWindow.savedToLikes')
-                      : passed
-                        ? t('disguiseMiniWindow.passedHint')
-                        : t('disguiseMiniWindow.actionsSync', { world: worldName })}
-                </Text>
-              </FadeSlideIn>
+                {showLikeLimitHint ? (
+                  <Text style={[styles.limitHint, { color: colors.gradientEnd }]}>
+                    {t('discoverHub.likeLimitTitle')} — {t('discoverHub.likeLimitBody')}
+                  </Text>
+                ) : (
+                  <Text style={[styles.hint, { color: colors.textMuted }]}>
+                    {superLiked
+                      ? t('disguiseMiniWindow.superLikedHint', { world: worldName })
+                      : liked
+                        ? t('disguiseMiniWindow.savedToLikes')
+                        : passed
+                          ? t('disguiseMiniWindow.passedHint')
+                          : t('disguiseMiniWindow.actionsSync', { world: worldName })}
+                  </Text>
+                )}
+              </View>
             ) : (
               <FadeSlideIn replayKey={visible} index={5}>
                 <Text style={[styles.hint, { color: colors.textMuted }]}>
@@ -414,9 +433,20 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
+  actionsWrap: {
+    marginTop: 2,
+    zIndex: 6,
+  },
   hint: {
     fontSize: 10,
     textAlign: 'center',
     marginTop: 2,
+  },
+  limitHint: {
+    fontSize: 10,
+    textAlign: 'center',
+    marginTop: 4,
+    fontWeight: '700',
+    lineHeight: 14,
   },
 });

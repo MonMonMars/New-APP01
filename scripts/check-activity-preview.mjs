@@ -65,7 +65,7 @@ await page.waitForTimeout(900);
 const body = await page.locator('body').innerText();
 const hasAlex = /alex chen/i.test(body);
 const hasPhotos = /photo \d+ of \d+/i.test(body);
-const hasSparkBar = /like syncs to spark|saved to likes|mi away/i.test(body);
+const hasSparkBar = /actions sync to|saved to likes|mi away|\d+ mi away/i.test(body);
 const hasSocialQuote = /hot take: the best productivity hack/i.test(body);
 
 console.log(

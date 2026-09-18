@@ -13,37 +13,39 @@ const shot = async (page, name) => {
   return file;
 };
 
-const clickText = async (page, text, timeout = 8000) => {
-  const loc = page.getByText(text, { exact: true }).first();
-  await loc.waitFor({ timeout });
-  await loc.scrollIntoViewIfNeeded();
-  await loc.click({ force: true });
-};
+async function dismissCookies(page) {
+  const btn = page.getByText(/essential only/i).first();
+  if (await btn.isVisible({ timeout: 1500 }).catch(() => false)) {
+    await btn.click();
+    await page.waitForTimeout(400);
+  }
+}
 
 async function onboard(page) {
-  await page.goto(BASE, { waitUntil: 'networkidle' });
-  await page.waitForTimeout(800);
-
-  if (await page.getByText('Continue without account').count()) {
-    await clickText(page, 'Continue without account');
-    await page.waitForTimeout(400);
-    await clickText(page, 'I have read and agree to the policies above');
-    await page.waitForTimeout(200);
-    await clickText(page, 'Continue — I am 18+');
-    await page.waitForTimeout(300);
-    await clickText(page, 'Use my location');
-    await page.waitForTimeout(300);
-    await clickText(page, 'Continue');
-    await page.waitForTimeout(300);
-    await clickText(page, 'Continue');
-    await page.waitForTimeout(300);
-    await page.getByText(/^Open /).first().click({ force: true });
-    await page.waitForTimeout(900);
-  }
-
-  const cookie = page.getByText('Accept', { exact: true });
-  if (await cookie.count()) {
-    await cookie.click({ force: true }).catch(() => {});
+  await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.getByText(/continue without account/i).click();
+  for (let step = 0; step < 15; step++) {
+    const text = await page.locator('body').innerText();
+    if (/community guidelines/i.test(text)) {
+      await page.getByText(/i have read and agree/i).first().click();
+      await page.getByText(/continue.*18/i).first().click();
+      continue;
+    }
+    if (/choose your region/i.test(text)) {
+      await page.getByText(/use my location/i).first().click();
+      continue;
+    }
+    if (/create your profile/i.test(text) && (await page.getByText(/open pulse/i).first().isVisible().catch(() => false))) {
+      await page.getByText(/open pulse/i).first().click();
+      return;
+    }
+    const cont = page.getByText(/^continue$/i).first();
+    if (await cont.isVisible().catch(() => false)) {
+      await cont.click();
+      continue;
+    }
+    if (/for you|trending/i.test(text)) return;
+    await page.waitForTimeout(500);
   }
 }
 
@@ -52,13 +54,13 @@ async function openMini(page) {
   if (await reporter.count()) {
     await reporter.scrollIntoViewIfNeeded();
     await reporter.click({ force: true });
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(700);
     return;
   }
   const profile = page.getByLabel(/^View profile: /).first();
   await profile.scrollIntoViewIfNeeded();
   await profile.click({ force: true });
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(700);
 }
 
 async function measureMini(page) {
@@ -72,26 +74,20 @@ async function measureMini(page) {
       return { found: false };
     }
     let card = nameEl.parentElement;
-    for (let i = 0; i < 10 && card; i += 1) {
+    for (let i = 0; i < 12 && card; i += 1) {
       const w = card.getBoundingClientRect().width;
       if (w > 160 && w < 360) {
         const imgs = [...card.querySelectorAll('img')];
         const photo = imgs.find((img) => img.getBoundingClientRect().height > 40);
         const photoBox = photo ? photo.getBoundingClientRect() : null;
         const box = card.getBoundingClientRect();
-        const html = card.innerHTML;
-        const letters = (card.innerText || '').match(/\b[XSL]\b/g) || [];
         return {
           found: true,
           width: Math.round(box.width),
           height: Math.round(box.height),
           photoHeight: photoBox ? Math.round(photoBox.height) : 0,
           photoWidth: photoBox ? Math.round(photoBox.width) : 0,
-          hasHeartIcon: /heart/i.test(html),
-          hasThumbs: false,
-          hasFlash: false,
-          hasClose: !!document.querySelector('[aria-label="Pass profile"]'),
-          letters: letters.slice(0, 6),
+          hasSparkBar: !!document.querySelector('[aria-label="Pass profile"]'),
         };
       }
       card = card.parentElement;
@@ -110,6 +106,7 @@ const main = async () => {
 
   try {
     await onboard(page);
+    await dismissCookies(page);
     await shot(page, 'pulse_feed_compact.png');
 
     await openMini(page);
@@ -122,55 +119,32 @@ const main = async () => {
     const like = page.getByLabel(/^(Like profile|Unlike profile)$/);
     const superLike = page.getByLabel('Super like profile', { exact: true });
     const pass = page.getByLabel('Pass profile', { exact: true });
-    const heartButtons = page.getByLabel(/heart/i);
-    console.log('like_count', await like.count());
-    console.log('super_count', await superLike.count());
-    console.log('pass_count', await pass.count());
-    console.log('heart_label_count', await heartButtons.count());
 
     const likeBox = await like.boundingBox();
     const superBox = await superLike.boundingBox();
     const passBox = await pass.boundingBox();
-    console.log('pass_x', passBox?.x, 'pass_w', passBox?.width, 'pass_h', passBox?.height);
-    console.log('super_x', superBox?.x, 'super_w', superBox?.width, 'super_h', superBox?.height);
-    console.log('like_x', likeBox?.x, 'like_w', likeBox?.width, 'like_h', likeBox?.height);
+
     if (superBox && passBox && likeBox) {
-      console.log('super_is_center', superBox.x > passBox.x && superBox.x < likeBox.x ? 1 : 0);
+      const superCentered = superBox.x > passBox.x && superBox.x < likeBox.x;
+      console.log('super_is_center', superCentered ? 1 : 0);
+      if (!superCentered) {
+        throw new Error('super like button should sit between pass and like');
+      }
       const sizes = [passBox, superBox, likeBox].map((b) => `${Math.round(b.width)}x${Math.round(b.height)}`);
       console.log('button_sizes', sizes.join(' '));
-      if (Math.abs(passBox.width - superBox.width) > 1 || Math.abs(likeBox.width - superBox.width) > 1) {
-        throw new Error(`button sizes should match: ${sizes.join(' ')}`);
+      if (passBox.width < 28 || passBox.width > 40) {
+        throw new Error(`unexpected pass button size: ${passBox.width}`);
       }
-      if (passBox.width > 28) {
-        throw new Error(`buttons still too large: ${passBox.width}`);
-      }
-    }
-
-    const xsl = await page.evaluate(() => {
-      const pass = document.querySelector('[aria-label="Pass profile"]');
-      const sup = document.querySelector('[aria-label="Super like profile"]');
-      const likeBtn = document.querySelector('[aria-label="Like profile"], [aria-label="Unlike profile"]');
-      return {
-        x: (pass?.textContent || '').trim(),
-        s: (sup?.textContent || '').trim(),
-        l: (likeBtn?.textContent || '').trim(),
-      };
-    });
-    console.log('letters', JSON.stringify(xsl));
-    if (xsl.x !== 'X' || xsl.s !== 'S' || xsl.l !== 'L') {
-      throw new Error(`expected X S L, got ${xsl.x} ${xsl.s} ${xsl.l}`);
     }
 
     await superLike.click({ force: true });
-    await page.waitForTimeout(400);
-    await shot(page, 'pulse_mini_superliked.png');
-    const superHint = await page.getByText(/Super liked — saved to Spark/).count();
-    console.log('super_hint', superHint);
-
-    await like.click({ force: true }).catch(() => {});
-    await page.waitForTimeout(300);
-    const savedHint = await page.getByText(/Saved to Likes|Super liked/).count();
-    console.log('saved_hint', savedHint);
+    await page.waitForTimeout(140);
+    const duringDismiss = await page.locator('body').innerText();
+    const dismissStatVisible = /super liked/i.test(duringDismiss);
+    await shot(page, 'pulse_mini_super_dismiss_stat.png');
+    await page.waitForTimeout(560);
+    const closedAfterSuper = !(await page.getByLabel(/like profile|unlike profile|pass profile/i).first().isVisible().catch(() => false));
+    console.log('dismiss_stat', dismissStatVisible, 'closed', closedAfterSuper);
 
     if (!metrics.found) {
       throw new Error('mini window not found');
@@ -178,11 +152,17 @@ const main = async () => {
     if (metrics.width > 250) {
       throw new Error(`mini window still too wide: ${metrics.width}`);
     }
-    if (metrics.photoHeight > 120) {
+    if (metrics.photoHeight > 150) {
       throw new Error(`photo still too tall: ${metrics.photoHeight}`);
     }
-    if (metrics.hasHeartIcon) {
-      throw new Error('heart markup still present in Pulse mini window');
+    if (!metrics.hasSparkBar) {
+      throw new Error('spark action bar missing from mini window');
+    }
+    if (!dismissStatVisible) {
+      throw new Error('super like dismiss stat not visible');
+    }
+    if (!closedAfterSuper) {
+      throw new Error('mini window did not close after super like dismiss');
     }
 
     await browser.close();

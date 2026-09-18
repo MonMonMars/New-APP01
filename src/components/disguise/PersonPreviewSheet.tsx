@@ -165,7 +165,7 @@ export function PersonPreviewSheet({
               borderColor: colors.border,
               marginTop: insets.top * 0.08,
               width: Math.min(224, windowWidth - 96),
-              maxHeight: Math.min(windowHeight * 0.46, 318),
+              maxHeight: Math.min(windowHeight * 0.52, 360),
             },
           ]}
           {...webClass('spark-sheet-in')}
@@ -232,7 +232,6 @@ export function PersonPreviewSheet({
               photos={displayPhotos}
               index={photoIndex}
               onIndexChange={setPhotoIndex}
-              height={96}
             />
           </FadeSlideIn>
 

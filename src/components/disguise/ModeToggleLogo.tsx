@@ -10,11 +10,17 @@ type ModeToggleLogoProps = {
   compact?: boolean;
 };
 
-/** Grey P-only Pulse entry — lower-left tab bar in Spark/Ember. */
-export function PulseTabIcon({ size = 24 }: { size?: number }) {
+/** Pulse P mark — lower-left tab bar in Spark/Ember (matches other tab icons). */
+export function PulseTabIcon({
+  size = 24,
+  focused = false,
+}: {
+  size?: number;
+  focused?: boolean;
+}) {
   return (
     <View accessibilityRole="image" accessibilityLabel="Pulse">
-      <BrandMark world="pulse" size={size} muted />
+      <BrandMark world="pulse" size={size} muted={!focused} />
     </View>
   );
 }

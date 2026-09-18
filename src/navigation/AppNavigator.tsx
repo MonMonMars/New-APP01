@@ -122,7 +122,7 @@ function MainTabs() {
         },
         tabBarIcon: ({ focused, color, size }) => {
           if (route.name === 'Discover') {
-            return <PulseTabIcon size={size} />;
+            return <PulseTabIcon size={size} focused={focused} />;
           }
           const icons: Record<
             Exclude<keyof MainTabParamList, 'Discover'>,
@@ -141,9 +141,8 @@ function MainTabs() {
         name="Discover"
         component={DiscoverScreen}
         options={{
-          tabBarShowLabel: false,
+          tabBarLabel: t('tabs.pulse'),
           tabBarAccessibilityLabel: t('pulseEntry.tabA11y'),
-          tabBarItemStyle: styles.pulseTabItem,
         }}
       />
       <Tab.Screen
@@ -422,8 +421,5 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  pulseTabItem: {
-    minWidth: 76,
   },
 });

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
 
@@ -13,6 +14,7 @@ type VoiceMessageBubbleProps = {
 
 export function VoiceMessageBubble({ durationSeconds, isMine }: VoiceMessageBubbleProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
 
@@ -40,7 +42,7 @@ export function VoiceMessageBubble({ durationSeconds, isMine }: VoiceMessageBubb
       style={styles.row}
       onPress={() => setPlaying((value) => !value)}
       accessibilityRole="button"
-      accessibilityLabel={`Voice message, ${durationSeconds} seconds`}
+      accessibilityLabel={t('chat.voiceMessageA11y', { seconds: durationSeconds })}
     >
       <View style={[styles.playBtn, { backgroundColor: isMine ? 'rgba(255,255,255,0.2)' : colors.border }]}>
         <Ionicons name={playing ? 'pause' : 'play'} size={14} color={colors.text} />

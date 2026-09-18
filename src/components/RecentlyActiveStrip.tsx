@@ -39,7 +39,13 @@ export function RecentlyActiveStrip({ profiles, onSelect }: RecentlyActiveStripP
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {profiles.map((profile) => (
-          <AnimatedPressable key={profile.id} style={styles.item} onPress={() => onSelect(profile)}>
+          <AnimatedPressable
+            key={profile.id}
+            style={styles.item}
+            onPress={() => onSelect(profile)}
+            accessibilityRole="button"
+            accessibilityLabel={t('discoverHub.viewProfileA11y', { name: profile.name })}
+          >
             <View style={[styles.ring, { borderColor: colors.like }]}>
               <Image source={{ uri: profile.photos[0] }} style={styles.avatar} />
             </View>

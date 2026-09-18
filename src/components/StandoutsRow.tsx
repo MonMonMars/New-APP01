@@ -44,6 +44,8 @@ export function StandoutsRow({ profiles, onSelect }: StandoutsRowProps) {
             key={profile.id}
             style={[styles.card, { borderColor: colors.superLike, backgroundColor: `${colors.superLike}14` }]}
             onPress={() => onSelect(profile)}
+            accessibilityRole="button"
+            accessibilityLabel={t('discoverHub.viewProfileA11y', { name: profile.name })}
           >
             <Image source={{ uri: profile.photos[0] }} style={styles.photo} />
             <View style={styles.badge}>

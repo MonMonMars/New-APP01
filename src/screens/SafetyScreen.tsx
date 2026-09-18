@@ -151,7 +151,7 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
           </View>
         ))}
 
-        <Text style={styles.sectionTitle}>Legal & policies</Text>
+        <Text style={styles.sectionTitle}>{t('safety.legalPoliciesTitle')}</Text>
         <Text style={styles.legalIntro}>{ui.safetyLegalIntro}</Text>
         {legalLinks.map((item) => (
           <AnimatedPressable

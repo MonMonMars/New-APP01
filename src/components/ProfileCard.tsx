@@ -18,6 +18,7 @@ import { VideoProfileOverlay } from './VideoProfileOverlay';
 import { VerificationBadges } from './VerificationBadges';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import {
   emberLocationLine,
   emberRelationshipLabel,
@@ -53,6 +54,7 @@ export function ProfileCard({
   onOpenDetail,
 }: ProfileCardProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const isTop = index === activeIndex;
   const [photoIndex, setPhotoIndex] = useState(0);
   const photoCount = profile.photos.length;
@@ -222,7 +224,7 @@ export function ProfileCard({
         <Text style={[styles.distance, compact && styles.distanceCompact]}>
           {emberStatus
             ? emberLocationLine(profile)
-            : `${profile.city ? `${profile.city} · ` : ''}${profile.distanceMiles} mi`}
+            : `${profile.city ? `${profile.city} · ` : ''}${t('likes.milesAway', { n: profile.distanceMiles })}`}
         </Text>
         {!compact && (
           <>

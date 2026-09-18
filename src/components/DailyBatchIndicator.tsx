@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 
 type DailyBatchIndicatorProps = {
   remaining: number;
@@ -12,6 +13,7 @@ type DailyBatchIndicatorProps = {
 /** Coffee Meets Bagel–style daily curated batch counter. */
 export function DailyBatchIndicator({ remaining, total, slim = false }: DailyBatchIndicatorProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   if (remaining <= 0) {
     return null;
   }
@@ -20,7 +22,7 @@ export function DailyBatchIndicator({ remaining, total, slim = false }: DailyBat
     <View style={[styles.container, slim && styles.containerSlim]}>
       <View style={[styles.dot, slim && styles.dotSlim, { backgroundColor: colors.heartRed }]} />
       <Text style={[styles.text, slim && styles.textSlim]}>
-        {remaining} of {total} left
+        {t('discoverHub.batchRemaining', { remaining, total })}
       </Text>
     </View>
   );

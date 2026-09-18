@@ -43,6 +43,7 @@ type SearchMapViewProps = {
   onZoomChange?: (zoom: number) => void;
   onPinPress?: (profileId: string) => void;
   pinAccessibilityLabel?: (name: string) => string;
+  youMarkerA11y?: string;
   style?: ViewStyle;
 };
 
@@ -71,6 +72,7 @@ export function SearchMapView({
   onZoomChange,
   onPinPress,
   pinAccessibilityLabel,
+  youMarkerA11y,
   style,
 }: SearchMapViewProps) {
   const [mapSize, setMapSize] = useState({
@@ -218,6 +220,8 @@ export function SearchMapView({
       {showYouMarker ? (
         <View
           pointerEvents="none"
+          accessible={Boolean(youMarkerA11y)}
+          accessibilityLabel={youMarkerA11y}
           style={[
             styles.youMarker,
             {

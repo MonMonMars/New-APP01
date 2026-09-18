@@ -10,6 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { spacing } from '../theme';
 
 type TypingIndicatorProps = {
@@ -40,6 +41,7 @@ function Dot({ delay }: { delay: number }) {
 
 export function TypingIndicator({ name }: TypingIndicatorProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <View style={styles.row}>
@@ -50,7 +52,7 @@ export function TypingIndicator({ name }: TypingIndicatorProps) {
           <Dot delay={300} />
         </View>
       </View>
-      <Text style={[styles.label, { color: colors.textMuted }]}>{name} is typing…</Text>
+      <Text style={[styles.label, { color: colors.textMuted }]}>{t('chat.typing', { name })}</Text>
     </View>
   );
 }

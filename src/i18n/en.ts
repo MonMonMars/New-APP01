@@ -714,6 +714,8 @@ export const en = {
     emptyNoTopicBody: 'Check back soon — or explore Trending for more stories.',
     emptyTopicBody: 'Try another topic or clear the filter to see everything.',
     exploreTrending: 'Explore {tab}',
+    scrollRefreshHint: 'Scroll to the end to refresh profile photos',
+    refreshingProfiles: 'Refreshing profiles…',
   },
   editProfile: {
     addPhotoFromLibrary: 'Add photo from library',

@@ -32,8 +32,32 @@ function weaveProfileCards(base: FeedItem[], profileCards: FeedItem[]): FeedItem
   return result;
 }
 
+/** Drop woven profile ids so a Pulse refresh can reassign every slot. */
+export function stripPulseProfileLinks(items: FeedItem[]): FeedItem[] {
+  return items.map((item) => {
+    if (item.type === 'news') {
+      return {
+        ...item,
+        reporters: item.reporters.map((reporter) => ({
+          ...reporter,
+          profileId: undefined,
+        })),
+      };
+    }
+
+    if (item.type === 'disguised_profile' && item.id !== 'disguised-user') {
+      return {
+        ...item,
+        profileId: undefined,
+      };
+    }
+
+    return item;
+  });
+}
+
 /** Pin reporter profile ids so news links do not swap after mini-window likes. */
-function pinFeedProfileLinks(items: FeedItem[], section?: SparkSection | string | null): FeedItem[] {
+export function pinFeedProfileLinks(items: FeedItem[], section?: SparkSection | string | null): FeedItem[] {
   return items.map((item) => {
     if (item.type !== 'news') {
       return item;
@@ -52,7 +76,7 @@ function pinFeedProfileLinks(items: FeedItem[], section?: SparkSection | string 
 }
 
 /** Use linked dating profile photos so Pulse reporters match their mini-window identity. */
-function syncReporterPhotos(items: FeedItem[], section?: SparkSection | string | null): FeedItem[] {
+export function syncReporterPhotos(items: FeedItem[], section?: SparkSection | string | null): FeedItem[] {
   return items.map((item) => {
     if (item.type !== 'news') {
       return item;

@@ -40,7 +40,9 @@ import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
 import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { usesFemalePulseExperience } from '../../utils/genderAccountPerks';
 import { briefToNewsPost, breakingToNewsPost, editorsPickToNewsPost } from '../../utils/disguiseTrendingArticles';
+import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefreshFooter';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
+import { usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
 
 function trendIcon(direction: TrendDirection): keyof typeof Ionicons.glyphMap {
   switch (direction) {
@@ -139,6 +141,7 @@ export function DisguiseTrendingScreen() {
       ? preferences.passportCity
       : preferences.passportCity ?? 'New York, NY';
   const { weather, isLive } = useDisguiseWeather(weatherCity);
+  const { refreshing, scrollViewProps } = usePulseScrollRefresh();
 
   const openTopic = (topic?: string) => {
     navigateDisguiseFeedTopic(navigation, topic);
@@ -155,7 +158,11 @@ export function DisguiseTrendingScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader title={meta.trendingTab} showSearch={false} />
-      <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
+        {...scrollViewProps}
+      >
         <Text style={[styles.pageTitle, { color: colors.text }]}>
           {isFemalePulse ? 'Cosmos & culture' : 'Trending & useful'}
         </Text>
@@ -329,6 +336,8 @@ export function DisguiseTrendingScreen() {
             <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
           </AnimatedPressable>
         ))}
+
+        <PulseFeedRefreshFooter refreshing={refreshing} />
       </ScrollView>
 
       <NewsArticleSheet

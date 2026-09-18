@@ -5,6 +5,19 @@ import { Profile } from '../types/profile';
 
 const reporterProfileCache = new Map<string, string>();
 const actionedProfileIds = new Set<string>();
+let pulseProfileMappingGeneration = 0;
+
+export function clearReporterProfileCache(): void {
+  reporterProfileCache.clear();
+}
+
+export function setPulseProfileMappingGeneration(generation: number): void {
+  pulseProfileMappingGeneration = generation;
+}
+
+export function getPulseProfileMappingGeneration(): number {
+  return pulseProfileMappingGeneration;
+}
 
 /** Keep social / activity reporter remaps aligned with Pulse feed swaps. */
 export function syncActionedProfileIds(ids: Set<string>): void {
@@ -51,7 +64,7 @@ export function resolveDisguiseProfileId(reporterId: string): string | undefined
 }
 
 function hashReporterId(id: string): number {
-  let hash = 0;
+  let hash = pulseProfileMappingGeneration * 9973;
   for (let i = 0; i < id.length; i += 1) {
     hash = (hash * 31 + id.charCodeAt(i)) | 0;
   }

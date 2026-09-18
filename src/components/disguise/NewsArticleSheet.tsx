@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import { NewsPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { openExternalUrl } from '../../utils/openExternalUrl';
@@ -30,6 +31,7 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
   const { colors } = useTheme();
+  const { locale } = useTranslation();
   const { recordPulseReading } = useApp();
   const meta = useDisguiseWorld();
   const heroHeight = disguiseReadHeroHeight(windowHeight);
@@ -102,7 +104,7 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
           <AnimatedPressable
             style={[styles.readOriginal, { backgroundColor: meta.accent }]}
             onPress={() => {
-              void openExternalUrl(post.articleUrl, post.source);
+              void openExternalUrl(post.articleUrl, post.source, locale);
             }}
             scaleTo={0.97}
             accessibilityLabel={`Read on ${post.source}`}

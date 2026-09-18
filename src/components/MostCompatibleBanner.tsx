@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -14,6 +15,7 @@ type MostCompatibleBannerProps = {
 
 export function MostCompatibleBanner({ profile, score, onPress }: MostCompatibleBannerProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <AnimatedPressable
@@ -21,11 +23,11 @@ export function MostCompatibleBanner({ profile, score, onPress }: MostCompatible
       onPress={onPress}
     >
       <View style={styles.left}>
-        <Text style={[styles.label, { color: colors.gradientEnd }]}>Most Compatible</Text>
+        <Text style={[styles.label, { color: colors.gradientEnd }]}>{t('discover.mostCompatibleBadge')}</Text>
         <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
-          {profile.name} · {score}% match
+          {t('discoverHub.matchScore', { name: profile.name, score })}
         </Text>
-        <Text style={[styles.hint, { color: colors.textMuted }]}>Tap to view today&apos;s top pick</Text>
+        <Text style={[styles.hint, { color: colors.textMuted }]}>{t('discoverHub.mostCompatibleHint')}</Text>
       </View>
       <Image source={{ uri: profile.photos[0] }} style={styles.avatar} />
       <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />

@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
@@ -43,10 +44,12 @@ export function SocialCommentSheet({
   visible,
   post,
   onClose,
-  sheetTitle = 'Comments',
+  sheetTitle,
 }: SocialCommentSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useTranslation();
+  const resolvedTitle = sheetTitle ?? t('pulseSocial.comments');
   const { addPulseComment, getPulseComments, preferences } = useApp();
   const accent = useDisguiseWorld().accent;
   const [draft, setDraft] = useState('');
@@ -77,8 +80,8 @@ export function SocialCommentSheet({
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>{sheetTitle}</Text>
-          <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel="Close">
+          <Text style={[styles.title, { color: colors.text }]}>{resolvedTitle}</Text>
+          <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel={t('common.close')}>
             <Ionicons name="close" size={24} color={colors.textMuted} />
           </AnimatedPressable>
         </View>
@@ -133,7 +136,7 @@ export function SocialCommentSheet({
           <TextInput
             value={draft}
             onChangeText={setDraft}
-            placeholder="Add a comment..."
+            placeholder={t('pulseSocial.addComment')}
             placeholderTextColor={colors.textMuted}
             style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]}
             onSubmitEditing={handlePost}
@@ -142,7 +145,7 @@ export function SocialCommentSheet({
           <AnimatedPressable
             onPress={handlePost}
             disabled={!draft.trim()}
-            accessibilityLabel="Send comment"
+            accessibilityLabel={t('pulseSocial.sendComment')}
             style={[styles.sendBtn, { backgroundColor: draft.trim() ? accent : colors.surface }]}
           >
             <Ionicons name="send" size={18} color={draft.trim() ? '#fff' : colors.textMuted} />

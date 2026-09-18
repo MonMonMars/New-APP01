@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { UserProfile } from '../types/profile';
 import { spacing } from '../theme';
 import { openExternalUrl } from '../utils/openExternalUrl';
@@ -14,6 +15,7 @@ type ProfileSocialLinksProps = {
 
 export function ProfileSocialLinks({ user, compact = false }: ProfileSocialLinksProps) {
   const { colors } = useTheme();
+  const { locale } = useTranslation();
   const hasInstagram = user.instagramConnected && user.instagramHandle;
   const hasSpotify = user.spotifyConnected && user.spotifyHandle;
 
@@ -27,7 +29,7 @@ export function ProfileSocialLinks({ user, compact = false }: ProfileSocialLinks
       {hasInstagram ? (
         <AnimatedPressable
           style={styles.row}
-          onPress={() => void openExternalUrl(`https://instagram.com/${user.instagramHandle}`, 'Instagram')}
+          onPress={() => void openExternalUrl(`https://instagram.com/${user.instagramHandle}`, 'Instagram', locale)}
         >
           <Ionicons name="logo-instagram" size={18} color="#E1306C" />
           <Text style={[styles.handle, { color: colors.text }]}>@{user.instagramHandle}</Text>
@@ -37,7 +39,7 @@ export function ProfileSocialLinks({ user, compact = false }: ProfileSocialLinks
       {hasSpotify ? (
         <AnimatedPressable
           style={styles.row}
-          onPress={() => void openExternalUrl(`https://open.spotify.com/user/${user.spotifyHandle}`, 'Spotify')}
+          onPress={() => void openExternalUrl(`https://open.spotify.com/user/${user.spotifyHandle}`, 'Spotify', locale)}
         >
           <Ionicons name="musical-notes" size={18} color="#1DB954" />
           <Text style={[styles.handle, { color: colors.text }]}>{user.spotifyHandle}</Text>

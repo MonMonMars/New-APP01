@@ -4,12 +4,14 @@ import { AppState, type AppStateStatus, StyleSheet, Text, View } from 'react-nat
 import { DisguiseBrand } from '../disguise/DisguiseBrand';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import { useSparkScreenProtection } from '../../hooks/useSparkScreenProtection';
 
 /** Hides Spark UI in the app switcher and blocks screenshots when enabled. */
 export function PrivacyShield() {
   const { disguiseMode, securitySettings } = useApp();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [appState, setAppState] = useState<AppStateStatus>(AppState.currentState);
 
   useSparkScreenProtection({ disguiseMode, securitySettings });
@@ -38,7 +40,7 @@ export function PrivacyShield() {
       <View style={styles.brandWrap}>
         <DisguiseBrand size="lg" showTagline />
       </View>
-      <Text style={[styles.subtitle, { color: colors.textMuted }]}>Content hidden for your privacy</Text>
+      <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('security.privacyShieldHidden')}</Text>
     </View>
   );
 }

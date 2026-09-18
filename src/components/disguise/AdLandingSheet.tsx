@@ -3,6 +3,7 @@ import { Image, ScrollView, StyleSheet, Text, useWindowDimensions, View } from '
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import { AdPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { openExternalUrl } from '../../utils/openExternalUrl';
@@ -23,6 +24,7 @@ type AdLandingSheetProps = {
 };
 
 export function AdLandingSheet({ visible, ad, onClose }: AdLandingSheetProps) {
+  const { locale } = useTranslation();
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
   const { colors } = useTheme();
@@ -37,7 +39,7 @@ export function AdLandingSheet({ visible, ad, onClose }: AdLandingSheetProps) {
   const paragraphs = ad.description?.split('\n\n').filter(Boolean) ?? [ad.tagline];
 
   const handleVisit = () => {
-    void openExternalUrl(ad.landingUrl, ad.brand);
+    void openExternalUrl(ad.landingUrl, ad.brand, locale);
   };
 
   return (

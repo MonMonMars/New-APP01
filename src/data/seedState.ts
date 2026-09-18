@@ -336,7 +336,7 @@ export type SeedSwipeState = {
 export function buildSeedSwipeState(): SeedSwipeState {
   const likedIds = new Set<string>([...PRE_MATCHED_IDS, ...PENDING_LIKE_IDS]);
   const pendingLikeIds = new Set<string>([...PENDING_LIKE_IDS]);
-  const passedIds = new Set<string>(['35', '55', '56']);
+  const passedIds = new Set<string>(['35', '140', '150']);
 
   return {
     likedIds: Array.from(likedIds),

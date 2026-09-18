@@ -19,26 +19,40 @@ const duplicatePhotos = [...photoCounts.entries()].filter(([, count]) => count >
 
 const missingIncoming = INCOMING_LIKE_IDS.filter((id) => getProfileById(id) === undefined);
 
-const nextBatch = humanProfiles.filter((p) => {
-  const n = Number(p.id);
-  return n >= 117 && n <= 136;
-});
+function validateBatch(minId: number, maxId: number, label: string): boolean {
+  const batch = humanProfiles.filter((p) => {
+    const n = Number(p.id);
+    return n >= minId && n <= maxId;
+  });
 
-const nextNamesUnique = new Set(nextBatch.map((p) => p.name.toLowerCase())).size === nextBatch.length;
-const nextPhotosUnique = new Set(nextBatch.map((p) => p.photos[0])).size === nextBatch.length;
-const nextPhotoNotInLegacy = nextBatch.every(
-  (p) => !humanProfiles.some((other) => other.id !== p.id && other.photos[0] === p.photos[0]),
-);
+  const namesUnique = new Set(batch.map((p) => p.name.toLowerCase())).size === batch.length;
+  const photosUnique = new Set(batch.map((p) => p.photos[0])).size === batch.length;
+  const photoNotInLegacy = batch.every(
+    (p) => !humanProfiles.some((other) => other.id !== p.id && other.photos[0] === p.photos[0]),
+  );
+
+  if (!namesUnique || !photosUnique || !photoNotInLegacy) {
+    console.error(`${label} must have unique names and primary photos`);
+    return false;
+  }
+
+  return true;
+}
+
+const nextBatchOk = validateBatch(117, 136, 'Batch 117–136');
+const latestBatchOk = validateBatch(137, 156, 'Batch 137–156');
 
 console.log(
   JSON.stringify(
     {
       totalHumanProfiles: humanProfiles.length,
-      nextBatchCount: nextBatch.length,
+      nextBatchCount: humanProfiles.filter((p) => Number(p.id) >= 117 && Number(p.id) <= 136).length,
+      latestBatchCount: humanProfiles.filter((p) => Number(p.id) >= 137 && Number(p.id) <= 156).length,
       duplicateNameCount: duplicateNames.length,
       duplicatePrimaryPhotoCount: duplicatePhotos.length,
       missingIncomingIds: missingIncoming,
-      nextBatchUnique: nextNamesUnique && nextPhotosUnique && nextPhotoNotInLegacy,
+      nextBatchUnique: nextBatchOk,
+      latestBatchUnique: latestBatchOk,
     },
     null,
     2,
@@ -50,8 +64,7 @@ if (missingIncoming.length > 0) {
   process.exit(1);
 }
 
-if (!nextNamesUnique || !nextPhotosUnique || !nextPhotoNotInLegacy) {
-  console.error('Batch 117–136 must have unique names and primary photos');
+if (!nextBatchOk || !latestBatchOk) {
   process.exit(1);
 }
 

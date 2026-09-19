@@ -252,6 +252,7 @@ export const en = {
     refreshSuggestions: 'Refresh AI suggestions',
     aiPowered: 'AI',
     suggestionA11y: 'Use suggestion: {text}',
+    reactWith: 'React with {emoji}',
     applySuggestionHint: 'Tap a suggestion to edit it below, then send.',
     suggestionsFailed: 'Could not load suggestions — tap refresh to try again.',
     readReceiptsSparkPlus: 'Spark+ unlocks read receipts',

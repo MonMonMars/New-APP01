@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
 
@@ -20,6 +21,7 @@ export function MessageReactionPicker({
   onClose,
 }: MessageReactionPickerProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   if (!visible) {
     return null;
@@ -33,6 +35,9 @@ export function MessageReactionPicker({
           <AnimatedPressable
             key={emoji}
             style={[styles.emojiButton, selected ? { backgroundColor: colors.border } : null]}
+            accessibilityRole="button"
+            accessibilityLabel={t('chat.reactWith', { emoji })}
+            accessibilityState={{ selected }}
             onPress={() => {
               onSelect(emoji);
               onClose();

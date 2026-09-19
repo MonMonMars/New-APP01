@@ -37,7 +37,7 @@ function modeLabel(t: (key: string) => string, mode: ChatDialogueMode): string {
   }
 }
 
-/** Three tappable AI reply / opener suggestions above the composer. */
+/** Inline AI reply, topic, and opener suggestions above the composer. */
 export function ChatReplySuggestions({
   title,
   options,

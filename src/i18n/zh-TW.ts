@@ -252,6 +252,7 @@ export const zhTw = {
     refreshSuggestions: '重新產生 AI 建議',
     aiPowered: 'AI',
     suggestionA11y: '使用建議：{text}',
+    reactWith: '以 {emoji} 回應',
     applySuggestionHint: '點選建議後可在下方編輯再傳送。',
     suggestionsFailed: '無法載入建議 — 請點重新整理再試。',
     readReceiptsSparkPlus: 'Spark+ 解鎖已讀回條',

@@ -92,17 +92,9 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
 
   useCloudConversation(conversationId);
 
-  const conversationUnread = conversation?.unread ?? false;
-
   useEffect(() => {
     markConversationRead(conversationId);
   }, [conversationId, markConversationRead]);
-
-  useEffect(() => {
-    if (conversationUnread) {
-      markConversationRead(conversationId);
-    }
-  }, [conversationId, conversationUnread, markConversationRead]);
 
   const expiryLabel = useLiveExpiry(conversation?.match.expiresAt);
   const threadMessages = conversation?.messages ?? [];
@@ -122,9 +114,16 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         ? t('chat.aiSuggestOpener')
         : t('chat.aiSuggestReply');
 
-  const showAiSuggestions =
+  const showInlineAiSuggestions =
     threadMessages.length === 0 ||
     (conversation?.yourTurn === true && threadMessages.length > 0);
+
+  const openDialogueHelper = useCallback(() => {
+    if (threadMessages.length > 0 && conversation?.yourTurn !== true) {
+      setDialogueMode('topic');
+    }
+    setShowDialogueHelper(true);
+  }, [conversation?.yourTurn, threadMessages.length]);
 
   const loadAiSuggestions = useCallback(() => {
     if (!threadProfile) {
@@ -175,11 +174,18 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   }, [dialogueMode, threadMessages.length]);
 
   useEffect(() => {
-    if (!showAiSuggestions) {
+    if (!showInlineAiSuggestions || showDialogueHelper) {
       return;
     }
     loadAiSuggestions();
-  }, [dialogueMode, loadAiSuggestions, showAiSuggestions, threadMessages.length, conversation?.yourTurn]);
+  }, [
+    dialogueMode,
+    loadAiSuggestions,
+    showInlineAiSuggestions,
+    showDialogueHelper,
+    threadMessages.length,
+    conversation?.yourTurn,
+  ]);
 
   if (!conversation) {
     return (
@@ -490,7 +496,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         onClose={() => setReactionMessageId(null)}
       />
 
-      {showAiSuggestions && conversation.messages.length > 0 ? (
+      {showInlineAiSuggestions && conversation.messages.length > 0 ? (
         <ChatReplySuggestions
           title={dialogueTitle}
           options={aiSuggestions}
@@ -516,7 +522,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         onSuggestDate={() => setShowSuggestDate(true)}
         onVibeGame={() => setShowVibeGame(true)}
         onVoiceNote={() => setShowVoiceNote(true)}
-        onAiSuggest={showAiSuggestions ? () => setShowDialogueHelper(true) : undefined}
+        onAiSuggest={openDialogueHelper}
         paddingBottom={insets.bottom + spacing.sm}
       />
 

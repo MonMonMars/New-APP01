@@ -12,7 +12,6 @@ import {
 import { Message } from '../types/match';
 import { Profile, UserProfile } from '../types/profile';
 import { radii, spacing } from '../theme';
-import { modalFill } from '../theme/modalFill';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type ChatDialogueHelperSheetProps = {

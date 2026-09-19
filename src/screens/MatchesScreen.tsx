@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useMemo } from 'react';
+import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -126,6 +127,33 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
     (match) => !conversations.some((c) => c.match.id === match.id && c.messages.length > 0),
   );
 
+  const newMatchProfileIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const match of [...newSuperMatches, ...newMatches]) {
+      ids.add(match.profile.id);
+    }
+    return ids;
+  }, [newMatches, newSuperMatches]);
+
+  const messageConversations = useMemo(
+    () =>
+      conversations.filter(
+        (conversation) =>
+          conversation.messages.length > 0 ||
+          !newMatchProfileIds.has(conversation.match.profile.id),
+      ),
+    [conversations, newMatchProfileIds],
+  );
+
+  const openChatOrAlert = (profileId: string) => {
+    const conversationId = getConversationIdForProfile(profileId);
+    if (conversationId) {
+      onOpenChat(conversationId);
+      return;
+    }
+    Alert.alert(t('chat.notFound'));
+  };
+
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <ScreenHeader
@@ -156,12 +184,7 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
                 <NewMatchItem
                   key={match.id}
                   match={match}
-                  onPress={() => {
-                    const conversationId = getConversationIdForProfile(match.profile.id);
-                    if (conversationId) {
-                      onOpenChat(conversationId);
-                    }
-                  }}
+                  onPress={() => openChatOrAlert(match.profile.id)}
                 />
               ))}
             </ScrollView>
@@ -176,12 +199,7 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
                 <NewMatchItem
                   key={match.id}
                   match={match}
-                  onPress={() => {
-                    const conversationId = getConversationIdForProfile(match.profile.id);
-                    if (conversationId) {
-                      onOpenChat(conversationId);
-                    }
-                  }}
+                  onPress={() => openChatOrAlert(match.profile.id)}
                 />
               ))}
             </ScrollView>
@@ -190,7 +208,7 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
 
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('matches.messages')}</Text>
-          {conversations.length === 0 ? (
+          {messageConversations.length === 0 ? (
             <View style={styles.empty}>
               <Ionicons name="chatbubbles-outline" size={40} color={colors.textMuted} />
               <Text style={[styles.emptyText, { color: colors.textMuted }]}>
@@ -198,7 +216,7 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
               </Text>
             </View>
           ) : (
-            conversations.map((conversation) => (
+            messageConversations.map((conversation) => (
               <ConversationRow
                 key={conversation.id}
                 conversation={conversation}

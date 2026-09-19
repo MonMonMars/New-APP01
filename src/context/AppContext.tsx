@@ -43,7 +43,7 @@ import {
   purchaseProduct as runPurchaseProduct,
   restorePurchases as runRestorePurchases,
 } from '../services/purchases';
-import { uploadPhotosToCloud } from '../services/cloudStorage';
+import { uploadPhotosToCloud, uploadVoiceNoteToCloud } from '../services/cloudStorage';
 import { generateDisguiseAdImage } from '../services/disguiseImageGeneration';
 import { registerCloudPushToken } from '../services/pushCloud';
 import { scheduleDateCheckInReminder } from '../utils/notifications';
@@ -391,7 +391,11 @@ type AppContextValue = {
     imageUrl?: string,
     isGif?: boolean,
   ) => boolean;
-  sendVoiceNote: (conversationId: string, durationSeconds: number, voiceUrl?: string) => boolean;
+  sendVoiceNote: (
+    conversationId: string,
+    durationSeconds: number,
+    voiceUrl?: string,
+  ) => Promise<boolean>;
   matchNotificationPromptVisible: boolean;
   dismissMatchNotificationPrompt: () => void;
   acceptMatchNotificationPrompt: () => Promise<void>;
@@ -2166,11 +2170,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const sendVoiceNote = useCallback(
-    (conversationId: string, durationSeconds: number, voiceUrl?: string): boolean => {
+    async (conversationId: string, durationSeconds: number, voiceUrl?: string): Promise<boolean> => {
       if (!checkClientRateLimit(`message:${conversationId}`, 30, 60_000)) {
         return false;
       }
       const seconds = Math.max(1, Math.min(30, Math.round(durationSeconds)));
+      let resolvedVoiceUrl = voiceUrl?.trim() || undefined;
+      if (resolvedVoiceUrl && userId && isSupabaseConfigured() && !resolvedVoiceUrl.startsWith('http')) {
+        resolvedVoiceUrl = await uploadVoiceNoteToCloud(userId, resolvedVoiceUrl);
+      }
       const locale = resolveAppLocale(preferences.appLocale);
       const voiceMessage: Message = {
         id: `msg-${Date.now()}`,
@@ -2179,7 +2187,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         isMine: true,
         isVoiceNote: true,
         voiceDurationSeconds: seconds,
-        voiceUrl: voiceUrl?.trim() || undefined,
+        voiceUrl: resolvedVoiceUrl,
         status: 'sent',
       };
       const preview = messagePreviewText(voiceMessage, locale);
@@ -2290,7 +2298,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       return true;
     },
-    [conversations, isSparkPlus, preferences.appLocale, user.name],
+    [conversations, isSparkPlus, preferences.appLocale, user.name, userId],
   );
 
   const canUseFreeWeeklyBoost = useMemo(() => {

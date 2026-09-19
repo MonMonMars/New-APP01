@@ -130,5 +130,18 @@ create policy "Public read profile photos"
   on storage.objects for select
   using (bucket_id = 'profile-photos');
 
+-- Voice note storage (public read for chat playback URLs)
+insert into storage.buckets (id, name, public)
+values ('voice-notes', 'voice-notes', true)
+on conflict (id) do nothing;
+
+create policy "Users upload own voice notes"
+  on storage.objects for insert
+  with check (bucket_id = 'voice-notes' and auth.uid()::text = (storage.foldername(name))[1]);
+
+create policy "Public read voice notes"
+  on storage.objects for select
+  using (bucket_id = 'voice-notes');
+
 -- Realtime for live chat sync
 alter publication supabase_realtime add table public.conversations;

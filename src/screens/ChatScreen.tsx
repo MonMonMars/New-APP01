@@ -89,6 +89,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const [showProfile, setShowProfile] = useState(false);
   const [showDateCheckIn, setShowDateCheckIn] = useState(false);
   const [showVoiceNote, setShowVoiceNote] = useState(false);
+  const [voiceNoteSending, setVoiceNoteSending] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
   const [aiSuggestionsLoading, setAiSuggestionsLoading] = useState(false);
   const [aiSuggestionSource, setAiSuggestionSource] = useState<'llm' | 'local'>('local');
@@ -664,14 +665,22 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
       <VoiceNoteSheet
         visible={showVoiceNote}
         profileName={profile.name}
-        onClose={() => setShowVoiceNote(false)}
-        onSend={(duration, voiceUrl) => {
-          const sent = sendVoiceNote(conversation.id, duration, voiceUrl);
-          if (!sent) {
-            Alert.alert(t('chat.sendRateLimitedTitle'), t('chat.sendRateLimitedBody'));
-            return;
+        busy={voiceNoteSending}
+        onClose={() => {
+          if (!voiceNoteSending) {
+            setShowVoiceNote(false);
           }
-          setShowVoiceNote(false);
+        }}
+        onSend={(duration, voiceUrl) => {
+          setVoiceNoteSending(true);
+          void sendVoiceNote(conversation.id, duration, voiceUrl).then((sent) => {
+            setVoiceNoteSending(false);
+            if (!sent) {
+              Alert.alert(t('chat.sendRateLimitedTitle'), t('chat.sendRateLimitedBody'));
+              return;
+            }
+            setShowVoiceNote(false);
+          });
         }}
       />
 

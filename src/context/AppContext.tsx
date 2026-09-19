@@ -2391,12 +2391,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const exportUserData = useCallback(async (): Promise<boolean> => {
     try {
       const payload = buildUserDataExport(buildPersistedState());
-      await shareUserDataExport(payload);
+      await shareUserDataExport(payload, resolveAppLocale(preferences.appLocale));
       return true;
     } catch {
       return false;
     }
-  }, [buildPersistedState]);
+  }, [buildPersistedState, preferences.appLocale]);
 
   const generateDisguiseAd = useCallback(
     async (overlayText: string, variant: DisguiseOverlayVariant) => {

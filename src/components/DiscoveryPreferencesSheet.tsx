@@ -8,7 +8,7 @@ import { AdvancedFiltersSection } from './AdvancedFiltersSection';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
-import { getShowMeLabel } from '../i18n/labels';
+import { getPassportCityLabel, getShowMeLabel } from '../i18n/labels';
 import {
   DiscoveryPreferences,
   PASSPORT_CITIES,
@@ -162,7 +162,7 @@ export function DiscoveryPreferencesSheet({
                     onPress={() => onChange({ ...preferences, passportCity: city })}
                   >
                     <Text style={[styles.cityText, { color: selected ? colors.text : colors.textMuted }]}>
-                      {city}
+                      {getPassportCityLabel(locale, city)}
                     </Text>
                   </AnimatedPressable>
                 );
@@ -216,7 +216,9 @@ export function DiscoveryPreferencesSheet({
           <Text style={[styles.hint, { color: colors.textMuted }]}>
             {t('preferences.discoveryHint')}
             {preferences.travelMode && preferences.passportCity
-              ? t('preferences.discoveryShowingNear', { city: preferences.passportCity })
+              ? t('preferences.discoveryShowingNear', {
+                  city: getPassportCityLabel(locale, preferences.passportCity),
+                })
               : ''}
           </Text>
         </ScrollView>

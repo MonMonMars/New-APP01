@@ -1,5 +1,7 @@
 import { Share, Platform } from 'react-native';
 
+import { translate } from '../i18n';
+import { AppLocale, resolveAppLocale } from '../types/locale';
 import { PersistedAppState } from './persistence';
 
 export type ExportableUserData = {
@@ -30,11 +32,20 @@ export function buildUserDataExport(state: PersistedAppState): ExportableUserDat
   };
 }
 
-export async function shareUserDataExport(payload: ExportableUserData): Promise<boolean> {
+export async function shareUserDataExport(
+  payload: ExportableUserData,
+  locale?: AppLocale | null,
+): Promise<boolean> {
+  const resolvedLocale = resolveAppLocale(locale);
   const json = JSON.stringify(payload, null, 2);
-  const message = `Spark data export (${payload.exportedAt})\n\n${json.slice(0, 8000)}${
-    json.length > 8000 ? '\n\n…(truncated for share sheet)' : ''
-  }`;
+  const content = json.slice(0, 8000);
+  const truncated =
+    json.length > 8000 ? translate(resolvedLocale, 'privacy.exportTruncated') : '';
+  const message =
+    translate(resolvedLocale, 'privacy.exportShareBody', {
+      date: payload.exportedAt,
+      content,
+    }) + truncated;
 
   if (Platform.OS === 'web') {
     const blob = new Blob([json], { type: 'application/json' });
@@ -47,6 +58,9 @@ export async function shareUserDataExport(payload: ExportableUserData): Promise<
     return true;
   }
 
-  await Share.share({ message, title: 'Spark data export' });
+  await Share.share({
+    message,
+    title: translate(resolvedLocale, 'privacy.exportShareTitle'),
+  });
   return true;
 }

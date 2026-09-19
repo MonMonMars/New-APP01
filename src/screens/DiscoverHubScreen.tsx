@@ -20,6 +20,7 @@ import { StandoutsRow } from '../components/StandoutsRow';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
+import { getPassportCityLabel } from '../i18n/labels';
 import { formatSearchRadiusLocalized } from '../i18n/labels';
 import { DiscoverFilter, resolveSparkSection } from '../types/preferences';
 import { RootStackParamList } from '../types/navigation';
@@ -180,7 +181,10 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
                 {isPaused && <StatusPill label={t('discoverHub.paused')} color={colors.rewind} />}
                 {isBoosted && <StatusPill label={t('discoverHub.boostActive')} color={colors.boost} />}
                 {preferences.travelMode && preferences.passportCity && (
-                  <StatusPill label={preferences.passportCity} color={colors.superLike} />
+                  <StatusPill
+                    label={getPassportCityLabel(locale, preferences.passportCity)}
+                    color={colors.superLike}
+                  />
                 )}
               </View>
             )}

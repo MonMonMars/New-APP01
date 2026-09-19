@@ -10,6 +10,7 @@ import {
   RelationshipStatus,
 } from '../types/profile';
 import { SUGGESTED_INTERESTS } from '../data/suggestedInterests';
+import { PASSPORT_CITIES } from '../types/preferences';
 import {
   EMBER_PROMPT_OPTIONS,
   HINGE_PROMPT_OPTIONS,
@@ -242,6 +243,24 @@ export function getOpeningMoveSuggestionLabel(locale: AppLocale, suggestion: str
 }
 
 const TRY_ANSWER_PREFIX = /^Try: "(.+)"$/;
+
+const PASSPORT_CITY_I18N_KEYS: Record<(typeof PASSPORT_CITIES)[number], string> = {
+  'New York, NY': 'passportCities.newYork',
+  'Los Angeles, CA': 'passportCities.losAngeles',
+  'Chicago, IL': 'passportCities.chicago',
+  'Miami, FL': 'passportCities.miami',
+  'Austin, TX': 'passportCities.austin',
+  'San Francisco, CA': 'passportCities.sanFrancisco',
+  'London, UK': 'passportCities.london',
+  'Paris, France': 'passportCities.paris',
+  'Tokyo, Japan': 'passportCities.tokyo',
+  'Sydney, Australia': 'passportCities.sydney',
+};
+
+export function getPassportCityLabel(locale: AppLocale, city: string): string {
+  const key = PASSPORT_CITY_I18N_KEYS[city as (typeof PASSPORT_CITIES)[number]];
+  return key ? translate(locale, key) : city;
+}
 
 export function getSparkPlusPlanLabel(locale: AppLocale, plan: SparkPlusPlan): string {
   switch (plan) {

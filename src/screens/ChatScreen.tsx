@@ -662,7 +662,11 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         profileName={profile.name}
         onClose={() => setShowVoiceNote(false)}
         onSend={(duration) => {
-          sendVoiceNote(conversation.id, duration);
+          const sent = sendVoiceNote(conversation.id, duration);
+          if (!sent) {
+            Alert.alert(t('chat.sendRateLimitedTitle'), t('chat.sendRateLimitedBody'));
+            return;
+          }
           setShowVoiceNote(false);
         }}
       />

@@ -1,6 +1,8 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { Platform } from 'react-native';
 
 import { supabaseSecureAuthStorage } from '../utils/secureStorage';
+import { getMagicLinkRedirectTo } from './supabaseAuthCallback';
 import { Conversation, Match } from '../types/match';
 import type { AppLocale } from '../types/locale';
 import { DiscoveryPreferences, type SparkSection } from '../types/preferences';
@@ -24,7 +26,7 @@ export function getSupabaseClient(): SupabaseClient | null {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: false,
+        detectSessionInUrl: Platform.OS === 'web',
         storage: supabaseSecureAuthStorage,
       },
     });
@@ -103,9 +105,13 @@ export async function signInWithMagicLink(email: string): Promise<{ ok: boolean;
   if (!supabase) {
     return { ok: false, error: 'Supabase not configured' };
   }
+  const redirectTo = getMagicLinkRedirectTo();
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { shouldCreateUser: true },
+    options: {
+      shouldCreateUser: true,
+      ...(redirectTo ? { emailRedirectTo: redirectTo } : {}),
+    },
   });
   if (error) {
     return { ok: false, error: error.message };

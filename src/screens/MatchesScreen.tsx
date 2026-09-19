@@ -116,6 +116,9 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
   const { t } = useTranslation();
   const { conversations, matches, preferences, setSparkSection, getConversationIdForProfile } = useApp();
 
+  const section = resolveSparkSection(preferences.sparkSection);
+  const isEmber = section === 'ember';
+
   const superMatches = matches.filter((match) => match.isSuperMatch);
   const regularMatches = matches.filter((match) => !match.isSuperMatch);
 
@@ -171,6 +174,18 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
+        {matches.length === 0 ? (
+          <View style={styles.emptyWorld}>
+            <Ionicons name={isEmber ? 'flame-outline' : 'heart-outline'} size={44} color={colors.textMuted} />
+            <Text style={[styles.emptyWorldTitle, { color: colors.text }]}>
+              {t(isEmber ? 'matches.emptyWorldEmberTitle' : 'matches.emptyWorldSparkTitle')}
+            </Text>
+            <Text style={[styles.emptyWorldBody, { color: colors.textMuted }]}>
+              {t(isEmber ? 'matches.emptyWorldEmberBody' : 'matches.emptyWorldSparkBody')}
+            </Text>
+          </View>
+        ) : null}
+
         {newSuperMatches.length > 0 && (
           <View style={styles.section}>
             <View style={styles.superHeader}>
@@ -212,7 +227,7 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
             <View style={styles.empty}>
               <Ionicons name="chatbubbles-outline" size={40} color={colors.textMuted} />
               <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-                {t('matches.empty')}
+                {t(isEmber ? 'matches.emptyMessagesEmber' : 'matches.emptyMessagesSpark')}
               </Text>
             </View>
           ) : (
@@ -360,5 +375,21 @@ const styles = StyleSheet.create({
   emptyText: {
     textAlign: 'center',
     lineHeight: 22,
+  },
+  emptyWorld: {
+    alignItems: 'center',
+    padding: spacing.lg,
+    paddingBottom: spacing.md,
+    gap: spacing.sm,
+  },
+  emptyWorldTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  emptyWorldBody: {
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
   },
 });

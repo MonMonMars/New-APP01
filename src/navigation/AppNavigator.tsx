@@ -14,6 +14,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { PulseTabIcon } from '../components/disguise/ModeToggleLogo';
 import { useTranslation } from '../i18n';
 import { CookieConsentBanner } from '../components/legal/CookieConsentBanner';
+import { MatchNotificationPrompt } from '../components/MatchNotificationPrompt';
 import { useApp } from '../context/AppContext';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { ChatScreen } from '../screens/ChatScreen';
@@ -409,6 +410,7 @@ function ThemedNavigator() {
             }
           }}
         />
+        <MatchNotificationPrompt />
       </NavigationContainer>
     </ThemeProvider>
   );

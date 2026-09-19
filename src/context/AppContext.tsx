@@ -55,6 +55,7 @@ import {
 } from '../utils/conversationMerge';
 import {
   deleteSupabaseAccount,
+  getSupabaseClient,
   getSupabaseSession,
   isSupabaseConfigured,
   loadFromSupabase,
@@ -62,6 +63,10 @@ import {
   signInWithMagicLink,
   syncToSupabase,
 } from '../services/supabase';
+import {
+  applySupabaseAuthFromUrl,
+  recoverSupabaseAuthFromLaunchUrl,
+} from '../services/supabaseAuthCallback';
 import { Conversation, Match, Message } from '../types/match';
 import {
   defaultPreferences,
@@ -383,7 +388,10 @@ type AppContextValue = {
     imageUrl?: string,
     isGif?: boolean,
   ) => boolean;
-  sendVoiceNote: (conversationId: string, durationSeconds: number) => void;
+  sendVoiceNote: (conversationId: string, durationSeconds: number) => boolean;
+  matchNotificationPromptVisible: boolean;
+  dismissMatchNotificationPrompt: () => void;
+  acceptMatchNotificationPrompt: () => Promise<void>;
   getConversationIdForProfile: (profileId: string) => string | null;
   blockProfile: (profileId: string) => void;
   unblockProfile: (profileId: string) => void;
@@ -483,6 +491,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences>(
     defaultNotificationPreferences,
   );
+  const [matchNotificationPromptShown, setMatchNotificationPromptShown] = useState(false);
+  const [matchNotificationPromptVisible, setMatchNotificationPromptVisible] = useState(false);
   const [lastPassedProfileId, setLastPassedProfileId] = useState<string | null>(null);
   const [emberDailyLikesUsed, setEmberDailyLikesUsed] = useState(0);
   const [emberLastPassedProfileId, setEmberLastPassedProfileId] = useState<string | null>(null);
@@ -602,6 +612,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setBonusSparkNotes(saved.bonusSparkNotes);
         setNotificationsEnabled(saved.notificationsEnabled);
         setNotificationPreferences(saved.notificationPreferences);
+        setMatchNotificationPromptShown(
+          saved.matchNotificationPromptShown ?? saved.notificationsEnabled ?? false,
+        );
         setLastPassedProfileId(saved.lastPassedProfileId);
         setEmberDailyLikesUsed(saved.emberDailyLikesUsed ?? 0);
         setEmberLastPassedProfileId(saved.emberLastPassedProfileId ?? null);
@@ -631,6 +644,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setDateCheckIns(saved.dateCheckIns ?? []);
 
         if (isSupabaseConfigured()) {
+          await recoverSupabaseAuthFromLaunchUrl();
           const session = await getSupabaseSession();
           const cloudUserId = session?.userId ?? saved.userId;
           if (session?.userId && !cancelled) {
@@ -688,6 +702,48 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  useEffect(() => {
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      return;
+    }
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUserId(session.user.id);
+        setIsAuthenticated(true);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured()) {
+      return;
+    }
+    const syncSessionFromUrl = (url: string | null) => {
+      if (!url) {
+        return;
+      }
+      void applySupabaseAuthFromUrl(url).then(async (ok) => {
+        if (!ok) {
+          return;
+        }
+        const session = await getSupabaseSession();
+        if (session?.userId) {
+          setUserId(session.userId);
+          setIsAuthenticated(true);
+        }
+      });
+    };
+    void Linking.getInitialURL().then(syncSessionFromUrl);
+    const listener = Linking.addEventListener('url', (event) => {
+      syncSessionFromUrl(event.url);
+    });
+    return () => listener.remove();
+  }, []);
+
   const buildPersistedState = useCallback((): PersistedAppState => {
     return {
       version: 6,
@@ -718,6 +774,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       bonusSparkNotes,
       notificationsEnabled,
       notificationPreferences,
+      matchNotificationPromptShown,
       lastPassedProfileId,
       emberDailyLikesUsed,
       emberLastPassedProfileId,
@@ -765,6 +822,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     bonusSparkNotes,
     notificationsEnabled,
     notificationPreferences,
+    matchNotificationPromptShown,
     lastPassedProfileId,
     emberDailyLikesUsed,
     emberLastPassedProfileId,
@@ -1824,6 +1882,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           disguiseSafe: disguiseMode && securitySettings.disguiseSafeNotifications,
           locale: resolveAppLocale(preferences.appLocale),
         });
+      } else if (!notificationsEnabled && !matchNotificationPromptShown) {
+        setMatchNotificationPromptShown(true);
+        setMatchNotificationPromptVisible(true);
       }
 
       return match;
@@ -1835,6 +1896,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       scheduleDemoMatchOpener,
       securitySettings.disguiseSafeNotifications,
       preferences.appLocale,
+      matchNotificationPromptShown,
     ],
   );
 
@@ -2035,9 +2097,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const sendVoiceNote = useCallback(
-    (conversationId: string, durationSeconds: number) => {
+    (conversationId: string, durationSeconds: number): boolean => {
       if (!checkClientRateLimit(`message:${conversationId}`, 30, 60_000)) {
-        return;
+        return false;
       }
       const seconds = Math.max(1, Math.min(30, Math.round(durationSeconds)));
       const locale = resolveAppLocale(preferences.appLocale);
@@ -2155,6 +2217,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
           })();
         }, 4500);
       }
+
+      return true;
     },
     [conversations, isSparkPlus, preferences.appLocale, user.name],
   );
@@ -2422,6 +2486,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setNotificationsEnabled(granted);
     return granted;
   }, [userId]);
+
+  const dismissMatchNotificationPrompt = useCallback(() => {
+    setMatchNotificationPromptVisible(false);
+  }, []);
+
+  const acceptMatchNotificationPrompt = useCallback(async () => {
+    setMatchNotificationPromptVisible(false);
+    const granted = await enableNotifications();
+    if (granted) {
+      setNotificationPreferences((prev) => ({
+        ...prev,
+        matches: true,
+        messages: true,
+      }));
+    }
+  }, [enableNotifications]);
 
   const updateNotificationPreferences = useCallback(
     (prefs: NotificationPreferences) => {
@@ -2779,6 +2859,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       markActivityAlertsRead,
       purchaseSparkNotes,
       rewindLastPass,
+      matchNotificationPromptVisible,
+      dismissMatchNotificationPrompt,
+      acceptMatchNotificationPrompt,
       enableNotifications,
       updateNotificationPreferences,
       setThemeMode,
@@ -2911,6 +2994,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       markActivityAlertsRead,
       purchaseSparkNotes,
       rewindLastPass,
+      matchNotificationPromptVisible,
+      dismissMatchNotificationPrompt,
+      acceptMatchNotificationPrompt,
       enableNotifications,
       updateNotificationPreferences,
       setThemeMode,

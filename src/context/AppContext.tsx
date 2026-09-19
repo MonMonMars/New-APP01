@@ -241,6 +241,8 @@ function filterDiscoverProfiles(
   locationSharing = true,
 ): Profile[] {
   const filters = preferences.discoverFilters ?? [];
+  const hasMapSearch =
+    preferences.mapSearchLat != null && preferences.mapSearchLng != null;
   const maxDistance =
     preferences.travelMode && preferences.passportCity
       ? 9999
@@ -251,14 +253,15 @@ function filterDiscoverProfiles(
   return profiles.filter(
     (profile) =>
       !excludedIds.has(profile.id) &&
-      profile.distanceMiles <= maxDistance &&
+      (hasMapSearch || profile.distanceMiles <= maxDistance) &&
       profile.age >= preferences.minAge &&
       profile.age <= preferences.maxAge &&
       matchesGenderFilter(profile, preferences.showMe) &&
       matchesDiscoverFilters(profile, filters) &&
       matchesAdvancedFilters(profile, user, preferences.advancedFilters, isSparkPlus) &&
       matchesSparkSection(profile, section) &&
-      (!preferences.travelMode ||
+      (hasMapSearch ||
+        !preferences.travelMode ||
         !preferences.passportCity ||
         matchesPassportCity(profile.city, preferences.passportCity)),
   );
@@ -1337,7 +1340,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const updatePreferences = useCallback((next: DiscoveryPreferences) => {
-    setPreferences(next);
+    setPreferences((prev) => {
+      const travelChanged = prev.travelMode !== next.travelMode;
+      const passportChanged = prev.passportCity !== next.passportCity;
+      if (travelChanged || passportChanged) {
+        return {
+          ...next,
+          mapSearchLat: undefined,
+          mapSearchLng: undefined,
+        };
+      }
+      return next;
+    });
+    setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
+    setPriorityProfileId(null);
   }, []);
 
   const setSparkSection = useCallback((section: SparkSection) => {

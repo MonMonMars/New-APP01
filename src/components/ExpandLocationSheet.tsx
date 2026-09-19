@@ -1,14 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import { useNavigation } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../context/AppContext';
+import { LikeLimitModal } from './LikeLimitModal';
+import { MatchModal } from './MatchModal';
+import { WaitingForMatchModal } from './WaitingForMatchModal';
+import { dailyLikeLimitForGender } from '../utils/genderAccountPerks';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
 import { formatSearchRadiusLocalized } from '../i18n/labels';
-import { resolveSparkSection } from '../types/preferences';
+import { type DiscoveryPreferences, resolveSparkSection } from '../types/preferences';
 import type { Profile } from '../types/profile';
 import {
   distanceFromCenter,
@@ -47,8 +52,19 @@ function centersDiffer(a: GeoPoint, b: GeoPoint): boolean {
 }
 
 /** Full-bleed real map — pan/zoom, geo pins, search this area. */
+function resolveInitialMapCenter(preferences: DiscoveryPreferences): GeoPoint {
+  if (preferences.mapSearchLat != null && preferences.mapSearchLng != null) {
+    return { lat: preferences.mapSearchLat, lng: preferences.mapSearchLng };
+  }
+  if (preferences.travelMode && preferences.passportCity) {
+    return mapCenterForCity(preferences.passportCity);
+  }
+  return mapCenterForCity(null);
+}
+
 export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
   const { colors } = useTheme();
   const { t, locale } = useTranslation();
   const {
@@ -65,6 +81,12 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     holdProfile,
     unholdProfile,
     heldIds,
+    canLike,
+    isSparkPlus,
+    user,
+    getConversationIdForProfile,
+    blockProfile,
+    reportProfile,
   } = useApp();
 
   const section = resolveSparkSection(preferences.sparkSection);
@@ -76,22 +98,18 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const onAccentText = section === 'ember' ? colors.text : '#fff';
 
   const [userLocation, setUserLocation] = useState<GeoPoint | null>(null);
-  const [mapCenter, setMapCenter] = useState<GeoPoint>(() =>
-    preferences.travelMode && preferences.passportCity
-      ? mapCenterForCity(preferences.passportCity)
-      : mapCenterForCity(null),
-  );
-  const [searchCenter, setSearchCenter] = useState<GeoPoint>(() => {
-    if (preferences.mapSearchLat != null && preferences.mapSearchLng != null) {
-      return { lat: preferences.mapSearchLat, lng: preferences.mapSearchLng };
-    }
-    return mapCenter;
-  });
+  const [mapCenter, setMapCenter] = useState<GeoPoint>(() => resolveInitialMapCenter(preferences));
+  const [searchCenter, setSearchCenter] = useState<GeoPoint>(() => resolveInitialMapCenter(preferences));
   const [mapZoom, setMapZoom] = useState(() => zoomForRadius(currentRadius));
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
   const [nameQuery, setNameQuery] = useState('');
   const [detailProfile, setDetailProfile] = useState<Profile | null>(null);
   const [deckToast, setDeckToast] = useState<string | null>(null);
+  const [showLikeLimit, setShowLikeLimit] = useState(false);
+  const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
+  const [showMatch, setShowMatch] = useState(false);
+  const [waitingProfile, setWaitingProfile] = useState<Profile | null>(null);
+  const [showWaiting, setShowWaiting] = useState(false);
   const hasActiveMapSearch =
     preferences.mapSearchLat != null && preferences.mapSearchLng != null;
 
@@ -118,6 +136,15 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   }, [currentRadius]);
 
   useEffect(() => {
+    if (preferences.mapSearchLat != null && preferences.mapSearchLng != null) {
+      const saved = { lat: preferences.mapSearchLat, lng: preferences.mapSearchLng };
+      setMapCenter(saved);
+      setSearchCenter(saved);
+      setMapZoom(zoomForRadius(currentRadius));
+    }
+  }, [currentRadius, preferences.mapSearchLat, preferences.mapSearchLng]);
+
+  useEffect(() => {
     if (preferences.travelMode && preferences.passportCity && !hasActiveMapSearch) {
       const passportCenter = mapCenterForCity(preferences.passportCity);
       setMapCenter(passportCenter);
@@ -134,7 +161,10 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     [currentRadius, discoverPool, searchCenter],
   );
 
-  const placeSuggestions = useMemo(() => searchMapPlaces(nameQuery), [nameQuery]);
+  const placeSuggestions = useMemo(
+    () => searchMapPlaces(nameQuery, locale),
+    [locale, nameQuery],
+  );
 
   const visiblePins = useMemo(() => {
     const query = nameQuery.trim().toLowerCase();
@@ -170,6 +200,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
 
   const handleResetSearchArea = useCallback(() => {
     clearMapSearch();
+    searchMorePeople();
     const target =
       preferences.travelMode && preferences.passportCity
         ? mapCenterForCity(preferences.passportCity)
@@ -179,7 +210,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     setSelectedPinId(null);
     setNameQuery('');
     setDeckToast(t('mapDiscover.resetSearchArea'));
-  }, [clearMapSearch, preferences.passportCity, preferences.travelMode, t, userLocation]);
+  }, [clearMapSearch, preferences.passportCity, preferences.travelMode, searchMorePeople, t, userLocation]);
 
   const handleSelectPlace = useCallback(
     (place: MapPlaceSuggestion) => {
@@ -220,11 +251,53 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     if (!detailProfile) {
       return;
     }
-    likeProfile(detailProfile);
+    if (!canLike) {
+      setShowLikeLimit(true);
+      return;
+    }
+    const match = likeProfile(detailProfile);
     prioritizeProfileInDeck(detailProfile.id);
-    setDeckToast(t('discoverHub.addedToDeck', { name: detailProfile.name }));
     setDetailProfile(null);
+    if (match) {
+      setMatchProfile(detailProfile);
+      setShowMatch(true);
+      return;
+    }
+    setWaitingProfile(detailProfile);
+    setShowWaiting(true);
   };
+
+  const handleOpenChat = () => {
+    if (!matchProfile) {
+      return;
+    }
+    const conversationId = getConversationIdForProfile(matchProfile.id);
+    setShowMatch(false);
+    setMatchProfile(null);
+    onClose();
+    navigation.getParent()?.navigate('Chat', { conversationId });
+  };
+
+  const handleBlockDetail = (profileId: string) => {
+    blockProfile(profileId);
+    setDetailProfile(null);
+    setSelectedPinId(null);
+    Alert.alert(t('discover.blocked'), t('discover.blockedHint'));
+  };
+
+  const handleReportDetail = (profileId: string) => {
+    reportProfile(profileId);
+    setDetailProfile(null);
+    setSelectedPinId(null);
+    Alert.alert(t('discover.reportSubmitted'), t('discover.blockedHint'));
+  };
+
+  const detailDistanceMiles = useMemo(() => {
+    if (!detailProfile) {
+      return undefined;
+    }
+    return Math.max(1, Math.round(distanceFromCenter(detailProfile, searchCenter)));
+  }, [detailProfile, searchCenter]);
 
   const handleDetailPass = () => {
     if (!detailProfile) {
@@ -484,10 +557,45 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         visible={detailProfile !== null}
         compatibilityScore={detailProfile ? getCompatibilityScore(detailProfile) : undefined}
         isHeld={detailProfile ? heldIds.has(detailProfile.id) : false}
+        distanceMilesOverride={detailDistanceMiles}
         onClose={() => setDetailProfile(null)}
         onHold={handleDetailHold}
         onLike={handleDetailLike}
         onPass={handleDetailPass}
+        onBlock={handleBlockDetail}
+        onReport={handleReportDetail}
+      />
+
+      <MatchModal
+        visible={showMatch}
+        profile={matchProfile}
+        userPhoto={user.photos[0] ?? ''}
+        onClose={() => {
+          setShowMatch(false);
+          setMatchProfile(null);
+        }}
+        onMessage={handleOpenChat}
+      />
+
+      <WaitingForMatchModal
+        visible={showWaiting}
+        profile={waitingProfile}
+        onFindMorePeople={() => {
+          setShowWaiting(false);
+          setWaitingProfile(null);
+          searchMorePeople();
+        }}
+      />
+
+      <LikeLimitModal
+        visible={showLikeLimit}
+        onClose={() => setShowLikeLimit(false)}
+        onUpgrade={() => {
+          setShowLikeLimit(false);
+          onClose();
+          navigation.getParent()?.navigate('SparkPlus');
+        }}
+        dailyLikeLimit={dailyLikeLimitForGender(user.gender, isSparkPlus)}
       />
     </View>
   );

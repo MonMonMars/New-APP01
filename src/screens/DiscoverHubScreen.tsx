@@ -29,6 +29,7 @@ import { radii, spacing } from '../theme';
 import { ActionToast } from '../components/ActionToast';
 import { SearchMapView } from '../components/SearchMapView';
 import { AnimatedPressable } from '../components/AnimatedPressable';
+import { filterProfilesInRadius } from '../utils/geoMap';
 import { mapCenterForCity, zoomForRadius } from '../utils/searchMapTiles';
 
 type DiscoverHubScreenProps = {
@@ -75,11 +76,6 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
 
   const activeFilters = preferences.discoverFilters ?? [];
 
-  const mapPreviewPins = useMemo(
-    () => discoverPool.slice(0, 16),
-    [discoverPool],
-  );
-
   const mapPreviewCenter = useMemo(() => {
     if (preferences.mapSearchLat != null && preferences.mapSearchLng != null) {
       return { lat: preferences.mapSearchLat, lng: preferences.mapSearchLng };
@@ -88,6 +84,16 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
       ? mapCenterForCity(preferences.passportCity)
       : mapCenterForCity(null);
   }, [preferences.mapSearchLat, preferences.mapSearchLng, preferences.passportCity, preferences.travelMode]);
+
+  const mapPreviewPins = useMemo(
+    () =>
+      filterProfilesInRadius(
+        discoverPool,
+        mapPreviewCenter,
+        preferences.maxDistanceMiles,
+      ).slice(0, 16),
+    [discoverPool, mapPreviewCenter, preferences.maxDistanceMiles],
+  );
 
   const openMap = () => {
     navigation.navigate('MapDiscover');
@@ -236,6 +242,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
         <StandoutsRow
           profiles={standoutsProfiles.slice(0, 6)}
           onSelect={handleSelectProfile}
+          showHeader={false}
         />
 
         <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
@@ -244,6 +251,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
         <RecentlyActiveStrip
           profiles={recentlyActiveProfiles.slice(0, 8)}
           onSelect={handleSelectProfile}
+          showHeader={false}
         />
 
         {heldProfiles.length > 0 && (

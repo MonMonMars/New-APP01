@@ -11,19 +11,22 @@ import { EmberStatusChips } from './EmberStatusChips';
 type StandoutsRowProps = {
   profiles: Profile[];
   onSelect: (profile: Profile) => void;
+  showHeader?: boolean;
 };
 
-export function StandoutsRow({ profiles, onSelect }: StandoutsRowProps) {
+export function StandoutsRow({ profiles, onSelect, showHeader = true }: StandoutsRowProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
 
   if (profiles.length === 0) {
     return (
       <View style={styles.section}>
-        <View style={styles.header}>
-          <Ionicons name="star" size={16} color={colors.superLike} />
-          <Text style={[styles.title, { color: colors.text }]}>{t('discoverHub.standouts')}</Text>
-        </View>
+        {showHeader ? (
+          <View style={styles.header}>
+            <Ionicons name="star" size={16} color={colors.superLike} />
+            <Text style={[styles.title, { color: colors.text }]}>{t('discoverHub.standouts')}</Text>
+          </View>
+        ) : null}
         <Text style={[styles.emptyText, { color: colors.textMuted }]}>
           {t('discoverHub.standoutsEmpty')}
         </Text>
@@ -33,11 +36,13 @@ export function StandoutsRow({ profiles, onSelect }: StandoutsRowProps) {
 
   return (
     <View style={styles.section}>
-      <View style={styles.header}>
-        <Ionicons name="star" size={16} color={colors.superLike} />
-        <Text style={[styles.title, { color: colors.text }]}>{t('discoverHub.standouts')}</Text>
-        <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('discoverHub.standoutsToday')}</Text>
-      </View>
+      {showHeader ? (
+        <View style={styles.header}>
+          <Ionicons name="star" size={16} color={colors.superLike} />
+          <Text style={[styles.title, { color: colors.text }]}>{t('discoverHub.standouts')}</Text>
+          <Text style={[styles.subtitle, { color: colors.textMuted }]}>{t('discoverHub.standoutsToday')}</Text>
+        </View>
+      ) : null}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {profiles.map((profile) => (
           <AnimatedPressable

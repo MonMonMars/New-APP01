@@ -43,6 +43,8 @@ type ProfileDetailSheetProps = {
   onSuperLike?: () => void;
   /** True after a match — Ember private photos unlock */
   photosUnlocked?: boolean;
+  /** Map search override — show distance from searched area instead of home miles */
+  distanceMilesOverride?: number;
 };
 
 export function ProfileDetailSheet({
@@ -60,6 +62,7 @@ export function ProfileDetailSheet({
   onSparkNote,
   onSuperLike,
   photosUnlocked = false,
+  distanceMilesOverride,
 }: ProfileDetailSheetProps) {
   const { colors } = useTheme();
   const { t, locale } = useTranslation();
@@ -147,7 +150,9 @@ export function ProfileDetailSheet({
             <Text style={[styles.distance, { color: colors.textMuted }]}>
               {emberStatus
                 ? getEmberLocationLabel(locale, profile)
-                : t('likes.milesAway', { n: profile.distanceMiles })}
+                : t('likes.milesAway', {
+                    n: distanceMilesOverride ?? profile.distanceMiles,
+                  })}
             </Text>
             {profile.openingMove ? (
               <View style={[styles.openingMove, { backgroundColor: `${colors.gradientEnd}1a` }]}>

@@ -17,6 +17,8 @@ import { SparkSectionToggle } from '../../components/SparkSectionToggle';
 import { PASSPORT_CITIES, resolveSparkSection } from '../../types/preferences';
 import { ThemeMode } from '../../types/settings';
 import { LEGAL_ENTITY } from '../../constants/legalEntity';
+import { logSecurityEvent, submitSecurityReport } from '../../services/securityReports';
+import { checkClientRateLimit } from '../../utils/securityGuards';
 import { openExternalUrl } from '../../utils/openExternalUrl';
 import { radii, spacing } from '../../theme';
 import { buildDisguiseFeed } from '../../utils/buildDisguiseFeed';
@@ -41,6 +43,7 @@ export function DisguiseProfileScreen() {
   const { colors } = useTheme();
   const {
     user,
+    userId,
     disguiseMode,
     setDisguiseMode,
     disguiseAdCreative,
@@ -369,8 +372,25 @@ export function DisguiseProfileScreen() {
               return;
             }
             if (item.id === 'h2') {
+              if (!checkClientRateLimit('disguise-report', 5, 60_000)) {
+                Alert.alert(
+                  t('disguiseProfile.reportAlertTitle'),
+                  t('disguiseProfile.reportAlertBody'),
+                  [{ text: t('common.gotIt') }],
+                );
+                return;
+              }
+              if (userId) {
+                void submitSecurityReport({
+                  reporterUserId: userId,
+                  reportedProfileId: 'disguise-content',
+                  reason: 'Disguise mode content report from help menu',
+                  context: 'pulse_post',
+                });
+                void logSecurityEvent(userId, 'disguise_content_reported', {});
+              }
               Alert.alert(
-                t('disguiseProfile.reportAlertTitle'),
+                t('discover.reportThanksSimple'),
                 t('disguiseProfile.reportAlertBody'),
                 [{ text: t('common.gotIt') }],
               );

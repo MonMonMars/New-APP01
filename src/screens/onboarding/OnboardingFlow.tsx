@@ -22,6 +22,8 @@ import { colors, radii, spacing } from '../../theme';
 import { pulseBrand } from '../../theme/pulseBrand';
 import { SearchMapView } from '../../components/SearchMapView';
 import { deriveShowMe } from '../../utils/deriveShowMe';
+import { resolveUserLocation } from '../../services/userLocation';
+import type { GeoPoint } from '../../utils/geoMap';
 import { mapCenterForCity, zoomForRadius } from '../../utils/searchMapTiles';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 
@@ -40,6 +42,10 @@ export function OnboardingFlow() {
     user,
   } = useApp();
   const [step, setStep] = useState<Step>('welcome');
+  const [locationCenter, setLocationCenter] = useState<GeoPoint>(() =>
+    mapCenterForCity(preferences.passportCity ?? 'New York, NY'),
+  );
+  const [locationLoading, setLocationLoading] = useState(false);
   const [legalAccepted, setLegalAccepted] = useState(false);
   const [legalPreviewId, setLegalPreviewId] = useState<LegalDocumentId | null>(null);
   const legalUi = getLegalUiStrings(locale);
@@ -257,7 +263,7 @@ export function OnboardingFlow() {
           </Text>
           <View style={styles.mapPreview}>
             <SearchMapView
-              center={mapCenterForCity(preferences.passportCity ?? 'New York, NY')}
+              center={locationCenter}
               zoom={zoomForRadius(preferences.maxDistanceMiles)}
               radiusMiles={preferences.maxDistanceMiles}
               accentColor={pulseBrand.accent}
@@ -271,16 +277,34 @@ export function OnboardingFlow() {
           </View>
           <AnimatedPressable
             style={styles.primaryButton}
+            disabled={locationLoading}
             onPress={() => {
-              updatePreferences({
-                ...preferences,
-                passportCity: preferences.passportCity ?? 'New York, NY',
-                travelMode: false,
-              });
-              setStep('intent');
+              setLocationLoading(true);
+              void resolveUserLocation(preferences.passportCity)
+                .then((result) => {
+                  setLocationCenter(result.coords);
+                  updatePreferences({
+                    ...preferences,
+                    travelMode: false,
+                    passportCity:
+                      result.source === 'device'
+                        ? undefined
+                        : preferences.passportCity ?? 'New York, NY',
+                    mapSearchLat: result.source === 'device' ? result.coords.lat : undefined,
+                    mapSearchLng: result.source === 'device' ? result.coords.lng : undefined,
+                  });
+                  setStep('intent');
+                })
+                .finally(() => {
+                  setLocationLoading(false);
+                });
             }}
           >
-            <Text style={styles.primaryButtonText}>{t('onboarding.useMyLocation')}</Text>
+            {locationLoading ? (
+              <ActivityIndicator color={colors.text} />
+            ) : (
+              <Text style={styles.primaryButtonText}>{t('onboarding.useMyLocation')}</Text>
+            )}
           </AnimatedPressable>
           {showLocationInfo ? (
             <Text style={styles.locationInfo}>

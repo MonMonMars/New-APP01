@@ -265,7 +265,11 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
       : null;
 
   const handleSend = (text: string, imageUrl?: string, isGif = false) => {
-    sendMessage(conversationId, text, imageUrl, isGif);
+    const sent = sendMessage(conversationId, text, imageUrl, isGif);
+    if (!sent) {
+      Alert.alert(t('chat.sendRateLimitedTitle'), t('chat.sendRateLimitedBody'));
+      return;
+    }
     setDraft('');
   };
 

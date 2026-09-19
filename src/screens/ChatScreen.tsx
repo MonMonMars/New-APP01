@@ -64,6 +64,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
     checkInDateNow,
     completeDateCheckIn,
     reactToMessage,
+    markConversationRead,
   } = useApp();
   const [draft, setDraft] = useState('');
   const [showGifPicker, setShowGifPicker] = useState(false);
@@ -87,6 +88,18 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   );
 
   useCloudConversation(conversationId);
+
+  const conversationUnread = conversation?.unread ?? false;
+
+  useEffect(() => {
+    markConversationRead(conversationId);
+  }, [conversationId, markConversationRead]);
+
+  useEffect(() => {
+    if (conversationUnread) {
+      markConversationRead(conversationId);
+    }
+  }, [conversationId, conversationUnread, markConversationRead]);
 
   const expiryLabel = useLiveExpiry(conversation?.match.expiresAt);
 
@@ -423,6 +436,11 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
 
       <MessageReactionPicker
         visible={reactionMessageId !== null}
+        currentReaction={
+          reactionMessageId
+            ? conversation.messages.find((message) => message.id === reactionMessageId)?.reaction
+            : undefined
+        }
         onSelect={(emoji) => {
           if (reactionMessageId) {
             reactToMessage(conversationId, reactionMessageId, emoji);

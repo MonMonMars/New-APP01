@@ -111,7 +111,7 @@ import {
 import { clearVaultKey } from '../utils/secureStorage';
 import { translate } from '../i18n';
 import { resolveAppLocale } from '../types/locale';
-import { messagePreviewText, sentPhotoContext } from '../utils/messageFormat';
+import { messagePreviewText, sentGifContext, sentPhotoContext, sentVoiceContext } from '../utils/messageFormat';
 import { disguiseWorldMeta } from '../utils/disguiseWorld';
 import { DisguiseUnlockConfirm } from '../components/disguise/DisguiseUnlockConfirm';
 import { SparkUnlockModal } from '../components/security/SparkUnlockModal';
@@ -405,6 +405,7 @@ type AppContextValue = {
   profileViewers: Profile[];
   profileViewCount: number;
   reactToMessage: (conversationId: string, messageId: string, reaction: string) => void;
+  markConversationRead: (conversationId: string) => void;
   enableNotifications: () => Promise<boolean>;
   updateNotificationPreferences: (prefs: NotificationPreferences) => void;
   setThemeMode: (mode: ThemeMode) => void;
@@ -1497,7 +1498,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
           return {
             ...conversation,
             messages: conversation.messages.map((message) =>
-              message.id === messageId ? { ...message, reaction } : message,
+              message.id === messageId
+                ? {
+                    ...message,
+                    reaction: message.reaction === reaction ? undefined : reaction,
+                  }
+                : message,
             ),
           };
         }),
@@ -1505,6 +1511,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     [],
   );
+
+  const markConversationRead = useCallback((conversationId: string) => {
+    setConversations((prev) =>
+      prev.map((conversation) =>
+        conversation.id === conversationId ? { ...conversation, unread: false } : conversation,
+      ),
+    );
+  }, []);
 
   const blockProfile = useCallback((profileId: string) => {
     setBlockedIds((prev) => new Set(prev).add(profileId));
@@ -1953,7 +1967,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           void (async () => {
             const result = await generateDemoReply({
               profile: replyProfile,
-              userMessage: trimmed || (imageUrl ? sentPhotoContext(locale) : ''),
+              userMessage:
+                trimmed ||
+                (imageUrl ? (isGif ? sentGifContext(locale) : sentPhotoContext(locale)) : ''),
               recentMessages: replyHistory,
               userName: user.name,
             });
@@ -2010,6 +2026,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         status: 'sent',
       };
       const preview = messagePreviewText(voiceMessage, locale);
+      const targetConversation = conversations.find((item) => item.id === conversationId);
 
       setConversations((prev) =>
         prev.map((conversation) => {
@@ -2027,8 +2044,94 @@ export function AppProvider({ children }: { children: ReactNode }) {
           };
         }),
       );
+
+      setTimeout(() => {
+        setConversations((prev) =>
+          prev.map((conversation) => {
+            if (conversation.id !== conversationId) {
+              return conversation;
+            }
+            return {
+              ...conversation,
+              messages: conversation.messages.map((m) =>
+                m.id === voiceMessage.id ? { ...m, status: 'delivered' as const } : m,
+              ),
+            };
+          }),
+        );
+      }, 800);
+
+      if (isSparkPlus) {
+        setTimeout(() => {
+          setConversations((prev) =>
+            prev.map((conversation) => {
+              if (conversation.id !== conversationId) {
+                return conversation;
+              }
+              return {
+                ...conversation,
+                messages: conversation.messages.map((m) =>
+                  m.id === voiceMessage.id ? { ...m, status: 'read' as const } : m,
+                ),
+              };
+            }),
+          );
+        }, 2000);
+      }
+
+      const replyProfile = targetConversation?.match.profile;
+      const replyHistory = targetConversation
+        ? [...targetConversation.messages, voiceMessage]
+        : [voiceMessage];
+
+      if (replyProfile && isDemoChatProfile(replyProfile)) {
+        setTimeout(() => {
+          setConversations((prev) =>
+            prev.map((conversation) => {
+              if (conversation.id !== conversationId) {
+                return conversation;
+              }
+              return { ...conversation, isTyping: true };
+            }),
+          );
+        }, 2500);
+
+        setTimeout(() => {
+          void (async () => {
+            const result = await generateDemoReply({
+              profile: replyProfile,
+              userMessage: sentVoiceContext(locale, seconds),
+              recentMessages: replyHistory,
+              userName: user.name,
+            });
+
+            setConversations((prev) =>
+              prev.map((conversation) => {
+                if (conversation.id !== conversationId) {
+                  return conversation;
+                }
+                const reply: Message = {
+                  id: `msg-reply-${Date.now()}`,
+                  text: result.text,
+                  sentAt: new Date().toISOString(),
+                  isMine: false,
+                };
+                return {
+                  ...conversation,
+                  isTyping: false,
+                  messages: [...conversation.messages, reply],
+                  lastMessage: reply.text,
+                  lastMessageAt: reply.sentAt,
+                  yourTurn: true,
+                  unread: true,
+                };
+              }),
+            );
+          })();
+        }, 4500);
+      }
     },
-    [preferences.appLocale],
+    [conversations, isSparkPlus, preferences.appLocale, user.name],
   );
 
   const canUseFreeWeeklyBoost = useMemo(() => {
@@ -2601,6 +2704,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       profileViewers,
       profileViewCount,
       reactToMessage,
+      markConversationRead,
       showMomentumUpsell,
       dismissMomentumUpsell,
       isSupabaseEnabled: isSupabaseConfigured(),
@@ -2732,6 +2836,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       profileViewers,
       profileViewCount,
       reactToMessage,
+      markConversationRead,
       showMomentumUpsell,
       dismissMomentumUpsell,
       completeOnboarding,

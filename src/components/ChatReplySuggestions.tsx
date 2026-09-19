@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
@@ -62,12 +62,21 @@ export function ChatReplySuggestions({
       ) : failed ? (
         <Text style={[styles.hint, { color: colors.textMuted }]}>{t('chat.suggestionsFailed')}</Text>
       ) : (
-        <View style={styles.options}>
-          {options.map((option) => (
+        <ScrollView
+          horizontal={options.length > 3}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={options.length > 3 ? styles.optionsRow : styles.options}
+          keyboardShouldPersistTaps="handled"
+        >
+          {options.map((option, index) => (
             <AnimatedPressable
-              key={option}
+              key={`${index}-${option.slice(0, 24)}`}
               scaleTo={0.97}
-              style={[styles.chip, { backgroundColor: colors.surface, borderColor: colors.border }]}
+              style={[
+                styles.chip,
+                options.length > 3 ? styles.chipHorizontal : null,
+                { backgroundColor: colors.surface, borderColor: colors.border },
+              ]}
               onPress={() => onSelect(option)}
               accessibilityLabel={t('chat.suggestionA11y', { text: option })}
             >
@@ -76,7 +85,7 @@ export function ChatReplySuggestions({
               </Text>
             </AnimatedPressable>
           ))}
-        </View>
+        </ScrollView>
       )}
     </View>
   );
@@ -122,11 +131,18 @@ const styles = StyleSheet.create({
   options: {
     gap: spacing.xs,
   },
+  optionsRow: {
+    gap: spacing.xs,
+    paddingRight: spacing.sm,
+  },
   chip: {
     borderRadius: radii.button,
     borderWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
+  },
+  chipHorizontal: {
+    maxWidth: 260,
   },
   chipText: {
     fontSize: 14,

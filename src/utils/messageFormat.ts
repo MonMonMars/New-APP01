@@ -45,3 +45,11 @@ export function messagePreviewText(message: MessagePreviewInput, locale: AppLoca
 export function sentPhotoContext(locale: AppLocale): string {
   return translate(locale, 'chat.sentPhotoContext');
 }
+
+export function sentVoiceContext(locale: AppLocale, seconds: number): string {
+  return translate(locale, 'chat.sentVoiceContext', { seconds });
+}
+
+export function sentGifContext(locale: AppLocale): string {
+  return translate(locale, 'chat.sentGifContext');
+}

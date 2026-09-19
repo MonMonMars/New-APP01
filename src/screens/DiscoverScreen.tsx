@@ -24,6 +24,7 @@ import { WaitingForMatchModal } from '../components/WaitingForMatchModal';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Profile, ProfilePrompt } from '../types/profile';
+import { getReportReasonLabel } from '../components/ReportReasonSheet';
 import { getPromptQuestionLabel, getSparkSectionEmpty } from '../i18n/labels';
 import { translate, useTranslation } from '../i18n';
 import { resolveSparkSection } from '../types/preferences';
@@ -185,7 +186,10 @@ export function DiscoverScreen() {
       }
       reportProfile(reportProfileId, reason);
       setReportProfileId(null);
-      Alert.alert(t('discover.reportSubmitted'), t('discover.reportThanks', { reason }));
+      Alert.alert(
+        t('discover.reportSubmitted'),
+        t('discover.reportThanks', { reason: getReportReasonLabel(locale, reason) }),
+      );
     },
     [reportProfile, reportProfileId, t],
   );

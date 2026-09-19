@@ -15,6 +15,11 @@ import { useApp } from '../../context/AppContext';
 import { useAppLocale } from '../../hooks/useAppLocale';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
+import {
+  getPulseCategoryLabel,
+  getTrendingChangeLabel,
+  getTrendingChipLabel,
+} from '../../i18n/labels';
 import { NewsPost } from '../../data/disguiseFeed';
 import {
   femaleBreakingNowCards,
@@ -149,7 +154,7 @@ export function DisguiseTrendingScreen() {
     preferences.travelMode && preferences.passportCity
       ? preferences.passportCity
       : preferences.passportCity ?? 'New York, NY';
-  const { weather, isLive } = useDisguiseWeather(weatherCity);
+  const { weather, isLive } = useDisguiseWeather(weatherCity, locale);
   const { refreshing, justUpdated, scrollViewProps } = usePulseScrollRefresh();
 
   const openTopic = (topic?: string) => {
@@ -219,7 +224,9 @@ export function DisguiseTrendingScreen() {
               onPress={() => openTopic(chip.topic)}
             >
               <Ionicons name={chipIcon(chip.icon)} size={14} color={meta.accent} />
-              <Text style={[styles.chipLabel, { color: colors.text }]}>{chip.label}</Text>
+              <Text style={[styles.chipLabel, { color: colors.text }]}>
+                {getTrendingChipLabel(locale, chip.label)}
+              </Text>
             </AnimatedPressable>
           ))}
         </ScrollView>
@@ -312,7 +319,7 @@ export function DisguiseTrendingScreen() {
                       color={trendColor(item.direction, meta.accent)}
                     />
                     <Text style={[styles.trendPillText, { color: trendColor(item.direction, meta.accent) }]}>
-                      {item.changeLabel}
+                      {getTrendingChangeLabel(locale, item.changeLabel)}
                     </Text>
                   </View>
                 )}
@@ -321,7 +328,10 @@ export function DisguiseTrendingScreen() {
                 {item.preview}
               </Text>
               <Text style={[styles.posts, { color: colors.textMuted }]}>
-                {t('disguiseTrending.postsInCategory', { posts: item.posts, category: item.category })}
+                {t('disguiseTrending.postsInCategory', {
+                  posts: item.posts,
+                  category: getPulseCategoryLabel(locale, item.category),
+                })}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />

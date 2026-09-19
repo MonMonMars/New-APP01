@@ -36,6 +36,7 @@ import {
   generateOpenerSuggestions,
   generateReplySuggestions,
 } from '../services/chatReplyCoach';
+import { getReportReasonLabel } from '../components/ReportReasonSheet';
 import { pickProfilePhoto } from '../utils/photoPicker';
 import { radii, spacing } from '../theme';
 
@@ -135,7 +136,10 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const handleReportSubmit = (reason: ReportReason) => {
     setShowReport(false);
     reportProfile(profile.id, reason);
-    Alert.alert(t('discover.reportSubmitted'), t('discover.reportThanks', { reason }));
+    Alert.alert(
+      t('discover.reportSubmitted'),
+      t('discover.reportThanks', { reason: getReportReasonLabel(locale, reason) }),
+    );
     onBack();
   };
 

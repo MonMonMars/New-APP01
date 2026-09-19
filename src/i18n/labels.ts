@@ -1,9 +1,11 @@
+import { WeatherSnapshot } from '../data/disguiseWeather';
 import { AppLocale } from '../types/locale';
 import { DiscoverFilter, ShowMePreference, SparkSection } from '../types/preferences';
 import {
   EmberAvailability,
   EmberDiscretion,
   EmberSeeking,
+  emberHidesCity,
   Orientation,
   ProfileGender,
   RelationshipIntent,
@@ -291,6 +293,137 @@ export function formatOpeningMoveDisplay(locale: AppLocale, text: string): strin
     return translate(locale, 'openingMove.tryAnswer', { answer: tryMatch[1] });
   }
   return getOpeningMoveSuggestionLabel(locale, text);
+}
+
+export function getEmberLocationLabel(
+  locale: AppLocale,
+  profile: { city?: string; distanceMiles: number; emberDiscretion?: EmberDiscretion | null },
+): string {
+  if (emberHidesCity(profile.emberDiscretion)) {
+    return translate(locale, 'ember.nearby');
+  }
+  const miles = translate(locale, 'preferences.miles', { n: profile.distanceMiles });
+  if (profile.emberDiscretion === 'careful') {
+    return miles;
+  }
+  return profile.city ? `${profile.city} · ${miles}` : miles;
+}
+
+const WEATHER_CONDITION_KEYS: Record<string, string> = {
+  'Clear sky': 'disguiseWeather.conditionClear',
+  'Partly cloudy': 'disguiseWeather.conditionPartlyCloudy',
+  Cloudy: 'disguiseWeather.conditionCloudy',
+  'Rain showers': 'disguiseWeather.conditionRain',
+  Thunderstorms: 'disguiseWeather.conditionStorm',
+  Windy: 'disguiseWeather.conditionWind',
+};
+
+const WEATHER_DAY_KEYS: Record<string, string> = {
+  Today: 'disguiseWeather.today',
+  Sun: 'disguiseWeather.daySun',
+  Mon: 'disguiseWeather.dayMon',
+  Tue: 'disguiseWeather.dayTue',
+  Wed: 'disguiseWeather.dayWed',
+  Thu: 'disguiseWeather.dayThu',
+  Fri: 'disguiseWeather.dayFri',
+  Sat: 'disguiseWeather.daySat',
+  Day: 'disguiseWeather.dayGeneric',
+};
+
+const WEATHER_UPDATED_KEYS: Record<string, string> = {
+  'Live · Open-Meteo': 'disguiseWeather.updatedLive',
+  'Updated just now': 'disguiseWeather.updatedJustNow',
+};
+
+export function getWeatherConditionLabel(locale: AppLocale, condition: string): string {
+  const key = WEATHER_CONDITION_KEYS[condition];
+  return key ? translate(locale, key) : condition;
+}
+
+export function getWeatherDayLabel(locale: AppLocale, label: string): string {
+  const key = WEATHER_DAY_KEYS[label];
+  return key ? translate(locale, key) : label;
+}
+
+export function getWeatherUpdatedLabel(locale: AppLocale, label: string): string {
+  const key = WEATHER_UPDATED_KEYS[label];
+  return key ? translate(locale, key) : label;
+}
+
+export function localizeWeatherSnapshot(
+  locale: AppLocale,
+  snapshot: WeatherSnapshot,
+  passportCity?: string,
+): WeatherSnapshot {
+  const city = passportCity
+    ? getPassportCityLabel(locale, passportCity).split(/[,，]/)[0]?.trim() ||
+      getPassportCityLabel(locale, passportCity)
+    : snapshot.city;
+
+  return {
+    ...snapshot,
+    city,
+    condition: getWeatherConditionLabel(locale, snapshot.condition),
+    updatedLabel: getWeatherUpdatedLabel(locale, snapshot.updatedLabel),
+    forecast: snapshot.forecast.map((day) => ({
+      ...day,
+      label: getWeatherDayLabel(locale, day.label),
+    })),
+  };
+}
+
+const PULSE_CATEGORY_KEYS: Record<string, string> = {
+  Tech: 'pulseCategory.tech',
+  Business: 'pulseCategory.business',
+  Local: 'pulseCategory.local',
+  Lifestyle: 'pulseCategory.lifestyle',
+  Science: 'pulseCategory.science',
+  Culture: 'pulseCategory.culture',
+  Creators: 'pulseCategory.creators',
+  Entertainment: 'pulseCategory.entertainment',
+  News: 'pulseCategory.news',
+  Tarot: 'pulseCategory.tarot',
+  星座: 'pulseCategory.zodiac',
+  Food: 'pulseCategory.food',
+  Film: 'pulseCategory.film',
+  Music: 'pulseCategory.music',
+  Style: 'pulseCategory.style',
+};
+
+export function getPulseCategoryLabel(locale: AppLocale, category: string): string {
+  const key = PULSE_CATEGORY_KEYS[category];
+  return key ? translate(locale, key) : category;
+}
+
+const TRENDING_CHIP_LABEL_KEYS: Record<string, string> = {
+  'For you': 'disguiseTrending.chipForYou',
+  Weather: 'disguiseTrending.weather',
+  Markets: 'disguiseTrending.chipMarkets',
+  Tech: 'pulseCategory.tech',
+  Local: 'pulseCategory.local',
+  Food: 'pulseCategory.food',
+  Weekend: 'disguiseTrending.chipWeekend',
+  星座: 'pulseCategory.zodiac',
+  Tarot: 'pulseCategory.tarot',
+  Film: 'pulseCategory.film',
+  Music: 'pulseCategory.music',
+  Style: 'pulseCategory.style',
+};
+
+export function getTrendingChipLabel(locale: AppLocale, label: string): string {
+  const key = TRENDING_CHIP_LABEL_KEYS[label];
+  return key ? translate(locale, key) : label;
+}
+
+const TRENDING_CHANGE_LABEL_KEYS: Record<string, string> = {
+  Live: 'disguiseTrending.changeLive',
+  New: 'disguiseTrending.changeNew',
+  Rising: 'disguiseTrending.changeRising',
+};
+
+export function getTrendingChangeLabel(locale: AppLocale, label: string): string {
+  const key = TRENDING_CHANGE_LABEL_KEYS[label];
+  return key ? translate(locale, key) : label;
 }
 
 export function getBrandMarkLabel(

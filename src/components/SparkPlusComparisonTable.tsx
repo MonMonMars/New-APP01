@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { freeTierComparisonRows } from '../utils/genderAccountPerks';
 import { radii, spacing } from '../theme';
 
@@ -24,14 +25,15 @@ function CellValue({ value }: { value: string | boolean }) {
 export function SparkPlusComparisonTable() {
   const { colors } = useTheme();
   const { user } = useApp();
-  const rows = freeTierComparisonRows(user.gender);
+  const { t } = useTranslation();
+  const rows = freeTierComparisonRows(user.gender, t);
 
   return (
     <View style={[styles.table, { backgroundColor: colors.surface }]}>
       <View style={styles.headerRow}>
-        <Text style={[styles.headerFeature, { color: colors.textMuted }]}>Feature</Text>
-        <Text style={[styles.headerCol, { color: colors.textMuted }]}>Free</Text>
-        <Text style={[styles.headerCol, { color: colors.gradientEnd }]}>Spark+</Text>
+        <Text style={[styles.headerFeature, { color: colors.textMuted }]}>{t('sparkPlusComparison.feature')}</Text>
+        <Text style={[styles.headerCol, { color: colors.textMuted }]}>{t('sparkPlusComparison.free')}</Text>
+        <Text style={[styles.headerCol, { color: colors.gradientEnd }]}>{t('sparkPlusComparison.sparkPlus')}</Text>
       </View>
       {rows.map((row) => (
         <View key={row.feature} style={[styles.row, { borderBottomColor: colors.border }]}>

@@ -1,7 +1,7 @@
 import { Image, StyleSheet, Text, View } from 'react-native';
 
-import { useApp } from '../../context/AppContext';
 import { radii } from '../../theme';
+import { useTranslation } from '../../i18n';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { DisguiseOverlayVariant } from './DisguiseOverlayAvatar';
 import { ContentTypeIcon, maskVariantToContentKind } from './ContentTypeIcon';
@@ -20,7 +20,7 @@ export function DisguiseOverlayImage({
   variant,
   height = 200,
 }: DisguiseOverlayImageProps) {
-  const { preferences } = useApp();
+  const { t } = useTranslation();
   const meta = useDisguiseWorld();
 
   return (
@@ -29,14 +29,14 @@ export function DisguiseOverlayImage({
       <View style={[styles.scrim, variant === 'news' ? styles.scrimNews : styles.scrimAd]} />
       {variant === 'news' ? (
         <View style={styles.newsBanner}>
-          <Text style={[styles.newsKicker, { color: meta.accentBright }]}>EXCLUSIVE</Text>
+          <Text style={[styles.newsKicker, { color: meta.accentBright }]}>{t('disguiseOverlay.exclusive')}</Text>
           <Text style={styles.newsHeadline} numberOfLines={2}>
             {overlayText}
           </Text>
         </View>
       ) : (
         <View style={styles.adBanner}>
-          <Text style={[styles.adKicker, { color: meta.accentBright }]}>LIMITED OFFER</Text>
+          <Text style={[styles.adKicker, { color: meta.accentBright }]}>{t('disguiseOverlay.limitedOffer')}</Text>
           <Text style={styles.adHeadline} numberOfLines={2}>
             {overlayText}
           </Text>

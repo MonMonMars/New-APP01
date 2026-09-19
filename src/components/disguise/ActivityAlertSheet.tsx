@@ -3,8 +3,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguiseAlert } from '../../data/disguiseFeed';
-import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
@@ -21,7 +21,7 @@ type ActivityAlertSheetProps = {
 export function ActivityAlertSheet({ visible, alert, onClose }: ActivityAlertSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { preferences } = useApp();
+  const { t } = useTranslation();
   const meta = useDisguiseWorld();
 
   if (!alert) {
@@ -45,9 +45,9 @@ export function ActivityAlertSheet({ visible, alert, onClose }: ActivityAlertShe
         <FadeSlideIn replayKey={visible} index={0}>
           <View style={[styles.toolbar, { borderBottomColor: colors.border }]}>
             <Text style={[styles.badge, { color: colors.textMuted }]}>
-              {isSponsored ? 'Sponsored' : 'Activity'}
+              {isSponsored ? t('activityAlert.sponsored') : t('tabs.activity')}
             </Text>
-            <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel="Close" scaleTo={0.9}>
+            <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel={t('common.close')} scaleTo={0.9}>
               <Ionicons name="close" size={24} color={colors.textMuted} />
             </AnimatedPressable>
           </View>
@@ -58,7 +58,7 @@ export function ActivityAlertSheet({ visible, alert, onClose }: ActivityAlertShe
             {alert.person ? (
               <FeedPersonRow
                 imageUrl={alert.person.avatarUrl}
-                overlayText={alert.person.overlayText ?? 'LIVE'}
+                overlayText={alert.person.overlayText ?? t('boost.live')}
                 overlayVariant={alert.person.overlayVariant ?? 'news'}
                 plainAvatar={!alert.person.overlayVariant}
                 contentKind="profile"
@@ -82,8 +82,8 @@ export function ActivityAlertSheet({ visible, alert, onClose }: ActivityAlertShe
           <FadeSlideIn replayKey={visible} index={3}>
             <Text style={[styles.hint, { color: colors.textMuted }]}>
               {isSponsored
-                ? `Offers in ${meta.name} are sponsored placements — tap through only if you recognise the brand.`
-                : `Notifications from your ${meta.name} feed. Dating actions stay private in ${meta.unlockLabel}.`}
+                ? t('activityAlert.sponsoredHint', { name: meta.name })
+                : t('activityAlert.feedHint', { name: meta.name, unlockLabel: meta.unlockLabel })}
             </Text>
           </FadeSlideIn>
         </View>

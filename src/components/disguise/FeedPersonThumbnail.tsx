@@ -1,8 +1,10 @@
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import { spacing } from '../../theme';
 import {
+  contentTypeLabel,
   ContentTypeIcon,
   ContentTypeKind,
   ContentTypeLabel,
@@ -46,6 +48,7 @@ export function FeedPersonThumbnail({
   style,
 }: FeedPersonThumbnailProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   const avatar = plainAvatar ? (
     <View style={[styles.plainWrap, { width: size, height: size, borderRadius: size / 2 }]}>
@@ -107,7 +110,7 @@ export function FeedPersonThumbnail({
         onPress?.();
       }}
       accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel ?? `View ${contentKind}`}
+      accessibilityLabel={accessibilityLabel ?? t('feedPerson.viewA11y', { kind: contentTypeLabel(contentKind, t) })}
       style={[styles.pressable, style]}
     >
       {content}

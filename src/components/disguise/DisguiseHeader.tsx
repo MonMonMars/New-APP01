@@ -6,6 +6,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { useAppLocale } from '../../hooks/useAppLocale';
+import { useTranslation } from '../../i18n';
 import { FeedItem } from '../../data/disguiseFeed';
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
 import { spacing } from '../../theme';
@@ -25,6 +26,7 @@ type DisguiseHeaderProps = {
 export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps) {
   const { user, preferences, setDisguiseMode } = useApp();
   const { locale } = useAppLocale();
+  const { t } = useTranslation();
   const meta = disguiseWorldMeta(preferences.sparkSection, user.gender, locale);
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
   const [searchOpen, setSearchOpen] = useState(false);
@@ -43,8 +45,8 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
               setDisguiseMode(false);
             }}
             accessibilityRole="button"
-            accessibilityLabel={`Tap ${meta.name} logo to leave ${meta.unlockLabel}`}
-            accessibilityHint={`Leaves ${meta.name} and opens ${meta.unlockLabel}`}
+            accessibilityLabel={t('disguiseHeader.leaveLogoA11y', { name: meta.name, unlockLabel: meta.unlockLabel })}
+            accessibilityHint={t('disguiseHeader.leaveLogoHint', { name: meta.name, unlockLabel: meta.unlockLabel })}
             scaleTo={0.96}
             hitSlop={8}
             style={styles.brandTap}
@@ -71,7 +73,7 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
               </AnimatedPressable>
               <AnimatedPressable
                 style={styles.iconBtn}
-                accessibilityLabel="Open activity"
+                accessibilityLabel={t('disguiseHeader.openActivity')}
                 onPress={() => navigation.navigate('Activity')}
               >
                 <Ionicons name="notifications-outline" size={22} color={pulseBrand.mastheadText} />

@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
+import { useTranslation } from '../../i18n';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 
 /** Visual category for Pulse / Harbor feed media. */
@@ -11,26 +12,51 @@ const ICON_SIZE = 16;
 /** Shared badge size for profile mini-thumbs across Pulse feed rows. */
 export const PROFILE_THUMB_ICON_SIZE = 12;
 
-const KIND_META: Record<
-  ContentTypeKind,
-  { icon: keyof typeof Ionicons.glyphMap; label: string }
-> = {
-  news: { icon: 'newspaper', label: 'News' },
-  ad: { icon: 'megaphone', label: 'Ad' },
-  sponsored: { icon: 'information-circle', label: 'Sponsored' },
-  social: { icon: 'chatbubble', label: 'Social' },
-  profile: { icon: 'person', label: 'Profile' },
-  trending: { icon: 'flame', label: 'Trending' },
-  alert: { icon: 'notifications', label: 'Alert' },
+const KIND_ICONS: Record<ContentTypeKind, keyof typeof Ionicons.glyphMap> = {
+  news: 'newspaper',
+  ad: 'megaphone',
+  sponsored: 'information-circle',
+  social: 'chatbubble',
+  profile: 'person',
+  trending: 'flame',
+  alert: 'notifications',
 };
+
+const KIND_LABEL_KEYS: Record<ContentTypeKind, string> = {
+  news: 'contentType.news',
+  ad: 'contentType.ad',
+  sponsored: 'contentType.sponsored',
+  social: 'contentType.social',
+  profile: 'contentType.profile',
+  trending: 'contentType.trending',
+  alert: 'contentType.alert',
+};
+
+function useKindMeta() {
+  const { t } = useTranslation();
+  return useMemo(
+    () =>
+      (Object.keys(KIND_ICONS) as ContentTypeKind[]).reduce(
+        (acc, kind) => {
+          acc[kind] = {
+            icon: KIND_ICONS[kind],
+            label: t(KIND_LABEL_KEYS[kind]),
+          };
+          return acc;
+        },
+        {} as Record<ContentTypeKind, { icon: keyof typeof Ionicons.glyphMap; label: string }>,
+      ),
+    [t],
+  );
+}
 
 type ContentTypeIconProps = {
   kind: ContentTypeKind;
   size?: number;
 };
 
-export function contentTypeLabel(kind: ContentTypeKind): string {
-  return KIND_META[kind].label;
+export function contentTypeLabel(kind: ContentTypeKind, t: (key: string) => string): string {
+  return t(KIND_LABEL_KEYS[kind]);
 }
 
 function useDisguiseIconColor(): string {
@@ -38,7 +64,8 @@ function useDisguiseIconColor(): string {
 }
 
 export function ContentTypeIcon({ kind, size = ICON_SIZE }: ContentTypeIconProps) {
-  const meta = KIND_META[kind];
+  const kindMeta = useKindMeta();
+  const meta = kindMeta[kind];
   const color = useDisguiseIconColor();
   return (
     <Ionicons
@@ -53,7 +80,8 @@ export function ContentTypeIcon({ kind, size = ICON_SIZE }: ContentTypeIconProps
 /** Word + icon row — same pattern as “Sponsored ⓘ”. */
 export function ContentTypeLabel({ kind }: { kind: ContentTypeKind }) {
   const color = useDisguiseIconColor();
-  const meta = KIND_META[kind];
+  const kindMeta = useKindMeta();
+  const meta = kindMeta[kind];
   return (
     <View style={styles.labelRow}>
       <Text style={[styles.labelText, { color }]}>{meta.label}</Text>
@@ -77,6 +105,7 @@ export function MediaWithContentBadge({
   style,
   placement = 'corner',
 }: MediaWithContentBadgeProps) {
+  const kindMeta = useKindMeta();
   if (placement === 'beside') {
     return (
       <View style={[styles.besideRow, style]}>
@@ -91,7 +120,7 @@ export function MediaWithContentBadge({
   return (
     <View style={[styles.cornerWrap, style]}>
       {children}
-      <View style={styles.cornerBadge} accessibilityLabel={KIND_META[kind].label}>
+      <View style={styles.cornerBadge} accessibilityLabel={kindMeta[kind].label}>
         <ContentTypeIcon kind={kind} size={14} />
       </View>
     </View>

@@ -1,8 +1,8 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { useApp } from '../../context/AppContext';
 import { hexToRgba } from '../../utils/disguiseWorld';
+import { useTranslation } from '../../i18n';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { FaceCenteredImage } from './FaceCenteredImage';
 
@@ -26,7 +26,7 @@ export function DisguiseOverlayAvatar({
   size = PROFILE_AVATAR_SIZE,
   badgeOnly = false,
 }: DisguiseOverlayAvatarProps) {
-  const { preferences } = useApp();
+  const { t } = useTranslation();
   const meta = useDisguiseWorld();
   const radius = size / 2;
   const isNews = variant === 'news';
@@ -55,7 +55,7 @@ export function DisguiseOverlayAvatar({
       <View style={styles.badgeStrip}>
         {isNews ? (
           <>
-            <Text style={[styles.newsBadge, { color: meta.accentBright }]}>BREAKING</Text>
+            <Text style={[styles.newsBadge, { color: meta.accentBright }]}>{t('disguiseOverlay.breaking')}</Text>
             {!badgeOnly && (
               <Text
                 style={styles.newsText}
@@ -69,7 +69,7 @@ export function DisguiseOverlayAvatar({
           </>
         ) : (
           <>
-            <Text style={[styles.adBadge, { color: meta.accentBright }]}>AD</Text>
+            <Text style={[styles.adBadge, { color: meta.accentBright }]}>{t('disguiseOverlay.adBadge')}</Text>
             {!badgeOnly && (
               <Text
                 style={styles.adText}

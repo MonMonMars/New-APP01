@@ -1,5 +1,8 @@
+import { TranslationParams } from '../i18n/types';
 import { FREE_DAILY_LIKE_LIMIT, FREE_DAILY_SPARK_NOTES } from '../types/subscription';
 import type { ProfileGender } from '../types/profile';
+
+type TranslateFn = (key: string, params?: TranslationParams) => string;
 
 /** Women get richer free tiers — they're rarer on the platform. */
 export const FEMALE_DAILY_LIKE_LIMIT = 25;
@@ -47,18 +50,35 @@ export type FreeTierComparisonRow = {
   plus: string | boolean;
 };
 
-export function freeTierComparisonRows(gender?: ProfileGender | null): FreeTierComparisonRow[] {
+export function freeTierComparisonRows(
+  gender: ProfileGender | undefined | null,
+  t: TranslateFn,
+): FreeTierComparisonRow[] {
   const woman = usesFemalePulseExperience(gender);
   return [
-    { feature: 'Daily likes', free: woman ? '25' : '10', plus: 'Unlimited' },
-    { feature: 'See who likes you', free: woman, plus: true },
-    { feature: 'See who viewed you', free: woman, plus: true },
-    { feature: 'Rewind passes', free: false, plus: true },
-    { feature: 'Spark Notes', free: woman ? '3/day' : '1/day', plus: 'Unlimited' },
-    { feature: 'Boost', free: false, plus: '1/week' },
-    { feature: 'Advanced filters', free: false, plus: true },
-    { feature: 'Read receipts', free: false, plus: true },
-    { feature: 'Passport mode', free: false, plus: true },
+    {
+      feature: t('sparkPlusComparison.dailyLikes'),
+      free: woman ? String(FEMALE_DAILY_LIKE_LIMIT) : String(FREE_DAILY_LIKE_LIMIT),
+      plus: t('sparkPlusComparison.unlimited'),
+    },
+    { feature: t('sparkPlusComparison.seeWhoLikesYou'), free: woman, plus: true },
+    { feature: t('sparkPlusComparison.seeWhoViewedYou'), free: woman, plus: true },
+    { feature: t('sparkPlusComparison.rewindPasses'), free: false, plus: true },
+    {
+      feature: t('sparkPlusComparison.sparkNotes'),
+      free: woman
+        ? t('sparkPlusComparison.perDay', { count: FEMALE_DAILY_SPARK_NOTES })
+        : t('sparkPlusComparison.perDay', { count: FREE_DAILY_SPARK_NOTES }),
+      plus: t('sparkPlusComparison.unlimited'),
+    },
+    {
+      feature: t('sparkPlusComparison.boost'),
+      free: false,
+      plus: t('sparkPlusComparison.perWeek', { count: 1 }),
+    },
+    { feature: t('sparkPlusComparison.advancedFilters'), free: false, plus: true },
+    { feature: t('sparkPlusComparison.readReceipts'), free: false, plus: true },
+    { feature: t('sparkPlusComparison.passportMode'), free: false, plus: true },
   ];
 }
 

@@ -2,6 +2,7 @@ import { ImageStyle, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-
 
 import { BrandMark } from '../brand/BrandMark';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import { pulseBrand, pulseTimesFontFamily } from '../../theme/pulseBrand';
 
 type PulseBrandMarkProps = {
@@ -63,9 +64,11 @@ type PulseWordmarkProps = {
 };
 
 /** Masthead wordmark for Pulse disguise headers. */
-export function PulseWordmark({ size = 'md', showTagline = false, tagline = 'World & Local News' }: PulseWordmarkProps) {
+export function PulseWordmark({ size = 'md', showTagline = false, tagline }: PulseWordmarkProps) {
   const { colors, resolvedMode } = useTheme();
+  const { t } = useTranslation();
   const isDark = resolvedMode === 'dark';
+  const resolvedTagline = tagline ?? t('disguiseWorld.pulseTagline');
   const fontSize = size === 'sm' ? 19 : size === 'lg' ? 26 : 22;
 
   return (
@@ -83,7 +86,7 @@ export function PulseWordmark({ size = 'md', showTagline = false, tagline = 'Wor
         Pulse
       </Text>
       {showTagline ? (
-        <Text style={[styles.tagline, { color: colors.textMuted }]}>{tagline}</Text>
+        <Text style={[styles.tagline, { color: colors.textMuted }]}>{resolvedTagline}</Text>
       ) : null}
     </View>
   );

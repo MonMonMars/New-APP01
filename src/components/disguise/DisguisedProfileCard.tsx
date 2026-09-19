@@ -147,10 +147,10 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
           style={[styles.card, { backgroundColor: '#1a1a2e', borderColor: colors.border }]}
           onPress={openPreview}
           accessibilityRole="button"
-          accessibilityLabel={`Profile disguised as ad: ${post.headline}`}
+          accessibilityLabel={t('disguisedProfile.disguisedAsAdA11y', { headline: post.headline })}
         >
           <View style={styles.sponsoredRow}>
-            <Text style={styles.sponsored}>Sponsored</Text>
+            <Text style={styles.sponsored}>{t('disguiseAd.sponsored')}</Text>
             <ContentTypeIcon kind="sponsored" />
           </View>
           <MediaWithContentBadge kind="ad">
@@ -161,10 +161,10 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
             <Text style={styles.tagline}>{post.summary}</Text>
             {avatarRow}
             <Text style={styles.spotlightHint} numberOfLines={2}>
-              Reader spotlight — verified comment from a Pulse member.
+              {t('disguisedProfile.spotlightHint')}
             </Text>
             <View style={[styles.cta, { backgroundColor: meta.accent }]}>
-              <Text style={styles.ctaText}>{post.cta ?? 'Learn more'}</Text>
+              <Text style={styles.ctaText}>{post.cta ?? t('disguiseAd.learnMore')}</Text>
               <Ionicons name="chevron-forward" size={14} color="#fff" />
             </View>
             <OwnerHint label={post.hintLabel} color={meta.accent} />

@@ -800,6 +800,7 @@ export const zhTw = {
     freeWeekly: 'Spark+ 每週 1 次免費 Boost',
     weeklyUsed: '本週免費 Boost 已使用 — 至商店購買更多',
     beSeen: '30 分鐘內被更多人看見',
+    activeBanner: 'Boost 進行中 — 接下來 30 分鐘你是熱門檔案',
   },
   profileViews: {
     title: '誰看過你',
@@ -1096,8 +1097,10 @@ export const zhTw = {
   disguiseAd: {
     offlineHint: '你的照片會在本機與廣告或新聞圖層合成。',
     removeGenerated: '移除生成的圖片',
+    sponsored: '贊助',
     sponsoredAd: '贊助廣告',
     breakingNews: '突發新聞',
+    learnMore: '了解更多',
     generateWithAi: '使用 AI 生成',
     generateDisguise: '生成偽裝圖片',
     title: 'AI 偽裝廣告',
@@ -1172,5 +1175,63 @@ export const zhTw = {
   newsArticle: {
     readOn: '在 {source} 閱讀',
     readOnA11y: '在 {source} 閱讀',
+  },
+  pulseUnavailable: {
+    title: '貼文無法使用',
+    message: '此項目可能已從動態中移除，或不再存在於你的收藏目錄。',
+  },
+  activityAlert: {
+    sponsored: '贊助',
+    sponsoredHint: '{name} 中的優惠為贊助內容 — 僅在認得品牌時再點進查看。',
+    feedHint: '來自 {name} 動態的通知。交友操作在 {unlockLabel} 中仍保持私密。',
+  },
+  contentType: {
+    news: '新聞',
+    ad: '廣告',
+    sponsored: '贊助',
+    social: '社群',
+    profile: '個人檔案',
+    trending: '熱門',
+    alert: '通知',
+  },
+  disguiseOverlay: {
+    exclusive: '獨家',
+    limitedOffer: '限時優惠',
+    breaking: '快訊',
+    adBadge: '廣告',
+  },
+  disguiseHeader: {
+    leaveLogoA11y: '點 {name} 標誌離開 {unlockLabel}',
+    leaveLogoHint: '離開 {name} 並開啟 {unlockLabel}',
+    openActivity: '開啟動態通知',
+  },
+  adBanner: {
+    sponsoredA11y: '贊助：{brand}',
+    viewProfileA11y: '查看個人檔案：{name}',
+    profilePhotoA11y: '{name} 的個人照片',
+  },
+  feedPerson: {
+    viewA11y: '查看{kind}',
+  },
+  disguisedProfile: {
+    spotlightHint: '讀者精選 — 來自 Pulse 會員的驗證留言。',
+    disguisedAsAdA11y: '偽裝成廣告的個人檔案：{headline}',
+  },
+  sparkPlusComparison: {
+    feature: '功能',
+    free: '免費',
+    sparkPlus: 'Spark+',
+    dailyLikes: '每日喜歡次數',
+    seeWhoLikesYou: '查看誰喜歡你',
+    seeWhoViewedYou: '查看誰瀏覽你',
+    rewindPasses: '倒帶略過',
+    sparkNotes: 'Spark Notes',
+    boost: 'Boost',
+    advancedFilters: '進階篩選',
+    readReceipts: '已讀回條',
+    passportMode: 'Passport 模式',
+    unlimited: '無上限',
+    perDay: '每日 {count} 次',
+    perWeek: '每週 {count} 次',
   },
 } as const;

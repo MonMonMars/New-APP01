@@ -802,6 +802,7 @@ export const en = {
     freeWeekly: '1 free Boost per week with Spark+',
     weeklyUsed: 'Free weekly Boost used — get more in Shop',
     beSeen: 'Be seen by more people for 30 minutes',
+    activeBanner: 'Boost active — you\'re a top profile for the next 30 minutes',
   },
   profileViews: {
     title: 'Who viewed you',
@@ -1103,8 +1104,10 @@ export const en = {
   disguiseAd: {
     offlineHint: 'Your photo blends with ad or news overlays on this device.',
     removeGenerated: 'Remove generated image',
+    sponsored: 'Sponsored',
     sponsoredAd: 'Sponsored ad',
     breakingNews: 'Breaking news',
+    learnMore: 'Learn more',
     generateWithAi: 'Generate with AI',
     generateDisguise: 'Generate disguise image',
     title: 'AI disguise ad',
@@ -1179,5 +1182,63 @@ export const en = {
   newsArticle: {
     readOn: 'Read on {source}',
     readOnA11y: 'Read on {source}',
+  },
+  pulseUnavailable: {
+    title: 'Post unavailable',
+    message: 'This item may have been removed from the feed or is no longer in your saved catalog.',
+  },
+  activityAlert: {
+    sponsored: 'Sponsored',
+    sponsoredHint: 'Offers in {name} are sponsored placements — tap through only if you recognise the brand.',
+    feedHint: 'Notifications from your {name} feed. Dating actions stay private in {unlockLabel}.',
+  },
+  contentType: {
+    news: 'News',
+    ad: 'Ad',
+    sponsored: 'Sponsored',
+    social: 'Social',
+    profile: 'Profile',
+    trending: 'Trending',
+    alert: 'Alert',
+  },
+  disguiseOverlay: {
+    exclusive: 'EXCLUSIVE',
+    limitedOffer: 'LIMITED OFFER',
+    breaking: 'BREAKING',
+    adBadge: 'AD',
+  },
+  disguiseHeader: {
+    leaveLogoA11y: 'Tap {name} logo to leave {unlockLabel}',
+    leaveLogoHint: 'Leaves {name} and opens {unlockLabel}',
+    openActivity: 'Open activity',
+  },
+  adBanner: {
+    sponsoredA11y: 'Sponsored: {brand}',
+    viewProfileA11y: 'View profile: {name}',
+    profilePhotoA11y: '{name} profile photo',
+  },
+  feedPerson: {
+    viewA11y: 'View {kind}',
+  },
+  disguisedProfile: {
+    spotlightHint: 'Reader spotlight — verified comment from a Pulse member.',
+    disguisedAsAdA11y: 'Profile disguised as ad: {headline}',
+  },
+  sparkPlusComparison: {
+    feature: 'Feature',
+    free: 'Free',
+    sparkPlus: 'Spark+',
+    dailyLikes: 'Daily likes',
+    seeWhoLikesYou: 'See who likes you',
+    seeWhoViewedYou: 'See who viewed you',
+    rewindPasses: 'Rewind passes',
+    sparkNotes: 'Spark Notes',
+    boost: 'Boost',
+    advancedFilters: 'Advanced filters',
+    readReceipts: 'Read receipts',
+    passportMode: 'Passport mode',
+    unlimited: 'Unlimited',
+    perDay: '{count}/day',
+    perWeek: '{count}/week',
   },
 } as const;

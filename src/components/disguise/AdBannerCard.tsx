@@ -2,8 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
-import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import { AI_PERSONA_IDS, mockProfiles } from '../../data/profiles';
 import { AdPost } from '../../data/disguiseFeed';
 import { disguiseDisplayName } from '../../utils/disguiseProfileFeed';
@@ -26,7 +26,7 @@ type AdBannerCardProps = {
 
 export function AdBannerCard({ ad }: AdBannerCardProps) {
   const { colors } = useTheme();
-  const { preferences } = useApp();
+  const { t } = useTranslation();
   const meta = useDisguiseWorld();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [testimonialOpen, setTestimonialOpen] = useState(false);
@@ -47,12 +47,12 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
     <>
       <AnimatedPressable
         accessibilityRole="button"
-        accessibilityLabel={`Sponsored: ${ad.brand}`}
+        accessibilityLabel={t('adBanner.sponsoredA11y', { brand: ad.brand })}
         onPress={() => setSheetOpen(true)}
         style={[styles.card, { backgroundColor: '#1a1a2e', borderColor: colors.border }]}
       >
         <View style={styles.sponsoredRow}>
-          <Text style={styles.sponsored}>Sponsored</Text>
+          <Text style={styles.sponsored}>{t('disguiseAd.sponsored')}</Text>
           <ContentTypeIcon kind="sponsored" />
         </View>
         <MediaWithContentBadge kind="ad">
@@ -65,7 +65,7 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
             <AnimatedPressable
               onPress={() => setTestimonialOpen(true)}
               accessibilityRole="button"
-              accessibilityLabel={`View profile: ${testimonialReporter.name}`}
+              accessibilityLabel={t('adBanner.viewProfileA11y', { name: testimonialReporter.name })}
               style={styles.testimonialRow}
             >
               <FeedPersonThumbnail
@@ -73,7 +73,7 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
                 contentKind="profile"
                 imageUrl={testimonialReporter.avatarUrl}
                 caption={testimonialReporter.quote}
-                accessibilityLabel={`${testimonialReporter.name} profile photo`}
+                accessibilityLabel={t('adBanner.profilePhotoA11y', { name: testimonialReporter.name })}
               />
             </AnimatedPressable>
           ) : null}

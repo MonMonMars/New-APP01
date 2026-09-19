@@ -2,8 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import { radii, spacing } from '../../theme';
 import { modalFill } from '../../theme/modalFill';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
@@ -18,24 +18,26 @@ type PulseUnavailableSheetProps = {
 
 export function PulseUnavailableSheet({
   visible,
-  title = 'Post unavailable',
-  message = 'This item may have been removed from the feed or is no longer in your saved catalog.',
+  title,
+  message,
   onClose,
 }: PulseUnavailableSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { preferences } = useApp();
+  const { t } = useTranslation();
   const accent = useDisguiseWorld().accent;
+  const displayTitle = title ?? t('pulseUnavailable.title');
+  const displayMessage = message ?? t('pulseUnavailable.message');
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={[styles.backdrop, modalFill]}>
         <View style={[styles.sheet, { backgroundColor: colors.surface, paddingBottom: insets.bottom + spacing.lg }]}>
           <Ionicons name="document-text-outline" size={40} color={colors.textMuted} />
-          <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
-          <Text style={[styles.message, { color: colors.textMuted }]}>{message}</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{displayTitle}</Text>
+          <Text style={[styles.message, { color: colors.textMuted }]}>{displayMessage}</Text>
           <AnimatedPressable style={[styles.button, { backgroundColor: accent }]} onPress={onClose}>
-            <Text style={styles.buttonText}>Got it</Text>
+            <Text style={styles.buttonText}>{t('common.gotIt')}</Text>
           </AnimatedPressable>
         </View>
       </View>

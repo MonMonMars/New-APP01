@@ -24,7 +24,7 @@ type AdLandingSheetProps = {
 };
 
 export function AdLandingSheet({ visible, ad, onClose }: AdLandingSheetProps) {
-  const { locale } = useTranslation();
+  const { locale, t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
   const { colors } = useTheme();
@@ -58,8 +58,8 @@ export function AdLandingSheet({ visible, ad, onClose }: AdLandingSheetProps) {
       >
         <FadeSlideIn replayKey={visible} index={0}>
           <View style={[disguiseReadSheetStyles.toolbar, { borderBottomColor: colors.border }]}>
-            <Text style={styles.sponsored}>Sponsored</Text>
-            <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel="Close" scaleTo={0.9}>
+            <Text style={styles.sponsored}>{t('disguiseAd.sponsored')}</Text>
+            <AnimatedPressable onPress={onClose} hitSlop={12} accessibilityLabel={t('common.close')} scaleTo={0.9}>
               <Ionicons name="close" size={24} color={colors.text} />
             </AnimatedPressable>
           </View>

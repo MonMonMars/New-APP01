@@ -2,6 +2,7 @@ import { ImageStyle, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-
 
 import { BrandMark } from '../brand/BrandMark';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import { harborBrand } from '../../theme/harborBrand';
 
 type HarborBrandMarkProps = {
@@ -22,6 +23,7 @@ type HarborWordmarkProps = {
 
 export function HarborWordmark({ size = 'md', showTagline = false }: HarborWordmarkProps) {
   const { colors, resolvedMode } = useTheme();
+  const { t } = useTranslation();
   const isDark = resolvedMode === 'dark';
   const fontSize = size === 'sm' ? 19 : size === 'lg' ? 26 : 22;
 
@@ -37,10 +39,10 @@ export function HarborWordmark({ size = 'md', showTagline = false }: HarborWordm
           },
         ]}
       >
-        Harbor
+        {t('disguiseWorld.harborName')}
       </Text>
       {showTagline ? (
-        <Text style={[styles.tagline, { color: colors.textMuted }]}>Markets & Briefing</Text>
+        <Text style={[styles.tagline, { color: colors.textMuted }]}>{t('disguiseWorld.harborTagline')}</Text>
       ) : null}
     </View>
   );

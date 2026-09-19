@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
+import { useTranslation } from '../../i18n';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type SavePostButtonProps = {
@@ -11,7 +12,8 @@ type SavePostButtonProps = {
 };
 
 export function SavePostButton({ postId, size = 22 }: SavePostButtonProps) {
-  const { pulseSocial, savePulsePost, unsavePulsePost, preferences } = useApp();
+  const { pulseSocial, savePulsePost, unsavePulsePost } = useApp();
+  const { t } = useTranslation();
   const isSaved = pulseSocial.savedPostIds.includes(postId);
   const accent = useDisguiseWorld().accent;
 
@@ -26,7 +28,7 @@ export function SavePostButton({ postId, size = 22 }: SavePostButtonProps) {
       }}
       hitSlop={10}
       accessibilityRole="button"
-      accessibilityLabel={isSaved ? 'Remove from saved' : 'Save post'}
+      accessibilityLabel={isSaved ? t('pulseSocial.unsavePost') : t('pulseSocial.savePost')}
       scaleTo={0.9}
       style={styles.button}
     >

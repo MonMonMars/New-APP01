@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { radii, spacing } from '../theme';
 
 type BoostBannerProps = {
@@ -10,6 +11,7 @@ type BoostBannerProps = {
 
 export function BoostBanner({ visible }: BoostBannerProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   if (!visible) {
     return null;
@@ -19,7 +21,7 @@ export function BoostBanner({ visible }: BoostBannerProps) {
     <View style={[styles.banner, { backgroundColor: `${colors.boost}26`, borderColor: colors.boost }]}>
       <Ionicons name="flash" size={16} color={colors.boost} />
       <Text style={[styles.text, { color: colors.text }]}>
-        Boost active — you&apos;re a top profile for the next 30 minutes
+        {t('boost.activeBanner')}
       </Text>
     </View>
   );

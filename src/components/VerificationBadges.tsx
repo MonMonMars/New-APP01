@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { radii, spacing } from '../theme';
 
 export type VerificationFlags = {
@@ -30,6 +31,7 @@ export function VerificationBadges({
   size = 'md',
 }: VerificationBadgesProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const iconSize = size === 'sm' ? 12 : 14;
   const accent = colors.like;
   const badges: BadgeSpec[] = (
@@ -38,19 +40,19 @@ export function VerificationBadges({
         key: 'photo',
         active: photoVerified,
         icon: 'camera' as const,
-        label: 'Photo verified',
+        label: t('profileTrust.photoTitle'),
       },
       {
         key: 'person',
         active: personVerified,
         icon: 'person' as const,
-        label: 'Real person',
+        label: t('profileTrust.personTitle'),
       },
       {
         key: 'age',
         active: ageVerified,
         icon: 'shield-checkmark' as const,
-        label: 'Age 18+',
+        label: t('profileTrust.ageTitle'),
       },
     ] satisfies BadgeSpec[]
   ).filter((badge) => badge.active);

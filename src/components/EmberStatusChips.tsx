@@ -1,13 +1,14 @@
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useAppLocale } from '../hooks/useAppLocale';
 import { useTheme } from '../context/ThemeContext';
 import {
-  emberRelationshipLabel,
-  EMBER_AVAILABILITY_LABELS,
-  EMBER_DISCRETION_LABELS,
-  EMBER_SEEKING_LABELS,
-  Profile,
-} from '../types/profile';
+  getEmberAvailabilityLabel,
+  getEmberDiscretionLabel,
+  getEmberRelationshipLabel,
+  getEmberSeekingLabel,
+} from '../i18n/labels';
+import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 
 type EmberStatusChipsProps = {
@@ -21,12 +22,13 @@ type EmberStatusChipsProps = {
 /** Married / Divorced plus Ember-only chips. Hidden when Spark-only (single, no Ember fields). */
 export function EmberStatusChips({ profile, compact = false }: EmberStatusChipsProps) {
   const { colors } = useTheme();
-  const emberStatus = emberRelationshipLabel(profile.relationshipStatus);
+  const { locale } = useAppLocale();
+  const emberStatus = getEmberRelationshipLabel(locale, profile.relationshipStatus);
   const labels = [
     emberStatus,
-    profile.emberDiscretion ? EMBER_DISCRETION_LABELS[profile.emberDiscretion] : null,
-    profile.emberSeeking ? EMBER_SEEKING_LABELS[profile.emberSeeking] : null,
-    compact ? null : profile.emberAvailability ? EMBER_AVAILABILITY_LABELS[profile.emberAvailability] : null,
+    profile.emberDiscretion ? getEmberDiscretionLabel(locale, profile.emberDiscretion) : null,
+    profile.emberSeeking ? getEmberSeekingLabel(locale, profile.emberSeeking) : null,
+    compact ? null : profile.emberAvailability ? getEmberAvailabilityLabel(locale, profile.emberAvailability) : null,
   ].filter((item): item is string => item !== null);
 
   if (labels.length === 0) {

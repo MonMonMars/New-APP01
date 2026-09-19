@@ -5,7 +5,8 @@ import { colors as palette, radii, spacing } from '../theme';
 import { modalFill } from '../theme/modalFill';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
-import { emberRelationshipLabel, Profile } from '../types/profile';
+import { getEmberRelationshipLabel } from '../i18n/labels';
+import { Profile } from '../types/profile';
 import { AnimatedPressable } from './AnimatedPressable';
 import { EmberStatusChips } from './EmberStatusChips';
 
@@ -21,12 +22,12 @@ export function WaitingForMatchModal({
   onFindMorePeople,
 }: WaitingForMatchModalProps) {
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   if (!profile) {
     return null;
   }
 
-  const emberStatus = emberRelationshipLabel(profile.relationshipStatus);
+  const emberStatus = getEmberRelationshipLabel(locale, profile.relationshipStatus);
 
   return (
     <Modal visible={visible} animationType="fade" transparent>

@@ -1,12 +1,15 @@
 import { AppLocale } from '../types/locale';
 import { DiscoverFilter, ShowMePreference, SparkSection } from '../types/preferences';
 import {
+  EmberAvailability,
   EmberDiscretion,
   EmberSeeking,
   Orientation,
   ProfileGender,
   RelationshipIntent,
+  RelationshipStatus,
 } from '../types/profile';
+import { SUGGESTED_INTERESTS } from '../data/suggestedInterests';
 import { translate } from './index';
 
 export function getGenderLabel(locale: AppLocale, gender: ProfileGender): string {
@@ -119,6 +122,75 @@ export function getEmberStatusLabel(locale: AppLocale, status: 'married' | 'divo
   return status === 'married'
     ? translate(locale, 'editProfile.statusMarried')
     : translate(locale, 'editProfile.statusDivorced');
+}
+
+export function getEmberRelationshipLabel(
+  locale: AppLocale,
+  status?: RelationshipStatus | null,
+): string | null {
+  switch (status) {
+    case 'married':
+    case 'divorced':
+      return getEmberStatusLabel(locale, status);
+    case 'single':
+    case undefined:
+    case null:
+      return null;
+    default: {
+      const _exhaustive: never = status;
+      return _exhaustive;
+    }
+  }
+}
+
+export function getEmberAvailabilityLabel(locale: AppLocale, value: EmberAvailability): string {
+  const map: Record<EmberAvailability, string> = {
+    evenings: translate(locale, 'editProfile.emberAvailEvenings'),
+    weekends: translate(locale, 'editProfile.emberAvailWeekends'),
+    flexible: translate(locale, 'editProfile.emberAvailFlexible'),
+  };
+  return map[value];
+}
+
+export function getEmberDiscretionHint(locale: AppLocale, value: EmberDiscretion): string {
+  const map: Record<EmberDiscretion, string> = {
+    open: translate(locale, 'editProfile.emberDiscretionOpenHint'),
+    careful: translate(locale, 'editProfile.emberDiscretionCarefulHint'),
+    hidden: translate(locale, 'editProfile.emberDiscretionHiddenHint'),
+  };
+  return map[value];
+}
+
+const INTEREST_I18N_KEYS: Record<(typeof SUGGESTED_INTERESTS)[number], string> = {
+  Coffee: 'interestTags.coffee',
+  Design: 'interestTags.design',
+  Hiking: 'interestTags.hiking',
+  Photography: 'interestTags.photography',
+  'Live music': 'interestTags.liveMusic',
+  Cooking: 'interestTags.cooking',
+  Yoga: 'interestTags.yoga',
+  Travel: 'interestTags.travel',
+  Art: 'interestTags.art',
+  Running: 'interestTags.running',
+  Wine: 'interestTags.wine',
+  Gaming: 'interestTags.gaming',
+  Reading: 'interestTags.reading',
+  Dogs: 'interestTags.dogs',
+  Cats: 'interestTags.cats',
+  Film: 'interestTags.film',
+  Brunch: 'interestTags.brunch',
+  Fitness: 'interestTags.fitness',
+  Museums: 'interestTags.museums',
+  Tech: 'interestTags.tech',
+  Dancing: 'interestTags.dancing',
+  Surfing: 'interestTags.surfing',
+  Podcasts: 'interestTags.podcasts',
+  Fashion: 'interestTags.fashion',
+};
+
+export function getInterestLabel(locale: AppLocale, interest: string): string {
+  const key = INTEREST_I18N_KEYS[interest as (typeof SUGGESTED_INTERESTS)[number]];
+  return key ? translate(locale, key) : interest;
 }
 
 export function getSparkSectionEmpty(

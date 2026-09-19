@@ -2,6 +2,8 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { SUGGESTED_INTERESTS } from '../data/suggestedInterests';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
+import { getInterestLabel } from '../i18n/labels';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
 
@@ -13,6 +15,7 @@ type InterestsEditorProps = {
 
 export function InterestsEditor({ interests, onChange, max = 10 }: InterestsEditorProps) {
   const { colors } = useTheme();
+  const { t, locale } = useTranslation();
 
   const toggle = (interest: string) => {
     if (interests.includes(interest)) {
@@ -28,10 +31,10 @@ export function InterestsEditor({ interests, onChange, max = 10 }: InterestsEdit
   return (
     <View style={styles.wrap}>
       <Text style={[styles.label, { color: colors.textMuted }]}>
-        Interests ({interests.length}/{max})
+        {t('interestsEditor.label', { count: interests.length, max })}
       </Text>
       <Text style={[styles.hint, { color: colors.textMuted }]}>
-        Pick at least 5 to improve compatibility and Standouts.
+        {t('interestsEditor.hint')}
       </Text>
       <View style={styles.chips}>
         {SUGGESTED_INTERESTS.map((interest) => {
@@ -50,7 +53,7 @@ export function InterestsEditor({ interests, onChange, max = 10 }: InterestsEdit
               scaleTo={0.96}
             >
               <Text style={[styles.chipText, { color: selected ? '#fff' : colors.text }]}>
-                {interest}
+                {getInterestLabel(locale, interest)}
               </Text>
             </AnimatedPressable>
           );

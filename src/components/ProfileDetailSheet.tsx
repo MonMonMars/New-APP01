@@ -8,14 +8,16 @@ import { ProfileVerificationDisplay } from './ProfileVerificationDisplay';
 import { VerificationBadges } from './VerificationBadges';
 import { isAiPersonaProfile } from '../data/aiPersonas';
 import { useTranslation } from '../i18n';
-import { getProfileIntentLabel } from '../i18n/labels';
+import {
+  getEmberDiscretionHint,
+  getEmberRelationshipLabel,
+  getProfileIntentLabel,
+} from '../i18n/labels';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import {
   emberLocationLine,
-  emberRelationshipLabel,
   emberVisiblePhotoCount,
-  EMBER_DISCRETION_HINTS,
   Profile,
   ProfilePrompt,
 } from '../types/profile';
@@ -65,7 +67,7 @@ export function ProfileDetailSheet({
     return null;
   }
 
-  const emberStatus = emberRelationshipLabel(profile.relationshipStatus);
+  const emberStatus = getEmberRelationshipLabel(locale, profile.relationshipStatus);
   const visiblePhotoCount = emberStatus
     ? emberVisiblePhotoCount(profile.photos.length, profile.emberDiscretion, photosUnlocked)
     : profile.photos.length;
@@ -132,7 +134,7 @@ export function ProfileDetailSheet({
                 </View>
                 {profile.emberDiscretion ? (
                   <Text style={[styles.meta, { color: colors.textMuted }]}>
-                    {EMBER_DISCRETION_HINTS[profile.emberDiscretion]}
+                    {getEmberDiscretionHint(locale, profile.emberDiscretion)}
                   </Text>
                 ) : null}
               </>

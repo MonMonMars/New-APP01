@@ -5,7 +5,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
-import { emberRelationshipLabel, Profile } from '../types/profile';
+import { getEmberRelationshipLabel } from '../i18n/labels';
+import { Profile } from '../types/profile';
 import { pickOpeningMove } from '../utils/openingMove';
 import { Button } from './Button';
 import { EmberStatusChips } from './EmberStatusChips';
@@ -27,14 +28,14 @@ export function MatchModal({
 }: MatchModalProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   if (!profile) {
     return null;
   }
 
   const openingMove = pickOpeningMove(profile);
-  const emberStatus = emberRelationshipLabel(profile.relationshipStatus);
+  const emberStatus = getEmberRelationshipLabel(locale, profile.relationshipStatus);
 
   return (
     <Modal visible={visible} animationType="fade">

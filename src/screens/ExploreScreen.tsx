@@ -9,7 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 import { EXPLORE_CATEGORY_MAP, mockProfiles } from '../data/profiles';
 import { useTranslation } from '../i18n';
 import { matchesSparkSection, resolveSparkSection, SparkSection } from '../types/preferences';
-import { emberLocationLine, emberRelationshipLabel, Profile } from '../types/profile';
+import { isEmberRelationshipStatus, emberLocationLine, Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { EmberStatusChips } from '../components/EmberStatusChips';
@@ -106,7 +106,7 @@ export function ExploreScreen({ onClose }: ExploreScreenProps) {
                     >
                       <Image source={{ uri: profile.photos[0] }} style={styles.photo} />
                       <Text style={[styles.name, { color: colors.text }]}>{profile.name}, {profile.age}</Text>
-                      {emberRelationshipLabel(profile.relationshipStatus) ? (
+                      {isEmberRelationshipStatus(profile.relationshipStatus) ? (
                         <>
                           <View style={styles.chips}>
                             <EmberStatusChips profile={profile} compact />

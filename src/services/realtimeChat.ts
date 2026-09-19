@@ -17,6 +17,35 @@ export type ConversationRealtimeUpdate = {
   lastMessageAt?: string;
 };
 
+/** Fetch the latest cloud conversation snapshot before subscribing. */
+export async function fetchConversationUpdate(
+  conversationId: string,
+): Promise<ConversationRealtimeUpdate | null> {
+  const supabase = getSupabaseClient();
+  if (!supabase || !isSupabaseConfigured()) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from('conversations')
+    .select('messages, your_turn, unread, last_message, last_message_at')
+    .eq('id', conversationId)
+    .maybeSingle();
+
+  if (error || !data) {
+    return null;
+  }
+
+  const row = data as ConversationRow;
+  return {
+    messages: row.messages ?? [],
+    yourTurn: row.your_turn ?? false,
+    unread: row.unread ?? false,
+    lastMessage: row.last_message ?? undefined,
+    lastMessageAt: row.last_message_at ?? undefined,
+  };
+}
+
 /** Subscribe to cloud conversation updates via Supabase Realtime. */
 export function subscribeToConversation(
   conversationId: string,

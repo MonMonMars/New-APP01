@@ -3,7 +3,16 @@ import { useNavigation } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useCloudConversation } from '../hooks/useCloudConversation';
-import { Alert, FlatList, Image, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  FlatList,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AiPersonaBadge } from '../components/AiPersonaBadge';
@@ -84,6 +93,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const [dialogueMode, setDialogueMode] = useState<ChatDialogueMode>('opener');
   const [showDialogueHelper, setShowDialogueHelper] = useState(false);
   const suggestRequestRef = useRef(0);
+  const messageListRef = useRef<FlatList<Message>>(null);
 
   const conversation = useMemo(
     () => conversations.find((c) => c.id === conversationId),
@@ -124,6 +134,25 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
     }
     setShowDialogueHelper(true);
   }, [conversation?.yourTurn, threadMessages.length]);
+
+  const lastIncomingMessageId = useMemo(() => {
+    for (let index = threadMessages.length - 1; index >= 0; index -= 1) {
+      if (!threadMessages[index].isMine) {
+        return threadMessages[index].id;
+      }
+    }
+    return null;
+  }, [threadMessages]);
+
+  const aiSuggestionFetchKey = useMemo(() => {
+    if (threadMessages.length === 0) {
+      return 'opener';
+    }
+    if (dialogueMode === 'topic') {
+      return `topic:${lastIncomingMessageId ?? 'none'}`;
+    }
+    return `reply:${lastIncomingMessageId ?? 'none'}`;
+  }, [dialogueMode, lastIncomingMessageId, threadMessages.length]);
 
   const loadAiSuggestions = useCallback(() => {
     if (!threadProfile) {
@@ -178,14 +207,16 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
       return;
     }
     loadAiSuggestions();
-  }, [
-    dialogueMode,
-    loadAiSuggestions,
-    showInlineAiSuggestions,
-    showDialogueHelper,
-    threadMessages.length,
-    conversation?.yourTurn,
-  ]);
+  }, [aiSuggestionFetchKey, loadAiSuggestions, showDialogueHelper, showInlineAiSuggestions]);
+
+  useEffect(() => {
+    if (threadMessages.length === 0) {
+      return;
+    }
+    requestAnimationFrame(() => {
+      messageListRef.current?.scrollToEnd({ animated: true });
+    });
+  }, [threadMessages.length]);
 
   if (!conversation) {
     return (
@@ -471,10 +502,14 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         </View>
       ) : (
         <FlatList
+          ref={messageListRef}
           data={conversation.messages}
           keyExtractor={(item) => item.id}
           renderItem={renderMessage}
           contentContainerStyle={styles.messages}
+          onContentSizeChange={() => {
+            messageListRef.current?.scrollToEnd({ animated: true });
+          }}
           ListFooterComponent={
             conversation.isTyping ? <TypingIndicator name={profile.name} /> : null
           }
@@ -532,6 +567,11 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         user={user}
         messages={conversation.messages}
         initialMode={dialogueMode}
+        seedOptions={aiSuggestions}
+        seedSource={aiSuggestionSource}
+        seedLoading={aiSuggestionsLoading}
+        seedFailed={aiSuggestionsFailed}
+        onRefresh={loadAiSuggestions}
         onClose={() => setShowDialogueHelper(false)}
         onSelect={handleApplySuggestion}
       />

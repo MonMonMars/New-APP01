@@ -166,13 +166,15 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     [locale, nameQuery],
   );
 
+  const mapPins = useMemo(() => areaPins.slice(0, MAP_PIN_LIMIT), [areaPins]);
+
   const visiblePins = useMemo(() => {
     const query = nameQuery.trim().toLowerCase();
     if (!query) {
-      return areaPins;
+      return mapPins;
     }
-    return areaPins.filter((profile) => profile.name.toLowerCase().includes(query));
-  }, [areaPins, nameQuery]);
+    return mapPins.filter((profile) => profile.name.toLowerCase().includes(query));
+  }, [mapPins, nameQuery]);
 
   const pinsTruncated = areaPins.length > MAP_PIN_LIMIT;
 
@@ -195,8 +197,11 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const handleRecenter = useCallback(() => {
     const target = userLocation ?? mapCenterForCity(preferences.passportCity);
     setMapCenter(target);
+    if (!hasActiveMapSearch) {
+      setSearchCenter(target);
+    }
     setSelectedPinId(null);
-  }, [preferences.passportCity, userLocation]);
+  }, [hasActiveMapSearch, preferences.passportCity, userLocation]);
 
   const handleResetSearchArea = useCallback(() => {
     clearMapSearch();
@@ -582,6 +587,10 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
       <WaitingForMatchModal
         visible={showWaiting}
         profile={waitingProfile}
+        onClose={() => {
+          setShowWaiting(false);
+          setWaitingProfile(null);
+        }}
         onFindMorePeople={() => {
           setShowWaiting(false);
           setWaitingProfile(null);

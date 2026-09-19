@@ -2420,10 +2420,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return { ok: true };
       } catch (error) {
         const locale = resolveAppLocale(preferences.appLocale);
-        const message =
-          error instanceof Error && error.message !== 'Generation failed.'
-            ? error.message
-            : translate(locale, 'disguiseAd.generationFailed');
+        let message = translate(locale, 'disguiseAd.generationFailed');
+        if (error instanceof Error) {
+          if (error.message === 'Enter promo or headline text first.') {
+            message = translate(locale, 'disguiseAd.textRequired');
+          } else if (error.message === 'Add a profile photo before generating a disguise ad.') {
+            message = translate(locale, 'disguiseAd.photoRequired');
+          } else if (error.message !== 'Generation failed.') {
+            message = error.message;
+          }
+        }
         return { ok: false, message };
       } finally {
         setIsGeneratingDisguiseAd(false);

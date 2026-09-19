@@ -9,8 +9,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
 import { NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
-import { getEmberRelationshipLabel } from '../../i18n/labels';
-import { emberLocationLine } from '../../types/profile';
+import { getEmberLocationLabel, getEmberRelationshipLabel } from '../../i18n/labels';
 import { buildReporterPhotoUrls } from '../../utils/disguiseReporterPhotos';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { webClass } from '../../motion/webMotion';
@@ -270,7 +269,7 @@ export function PersonPreviewSheet({
                   {linkedProfile ? (
                     <Text style={[styles.meta, { color: colors.textMuted }]} numberOfLines={1}>
                       {emberStatus
-                        ? emberLocationLine(linkedProfile)
+                        ? getEmberLocationLabel(locale, linkedProfile)
                         : `${t('likes.milesAway', { n: linkedProfile.distanceMiles })}${linkedProfile.job ? ` · ${linkedProfile.job}` : ''}`}
                     </Text>
                   ) : null}

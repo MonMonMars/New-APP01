@@ -172,7 +172,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     if (key === 'any') {
       return t('mapDiscover.any');
     }
-    return key;
+    return formatSearchRadiusLocalized(locale, Number(key));
   };
 
   const radiusA11y = (key: (typeof RADIUS_CHIPS)[number]['labelKey']) => {

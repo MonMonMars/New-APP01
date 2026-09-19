@@ -64,7 +64,7 @@ export function DisguiseFeedScreen() {
   const refreshGeneration = usePulseFeedRefreshGeneration();
   const { refreshing, justUpdated, flatListProps } = usePulseScrollRefresh();
 
-  const sectionLabel = topic ? topicFilterLabel(topic) : meta.feedLabel;
+  const sectionLabel = topic ? topicFilterLabel(topic, locale) : meta.feedLabel;
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>

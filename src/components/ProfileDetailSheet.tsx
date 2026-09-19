@@ -10,14 +10,15 @@ import { isAiPersonaProfile } from '../data/aiPersonas';
 import { useTranslation } from '../i18n';
 import {
   getEmberDiscretionHint,
+  getEmberLocationLabel,
   getEmberRelationshipLabel,
+  getInterestLabel,
   getProfileIntentLabel,
   getPromptQuestionLabel,
 } from '../i18n/labels';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import {
-  emberLocationLine,
   emberVisiblePhotoCount,
   Profile,
   ProfilePrompt,
@@ -144,7 +145,9 @@ export function ProfileDetailSheet({
               <Text style={[styles.intentMeta, { color: colors.gradientEnd }]}>{getProfileIntentLabel(locale, profile.intent)}</Text>
             ) : null}
             <Text style={[styles.distance, { color: colors.textMuted }]}>
-              {emberStatus ? emberLocationLine(profile) : t('likes.milesAway', { n: profile.distanceMiles })}
+              {emberStatus
+                ? getEmberLocationLabel(locale, profile)
+                : t('likes.milesAway', { n: profile.distanceMiles })}
             </Text>
             {profile.openingMove ? (
               <View style={[styles.openingMove, { backgroundColor: `${colors.gradientEnd}1a` }]}>
@@ -210,7 +213,9 @@ export function ProfileDetailSheet({
             <View style={styles.tags}>
               {profile.interests.map((interest) => (
                 <View key={interest} style={styles.tag}>
-                  <Text style={[styles.tagText, { color: colors.text }]}>{interest}</Text>
+                  <Text style={[styles.tagText, { color: colors.text }]}>
+                    {getInterestLabel(locale, interest)}
+                  </Text>
                 </View>
               ))}
             </View>

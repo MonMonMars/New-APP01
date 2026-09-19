@@ -2,7 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useTranslation } from '../i18n';
+import { translate, useTranslation } from '../i18n';
+import { AppLocale } from '../types/locale';
 import { colors, radii, spacing } from '../theme';
 import { modalFill } from '../theme/modalFill';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -18,7 +19,7 @@ export const REPORT_REASONS = [
 
 export type ReportReason = (typeof REPORT_REASONS)[number];
 
-const REPORT_REASON_KEYS: Record<ReportReason, string> = {
+export const REPORT_REASON_KEYS: Record<ReportReason, string> = {
   'Inappropriate photos': 'report.inappropriatePhotos',
   'Harassment or hate speech': 'report.harassment',
   'Spam or scam': 'report.spam',
@@ -26,6 +27,10 @@ const REPORT_REASON_KEYS: Record<ReportReason, string> = {
   'Fake profile': 'report.fakeProfile',
   Other: 'report.other',
 };
+
+export function getReportReasonLabel(locale: AppLocale, reason: ReportReason): string {
+  return translate(locale, REPORT_REASON_KEYS[reason]);
+}
 
 type ReportReasonSheetProps = {
   visible: boolean;

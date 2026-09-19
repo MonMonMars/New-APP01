@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   defaultWeatherSnapshot,
@@ -6,6 +6,8 @@ import {
   WeatherSnapshot,
   weatherFromWmoCode,
 } from '../data/disguiseWeather';
+import { getWeatherDayLabel, localizeWeatherSnapshot } from '../i18n/labels';
+import { AppLocale, resolveAppLocale } from '../types/locale';
 import { getPassportCoordinates } from '../utils/passportFilter';
 
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -26,7 +28,7 @@ type OpenMeteoResponse = {
   };
 };
 
-function buildForecast(response: OpenMeteoResponse): WeatherDay[] {
+function buildForecast(response: OpenMeteoResponse, locale: AppLocale): WeatherDay[] {
   const times = response.daily?.time ?? [];
   const highs = response.daily?.temperature_2m_max ?? [];
   const lows = response.daily?.temperature_2m_min ?? [];
@@ -34,12 +36,12 @@ function buildForecast(response: OpenMeteoResponse): WeatherDay[] {
 
   return times.slice(0, 6).map((isoDate, index) => {
     const date = new Date(isoDate);
-    const label = index === 0 ? 'Today' : DAY_LABELS[date.getDay()] ?? 'Day';
+    const rawLabel = index === 0 ? 'Today' : DAY_LABELS[date.getDay()] ?? 'Day';
     const mapped = weatherFromWmoCode(codes[index] ?? 1);
 
     return {
       id: `forecast-${index}`,
-      label,
+      label: getWeatherDayLabel(locale, rawLabel),
       highC: Math.round(highs[index] ?? 0),
       lowC: Math.round(lows[index] ?? 0),
       icon: mapped.icon,
@@ -47,7 +49,10 @@ function buildForecast(response: OpenMeteoResponse): WeatherDay[] {
   });
 }
 
-async function fetchLiveWeather(passportCity?: string): Promise<WeatherSnapshot | null> {
+async function fetchLiveWeather(
+  passportCity: string | undefined,
+  locale: AppLocale,
+): Promise<WeatherSnapshot | null> {
   const { lat, lon, region } = getPassportCoordinates(passportCity);
   const cityLabel = passportCity?.split(',')[0] ?? 'New York';
 
@@ -64,11 +69,11 @@ async function fetchLiveWeather(passportCity?: string): Promise<WeatherSnapshot 
   const data = (await response.json()) as OpenMeteoResponse;
   const currentCode = data.current?.weather_code ?? 1;
   const mapped = weatherFromWmoCode(currentCode);
-  const forecast = buildForecast(data);
+  const forecast = buildForecast(data, locale);
   const todayHigh = forecast[0]?.highC ?? defaultWeatherSnapshot.highC;
   const todayLow = forecast[0]?.lowC ?? defaultWeatherSnapshot.lowC;
 
-  return {
+  const snapshot: WeatherSnapshot = {
     city: cityLabel,
     region,
     tempC: Math.round(data.current?.temperature_2m ?? defaultWeatherSnapshot.tempC),
@@ -83,16 +88,31 @@ async function fetchLiveWeather(passportCity?: string): Promise<WeatherSnapshot 
     updatedLabel: 'Live · Open-Meteo',
     forecast: forecast.length > 0 ? forecast : defaultWeatherSnapshot.forecast,
   };
+
+  return localizeWeatherSnapshot(locale, snapshot, passportCity);
 }
 
-export function useDisguiseWeather(passportCity?: string) {
-  const [weather, setWeather] = useState<WeatherSnapshot>(defaultWeatherSnapshot);
+export function useDisguiseWeather(passportCity?: string, locale?: AppLocale | null) {
+  const resolvedLocale = resolveAppLocale(locale);
+  const [weather, setWeather] = useState<WeatherSnapshot>(() =>
+    localizeWeatherSnapshot(resolvedLocale, defaultWeatherSnapshot, passportCity),
+  );
   const [isLive, setIsLive] = useState(false);
+
+  const localizedFallback = useMemo(
+    () => localizeWeatherSnapshot(resolvedLocale, defaultWeatherSnapshot, passportCity),
+    [resolvedLocale, passportCity],
+  );
+
+  useEffect(() => {
+    setWeather(localizedFallback);
+    setIsLive(false);
+  }, [localizedFallback]);
 
   useEffect(() => {
     let cancelled = false;
 
-    void fetchLiveWeather(passportCity)
+    void fetchLiveWeather(passportCity, resolvedLocale)
       .then((snapshot) => {
         if (!cancelled && snapshot) {
           setWeather(snapshot);
@@ -106,7 +126,7 @@ export function useDisguiseWeather(passportCity?: string) {
     return () => {
       cancelled = true;
     };
-  }, [passportCity]);
+  }, [passportCity, resolvedLocale]);
 
   return { weather, isLive };
 }

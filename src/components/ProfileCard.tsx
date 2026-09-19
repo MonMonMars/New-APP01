@@ -19,9 +19,8 @@ import { VerificationBadges } from './VerificationBadges';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
-import { getEmberRelationshipLabel, getInterestLabel } from '../i18n/labels';
+import { getEmberLocationLabel, getEmberRelationshipLabel, getInterestLabel } from '../i18n/labels';
 import {
-  emberLocationLine,
   emberVisiblePhotoCount,
   Profile,
 } from '../types/profile';
@@ -223,7 +222,7 @@ export function ProfileCard({
         {profile.job && <Text style={[styles.job, compact && styles.jobCompact]}>{profile.job}</Text>}
         <Text style={[styles.distance, compact && styles.distanceCompact]}>
           {emberStatus
-            ? emberLocationLine(profile)
+            ? getEmberLocationLabel(locale, profile)
             : `${profile.city ? `${profile.city} · ` : ''}${t('likes.milesAway', { n: profile.distanceMiles })}`}
         </Text>
         {!compact && (

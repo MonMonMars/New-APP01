@@ -1,4 +1,6 @@
 import { FeedItem } from '../data/disguiseFeed';
+import { translate } from '../i18n';
+import { AppLocale } from '../types/locale';
 import type { ProfileGender } from '../types/profile';
 import { isCosmosTarotFeedItem, isFemaleOnlyPulseTopic } from './disguiseFeedCatalog';
 import { usesFemalePulseExperience } from './genderAccountPerks';
@@ -127,9 +129,9 @@ function feedSearchText(item: FeedItem): string {
   }
 }
 
-export function topicFilterLabel(topic?: string): string {
+export function topicFilterLabel(topic: string | undefined, locale: AppLocale): string {
   if (!topic) {
-    return 'For you';
+    return translate(locale, 'disguiseFeed.forYou');
   }
   return topic.replace('#', '');
 }

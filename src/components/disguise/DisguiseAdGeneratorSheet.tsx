@@ -26,7 +26,7 @@ const VARIANTS: { id: DisguiseOverlayVariant; labelKey: string; icon: keyof type
 export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGeneratorSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const {
     user,
     disguiseAdCreative,
@@ -140,7 +140,10 @@ export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGenerat
             {previewCreative && (
               <Text style={[styles.previewMeta, { color: colors.textMuted }]}>
                 {previewCreative.isAiGenerated ? t('disguiseAd.aiGenerated') : t('disguiseAd.smartOverlay')} ·{' '}
-                {new Date(previewCreative.generatedAt).toLocaleString()}
+                {new Date(previewCreative.generatedAt).toLocaleString(
+                  locale === 'zh-TW' ? 'zh-TW' : 'en-US',
+                  { dateStyle: 'medium', timeStyle: 'short' },
+                )}
               </Text>
             )}
           </View>

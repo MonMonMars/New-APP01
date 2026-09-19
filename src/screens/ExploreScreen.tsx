@@ -9,7 +9,8 @@ import { useTheme } from '../context/ThemeContext';
 import { EXPLORE_CATEGORY_MAP, mockProfiles } from '../data/profiles';
 import { useTranslation } from '../i18n';
 import { matchesSparkSection, resolveSparkSection, SparkSection } from '../types/preferences';
-import { isEmberRelationshipStatus, emberLocationLine, Profile } from '../types/profile';
+import { getEmberLocationLabel } from '../i18n/labels';
+import { isEmberRelationshipStatus, Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { EmberStatusChips } from '../components/EmberStatusChips';
@@ -49,7 +50,7 @@ export function ExploreScreen({ onClose }: ExploreScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { passedIds, likedIds, blockedIds, prioritizeProfileInDeck, preferences } = useApp();
 
   const excluded = new Set([...passedIds, ...likedIds, ...blockedIds]);
@@ -112,7 +113,7 @@ export function ExploreScreen({ onClose }: ExploreScreenProps) {
                             <EmberStatusChips profile={profile} compact />
                           </View>
                           <Text style={[styles.distance, { color: colors.textMuted }]}>
-                            {emberLocationLine(profile)}
+                            {getEmberLocationLabel(locale, profile)}
                           </Text>
                         </>
                       ) : (

@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useCallback, useMemo, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -12,6 +13,7 @@ import { matchesSparkSection, resolveSparkSection, SparkSection } from '../types
 import { getEmberLocationLabel } from '../i18n/labels';
 import { isEmberRelationshipStatus, Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
+import { ActionToast } from '../components/ActionToast';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { EmberStatusChips } from '../components/EmberStatusChips';
 
@@ -51,17 +53,39 @@ export function ExploreScreen({ onClose }: ExploreScreenProps) {
   const navigation = useNavigation();
   const { colors } = useTheme();
   const { t, locale } = useTranslation();
-  const { passedIds, likedIds, blockedIds, prioritizeProfileInDeck, preferences } = useApp();
+  const { passedIds, likedIds, blockedIds, prioritizeProfileInDeck, preferences, discoverPool } =
+    useApp();
+
+  const [deckToast, setDeckToast] = useState<string | null>(null);
+
+  const poolIds = useMemo(
+    () => new Set(discoverPool.map((profile) => profile.id)),
+    [discoverPool],
+  );
 
   const excluded = new Set([...passedIds, ...likedIds, ...blockedIds]);
   const section = resolveSparkSection(preferences.sparkSection);
   const isEmber = section === 'ember';
 
-  const openInDeck = (profileId: string) => {
-    prioritizeProfileInDeck(profileId);
-    onClose();
-    navigation.getParent()?.navigate('Main', { screen: 'Discover' });
-  };
+  const openInDeck = useCallback(
+    (profileId: string, profileName: string) => {
+      if (!poolIds.has(profileId)) {
+        setDeckToast(t('discoverHub.notInPool'));
+        return;
+      }
+      const added = prioritizeProfileInDeck(profileId);
+      setDeckToast(
+        added
+          ? t('discoverHub.addedToDeck', { name: profileName })
+          : t('discoverHub.notInPool'),
+      );
+      if (added) {
+        onClose();
+        navigation.getParent()?.navigate('Main', { screen: 'Discover' });
+      }
+    },
+    [navigation, onClose, poolIds, prioritizeProfileInDeck, t],
+  );
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
@@ -101,7 +125,7 @@ export function ExploreScreen({ onClose }: ExploreScreenProps) {
                     <AnimatedPressable
                       key={profile.id}
                       style={[styles.card, { backgroundColor: colors.surface }]}
-                      onPress={() => openInDeck(profile.id)}
+                      onPress={() => openInDeck(profile.id, profile.name)}
                       accessibilityRole="button"
                       accessibilityLabel={t('explore.viewProfileA11y', { name: profile.name })}
                     >
@@ -129,6 +153,12 @@ export function ExploreScreen({ onClose }: ExploreScreenProps) {
           );
         })}
       </ScrollView>
+
+      <ActionToast
+        visible={deckToast !== null}
+        message={deckToast ?? ''}
+        onDismiss={() => setDeckToast(null)}
+      />
     </View>
   );
 }

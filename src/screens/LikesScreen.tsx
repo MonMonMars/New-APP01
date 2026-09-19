@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MatchModal } from '../components/MatchModal';
+import { WaitingForMatchModal } from '../components/WaitingForMatchModal';
 import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
 import { SparkNoteSheet } from '../components/SparkNoteSheet';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -42,10 +43,15 @@ export function LikesScreen() {
     canSendSparkNote,
     preferences,
     setSparkSection,
+    blockProfile,
+    reportProfile,
+    searchMorePeople,
   } = useApp();
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
   const [showMatch, setShowMatch] = useState(false);
+  const [waitingProfile, setWaitingProfile] = useState<Profile | null>(null);
+  const [showWaiting, setShowWaiting] = useState(false);
   const [showSparkNote, setShowSparkNote] = useState(false);
 
   const revealIncomingLikes = canRevealIncomingLikes(user.gender, isSparkPlus);
@@ -78,7 +84,10 @@ export function LikesScreen() {
     if (match) {
       setMatchProfile(profile);
       setShowMatch(true);
+      return;
     }
+    setWaitingProfile(profile);
+    setShowWaiting(true);
   };
 
   const handleSparkNote = () => {
@@ -107,14 +116,19 @@ export function LikesScreen() {
     if (match) {
       setMatchProfile(profile);
       setShowMatch(true);
+      return;
     }
+    setWaitingProfile(profile);
+    setShowWaiting(true);
   };
 
   const openChat = (profile: Profile) => {
     const conversationId = getConversationIdForProfile(profile.id);
     if (conversationId) {
       navigation.getParent()?.navigate('Chat', { conversationId });
+      return;
     }
+    Alert.alert(t('chat.notFound'));
   };
 
   const openSuperLikeProfile = (profile: Profile) => {
@@ -270,11 +284,33 @@ export function LikesScreen() {
       <ProfileDetailSheet
         profile={selectedProfile}
         visible={selectedProfile !== null}
+        photosUnlocked={
+          selectedProfile
+            ? matches.some((match) => match.profile.id === selectedProfile.id)
+            : false
+        }
         onClose={() => setSelectedProfile(null)}
         onLike={selectedProfile ? () => handleLike(selectedProfile) : undefined}
         onPass={selectedProfile ? () => handlePass(selectedProfile) : undefined}
         onSuperLike={selectedProfile ? () => handleSuperLike(selectedProfile) : undefined}
         onSparkNote={selectedProfile && canSendSparkNote ? handleSparkNote : undefined}
+        onBlock={
+          selectedProfile
+            ? () => {
+                blockProfile(selectedProfile.id);
+                setSelectedProfile(null);
+              }
+            : undefined
+        }
+        onReport={
+          selectedProfile
+            ? () => {
+                reportProfile(selectedProfile.id);
+                setSelectedProfile(null);
+                Alert.alert(t('discover.reportSubmitted'), t('discover.reportThanksSimple'));
+              }
+            : undefined
+        }
       />
 
       <SparkNoteSheet
@@ -305,6 +341,21 @@ export function LikesScreen() {
             setShowMatch(false);
             openChat(matchProfile);
           }
+        }}
+      />
+
+      <WaitingForMatchModal
+        visible={showWaiting}
+        profile={waitingProfile}
+        onClose={() => {
+          setShowWaiting(false);
+          setWaitingProfile(null);
+        }}
+        onFindMorePeople={() => {
+          setShowWaiting(false);
+          setWaitingProfile(null);
+          searchMorePeople();
+          openDiscover();
         }}
       />
     </View>

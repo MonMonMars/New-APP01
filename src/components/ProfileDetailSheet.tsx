@@ -246,7 +246,16 @@ export function ProfileDetailSheet({
         </ScrollView>
 
         {(onLike || onPass || onSparkNote || onSuperLike) && (
-          <View style={[styles.actionBar, { backgroundColor: colors.background, borderTopColor: colors.border }]}>
+          <View
+            style={[
+              styles.actionBar,
+              {
+                backgroundColor: colors.background,
+                borderTopColor: colors.border,
+                paddingBottom: Math.max(insets.bottom, spacing.sm),
+              },
+            ]}
+          >
             {onPass && (
               <AnimatedPressable style={[styles.passButton, styles.actionButton, { borderColor: colors.nope, backgroundColor: colors.surface }]} onPress={onPass}>
                 <Ionicons name="close" size={24} color={colors.nope} />

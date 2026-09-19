@@ -48,6 +48,7 @@ import {
 } from '../services/chatReplyCoach';
 import { getReportReasonLabel } from '../components/ReportReasonSheet';
 import { pickProfilePhoto } from '../utils/photoPicker';
+import { resolveYourTurnFromMessages } from '../utils/conversationMerge';
 import { radii, spacing } from '../theme';
 
 type ChatScreenProps = {
@@ -76,6 +77,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
     reactToMessage,
     markConversationRead,
     setActiveConversationId,
+    preferences,
   } = useApp();
   const [draft, setDraft] = useState('');
   const [showGifPicker, setShowGifPicker] = useState(false);
@@ -129,16 +131,32 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         ? t('chat.aiSuggestOpener')
         : t('chat.aiSuggestReply');
 
+  const effectiveYourTurn = useMemo(
+    () => resolveYourTurnFromMessages(threadMessages, conversation?.yourTurn ?? false),
+    [conversation?.yourTurn, threadMessages],
+  );
+
   const showInlineAiSuggestions =
-    threadMessages.length === 0 ||
-    (conversation?.yourTurn === true && threadMessages.length > 0);
+    threadMessages.length === 0 || (effectiveYourTurn && threadMessages.length > 0);
 
   const openDialogueHelper = useCallback(() => {
-    if (threadMessages.length > 0 && conversation?.yourTurn !== true) {
+    if (threadMessages.length > 0 && !effectiveYourTurn) {
       setDialogueMode('topic');
     }
     setShowDialogueHelper(true);
-  }, [conversation?.yourTurn, threadMessages.length]);
+  }, [effectiveYourTurn, threadMessages.length]);
+
+  const sparkSectionRef = useRef(preferences.sparkSection);
+  useEffect(() => {
+    if (sparkSectionRef.current === preferences.sparkSection) {
+      return;
+    }
+    sparkSectionRef.current = preferences.sparkSection;
+    const stillVisible = conversations.some((item) => item.id === conversationId);
+    if (!stillVisible) {
+      onBack();
+    }
+  }, [conversationId, conversations, onBack, preferences.sparkSection]);
 
   const lastIncomingMessageId = useMemo(() => {
     for (let index = threadMessages.length - 1; index >= 0; index -= 1) {
@@ -240,7 +258,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
 
   const profile = conversation.match.profile;
   const activeDateCheckIn = getActiveDateCheckIn(profile.id);
-  const turnLabel = conversation.yourTurn
+  const turnLabel = effectiveYourTurn
     ? t('matches.yourTurn')
     : conversation.messages.length > 0
       ? t('matches.waitingReply')
@@ -390,7 +408,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
             <View
               style={[
                 styles.turnBadge,
-                { backgroundColor: conversation.yourTurn ? colors.gradientEnd : colors.surface },
+                { backgroundColor: effectiveYourTurn ? colors.gradientEnd : colors.surface },
               ]}
             >
               <Text style={[styles.turnText, { color: colors.text }]}>{turnLabel}</Text>

@@ -2029,6 +2029,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const sendVoiceNote = useCallback(
     (conversationId: string, durationSeconds: number) => {
+      if (!checkClientRateLimit(`message:${conversationId}`, 30, 60_000)) {
+        return;
+      }
       const seconds = Math.max(1, Math.min(30, Math.round(durationSeconds)));
       const locale = resolveAppLocale(preferences.appLocale);
       const voiceMessage: Message = {

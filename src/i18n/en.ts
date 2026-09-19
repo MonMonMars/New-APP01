@@ -705,6 +705,7 @@ export const en = {
     emberHint: 'Likes, matches, and chats stay in the section you pick. Ember keeps photos and city private until you match.',
     getUnlimited: 'Get unlimited likes with Spark+',
     addedToDeck: '{name} added to your deck',
+    notInPool: 'This profile isn\'t in your current discover pool',
     likeLimitTitle: 'Like limit reached',
     likeLimitBody: 'Come back tomorrow or upgrade to Spark+ for unlimited likes.',
     standoutsEmpty: 'Top Picks refresh daily — check back tomorrow for curated standouts.',

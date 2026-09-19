@@ -39,6 +39,18 @@ function conversationActivityAt(conversation: Conversation): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+/** Derive turn state from merged messages — avoids stale cloud yourTurn after local sends. */
+export function resolveYourTurnFromMessages(
+  messages: Message[],
+  fallback: boolean,
+): boolean {
+  const last = messages.at(-1);
+  if (!last) {
+    return fallback;
+  }
+  return !last.isMine;
+}
+
 /** Merge hydrated local conversations with a cloud snapshot. */
 export function mergeConversationLists(
   local: Conversation[],
@@ -53,9 +65,11 @@ export function mergeConversationLists(
       continue;
     }
 
+    const messages = mergeConversationMessages(existing.messages, remoteConversation.messages);
     byId.set(remoteConversation.id, {
       ...remoteConversation,
-      messages: mergeConversationMessages(existing.messages, remoteConversation.messages),
+      messages,
+      yourTurn: resolveYourTurnFromMessages(messages, remoteConversation.yourTurn),
       unread: existing.unread === false ? false : remoteConversation.unread,
       isTyping: existing.isTyping,
     });

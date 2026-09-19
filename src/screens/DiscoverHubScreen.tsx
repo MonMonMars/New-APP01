@@ -12,6 +12,7 @@ import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesShe
 import { AiPersonasRow } from '../components/AiPersonasRow';
 import { HeldProfilesRow } from '../components/HeldProfilesRow';
 import { MatchModal } from '../components/MatchModal';
+import { WaitingForMatchModal } from '../components/WaitingForMatchModal';
 import { MostCompatibleBanner } from '../components/MostCompatibleBanner';
 import { RecentlyActiveStrip } from '../components/RecentlyActiveStrip';
 import { SparkSectionToggle } from '../components/SparkSectionToggle';
@@ -71,6 +72,8 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
   const [showPreferences, setShowPreferences] = useState(false);
   const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
   const [showMatch, setShowMatch] = useState(false);
+  const [waitingProfile, setWaitingProfile] = useState<Profile | null>(null);
+  const [showWaiting, setShowWaiting] = useState(false);
   const [deckToast, setDeckToast] = useState<string | null>(null);
   const [closeAfterToast, setCloseAfterToast] = useState(false);
 
@@ -105,9 +108,13 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
 
   const handleSelectProfile = useCallback(
     (profile: Profile) => {
-      prioritizeProfileInDeck(profile.id);
-      setDeckToast(t('discoverHub.addedToDeck', { name: profile.name }));
-      setCloseAfterToast(true);
+      const added = prioritizeProfileInDeck(profile.id);
+      setDeckToast(
+        added
+          ? t('discoverHub.addedToDeck', { name: profile.name })
+          : t('discoverHub.notInPool'),
+      );
+      setCloseAfterToast(added);
     },
     [prioritizeProfileInDeck, t],
   );
@@ -122,7 +129,10 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
       if (match) {
         setMatchProfile(profile);
         setShowMatch(true);
+        return;
       }
+      setWaitingProfile(profile);
+      setShowWaiting(true);
     },
     [canLike, likeProfile, t],
   );
@@ -313,6 +323,20 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
           setMatchProfile(null);
         }}
         onMessage={handleOpenChat}
+      />
+
+      <WaitingForMatchModal
+        visible={showWaiting}
+        profile={waitingProfile}
+        onClose={() => {
+          setShowWaiting(false);
+          setWaitingProfile(null);
+        }}
+        onFindMorePeople={() => {
+          setShowWaiting(false);
+          setWaitingProfile(null);
+          searchMorePeople();
+        }}
       />
 
       <ActionToast

@@ -75,6 +75,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
     completeDateCheckIn,
     reactToMessage,
     markConversationRead,
+    setActiveConversationId,
   } = useApp();
   const [draft, setDraft] = useState('');
   const [showGifPicker, setShowGifPicker] = useState(false);
@@ -103,8 +104,12 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   useCloudConversation(conversationId);
 
   useEffect(() => {
+    setActiveConversationId(conversationId);
     markConversationRead(conversationId);
-  }, [conversationId, markConversationRead]);
+    return () => {
+      setActiveConversationId(null);
+    };
+  }, [conversationId, markConversationRead, setActiveConversationId]);
 
   const expiryLabel = useLiveExpiry(conversation?.match.expiresAt);
   const threadMessages = conversation?.messages ?? [];
@@ -143,6 +148,10 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
     }
     return null;
   }, [threadMessages]);
+
+  useEffect(() => {
+    markConversationRead(conversationId);
+  }, [conversationId, lastIncomingMessageId, markConversationRead]);
 
   const aiSuggestionFetchKey = useMemo(() => {
     if (threadMessages.length === 0) {
@@ -333,7 +342,13 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
           )}
         </View>
         {item.reaction && (
-          <View style={[styles.reactionBadge, { backgroundColor: colors.background, borderColor: colors.border }]}>
+          <View
+            style={[
+              styles.reactionBadge,
+              item.isMine ? styles.reactionBadgeMine : styles.reactionBadgeTheirs,
+              { backgroundColor: colors.background, borderColor: colors.border },
+            ]}
+          >
             <Text style={styles.reactionEmoji}>{item.reaction}</Text>
           </View>
         )}
@@ -344,7 +359,8 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   return (
     <KeyboardAvoidingView
       style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
     >
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <AnimatedPressable onPress={onBack} style={styles.backButton} accessibilityLabel={t('common.goBack')}>
@@ -896,11 +912,16 @@ const styles = StyleSheet.create({
   reactionBadge: {
     position: 'absolute',
     bottom: -4,
-    right: 8,
     borderRadius: 12,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderWidth: StyleSheet.hairlineWidth,
+  },
+  reactionBadgeMine: {
+    right: 8,
+  },
+  reactionBadgeTheirs: {
+    left: 8,
   },
   reactionEmoji: {
     fontSize: 14,

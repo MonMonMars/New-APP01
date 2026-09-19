@@ -150,8 +150,11 @@ export function ChatComposer({
           placeholder={t('chat.messagePlaceholder')}
           placeholderTextColor={colors.textMuted}
           style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]}
+          multiline
+          blurOnSubmit={false}
+          textAlignVertical="center"
           onSubmitEditing={handleSend}
-          returnKeyType="send"
+          returnKeyType="default"
         />
 
         <AnimatedPressable
@@ -203,7 +206,7 @@ const styles = StyleSheet.create({
   },
   composer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     paddingHorizontal: spacing.md,
     paddingTop: spacing.xs,
     gap: spacing.sm,

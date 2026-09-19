@@ -12,10 +12,13 @@ export function PurchasesModeNotice() {
   const { t } = useTranslation();
 
   if (purchasesMode === 'store') {
+    const revenueCatReady = Boolean(process.env.EXPO_PUBLIC_REVENUECAT_API_KEY?.trim());
     return (
       <View style={[styles.banner, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <Ionicons name="storefront-outline" size={18} color={colors.textMuted} />
-        <Text style={[styles.text, { color: colors.textMuted }]}>{t('payments.storeModeHint')}</Text>
+        <Text style={[styles.text, { color: colors.textMuted }]}>
+          {revenueCatReady ? t('payments.storeModeHint') : t('payments.storeModeMissingKey')}
+        </Text>
       </View>
     );
   }

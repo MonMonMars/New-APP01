@@ -1114,6 +1114,8 @@ export const zhTw = {
     film: '電影',
     music: '音樂',
     style: '風格',
+    weather: '天氣',
+    climate: '氣候',
   },
   verificationPolicy: {
     headerTitle: '驗證政策',
@@ -1176,11 +1178,15 @@ export const zhTw = {
     postTitle: '貼文',
     addComment: '新增留言…',
     sendComment: '送出留言',
+    seedReply1: '完全同意這一點。',
+    seedReply2: '先收藏這串，之後再看。',
+    seedReply3: '今天正需要這個 — 謝謝分享。',
   },
   time: {
     justNow: '剛剛',
     minutesAgo: '{n} 分鐘前',
     hoursAgo: '{n} 小時前',
+    daysAgo: '{n} 天前',
   },
   utils: {
     photoPermissionTitle: '需要照片存取權限',
@@ -1297,6 +1303,8 @@ export const zhTw = {
     stocks: '個股',
     cryptoFx: '加密貨幣與外匯',
     topMovers: '漲跌幅榜',
+    sessionLabel: '美國股市開盤中 · 英國收盤還有 2 小時 14 分',
+    volumeLabel: '{value} 成交量',
   },
   newsArticle: {
     readOn: '在 {source} 閱讀',

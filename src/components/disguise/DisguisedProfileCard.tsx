@@ -5,6 +5,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
+import { getPulseCategoryLabel } from '../../i18n/labels';
 import { DisguisedProfilePost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
@@ -35,7 +36,7 @@ function OwnerHint({ label, color }: { label: string; color: string }) {
 
 export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const { pulseSocial, togglePulseLike, preferences } = useApp();
   const meta = useDisguiseWorld();
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -190,7 +191,11 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
           <View style={styles.metaRow}>
             <Text style={[styles.source, { color: meta.accent }]}>{post.sourceLabel}</Text>
             <Text style={[styles.dot, { color: colors.textMuted }]}>·</Text>
-            <Text style={[styles.category, { color: meta.accent }]}>{post.category}</Text>
+            {post.category ? (
+              <Text style={[styles.category, { color: meta.accent }]}>
+                {getPulseCategoryLabel(locale, post.category)}
+              </Text>
+            ) : null}
             <Text style={[styles.time, { color: colors.textMuted }]}>{post.timeAgo}</Text>
           </View>
           <Text style={[styles.headline, { color: colors.text }]}>{post.headline}</Text>

@@ -6,11 +6,11 @@ import { useTranslation } from '../../i18n';
 import {
   marketCryptoForex,
   marketIndexQuotes,
-  marketSessionLabel,
   marketStockQuotes,
   marketTopMovers,
   MarketQuote,
 } from '../../data/disguiseMarkets';
+import { getMarketVolumeLabel } from '../../i18n/labels';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { AnimatedPressable } from '../AnimatedPressable';
@@ -41,14 +41,16 @@ function QuoteRow({ quote, colors, onPress }: { quote: MarketQuote; colors: { te
 
 export function DisguiseMarketsPanel({ onQuotePress }: DisguiseMarketsPanelProps) {
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const meta = useDisguiseWorld();
 
   return (
     <View style={styles.wrap}>
       <View style={[styles.sessionBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <Ionicons name="newspaper-outline" size={14} color={meta.accent} />
-        <Text style={[styles.sessionText, { color: colors.textMuted }]}>{marketSessionLabel}</Text>
+        <Text style={[styles.sessionText, { color: colors.textMuted }]}>
+          {t('disguiseMarkets.sessionLabel')}
+        </Text>
       </View>
 
       <Text style={[styles.subheading, { color: colors.textMuted }]}>{t('disguiseMarkets.indices')}</Text>
@@ -105,7 +107,9 @@ export function DisguiseMarketsPanel({ onQuotePress }: DisguiseMarketsPanelProps
             <Text style={[styles.moverChange, { color: mover.up ? '#22c55e' : '#ef4444' }]}>
               {mover.changePct}
             </Text>
-            <Text style={[styles.moverVol, { color: colors.textMuted }]}>{mover.volumeLabel}</Text>
+            <Text style={[styles.moverVol, { color: colors.textMuted }]}>
+              {getMarketVolumeLabel(locale, mover.volumeLabel)}
+            </Text>
           </AnimatedPressable>
         ))}
       </ScrollView>

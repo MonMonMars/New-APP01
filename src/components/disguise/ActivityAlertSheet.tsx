@@ -5,6 +5,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DisguiseAlert } from '../../data/disguiseFeed';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
+import {
+  getActivityAlertText,
+  getDisguiseOverlaySnippet,
+  localizeTimeAgoLabel,
+} from '../../i18n/labels';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
@@ -21,7 +26,7 @@ type ActivityAlertSheetProps = {
 export function ActivityAlertSheet({ visible, alert, onClose }: ActivityAlertSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const meta = useDisguiseWorld();
 
   if (!alert) {
@@ -58,12 +63,16 @@ export function ActivityAlertSheet({ visible, alert, onClose }: ActivityAlertShe
             {alert.person ? (
               <FeedPersonRow
                 imageUrl={alert.person.avatarUrl}
-                overlayText={alert.person.overlayText ?? t('boost.live')}
+                overlayText={
+                  alert.person.overlayText
+                    ? getDisguiseOverlaySnippet(locale, alert.person.overlayText)
+                    : t('boost.live')
+                }
                 overlayVariant={alert.person.overlayVariant ?? 'news'}
                 plainAvatar={!alert.person.overlayVariant}
                 contentKind="profile"
                 title={alert.person.name}
-                body={alert.text}
+                body={getActivityAlertText(locale, alert.id, alert.text)}
                 titleStyle={{ color: colors.text }}
                 bodyStyle={{ color: colors.textMuted, lineHeight: 20 }}
               />
@@ -72,12 +81,16 @@ export function ActivityAlertSheet({ visible, alert, onClose }: ActivityAlertShe
                 <View style={[styles.iconWrap, { backgroundColor: meta.accentSoft }]}>
                   <Ionicons name={alert.icon} size={22} color={meta.accent} />
                 </View>
-                <Text style={[styles.text, { color: colors.text }]}>{alert.text}</Text>
+                <Text style={[styles.text, { color: colors.text }]}>
+                  {getActivityAlertText(locale, alert.id, alert.text)}
+                </Text>
               </>
             )}
           </FadeSlideIn>
           <FadeSlideIn replayKey={visible} index={2}>
-            <Text style={[styles.time, { color: colors.textMuted }]}>{alert.time}</Text>
+            <Text style={[styles.time, { color: colors.textMuted }]}>
+              {localizeTimeAgoLabel(locale, alert.time)}
+            </Text>
           </FadeSlideIn>
           <FadeSlideIn replayKey={visible} index={3}>
             <Text style={[styles.hint, { color: colors.textMuted }]}>

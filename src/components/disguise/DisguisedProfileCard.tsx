@@ -5,7 +5,12 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
-import { getPulseCategoryLabel, localizeTimeAgoLabel } from '../../i18n/labels';
+import {
+  getDisguisedProfileHintLabel,
+  getDisguisedSourceLabel,
+  getPulseCategoryLabel,
+  localizeTimeAgoLabel,
+} from '../../i18n/labels';
 import { DisguisedProfilePost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
@@ -118,7 +123,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
               <Text style={[styles.socialActionText, { color: colors.textMuted }]}>3</Text>
             </AnimatedPressable>
           </View>
-          <OwnerHint label={post.hintLabel} color={meta.accent} />
+          <OwnerHint label={getDisguisedProfileHintLabel(locale, post.hintLabel)} color={meta.accent} />
         </View>
         {previewSheet}
         <SocialCommentSheet
@@ -127,7 +132,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
             id: post.id,
             type: 'social',
             author: post.name,
-            handle: post.name.toLowerCase().replace(/\s+/g, ''),
+            handle: post.handle ?? `@${post.name.toLowerCase().replace(/\s+/g, '')}`,
             body: post.summary,
             avatarUrl: post.avatarUrl,
             timeAgo: post.timeAgo,
@@ -168,7 +173,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
               <Text style={styles.ctaText}>{post.cta ?? t('disguiseAd.learnMore')}</Text>
               <Ionicons name="chevron-forward" size={14} color="#fff" />
             </View>
-            <OwnerHint label={post.hintLabel} color={meta.accent} />
+            <OwnerHint label={getDisguisedProfileHintLabel(locale, post.hintLabel)} color={meta.accent} />
           </View>
         </AnimatedPressable>
         {previewSheet}
@@ -189,7 +194,9 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
         </MediaWithContentBadge>
         <View style={styles.body}>
           <View style={styles.metaRow}>
-            <Text style={[styles.source, { color: meta.accent }]}>{post.sourceLabel}</Text>
+            <Text style={[styles.source, { color: meta.accent }]}>
+              {getDisguisedSourceLabel(locale, post.sourceLabel)}
+            </Text>
             <Text style={[styles.dot, { color: colors.textMuted }]}>·</Text>
             {post.category ? (
               <Text style={[styles.category, { color: meta.accent }]}>
@@ -206,7 +213,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
           </Text>
 
           <View style={styles.reportersRow}>{avatarRow}</View>
-          <OwnerHint label={post.hintLabel} color={meta.accent} />
+          <OwnerHint label={getDisguisedProfileHintLabel(locale, post.hintLabel)} color={meta.accent} />
         </View>
       </AnimatedPressable>
       {previewSheet}

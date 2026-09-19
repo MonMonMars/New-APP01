@@ -13,6 +13,11 @@ import { PersonPreviewSheet } from '../../components/disguise/PersonPreviewSheet
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
 import {
+  getActivityAlertText,
+  getDisguiseOverlaySnippet,
+  localizeTimeAgoLabel,
+} from '../../i18n/labels';
+import {
   AdPost,
   DisguiseAlert,
   disguiseAlerts,
@@ -36,7 +41,7 @@ import { profileIntroCaption } from '../../utils/profileIntroCaption';
 export function DisguiseAlertsScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const { markActivityAlertsRead, preferences } = useApp();
   const meta = useDisguiseWorld();
   const refreshGeneration = usePulseFeedRefreshGeneration();
@@ -99,7 +104,11 @@ export function DisguiseAlertsScreen() {
                   <PulseProfileSwap profileKey={profileKey} style={styles.avatarSlot}>
                     <FeedPersonThumbnail
                       imageUrl={avatarUrl}
-                      overlayText={item.person.overlayText ?? t('profile.live')}
+                      overlayText={
+                        item.person.overlayText
+                          ? getDisguiseOverlaySnippet(locale, item.person.overlayText)
+                          : t('profile.live')
+                      }
                       overlayVariant={item.person.overlayVariant ?? 'news'}
                       plainAvatar={!item.person.overlayVariant}
                       contentKind="profile"
@@ -112,9 +121,11 @@ export function DisguiseAlertsScreen() {
                   </PulseProfileSwap>
                   <View style={styles.textWrap}>
                     <Text style={[styles.text, { color: colors.text }]} numberOfLines={3}>
-                      {item.text}
+                      {getActivityAlertText(locale, item.id, item.text)}
                     </Text>
-                    <Text style={[styles.time, { color: colors.textMuted }]}>{item.time}</Text>
+                    <Text style={[styles.time, { color: colors.textMuted }]}>
+                      {localizeTimeAgoLabel(locale, item.time)}
+                    </Text>
                   </View>
                 </View>
               ) : (
@@ -124,9 +135,11 @@ export function DisguiseAlertsScreen() {
                   </View>
                   <View style={styles.textWrap}>
                     <Text style={[styles.text, { color: colors.text }]} numberOfLines={3}>
-                      {item.text}
+                      {getActivityAlertText(locale, item.id, item.text)}
                     </Text>
-                    <Text style={[styles.time, { color: colors.textMuted }]}>{item.time}</Text>
+                    <Text style={[styles.time, { color: colors.textMuted }]}>
+                      {localizeTimeAgoLabel(locale, item.time)}
+                    </Text>
                   </View>
                 </>
               )}

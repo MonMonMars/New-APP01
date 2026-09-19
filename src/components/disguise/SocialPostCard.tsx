@@ -5,7 +5,7 @@ import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
-import { localizeTimeAgoLabel } from '../../i18n/labels';
+import { getDisguiseOverlaySnippet, localizeTimeAgoLabel } from '../../i18n/labels';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { buildSocialReporter, socialReporterPhotoIndex } from '../../utils/disguiseReporterPhotos';
@@ -56,7 +56,9 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
   const authorContentKind = linkedAuthorProfile ? 'profile' : 'social';
   const authorCaption = linkedAuthorProfile ? profileIntroCaption(linkedAuthorProfile) : undefined;
 
-  const maskSnippet = post.avatarMask?.text.split(' ').slice(0, 2).join(' ') ?? 'LIVE';
+  const maskSnippet = post.avatarMask?.text.split(' ').slice(0, 2).join(' ')
+    ? getDisguiseOverlaySnippet(locale, post.avatarMask.text.split(' ').slice(0, 2).join(' '))
+    : t('profile.live');
   const handleSave = () => {
     if (isSaved) {
       unsavePulsePost(post.id);
@@ -78,7 +80,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
       {
         text: t('pulseSocial.reportMisleading'),
         onPress: () => {
-          reportPulsePost(post.id, 'Misleading content');
+          reportPulsePost(post.id, t('pulseSocial.reportMisleading'));
           Alert.alert(t('pulseSocial.reportedTitle'), t('pulseSocial.reportedBody'));
         },
       },
@@ -86,7 +88,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
         text: t('pulseSocial.reportHarmful'),
         style: 'destructive',
         onPress: () => {
-          reportPulsePost(post.id, 'Harmful content');
+          reportPulsePost(post.id, t('pulseSocial.reportHarmful'));
           Alert.alert(t('pulseSocial.reportedTitle'), t('pulseSocial.reportedBody'));
         },
       },

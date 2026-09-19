@@ -1,6 +1,9 @@
 import { BreakingCard, editorsPicks, TrendingBrief } from '../data/disguiseTrending';
 import { NewsPost } from '../data/disguiseFeed';
 import { freeNewsUrlForTopic, pulseNewsImages } from '../data/pulseNewsMedia';
+import { translate } from '../i18n';
+import { localizeTimeAgoLabel } from '../i18n/labels';
+import { AppLocale, resolveAppLocale } from '../types/locale';
 
 function topicCategory(topic: string): string {
   switch (topic) {
@@ -42,7 +45,8 @@ function topicCategory(topic: string): string {
   }
 }
 
-export function briefToNewsPost(brief: TrendingBrief): NewsPost {
+export function briefToNewsPost(brief: TrendingBrief, locale?: AppLocale | null): NewsPost {
+  const resolvedLocale = resolveAppLocale(locale);
   const category = topicCategory(brief.topic);
 
   return {
@@ -51,7 +55,7 @@ export function briefToNewsPost(brief: TrendingBrief): NewsPost {
     source: brief.source,
     headline: brief.headline,
     summary: brief.summary,
-    articleBody: `${brief.summary}\n\nThis morning brief is curated by Pulse editors from trusted publishers. Open the full story on ${brief.source} for complete reporting, charts, and updates as the story develops.`,
+    articleBody: `${brief.summary}\n\n${translate(resolvedLocale, 'trendingArticle.briefFooter', { source: brief.source })}`,
     imageUrl: brief.imageUrl,
     timeAgo: `${brief.readMinutes} min read`,
     category,
@@ -60,7 +64,11 @@ export function briefToNewsPost(brief: TrendingBrief): NewsPost {
   };
 }
 
-export function editorsPickToNewsPost(pick: (typeof editorsPicks)[number]): NewsPost {
+export function editorsPickToNewsPost(
+  pick: (typeof editorsPicks)[number],
+  locale?: AppLocale | null,
+): NewsPost {
+  const resolvedLocale = resolveAppLocale(locale);
   const category = topicCategory(pick.topic);
   const source = pick.subtitle.split(' · ')[0] ?? 'Pulse';
 
@@ -70,7 +78,7 @@ export function editorsPickToNewsPost(pick: (typeof editorsPicks)[number]): News
     source,
     headline: pick.title,
     summary: pick.subtitle,
-    articleBody: `${pick.title}\n\n${pick.subtitle}\n\nThis editor's pick is curated by Pulse. Follow ${source} for the full story and related coverage in your feed.`,
+    articleBody: `${pick.title}\n\n${pick.subtitle}\n\n${translate(resolvedLocale, 'trendingArticle.editorsPickFooter', { source })}`,
     imageUrl: pulseNewsImages.newspaper,
     timeAgo: 'Editor\'s pick',
     category,
@@ -79,8 +87,10 @@ export function editorsPickToNewsPost(pick: (typeof editorsPicks)[number]): News
   };
 }
 
-export function breakingToNewsPost(card: BreakingCard): NewsPost {
+export function breakingToNewsPost(card: BreakingCard, locale?: AppLocale | null): NewsPost {
+  const resolvedLocale = resolveAppLocale(locale);
   const category = topicCategory(card.topic);
+  const localizedTime = localizeTimeAgoLabel(resolvedLocale, card.timeAgo);
 
   return {
     id: `trending-breaking-${card.id}`,
@@ -88,7 +98,11 @@ export function breakingToNewsPost(card: BreakingCard): NewsPost {
     source: card.source,
     headline: card.headline,
     summary: card.headline,
-    articleBody: `${card.headline}\n\nReported ${card.timeAgo} ago on Pulse. This breaking story is being updated — follow ${card.source} for the latest details and context.`,
+    articleBody: translate(resolvedLocale, 'trendingArticle.breakingFooter', {
+      headline: card.headline,
+      time: localizedTime,
+      source: card.source,
+    }),
     imageUrl: card.imageUrl,
     timeAgo: card.timeAgo,
     category,

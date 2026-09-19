@@ -163,11 +163,11 @@ export function DisguiseTrendingScreen() {
   };
 
   const openBrief = () => {
-    setArticlePost(briefToNewsPost(brief));
+    setArticlePost(briefToNewsPost(brief, locale));
   };
 
   const openBreaking = (card: (typeof breakingNowCards)[number]) => {
-    setArticlePost(breakingToNewsPost(card));
+    setArticlePost(breakingToNewsPost(card, locale));
   };
 
   return (
@@ -344,7 +344,7 @@ export function DisguiseTrendingScreen() {
           <AnimatedPressable
             key={pick.id}
             style={[styles.pickRow, { backgroundColor: colors.surface, borderColor: colors.border }]}
-            onPress={() => setArticlePost(editorsPickToNewsPost(pick))}
+            onPress={() => setArticlePost(editorsPickToNewsPost(pick, locale))}
           >
             <Ionicons name="bookmark-outline" size={18} color={meta.accent} />
             <View style={styles.pickText}>

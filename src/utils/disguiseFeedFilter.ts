@@ -1,4 +1,5 @@
 import { FeedItem } from '../data/disguiseFeed';
+import { getPulseTopicLabel } from '../i18n/labels';
 import { translate } from '../i18n';
 import { AppLocale } from '../types/locale';
 import type { ProfileGender } from '../types/profile';
@@ -133,5 +134,5 @@ export function topicFilterLabel(topic: string | undefined, locale: AppLocale): 
   if (!topic) {
     return translate(locale, 'disguiseFeed.forYou');
   }
-  return topic.replace('#', '');
+  return getPulseTopicLabel(locale, topic);
 }

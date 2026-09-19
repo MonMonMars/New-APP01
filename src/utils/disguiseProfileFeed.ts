@@ -82,10 +82,10 @@ function toDisguisedProfilePost(
     handle: isSocial ? profileHandle(disguiseDisplayName(profile.name)) : undefined,
     cta: isAd ? adCampaign.cta : undefined,
     hintLabel: isAd
-      ? 'Tap masked photo for more'
+      ? 'tapMaskedPhoto'
       : isSocial
-        ? 'Tap avatar to view thread'
-        : 'Tap BREAKING avatar for more',
+        ? 'tapAvatarThread'
+        : 'tapBreakingAvatar',
   };
 }
 
@@ -130,7 +130,7 @@ export function buildDisguisedProfileFeedItem(
     category: isAd ? undefined : 'Community',
     handle: profileHandle(disguiseDisplayName(user.name)),
     cta: isAd ? adCampaign.cta : undefined,
-    hintLabel: isAd ? 'Tap masked photo for more' : 'Tap BREAKING avatar for more',
+    hintLabel: isAd ? 'tapMaskedPhoto' : 'tapBreakingAvatar',
   };
 }
 
@@ -161,9 +161,9 @@ export function profileToDisguisedProfilePost(
     cta: variant === 'ad' ? adCampaign.cta : undefined,
     hintLabel:
       variant === 'ad'
-        ? 'Tap masked photo for more'
+        ? 'tapMaskedPhoto'
         : variant === 'social'
-          ? 'Tap avatar to view thread'
-          : 'Tap BREAKING avatar for more',
+          ? 'tapAvatarThread'
+          : 'tapBreakingAvatar',
   };
 }

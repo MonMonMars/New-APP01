@@ -390,6 +390,50 @@ const PULSE_CATEGORY_KEYS: Record<string, string> = {
   Style: 'pulseCategory.style',
   Weather: 'pulseCategory.weather',
   Climate: 'pulseCategory.climate',
+  Community: 'pulseCategory.community',
+  Markets: 'pulseCategory.markets',
+  Finance: 'pulseCategory.finance',
+};
+
+const DISGUISED_PROFILE_HINT_KEYS: Record<string, string> = {
+  tapMaskedPhoto: 'disguisedProfile.hintTapMaskedPhoto',
+  tapAvatarThread: 'disguisedProfile.hintTapAvatarThread',
+  tapBreakingAvatar: 'disguisedProfile.hintTapBreakingAvatar',
+};
+
+const PULSE_TOPIC_KEYS: Record<string, string> = {
+  '#WeekendPlans': 'pulseTopic.weekendPlans',
+  '#TechNews': 'pulseTopic.techNews',
+  '#CoffeeShops': 'pulseTopic.coffeeShops',
+  '#CityLife': 'pulseTopic.cityLife',
+  '#DesignTips': 'pulseTopic.designTips',
+  '#MarketWatch': 'pulseTopic.marketWatch',
+  '#AIInvesting': 'pulseTopic.aiInvesting',
+  '#RemoteWork': 'pulseTopic.remoteWork',
+  '#EURegulation': 'pulseTopic.euRegulation',
+  '#NightTransit': 'pulseTopic.nightTransit',
+  '#StartupJobs': 'pulseTopic.startupJobs',
+  '#WeekendEats': 'pulseTopic.weekendEats',
+  '#ClimateTech': 'pulseTopic.climateTech',
+  '#BookClub': 'pulseTopic.bookClub',
+  '#TransitTalk': 'pulseTopic.transitTalk',
+  '#OnDeviceAI': 'pulseTopic.onDeviceAi',
+  '#HeatWave': 'pulseTopic.heatWave',
+  '#CarFreeCities': 'pulseTopic.carFreeCities',
+  '#IndieBooks': 'pulseTopic.indieBooks',
+  '#SolarHome': 'pulseTopic.solarHome',
+  '#Weather': 'pulseTopic.weather',
+  '#Zodiac': 'pulseTopic.zodiac',
+  '#Tarot': 'pulseTopic.tarot',
+  '#Film': 'pulseTopic.film',
+  '#Music': 'pulseTopic.music',
+  '#Style': 'pulseTopic.style',
+};
+
+const DISGUISE_OVERLAY_SNIPPET_KEYS: Record<string, string> = {
+  LIVE: 'profile.live',
+  AD: 'disguiseOverlay.adBadge',
+  BREAKING: 'disguiseOverlay.breaking',
 };
 
 export function formatRelativeTimeLocalized(locale: AppLocale, iso: string): string {
@@ -474,6 +518,38 @@ export function getMarketVolumeLabel(locale: AppLocale, volumeLabel: string): st
 export function getPulseCategoryLabel(locale: AppLocale, category: string): string {
   const key = PULSE_CATEGORY_KEYS[category];
   return key ? translate(locale, key) : category;
+}
+
+export function getDisguisedProfileHintLabel(locale: AppLocale, hintKey: string): string {
+  const key = DISGUISED_PROFILE_HINT_KEYS[hintKey];
+  return key ? translate(locale, key) : hintKey;
+}
+
+export function getDisguisedSourceLabel(locale: AppLocale, sourceLabel: string): string {
+  if (sourceLabel === 'Sponsored') {
+    return translate(locale, 'disguiseAd.sponsored');
+  }
+  return sourceLabel;
+}
+
+export function getActivityAlertText(locale: AppLocale, alertId: string, fallback: string): string {
+  const key = `activityAlert.${alertId}`;
+  const translated = translate(locale, key);
+  return translated === key ? fallback : translated;
+}
+
+export function getPulseTopicLabel(locale: AppLocale, topic: string): string {
+  const key = PULSE_TOPIC_KEYS[topic];
+  if (key) {
+    return translate(locale, key);
+  }
+  return topic.replace('#', '');
+}
+
+export function getDisguiseOverlaySnippet(locale: AppLocale, snippet: string): string {
+  const firstWord = snippet.trim().split(/\s+/)[0]?.toUpperCase() ?? '';
+  const key = DISGUISE_OVERLAY_SNIPPET_KEYS[firstWord];
+  return key ? translate(locale, key) : snippet;
 }
 
 const TRENDING_CHIP_LABEL_KEYS: Record<string, string> = {

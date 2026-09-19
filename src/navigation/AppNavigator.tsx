@@ -44,7 +44,6 @@ import { MainTabParamList, RootStackParamList } from '../types/navigation';
 import { resolveSparkSection } from '../types/preferences';
 
 function DiscoverTabButton(props: BottomTabBarButtonProps) {
-  const { setDisguiseMode } = useApp();
   const { t } = useTranslation();
   const selected = props.accessibilityState?.selected ?? false;
 
@@ -54,13 +53,6 @@ function DiscoverTabButton(props: BottomTabBarButtonProps) {
       accessibilityHint={
         selected ? t('pulseEntry.tabHintActive') : t('pulseEntry.tabHint')
       }
-      onPress={(event) => {
-        if (selected) {
-          setDisguiseMode(true);
-          return;
-        }
-        props.onPress?.(event);
-      }}
     />
   );
 }

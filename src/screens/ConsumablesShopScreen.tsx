@@ -21,6 +21,7 @@ import { useTheme } from '../context/ThemeContext';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { PurchaseConfirmSheet } from '../components/PurchaseConfirmSheet';
+import { PurchasesModeNotice } from '../components/PurchasesModeNotice';
 
 type ConsumablesShopScreenProps = {
   onClose: () => void;
@@ -156,6 +157,8 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
           <Text style={styles.heroTitle}>{t('shop.heroTitle')}</Text>
           <Text style={styles.heroSubtitle}>{t('shop.heroSubtitle')}</Text>
         </LinearGradient>
+
+        <PurchasesModeNotice />
 
         {packs.map((pack) => {
           const packAccent = colors.gradientEnd;

@@ -20,6 +20,7 @@ import { sparkPlusFeatureDescriptions } from '../utils/genderAccountPerks';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { PurchaseConfirmSheet } from '../components/PurchaseConfirmSheet';
+import { PurchasesModeNotice } from '../components/PurchasesModeNotice';
 
 type SparkPlusScreenProps = {
   onClose: () => void;
@@ -119,6 +120,7 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
       </LinearGradient>
 
       <ScrollView contentContainerStyle={styles.content}>
+        <PurchasesModeNotice />
         <SparkPlusComparisonTable />
 
         {features.map((feature) => (

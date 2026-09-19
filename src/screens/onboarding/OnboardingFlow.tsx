@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -40,6 +40,9 @@ export function OnboardingFlow() {
     updatePreferences,
     preferences,
     user,
+    isAuthenticated,
+    userId,
+    isSupabaseEnabled,
   } = useApp();
   const [step, setStep] = useState<Step>('welcome');
   const [locationCenter, setLocationCenter] = useState<GeoPoint>(() =>
@@ -60,6 +63,17 @@ export function OnboardingFlow() {
   const [photos, setPhotos] = useState<string[]>(user.photos);
   const [authLoading, setAuthLoading] = useState(false);
   const [showLocationInfo, setShowLocationInfo] = useState(false);
+  const [awaitingMagicLink, setAwaitingMagicLink] = useState(false);
+
+  useEffect(() => {
+    if (!isSupabaseEnabled || !awaitingMagicLink) {
+      return;
+    }
+    if (isAuthenticated && userId && step === 'welcome') {
+      setAwaitingMagicLink(false);
+      setStep('rules');
+    }
+  }, [awaitingMagicLink, isAuthenticated, isSupabaseEnabled, step, userId]);
 
   const genderOptions: ProfileGender[] = ['woman', 'man', 'nonbinary'];
   const orientationOptions: Orientation[] = ['straight', 'gay', 'lesbian', 'bisexual', 'pansexual', 'queer', 'asexual', 'other'];
@@ -85,7 +99,11 @@ export function OnboardingFlow() {
       const result = await signInWithEmailMagicLink(email);
       setEmailMessage(result.message);
       if (result.ok) {
-        setStep('rules');
+        if (isSupabaseEnabled) {
+          setAwaitingMagicLink(true);
+        } else {
+          setStep('rules');
+        }
       }
     } finally {
       setAuthLoading(false);
@@ -184,7 +202,10 @@ export function OnboardingFlow() {
               <Ionicons name="mail-outline" size={18} color={colors.text} />
               <Text style={styles.emailButtonText}>{t('onboarding.continueEmail')}</Text>
             </AnimatedPressable>
-            {emailMessage && <Text style={styles.emailHint}>{emailMessage}</Text>}
+            {emailMessage ? <Text style={styles.emailHint}>{emailMessage}</Text> : null}
+            {awaitingMagicLink ? (
+              <Text style={styles.emailHint}>{t('onboarding.magicLinkWaiting')}</Text>
+            ) : null}
           </View>
           <AnimatedPressable onPress={() => { signInWithAppleStub(); setStep('rules'); }}>
             <Text style={styles.link}>{t('onboarding.continueGuest')}</Text>

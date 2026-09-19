@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
+import { resolveSparkSection } from '../types/preferences';
 import { spacing } from '../theme';
 import { IconButton } from './Button';
-import { SectionLeftLogo } from './disguise/ModeToggleLogo';
+import { SparkSectionToggle } from './SparkSectionToggle';
 
 type ScreenHeaderProps = {
   title?: string;
@@ -30,19 +32,24 @@ export function ScreenHeader({
   onSecondaryRightPress,
 }: ScreenHeaderProps) {
   const { colors } = useTheme();
+  const { preferences, setSparkSection } = useApp();
+  const sparkSection = resolveSparkSection(preferences.sparkSection);
 
   return (
     <View style={[styles.header, compact && styles.headerCompact]}>
       <View
         style={[
           styles.leftSlot,
+          showLogo ? styles.leftSlotWithWorld : null,
           leftIcon && showLogo ? styles.leftSlotDual : null,
         ]}
       >
         {leftIcon ? (
           <IconButton icon={leftIcon} onPress={onLeftPress} backgroundColor={colors.surface} />
         ) : null}
-        {showLogo ? <SectionLeftLogo compact={compact} /> : null}
+        {showLogo ? (
+          <SparkSectionToggle section={sparkSection} onChange={setSparkSection} variant="mark" />
+        ) : null}
         {!leftIcon && !showLogo ? <View style={styles.iconButtonPlaceholder} /> : null}
       </View>
 
@@ -89,8 +96,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  leftSlotWithWorld: {
+    width: undefined,
+    flexShrink: 1,
+    maxWidth: '42%',
+    minWidth: 40,
+  },
   leftSlotDual: {
-    width: 84,
+    width: undefined,
+    maxWidth: '48%',
     gap: spacing.xs,
   },
   centerSlot: {

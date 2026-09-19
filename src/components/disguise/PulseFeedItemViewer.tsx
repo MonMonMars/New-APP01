@@ -94,7 +94,9 @@ export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItem
               id: feedItem.id,
               type: 'social',
               author: feedItem.name,
-              handle: feedItem.handle ?? feedItem.name.toLowerCase().replace(/\s+/g, ''),
+              handle:
+              feedItem.handle ??
+              `@${feedItem.name.toLowerCase().replace(/\s+/g, '')}`,
               body: feedItem.summary,
               avatarUrl: feedItem.avatarUrl,
               timeAgo: feedItem.timeAgo,

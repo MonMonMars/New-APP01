@@ -36,6 +36,18 @@ npm start
 
 Enable Apple provider in Supabase Dashboard → Authentication → Providers.
 
+### Magic link redirect URLs
+
+Add these under **Authentication → URL configuration → Redirect URLs** (adjust host for your deploy):
+
+| Platform | Redirect URL |
+|----------|----------------|
+| Web demo | `https://monmonmars.github.io/New-APP01/` |
+| Local web | `http://localhost:8081/` |
+| Native | `spark://auth/callback` |
+
+The app sets `emailRedirectTo` to the web origin or `spark://auth/callback` and completes the session via `src/services/supabaseAuthCallback.ts` (hash tokens, PKCE `code`, and deep links).
+
 ## 5. What syncs
 
 When configured, `AppContext` calls `syncToSupabase()` after state changes:

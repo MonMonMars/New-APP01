@@ -20,7 +20,8 @@
         "NSCameraUsageDescription": "Spark uses your camera for profile photos and verification selfies.",
         "NSPhotoLibraryUsageDescription": "Spark uses your photo library to add profile pictures.",
         "NSFaceIDUsageDescription": "Spark uses Face ID to unlock private dating mode.",
-        "NSLocationWhenInUseUsageDescription": "Spark uses your location to show people nearby."
+        "NSLocationWhenInUseUsageDescription": "Spark uses your location to show people nearby.",
+        "NSMicrophoneUsageDescription": "Spark uses your microphone for voice notes in chat."
       }
     },
     "android": {
@@ -38,7 +39,8 @@
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
         "USE_BIOMETRIC",
-        "USE_FINGERPRINT"
+        "USE_FINGERPRINT",
+        "RECORD_AUDIO"
       ],
       "predictiveBackGestureEnabled": false,
       "intentFilters": [
@@ -78,7 +80,8 @@
           "locationWhenInUsePermission": "Spark uses your location to show people nearby on the map."
         }
       ],
-      "expo-notifications"
+      "expo-notifications",
+      "expo-audio"
     ]
   }
 }

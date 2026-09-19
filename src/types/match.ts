@@ -23,6 +23,8 @@ export type Message = {
   isGif?: boolean;
   isVoiceNote?: boolean;
   voiceDurationSeconds?: number;
+  /** Local or remote recording URI when captured with expo-audio */
+  voiceUrl?: string;
 };
 
 export type Conversation = {

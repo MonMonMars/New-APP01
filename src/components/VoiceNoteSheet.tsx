@@ -1,6 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
+import {
+  RecordingPresets,
+  requestRecordingPermissionsAsync,
+  setAudioModeAsync,
+  useAudioRecorder,
+  useAudioRecorderState,
+} from 'expo-audio';
 import { useEffect, useState } from 'react';
-import { Modal, StyleSheet, Text, View } from 'react-native';
+import { Alert, Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
@@ -13,46 +20,74 @@ type VoiceNoteSheetProps = {
   visible: boolean;
   profileName: string;
   onClose: () => void;
-  onSend: (durationSeconds: number) => void;
+  onSend: (durationSeconds: number, voiceUrl?: string) => void;
 };
 
 export function VoiceNoteSheet({ visible, profileName, onClose, onSend }: VoiceNoteSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const [recording, setRecording] = useState(false);
-  const [elapsed, setElapsed] = useState(0);
+  const recorder = useAudioRecorder(RecordingPresets.LOW_QUALITY);
+  const recorderState = useAudioRecorderState(recorder, 250);
+  const [recordedUri, setRecordedUri] = useState<string | null>(null);
+
+  const elapsedSeconds = Math.min(30, Math.max(0, Math.round((recorderState.durationMillis || 0) / 1000)));
 
   useEffect(() => {
-    if (visible) {
-      setRecording(false);
-      setElapsed(0);
-    }
-  }, [visible]);
-
-  useEffect(() => {
-    if (!recording) {
-      return undefined;
-    }
-    const interval = setInterval(() => {
-      setElapsed((value) => {
-        const next = value + 1;
-        if (next >= 30) {
-          setRecording(false);
-        }
-        return next;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [recording]);
-
-  const handleSend = () => {
-    if (elapsed < 1) {
+    if (!visible) {
+      if (recorderState.isRecording) {
+        void recorder.stop();
+      }
       return;
     }
-    onSend(elapsed);
+    setRecordedUri(null);
+    void setAudioModeAsync({
+      allowsRecording: true,
+      playsInSilentMode: true,
+    });
+  }, [visible, recorder, recorderState.isRecording]);
+
+  useEffect(() => {
+    if (!recorderState.isRecording) {
+      return;
+    }
+    if (recorderState.durationMillis >= 30_000) {
+      void recorder.stop().then(() => {
+        setRecordedUri(recorder.uri);
+      });
+    }
+  }, [recorder, recorderState.durationMillis, recorderState.isRecording]);
+
+  const toggleRecording = () => {
+    void (async () => {
+      if (recorderState.isRecording) {
+        await recorder.stop();
+        setRecordedUri(recorder.uri);
+        return;
+      }
+
+      const permission = await requestRecordingPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert(t('chat.voiceNotePermissionTitle'), t('chat.voiceNotePermissionBody'));
+        return;
+      }
+
+      setRecordedUri(null);
+      recorder.record();
+    })();
+  };
+
+  const handleSend = () => {
+    const seconds = Math.max(1, elapsedSeconds);
+    if (seconds < 1) {
+      return;
+    }
+    onSend(seconds, recordedUri ?? recorder.uri ?? undefined);
     onClose();
   };
+
+  const displaySeconds = elapsedSeconds;
+  const isRecording = recorderState.isRecording;
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
@@ -66,22 +101,22 @@ export function VoiceNoteSheet({ visible, profileName, onClose, onSend }: VoiceN
             {t('chat.voiceNoteSubtitle', { name: profileName })}
           </Text>
           <AnimatedPressable
-            style={[styles.recordButton, { backgroundColor: recording ? colors.nope : colors.gradientEnd }]}
-            onPress={() => setRecording((value) => !value)}
+            style={[styles.recordButton, { backgroundColor: isRecording ? colors.nope : colors.gradientEnd }]}
+            onPress={toggleRecording}
           >
-            <Ionicons name={recording ? 'stop' : 'mic'} size={28} color={colors.text} />
+            <Ionicons name={isRecording ? 'stop' : 'mic'} size={28} color={colors.text} />
           </AnimatedPressable>
           <Text style={[styles.timer, { color: colors.text }]}>
-            {recording
-              ? t('chat.voiceNoteRecording', { seconds: elapsed })
-              : elapsed > 0
-                ? t('chat.voiceNoteRecorded', { seconds: elapsed })
+            {isRecording
+              ? t('chat.voiceNoteRecording', { seconds: displaySeconds })
+              : displaySeconds > 0
+                ? t('chat.voiceNoteRecorded', { seconds: displaySeconds })
                 : t('chat.voiceNoteTapRecord')}
           </Text>
           <AnimatedPressable
-            style={[styles.sendButton, { backgroundColor: colors.gradientEnd }, elapsed < 1 && styles.sendDisabled]}
+            style={[styles.sendButton, { backgroundColor: colors.gradientEnd }, displaySeconds < 1 && styles.sendDisabled]}
             onPress={handleSend}
-            disabled={elapsed < 1}
+            disabled={displaySeconds < 1}
           >
             <Text style={[styles.sendText, { color: colors.text }]}>{t('chat.voiceNoteSend')}</Text>
           </AnimatedPressable>

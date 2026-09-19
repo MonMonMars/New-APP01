@@ -44,7 +44,9 @@ npm run build:web
 
 ## 2. Supabase backend
 
-See [`BACKEND_SETUP.md`](./BACKEND_SETUP.md).
+See [`BACKEND_SETUP.md`](./BACKEND_SETUP.md) (includes magic-link redirect URLs).
+
+For in-app purchases, see [`IAP.md`](./IAP.md).
 
 1. Create project at supabase.com
 2. Run `docs/supabase-schema.sql` in SQL Editor

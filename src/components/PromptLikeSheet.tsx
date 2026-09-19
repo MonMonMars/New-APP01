@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
+import { getPromptQuestionLabel } from '../i18n/labels';
 import { Profile, ProfilePrompt } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { modalFill } from '../theme/modalFill';
@@ -22,7 +23,7 @@ type PromptLikeSheetProps = {
 export function PromptLikeSheet({ visible, profile, prompt, onClose, onSend }: PromptLikeSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [comment, setComment] = useState('');
 
   if (!profile || !prompt) {
@@ -40,7 +41,9 @@ export function PromptLikeSheet({ visible, profile, prompt, onClose, onSend }: P
             </AnimatedPressable>
           </View>
           <View style={[styles.promptCard, { backgroundColor: colors.surface }]}>
-            <Text style={[styles.question, { color: colors.gradientEnd }]}>{prompt.question}</Text>
+            <Text style={[styles.question, { color: colors.gradientEnd }]}>
+              {getPromptQuestionLabel(locale, prompt.question)}
+            </Text>
             <Text style={[styles.answer, { color: colors.text }]}>{prompt.answer}</Text>
           </View>
           <TextInput

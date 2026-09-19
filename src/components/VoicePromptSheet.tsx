@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
+import { getPromptQuestionLabel } from '../i18n/labels';
 import { VOICE_PROMPT_QUESTIONS, VoicePrompt } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { modalFill } from '../theme/modalFill';
@@ -27,7 +28,7 @@ export function VoicePromptSheet({
 }: VoicePromptSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [question, setQuestion] = useState(existing?.question ?? VOICE_PROMPT_QUESTIONS[0]);
   const [recording, setRecording] = useState(false);
   const [elapsed, setElapsed] = useState(0);
@@ -111,7 +112,7 @@ export function VoicePromptSheet({
                   onPress={() => setQuestion(option)}
                 >
                   <Text style={[styles.chipText, { color: selected ? '#fff' : colors.text }]}>
-                    {option}
+                    {getPromptQuestionLabel(locale, option)}
                   </Text>
                 </AnimatedPressable>
               );

@@ -8,6 +8,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useAppLocale } from '../hooks/useAppLocale';
 import {
   getGenderLabel,
+  getOpeningMoveSuggestionLabel,
   getOrientationLabel,
   getProfileIntentLabel,
 } from '../i18n/labels';
@@ -523,7 +524,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
                   onPress={() => setOpeningMove(suggestion)}
                 >
                   <Text style={[styles.openingMoveChipText, { color: selected ? '#fff' : colors.text }]}>
-                    {suggestion}
+                    {getOpeningMoveSuggestionLabel(locale, suggestion)}
                   </Text>
                 </AnimatedPressable>
               );

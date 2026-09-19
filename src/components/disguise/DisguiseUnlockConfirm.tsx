@@ -3,7 +3,7 @@ import { Modal, Platform, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from '../../i18n';
 import { radii, spacing } from '../../theme';
 import { modalFill } from '../../theme/modalFill';
-import { AnimatedPressable } from '../AnimatedPressable';
+import { NavigationPressable } from '../NavigationPressable';
 
 type DisguiseUnlockConfirmProps = {
   visible: boolean;
@@ -37,23 +37,21 @@ export function DisguiseUnlockConfirm({
           <Text style={styles.title}>{t('disguiseConfirm.leaveTitle', { name: disguiseName })}</Text>
           <Text style={styles.body}>{t('disguiseConfirm.body', { unlockLabel })}</Text>
           <View style={styles.actions}>
-            <AnimatedPressable
+            <NavigationPressable
               style={styles.stay}
               onPress={onCancel}
-              scaleTo={0.97}
               accessibilityLabel={t('disguiseConfirm.stayA11y', { name: disguiseName })}
             >
               <Text style={styles.stayText}>{t('disguiseConfirm.stay')}</Text>
-            </AnimatedPressable>
-            <AnimatedPressable
+            </NavigationPressable>
+            <NavigationPressable
               style={[styles.unlock, { backgroundColor: accent }]}
               onPress={onConfirm}
-              scaleTo={0.97}
               accessibilityLabel={t('disguiseConfirm.leaveA11y', { unlockLabel })}
               accessibilityHint={t('disguiseConfirm.leaveHint', { unlockLabel })}
             >
               <Text style={styles.unlockText}>{t('disguiseConfirm.leaveUnlock', { unlockLabel })}</Text>
-            </AnimatedPressable>
+            </NavigationPressable>
           </View>
         </View>
       </View>

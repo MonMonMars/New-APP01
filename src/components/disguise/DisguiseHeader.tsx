@@ -17,6 +17,7 @@ import { DisguiseSearchSheet } from './DisguiseSearchSheet';
 import { DisguiseHeaderLogo } from './DisguiseBrand';
 import { PulseFeedItemViewer } from './PulseFeedItemViewer';
 import { AnimatedPressable } from '../AnimatedPressable';
+import { NavigationPressable } from '../NavigationPressable';
 
 type DisguiseHeaderProps = {
   title?: string;
@@ -40,19 +41,18 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
     <>
       <View style={[styles.header, { backgroundColor: pulseBrand.navy, borderBottomColor: pulseBrand.navyMuted }]}>
         <View style={styles.leading}>
-          <AnimatedPressable
+          <NavigationPressable
             onPress={() => {
-              setDisguiseMode(false);
+              void setDisguiseMode(false);
             }}
             accessibilityRole="button"
             accessibilityLabel={t('disguiseHeader.leaveLogoA11y', { name: meta.name, unlockLabel: meta.unlockLabel })}
             accessibilityHint={t('disguiseHeader.leaveLogoHint', { name: meta.name, unlockLabel: meta.unlockLabel })}
-            scaleTo={0.96}
             hitSlop={8}
             style={styles.brandTap}
           >
             <DisguiseHeaderLogo />
-          </AnimatedPressable>
+          </NavigationPressable>
           {title ? (
             <View style={styles.titleBlock}>
               <Text style={styles.sectionTitle} numberOfLines={1}>

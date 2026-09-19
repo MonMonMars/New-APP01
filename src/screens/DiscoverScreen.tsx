@@ -1,6 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useCallback, useRef, useState } from 'react';
+
+import { usePulseTabReturnToDisguise } from '../hooks/usePulseTabReturnToDisguise';
 import { Alert, Dimensions, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -34,6 +36,7 @@ const TAB_BAR_HEIGHT = 72;
 const { height: WINDOW_HEIGHT } = Dimensions.get('window');
 
 export function DiscoverScreen() {
+  usePulseTabReturnToDisguise();
   const insets = useSafeAreaInsets();
   const deckHeight = Math.round((WINDOW_HEIGHT - insets.top - TAB_BAR_HEIGHT) * 0.92);
   const navigation = useNavigation();

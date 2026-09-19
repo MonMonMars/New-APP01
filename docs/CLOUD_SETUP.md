@@ -66,6 +66,7 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 | Web demo | ✅ GitHub Pages | ✅ + cloud sync |
 | Magic link email | Demo stub | ✅ Real OTP email |
 | Photo upload | Local URI | ✅ Supabase Storage URL |
+| Voice notes | Local recording only | ✅ `voice-notes` bucket + HTTPS URL in messages |
 | Chat sync | Local only | ✅ Realtime subscriptions |
 | Push tokens | Local notification | ✅ Expo Push + DB |
 | Cross-device | ❌ | ✅ |

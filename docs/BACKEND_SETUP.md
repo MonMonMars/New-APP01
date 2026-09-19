@@ -55,7 +55,8 @@ When configured, `AppContext` calls `syncToSupabase()` after state changes:
 - `profiles` — name, bio, photos, prompts, social flags
 - `user_preferences` — distance, age, show-me, passport city, filters, `preferences_extra` (map search, spark section, locale, advanced filters)
 - `user_state` — passed/liked/blocked IDs, Spark+, pause flag
-- `matches` + `conversations` — full thread data
+- `matches` + `conversations` — full thread data (including `voiceUrl` on voice messages)
+- **Storage** — `profile-photos` and `voice-notes` buckets (see schema)
 
 On boot, if a Supabase session exists, `loadFromSupabase()` hydrates local state.
 

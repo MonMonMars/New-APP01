@@ -341,6 +341,7 @@ export const en = {
     voiceNoteSend: 'Send voice note',
     voiceNotePermissionTitle: 'Microphone access needed',
     voiceNotePermissionBody: 'Allow microphone access in Settings to record voice notes.',
+    voiceNoteUploading: 'Uploading voice note…',
     gifPickerTitle: 'Send a GIF',
     gifPickerSearch: 'Search GIFs...',
     gifPickerEmpty: 'No GIFs match "{query}"',

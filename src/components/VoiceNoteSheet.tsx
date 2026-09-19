@@ -7,7 +7,7 @@ import {
   useAudioRecorderState,
 } from 'expo-audio';
 import { useEffect, useState } from 'react';
-import { Alert, Modal, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../context/ThemeContext';
@@ -19,11 +19,12 @@ import { AnimatedPressable } from './AnimatedPressable';
 type VoiceNoteSheetProps = {
   visible: boolean;
   profileName: string;
+  busy?: boolean;
   onClose: () => void;
   onSend: (durationSeconds: number, voiceUrl?: string) => void;
 };
 
-export function VoiceNoteSheet({ visible, profileName, onClose, onSend }: VoiceNoteSheetProps) {
+export function VoiceNoteSheet({ visible, profileName, busy = false, onClose, onSend }: VoiceNoteSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { t } = useTranslation();
@@ -103,6 +104,7 @@ export function VoiceNoteSheet({ visible, profileName, onClose, onSend }: VoiceN
           <AnimatedPressable
             style={[styles.recordButton, { backgroundColor: isRecording ? colors.nope : colors.gradientEnd }]}
             onPress={toggleRecording}
+            disabled={busy}
           >
             <Ionicons name={isRecording ? 'stop' : 'mic'} size={28} color={colors.text} />
           </AnimatedPressable>
@@ -114,12 +116,23 @@ export function VoiceNoteSheet({ visible, profileName, onClose, onSend }: VoiceN
                 : t('chat.voiceNoteTapRecord')}
           </Text>
           <AnimatedPressable
-            style={[styles.sendButton, { backgroundColor: colors.gradientEnd }, displaySeconds < 1 && styles.sendDisabled]}
+            style={[
+              styles.sendButton,
+              { backgroundColor: colors.gradientEnd },
+              (displaySeconds < 1 || busy) && styles.sendDisabled,
+            ]}
             onPress={handleSend}
-            disabled={displaySeconds < 1}
+            disabled={displaySeconds < 1 || busy}
           >
-            <Text style={[styles.sendText, { color: colors.text }]}>{t('chat.voiceNoteSend')}</Text>
+            {busy ? (
+              <ActivityIndicator color={colors.text} />
+            ) : (
+              <Text style={[styles.sendText, { color: colors.text }]}>{t('chat.voiceNoteSend')}</Text>
+            )}
           </AnimatedPressable>
+          {busy ? (
+            <Text style={[styles.uploadHint, { color: colors.textMuted }]}>{t('chat.voiceNoteUploading')}</Text>
+          ) : null}
         </AnimatedPressable>
       </AnimatedPressable>
     </Modal>
@@ -174,5 +187,10 @@ const styles = StyleSheet.create({
   sendText: {
     fontSize: 16,
     fontWeight: '700',
+  },
+  uploadHint: {
+    marginTop: spacing.sm,
+    fontSize: 12,
+    fontWeight: '600',
   },
 });

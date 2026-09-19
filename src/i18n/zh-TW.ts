@@ -341,6 +341,7 @@ export const zhTw = {
     voiceNoteSend: '傳送語音訊息',
     voiceNotePermissionTitle: '需要麥克風權限',
     voiceNotePermissionBody: '請在設定中允許麥克風，才能錄製語音訊息。',
+    voiceNoteUploading: '正在上傳語音訊息…',
     gifPickerTitle: '傳送 GIF',
     gifPickerSearch: '搜尋 GIF…',
     gifPickerEmpty: '沒有符合「{query}」的 GIF',

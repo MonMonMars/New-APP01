@@ -82,7 +82,10 @@ export function freeTierComparisonRows(
   ];
 }
 
-export function sparkPlusFeatureDescriptions(gender?: ProfileGender | null): Array<{
+export function sparkPlusFeatureDescriptions(
+  gender: ProfileGender | undefined | null,
+  t: TranslateFn,
+): Array<{
   icon: string;
   title: string;
   description: string;
@@ -91,39 +94,39 @@ export function sparkPlusFeatureDescriptions(gender?: ProfileGender | null): Arr
   return [
     {
       icon: 'heart',
-      title: 'See who likes you',
+      title: t('sparkPlus.features.seeWhoLikesYou.title'),
       description: woman
-        ? 'You already see incoming likes on the free tier — Spark+ adds unlimited likes and rewinds.'
-        : 'Skip the guesswork — match instantly with people who already liked you.',
+        ? t('sparkPlus.features.seeWhoLikesYou.descriptionWoman')
+        : t('sparkPlus.features.seeWhoLikesYou.description'),
     },
     {
       icon: 'infinite',
-      title: 'Unlimited likes',
+      title: t('sparkPlus.features.unlimitedLikes.title'),
       description: woman
-        ? 'Go beyond 25 free likes per day with no cap.'
-        : 'No daily cap. Like as many profiles as you want.',
+        ? t('sparkPlus.features.unlimitedLikes.descriptionWoman')
+        : t('sparkPlus.features.unlimitedLikes.description'),
     },
     {
       icon: 'flash',
-      title: '1 free Boost / week',
-      description: 'Be a top profile in your area for 30 minutes.',
+      title: t('sparkPlus.features.boost.title'),
+      description: t('sparkPlus.features.boost.description'),
     },
     {
       icon: 'refresh',
-      title: 'Unlimited rewinds',
-      description: 'Undo a pass if you changed your mind.',
+      title: t('sparkPlus.features.rewinds.title'),
+      description: t('sparkPlus.features.rewinds.description'),
     },
     {
       icon: 'options',
-      title: 'Advanced filters',
-      description: 'Filter by intent, interests, and more.',
+      title: t('sparkPlus.features.filters.title'),
+      description: t('sparkPlus.features.filters.description'),
     },
     {
       icon: 'chatbubble-ellipses',
-      title: 'Spark Notes',
+      title: t('sparkPlus.features.sparkNotes.title'),
       description: woman
-        ? 'Send a message before you match — 3/day free, unlimited on Spark+.'
-        : 'Send one message before you match (1/day free).',
+        ? t('sparkPlus.features.sparkNotes.descriptionWoman')
+        : t('sparkPlus.features.sparkNotes.description'),
     },
   ];
 }

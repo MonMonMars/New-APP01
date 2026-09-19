@@ -54,7 +54,7 @@ export function runVerificationFlow(
       onPress: () => {
         void (async () => {
           if (kind === 'photo' || kind === 'person') {
-            const uri = await pickProfilePhoto();
+            const uri = await pickProfilePhoto(resolvedLocale);
             if (!uri) {
               return;
             }

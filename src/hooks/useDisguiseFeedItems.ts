@@ -2,6 +2,7 @@ import { useMemo, useRef } from 'react';
 
 import { useApp } from '../context/AppContext';
 import { FeedItem } from '../data/disguiseFeed';
+import { resolveAppLocale } from '../types/locale';
 import { buildDisguiseFeed } from '../utils/buildDisguiseFeed';
 import { filterActionedDisguiseFeed } from '../utils/filterActionedDisguiseFeed';
 import { filterDisguiseFeed } from '../utils/disguiseFeedFilter';
@@ -42,6 +43,7 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
       disguiseAdCreative,
       preferences.sparkSection,
       refreshGeneration,
+      resolveAppLocale(preferences.appLocale),
     );
     cacheRef.current = { signature, base: built };
     return built;

@@ -103,7 +103,7 @@ export function OnboardingFlow() {
   };
 
   const handleAddPhoto = async () => {
-    const uri = await pickProfilePhoto();
+    const uri = await pickProfilePhoto(locale);
     if (uri) {
       setPhotos((prev) => [...prev, uri]);
     }

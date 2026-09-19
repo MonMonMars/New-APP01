@@ -14,6 +14,7 @@ import {
 import { useApp } from '../context/AppContext';
 import { getLegalUiStrings } from '../content/legal';
 import { useTranslation } from '../i18n';
+import { translatePurchaseError } from '../utils/purchaseMessages';
 import { RootStackParamList } from '../types/navigation';
 import { PurchaseProductId } from '../types/purchases';
 import { useTheme } from '../context/ThemeContext';
@@ -97,7 +98,7 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
 
     if (!result.ok) {
       if (result.code !== 'cancelled') {
-        setPurchaseError(result.message);
+        setPurchaseError(translatePurchaseError(locale, result.code, result.message));
       }
       return;
     }

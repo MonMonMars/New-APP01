@@ -12,6 +12,8 @@ import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { getLegalUiStrings } from '../content/legal';
 import { useTranslation } from '../i18n';
+import { formatSparkPlusPerMonth, getSparkPlusPlanLabel } from '../i18n/labels';
+import { translateRestoreMessage, translatePurchaseError } from '../utils/purchaseMessages';
 import { RootStackParamList } from '../types/navigation';
 import { SPARK_PLUS_PRICING, SparkPlusPlan } from '../types/subscription';
 import { sparkPlusFeatureDescriptions } from '../utils/genderAccountPerks';
@@ -50,7 +52,7 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
   } = useApp();
   const { t, locale } = useTranslation();
   const legalUi = getLegalUiStrings(locale);
-  const features = sparkPlusFeatureDescriptions(user.gender);
+  const features = sparkPlusFeatureDescriptions(user.gender, t);
   const [selectedPlan, setSelectedPlan] = useState<SparkPlusPlan>(subscriptionPlan ?? 'annual');
   const [restoring, setRestoring] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
@@ -75,7 +77,7 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
       return;
     }
 
-    setPurchaseError(result.message);
+    setPurchaseError(translatePurchaseError(locale, result.code, result.message));
   };
 
   const handleRestore = async () => {
@@ -86,7 +88,7 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
       Alert.alert(t('sparkPlus.restored'), t('sparkPlus.restoredBody'));
       onClose();
     } else {
-      Alert.alert(t('sparkPlus.noneFound'), result.message ?? t('sparkPlus.noneFoundBody'));
+      Alert.alert(t('sparkPlus.noneFound'), translateRestoreMessage(locale, result));
     }
   };
 
@@ -156,7 +158,9 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
                   onPress={() => setSelectedPlan(plan)}
                 >
                   <View>
-                    <Text style={[styles.planLabel, { color: colors.text }]}>{pricing.label}</Text>
+                    <Text style={[styles.planLabel, { color: colors.text }]}>
+                      {getSparkPlusPlanLabel(locale, plan)}
+                    </Text>
                     {plan === 'annual' && (
                       <Text style={[styles.planBadge, { color: colors.gradientEnd }]}>
                         {t('sparkPlus.bestValue')}
@@ -166,7 +170,9 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
                   <View style={styles.planPriceCol}>
                     <Text style={[styles.planPrice, { color: colors.text }]}>{displayPrice}</Text>
                     {pricing.perMonth !== '—' && (
-                      <Text style={[styles.planPerMonth, { color: colors.textMuted }]}>{pricing.perMonth}</Text>
+                      <Text style={[styles.planPerMonth, { color: colors.textMuted }]}>
+                        {formatSparkPlusPerMonth(locale, pricing.perMonth)}
+                      </Text>
                     )}
                   </View>
                 </AnimatedPressable>
@@ -223,14 +229,14 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
 
       <PurchaseConfirmSheet
         visible={showConfirm}
-        title={`Spark+ ${SPARK_PLUS_PRICING[selectedPlan].label}`}
+        title={t('sparkPlus.confirmTitle', { plan: getSparkPlusPlanLabel(locale, selectedPlan) })}
         description={t('sparkPlus.confirmDesc')}
         price={formatProductPrice(
           PRODUCT_CATALOG[sparkPlusProductForPlan(selectedPlan)].displayPriceUsd,
         )}
         quantity={
           SPARK_PLUS_PRICING[selectedPlan].perMonth !== '—'
-            ? SPARK_PLUS_PRICING[selectedPlan].perMonth
+            ? formatSparkPlusPerMonth(locale, SPARK_PLUS_PRICING[selectedPlan].perMonth)
             : undefined
         }
         icon="diamond"

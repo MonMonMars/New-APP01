@@ -114,7 +114,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   };
 
   const handlePickImage = async () => {
-    const uri = await pickProfilePhoto();
+    const uri = await pickProfilePhoto(locale);
     if (uri) {
       handleSend('', uri);
     }

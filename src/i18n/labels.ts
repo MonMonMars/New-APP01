@@ -16,6 +16,7 @@ import {
   VOICE_PROMPT_QUESTIONS,
 } from '../types/profile';
 import { OPENING_MOVE_SUGGESTIONS } from '../utils/openingMove';
+import { SparkPlusPlan } from '../types/subscription';
 import { translate } from './index';
 
 export function getGenderLabel(locale: AppLocale, gender: ProfileGender): string {
@@ -241,6 +242,29 @@ export function getOpeningMoveSuggestionLabel(locale: AppLocale, suggestion: str
 }
 
 const TRY_ANSWER_PREFIX = /^Try: "(.+)"$/;
+
+export function getSparkPlusPlanLabel(locale: AppLocale, plan: SparkPlusPlan): string {
+  switch (plan) {
+    case 'weekly':
+      return translate(locale, 'sparkPlus.planWeekly');
+    case 'monthly':
+      return translate(locale, 'sparkPlus.planMonthly');
+    case 'annual':
+      return translate(locale, 'sparkPlus.planAnnual');
+    default: {
+      const _exhaustive: never = plan;
+      return _exhaustive;
+    }
+  }
+}
+
+export function formatSparkPlusPerMonth(locale: AppLocale, perMonth: string): string {
+  if (perMonth === '—') {
+    return perMonth;
+  }
+  const price = perMonth.replace(/\/mo$/, '');
+  return translate(locale, 'sparkPlus.perMonth', { price });
+}
 
 export function formatOpeningMoveDisplay(locale: AppLocale, text: string): string {
   const tryMatch = TRY_ANSWER_PREFIX.exec(text);

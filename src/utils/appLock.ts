@@ -1,6 +1,8 @@
 import * as LocalAuthentication from 'expo-local-authentication';
 import { Platform } from 'react-native';
 
+import { translate } from '../i18n';
+import { AppLocale, resolveAppLocale } from '../types/locale';
 import { SecuritySettings } from '../types/security';
 import { verifyPin } from './secureStorage';
 
@@ -18,19 +20,23 @@ export async function isBiometricAvailable(): Promise<boolean> {
   return enrolled;
 }
 
-export async function authenticateWithBiometric(prompt: string): Promise<boolean> {
+export async function authenticateWithBiometric(
+  prompt: string,
+  locale?: AppLocale | null,
+): Promise<boolean> {
   if (Platform.OS === 'web') {
     return false;
   }
+  const resolvedLocale = resolveAppLocale(locale);
   const available = await isBiometricAvailable();
   if (!available) {
     return false;
   }
   const result = await LocalAuthentication.authenticateAsync({
     promptMessage: prompt,
-    cancelLabel: 'Cancel',
+    cancelLabel: translate(resolvedLocale, 'security.biometricCancel'),
     disableDeviceFallback: false,
-    fallbackLabel: 'Use PIN',
+    fallbackLabel: translate(resolvedLocale, 'security.biometricUsePin'),
   });
   return result.success;
 }
@@ -39,7 +45,9 @@ export async function unlockSpark(
   settings: SecuritySettings,
   pin?: string,
   leaveLabel = 'Spark',
+  locale?: AppLocale | null,
 ): Promise<{ ok: boolean; method: UnlockMethod }> {
+  const resolvedLocale = resolveAppLocale(locale);
   if (!settings.appLockEnabled) {
     return { ok: true, method: 'none' };
   }
@@ -47,7 +55,10 @@ export async function unlockSpark(
   if (settings.biometricEnabled) {
     const biometricAvailable = await isBiometricAvailable();
     if (biometricAvailable) {
-      const biometricOk = await authenticateWithBiometric(`Leave ${leaveLabel}`);
+      const biometricOk = await authenticateWithBiometric(
+        translate(resolvedLocale, 'security.biometricLeavePrompt', { appName: leaveLabel }),
+        resolvedLocale,
+      );
       if (biometricOk) {
         return { ok: true, method: 'biometric' };
       }

@@ -84,7 +84,16 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 - **Development:** Optional `npm run web` — not required for users
 - **Tunnels (cloudflared):** Deprecated for production; use static deploy instead
 
-## 6. Environment checklist
+## 6. Chat media troubleshooting
+
+| Symptom | Fix |
+|---------|-----|
+| Alert **Upload failed** on photo send | Confirm `profile-photos` bucket exists and RLS allows `{userId}/chat/*` uploads |
+| Alert **Upload failed** on voice note | Run latest `docs/supabase-schema.sql` to create the `voice-notes` bucket |
+| Messages stay local-only | Set `EXPO_PUBLIC_SUPABASE_URL` and anon key; sign in so `userId` is set |
+| Realtime overwrites typing indicator | Expected when new cloud rows arrive; demo replies keep typing until a message lands |
+
+## 7. Environment checklist
 
 ```bash
 cp .env.example .env

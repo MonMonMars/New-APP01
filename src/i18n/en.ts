@@ -291,6 +291,11 @@ export const en = {
     sendMessage: 'Send message',
     sendRateLimitedTitle: 'Slow down a moment',
     sendRateLimitedBody: 'You are sending messages too quickly. Wait a few seconds and try again.',
+    uploadFailedTitle: 'Upload failed',
+    uploadFailedBody:
+      'Your photo or voice note could not reach cloud storage. Check your connection and Supabase bucket setup, then try again.',
+    sendFailedTitle: 'Message not sent',
+    sendFailedBody: 'This message could not be sent. Check the content and try again.',
     checkedInSafely: '✅ Checked in safely at {location}',
     homeSafeEnding: '🏠 Home safe — ending date check-in',
     dateCheckInStarted: '📍 Date check-in: meeting at {location}{contactSuffix}',

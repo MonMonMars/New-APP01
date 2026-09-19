@@ -90,8 +90,8 @@ export function DisguiseProfileScreen() {
     [user, disguiseAdCreative, preferences.sparkSection],
   );
   const savedPosts = useMemo(
-    () => resolveSavedPulsePosts(pulseSocial.savedPostIds, feedItems, user.gender),
-    [pulseSocial.savedPostIds, feedItems, user.gender],
+    () => resolveSavedPulsePosts(pulseSocial.savedPostIds, feedItems, user.gender, locale),
+    [pulseSocial.savedPostIds, feedItems, user.gender, locale],
   );
   const historyItems: PulseDetailItem[] = pulseSocial.readingHistory.map((entry, index) => ({
     id: `hist-${index}`,

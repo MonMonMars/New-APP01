@@ -6,6 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../../context/AppContext';
 import { useAppLocale } from '../../hooks/useAppLocale';
 import { useTranslation } from '../../i18n';
+import { getPulseCategoryLabel } from '../../i18n/labels';
+import { AppLocale } from '../../types/locale';
 import { useTheme } from '../../context/ThemeContext';
 import { femaleTrendingTopics } from '../../data/disguiseFemaleTrending';
 import { disguiseTrendingTopics } from '../../data/disguiseTrending';
@@ -30,10 +32,10 @@ type DisguiseSearchSheetProps = {
   onSelectArticle: (item: FeedItem) => void;
 };
 
-function searchableText(item: FeedItem): string {
+function searchableText(item: FeedItem, locale: AppLocale): string {
   switch (item.type) {
     case 'news':
-      return `${item.headline} ${item.summary} ${item.source} ${item.category}`;
+      return `${item.headline} ${item.summary} ${item.source} ${item.category} ${getPulseCategoryLabel(locale, item.category)}`;
     case 'social':
       return `${item.body} ${item.author} ${item.handle}`;
     case 'ad':
@@ -83,7 +85,8 @@ export function DisguiseSearchSheet({
         (topic) =>
           topic.label.toLowerCase().includes(q) ||
           topic.preview.toLowerCase().includes(q) ||
-          topic.category.toLowerCase().includes(q),
+          topic.category.toLowerCase().includes(q) ||
+          getPulseCategoryLabel(locale, topic.category).toLowerCase().includes(q),
       )
       .slice(0, 5)
       .map((topic) => ({ kind: 'topic' as const, label: topic.label, preview: topic.preview }));
@@ -94,7 +97,7 @@ export function DisguiseSearchSheet({
       if (seen.has(item.id)) {
         continue;
       }
-      if (searchableText(item).toLowerCase().includes(q)) {
+      if (searchableText(item, locale).toLowerCase().includes(q)) {
         seen.add(item.id);
         articleHits.push({ kind: 'article', item });
       }
@@ -104,7 +107,7 @@ export function DisguiseSearchSheet({
     }
 
     return [...topicHits, ...articleHits];
-  }, [query, rotatedFeedCatalog, trendingTopics]);
+  }, [query, rotatedFeedCatalog, trendingTopics, locale]);
 
   const handleClose = () => {
     setQuery('');

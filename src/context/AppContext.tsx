@@ -48,7 +48,7 @@ import { generateDisguiseAdImage } from '../services/disguiseImageGeneration';
 import { registerCloudPushToken } from '../services/pushCloud';
 import { scheduleDateCheckInReminder } from '../utils/notifications';
 import type { ConversationRealtimeUpdate } from '../services/realtimeChat';
-import { mergeConversationMessages } from '../utils/conversationMerge';
+import { mergeConversationLists, mergeConversationMessages } from '../utils/conversationMerge';
 import {
   deleteSupabaseAccount,
   getSupabaseSession,
@@ -633,7 +633,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 setUser(remote.user);
               }
               if (remote.preferences) {
-                setPreferences(remote.preferences);
+                setPreferences((prev) => ({ ...prev, ...remote.preferences }));
               }
               setPassedIds(arrayToSet(remote.passedIds ?? []));
               setLikedIds(arrayToSet(remote.likedIds ?? []));
@@ -642,7 +642,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
               setBlockedIds(arrayToSet(remote.blockedIds ?? []));
               setMatches(remote.matches ?? []);
               if (remote.conversations && remote.conversations.length > 0) {
-                setConversations(remote.conversations);
+                setConversations((prev) => mergeConversationLists(prev, remote.conversations ?? []));
               }
               setIsSparkPlus(remote.isSparkPlus ?? false);
               setIsPaused(remote.isPaused ?? false);

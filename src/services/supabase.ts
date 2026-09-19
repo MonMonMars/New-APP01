@@ -2,7 +2,8 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 import { supabaseSecureAuthStorage } from '../utils/secureStorage';
 import { Conversation, Match } from '../types/match';
-import { DiscoveryPreferences } from '../types/preferences';
+import type { AppLocale } from '../types/locale';
+import { DiscoveryPreferences, type SparkSection } from '../types/preferences';
 import { UserProfile } from '../types/profile';
 
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
@@ -29,6 +30,46 @@ export function getSupabaseClient(): SupabaseClient | null {
     });
   }
   return client;
+}
+
+type PreferencesExtraRow = {
+  sparkSection?: SparkSection;
+  appLocale?: AppLocale;
+  mapSearchLat?: number;
+  mapSearchLng?: number;
+  advancedFilters?: DiscoveryPreferences['advancedFilters'];
+};
+
+function buildPreferencesExtra(preferences: DiscoveryPreferences): PreferencesExtraRow {
+  return {
+    sparkSection: preferences.sparkSection,
+    appLocale: preferences.appLocale,
+    mapSearchLat: preferences.mapSearchLat,
+    mapSearchLng: preferences.mapSearchLng,
+    advancedFilters: preferences.advancedFilters,
+  };
+}
+
+function applyPreferencesExtra(
+  preferences: DiscoveryPreferences,
+  extra: unknown,
+): DiscoveryPreferences {
+  if (!extra || typeof extra !== 'object') {
+    return preferences;
+  }
+
+  const row = extra as PreferencesExtraRow;
+  return {
+    ...preferences,
+    sparkSection:
+      row.sparkSection === 'ember' || row.sparkSection === 'spark'
+        ? row.sparkSection
+        : preferences.sparkSection,
+    appLocale: row.appLocale === 'zh-TW' || row.appLocale === 'en' ? row.appLocale : preferences.appLocale,
+    mapSearchLat: typeof row.mapSearchLat === 'number' ? row.mapSearchLat : preferences.mapSearchLat,
+    mapSearchLng: typeof row.mapSearchLng === 'number' ? row.mapSearchLng : preferences.mapSearchLng,
+    advancedFilters: row.advancedFilters ?? preferences.advancedFilters,
+  };
 }
 
 export type SyncPayload = {
@@ -143,6 +184,7 @@ export async function syncToSupabase(payload: SyncPayload): Promise<void> {
     passport_city: preferences.passportCity ?? null,
     travel_mode: preferences.travelMode ?? false,
     discover_filters: preferences.discoverFilters ?? [],
+    preferences_extra: buildPreferencesExtra(preferences),
     updated_at: new Date().toISOString(),
   });
 
@@ -230,7 +272,7 @@ export async function loadFromSupabase(userId: string): Promise<Partial<SyncPayl
         interests: [],
       };
 
-  const preferences: DiscoveryPreferences = prefs
+  const basePreferences: DiscoveryPreferences = prefs
     ? {
         maxDistanceMiles: prefs.max_distance_miles ?? 25,
         minAge: prefs.min_age ?? 21,
@@ -246,6 +288,8 @@ export async function loadFromSupabase(userId: string): Promise<Partial<SyncPayl
         maxAge: 35,
         showMe: 'everyone',
       };
+
+  const preferences = applyPreferencesExtra(basePreferences, prefs?.preferences_extra);
 
   const matches: Match[] = (matchesRes.data ?? []).map((row) => ({
     id: row.id,

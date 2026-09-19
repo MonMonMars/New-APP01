@@ -264,6 +264,29 @@ export function getPassportCityLabel(locale: AppLocale, city: string): string {
   return key ? translate(locale, key) : city;
 }
 
+const NEIGHBORHOOD_I18N_KEYS: Record<string, string> = {
+  'Astoria, NY': 'mapNeighborhoods.astoriaNy',
+  'Brooklyn, NY': 'mapNeighborhoods.brooklynNy',
+  'Chelsea, NY': 'mapNeighborhoods.chelseaNy',
+  'DUMBO, NY': 'mapNeighborhoods.dumboNy',
+  'East Village, NY': 'mapNeighborhoods.eastVillageNy',
+  'Harlem, NY': 'mapNeighborhoods.harlemNy',
+  'Hoboken, NJ': 'mapNeighborhoods.hobokenNj',
+  'Jersey City, NJ': 'mapNeighborhoods.jerseyCityNj',
+  'Lower East Side, NY': 'mapNeighborhoods.lowerEastSideNy',
+  'Manhattan, NY': 'mapNeighborhoods.manhattanNy',
+  'Montreal, Canada': 'mapNeighborhoods.montrealCanada',
+  'Park Slope, NY': 'mapNeighborhoods.parkSlopeNy',
+  'Queens, NY': 'mapNeighborhoods.queensNy',
+  'Upper East Side, NY': 'mapNeighborhoods.upperEastSideNy',
+  'Williamsburg, NY': 'mapNeighborhoods.williamsburgNy',
+};
+
+export function getNeighborhoodLabel(locale: AppLocale, neighborhood: string): string {
+  const key = NEIGHBORHOOD_I18N_KEYS[neighborhood];
+  return key ? translate(locale, key) : neighborhood;
+}
+
 export function getSparkPlusPlanLabel(locale: AppLocale, plan: SparkPlusPlan): string {
   switch (plan) {
     case 'weekly':

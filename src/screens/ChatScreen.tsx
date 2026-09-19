@@ -444,7 +444,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
                 : t('chat.expireHintSpark')}
           </Text>
           <View style={styles.icebreakers}>
-            {profile.openingMove && (
+            {profile.openingMove ? (
               <>
                 <Text style={[styles.icebreakerTitle, { color: colors.textMuted }]}>
                   {t('chat.openingMoveLabel', { name: profile.name })}
@@ -453,6 +453,10 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
                   {profile.openingMove}
                 </Text>
               </>
+            ) : (
+              <Text style={[styles.icebreakerTitle, { color: colors.textMuted }]}>
+                {t('chat.breakTheIce')}
+              </Text>
             )}
             <ChatReplySuggestions
               title={dialogueTitle}

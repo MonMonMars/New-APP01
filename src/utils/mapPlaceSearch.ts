@@ -1,4 +1,4 @@
-import { getPassportCityLabel } from '../i18n/labels';
+import { getNeighborhoodLabel, getPassportCityLabel } from '../i18n/labels';
 import { PASSPORT_CITIES } from '../types/preferences';
 import type { AppLocale } from '../types/locale';
 import { NEIGHBORHOOD_COORDS } from './neighborhoodCoords';
@@ -23,15 +23,15 @@ function buildPassportPlaces(locale: AppLocale): MapPlaceSuggestion[] {
   }));
 }
 
-const NEIGHBORHOOD_PLACES: MapPlaceSuggestion[] = Object.entries(NEIGHBORHOOD_COORDS).map(
-  ([label, coords]) => ({
-    id: `hood:${label}`,
-    label,
-    searchKey: label.toLowerCase(),
+function buildNeighborhoodPlaces(locale: AppLocale): MapPlaceSuggestion[] {
+  return Object.entries(NEIGHBORHOOD_COORDS).map(([key, coords]) => ({
+    id: `hood:${key}`,
+    label: getNeighborhoodLabel(locale, key),
+    searchKey: key.toLowerCase(),
     coords,
     kind: 'neighborhood' as const,
-  }),
-);
+  }));
+}
 
 function normalizeQuery(query: string): string {
   return query.trim().toLowerCase();
@@ -44,7 +44,7 @@ export function searchMapPlaces(query: string, locale: AppLocale, limit = 6): Ma
     return [];
   }
 
-  const allPlaces = [...buildPassportPlaces(locale), ...NEIGHBORHOOD_PLACES];
+  const allPlaces = [...buildPassportPlaces(locale), ...buildNeighborhoodPlaces(locale)];
 
   const scored = allPlaces.flatMap((place) => {
     const label = place.searchKey;

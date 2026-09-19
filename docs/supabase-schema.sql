@@ -30,8 +30,13 @@ create table if not exists public.user_preferences (
   passport_city text,
   travel_mode boolean default false,
   discover_filters jsonb default '[]'::jsonb,
+  preferences_extra jsonb default '{}'::jsonb,
   updated_at timestamptz default now()
 );
+
+-- Existing projects: add extended preference fields (map search, spark section, locale, advanced filters)
+alter table public.user_preferences
+  add column if not exists preferences_extra jsonb default '{}'::jsonb;
 
 -- App state (likes, passes, subscription flags)
 create table if not exists public.user_state (

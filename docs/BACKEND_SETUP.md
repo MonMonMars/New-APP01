@@ -41,7 +41,7 @@ Enable Apple provider in Supabase Dashboard → Authentication → Providers.
 When configured, `AppContext` calls `syncToSupabase()` after state changes:
 
 - `profiles` — name, bio, photos, prompts, social flags
-- `user_preferences` — distance, age, show-me, passport city, filters
+- `user_preferences` — distance, age, show-me, passport city, filters, `preferences_extra` (map search, spark section, locale, advanced filters)
 - `user_state` — passed/liked/blocked IDs, Spark+, pause flag
 - `matches` + `conversations` — full thread data
 

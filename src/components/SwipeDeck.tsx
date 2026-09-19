@@ -20,6 +20,7 @@ import Animated, {
 import { Profile } from '../types/profile';
 import { spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { AnimatedPressable } from './AnimatedPressable';
 import { DropTargets, ZoneLayout } from './DropTargets';
 import { ProfileCard } from './ProfileCard';
@@ -101,6 +102,7 @@ function zoneProximity(
 export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
   function SwipeDeck({ profiles, onSwipe, onEmpty, canLike = true, onLikeBlocked, onSuperLike, onOpenProfile, compact = false }, ref) {
     const { colors } = useTheme();
+    const { t } = useTranslation();
     const containerRef = useRef<View>(null);
     const [activeIndex, setActiveIndex] = useState(0);
     const [activeEffect, setActiveEffect] = useState<ActiveEffect | null>(null);
@@ -480,7 +482,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
                       <AnimatedPressable
                         style={styles.infoButton}
                         onPress={() => onOpenProfile(profile)}
-                        accessibilityLabel="Open profile details"
+                        accessibilityLabel={t('profileDetail.openDetails')}
                         hitSlop={12}
                         scaleTo={0.9}
                       >

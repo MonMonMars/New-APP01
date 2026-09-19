@@ -308,6 +308,7 @@ export const zhTw = {
   profileDetail: {
     hold: '保留',
     onHold: '已保留',
+    openDetails: '開啟個人檔案詳情',
     privateUntilMatch: '配對前為私密',
     compatible: '{score}% 合拍',
     about: '關於',
@@ -1076,6 +1077,7 @@ export const zhTw = {
     openPostPhoto: '開啟貼文照片',
     sharePost: '分享貼文',
     comments: '留言',
+    postTitle: '貼文',
     addComment: '新增留言…',
     sendComment: '送出留言',
   },
@@ -1175,6 +1177,7 @@ export const zhTw = {
   newsArticle: {
     readOn: '在 {source} 閱讀',
     readOnA11y: '在 {source} 閱讀',
+    readArticleA11y: '閱讀文章：{headline}',
   },
   pulseUnavailable: {
     title: '貼文無法使用',
@@ -1216,6 +1219,7 @@ export const zhTw = {
   disguisedProfile: {
     spotlightHint: '讀者精選 — 來自 Pulse 會員的驗證留言。',
     disguisedAsAdA11y: '偽裝成廣告的個人檔案：{headline}',
+    disguisedAsNewsA11y: '偽裝成新聞的個人檔案：{headline}',
   },
   interestsEditor: {
     label: '興趣（{count}/{max}）',

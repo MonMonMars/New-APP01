@@ -181,7 +181,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
         style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
         onPress={openPreview}
         accessibilityRole="button"
-        accessibilityLabel={`Profile disguised as news: ${post.headline}`}
+        accessibilityLabel={t('disguisedProfile.disguisedAsNewsA11y', { headline: post.headline })}
       >
         <MediaWithContentBadge kind="news">
           <NewsHeroImage uri={post.coverImageUrl} style={styles.newsImage} accessibilityLabel={post.headline} />

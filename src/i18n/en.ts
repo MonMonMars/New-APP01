@@ -308,6 +308,7 @@ export const en = {
   profileDetail: {
     hold: 'Hold',
     onHold: 'On hold',
+    openDetails: 'Open profile details',
     privateUntilMatch: 'Private until you match',
     compatible: '{score}% compatible',
     about: 'About',
@@ -1083,6 +1084,7 @@ export const en = {
     openPostPhoto: 'Open post photo',
     sharePost: 'Share post',
     comments: 'Comments',
+    postTitle: 'Post',
     addComment: 'Add a comment...',
     sendComment: 'Send comment',
   },
@@ -1182,6 +1184,7 @@ export const en = {
   newsArticle: {
     readOn: 'Read on {source}',
     readOnA11y: 'Read on {source}',
+    readArticleA11y: 'Read article: {headline}',
   },
   pulseUnavailable: {
     title: 'Post unavailable',
@@ -1223,6 +1226,7 @@ export const en = {
   disguisedProfile: {
     spotlightHint: 'Reader spotlight — verified comment from a Pulse member.',
     disguisedAsAdA11y: 'Profile disguised as ad: {headline}',
+    disguisedAsNewsA11y: 'Profile disguised as news: {headline}',
   },
   interestsEditor: {
     label: 'Interests ({count}/{max})',

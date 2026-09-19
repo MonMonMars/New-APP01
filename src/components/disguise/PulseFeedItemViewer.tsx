@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 
 import { useApp } from '../../context/AppContext';
+import { useTranslation } from '../../i18n';
 import { FeedItem } from '../../data/disguiseFeed';
 import { buildDisguiseFeed } from '../../utils/buildDisguiseFeed';
 import { isCosmosTarotFeedItem } from '../../utils/disguiseFeedCatalog';
@@ -22,6 +23,7 @@ type PulseFeedItemViewerProps = {
 /** Opens the correct disguise sheet for a saved or history item. */
 export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItemViewerProps) {
   const { user, disguiseAdCreative, preferences } = useApp();
+  const { t } = useTranslation();
 
   const feedItem = useMemo((): FeedItem | null => {
     const allowItem = (item: FeedItem | undefined): FeedItem | null => {
@@ -78,7 +80,7 @@ export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItem
           visible
           post={feedItem}
           onClose={onClose}
-          sheetTitle={itemId ? 'Post' : 'Comments'}
+          sheetTitle={itemId ? t('pulseSocial.postTitle') : t('pulseSocial.comments')}
         />
       );
     case 'ad':
@@ -101,7 +103,7 @@ export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItem
               avatarMask: { text: feedItem.overlayText, variant: 'news' },
             }}
             onClose={onClose}
-            sheetTitle="Post"
+            sheetTitle={t('pulseSocial.postTitle')}
           />
         );
       }

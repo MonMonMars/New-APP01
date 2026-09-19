@@ -11,19 +11,22 @@ import { EmberStatusChips } from './EmberStatusChips';
 type RecentlyActiveStripProps = {
   profiles: Profile[];
   onSelect: (profile: Profile) => void;
+  showHeader?: boolean;
 };
 
-export function RecentlyActiveStrip({ profiles, onSelect }: RecentlyActiveStripProps) {
+export function RecentlyActiveStrip({ profiles, onSelect, showHeader = true }: RecentlyActiveStripProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
 
   if (profiles.length === 0) {
     return (
       <View style={styles.section}>
-        <View style={styles.header}>
-          <View style={[styles.liveDot, { backgroundColor: colors.like }]} />
-          <Text style={[styles.title, { color: colors.text }]}>{t('discoverHub.recentlyActive')}</Text>
-        </View>
+        {showHeader ? (
+          <View style={styles.header}>
+            <View style={[styles.liveDot, { backgroundColor: colors.like }]} />
+            <Text style={[styles.title, { color: colors.text }]}>{t('discoverHub.recentlyActive')}</Text>
+          </View>
+        ) : null}
         <Text style={[styles.emptyText, { color: colors.textMuted }]}>
           {t('discoverHub.recentlyActiveEmpty')}
         </Text>
@@ -33,10 +36,12 @@ export function RecentlyActiveStrip({ profiles, onSelect }: RecentlyActiveStripP
 
   return (
     <View style={styles.section}>
-      <View style={styles.header}>
-        <View style={[styles.liveDot, { backgroundColor: colors.like }]} />
-        <Text style={[styles.title, { color: colors.text }]}>{t('discoverHub.recentlyActive')}</Text>
-      </View>
+      {showHeader ? (
+        <View style={styles.header}>
+          <View style={[styles.liveDot, { backgroundColor: colors.like }]} />
+          <Text style={[styles.title, { color: colors.text }]}>{t('discoverHub.recentlyActive')}</Text>
+        </View>
+      ) : null}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {profiles.map((profile) => (
           <AnimatedPressable

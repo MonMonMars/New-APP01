@@ -1,4 +1,6 @@
+import { getPassportCityLabel } from '../i18n/labels';
 import { PASSPORT_CITIES } from '../types/preferences';
+import type { AppLocale } from '../types/locale';
 import { NEIGHBORHOOD_COORDS } from './neighborhoodCoords';
 import type { GeoPoint } from './geoMap';
 import { CITY_COORDS } from './searchMapTiles';
@@ -6,41 +8,46 @@ import { CITY_COORDS } from './searchMapTiles';
 export type MapPlaceSuggestion = {
   id: string;
   label: string;
+  searchKey: string;
   coords: GeoPoint;
   kind: 'passport' | 'neighborhood';
 };
 
-const PASSPORT_PLACES: MapPlaceSuggestion[] = PASSPORT_CITIES.map((city) => ({
-  id: `passport:${city}`,
-  label: city,
-  coords: CITY_COORDS[city],
-  kind: 'passport' as const,
-}));
+function buildPassportPlaces(locale: AppLocale): MapPlaceSuggestion[] {
+  return PASSPORT_CITIES.map((city) => ({
+    id: `passport:${city}`,
+    label: getPassportCityLabel(locale, city),
+    searchKey: city.toLowerCase(),
+    coords: CITY_COORDS[city],
+    kind: 'passport' as const,
+  }));
+}
 
 const NEIGHBORHOOD_PLACES: MapPlaceSuggestion[] = Object.entries(NEIGHBORHOOD_COORDS).map(
   ([label, coords]) => ({
     id: `hood:${label}`,
     label,
+    searchKey: label.toLowerCase(),
     coords,
     kind: 'neighborhood' as const,
   }),
 );
-
-const ALL_PLACES: MapPlaceSuggestion[] = [...PASSPORT_PLACES, ...NEIGHBORHOOD_PLACES];
 
 function normalizeQuery(query: string): string {
   return query.trim().toLowerCase();
 }
 
 /** City and neighborhood suggestions for the map search bar. */
-export function searchMapPlaces(query: string, limit = 6): MapPlaceSuggestion[] {
+export function searchMapPlaces(query: string, locale: AppLocale, limit = 6): MapPlaceSuggestion[] {
   const normalized = normalizeQuery(query);
   if (normalized.length < 2) {
     return [];
   }
 
-  const scored = ALL_PLACES.flatMap((place) => {
-    const label = place.label.toLowerCase();
+  const allPlaces = [...buildPassportPlaces(locale), ...NEIGHBORHOOD_PLACES];
+
+  const scored = allPlaces.flatMap((place) => {
+    const label = place.searchKey;
     const cityPart = label.split(',')[0].toLowerCase();
     let score = 0;
     if (label.startsWith(normalized)) {

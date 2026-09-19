@@ -4,7 +4,6 @@ import { useCallback, useRef, useState } from 'react';
 import { Alert, Dimensions, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesSheet';
 import { BoostBanner } from '../components/BoostBanner';
 import { RewindButton } from '../components/RewindButton';
 import { LikeLimitModal } from '../components/LikeLimitModal';
@@ -45,7 +44,6 @@ export function DiscoverScreen() {
     discoverQueue,
     hasMoreInPool,
     preferences,
-    updatePreferences,
     setSparkSection,
     searchMorePeople,
     passProfile,
@@ -79,7 +77,6 @@ export function DiscoverScreen() {
   const [waitingProfile, setWaitingProfile] = useState<Profile | null>(null);
   const [showWaiting, setShowWaiting] = useState(false);
   const [detailProfile, setDetailProfile] = useState<Profile | null>(null);
-  const [showPreferences, setShowPreferences] = useState(false);
   const [showLikeLimit, setShowLikeLimit] = useState(false);
   const [toastProfileName, setToastProfileName] = useState<string | null>(null);
   const [showMatchToast, setShowMatchToast] = useState(false);
@@ -189,7 +186,7 @@ export function DiscoverScreen() {
         t('discover.reportThanks', { reason: getReportReasonLabel(locale, reason) }),
       );
     },
-    [reportProfile, reportProfileId, t],
+    [locale, reportProfile, reportProfileId, t],
   );
 
   const handleBlockDetail = useCallback(
@@ -429,7 +426,9 @@ export function DiscoverScreen() {
             onEmpty={() => {
               if (hasMoreInPool) {
                 searchMorePeople();
+                return;
               }
+              navigation.getParent()?.navigate('MapDiscover');
             }}
             canLike={canLike}
             onLikeBlocked={() => setShowLikeLimit(true)}
@@ -536,13 +535,6 @@ export function DiscoverScreen() {
         profileName={reportProfileName}
         onClose={() => setReportProfileId(null)}
         onSubmit={handleReportSubmit}
-      />
-
-      <DiscoveryPreferencesSheet
-        visible={showPreferences}
-        preferences={preferences}
-        onClose={() => setShowPreferences(false)}
-        onChange={updatePreferences}
       />
 
     </View>

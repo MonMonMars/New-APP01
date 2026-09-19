@@ -10,6 +10,12 @@ import {
   RelationshipStatus,
 } from '../types/profile';
 import { SUGGESTED_INTERESTS } from '../data/suggestedInterests';
+import {
+  EMBER_PROMPT_OPTIONS,
+  HINGE_PROMPT_OPTIONS,
+  VOICE_PROMPT_QUESTIONS,
+} from '../types/profile';
+import { OPENING_MOVE_SUGGESTIONS } from '../utils/openingMove';
 import { translate } from './index';
 
 export function getGenderLabel(locale: AppLocale, gender: ProfileGender): string {
@@ -191,6 +197,57 @@ const INTEREST_I18N_KEYS: Record<(typeof SUGGESTED_INTERESTS)[number], string> =
 export function getInterestLabel(locale: AppLocale, interest: string): string {
   const key = INTEREST_I18N_KEYS[interest as (typeof SUGGESTED_INTERESTS)[number]];
   return key ? translate(locale, key) : interest;
+}
+
+const PROMPT_QUESTION_I18N_KEYS: Record<string, string> = {
+  [HINGE_PROMPT_OPTIONS[0]]: 'hingePrompts.mySimplePleasures',
+  [HINGE_PROMPT_OPTIONS[1]]: 'hingePrompts.iGoCrazyFor',
+  [HINGE_PROMPT_OPTIONS[2]]: 'hingePrompts.togetherWeCould',
+  [HINGE_PROMPT_OPTIONS[3]]: 'hingePrompts.wayToWinMeOver',
+  [HINGE_PROMPT_OPTIONS[4]]: 'hingePrompts.lifeGoalOfMine',
+  [HINGE_PROMPT_OPTIONS[5]]: 'hingePrompts.mostControversialOpinion',
+  [HINGE_PROMPT_OPTIONS[6]]: 'hingePrompts.imLookingFor',
+  [HINGE_PROMPT_OPTIONS[7]]: 'hingePrompts.typicalSunday',
+  [HINGE_PROMPT_OPTIONS[8]]: 'hingePrompts.bestTravelStory',
+  [HINGE_PROMPT_OPTIONS[9]]: 'hingePrompts.greenFlagsILookFor',
+  [EMBER_PROMPT_OPTIONS[0]]: 'emberPrompts.iValueDiscretionBecause',
+  [EMBER_PROMPT_OPTIONS[1]]: 'emberPrompts.bestTimeToTalkIs',
+  [EMBER_PROMPT_OPTIONS[2]]: 'emberPrompts.whatThisIsAndIsnt',
+  [EMBER_PROMPT_OPTIONS[3]]: 'emberPrompts.imLookingFor',
+  [VOICE_PROMPT_QUESTIONS[0]]: 'voicePromptQuestions.myPerfectSunday',
+  [VOICE_PROMPT_QUESTIONS[1]]: 'voicePromptQuestions.wayToWinMeOver',
+  [VOICE_PROMPT_QUESTIONS[2]]: 'voicePromptQuestions.iGeekOutOn',
+  [VOICE_PROMPT_QUESTIONS[3]]: 'voicePromptQuestions.mostIrrationalFear',
+  [VOICE_PROMPT_QUESTIONS[4]]: 'voicePromptQuestions.twoTruthsAndALie',
+};
+
+export function getPromptQuestionLabel(locale: AppLocale, question: string): string {
+  const key = PROMPT_QUESTION_I18N_KEYS[question];
+  return key ? translate(locale, key) : question;
+}
+
+const OPENING_MOVE_I18N_KEYS: Record<(typeof OPENING_MOVE_SUGGESTIONS)[number], string> = {
+  [OPENING_MOVE_SUGGESTIONS[0]]: 'openingMoveSuggestions.goToWeekendPlan',
+  [OPENING_MOVE_SUGGESTIONS[1]]: 'openingMoveSuggestions.hiddenGemInCity',
+  [OPENING_MOVE_SUGGESTIONS[2]]: 'openingMoveSuggestions.coffeeOrCocktails',
+  [OPENING_MOVE_SUGGESTIONS[3]]: 'openingMoveSuggestions.twoTruthsAndALie',
+  [OPENING_MOVE_SUGGESTIONS[4]]: 'openingMoveSuggestions.bestMealLately',
+  [OPENING_MOVE_SUGGESTIONS[5]]: 'openingMoveSuggestions.passionateAboutNow',
+};
+
+export function getOpeningMoveSuggestionLabel(locale: AppLocale, suggestion: string): string {
+  const key = OPENING_MOVE_I18N_KEYS[suggestion as (typeof OPENING_MOVE_SUGGESTIONS)[number]];
+  return key ? translate(locale, key) : suggestion;
+}
+
+const TRY_ANSWER_PREFIX = /^Try: "(.+)"$/;
+
+export function formatOpeningMoveDisplay(locale: AppLocale, text: string): string {
+  const tryMatch = TRY_ANSWER_PREFIX.exec(text);
+  if (tryMatch) {
+    return translate(locale, 'openingMove.tryAnswer', { answer: tryMatch[1] });
+  }
+  return getOpeningMoveSuggestionLabel(locale, text);
 }
 
 export function getBrandMarkLabel(

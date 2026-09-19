@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
-import { getEmberRelationshipLabel } from '../i18n/labels';
+import { formatOpeningMoveDisplay, getEmberRelationshipLabel } from '../i18n/labels';
 import { Profile } from '../types/profile';
 import { pickOpeningMove } from '../utils/openingMove';
 import { Button } from './Button';
@@ -66,7 +66,7 @@ export function MatchModal({
 
         <View style={styles.openingMoveCard}>
           <Text style={styles.openingMoveLabel}>{t('discover.openingMove')}</Text>
-          <Text style={styles.openingMoveText}>{openingMove}</Text>
+          <Text style={styles.openingMoveText}>{formatOpeningMoveDisplay(locale, openingMove)}</Text>
         </View>
 
         <View style={[styles.actions, { paddingBottom: insets.bottom + spacing.lg }]}>

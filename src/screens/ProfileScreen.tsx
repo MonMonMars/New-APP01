@@ -21,7 +21,7 @@ import { EmberStatusChips } from '../components/EmberStatusChips';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
-import { getInterestLabel, getProfileIntentLabel } from '../i18n/labels';
+import { getInterestLabel, getProfileIntentLabel, getPromptQuestionLabel } from '../i18n/labels';
 import { ThemeMode } from '../types/settings';
 import { DisguiseAdGeneratorSheet } from '../components/disguise/DisguiseAdGeneratorSheet';
 import { computeProfileCompletion } from '../utils/profileCompletion';
@@ -376,7 +376,9 @@ export function ProfileScreen() {
             <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('profile.prompts')}</Text>
             {user.prompts.map((prompt) => (
               <View key={prompt.question} style={[styles.promptCard, { backgroundColor: colors.surface }]}>
-                <Text style={[styles.promptQ, { color: colors.textMuted }]}>{prompt.question}</Text>
+                <Text style={[styles.promptQ, { color: colors.textMuted }]}>
+                  {getPromptQuestionLabel(locale, prompt.question)}
+                </Text>
                 <Text style={[styles.promptA, { color: colors.text }]}>{prompt.answer}</Text>
               </View>
             ))}

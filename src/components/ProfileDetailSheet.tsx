@@ -12,6 +12,7 @@ import {
   getEmberDiscretionHint,
   getEmberRelationshipLabel,
   getProfileIntentLabel,
+  getPromptQuestionLabel,
 } from '../i18n/labels';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
@@ -191,7 +192,9 @@ export function ProfileDetailSheet({
               onPress={() => onLikePrompt?.(prompt)}
               disabled={!onLikePrompt}
             >
-              <Text style={[styles.promptQuestion, { color: colors.textMuted }]}>{prompt.question}</Text>
+              <Text style={[styles.promptQuestion, { color: colors.textMuted }]}>
+                {getPromptQuestionLabel(locale, prompt.question)}
+              </Text>
               <Text style={[styles.promptAnswer, { color: colors.text }]}>{prompt.answer}</Text>
               {onLikePrompt && (
                 <View style={styles.likePromptRow}>

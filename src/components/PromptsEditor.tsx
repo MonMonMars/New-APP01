@@ -3,6 +3,7 @@ import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
+import { getPromptQuestionLabel } from '../i18n/labels';
 import { HINGE_PROMPT_OPTIONS, ProfilePrompt } from '../types/profile';
 import { getPromptFeedback } from '../utils/promptFeedback';
 import { radii, spacing } from '../theme';
@@ -60,7 +61,9 @@ export function PromptsEditor({
         return (
         <View key={`prompt-${index}`} style={[styles.card, { backgroundColor: colors.surface }]}>
           <AnimatedPressable style={styles.questionRow} onPress={() => cycleQuestion(index)}>
-            <Text style={[styles.question, { color: colors.gradientEnd }]}>{prompt.question}</Text>
+            <Text style={[styles.question, { color: colors.gradientEnd }]}>
+              {getPromptQuestionLabel(locale, prompt.question)}
+            </Text>
             <Ionicons name="swap-horizontal" size={16} color={colors.textMuted} />
           </AnimatedPressable>
           <TextInput

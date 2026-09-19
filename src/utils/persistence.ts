@@ -59,6 +59,7 @@ export type PersistedAppState = {
   bonusSparkNotes: number;
   notificationsEnabled: boolean;
   notificationPreferences: NotificationPreferences;
+  matchNotificationPromptShown: boolean;
   lastPassedProfileId: string | null;
   emberDailyLikesUsed?: number;
   emberLastPassedProfileId?: string | null;
@@ -121,6 +122,7 @@ export function createDefaultPersistedState(): PersistedAppState {
     bonusSparkNotes: 0,
     notificationsEnabled: false,
     notificationPreferences: defaultNotificationPreferences,
+    matchNotificationPromptShown: false,
       lastPassedProfileId: null,
       emberDailyLikesUsed: 0,
       emberLastPassedProfileId: null,

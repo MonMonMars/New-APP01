@@ -51,7 +51,7 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
     <>
       <AnimatedPressable
         accessibilityRole="button"
-        accessibilityLabel={`Read article: ${post.headline}`}
+        accessibilityLabel={t('newsArticle.readArticleA11y', { headline: post.headline })}
         onPress={() => setArticleOpen(true)}
         style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
       >

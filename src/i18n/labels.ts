@@ -193,6 +193,26 @@ export function getInterestLabel(locale: AppLocale, interest: string): string {
   return key ? translate(locale, key) : interest;
 }
 
+export function getBrandMarkLabel(
+  locale: AppLocale,
+  world: 'spark' | 'ember' | 'pulse' | 'harbor',
+): string {
+  switch (world) {
+    case 'spark':
+      return translate(locale, 'preferences.spark');
+    case 'ember':
+      return translate(locale, 'preferences.ember');
+    case 'pulse':
+      return translate(locale, 'tabs.pulse');
+    case 'harbor':
+      return translate(locale, 'disguiseWorld.harborName');
+    default: {
+      const _exhaustive: never = world;
+      return _exhaustive;
+    }
+  }
+}
+
 export function getSparkSectionEmpty(
   locale: AppLocale,
   section: SparkSection,

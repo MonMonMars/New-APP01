@@ -97,7 +97,7 @@ export function AdvancedFiltersSection({
         {!emberMode && !isSparkPlus && (
           <View style={[styles.plusBadge, { backgroundColor: colors.gradientEnd }]}>
             <Ionicons name="diamond" size={10} color={colors.text} />
-            <Text style={[styles.plusText, { color: colors.text }]}>Spark+</Text>
+            <Text style={[styles.plusText, { color: colors.text }]}>{t('sparkPlus.memberBadge')}</Text>
           </View>
         )}
       </View>

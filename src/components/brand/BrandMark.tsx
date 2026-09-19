@@ -1,5 +1,8 @@
 import { Image, ImageSourcePropType, ImageStyle, Platform, StyleProp, StyleSheet } from 'react-native';
 
+import { useAppLocale } from '../../hooks/useAppLocale';
+import { getBrandMarkLabel } from '../../i18n/labels';
+
 export type BrandMarkWorld = 'spark' | 'ember' | 'pulse' | 'harbor';
 
 type BrandMarkSize = 'sm' | 'md' | 'lg';
@@ -25,25 +28,19 @@ const SOURCES: Record<BrandMarkWorld, ImageSourcePropType> = {
   harbor: require('../../../assets/brand/harbor-h.png'),
 };
 
-const LABELS: Record<BrandMarkWorld, string> = {
-  spark: 'Spark',
-  ember: 'Ember',
-  pulse: 'Pulse',
-  harbor: 'Harbor',
-};
-
 function markSize(size: BrandMarkSize | number): number {
   return typeof size === 'number' ? size : SIZE_PX[size];
 }
 
 /** Locked lettermarks: Pulse P3, Spark S5, Ember E1e, Harbor H on E1e gold. */
 export function BrandMark({ world, size = 'md', muted = false, style }: BrandMarkProps) {
+  const { locale } = useAppLocale();
   const px = markSize(size);
 
   return (
     <Image
       accessibilityRole="image"
-      accessibilityLabel={LABELS[world]}
+      accessibilityLabel={getBrandMarkLabel(locale, world)}
       source={SOURCES[world]}
       resizeMode="contain"
       style={[

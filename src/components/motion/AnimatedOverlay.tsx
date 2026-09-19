@@ -8,6 +8,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { useTranslation } from '../../i18n';
 import { MOTION } from '../../motion/presets';
 import { modalFill } from '../../theme/modalFill';
 import { webClass } from '../../motion/webMotion';
@@ -29,6 +30,7 @@ export function AnimatedOverlay({
   variant = 'bottom',
   contentStyle,
 }: AnimatedOverlayProps) {
+  const { t } = useTranslation();
   const [mounted, setMounted] = useState(visible);
   const backdrop = useSharedValue(0);
   const progress = useSharedValue(0);
@@ -94,7 +96,7 @@ export function AnimatedOverlay({
           <Pressable
             style={[styles.backdrop, styles.backdropLayer, { opacity: 0.52 }]}
             onPress={onClose}
-            accessibilityLabel="Close"
+            accessibilityLabel={t('common.close')}
           />
           <View
             style={[
@@ -127,7 +129,7 @@ export function AnimatedOverlay({
     <Modal visible transparent animationType="none" onRequestClose={onClose}>
       <View style={[styles.root, modalFill]} pointerEvents="box-none">
         <Animated.View style={[styles.backdrop, backdropStyle]} pointerEvents="auto">
-          <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
+          <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel={t('common.close')} />
         </Animated.View>
 
         <Animated.View

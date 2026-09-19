@@ -40,6 +40,7 @@ export function PulseDisguiseLogo({ compact = false }: { compact?: boolean }) {
 /** Spark S5 / Ember E1e — top-left brand mark in dating mode. */
 export function SectionLeftLogo({ compact = false }: { compact?: boolean }) {
   const { disguiseMode, preferences } = useApp();
+  const { t } = useTranslation();
   const section = resolveSparkSection(preferences.sparkSection);
   const markSize = compact ? 36 : 40;
 
@@ -51,7 +52,7 @@ export function SectionLeftLogo({ compact = false }: { compact?: boolean }) {
     <View
       style={styles.leftMark}
       accessibilityRole="image"
-      accessibilityLabel={section === 'ember' ? 'Ember' : 'Spark'}
+      accessibilityLabel={section === 'ember' ? t('preferences.ember') : t('preferences.spark')}
     >
       <BrandMark world={section} size={markSize} />
     </View>

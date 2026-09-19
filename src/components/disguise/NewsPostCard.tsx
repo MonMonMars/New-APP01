@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
-import { getPulseCategoryLabel } from '../../i18n/labels';
+import { getPulseCategoryLabel, localizeTimeAgoLabel } from '../../i18n/labels';
 import { getProfileById } from '../../data/profiles';
 import { NewsPost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
@@ -66,7 +66,9 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
             <Text style={[styles.category, { color: colors.textMuted }]}>
               {getPulseCategoryLabel(locale, post.category)}
             </Text>
-            <Text style={[styles.time, { color: colors.textMuted }]}>{post.timeAgo}</Text>
+            <Text style={[styles.time, { color: colors.textMuted }]}>
+              {localizeTimeAgoLabel(locale, post.timeAgo)}
+            </Text>
           </View>
           <Text style={[styles.headline, { color: colors.text }]}>{post.headline}</Text>
           <Text style={[styles.summary, { color: colors.textMuted }]} numberOfLines={3}>

@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
-import { getPulseCategoryLabel } from '../../i18n/labels';
+import { getPulseCategoryLabel, localizeTimeAgoLabel } from '../../i18n/labels';
 import { DisguisedProfilePost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
@@ -196,7 +196,9 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
                 {getPulseCategoryLabel(locale, post.category)}
               </Text>
             ) : null}
-            <Text style={[styles.time, { color: colors.textMuted }]}>{post.timeAgo}</Text>
+            <Text style={[styles.time, { color: colors.textMuted }]}>
+              {localizeTimeAgoLabel(locale, post.timeAgo)}
+            </Text>
           </View>
           <Text style={[styles.headline, { color: colors.text }]}>{post.headline}</Text>
           <Text style={[styles.summary, { color: colors.textMuted }]} numberOfLines={3}>

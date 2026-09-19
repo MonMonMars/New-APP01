@@ -1091,6 +1091,7 @@ export const zhTw = {
     trendingTopics: '熱門話題',
     postsInCategory: '{posts} 則貼文 · {category}',
     editorsPicks: '編輯精選',
+    editorsPick: '編輯精選',
     chipForYou: '為你推薦',
     chipMarkets: '股市',
     chipWeekend: '週末',
@@ -1187,6 +1188,7 @@ export const zhTw = {
     minutesAgo: '{n} 分鐘前',
     hoursAgo: '{n} 小時前',
     daysAgo: '{n} 天前',
+    minRead: '閱讀 {n} 分鐘',
   },
   utils: {
     photoPermissionTitle: '需要照片存取權限',

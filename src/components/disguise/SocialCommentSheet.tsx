@@ -6,7 +6,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
-import { formatHoursAgoLocalized, formatRelativeTimeLocalized } from '../../i18n/labels';
+import {
+  formatHoursAgoLocalized,
+  formatRelativeTimeLocalized,
+  localizeTimeAgoLabel,
+} from '../../i18n/labels';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
@@ -83,7 +87,7 @@ export function SocialCommentSheet({
               overlayVariant={post.avatarMask?.variant ?? 'news'}
               contentKind={authorContentKind}
               title={post.author}
-              subtitle={`${post.handle} · ${post.timeAgo}`}
+              subtitle={`${post.handle} · ${localizeTimeAgoLabel(locale, post.timeAgo)}`}
               body={post.body}
               titleStyle={{ color: colors.text }}
               bodyStyle={{ color: colors.text }}

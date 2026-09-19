@@ -1098,6 +1098,7 @@ export const en = {
     trendingTopics: 'Trending topics',
     postsInCategory: '{posts} posts · {category}',
     editorsPicks: 'Editor\'s picks',
+    editorsPick: 'Editor\'s pick',
     chipForYou: 'For you',
     chipMarkets: 'Markets',
     chipWeekend: 'Weekend',
@@ -1194,6 +1195,7 @@ export const en = {
     minutesAgo: '{n}m ago',
     hoursAgo: '{n}h ago',
     daysAgo: '{n}d ago',
+    minRead: '{n} min read',
   },
   utils: {
     photoPermissionTitle: 'Photo access needed',

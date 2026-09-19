@@ -412,6 +412,60 @@ export function formatHoursAgoLocalized(locale: AppLocale, hours: number): strin
   return translate(locale, 'time.hoursAgo', { n: hours });
 }
 
+const TIME_AGO_LABEL_KEYS: Record<string, string> = {
+  'Just now': 'time.justNow',
+  "Editor's pick": 'disguiseTrending.editorsPick',
+};
+
+export function localizeTimeAgoLabel(locale: AppLocale, label: string): string {
+  const trimmed = label.trim();
+  if (!trimmed) {
+    return label;
+  }
+
+  const staticKey = TIME_AGO_LABEL_KEYS[trimmed];
+  if (staticKey) {
+    return translate(locale, staticKey);
+  }
+
+  const minRead = trimmed.match(/^(\d+)\s*min read$/i);
+  if (minRead) {
+    return translate(locale, 'time.minRead', { n: Number(minRead[1]) });
+  }
+
+  const withAgo = trimmed.match(/^(\d+)\s*([mhd])\s*ago$/i);
+  if (withAgo) {
+    const n = Number(withAgo[1]);
+    const unit = withAgo[2].toLowerCase();
+    if (unit === 'm') {
+      return translate(locale, 'time.minutesAgo', { n });
+    }
+    if (unit === 'h') {
+      return translate(locale, 'time.hoursAgo', { n });
+    }
+    if (unit === 'd') {
+      return translate(locale, 'time.daysAgo', { n });
+    }
+  }
+
+  const compact = trimmed.match(/^(\d+)\s*([mhd])$/i);
+  if (compact) {
+    const n = Number(compact[1]);
+    const unit = compact[2].toLowerCase();
+    if (unit === 'm') {
+      return translate(locale, 'time.minutesAgo', { n });
+    }
+    if (unit === 'h') {
+      return translate(locale, 'time.hoursAgo', { n });
+    }
+    if (unit === 'd') {
+      return translate(locale, 'time.daysAgo', { n });
+    }
+  }
+
+  return label;
+}
+
 export function getMarketVolumeLabel(locale: AppLocale, volumeLabel: string): string {
   const value = volumeLabel.replace(/\s*vol$/i, '').trim();
   return translate(locale, 'disguiseMarkets.volumeLabel', { value });

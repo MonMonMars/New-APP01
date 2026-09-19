@@ -19,6 +19,7 @@ import {
   getPulseCategoryLabel,
   getTrendingChangeLabel,
   getTrendingChipLabel,
+  localizeTimeAgoLabel,
 } from '../../i18n/labels';
 import { NewsPost } from '../../data/disguiseFeed';
 import {
@@ -281,7 +282,7 @@ export function DisguiseTrendingScreen() {
               </MediaWithContentBadge>
               <View style={styles.breakingBody}>
                 <Text style={[styles.breakingSource, { color: colors.textMuted }]}>
-                  {card.source} · {card.timeAgo}
+                  {card.source} · {localizeTimeAgoLabel(locale, card.timeAgo)}
                 </Text>
                 <Text style={[styles.breakingHeadline, { color: colors.text }]} numberOfLines={3}>
                   {card.headline}

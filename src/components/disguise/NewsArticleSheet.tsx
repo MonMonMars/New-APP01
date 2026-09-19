@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
-import { getPulseCategoryLabel } from '../../i18n/labels';
+import { getPulseCategoryLabel, localizeTimeAgoLabel } from '../../i18n/labels';
 import { NewsPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { openExternalUrl } from '../../utils/openExternalUrl';
@@ -95,7 +95,9 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
           </FadeSlideIn>
           <FadeSlideIn replayKey={visible} index={2}>
             <Text style={[styles.headline, { color: colors.text }]}>{post.headline}</Text>
-            <Text style={[styles.time, { color: colors.textMuted }]}>{post.timeAgo}</Text>
+            <Text style={[styles.time, { color: colors.textMuted }]}>
+              {localizeTimeAgoLabel(locale, post.timeAgo)}
+            </Text>
           </FadeSlideIn>
           {paragraphs.map((paragraph, index) => (
             <FadeSlideIn key={`${post.id}-p-${index}`} replayKey={visible} index={3 + index}>

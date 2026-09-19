@@ -5,6 +5,7 @@ import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
+import { localizeTimeAgoLabel } from '../../i18n/labels';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { buildSocialReporter, socialReporterPhotoIndex } from '../../utils/disguiseReporterPhotos';
@@ -130,7 +131,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
               {post.author}
             </Text>
             <Text style={[styles.authorHandle, { color: colors.textMuted }]} numberOfLines={1}>
-              {post.handle} · {post.timeAgo}
+              {post.handle} · {localizeTimeAgoLabel(locale, post.timeAgo)}
             </Text>
           </View>
         </View>

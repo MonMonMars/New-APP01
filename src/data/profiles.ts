@@ -1,4 +1,5 @@
 import { aiPersonaProfiles, AI_PERSONA_IDS } from './aiPersonas';
+import { passportRawProfiles } from './passportProfiles';
 import { extraRawProfiles } from './extraProfiles';
 import { latestRawProfiles } from './latestProfiles';
 import { moreRawProfiles } from './moreProfiles';
@@ -1167,6 +1168,7 @@ const rawProfiles: Profile[] = [
   ...latestRawProfiles,
   ...newestRawProfiles,
   ...aiPersonaProfiles,
+  ...passportRawProfiles,
 ];
 
 function withVerification(profile: Profile): Profile {

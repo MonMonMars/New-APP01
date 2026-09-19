@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../context/AppContext';
@@ -17,11 +17,15 @@ import {
   type GeoPoint,
 } from '../utils/geoMap';
 import { resolveUserLocation } from '../services/userLocation';
+import { searchMapPlaces, type MapPlaceSuggestion } from '../utils/mapPlaceSearch';
 import { mapCenterForCity, zoomForRadius } from '../utils/searchMapTiles';
 import { radii, spacing } from '../theme';
 import { ActionToast } from './ActionToast';
 import { AnimatedPressable } from './AnimatedPressable';
+import { ProfileDetailSheet } from './ProfileDetailSheet';
 import { MAP_MAX_ZOOM, MAP_MIN_ZOOM, SearchMapView } from './SearchMapView';
+
+const MAP_PIN_LIMIT = 48;
 
 const RADIUS_CHIPS = [
   { labelKey: '25', value: 25 },
@@ -52,8 +56,15 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     discoverPool,
     expandSearchRadius,
     searchMapAt,
+    clearMapSearch,
     searchMorePeople,
     prioritizeProfileInDeck,
+    getCompatibilityScore,
+    likeProfile,
+    passProfile,
+    holdProfile,
+    unholdProfile,
+    heldIds,
   } = useApp();
 
   const section = resolveSparkSection(preferences.sparkSection);
@@ -79,7 +90,10 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const [mapZoom, setMapZoom] = useState(() => zoomForRadius(currentRadius));
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
   const [nameQuery, setNameQuery] = useState('');
+  const [detailProfile, setDetailProfile] = useState<Profile | null>(null);
   const [deckToast, setDeckToast] = useState<string | null>(null);
+  const hasActiveMapSearch =
+    preferences.mapSearchLat != null && preferences.mapSearchLng != null;
 
   useEffect(() => {
     let active = true;
@@ -89,7 +103,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         return;
       }
       setUserLocation(result.coords);
-      if (!preferences.travelMode) {
+      if (!preferences.travelMode && !hasActiveMapSearch) {
         setMapCenter(result.coords);
         setSearchCenter(result.coords);
       }
@@ -97,19 +111,19 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     return () => {
       active = false;
     };
-  }, [preferences.passportCity, preferences.travelMode]);
+  }, [hasActiveMapSearch, preferences.passportCity, preferences.travelMode]);
 
   useEffect(() => {
     setMapZoom(zoomForRadius(currentRadius));
   }, [currentRadius]);
 
   useEffect(() => {
-    if (preferences.travelMode && preferences.passportCity) {
+    if (preferences.travelMode && preferences.passportCity && !hasActiveMapSearch) {
       const passportCenter = mapCenterForCity(preferences.passportCity);
       setMapCenter(passportCenter);
       setSearchCenter(passportCenter);
     }
-  }, [preferences.passportCity, preferences.travelMode]);
+  }, [hasActiveMapSearch, preferences.passportCity, preferences.travelMode]);
 
   const areaPins = useMemo(
     () =>
@@ -120,6 +134,8 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     [currentRadius, discoverPool, searchCenter],
   );
 
+  const placeSuggestions = useMemo(() => searchMapPlaces(nameQuery), [nameQuery]);
+
   const visiblePins = useMemo(() => {
     const query = nameQuery.trim().toLowerCase();
     if (!query) {
@@ -127,6 +143,8 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     }
     return areaPins.filter((profile) => profile.name.toLowerCase().includes(query));
   }, [areaPins, nameQuery]);
+
+  const pinsTruncated = areaPins.length > MAP_PIN_LIMIT;
 
   const selectedProfile = useMemo(
     () => visiblePins.find((profile) => profile.id === selectedPinId) ?? null,
@@ -147,9 +165,35 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const handleRecenter = useCallback(() => {
     const target = userLocation ?? mapCenterForCity(preferences.passportCity);
     setMapCenter(target);
-    setSearchCenter(target);
     setSelectedPinId(null);
   }, [preferences.passportCity, userLocation]);
+
+  const handleResetSearchArea = useCallback(() => {
+    clearMapSearch();
+    const target =
+      preferences.travelMode && preferences.passportCity
+        ? mapCenterForCity(preferences.passportCity)
+        : userLocation ?? mapCenterForCity(preferences.passportCity);
+    setMapCenter(target);
+    setSearchCenter(target);
+    setSelectedPinId(null);
+    setNameQuery('');
+    setDeckToast(t('mapDiscover.resetSearchArea'));
+  }, [clearMapSearch, preferences.passportCity, preferences.travelMode, t, userLocation]);
+
+  const handleSelectPlace = useCallback(
+    (place: MapPlaceSuggestion) => {
+      setMapCenter(place.coords);
+      setSearchCenter(place.coords);
+      setMapZoom(zoomForRadius(currentRadius));
+      searchMapAt(place.coords);
+      searchMorePeople();
+      setNameQuery('');
+      setSelectedPinId(null);
+      setDeckToast(t('mapDiscover.areaLoaded'));
+    },
+    [currentRadius, searchMapAt, searchMorePeople, t],
+  );
 
   const handlePinPress = (profileId: string) => {
     setSelectedPinId(profileId);
@@ -166,6 +210,40 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const handleAddToDeck = (profile: Profile) => {
     prioritizeProfileInDeck(profile.id);
     setDeckToast(t('discoverHub.addedToDeck', { name: profile.name }));
+  };
+
+  const handleOpenProfile = (profile: Profile) => {
+    setDetailProfile(profile);
+  };
+
+  const handleDetailLike = () => {
+    if (!detailProfile) {
+      return;
+    }
+    likeProfile(detailProfile);
+    prioritizeProfileInDeck(detailProfile.id);
+    setDeckToast(t('discoverHub.addedToDeck', { name: detailProfile.name }));
+    setDetailProfile(null);
+  };
+
+  const handleDetailPass = () => {
+    if (!detailProfile) {
+      return;
+    }
+    passProfile(detailProfile);
+    setDetailProfile(null);
+    setSelectedPinId(null);
+  };
+
+  const handleDetailHold = () => {
+    if (!detailProfile) {
+      return;
+    }
+    if (heldIds.has(detailProfile.id)) {
+      unholdProfile(detailProfile.id);
+    } else {
+      holdProfile(detailProfile.id);
+    }
   };
 
   const radiusChipLabel = (key: (typeof RADIUS_CHIPS)[number]['labelKey']) => {
@@ -219,14 +297,25 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
             })}
           </Text>
         </View>
-        <AnimatedPressable
-          onPress={handleRecenter}
-          hitSlop={12}
-          accessibilityLabel={t('mapDiscover.recenterA11y')}
-          style={[styles.iconButton, { backgroundColor: chromeBg }]}
-        >
-          <Ionicons name="locate" size={20} color={chromeText} />
-        </AnimatedPressable>
+        {hasActiveMapSearch ? (
+          <AnimatedPressable
+            onPress={handleResetSearchArea}
+            hitSlop={12}
+            accessibilityLabel={t('mapDiscover.resetSearchAreaA11y')}
+            style={[styles.iconButton, { backgroundColor: chromeBg }]}
+          >
+            <Ionicons name="refresh" size={20} color={chromeText} />
+          </AnimatedPressable>
+        ) : (
+          <AnimatedPressable
+            onPress={handleRecenter}
+            hitSlop={12}
+            accessibilityLabel={t('mapDiscover.recenterA11y')}
+            style={[styles.iconButton, { backgroundColor: chromeBg }]}
+          >
+            <Ionicons name="locate" size={20} color={chromeText} />
+          </AnimatedPressable>
+        )}
       </View>
 
       <View style={[styles.searchBarWrap, { top: insets.top + spacing.sm + 52 }]}>
@@ -252,6 +341,29 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
             </AnimatedPressable>
           ) : null}
         </View>
+        {placeSuggestions.length > 0 ? (
+          <ScrollView
+            style={[styles.suggestionsList, { backgroundColor: chromeBg }]}
+            keyboardShouldPersistTaps="handled"
+            accessibilityLabel={t('mapDiscover.placeSuggestionsA11y')}
+          >
+            {placeSuggestions.map((place) => (
+              <AnimatedPressable
+                key={place.id}
+                style={styles.suggestionRow}
+                accessibilityLabel={t('mapDiscover.goToPlaceA11y', { place: place.label })}
+                onPress={() => handleSelectPlace(place)}
+              >
+                <Ionicons
+                  name={place.kind === 'passport' ? 'earth' : 'location-outline'}
+                  size={16}
+                  color={chromeMuted}
+                />
+                <Text style={[styles.suggestionText, { color: chromeText }]}>{place.label}</Text>
+              </AnimatedPressable>
+            ))}
+          </ScrollView>
+        ) : null}
       </View>
 
       <View style={[styles.zoomControls, { top: insets.top + spacing.sm + 104 }]}>
@@ -298,20 +410,26 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
             },
           ]}
         >
-          <Image source={{ uri: selectedProfile.photos[0] }} style={styles.previewPhoto} contentFit="cover" />
-          <View style={styles.previewBody}>
-            <Text style={[styles.previewName, { color: chromeText }]}>
-              {selectedProfile.name}, {selectedProfile.age}
-            </Text>
-            <Text style={[styles.previewDistance, { color: chromeMuted }]}>
-              {t('mapDiscover.milesAway', {
-                miles: Math.max(
-                  1,
-                  Math.round(distanceFromCenter(selectedProfile, searchCenter)),
-                ),
-              })}
-            </Text>
-          </View>
+          <AnimatedPressable
+            style={styles.previewTapArea}
+            accessibilityLabel={t('mapDiscover.viewProfileA11y', { name: selectedProfile.name })}
+            onPress={() => handleOpenProfile(selectedProfile)}
+          >
+            <Image source={{ uri: selectedProfile.photos[0] }} style={styles.previewPhoto} contentFit="cover" />
+            <View style={styles.previewBody}>
+              <Text style={[styles.previewName, { color: chromeText }]}>
+                {selectedProfile.name}, {selectedProfile.age}
+              </Text>
+              <Text style={[styles.previewDistance, { color: chromeMuted }]}>
+                {t('mapDiscover.milesAway', {
+                  miles: Math.max(
+                    1,
+                    Math.round(distanceFromCenter(selectedProfile, searchCenter)),
+                  ),
+                })}
+              </Text>
+            </View>
+          </AnimatedPressable>
           <AnimatedPressable
             style={[styles.previewAction, { backgroundColor: accent }]}
             accessibilityLabel={t('mapDiscover.addToDeckA11y', { name: selectedProfile.name })}
@@ -326,6 +444,13 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         {visiblePins.length === 0 ? (
           <Text style={[styles.emptyHint, { color: chromeText, backgroundColor: chromeBg }]}>
             {nameQuery.trim() ? t('mapDiscover.noSearchResults') : t('mapDiscover.emptyArea')}
+          </Text>
+        ) : pinsTruncated ? (
+          <Text style={[styles.emptyHint, { color: chromeMuted, backgroundColor: chromeBg }]}>
+            {t('mapDiscover.pinsTruncated', {
+              shown: MAP_PIN_LIMIT,
+              total: areaPins.length,
+            })}
           </Text>
         ) : null}
         <View style={[styles.segment, { backgroundColor: chromeBg }]}>
@@ -352,6 +477,17 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         visible={deckToast !== null}
         message={deckToast ?? ''}
         onDismiss={() => setDeckToast(null)}
+      />
+
+      <ProfileDetailSheet
+        profile={detailProfile}
+        visible={detailProfile !== null}
+        compatibilityScore={detailProfile ? getCompatibilityScore(detailProfile) : undefined}
+        isHeld={detailProfile ? heldIds.has(detailProfile.id) : false}
+        onClose={() => setDetailProfile(null)}
+        onHold={handleDetailHold}
+        onLike={handleDetailLike}
+        onPass={handleDetailPass}
       />
     </View>
   );
@@ -435,6 +571,23 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     padding: 0,
   },
+  suggestionsList: {
+    marginTop: spacing.xs,
+    borderRadius: radii.button,
+    maxHeight: 180,
+  },
+  suggestionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
+  },
+  suggestionText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '700',
+  },
   searchAreaWrap: {
     position: 'absolute',
     left: 0,
@@ -466,6 +619,12 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     borderRadius: radii.card,
     padding: spacing.sm,
+  },
+  previewTapArea: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
   },
   previewPhoto: {
     width: 56,

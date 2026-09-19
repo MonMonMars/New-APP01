@@ -74,7 +74,7 @@ export function filterProfilesInRadius(
       return false;
     }
     if (!profileHasGeo(profile)) {
-      return true;
+      return false;
     }
     return haversineDistanceMiles(center, { lat: profile.latitude, lng: profile.longitude }) <= cap;
   });

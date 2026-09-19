@@ -5,7 +5,6 @@ import { Alert, Dimensions, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DiscoveryPreferencesSheet } from '../components/DiscoveryPreferencesSheet';
-import { ExpandLocationSheet } from '../components/ExpandLocationSheet';
 import { BoostBanner } from '../components/BoostBanner';
 import { RewindButton } from '../components/RewindButton';
 import { LikeLimitModal } from '../components/LikeLimitModal';
@@ -81,7 +80,6 @@ export function DiscoverScreen() {
   const [showWaiting, setShowWaiting] = useState(false);
   const [detailProfile, setDetailProfile] = useState<Profile | null>(null);
   const [showPreferences, setShowPreferences] = useState(false);
-  const [showExpandLocation, setShowExpandLocation] = useState(false);
   const [showLikeLimit, setShowLikeLimit] = useState(false);
   const [toastProfileName, setToastProfileName] = useState<string | null>(null);
   const [showMatchToast, setShowMatchToast] = useState(false);
@@ -404,7 +402,11 @@ export function DiscoverScreen() {
             </Text>
             <AnimatedPressable
               style={[styles.primaryButton, { backgroundColor: colors.gradientEnd }]}
-              onPress={hasMoreInPool ? searchMorePeople : () => setShowExpandLocation(true)}
+              onPress={
+                hasMoreInPool
+                  ? searchMorePeople
+                  : () => navigation.getParent()?.navigate('MapDiscover')
+              }
             >
               <Text style={[styles.primaryButtonText, { color: colors.text }]}>
                 {hasMoreInPool ? t('discover.searchMore') : t('discover.expandSearch')}
@@ -543,10 +545,6 @@ export function DiscoverScreen() {
         onChange={updatePreferences}
       />
 
-      <ExpandLocationSheet
-        visible={showExpandLocation}
-        onClose={() => setShowExpandLocation(false)}
-      />
     </View>
   );
 }

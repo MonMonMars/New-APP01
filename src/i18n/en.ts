@@ -180,6 +180,7 @@ export const en = {
     worldHint: 'Anyone can join either section. Likes, matches, and chats stay in the world you pick.',
     reportSubmitted: 'Report submitted',
     reportThanks: 'Thanks for reporting. Reason: {reason}',
+    reportThanksSimple: 'Thanks for helping keep Spark safe.',
     blocked: 'Blocked',
     blockedHint: 'You will no longer see this profile.',
     outOfLikes: 'You\'re out of likes today',

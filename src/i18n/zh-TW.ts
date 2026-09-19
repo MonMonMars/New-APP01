@@ -180,6 +180,7 @@ export const zhTw = {
     worldHint: '任何人都可以加入任一區塊。喜歡、配對與聊天會保留在你選擇的世界中。',
     reportSubmitted: '檢舉已提交',
     reportThanks: '感謝你的檢舉。原因：{reason}',
+    reportThanksSimple: '感謝你協助維護 Spark 的安全。',
     blocked: '已封鎖',
     blockedHint: '你將不再看到此個人檔案。',
     outOfLikes: '你今天的喜歡次數已用完',

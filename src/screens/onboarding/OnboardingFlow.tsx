@@ -20,11 +20,9 @@ import { signInWithApple } from '../../utils/appleAuth';
 import { pickProfilePhoto } from '../../utils/photoPicker';
 import { colors, radii, spacing } from '../../theme';
 import { pulseBrand } from '../../theme/pulseBrand';
-import { SearchMapView } from '../../components/SearchMapView';
+import { OnboardingLocationMap } from '../../components/onboarding/OnboardingLocationMap';
 import { deriveShowMe } from '../../utils/deriveShowMe';
-import { resolveUserLocation } from '../../services/userLocation';
-import type { GeoPoint } from '../../utils/geoMap';
-import { mapCenterForCity, zoomForRadius } from '../../utils/searchMapTiles';
+import { mapCenterForCity } from '../../utils/searchMapTiles';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 
 type Step = 'welcome' | 'rules' | 'location' | 'intent' | 'identity' | 'profile';
@@ -46,10 +44,6 @@ export function OnboardingFlow() {
     refreshAuthFromCloud,
   } = useApp();
   const [step, setStep] = useState<Step>('welcome');
-  const [locationCenter, setLocationCenter] = useState<GeoPoint>(() =>
-    mapCenterForCity(preferences.passportCity ?? 'New York, NY'),
-  );
-  const [locationLoading, setLocationLoading] = useState(false);
   const [legalAccepted, setLegalAccepted] = useState(false);
   const [legalPreviewId, setLegalPreviewId] = useState<LegalDocumentId | null>(null);
   const legalUi = getLegalUiStrings(locale);
@@ -299,67 +293,36 @@ export function OnboardingFlow() {
       )}
 
       {step === 'location' && (
-        <View style={styles.step}>
+        <ScrollView
+          style={styles.stepScroll}
+          contentContainerStyle={styles.stepScrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
           <Text style={styles.title}>{t('onboarding.locationTitle')}</Text>
-          <Text style={styles.subtitle}>
-            {t('onboarding.locationSubtitle')}
-          </Text>
-          <View style={styles.mapPreview}>
-            <SearchMapView
-              center={locationCenter}
-              zoom={zoomForRadius(preferences.maxDistanceMiles)}
-              radiusMiles={preferences.maxDistanceMiles}
-              accentColor={pulseBrand.accent}
-              pinColor={pulseBrand.accent}
-              showRadiusRing={false}
-              interactive={false}
-              style={styles.mapPreviewInner}
-            />
-            <View style={styles.mapPreviewScrim} />
-            <Text style={styles.mapPreviewLabel}>{t('onboarding.topStoriesNearYou')}</Text>
-          </View>
-          <AnimatedPressable
-            style={styles.primaryButton}
-            disabled={locationLoading}
-            onPress={() => {
-              setLocationLoading(true);
-              void resolveUserLocation(preferences.passportCity)
-                .then((result) => {
-                  setLocationCenter(result.coords);
-                  updatePreferences({
-                    ...preferences,
-                    travelMode: false,
-                    passportCity:
-                      result.source === 'device'
-                        ? undefined
-                        : preferences.passportCity ?? 'New York, NY',
-                    mapSearchLat: result.source === 'device' ? result.coords.lat : undefined,
-                    mapSearchLng: result.source === 'device' ? result.coords.lng : undefined,
-                  });
-                  setStep('intent');
-                })
-                .finally(() => {
-                  setLocationLoading(false);
-                });
+          <Text style={styles.subtitle}>{t('onboarding.locationSubtitle')}</Text>
+          <OnboardingLocationMap
+            initialCenter={mapCenterForCity(preferences.passportCity ?? 'New York, NY')}
+            radiusMiles={preferences.maxDistanceMiles}
+            onConfirm={(center, passportCity) => {
+              updatePreferences({
+                ...preferences,
+                travelMode: false,
+                passportCity: passportCity ?? preferences.passportCity,
+                mapSearchLat: center.lat,
+                mapSearchLng: center.lng,
+              });
+              setStep('intent');
             }}
-          >
-            {locationLoading ? (
-              <ActivityIndicator color={colors.text} />
-            ) : (
-              <Text style={styles.primaryButtonText}>{t('onboarding.useMyLocation')}</Text>
-            )}
-          </AnimatedPressable>
+          />
           {showLocationInfo ? (
-            <Text style={styles.locationInfo}>
-              {t('onboarding.locationHint')}
-            </Text>
+            <Text style={styles.locationInfo}>{t('onboarding.locationHint')}</Text>
           ) : null}
           <AnimatedPressable onPress={() => setShowLocationInfo((v) => !v)}>
             <Text style={styles.link}>
               {showLocationInfo ? t('onboarding.hideDetails') : t('onboarding.tellMeMore')}
             </Text>
           </AnimatedPressable>
-        </View>
+        </ScrollView>
       )}
 
       {step === 'intent' && (

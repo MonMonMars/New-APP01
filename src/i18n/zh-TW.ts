@@ -47,7 +47,12 @@ export const zhTw = {
     ruleSafe: '注意安全 — 在公共場所見面，並回報可疑行為。',
     ruleAge: '限 18 歲以上 — 一人僅能擁有一個帳號。',
     locationTitle: '選擇你的地區',
-    locationSubtitle: '為你所在區域提供本地頭條與熱門話題。我們絕不會分享你的精確位置。',
+    locationSubtitle:
+      '設定你想認識對象的區域。拖動地圖、搜尋城市或使用 GPS — 其他人不會看到你的精確位置。',
+    mapDragHint: '拖動並縮放地圖，圖釘代表你的探索範圍中心。',
+    searchPlacePlaceholder: '搜尋城市或街區',
+    clearPlaceSearch: '清除搜尋',
+    confirmLocation: '使用此區域繼續',
     topStoriesNearYou: '你附近的頭條新聞',
     useMyLocation: '使用我的位置',
     locationHint: '我們僅使用你的地區以顯示本地頭條 — 絕不使用精確 GPS。可隨時在「個人檔案 → 探索偏好」中更改。',

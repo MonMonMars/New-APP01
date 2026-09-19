@@ -47,7 +47,12 @@ export const en = {
     ruleSafe: 'Stay safe — meet in public and report suspicious behaviour.',
     ruleAge: '18+ only — one person, one account.',
     locationTitle: 'Choose your region',
-    locationSubtitle: 'Local headlines and trending topics for your area. We never share your exact location.',
+    locationSubtitle:
+      'Set where you want to discover people. Pan the map, search for a city, or use GPS — others never see your exact pin.',
+    mapDragHint: 'Drag and zoom the map. The pin marks your discovery area.',
+    searchPlacePlaceholder: 'Search city or neighborhood',
+    clearPlaceSearch: 'Clear search',
+    confirmLocation: 'Continue with this area',
     topStoriesNearYou: 'Top stories near you',
     useMyLocation: 'Use my location',
     locationHint: 'We use your region for local headlines — never exact GPS. Change anytime in Profile → Discovery preferences.',

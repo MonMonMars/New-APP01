@@ -9,7 +9,6 @@ import { WaitingForMatchModal } from '../components/WaitingForMatchModal';
 import { ProfileDetailSheet } from '../components/ProfileDetailSheet';
 import { SparkNoteSheet } from '../components/SparkNoteSheet';
 import { ScreenHeader } from '../components/ScreenHeader';
-import { SparkSectionToggle } from '../components/SparkSectionToggle';
 import { useApp } from '../context/AppContext';
 import { getProfileById } from '../data/profiles';
 import { resolveSparkSection } from '../types/preferences';
@@ -42,7 +41,6 @@ export function LikesScreen() {
     remainingSparkNotes,
     canSendSparkNote,
     preferences,
-    setSparkSection,
     blockProfile,
     reportProfile,
     searchMorePeople,
@@ -150,14 +148,6 @@ export function LikesScreen() {
         rightIcon="diamond-outline"
         onRightPress={openPaywall}
       />
-      <View style={styles.worldBar}>
-        <SparkSectionToggle
-          section={resolveSparkSection(preferences.sparkSection)}
-          onChange={setSparkSection}
-          variant="chip"
-        />
-      </View>
-
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={[styles.banner, { backgroundColor: colors.surface }]}>
           <View style={[styles.bannerBadge, { backgroundColor: colors.gradientEnd }]}>
@@ -366,11 +356,6 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: palette.background,
-  },
-  worldBar: {
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.sm,
-    alignItems: 'center',
   },
   scrollContent: {
     paddingBottom: spacing.xl,

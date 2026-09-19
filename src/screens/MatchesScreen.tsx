@@ -5,7 +5,6 @@ import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '../components/ScreenHeader';
-import { SparkSectionToggle } from '../components/SparkSectionToggle';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
@@ -114,7 +113,7 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
   const navigation = useNavigation();
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const { conversations, matches, preferences, setSparkSection, getConversationIdForProfile } = useApp();
+  const { conversations, matches, preferences, getConversationIdForProfile } = useApp();
 
   const section = resolveSparkSection(preferences.sparkSection);
   const isEmber = section === 'ember';
@@ -165,14 +164,6 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
         rightIcon="shield-checkmark-outline"
         onRightPress={() => navigation.getParent()?.navigate('Safety')}
       />
-      <View style={styles.worldBar}>
-        <SparkSectionToggle
-          section={resolveSparkSection(preferences.sparkSection)}
-          onChange={setSparkSection}
-          variant="chip"
-        />
-      </View>
-
       <ScrollView contentContainerStyle={styles.content}>
         {matches.length === 0 ? (
           <View style={styles.emptyWorld}>
@@ -248,11 +239,6 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-  },
-  worldBar: {
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.sm,
-    alignItems: 'center',
   },
   content: {
     paddingBottom: spacing.xl,

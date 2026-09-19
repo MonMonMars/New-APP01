@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
-import { Modal, Platform, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { useState, type ReactNode } from 'react';
+import { Modal, Platform, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { BrandMark } from './brand/BrandMark';
 import { useTheme } from '../context/ThemeContext';
@@ -12,6 +12,7 @@ import { harborBrand } from '../theme/harborBrand';
 import { sparkBrand } from '../theme/sparkBrand';
 import { modalFill } from '../theme/modalFill';
 import { AnimatedPressable } from './AnimatedPressable';
+import { NavigationPressable } from './NavigationPressable';
 
 type SparkSectionToggleVariant = 'title' | 'chip' | 'list' | 'mark';
 
@@ -190,6 +191,33 @@ function WorldPickerSheet({
   );
 }
 
+function WorldTriggerPressable({
+  onPress,
+  accessibilityLabel,
+  accessibilityHint,
+  style,
+  children,
+}: {
+  onPress: () => void;
+  accessibilityLabel: string;
+  accessibilityHint: string;
+  style: StyleProp<ViewStyle>;
+  children: ReactNode;
+}) {
+  return (
+    <NavigationPressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint={accessibilityHint}
+      style={style}
+      scaleTo={0.94}
+    >
+      {children}
+    </NavigationPressable>
+  );
+}
+
 function WorldTrigger({
   section,
   colors,
@@ -205,27 +233,32 @@ function WorldTrigger({
 }) {
   const { t } = useTranslation();
   const label = getSparkSectionLabel(locale, section);
+  const a11yLabel = `${label}. ${t('discover.switchWorld')}`;
+  const a11yHint = t('discover.worldPickerHint');
+  const labelColor = section === 'ember' ? colors.ember : colors.text;
+
   switch (variant) {
     case 'mark':
       return (
-        <AnimatedPressable
+        <WorldTriggerPressable
           onPress={onPress}
-          accessibilityRole="button"
-          accessibilityLabel={`${label}. ${t('discover.switchWorld')}`}
-          accessibilityHint={t('discover.worldPickerHint')}
+          accessibilityLabel={a11yLabel}
+          accessibilityHint={a11yHint}
           style={styles.markTrigger}
-          scaleTo={0.94}
         >
           <BrandMark world={section} size={SECTION_MARK_SIZE.mark} />
-        </AnimatedPressable>
+          <Text style={[styles.markLabel, { color: labelColor }]} numberOfLines={1}>
+            {label}
+          </Text>
+          <Ionicons name="chevron-down" size={13} color={colors.textMuted} />
+        </WorldTriggerPressable>
       );
     case 'chip':
       return (
-        <AnimatedPressable
+        <WorldTriggerPressable
           onPress={onPress}
-          accessibilityRole="button"
-          accessibilityLabel={`${label}. ${t('discover.switchWorld')}`}
-          accessibilityHint={t('discover.worldPickerHint')}
+          accessibilityLabel={a11yLabel}
+          accessibilityHint={a11yHint}
           style={[
             styles.chipTrigger,
             {
@@ -233,28 +266,28 @@ function WorldTrigger({
               borderColor: section === 'ember' ? colors.ember : colors.border,
             },
           ]}
-          scaleTo={0.94}
         >
           <BrandMark world={section} size={SECTION_MARK_SIZE.chip} />
-          <Text style={[styles.chipLabel, { color: section === 'ember' ? colors.ember : colors.text }]}>
+          <Text style={[styles.chipLabel, { color: labelColor }]}>
             {label}
           </Text>
           <Ionicons name="chevron-down" size={14} color={section === 'ember' ? colors.ember : colors.textMuted} />
-        </AnimatedPressable>
+        </WorldTriggerPressable>
       );
     case 'title':
       return (
-        <AnimatedPressable
+        <WorldTriggerPressable
           onPress={onPress}
-          accessibilityRole="button"
-          accessibilityLabel={`${label}. ${t('discover.switchWorld')}`}
-          accessibilityHint={t('discover.worldPickerHint')}
+          accessibilityLabel={a11yLabel}
+          accessibilityHint={a11yHint}
           style={styles.titleTrigger}
-          scaleTo={0.94}
         >
           <BrandMark world={section} size={SECTION_MARK_SIZE.title} />
+          <Text style={[styles.titleLabel, { color: labelColor }]} numberOfLines={1}>
+            {label}
+          </Text>
           <Ionicons name="chevron-down" size={14} color={section === 'ember' ? colors.ember : colors.textMuted} />
-        </AnimatedPressable>
+        </WorldTriggerPressable>
       );
     default: {
       const _exhaustive: never = variant;
@@ -325,10 +358,18 @@ export function SparkSectionToggle({
 
 const styles = StyleSheet.create({
   markTrigger: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    width: 40,
-    height: 40,
+    gap: 6,
+    paddingRight: spacing.xs,
+    minHeight: 40,
+    maxWidth: 148,
+  },
+  markLabel: {
+    fontSize: 17,
+    fontWeight: '800',
+    letterSpacing: 0.15,
+    flexShrink: 1,
   },
   titleTrigger: {
     flexDirection: 'row',

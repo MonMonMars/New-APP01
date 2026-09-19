@@ -12,6 +12,7 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { useTranslation } from '../../i18n';
+import { getPassportCityLabel } from '../../i18n/labels';
 import { SparkSectionToggle } from '../../components/SparkSectionToggle';
 import { PASSPORT_CITIES, resolveSparkSection } from '../../types/preferences';
 import { ThemeMode } from '../../types/settings';
@@ -62,7 +63,7 @@ export function DisguiseProfileScreen() {
   } = useApp();
   const sparkSection = resolveSparkSection(preferences.sparkSection);
   const meta = useDisguiseWorld();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [showGenerator, setShowGenerator] = useState(false);
   const [detailSheet, setDetailSheet] = useState<DetailSheetKey>(null);
   const [viewerItemId, setViewerItemId] = useState<string | null>(null);
@@ -71,7 +72,7 @@ export function DisguiseProfileScreen() {
   const [regionPickerOpen, setRegionPickerOpen] = useState(false);
   const profileCreative = disguiseAdCreative ?? {
     imageUrl: user.photos[0],
-    overlayText: 'Weekend reads you should not miss',
+    overlayText: t('disguiseProfile.defaultOverlayText'),
     variant: 'news' as const,
     sourcePhotoUrl: user.photos[0],
     isAiGenerated: false,
@@ -145,7 +146,9 @@ export function DisguiseProfileScreen() {
         {
           id: 'st3',
           title: t('disguiseProfile.region'),
-          subtitle: preferences.passportCity ?? 'United Kingdom',
+          subtitle: preferences.passportCity
+            ? getPassportCityLabel(locale, preferences.passportCity)
+            : t('disguiseProfile.regionFallback'),
           icon: 'globe-outline' as const,
         },
         {
@@ -373,7 +376,11 @@ export function DisguiseProfileScreen() {
             }
             if (item.id === 'h3') {
               setDetailSheet(null);
-              void openExternalUrl(`mailto:${LEGAL_ENTITY.supportEmail}?subject=${encodeURIComponent(`${meta.name} support`)}`, 'Email support');
+              void openExternalUrl(
+                `mailto:${LEGAL_ENTITY.supportEmail}?subject=${encodeURIComponent(t('disguiseProfile.supportEmailSubject', { appName: meta.name }))}`,
+                t('disguiseProfile.emailSupport'),
+                locale,
+              );
             }
           }}
         />
@@ -404,7 +411,7 @@ export function DisguiseProfileScreen() {
         title={t('disguiseProfile.regionPickerTitle')}
         items={PASSPORT_CITIES.map((city) => ({
           id: `city:${city}`,
-          label: city,
+          label: getPassportCityLabel(locale, city),
           selected: preferences.passportCity === city,
         }))}
         onClose={() => setRegionPickerOpen(false)}

@@ -37,17 +37,18 @@ export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGenerat
   } = useApp();
   const accent = useDisguiseWorld().accent;
 
-  const [overlayText, setOverlayText] = useState(disguiseAdCreative?.overlayText ?? 'Weekend sale — 50% off');
+  const defaultOverlayText = t('disguiseAd.defaultOverlayText');
+  const [overlayText, setOverlayText] = useState(disguiseAdCreative?.overlayText ?? defaultOverlayText);
   const [variant, setVariant] = useState<DisguiseOverlayVariant>(disguiseAdCreative?.variant ?? 'ad');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (visible) {
-      setOverlayText(disguiseAdCreative?.overlayText ?? 'Weekend sale — 50% off');
+      setOverlayText(disguiseAdCreative?.overlayText ?? defaultOverlayText);
       setVariant(disguiseAdCreative?.variant ?? 'ad');
       setError(null);
     }
-  }, [visible, disguiseAdCreative]);
+  }, [visible, disguiseAdCreative, defaultOverlayText]);
 
   const sourcePhoto = user.photos[0];
   const previewCreative = disguiseAdCreative;

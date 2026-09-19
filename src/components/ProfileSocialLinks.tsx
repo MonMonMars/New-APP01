@@ -29,7 +29,13 @@ export function ProfileSocialLinks({ user, compact = false }: ProfileSocialLinks
       {hasInstagram ? (
         <AnimatedPressable
           style={styles.row}
-          onPress={() => void openExternalUrl(`https://instagram.com/${user.instagramHandle}`, 'Instagram', locale)}
+          onPress={() =>
+            void openExternalUrl(
+              `https://instagram.com/${user.instagramHandle}`,
+              t('socialConnect.instagram'),
+              locale,
+            )
+          }
         >
           <Ionicons name="logo-instagram" size={18} color="#E1306C" />
           <Text style={[styles.handle, { color: colors.text }]}>@{user.instagramHandle}</Text>
@@ -39,7 +45,13 @@ export function ProfileSocialLinks({ user, compact = false }: ProfileSocialLinks
       {hasSpotify ? (
         <AnimatedPressable
           style={styles.row}
-          onPress={() => void openExternalUrl(`https://open.spotify.com/user/${user.spotifyHandle}`, 'Spotify', locale)}
+          onPress={() =>
+            void openExternalUrl(
+              `https://open.spotify.com/user/${user.spotifyHandle}`,
+              t('socialConnect.spotify'),
+              locale,
+            )
+          }
         >
           <Ionicons name="musical-notes" size={18} color="#1DB954" />
           <Text style={[styles.handle, { color: colors.text }]}>{user.spotifyHandle}</Text>

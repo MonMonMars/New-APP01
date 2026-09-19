@@ -3,6 +3,7 @@ import { NewsPost } from '../data/disguiseFeed';
 import { freeNewsUrlForTopic, pulseNewsImages } from '../data/pulseNewsMedia';
 import { translate } from '../i18n';
 import { localizeTimeAgoLabel } from '../i18n/labels';
+import { getTrendingContentField } from '../i18n/trendingContent';
 import { AppLocale, resolveAppLocale } from '../types/locale';
 
 function topicCategory(topic: string): string {
@@ -48,14 +49,16 @@ function topicCategory(topic: string): string {
 export function briefToNewsPost(brief: TrendingBrief, locale?: AppLocale | null): NewsPost {
   const resolvedLocale = resolveAppLocale(locale);
   const category = topicCategory(brief.topic);
+  const headline = getTrendingContentField(resolvedLocale, 'brief', brief.id, 'headline', brief.headline);
+  const summary = getTrendingContentField(resolvedLocale, 'brief', brief.id, 'summary', brief.summary);
 
   return {
     id: `trending-brief-${brief.id}`,
     type: 'news',
     source: brief.source,
-    headline: brief.headline,
-    summary: brief.summary,
-    articleBody: `${brief.summary}\n\n${translate(resolvedLocale, 'trendingArticle.briefFooter', { source: brief.source })}`,
+    headline,
+    summary,
+    articleBody: `${summary}\n\n${translate(resolvedLocale, 'trendingArticle.briefFooter', { source: brief.source })}`,
     imageUrl: brief.imageUrl,
     timeAgo: `${brief.readMinutes} min read`,
     category,
@@ -71,14 +74,16 @@ export function editorsPickToNewsPost(
   const resolvedLocale = resolveAppLocale(locale);
   const category = topicCategory(pick.topic);
   const source = pick.subtitle.split(' · ')[0] ?? 'Pulse';
+  const title = getTrendingContentField(resolvedLocale, 'editorsPick', pick.id, 'title', pick.title);
+  const subtitle = getTrendingContentField(resolvedLocale, 'editorsPick', pick.id, 'subtitle', pick.subtitle);
 
   return {
     id: `trending-pick-${pick.id}`,
     type: 'news',
     source,
-    headline: pick.title,
-    summary: pick.subtitle,
-    articleBody: `${pick.title}\n\n${pick.subtitle}\n\n${translate(resolvedLocale, 'trendingArticle.editorsPickFooter', { source })}`,
+    headline: title,
+    summary: subtitle,
+    articleBody: `${title}\n\n${subtitle}\n\n${translate(resolvedLocale, 'trendingArticle.editorsPickFooter', { source })}`,
     imageUrl: pulseNewsImages.newspaper,
     timeAgo: 'Editor\'s pick',
     category,

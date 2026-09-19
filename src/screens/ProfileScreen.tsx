@@ -21,7 +21,7 @@ import { EmberStatusChips } from '../components/EmberStatusChips';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
-import { getProfileIntentLabel } from '../i18n/labels';
+import { getInterestLabel, getProfileIntentLabel } from '../i18n/labels';
 import { ThemeMode } from '../types/settings';
 import { DisguiseAdGeneratorSheet } from '../components/disguise/DisguiseAdGeneratorSheet';
 import { computeProfileCompletion } from '../utils/profileCompletion';
@@ -391,7 +391,7 @@ export function ProfileScreen() {
             <View style={styles.tags}>
               {user.interests.map((interest) => (
                 <View key={interest} style={[styles.tag, { backgroundColor: colors.surface }]}>
-                  <Text style={[styles.tagText, { color: colors.text }]}>{interest}</Text>
+                  <Text style={[styles.tagText, { color: colors.text }]}>{getInterestLabel(locale, interest)}</Text>
                 </View>
               ))}
             </View>

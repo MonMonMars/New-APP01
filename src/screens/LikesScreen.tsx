@@ -12,7 +12,8 @@ import { SparkSectionToggle } from '../components/SparkSectionToggle';
 import { useApp } from '../context/AppContext';
 import { getProfileById } from '../data/profiles';
 import { resolveSparkSection } from '../types/preferences';
-import { emberRelationshipLabel, Profile } from '../types/profile';
+import { getEmberRelationshipLabel } from '../i18n/labels';
+import { isEmberRelationshipStatus, Profile } from '../types/profile';
 import { canRevealIncomingLikes } from '../utils/genderAccountPerks';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
@@ -22,7 +23,7 @@ import { EmberStatusChips } from '../components/EmberStatusChips';
 
 export function LikesScreen() {
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const {
@@ -180,8 +181,8 @@ export function LikesScreen() {
                     style={[styles.superPhoto, { borderColor: colors.heartPink, backgroundColor: colors.surface }]}
                   />
                   <Text style={[styles.superName, { color: colors.text }]}>{profile.name}</Text>
-                  <Text style={[styles.superStatus, emberRelationshipLabel(profile.relationshipStatus) ? { color: colors.ember } : { color: colors.textMuted }]}>
-                    {emberRelationshipLabel(profile.relationshipStatus) ?? t('likes.waitingForMatch')}
+                  <Text style={[styles.superStatus, isEmberRelationshipStatus(profile.relationshipStatus) ? { color: colors.ember } : { color: colors.textMuted }]}>
+                    {getEmberRelationshipLabel(locale, profile.relationshipStatus) ?? t('likes.waitingForMatch')}
                   </Text>
                 </AnimatedPressable>
               ))}
@@ -208,8 +209,8 @@ export function LikesScreen() {
                     style={[styles.superPhoto, { borderColor: colors.superLike, backgroundColor: colors.surface }]}
                   />
                   <Text style={[styles.superName, { color: colors.text }]}>{profile.name}</Text>
-                  <Text style={[styles.superStatus, emberRelationshipLabel(profile.relationshipStatus) ? { color: colors.ember } : { color: colors.textMuted }]}>
-                    {emberRelationshipLabel(profile.relationshipStatus) ??
+                  <Text style={[styles.superStatus, isEmberRelationshipStatus(profile.relationshipStatus) ? { color: colors.ember } : { color: colors.textMuted }]}>
+                    {getEmberRelationshipLabel(locale, profile.relationshipStatus) ??
                       (pendingLikeIds.has(profile.id) ? t('likes.pending') : t('likes.matched'))}
                   </Text>
                 </AnimatedPressable>
@@ -247,7 +248,7 @@ export function LikesScreen() {
                     {revealIncomingLikes ? `${profile.name}, ${profile.age}` : '???'}
                   </Text>
                   {revealIncomingLikes ? (
-                    emberRelationshipLabel(profile.relationshipStatus) ? (
+                    isEmberRelationshipStatus(profile.relationshipStatus) ? (
                       <View style={styles.likeChips}>
                         <EmberStatusChips profile={profile} compact />
                       </View>

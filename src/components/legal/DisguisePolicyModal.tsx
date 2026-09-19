@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { getLegalUiStrings } from '../../content/legal';
 import { useAppLocale } from '../../hooks/useAppLocale';
+import { useTranslation } from '../../i18n';
 import { useTheme } from '../../context/ThemeContext';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
@@ -25,6 +26,7 @@ export function DisguisePolicyModal({
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { locale } = useAppLocale();
+  const { t } = useTranslation();
   const ui = getLegalUiStrings(locale);
   const meta = useDisguiseWorld();
 
@@ -43,12 +45,10 @@ export function DisguisePolicyModal({
           <View style={[styles.hero, { backgroundColor: colors.surface }]}>
             <Ionicons name="eye-off" size={32} color={colors.gradientEnd} />
             <Text style={[styles.heroTitle, { color: colors.text }]}>
-              {locale === 'zh-TW' ? `離開 ${meta.name} 之前` : `Before you leave ${meta.name}`}
+              {t('disguisePolicyModal.heroTitle', { name: meta.name })}
             </Text>
             <Text style={[styles.heroBody, { color: colors.textMuted }]}>
-              {locale === 'zh-TW'
-                ? `您即將離開 ${meta.name}。請確認您了解偽裝模式的運作方式。`
-                : `You are leaving ${meta.name}. Please confirm you understand how disguise mode works.`}
+              {t('disguisePolicyModal.heroBody', { name: meta.name })}
             </Text>
           </View>
 

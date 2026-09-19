@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
 import { Profile } from '../types/profile';
 import { isAiPersonaProfile } from '../data/aiPersonas';
 import { radii, spacing } from '../theme';
@@ -13,6 +14,7 @@ type AiPersonaBadgeProps = {
 
 export function AiPersonaBadge({ profile, compact = false }: AiPersonaBadgeProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   if (!isAiPersonaProfile(profile)) {
     return null;
@@ -28,7 +30,7 @@ export function AiPersonaBadge({ profile, compact = false }: AiPersonaBadgeProps
     >
       <Ionicons name="sparkles" size={compact ? 10 : 12} color={colors.text} />
       <Text style={[styles.text, compact && styles.textCompact, { color: colors.text }]}>
-        AI
+        {t('chat.aiPowered')}
       </Text>
     </View>
   );

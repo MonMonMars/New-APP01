@@ -9,7 +9,8 @@ import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
 import { NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
-import { emberLocationLine, emberRelationshipLabel } from '../../types/profile';
+import { getEmberRelationshipLabel } from '../../i18n/labels';
+import { emberLocationLine } from '../../types/profile';
 import { buildReporterPhotoUrls } from '../../utils/disguiseReporterPhotos';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { webClass } from '../../motion/webMotion';
@@ -42,7 +43,7 @@ export function PersonPreviewSheet({
   const insets = useSafeAreaInsets();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingMatchRef = useRef<string | null>(null);
   const {
@@ -152,7 +153,7 @@ export function PersonPreviewSheet({
   const superLiked = profileId ? superLikedIds.has(profileId) : false;
   const passed = profileId ? passedIds.has(profileId) : false;
   const worldName = worldMeta.unlockLabel;
-  const emberStatus = linkedProfile ? emberRelationshipLabel(linkedProfile.relationshipStatus) : null;
+  const emberStatus = linkedProfile ? getEmberRelationshipLabel(locale, linkedProfile.relationshipStatus) : null;
 
   const photoCount = displayPhotos.length;
   const trimmedQuote = reporter?.quote.trim() ?? '';

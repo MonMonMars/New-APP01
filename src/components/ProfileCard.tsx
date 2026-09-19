@@ -19,9 +19,9 @@ import { VerificationBadges } from './VerificationBadges';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
+import { getEmberRelationshipLabel, getInterestLabel } from '../i18n/labels';
 import {
   emberLocationLine,
-  emberRelationshipLabel,
   emberVisiblePhotoCount,
   Profile,
 } from '../types/profile';
@@ -54,11 +54,11 @@ export function ProfileCard({
   onOpenDetail,
 }: ProfileCardProps) {
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const isTop = index === activeIndex;
   const [photoIndex, setPhotoIndex] = useState(0);
   const photoCount = profile.photos.length;
-  const emberStatus = emberRelationshipLabel(profile.relationshipStatus);
+  const emberStatus = getEmberRelationshipLabel(locale, profile.relationshipStatus);
   const visiblePhotoCount = emberStatus
     ? emberVisiblePhotoCount(photoCount, profile.emberDiscretion)
     : photoCount;
@@ -232,7 +232,7 @@ export function ProfileCard({
             <View style={styles.tags}>
               {profile.interests.slice(0, 3).map((interest) => (
                 <View key={interest} style={styles.tag}>
-                  <Text style={styles.tagText}>{interest}</Text>
+                  <Text style={styles.tagText}>{getInterestLabel(locale, interest)}</Text>
                 </View>
               ))}
             </View>

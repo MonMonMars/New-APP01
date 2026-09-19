@@ -26,7 +26,7 @@ import { TypingIndicator } from '../components/TypingIndicator';
 import { VibeGameSheet } from '../components/VibeGameSheet';
 import { isAiPersonaProfile } from '../data/aiPersonas';
 import { messageHasCaption } from '../utils/messageFormat';
-import { emberRelationshipLabel } from '../types/profile';
+import { isEmberRelationshipStatus } from '../types/profile';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
@@ -348,7 +348,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
           <Text style={[styles.emptySubtitle, { color: colors.textMuted }]}>
             {isAiPersonaProfile(profile)
               ? t('chat.emberOpenerHint')
-              : emberRelationshipLabel(profile.relationshipStatus)
+              : isEmberRelationshipStatus(profile.relationshipStatus)
                 ? t('chat.expireHintEmber')
                 : t('chat.expireHintSpark')}
           </Text>

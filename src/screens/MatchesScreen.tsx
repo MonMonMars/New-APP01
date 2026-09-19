@@ -9,7 +9,8 @@ import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
 import { resolveSparkSection } from '../types/preferences';
-import { emberRelationshipLabel, type RelationshipStatus } from '../types/profile';
+import { getEmberRelationshipLabel } from '../i18n/labels';
+import { type RelationshipStatus } from '../types/profile';
 import { useLiveExpiry } from '../hooks/useLiveExpiry';
 import { Conversation } from '../types/match';
 import { messagePreviewText } from '../utils/messageFormat';
@@ -82,9 +83,9 @@ function NewMatchItem({
   onPress: () => void;
 }) {
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const expiryLabel = useLiveExpiry(match.expiresAt);
-  const emberStatus = emberRelationshipLabel(match.profile.relationshipStatus);
+  const emberStatus = getEmberRelationshipLabel(locale, match.profile.relationshipStatus);
 
   return (
     <AnimatedPressable style={styles.newMatch} onPress={onPress}>

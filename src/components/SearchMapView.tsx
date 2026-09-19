@@ -68,7 +68,7 @@ function zoomFromPinchScale(baseZoom: number, scale: number): number {
   return clampZoom(baseZoom + Math.log2(scale) * 1.5);
 }
 
-/** Esri street map with real lat/lng pins, live pan, and pinch zoom. */
+/** Carto Voyager raster map with real lat/lng pins, live pan, and pinch zoom. */
 export function SearchMapView({
   center,
   zoom,
@@ -254,8 +254,9 @@ export function SearchMapView({
           key={tile.key}
           source={{ uri: tile.uri }}
           style={[styles.tile, { left: tile.left, top: tile.top }]}
-          contentFit="cover"
+          contentFit="fill"
           cachePolicy="memory-disk"
+          recyclingKey={tile.key}
         />
       ))}
 

@@ -1,7 +1,24 @@
+import { PixelRatio } from 'react-native';
+
 import { PASSPORT_CITIES } from '../types/preferences';
 import type { GeoPoint } from './geoMap';
 
+/** Logical tile size on screen (Slippy Map 256 world units). */
 export const TILE_PX = 256;
+
+const CARTO_SUBDOMAINS = ['a', 'b', 'c', 'd'] as const;
+
+/** Prefer @2x raster tiles on retina — keeps sharpness without changing layout math. */
+export function mapTilePixelRatio(): number {
+  return PixelRatio.get() >= 2 ? 2 : 1;
+}
+
+/** Carto Voyager — cleaner street basemap than legacy Esri World Street (OSM data). */
+export function buildMapTileUri(zoom: number, x: number, y: number): string {
+  const retinaSuffix = mapTilePixelRatio() >= 2 ? '@2x' : '';
+  const subdomain = CARTO_SUBDOMAINS[Math.abs(x + y) % CARTO_SUBDOMAINS.length];
+  return `https://${subdomain}.basemaps.cartocdn.com/rastertiles/voyager/${zoom}/${x}/${y}${retinaSuffix}.png`;
+}
 
 export const DEFAULT_MAP_CENTER = { lat: 40.758, lng: -73.985 };
 
@@ -128,7 +145,7 @@ export function buildMapTiles(
       const wrappedX = ((x % n) + n) % n;
       tiles.push({
         key: `${zoom}-${wrappedX}-${y}-${x}`,
-        uri: `https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/${zoom}/${y}/${wrappedX}`,
+        uri: buildMapTileUri(zoom, wrappedX, y),
         left: (x - cx) * TILE_PX + width / 2,
         top: (y - cy) * TILE_PX + height / 2,
       });

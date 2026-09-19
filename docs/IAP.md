@@ -15,9 +15,16 @@ EXPO_PUBLIC_REVENUECAT_API_KEY=appl_...   # or goog_...
 
 2. Create products in App Store Connect / Google Play Console using IDs from `src/constants/products.ts` (`storeProductId` fields).
 
-3. Link **react-native-purchases** (RevenueCat) in a native build and implement purchase/restore in `src/services/storePurchases.ts` (see `listStoreProductSkus()` for SKU list).
+3. Install the SDK in your native project:
 
-4. Until the SDK is linked, store mode returns clear errors in the shop UI (`PurchasesModeNotice`).
+```bash
+npx expo install react-native-purchases
+npx expo prebuild
+```
+
+4. In RevenueCat, create an entitlement **`spark_plus`** and attach your subscription products (SKUs from `listStoreProductSkus()` / `src/constants/products.ts`).
+
+5. Purchase and restore flow lives in `src/services/revenueCatBridge.native.ts` (configured on sign-in via `configureStorePurchases`). Web and builds without the SDK show guidance in `PurchasesModeNotice`.
 
 ## Product catalog
 

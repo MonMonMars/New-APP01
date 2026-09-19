@@ -10,13 +10,12 @@ import {
   PurchaseResult,
   PurchaseTransaction,
 } from '../types/purchases';
-import { SparkPlusPlan } from '../types/subscription';
-
 import {
   appendPurchaseTransaction,
   findActiveSubscription,
   loadPurchaseHistory,
 } from './purchaseHistory';
+import { grantForProduct, subscriptionExpiry } from './productGrants';
 import { purchaseStoreProduct, restoreStorePurchases } from './storePurchases';
 
 export type PurchasesMode = 'demo' | 'store';
@@ -48,39 +47,6 @@ function providerForPlatform(): PurchaseProvider {
   }
 }
 
-function subscriptionExpiry(plan: SparkPlusPlan, from = Date.now()): string {
-  const days = plan === 'weekly' ? 7 : plan === 'monthly' ? 30 : 365;
-  return new Date(from + days * 24 * 60 * 60 * 1000).toISOString();
-}
-
-function grantForProduct(productId: PurchaseProductId): EntitlementGrant {
-  const product = PRODUCT_CATALOG[productId];
-
-  if (product.kind === 'subscription' && product.plan) {
-    const expiresAt = subscriptionExpiry(product.plan);
-    return { sparkPlus: { plan: product.plan, expiresAt } };
-  }
-
-  const grant: EntitlementGrant = {};
-
-  if (product.boostCount) {
-    const toActivate = product.activateBoostOnPurchase ? 1 : 0;
-    const toInventory = Math.max(0, product.boostCount - toActivate);
-    if (toInventory > 0) {
-      grant.bonusBoosts = toInventory;
-    }
-    if (toActivate > 0) {
-      grant.activateBoost = true;
-    }
-  }
-
-  if (product.sparkNoteCount) {
-    grant.bonusSparkNotes = product.sparkNoteCount;
-  }
-
-  return grant;
-}
-
 async function simulateStoreDelay(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, DEMO_PROCESSING_MS));
 }
@@ -100,7 +66,11 @@ export async function purchaseProduct(productId: PurchaseProductId): Promise<Pur
   }
 
   if (PURCHASES_MODE === 'store') {
-    return purchaseStoreProduct(productId);
+    const result = await purchaseStoreProduct(productId);
+    if (result.ok) {
+      await appendPurchaseTransaction(result.transaction);
+    }
+    return result;
   }
 
   await simulateStoreDelay();

@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
+import { isNativeStoreBillingLinked } from '../services/storePurchases';
 import { radii, spacing } from '../theme';
 
 export function PurchasesModeNotice() {
@@ -12,13 +13,17 @@ export function PurchasesModeNotice() {
   const { t } = useTranslation();
 
   if (purchasesMode === 'store') {
-    const revenueCatReady = Boolean(process.env.EXPO_PUBLIC_REVENUECAT_API_KEY?.trim());
+    const revenueCatKeySet = Boolean(process.env.EXPO_PUBLIC_REVENUECAT_API_KEY?.trim());
+    const billingLinked = isNativeStoreBillingLinked();
+    const messageKey = billingLinked
+      ? 'payments.storeModeReady'
+      : revenueCatKeySet
+        ? 'payments.storeModeHint'
+        : 'payments.storeModeMissingKey';
     return (
       <View style={[styles.banner, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <Ionicons name="storefront-outline" size={18} color={colors.textMuted} />
-        <Text style={[styles.text, { color: colors.textMuted }]}>
-          {revenueCatReady ? t('payments.storeModeHint') : t('payments.storeModeMissingKey')}
-        </Text>
+        <Text style={[styles.text, { color: colors.textMuted }]}>{t(messageKey)}</Text>
       </View>
     );
   }

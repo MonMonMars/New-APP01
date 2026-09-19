@@ -704,6 +704,7 @@ export const zhTw = {
     emberHint: '喜歡、配對與聊天會保留在你選擇的區塊。Ember 在配對前會保持照片與城市私密。',
     getUnlimited: '使用 Spark+ 取得無限喜歡',
     addedToDeck: '已將 {name} 加入你的推薦列表',
+    notInPool: '此對象不在目前的推薦池中',
     likeLimitTitle: '已達喜歡上限',
     likeLimitBody: '明天再來，或升級至 Spark+ 以取得無限喜歡。',
     standoutsEmpty: 'Top Picks 每日更新 — 明天再來查看精選推薦。',

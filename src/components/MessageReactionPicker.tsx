@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
@@ -28,39 +28,48 @@ export function MessageReactionPicker({
   }
 
   return (
-    <View style={[styles.wrap, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      {REACTIONS.map((emoji) => {
-        const selected = currentReaction === emoji;
-        return (
-          <AnimatedPressable
-            key={emoji}
-            style={[styles.emojiButton, selected ? { backgroundColor: colors.border } : null]}
-            accessibilityRole="button"
-            accessibilityLabel={t('chat.reactWith', { emoji })}
-            accessibilityState={{ selected }}
-            onPress={() => {
-              onSelect(emoji);
-              onClose();
-            }}
-          >
-            <Text style={styles.emoji}>{emoji}</Text>
-          </AnimatedPressable>
-        );
-      })}
-    </View>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel={t('common.close')}>
+        <View style={[styles.wrap, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          {REACTIONS.map((emoji) => {
+            const selected = currentReaction === emoji;
+            return (
+              <AnimatedPressable
+                key={emoji}
+                style={[styles.emojiButton, selected ? { backgroundColor: colors.border } : null]}
+                accessibilityRole="button"
+                accessibilityLabel={t('chat.reactWith', { emoji })}
+                accessibilityState={{ selected }}
+                onPress={() => {
+                  onSelect(emoji);
+                  onClose();
+                }}
+              >
+                <Text style={styles.emoji}>{emoji}</Text>
+              </AnimatedPressable>
+            );
+          })}
+        </View>
+      </Pressable>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingBottom: spacing.xl,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+  },
   wrap: {
     flexDirection: 'row',
-    alignSelf: 'center',
     borderRadius: radii.card,
     borderWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     gap: spacing.xs,
-    marginBottom: spacing.sm,
     shadowColor: '#000',
     shadowOpacity: 0.15,
     shadowRadius: 8,

@@ -141,16 +141,19 @@ export function ChatDialogueHelperSheet({
         setFailed(false);
         return;
       }
+      if (seedFailed) {
+        setLoading(false);
+        setFailed(true);
+        return;
+      }
       if (seedOptions && seedOptions.length > 0) {
         setOptions([...seedOptions]);
         setSource(seedSource ?? 'local');
         setLoading(false);
-        setFailed(seedFailed ?? false);
+        setFailed(false);
         return;
       }
-      if (!seedFailed) {
-        onRefresh();
-      }
+      onRefresh();
       return;
     }
 

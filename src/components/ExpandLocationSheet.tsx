@@ -28,6 +28,7 @@ import { radii, spacing } from '../theme';
 import { ActionToast } from './ActionToast';
 import { AnimatedPressable } from './AnimatedPressable';
 import { ProfileDetailSheet } from './ProfileDetailSheet';
+import { ReportReasonSheet, type ReportReason, getReportReasonLabel } from './ReportReasonSheet';
 import { MAP_MAX_ZOOM, MAP_MIN_ZOOM, SearchMapView } from './SearchMapView';
 
 const MAP_PIN_LIMIT = 48;
@@ -111,6 +112,8 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const [showMatch, setShowMatch] = useState(false);
   const [waitingProfile, setWaitingProfile] = useState<Profile | null>(null);
   const [showWaiting, setShowWaiting] = useState(false);
+  const [reportProfileId, setReportProfileId] = useState<string | null>(null);
+  const [reportProfileName, setReportProfileName] = useState('');
   const hasActiveMapSearch =
     preferences.mapSearchLat != null && preferences.mapSearchLng != null;
 
@@ -251,8 +254,10 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   };
 
   const handleAddToDeck = (profile: Profile) => {
-    prioritizeProfileInDeck(profile.id);
-    setDeckToast(t('discoverHub.addedToDeck', { name: profile.name }));
+    const added = prioritizeProfileInDeck(profile.id);
+    setDeckToast(
+      added ? t('discoverHub.addedToDeck', { name: profile.name }) : t('discoverHub.notInPool'),
+    );
   };
 
   const handleOpenProfile = (profile: Profile) => {
@@ -300,10 +305,27 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   };
 
   const handleReportDetail = (profileId: string) => {
-    reportProfile(profileId);
+    const profile =
+      detailProfile?.id === profileId
+        ? detailProfile
+        : discoverPool.find((item) => item.id === profileId);
+    setReportProfileId(profileId);
+    setReportProfileName(profile?.name ?? '');
     setDetailProfile(null);
     setSelectedPinId(null);
-    Alert.alert(t('discover.reportSubmitted'), t('discover.reportThanksSimple'));
+  };
+
+  const handleReportSubmit = (reason: ReportReason) => {
+    if (!reportProfileId) {
+      return;
+    }
+    reportProfile(reportProfileId, reason);
+    Alert.alert(
+      t('discover.reportSubmitted'),
+      t('discover.reportThanks', { reason: getReportReasonLabel(locale, reason) }),
+    );
+    setReportProfileId(null);
+    setReportProfileName('');
   };
 
   const detailDistanceMiles = useMemo(() => {
@@ -650,6 +672,16 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
           navigation.getParent()?.navigate('SparkPlus');
         }}
         dailyLikeLimit={dailyLikeLimitForGender(user.gender, isSparkPlus)}
+      />
+
+      <ReportReasonSheet
+        visible={reportProfileId !== null}
+        profileName={reportProfileName}
+        onClose={() => {
+          setReportProfileId(null);
+          setReportProfileName('');
+        }}
+        onSubmit={handleReportSubmit}
       />
     </View>
   );

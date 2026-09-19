@@ -48,7 +48,11 @@ import { generateDisguiseAdImage } from '../services/disguiseImageGeneration';
 import { registerCloudPushToken } from '../services/pushCloud';
 import { scheduleDateCheckInReminder } from '../utils/notifications';
 import type { ConversationRealtimeUpdate } from '../services/realtimeChat';
-import { mergeConversationLists, mergeConversationMessages } from '../utils/conversationMerge';
+import {
+  mergeConversationLists,
+  mergeConversationMessages,
+  resolveYourTurnFromMessages,
+} from '../utils/conversationMerge';
 import {
   deleteSupabaseAccount,
   getSupabaseSession,
@@ -366,7 +370,8 @@ type AppContextValue = {
   expandSearchRadius: (miles: number) => void;
   searchMapAt: (center: { lat: number; lng: number }) => void;
   clearMapSearch: () => void;
-  prioritizeProfileInDeck: (profileId: string) => void;
+  prioritizeProfileInDeck: (profileId: string) => boolean;
+  setActiveConversationId: (conversationId: string | null) => void;
   holdProfile: (profileId: string) => void;
   unholdProfile: (profileId: string) => void;
   passProfile: (profile: Profile) => void;
@@ -502,6 +507,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const hydratedRef = useRef(false);
   const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const activeConversationIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -1324,23 +1330,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const applyCloudConversationUpdate = useCallback(
     (conversationId: string, update: ConversationRealtimeUpdate) => {
       setConversations((prev) =>
-        prev.map((conversation) =>
-          conversation.id === conversationId
-            ? {
-                ...conversation,
-                messages: mergeConversationMessages(conversation.messages, update.messages),
-                yourTurn: update.yourTurn,
-                unread: conversation.unread === false ? false : update.unread,
-                isTyping: false,
-                lastMessage: update.lastMessage ?? conversation.lastMessage,
-                lastMessageAt: update.lastMessageAt ?? conversation.lastMessageAt,
-              }
-            : conversation,
-        ),
+        prev.map((conversation) => {
+          if (conversation.id !== conversationId) {
+            return conversation;
+          }
+          const messages = mergeConversationMessages(conversation.messages, update.messages);
+          return {
+            ...conversation,
+            messages,
+            yourTurn: resolveYourTurnFromMessages(messages, update.yourTurn),
+            unread: conversation.unread === false ? false : update.unread,
+            isTyping: false,
+            lastMessage: update.lastMessage ?? conversation.lastMessage,
+            lastMessageAt: update.lastMessageAt ?? conversation.lastMessageAt,
+          };
+        }),
       );
     },
     [],
   );
+
+  const setActiveConversationId = useCallback((conversationId: string | null) => {
+    activeConversationIdRef.current = conversationId;
+  }, []);
 
   const updatePreferences = useCallback((next: DiscoveryPreferences) => {
     setPreferences((prev) => {
@@ -1387,7 +1399,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const expandSearchRadius = useCallback((miles: number) => {
     setPreferences((prev) => ({ ...prev, maxDistanceMiles: miles }));
-    setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
+    setDiscoverUnlockedCount((count) => Math.max(count, DISCOVER_BATCH_SIZE));
     setPriorityProfileId(null);
   }, []);
 
@@ -1397,7 +1409,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       mapSearchLat: center.lat,
       mapSearchLng: center.lng,
     }));
-    setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
+    setDiscoverUnlockedCount((count) => Math.max(count, DISCOVER_BATCH_SIZE));
     setPriorityProfileId(null);
   }, []);
 
@@ -1407,20 +1419,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
       mapSearchLat: undefined,
       mapSearchLng: undefined,
     }));
-    setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
+    setDiscoverUnlockedCount((count) => Math.max(count, DISCOVER_BATCH_SIZE));
     setPriorityProfileId(null);
   }, []);
 
   const prioritizeProfileInDeck = useCallback(
-    (profileId: string) => {
+    (profileId: string): boolean => {
       const poolIndex = discoverPool.findIndex((profile) => profile.id === profileId);
       if (poolIndex < 0) {
-        return;
+        return false;
       }
       if (poolIndex >= discoverUnlockedCount) {
         setDiscoverUnlockedCount(poolIndex + 1);
       }
       setPriorityProfileId(profileId);
+      return true;
     },
     [discoverPool, discoverUnlockedCount],
   );
@@ -1639,7 +1652,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             isTyping: false,
             messages: [opener],
             yourTurn: true,
-            unread: true,
+            unread: activeConversationIdRef.current !== conversationId,
             lastMessage: text,
             lastMessageAt: opener.sentAt,
           };
@@ -1994,7 +2007,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
                   lastMessage: reply.text,
                   lastMessageAt: reply.sentAt,
                   yourTurn: true,
-                  unread: true,
+                  unread: activeConversationIdRef.current !== conversationId,
                 };
               }),
             );
@@ -2125,7 +2138,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
                   lastMessage: reply.text,
                   lastMessageAt: reply.sentAt,
                   yourTurn: true,
-                  unread: true,
+                  unread: activeConversationIdRef.current !== conversationId,
                 };
               }),
             );
@@ -2707,6 +2720,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       profileViewCount,
       reactToMessage,
       markConversationRead,
+      setActiveConversationId,
       showMomentumUpsell,
       dismissMomentumUpsell,
       isSupabaseEnabled: isSupabaseConfigured(),
@@ -2839,6 +2853,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       profileViewCount,
       reactToMessage,
       markConversationRead,
+      setActiveConversationId,
       showMomentumUpsell,
       dismissMomentumUpsell,
       completeOnboarding,

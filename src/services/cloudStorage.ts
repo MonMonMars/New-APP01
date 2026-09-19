@@ -67,9 +67,46 @@ export async function uploadPhotosToCloud(
   return results;
 }
 
+function isRemoteUri(uri: string): boolean {
+  return uri.startsWith('http://') || uri.startsWith('https://') || uri.startsWith('data:');
+}
+
+/** Upload a chat photo from the device gallery/camera. */
+export async function uploadChatImageToCloud(userId: string, localUri: string): Promise<string> {
+  if (!isSupabaseConfigured() || isRemoteUri(localUri)) {
+    return localUri;
+  }
+
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    return localUri;
+  }
+
+  try {
+    const response = await fetch(localUri);
+    const blob = await response.blob();
+    const ext = blob.type.includes('png') ? 'png' : 'jpg';
+    const path = `${userId}/chat/${Date.now()}.${ext}`;
+
+    const { error } = await supabase.storage.from(BUCKET).upload(path, blob, {
+      upsert: true,
+      contentType: blob.type || `image/${ext}`,
+    });
+
+    if (error) {
+      return localUri;
+    }
+
+    const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
+    return data.publicUrl;
+  } catch {
+    return localUri;
+  }
+}
+
 /** Upload a recorded voice note; returns public HTTPS URL when cloud is configured. */
 export async function uploadVoiceNoteToCloud(userId: string, localUri: string): Promise<string> {
-  if (!isSupabaseConfigured() || localUri.startsWith('http')) {
+  if (!isSupabaseConfigured() || isRemoteUri(localUri)) {
     return localUri;
   }
 

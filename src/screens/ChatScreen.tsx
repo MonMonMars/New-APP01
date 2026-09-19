@@ -90,6 +90,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const [showDateCheckIn, setShowDateCheckIn] = useState(false);
   const [showVoiceNote, setShowVoiceNote] = useState(false);
   const [voiceNoteSending, setVoiceNoteSending] = useState(false);
+  const [messageSending, setMessageSending] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
   const [aiSuggestionsLoading, setAiSuggestionsLoading] = useState(false);
   const [aiSuggestionSource, setAiSuggestionSource] = useState<'llm' | 'local'>('local');
@@ -266,12 +267,27 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
       : null;
 
   const handleSend = (text: string, imageUrl?: string, isGif = false) => {
-    const sent = sendMessage(conversationId, text, imageUrl, isGif);
-    if (!sent) {
-      Alert.alert(t('chat.sendRateLimitedTitle'), t('chat.sendRateLimitedBody'));
+    if (messageSending) {
       return;
     }
-    setDraft('');
+    const needsUpload =
+      Boolean(imageUrl) &&
+      !isGif &&
+      !imageUrl!.startsWith('http') &&
+      !imageUrl!.startsWith('data:');
+    if (needsUpload) {
+      setMessageSending(true);
+    }
+    void sendMessage(conversationId, text, imageUrl, isGif).then((sent) => {
+      if (needsUpload) {
+        setMessageSending(false);
+      }
+      if (!sent) {
+        Alert.alert(t('chat.sendRateLimitedTitle'), t('chat.sendRateLimitedBody'));
+        return;
+      }
+      setDraft('');
+    });
   };
 
   const handlePickImage = async () => {
@@ -605,6 +621,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         onVibeGame={() => setShowVibeGame(true)}
         onVoiceNote={() => setShowVoiceNote(true)}
         onAiSuggest={openDialogueHelper}
+        sendDisabled={messageSending || voiceNoteSending}
         paddingBottom={insets.bottom + spacing.sm}
       />
 

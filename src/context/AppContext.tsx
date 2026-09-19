@@ -43,7 +43,11 @@ import {
   purchaseProduct as runPurchaseProduct,
   restorePurchases as runRestorePurchases,
 } from '../services/purchases';
-import { uploadPhotosToCloud, uploadVoiceNoteToCloud } from '../services/cloudStorage';
+import {
+  uploadChatImageToCloud,
+  uploadPhotosToCloud,
+  uploadVoiceNoteToCloud,
+} from '../services/cloudStorage';
 import { generateDisguiseAdImage } from '../services/disguiseImageGeneration';
 import { registerCloudPushToken } from '../services/pushCloud';
 import { scheduleDateCheckInReminder } from '../utils/notifications';
@@ -390,7 +394,7 @@ type AppContextValue = {
     text: string,
     imageUrl?: string,
     isGif?: boolean,
-  ) => boolean;
+  ) => Promise<boolean>;
   sendVoiceNote: (
     conversationId: string,
     durationSeconds: number,
@@ -2010,7 +2014,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const sendMessage = useCallback(
-    (conversationId: string, text: string, imageUrl?: string, isGif = false): boolean => {
+    async (conversationId: string, text: string, imageUrl?: string, isGif = false): Promise<boolean> => {
       if (!checkClientRateLimit(`message:${conversationId}`, 30, 60_000)) {
         return false;
       }
@@ -2018,7 +2022,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!trimmed && !imageUrl) {
         return false;
       }
-      if (imageUrl && !isAllowedImageUrl(imageUrl)) {
+
+      let resolvedImageUrl = imageUrl;
+      if (
+        resolvedImageUrl &&
+        !isGif &&
+        userId &&
+        isSupabaseConfigured() &&
+        !resolvedImageUrl.startsWith('http') &&
+        !resolvedImageUrl.startsWith('data:')
+      ) {
+        resolvedImageUrl = await uploadChatImageToCloud(userId, resolvedImageUrl);
+      }
+
+      if (resolvedImageUrl && !isAllowedImageUrl(resolvedImageUrl)) {
         return false;
       }
 
@@ -2029,7 +2046,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         text: trimmed,
         sentAt: new Date().toISOString(),
         isMine: true,
-        imageUrl,
+        imageUrl: resolvedImageUrl,
         isGif,
         status: 'sent',
       };
@@ -2166,6 +2183,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       securitySettings.disguiseSafeNotifications,
       user.name,
       preferences.appLocale,
+      userId,
     ],
   );
 

@@ -15,7 +15,7 @@ EXPO_PUBLIC_REVENUECAT_API_KEY=appl_...   # or goog_...
 
 2. Create products in App Store Connect / Google Play Console using IDs from `src/constants/products.ts` (`storeProductId` fields).
 
-3. Link **react-native-purchases** (RevenueCat) in a native build and implement purchase/restore in `src/services/storePurchases.ts`.
+3. Link **react-native-purchases** (RevenueCat) in a native build and implement purchase/restore in `src/services/storePurchases.ts` (see `listStoreProductSkus()` for SKU list).
 
 4. Until the SDK is linked, store mode returns clear errors in the shop UI (`PurchasesModeNotice`).
 

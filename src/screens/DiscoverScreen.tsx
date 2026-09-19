@@ -165,7 +165,9 @@ export function DiscoverScreen() {
     const conversationId = getConversationIdForProfile(matchProfile.id);
     setShowMatch(false);
     setMatchProfile(null);
-    navigation.getParent()?.navigate('Chat', { conversationId });
+    if (conversationId) {
+      navigation.getParent()?.navigate('Chat', { conversationId });
+    }
   }, [getConversationIdForProfile, matchProfile, navigation]);
 
   const openReportSheet = useCallback((profileId: string, name: string) => {
@@ -333,7 +335,9 @@ export function DiscoverScreen() {
 
     if (superLikeIsMatch) {
       const conversationId = getConversationIdForProfile(profile.id);
-      navigation.getParent()?.navigate('Chat', { conversationId });
+      if (conversationId) {
+        navigation.getParent()?.navigate('Chat', { conversationId });
+      }
       return;
     }
 

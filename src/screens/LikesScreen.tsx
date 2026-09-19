@@ -112,7 +112,9 @@ export function LikesScreen() {
 
   const openChat = (profile: Profile) => {
     const conversationId = getConversationIdForProfile(profile.id);
-    navigation.getParent()?.navigate('Chat', { conversationId });
+    if (conversationId) {
+      navigation.getParent()?.navigate('Chat', { conversationId });
+    }
   };
 
   const openSuperLikeProfile = (profile: Profile) => {

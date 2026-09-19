@@ -113,7 +113,7 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
   const navigation = useNavigation();
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const { conversations, matches, preferences, setSparkSection } = useApp();
+  const { conversations, matches, preferences, setSparkSection, getConversationIdForProfile } = useApp();
 
   const superMatches = matches.filter((match) => match.isSuperMatch);
   const regularMatches = matches.filter((match) => !match.isSuperMatch);
@@ -156,7 +156,12 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
                 <NewMatchItem
                   key={match.id}
                   match={match}
-                  onPress={() => onOpenChat(`conv-${match.profile.id}`)}
+                  onPress={() => {
+                    const conversationId = getConversationIdForProfile(match.profile.id);
+                    if (conversationId) {
+                      onOpenChat(conversationId);
+                    }
+                  }}
                 />
               ))}
             </ScrollView>
@@ -171,7 +176,12 @@ export function MatchesScreen({ onOpenChat }: MatchesScreenProps) {
                 <NewMatchItem
                   key={match.id}
                   match={match}
-                  onPress={() => onOpenChat(`conv-${match.profile.id}`)}
+                  onPress={() => {
+                    const conversationId = getConversationIdForProfile(match.profile.id);
+                    if (conversationId) {
+                      onOpenChat(conversationId);
+                    }
+                  }}
                 />
               ))}
             </ScrollView>

@@ -1329,7 +1329,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 ...conversation,
                 messages: update.messages,
                 yourTurn: update.yourTurn,
-                unread: update.unread,
+                unread: conversation.unread === false ? false : update.unread,
                 lastMessage: update.lastMessage ?? conversation.lastMessage,
                 lastMessageAt: update.lastMessageAt ?? conversation.lastMessageAt,
               }
@@ -2636,7 +2636,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const conversation = conversations.find(
         (item) => item.match.profile.id === profileId,
       );
-      return conversation?.id ?? `conv-${profileId}`;
+      return conversation?.id ?? null;
     },
     [conversations],
   );

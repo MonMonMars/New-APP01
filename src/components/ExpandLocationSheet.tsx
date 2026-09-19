@@ -275,7 +275,9 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     setShowMatch(false);
     setMatchProfile(null);
     onClose();
-    navigation.getParent()?.navigate('Chat', { conversationId });
+    if (conversationId) {
+      navigation.getParent()?.navigate('Chat', { conversationId });
+    }
   };
 
   const handleBlockDetail = (profileId: string) => {

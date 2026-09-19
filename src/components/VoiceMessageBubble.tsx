@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -10,37 +11,60 @@ import { AnimatedPressable } from './AnimatedPressable';
 type VoiceMessageBubbleProps = {
   durationSeconds: number;
   isMine: boolean;
+  voiceUrl?: string;
 };
 
-export function VoiceMessageBubble({ durationSeconds, isMine }: VoiceMessageBubbleProps) {
+export function VoiceMessageBubble({ durationSeconds, isMine, voiceUrl }: VoiceMessageBubbleProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const [playing, setPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const player = useAudioPlayer(voiceUrl ?? null);
+  const status = useAudioPlayerStatus(player);
+  const [simulatedPlaying, setSimulatedPlaying] = useState(false);
+  const [simulatedProgress, setSimulatedProgress] = useState(0);
+
+  const hasAudio = Boolean(voiceUrl);
+  const playing = hasAudio ? status.playing : simulatedPlaying;
+  const progress = hasAudio
+    ? status.duration > 0
+      ? status.currentTime / status.duration
+      : 0
+    : simulatedProgress;
 
   useEffect(() => {
-    if (!playing) {
+    if (hasAudio || !simulatedPlaying) {
       return undefined;
     }
     const interval = setInterval(() => {
-      setProgress((value) => {
+      setSimulatedProgress((value) => {
         const next = value + 0.08;
         if (next >= 1) {
-          setPlaying(false);
+          setSimulatedPlaying(false);
           return 0;
         }
         return next;
       });
     }, durationSeconds * 30);
     return () => clearInterval(interval);
-  }, [playing, durationSeconds]);
+  }, [durationSeconds, hasAudio, simulatedPlaying]);
+
+  const togglePlayback = () => {
+    if (hasAudio) {
+      if (status.playing) {
+        player.pause();
+      } else {
+        player.play();
+      }
+      return;
+    }
+    setSimulatedPlaying((value) => !value);
+  };
 
   const bars = [0.35, 0.7, 1, 0.55, 0.85, 0.45, 0.65];
 
   return (
     <AnimatedPressable
       style={styles.row}
-      onPress={() => setPlaying((value) => !value)}
+      onPress={togglePlayback}
       accessibilityRole="button"
       accessibilityLabel={t('chat.voiceMessageA11y', { seconds: durationSeconds })}
     >

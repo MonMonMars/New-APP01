@@ -391,7 +391,7 @@ type AppContextValue = {
     imageUrl?: string,
     isGif?: boolean,
   ) => boolean;
-  sendVoiceNote: (conversationId: string, durationSeconds: number) => boolean;
+  sendVoiceNote: (conversationId: string, durationSeconds: number, voiceUrl?: string) => boolean;
   matchNotificationPromptVisible: boolean;
   dismissMatchNotificationPrompt: () => void;
   acceptMatchNotificationPrompt: () => Promise<void>;
@@ -2166,7 +2166,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const sendVoiceNote = useCallback(
-    (conversationId: string, durationSeconds: number): boolean => {
+    (conversationId: string, durationSeconds: number, voiceUrl?: string): boolean => {
       if (!checkClientRateLimit(`message:${conversationId}`, 30, 60_000)) {
         return false;
       }
@@ -2179,6 +2179,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         isMine: true,
         isVoiceNote: true,
         voiceDurationSeconds: seconds,
+        voiceUrl: voiceUrl?.trim() || undefined,
         status: 'sent',
       };
       const preview = messagePreviewText(voiceMessage, locale);

@@ -352,7 +352,11 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
             />
           )}
           {item.isVoiceNote && item.voiceDurationSeconds ? (
-            <VoiceMessageBubble durationSeconds={item.voiceDurationSeconds} isMine={item.isMine} />
+            <VoiceMessageBubble
+              durationSeconds={item.voiceDurationSeconds}
+              isMine={item.isMine}
+              voiceUrl={item.voiceUrl}
+            />
           ) : null}
           {messageHasCaption(item) ? (
             <Text style={[styles.bubbleText, { color: colors.text }]}>{item.text}</Text>
@@ -661,8 +665,8 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         visible={showVoiceNote}
         profileName={profile.name}
         onClose={() => setShowVoiceNote(false)}
-        onSend={(duration) => {
-          const sent = sendVoiceNote(conversation.id, duration);
+        onSend={(duration, voiceUrl) => {
+          const sent = sendVoiceNote(conversation.id, duration, voiceUrl);
           if (!sent) {
             Alert.alert(t('chat.sendRateLimitedTitle'), t('chat.sendRateLimitedBody'));
             return;

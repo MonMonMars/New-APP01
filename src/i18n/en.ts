@@ -487,7 +487,9 @@ export const en = {
     demoModeHint:
       'Demo billing is on — purchases apply instantly with no App Store charge. Set EXPO_PUBLIC_PURCHASES_MODE=store for production IAP.',
     storeModeHint:
-      'Store billing mode — purchases need a native build with App Store or Google Play configured (RevenueCat wiring pending).',
+      'Store billing mode — run expo prebuild with react-native-purchases installed, then use a dev or release native build.',
+    storeModeReady:
+      'Store billing is linked — purchases go through App Store or Google Play via RevenueCat.',
     storeModeMissingKey:
       'Store mode is on but EXPO_PUBLIC_REVENUECAT_API_KEY is missing. Add the key and react-native-purchases in a native build.',
     boostActivated: 'Boost activated!',

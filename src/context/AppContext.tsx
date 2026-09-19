@@ -43,6 +43,7 @@ import {
   purchaseProduct as runPurchaseProduct,
   restorePurchases as runRestorePurchases,
 } from '../services/purchases';
+import { configureStorePurchases } from '../services/storePurchases';
 import {
   uploadChatImageToCloud,
   uploadPhotosToCloud,
@@ -884,6 +885,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const purchasesMode = useMemo(() => getPurchasesMode(), []);
+
+  useEffect(() => {
+    if (purchasesMode !== 'store') {
+      return;
+    }
+    void configureStorePurchases(userId);
+  }, [purchasesMode, userId]);
 
   const runSparkUnlockFlow = useCallback(async (): Promise<boolean> => {
     const leaveLabel = disguiseWorldMeta(preferences.sparkSection, user.gender, resolveAppLocale(preferences.appLocale)).unlockLabel;

@@ -487,7 +487,9 @@ export const zhTw = {
     demoModeHint:
       '目前為示範計費 — 購買會立即生效且不會向 App Store 扣款。正式環境請設定 EXPO_PUBLIC_PURCHASES_MODE=store。',
     storeModeHint:
-      '已啟用商店計費模式 — 需使用已設定 App Store 或 Google Play 的原生版本（RevenueCat 整合待完成）。',
+      '已啟用商店計費 — 請安裝 react-native-purchases 並執行 expo prebuild，再以原生版本測試。',
+    storeModeReady:
+      '商店計費已連線 — 購買將透過 RevenueCat 走 App Store 或 Google Play。',
     storeModeMissingKey:
       '已開啟商店模式但缺少 EXPO_PUBLIC_REVENUECAT_API_KEY。請設定金鑰並在原生版本加入 react-native-purchases。',
     boostActivated: 'Boost 已啟用！',

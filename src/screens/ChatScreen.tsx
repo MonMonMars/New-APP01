@@ -48,6 +48,7 @@ import {
 } from '../services/chatReplyCoach';
 import { getReportReasonLabel } from '../components/ReportReasonSheet';
 import { pickProfilePhoto } from '../utils/photoPicker';
+import { alertChatSendOutcome } from '../utils/chatSendAlerts';
 import { resolveYourTurnFromMessages } from '../utils/conversationMerge';
 import { radii, spacing } from '../theme';
 
@@ -278,12 +279,11 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
     if (needsUpload) {
       setMessageSending(true);
     }
-    void sendMessage(conversationId, text, imageUrl, isGif).then((sent) => {
+    void sendMessage(conversationId, text, imageUrl, isGif).then((outcome) => {
       if (needsUpload) {
         setMessageSending(false);
       }
-      if (!sent) {
-        Alert.alert(t('chat.sendRateLimitedTitle'), t('chat.sendRateLimitedBody'));
+      if (!alertChatSendOutcome(outcome, t)) {
         return;
       }
       setDraft('');
@@ -690,10 +690,9 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         }}
         onSend={(duration, voiceUrl) => {
           setVoiceNoteSending(true);
-          void sendVoiceNote(conversation.id, duration, voiceUrl).then((sent) => {
+          void sendVoiceNote(conversation.id, duration, voiceUrl).then((outcome) => {
             setVoiceNoteSending(false);
-            if (!sent) {
-              Alert.alert(t('chat.sendRateLimitedTitle'), t('chat.sendRateLimitedBody'));
+            if (!alertChatSendOutcome(outcome, t)) {
               return;
             }
             setShowVoiceNote(false);

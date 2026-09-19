@@ -74,7 +74,12 @@ import {
   applySupabaseAuthFromUrl,
   recoverSupabaseAuthFromLaunchUrl,
 } from '../services/supabaseAuthCallback';
+import { ChatSendOutcome } from '../types/chatSend';
 import { Conversation, Match, Message } from '../types/match';
+import {
+  cloudMediaUploadSucceeded,
+  needsCloudMediaUpload,
+} from '../utils/cloudUploadGuard';
 import {
   defaultPreferences,
   DISCOVER_BATCH_SIZE,
@@ -395,12 +400,12 @@ type AppContextValue = {
     text: string,
     imageUrl?: string,
     isGif?: boolean,
-  ) => Promise<boolean>;
+  ) => Promise<ChatSendOutcome>;
   sendVoiceNote: (
     conversationId: string,
     durationSeconds: number,
     voiceUrl?: string,
-  ) => Promise<boolean>;
+  ) => Promise<ChatSendOutcome>;
   matchNotificationPromptVisible: boolean;
   dismissMatchNotificationPrompt: () => void;
   acceptMatchNotificationPrompt: () => Promise<void>;
@@ -1483,12 +1488,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
             return conversation;
           }
           const messages = mergeConversationMessages(conversation.messages, update.messages);
+          const messageCountChanged = messages.length !== conversation.messages.length;
           return {
             ...conversation,
             messages,
             yourTurn: resolveYourTurnFromMessages(messages, update.yourTurn),
             unread: conversation.unread === false ? false : update.unread,
-            isTyping: false,
+            isTyping: messageCountChanged ? false : conversation.isTyping,
             lastMessage: update.lastMessage ?? conversation.lastMessage,
             lastMessageAt: update.lastMessageAt ?? conversation.lastMessageAt,
           };
@@ -2022,29 +2028,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const sendMessage = useCallback(
-    async (conversationId: string, text: string, imageUrl?: string, isGif = false): Promise<boolean> => {
+    async (conversationId: string, text: string, imageUrl?: string, isGif = false): Promise<ChatSendOutcome> => {
       if (!checkClientRateLimit(`message:${conversationId}`, 30, 60_000)) {
-        return false;
+        return 'rate_limited';
       }
       const trimmed = sanitizeMessage(text);
       if (!trimmed && !imageUrl) {
-        return false;
+        return 'invalid';
       }
 
       let resolvedImageUrl = imageUrl;
-      if (
-        resolvedImageUrl &&
-        !isGif &&
-        userId &&
-        isSupabaseConfigured() &&
-        !resolvedImageUrl.startsWith('http') &&
-        !resolvedImageUrl.startsWith('data:')
-      ) {
-        resolvedImageUrl = await uploadChatImageToCloud(userId, resolvedImageUrl);
+      if (resolvedImageUrl && !isGif && needsCloudMediaUpload(resolvedImageUrl, userId)) {
+        const localUri = resolvedImageUrl;
+        resolvedImageUrl = await uploadChatImageToCloud(userId!, localUri);
+        if (!cloudMediaUploadSucceeded(resolvedImageUrl)) {
+          return 'upload_failed';
+        }
       }
 
       if (resolvedImageUrl && !isAllowedImageUrl(resolvedImageUrl)) {
-        return false;
+        return 'invalid';
       }
 
       const locale = resolveAppLocale(preferences.appLocale);
@@ -2180,7 +2183,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }, 4500);
       }
 
-      return true;
+      return 'sent';
     },
     [
       conversations,
@@ -2196,14 +2199,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const sendVoiceNote = useCallback(
-    async (conversationId: string, durationSeconds: number, voiceUrl?: string): Promise<boolean> => {
+    async (conversationId: string, durationSeconds: number, voiceUrl?: string): Promise<ChatSendOutcome> => {
       if (!checkClientRateLimit(`message:${conversationId}`, 30, 60_000)) {
-        return false;
+        return 'rate_limited';
       }
       const seconds = Math.max(1, Math.min(30, Math.round(durationSeconds)));
       let resolvedVoiceUrl = voiceUrl?.trim() || undefined;
-      if (resolvedVoiceUrl && userId && isSupabaseConfigured() && !resolvedVoiceUrl.startsWith('http')) {
-        resolvedVoiceUrl = await uploadVoiceNoteToCloud(userId, resolvedVoiceUrl);
+      if (resolvedVoiceUrl && needsCloudMediaUpload(resolvedVoiceUrl, userId)) {
+        const localUri = resolvedVoiceUrl;
+        resolvedVoiceUrl = await uploadVoiceNoteToCloud(userId!, localUri);
+        if (!cloudMediaUploadSucceeded(resolvedVoiceUrl)) {
+          return 'upload_failed';
+        }
       }
       const locale = resolveAppLocale(preferences.appLocale);
       const voiceMessage: Message = {
@@ -2322,7 +2329,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }, 4500);
       }
 
-      return true;
+      return 'sent';
     },
     [conversations, isSparkPlus, preferences.appLocale, user.name, userId],
   );

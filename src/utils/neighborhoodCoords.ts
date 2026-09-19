@@ -1,3 +1,17 @@
+/** Passport and major city centers — kept local to avoid circular imports with geoMap. */
+const PASSPORT_CITY_COORDS: Record<string, { lat: number; lng: number }> = {
+  'New York, NY': { lat: 40.758, lng: -73.985 },
+  'Los Angeles, CA': { lat: 34.052, lng: -118.244 },
+  'Chicago, IL': { lat: 41.878, lng: -87.63 },
+  'Miami, FL': { lat: 25.762, lng: -80.192 },
+  'Austin, TX': { lat: 30.267, lng: -97.743 },
+  'San Francisco, CA': { lat: 37.775, lng: -122.419 },
+  'London, UK': { lat: 51.507, lng: -0.128 },
+  'Paris, France': { lat: 48.857, lng: 2.352 },
+  'Tokyo, Japan': { lat: 35.676, lng: 139.65 },
+  'Sydney, Australia': { lat: -33.869, lng: 151.209 },
+};
+
 /** Real lat/lng for demo profile neighborhoods — NYC metro and nearby cities. */
 export const NEIGHBORHOOD_COORDS: Record<string, { lat: number; lng: number }> = {
   'Astoria, NY': { lat: 40.764, lng: -73.923 },
@@ -51,7 +65,7 @@ export function geocodeCity(city?: string | null): { lat: number; lng: number } 
   if (!city) {
     return null;
   }
-  const exact = NEIGHBORHOOD_COORDS[city];
+  const exact = NEIGHBORHOOD_COORDS[city] ?? PASSPORT_CITY_COORDS[city];
   if (exact) {
     return exact;
   }
@@ -67,5 +81,24 @@ export function geocodeCity(city?: string | null): { lat: number; lng: number } 
   if (normalized.includes('boston')) return NEIGHBORHOOD_COORDS['Boston, MA'];
   if (normalized.includes('philadelphia')) return NEIGHBORHOOD_COORDS['Philadelphia, PA'];
   if (normalized.includes('washington')) return NEIGHBORHOOD_COORDS['Washington, DC'];
+  if (normalized.includes('los angeles') || normalized.includes('la,')) {
+    return PASSPORT_CITY_COORDS['Los Angeles, CA'];
+  }
+  if (normalized.includes('chicago')) return PASSPORT_CITY_COORDS['Chicago, IL'];
+  if (normalized.includes('miami')) return PASSPORT_CITY_COORDS['Miami, FL'];
+  if (normalized.includes('austin')) return PASSPORT_CITY_COORDS['Austin, TX'];
+  if (normalized.includes('san francisco') || normalized.includes('sf,')) {
+    return PASSPORT_CITY_COORDS['San Francisco, CA'];
+  }
+  if (normalized.includes('london')) return PASSPORT_CITY_COORDS['London, UK'];
+  if (normalized.includes('paris')) return PASSPORT_CITY_COORDS['Paris, France'];
+  if (normalized.includes('tokyo')) return PASSPORT_CITY_COORDS['Tokyo, Japan'];
+  if (normalized.includes('sydney')) return PASSPORT_CITY_COORDS['Sydney, Australia'];
+  for (const [label, coords] of Object.entries(PASSPORT_CITY_COORDS)) {
+    const cityPart = label.split(',')[0].toLowerCase();
+    if (normalized.includes(cityPart)) {
+      return coords;
+    }
+  }
   return null;
 }

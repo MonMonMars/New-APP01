@@ -361,6 +361,7 @@ type AppContextValue = {
   searchMorePeople: () => void;
   expandSearchRadius: (miles: number) => void;
   searchMapAt: (center: { lat: number; lng: number }) => void;
+  clearMapSearch: () => void;
   prioritizeProfileInDeck: (profileId: string) => void;
   holdProfile: (profileId: string) => void;
   unholdProfile: (profileId: string) => void;
@@ -1044,11 +1045,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           stableIncognitoVisible(profile.id),
       );
     }
-    if (
-      preferences.mapSearchLat != null &&
-      preferences.mapSearchLng != null &&
-      !preferences.travelMode
-    ) {
+    if (preferences.mapSearchLat != null && preferences.mapSearchLng != null) {
       filtered = filterProfilesInRadius(
         filtered,
         { lat: preferences.mapSearchLat, lng: preferences.mapSearchLng },
@@ -1380,6 +1377,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ...prev,
       mapSearchLat: center.lat,
       mapSearchLng: center.lng,
+    }));
+    setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
+    setPriorityProfileId(null);
+  }, []);
+
+  const clearMapSearch = useCallback(() => {
+    setPreferences((prev) => ({
+      ...prev,
+      mapSearchLat: undefined,
+      mapSearchLng: undefined,
     }));
     setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
     setPriorityProfileId(null);
@@ -2592,6 +2599,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       searchMorePeople,
       expandSearchRadius,
       searchMapAt,
+      clearMapSearch,
       prioritizeProfileInDeck,
       holdProfile,
       unholdProfile,
@@ -2721,6 +2729,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       searchMorePeople,
       expandSearchRadius,
       searchMapAt,
+      clearMapSearch,
       prioritizeProfileInDeck,
       holdProfile,
       unholdProfile,

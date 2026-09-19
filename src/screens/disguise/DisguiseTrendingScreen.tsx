@@ -17,10 +17,12 @@ import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
 import {
   getPulseCategoryLabel,
+  getPulseTopicLabel,
   getTrendingChangeLabel,
   getTrendingChipLabel,
   localizeTimeAgoLabel,
 } from '../../i18n/labels';
+import { getTrendingContentField } from '../../i18n/trendingContent';
 import { NewsPost } from '../../data/disguiseFeed';
 import {
   femaleBreakingNowCards,
@@ -189,9 +191,15 @@ export function DisguiseTrendingScreen() {
           style={[styles.briefCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
           onPress={openBrief}
           accessibilityRole="button"
-          accessibilityLabel={t('disguiseTrending.readBriefA11y', { headline: brief.headline })}
+          accessibilityLabel={t('disguiseTrending.readBriefA11y', {
+            headline: getTrendingContentField(locale, 'brief', brief.id, 'headline', brief.headline),
+          })}
         >
-          <NewsHeroImage uri={brief.imageUrl} style={styles.briefImage} accessibilityLabel={brief.headline} />
+          <NewsHeroImage
+            uri={brief.imageUrl}
+            style={styles.briefImage}
+            accessibilityLabel={getTrendingContentField(locale, 'brief', brief.id, 'headline', brief.headline)}
+          />
           <View style={styles.briefBody}>
             <View style={styles.briefMeta}>
               <View style={[styles.livePill, { backgroundColor: meta.accentSoft }]}>
@@ -205,10 +213,10 @@ export function DisguiseTrendingScreen() {
               </Text>
             </View>
             <Text style={[styles.briefHeadline, { color: colors.text }]} numberOfLines={3}>
-              {brief.headline}
+              {getTrendingContentField(locale, 'brief', brief.id, 'headline', brief.headline)}
             </Text>
             <Text style={[styles.briefSummary, { color: colors.textMuted }]} numberOfLines={2}>
-              {brief.summary}
+              {getTrendingContentField(locale, 'brief', brief.id, 'summary', brief.summary)}
             </Text>
           </View>
         </AnimatedPressable>
@@ -263,8 +271,12 @@ export function DisguiseTrendingScreen() {
               <View style={[styles.radarIcon, { backgroundColor: meta.accentSoft }]}>
                 <Ionicons name={radarIcon(item.icon)} size={18} color={meta.accent} />
               </View>
-              <Text style={[styles.radarTitle, { color: colors.text }]}>{item.title}</Text>
-              <Text style={[styles.radarDetail, { color: colors.textMuted }]}>{item.detail}</Text>
+              <Text style={[styles.radarTitle, { color: colors.text }]}>
+                {getTrendingContentField(locale, 'radar', item.id, 'title', item.title)}
+              </Text>
+              <Text style={[styles.radarDetail, { color: colors.textMuted }]}>
+                {getTrendingContentField(locale, 'radar', item.id, 'detail', item.detail)}
+              </Text>
             </AnimatedPressable>
           ))}
         </ScrollView>
@@ -311,7 +323,9 @@ export function DisguiseTrendingScreen() {
             )}
             <View style={styles.topicText}>
               <View style={styles.topicTopLine}>
-                <Text style={[styles.label, { color: colors.text }]}>{item.label}</Text>
+                <Text style={[styles.label, { color: colors.text }]}>
+                  {getPulseTopicLabel(locale, item.label)}
+                </Text>
                 {item.changeLabel && (
                   <View style={[styles.trendPill, { backgroundColor: `${trendColor(item.direction, meta.accent)}22` }]}>
                     <Ionicons
@@ -326,7 +340,7 @@ export function DisguiseTrendingScreen() {
                 )}
               </View>
               <Text style={[styles.preview, { color: colors.textMuted }]} numberOfLines={1}>
-                {item.preview}
+                {getTrendingContentField(locale, 'topic', item.id, 'preview', item.preview)}
               </Text>
               <Text style={[styles.posts, { color: colors.textMuted }]}>
                 {t('disguiseTrending.postsInCategory', {
@@ -348,8 +362,12 @@ export function DisguiseTrendingScreen() {
           >
             <Ionicons name="bookmark-outline" size={18} color={meta.accent} />
             <View style={styles.pickText}>
-              <Text style={[styles.pickTitle, { color: colors.text }]}>{pick.title}</Text>
-              <Text style={[styles.pickSubtitle, { color: colors.textMuted }]}>{pick.subtitle}</Text>
+              <Text style={[styles.pickTitle, { color: colors.text }]}>
+                {getTrendingContentField(locale, 'editorsPick', pick.id, 'title', pick.title)}
+              </Text>
+              <Text style={[styles.pickSubtitle, { color: colors.textMuted }]}>
+                {getTrendingContentField(locale, 'editorsPick', pick.id, 'subtitle', pick.subtitle)}
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
           </AnimatedPressable>

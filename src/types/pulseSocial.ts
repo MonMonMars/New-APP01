@@ -9,6 +9,8 @@ export type PulseReadingEntry = {
   title: string;
   source: string;
   readAt: string;
+  postId?: string;
+  articleUrl?: string;
 };
 
 export type PulseSocialState = {

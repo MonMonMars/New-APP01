@@ -40,7 +40,10 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
 
   useEffect(() => {
     if (visible && post) {
-      recordPulseReading(post.headline, post.source);
+      recordPulseReading(post.headline, post.source, {
+        postId: post.id,
+        articleUrl: post.articleUrl,
+      });
     }
   }, [visible, post, recordPulseReading]);
 

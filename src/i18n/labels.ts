@@ -393,6 +393,26 @@ const PULSE_CATEGORY_KEYS: Record<string, string> = {
   Community: 'pulseCategory.community',
   Markets: 'pulseCategory.markets',
   Finance: 'pulseCategory.finance',
+  Work: 'pulseCategory.work',
+  Policy: 'pulseCategory.policy',
+  Careers: 'pulseCategory.careers',
+};
+
+const MARKET_QUOTE_NAME_KEYS: Record<string, string> = {
+  'idx-spx': 'disguiseMarkets.nameUsLargeCap',
+  'idx-ndx': 'disguiseMarkets.nameUsTech',
+  'idx-dji': 'disguiseMarkets.nameIndustrials',
+  'idx-ftse': 'disguiseMarkets.nameUkBlueChips',
+  'stk-aapl': 'disguiseMarkets.nameApple',
+  'stk-msft': 'disguiseMarkets.nameMicrosoft',
+  'stk-nvda': 'disguiseMarkets.nameNvidia',
+  'stk-tsla': 'disguiseMarkets.nameTesla',
+  'stk-goog': 'disguiseMarkets.nameAlphabet',
+  'stk-meta': 'disguiseMarkets.nameMeta',
+  'cry-btc': 'disguiseMarkets.nameBitcoin',
+  'cry-eth': 'disguiseMarkets.nameEthereum',
+  'fx-eurusd': 'disguiseMarkets.nameEuro',
+  'com-gold': 'disguiseMarkets.nameSpotGold',
 };
 
 const DISGUISED_PROFILE_HINT_KEYS: Record<string, string> = {
@@ -513,6 +533,11 @@ export function localizeTimeAgoLabel(locale: AppLocale, label: string): string {
 export function getMarketVolumeLabel(locale: AppLocale, volumeLabel: string): string {
   const value = volumeLabel.replace(/\s*vol$/i, '').trim();
   return translate(locale, 'disguiseMarkets.volumeLabel', { value });
+}
+
+export function getMarketQuoteNameLabel(locale: AppLocale, quoteId: string, fallback: string): string {
+  const key = MARKET_QUOTE_NAME_KEYS[quoteId];
+  return key ? translate(locale, key) : fallback;
 }
 
 export function getPulseCategoryLabel(locale: AppLocale, category: string): string {

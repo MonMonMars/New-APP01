@@ -10,7 +10,8 @@ import {
   marketTopMovers,
   MarketQuote,
 } from '../../data/disguiseMarkets';
-import { getMarketVolumeLabel } from '../../i18n/labels';
+import { getMarketQuoteNameLabel, getMarketVolumeLabel } from '../../i18n/labels';
+import { AppLocale } from '../../types/locale';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { AnimatedPressable } from '../AnimatedPressable';
@@ -19,14 +20,26 @@ type DisguiseMarketsPanelProps = {
   onQuotePress?: (symbol: string) => void;
 };
 
-function QuoteRow({ quote, colors, onPress }: { quote: MarketQuote; colors: { text: string; textMuted: string }; onPress?: () => void }) {
+function QuoteRow({
+  quote,
+  colors,
+  locale,
+  onPress,
+}: {
+  quote: MarketQuote;
+  colors: { text: string; textMuted: string };
+  locale: AppLocale;
+  onPress?: () => void;
+}) {
   const changeColor = quote.up ? '#22c55e' : '#ef4444';
 
   return (
     <AnimatedPressable style={styles.quoteRow} onPress={onPress} disabled={!onPress}>
       <View style={styles.quoteLeft}>
         <Text style={[styles.symbol, { color: colors.text }]}>{quote.symbol}</Text>
-        <Text style={[styles.name, { color: colors.textMuted }]} numberOfLines={1}>{quote.name}</Text>
+        <Text style={[styles.name, { color: colors.textMuted }]} numberOfLines={1}>
+          {getMarketQuoteNameLabel(locale, quote.id, quote.name)}
+        </Text>
       </View>
       <View style={styles.quoteRight}>
         <Text style={[styles.price, { color: colors.text }]}>{quote.price}</Text>
@@ -77,6 +90,7 @@ export function DisguiseMarketsPanel({ onQuotePress }: DisguiseMarketsPanelProps
             key={quote.id}
             quote={quote}
             colors={colors}
+            locale={locale}
             onPress={() => onQuotePress?.(quote.symbol)}
           />
         ))}
@@ -89,6 +103,7 @@ export function DisguiseMarketsPanel({ onQuotePress }: DisguiseMarketsPanelProps
             key={quote.id}
             quote={quote}
             colors={colors}
+            locale={locale}
             onPress={() => onQuotePress?.(quote.symbol)}
           />
         ))}

@@ -24,6 +24,7 @@ import {
   buildDisguisedProfileFeedItem,
   buildDisguisedProfileFeedItems,
 } from '../../utils/disguiseProfileFeed';
+import { resolveReadingHistoryItems, resolveReadingHistoryOpenTarget } from '../../utils/resolveReadingHistory';
 import { resolveSavedPulsePosts } from '../../utils/pulseSavedPosts';
 import { PulseDetailItem, PulseDetailSheet } from '../../components/disguise/PulseDetailSheet';
 import { PulseFeedItemViewer } from '../../components/disguise/PulseFeedItemViewer';
@@ -33,17 +34,6 @@ import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { usePulseFeedRefreshGeneration, usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
 
 type DetailSheetKey = 'saved' | 'history' | 'settings' | 'help' | null;
-
-function formatReadAge(iso: string, t: (key: string, params?: Record<string, string | number>) => string): string {
-  const days = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86400000));
-  if (days === 0) {
-    return t('disguiseProfile.readToday');
-  }
-  if (days === 1) {
-    return t('disguiseProfile.readYesterday');
-  }
-  return t('disguiseProfile.readDaysAgo', { days });
-}
 
 export function DisguiseProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -93,12 +83,10 @@ export function DisguiseProfileScreen() {
     () => resolveSavedPulsePosts(pulseSocial.savedPostIds, feedItems, user.gender, locale),
     [pulseSocial.savedPostIds, feedItems, user.gender, locale],
   );
-  const historyItems: PulseDetailItem[] = pulseSocial.readingHistory.map((entry, index) => ({
-    id: `hist-${index}`,
-    title: entry.title,
-    subtitle: `${entry.source} · ${formatReadAge(entry.readAt, t)}`,
-    icon: 'newspaper-outline',
-  }));
+  const historyItems = useMemo(
+    () => resolveReadingHistoryItems(pulseSocial.readingHistory, locale, user.gender, t),
+    [pulseSocial.readingHistory, locale, user.gender, t],
+  );
   const postCount = recentPosts.length + pulseSocial.readingHistory.length;
   const followerCount = 120 + pulseSocial.savedPostIds.length * 3;
   const followingCount = 80 + Math.min(pulseSocial.referralShareCount * 5, 40);
@@ -229,7 +217,20 @@ export function DisguiseProfileScreen() {
                   label={item.title}
                   colors={colors}
                   accent={meta.accent}
-                  onPress={() => setViewerHeadline(item.title)}
+                  onPress={() => {
+                    if (item.id.startsWith('hist-')) {
+                      const index = Number.parseInt(item.id.replace('hist-', ''), 10);
+                      const entry = pulseSocial.readingHistory[index];
+                      if (entry) {
+                        const target = resolveReadingHistoryOpenTarget(entry, user.gender);
+                        setViewerItemId(target.itemId);
+                        setViewerHeadline(target.headline);
+                      }
+                      return;
+                    }
+                    setViewerItemId(item.id);
+                    setViewerHeadline(null);
+                  }}
                 />
               ))}
             </View>
@@ -337,9 +338,10 @@ export function DisguiseProfileScreen() {
               const index = Number.parseInt(item.id.replace('hist-', ''), 10);
               const entry = pulseSocial.readingHistory[index];
               if (entry) {
+                const target = resolveReadingHistoryOpenTarget(entry, user.gender);
                 setDetailSheet(null);
-                setViewerItemId(null);
-                setViewerHeadline(entry.title);
+                setViewerItemId(target.itemId);
+                setViewerHeadline(target.headline);
               }
               return;
             }

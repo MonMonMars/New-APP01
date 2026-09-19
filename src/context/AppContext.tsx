@@ -390,7 +390,11 @@ type AppContextValue = {
   openManageSubscriptions: () => void;
   activateBoost: (options?: { purchased?: boolean }) => BoostActivationResult;
   addBonusBoosts: (count: number) => void;
-  recordPulseReading: (title: string, source: string) => void;
+  recordPulseReading: (
+    title: string,
+    source: string,
+    options?: { postId?: string; articleUrl?: string },
+  ) => void;
   markActivityAlertsRead: () => void;
   purchaseSparkNotes: (count: number) => void;
   rewindLastPass: () => void;
@@ -2059,20 +2063,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setBonusBoosts((prev) => prev + count);
   }, []);
 
-  const recordPulseReading = useCallback((title: string, source: string) => {
-    const trimmedTitle = title.trim();
-    if (!trimmedTitle) {
-      return;
-    }
-    setPulseSocial((prev) => {
-      const withoutDuplicate = prev.readingHistory.filter((entry) => entry.title !== trimmedTitle);
-      const next = [
-        { title: trimmedTitle, source, readAt: new Date().toISOString() },
-        ...withoutDuplicate,
-      ].slice(0, 20);
-      return { ...prev, readingHistory: next };
-    });
-  }, []);
+  const recordPulseReading = useCallback(
+    (title: string, source: string, options?: { postId?: string; articleUrl?: string }) => {
+      const trimmedTitle = title.trim();
+      if (!trimmedTitle) {
+        return;
+      }
+      setPulseSocial((prev) => {
+        const withoutDuplicate = prev.readingHistory.filter((entry) => {
+          if (options?.postId && entry.postId === options.postId) {
+            return false;
+          }
+          if (options?.articleUrl && entry.articleUrl === options.articleUrl) {
+            return false;
+          }
+          return entry.title !== trimmedTitle;
+        });
+        const next = [
+          {
+            title: trimmedTitle,
+            source,
+            readAt: new Date().toISOString(),
+            postId: options?.postId,
+            articleUrl: options?.articleUrl,
+          },
+          ...withoutDuplicate,
+        ].slice(0, 20);
+        return { ...prev, readingHistory: next };
+      });
+    },
+    [],
+  );
 
   const markActivityAlertsRead = useCallback(() => {
     setPulseSocial((prev) =>

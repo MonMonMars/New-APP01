@@ -23,6 +23,7 @@ type ChatComposerProps = {
   onVoiceNote?: () => void;
   onPickGif?: () => void;
   onAiSuggest?: () => void;
+  sendDisabled?: boolean;
   paddingBottom: number;
 };
 
@@ -43,6 +44,7 @@ export function ChatComposer({
   onVoiceNote,
   onPickGif,
   onAiSuggest,
+  sendDisabled = false,
   paddingBottom,
 }: ChatComposerProps) {
   const { colors } = useTheme();
@@ -65,13 +67,16 @@ export function ChatComposer({
   };
 
   const runExtra = (action: () => void) => {
+    if (sendDisabled) {
+      return;
+    }
     action();
     setExtrasOpen(false);
     extrasProgress.value = withTiming(0, { duration: 180 });
   };
 
   const handleSend = () => {
-    if (!hasText) {
+    if (!hasText || sendDisabled) {
       return;
     }
     onSend(draft);
@@ -160,7 +165,7 @@ export function ChatComposer({
         <AnimatedPressable
           scaleTo={0.9}
           onPress={handleSend}
-          disabled={!hasText}
+          disabled={!hasText || sendDisabled}
           style={[
             styles.sendButton,
             { backgroundColor: hasText ? colors.gradientEnd : colors.surface },

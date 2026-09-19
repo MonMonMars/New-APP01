@@ -36,8 +36,12 @@ function profilesForCategory(
   category: ExploreCategory,
   excluded: Set<string>,
   section: SparkSection,
+  poolIds: Set<string>,
 ): Profile[] {
   return mockProfiles.filter((profile) => {
+    if (!poolIds.has(profile.id)) {
+      return false;
+    }
     if (excluded.has(profile.id)) {
       return false;
     }
@@ -97,7 +101,7 @@ export function ExploreScreen({ onClose }: ExploreScreenProps) {
         </Text>
 
         {CATEGORY_META.map((category) => {
-          const profiles = profilesForCategory(category.id, excluded, section);
+          const profiles = profilesForCategory(category.id, excluded, section, poolIds);
           const labelKey = `explore.categories.${category.id}.label` as const;
           const emberLabelKey = `explore.categories.${category.id}.emberLabel` as const;
           const descKey = `explore.categories.${category.id}.description` as const;

@@ -377,7 +377,12 @@ type AppContextValue = {
   passProfile: (profile: Profile) => void;
   likeProfile: (profile: Profile, sparkNote?: string) => Match | null;
   superLikeProfile: (profile: Profile) => Match | null;
-  sendMessage: (conversationId: string, text: string, imageUrl?: string, isGif?: boolean) => void;
+  sendMessage: (
+    conversationId: string,
+    text: string,
+    imageUrl?: string,
+    isGif?: boolean,
+  ) => boolean;
   sendVoiceNote: (conversationId: string, durationSeconds: number) => void;
   getConversationIdForProfile: (profileId: string) => string | null;
   blockProfile: (profileId: string) => void;
@@ -1304,7 +1309,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     (nextUser: UserProfile) => {
       setUser(nextUser);
       setHasOnboarded(true);
-      setDisguiseModeState(true);
+      setDisguiseModeState(false);
       if (!userId && isSupabaseConfigured()) {
         setUserId(`user-${Date.now()}`);
       }
@@ -1870,16 +1875,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const sendMessage = useCallback(
-    (conversationId: string, text: string, imageUrl?: string, isGif = false) => {
+    (conversationId: string, text: string, imageUrl?: string, isGif = false): boolean => {
       if (!checkClientRateLimit(`message:${conversationId}`, 30, 60_000)) {
-        return;
+        return false;
       }
       const trimmed = sanitizeMessage(text);
       if (!trimmed && !imageUrl) {
-        return;
+        return false;
       }
       if (imageUrl && !isAllowedImageUrl(imageUrl)) {
-        return;
+        return false;
       }
 
       const locale = resolveAppLocale(preferences.appLocale);
@@ -2014,6 +2019,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
           })();
         }, 4500);
       }
+
+      return true;
     },
     [
       conversations,

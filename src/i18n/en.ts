@@ -280,6 +280,8 @@ export const en = {
     hideExtras: 'Hide extras',
     moreActions: 'More actions',
     sendMessage: 'Send message',
+    sendRateLimitedTitle: 'Slow down a moment',
+    sendRateLimitedBody: 'You are sending messages too quickly. Wait a few seconds and try again.',
     checkedInSafely: '✅ Checked in safely at {location}',
     homeSafeEnding: '🏠 Home safe — ending date check-in',
     dateCheckInStarted: '📍 Date check-in: meeting at {location}{contactSuffix}',

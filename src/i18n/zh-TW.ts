@@ -280,6 +280,8 @@ export const zhTw = {
     hideExtras: '隱藏附加功能',
     moreActions: '更多操作',
     sendMessage: '傳送訊息',
+    sendRateLimitedTitle: '請稍等一下',
+    sendRateLimitedBody: '訊息傳送過於頻繁，請稍候幾秒再試。',
     checkedInSafely: '✅ 已在 {location} 安全簽到',
     homeSafeEnding: '🏠 已安全到家 — 結束約會簽到',
     dateCheckInStarted: '📍 約會簽到：見面地點 {location}{contactSuffix}',

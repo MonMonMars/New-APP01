@@ -60,6 +60,7 @@ import {
   getSupabaseSession,
   isSupabaseConfigured,
   loadFromSupabase,
+  type SyncPayload,
   signInWithAppleToken,
   signInWithMagicLink,
   syncToSupabase,
@@ -364,6 +365,7 @@ type AppContextValue = {
   completeOnboarding: (user: UserProfile) => void;
   signInWithAppleStub: (identityToken?: string, displayName?: string) => Promise<void>;
   signInWithEmailMagicLink: (email: string) => Promise<{ ok: boolean; message: string }>;
+  refreshAuthFromCloud: () => Promise<boolean>;
   updateUser: (user: UserProfile) => void;
   applyCloudConversationUpdate: (
     conversationId: string,
@@ -524,6 +526,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const hydratedRef = useRef(false);
   const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activeConversationIdRef = useRef<string | null>(null);
+  const superLikedIdsRef = useRef(superLikedIds);
+
+  useEffect(() => {
+    superLikedIdsRef.current = superLikedIds;
+  }, [superLikedIds]);
+
+  const applyCloudSnapshot = useCallback(
+    (remote: Partial<SyncPayload>, superLikedFallback: string[]) => {
+      if (remote.user) {
+        setUser(remote.user);
+      }
+      if (remote.preferences) {
+        setPreferences((prev) => ({ ...prev, ...remote.preferences }));
+      }
+      setPassedIds(arrayToSet(remote.passedIds ?? []));
+      setLikedIds(arrayToSet(remote.likedIds ?? []));
+      setPendingLikeIds(arrayToSet(remote.pendingLikeIds ?? []));
+      setSuperLikedIds(arrayToSet(superLikedFallback));
+      setBlockedIds(arrayToSet(remote.blockedIds ?? []));
+      if (remote.matches) {
+        setMatches(remote.matches);
+      }
+      if (remote.conversations && remote.conversations.length > 0) {
+        setConversations((prev) => mergeConversationLists(prev, remote.conversations ?? []));
+      }
+      if (remote.isSparkPlus !== undefined) {
+        setIsSparkPlus(remote.isSparkPlus);
+      }
+      if (remote.isPaused !== undefined) {
+        setIsPaused(remote.isPaused);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -655,23 +691,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           if (cloudUserId) {
             const remote = await loadFromSupabase(cloudUserId);
             if (remote && !cancelled) {
-              if (remote.user) {
-                setUser(remote.user);
-              }
-              if (remote.preferences) {
-                setPreferences((prev) => ({ ...prev, ...remote.preferences }));
-              }
-              setPassedIds(arrayToSet(remote.passedIds ?? []));
-              setLikedIds(arrayToSet(remote.likedIds ?? []));
-              setPendingLikeIds(arrayToSet(remote.pendingLikeIds ?? []));
-              setSuperLikedIds(arrayToSet(saved.superLikedIds ?? []));
-              setBlockedIds(arrayToSet(remote.blockedIds ?? []));
-              setMatches(remote.matches ?? []);
-              if (remote.conversations && remote.conversations.length > 0) {
-                setConversations((prev) => mergeConversationLists(prev, remote.conversations ?? []));
-              }
-              setIsSparkPlus(remote.isSparkPlus ?? false);
-              setIsPaused(remote.isPaused ?? false);
+              applyCloudSnapshot(remote, saved.superLikedIds ?? []);
             }
           }
         }
@@ -710,14 +730,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUserId(session.user.id);
-        setIsAuthenticated(true);
+    } =     supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session?.user) {
+        return;
       }
+      const cloudUserId = session.user.id;
+      setUserId(cloudUserId);
+      setIsAuthenticated(true);
+      void loadFromSupabase(cloudUserId).then((remote) => {
+        if (remote) {
+          applyCloudSnapshot(remote, setToArray(superLikedIdsRef.current));
+        }
+      });
+      void registerCloudPushToken(cloudUserId);
     });
     return () => subscription.unsubscribe();
-  }, []);
+  }, [applyCloudSnapshot]);
 
   useEffect(() => {
     if (!isSupabaseConfigured()) {
@@ -732,10 +760,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
           return;
         }
         const session = await getSupabaseSession();
-        if (session?.userId) {
-          setUserId(session.userId);
-          setIsAuthenticated(true);
+        if (!session?.userId) {
+          return;
         }
+        setUserId(session.userId);
+        setIsAuthenticated(true);
+        const remote = await loadFromSupabase(session.userId);
+        if (remote) {
+          applyCloudSnapshot(remote, setToArray(superLikedIdsRef.current));
+        }
+        void registerCloudPushToken(session.userId);
       });
     };
     void Linking.getInitialURL().then(syncSessionFromUrl);
@@ -743,7 +777,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       syncSessionFromUrl(event.url);
     });
     return () => listener.remove();
-  }, []);
+  }, [applyCloudSnapshot]);
 
   const buildPersistedState = useCallback((): PersistedAppState => {
     return {
@@ -1306,6 +1340,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     [dateCheckIns],
   );
+
+  const refreshAuthFromCloud = useCallback(async (): Promise<boolean> => {
+    if (!isSupabaseConfigured()) {
+      return false;
+    }
+    await recoverSupabaseAuthFromLaunchUrl();
+    const session = await getSupabaseSession();
+    if (!session?.userId) {
+      return false;
+    }
+    setUserId(session.userId);
+    setIsAuthenticated(true);
+    const remote = await loadFromSupabase(session.userId);
+    if (remote) {
+      applyCloudSnapshot(remote, setToArray(superLikedIdsRef.current));
+    }
+    void registerCloudPushToken(session.userId);
+    return true;
+  }, [applyCloudSnapshot]);
 
   const signInWithAppleStub = useCallback(
     async (identityToken?: string, displayName?: string) => {
@@ -2833,6 +2886,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       completeOnboarding,
       signInWithAppleStub,
       signInWithEmailMagicLink,
+      refreshAuthFromCloud,
       updateUser,
       applyCloudConversationUpdate,
       updatePreferences,
@@ -2968,6 +3022,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       completeOnboarding,
       signInWithAppleStub,
       signInWithEmailMagicLink,
+      refreshAuthFromCloud,
       updateUser,
       applyCloudConversationUpdate,
       updatePreferences,

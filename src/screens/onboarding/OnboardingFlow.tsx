@@ -43,6 +43,7 @@ export function OnboardingFlow() {
     isAuthenticated,
     userId,
     isSupabaseEnabled,
+    refreshAuthFromCloud,
   } = useApp();
   const [step, setStep] = useState<Step>('welcome');
   const [locationCenter, setLocationCenter] = useState<GeoPoint>(() =>
@@ -204,7 +205,28 @@ export function OnboardingFlow() {
             </AnimatedPressable>
             {emailMessage ? <Text style={styles.emailHint}>{emailMessage}</Text> : null}
             {awaitingMagicLink ? (
-              <Text style={styles.emailHint}>{t('onboarding.magicLinkWaiting')}</Text>
+              <>
+                <Text style={styles.emailHint}>{t('onboarding.magicLinkWaiting')}</Text>
+                <AnimatedPressable
+                  style={styles.emailButton}
+                  disabled={authLoading}
+                  onPress={() => {
+                    setAuthLoading(true);
+                    void refreshAuthFromCloud()
+                      .then((ok) => {
+                        if (!ok) {
+                          setEmailMessage(t('onboarding.magicLinkNotYet'));
+                        }
+                      })
+                      .finally(() => {
+                        setAuthLoading(false);
+                      });
+                  }}
+                >
+                  <Ionicons name="refresh-outline" size={18} color={colors.text} />
+                  <Text style={styles.emailButtonText}>{t('onboarding.magicLinkRefresh')}</Text>
+                </AnimatedPressable>
+              </>
             ) : null}
           </View>
           <AnimatedPressable onPress={() => { signInWithAppleStub(); setStep('rules'); }}>

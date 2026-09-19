@@ -17,6 +17,7 @@ import {
   findActiveSubscription,
   loadPurchaseHistory,
 } from './purchaseHistory';
+import { purchaseStoreProduct, restoreStorePurchases } from './storePurchases';
 
 export type PurchasesMode = 'demo' | 'store';
 
@@ -99,10 +100,7 @@ export async function purchaseProduct(productId: PurchaseProductId): Promise<Pur
   }
 
   if (PURCHASES_MODE === 'store') {
-    return failure(
-      'store_unavailable',
-      'In-app purchases require a production build with App Store or Google Play billing configured.',
-    );
+    return purchaseStoreProduct(productId);
   }
 
   await simulateStoreDelay();
@@ -126,12 +124,7 @@ export async function purchaseProduct(productId: PurchaseProductId): Promise<Pur
 /** Restore active Spark+ subscription from local purchase history (demo) or store (future). */
 export async function restorePurchases(): Promise<PurchaseRestoreResult> {
   if (PURCHASES_MODE === 'store') {
-    return {
-      ok: false,
-      restoredSubscriptions: 0,
-      reason: 'store_unavailable',
-      message: 'Restore requires a production build with store billing configured.',
-    };
+    return restoreStorePurchases();
   }
 
   await simulateStoreDelay();

@@ -10,6 +10,7 @@ import { AiPersonaBadge } from '../components/AiPersonaBadge';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { EmberStatusChips } from '../components/EmberStatusChips';
 import { ChatComposer } from '../components/ChatComposer';
+import { ChatDialogueHelperSheet } from '../components/ChatDialogueHelperSheet';
 import { ChatReplySuggestions } from '../components/ChatReplySuggestions';
 import { GifPickerSheet } from '../components/GifPickerSheet';
 import { MessageReactionPicker } from '../components/MessageReactionPicker';
@@ -33,8 +34,8 @@ import { useTranslation } from '../i18n';
 import { useLiveExpiry } from '../hooks/useLiveExpiry';
 import { Message, MessageStatus } from '../types/match';
 import {
-  generateOpenerSuggestions,
-  generateReplySuggestions,
+  generateDialogueSuggestions,
+  type ChatDialogueMode,
 } from '../services/chatReplyCoach';
 import { getReportReasonLabel } from '../components/ReportReasonSheet';
 import { pickProfilePhoto } from '../utils/photoPicker';
@@ -80,6 +81,8 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const [aiSuggestionsLoading, setAiSuggestionsLoading] = useState(false);
   const [aiSuggestionSource, setAiSuggestionSource] = useState<'llm' | 'local'>('local');
   const [aiSuggestionsFailed, setAiSuggestionsFailed] = useState(false);
+  const [dialogueMode, setDialogueMode] = useState<ChatDialogueMode>('opener');
+  const [showDialogueHelper, setShowDialogueHelper] = useState(false);
   const suggestRequestRef = useRef(0);
 
   const conversation = useMemo(
@@ -102,6 +105,81 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   }, [conversationId, conversationUnread, markConversationRead]);
 
   const expiryLabel = useLiveExpiry(conversation?.match.expiresAt);
+  const threadMessages = conversation?.messages ?? [];
+  const threadProfile = conversation?.match.profile;
+
+  const dialogueModes = useMemo((): ChatDialogueMode[] => {
+    if (threadMessages.length === 0) {
+      return ['opener'];
+    }
+    return ['reply', 'topic'];
+  }, [threadMessages.length]);
+
+  const dialogueTitle =
+    dialogueMode === 'topic'
+      ? t('chat.aiSuggestTopic')
+      : dialogueMode === 'opener'
+        ? t('chat.aiSuggestOpener')
+        : t('chat.aiSuggestReply');
+
+  const showAiSuggestions =
+    threadMessages.length === 0 ||
+    (conversation?.yourTurn === true && threadMessages.length > 0);
+
+  const loadAiSuggestions = useCallback(() => {
+    if (!threadProfile) {
+      return;
+    }
+    const activeMode = dialogueModes.includes(dialogueMode) ? dialogueMode : dialogueModes[0];
+    const requestId = suggestRequestRef.current + 1;
+    suggestRequestRef.current = requestId;
+    setAiSuggestionsLoading(true);
+    setAiSuggestionsFailed(false);
+    const task = generateDialogueSuggestions(
+      activeMode,
+      threadProfile,
+      user,
+      threadMessages,
+      locale,
+    );
+    void task
+      .then((result) => {
+        if (requestId !== suggestRequestRef.current) {
+          return;
+        }
+        setAiSuggestions([...result.options]);
+        setAiSuggestionSource(result.source);
+      })
+      .catch(() => {
+        if (requestId !== suggestRequestRef.current) {
+          return;
+        }
+        setAiSuggestionsFailed(true);
+      })
+      .finally(() => {
+        if (requestId !== suggestRequestRef.current) {
+          return;
+        }
+        setAiSuggestionsLoading(false);
+      });
+  }, [dialogueMode, dialogueModes, locale, threadMessages, threadProfile, user]);
+
+  useEffect(() => {
+    if (threadMessages.length === 0) {
+      setDialogueMode('opener');
+      return;
+    }
+    if (dialogueMode === 'opener') {
+      setDialogueMode('reply');
+    }
+  }, [dialogueMode, threadMessages.length]);
+
+  useEffect(() => {
+    if (!showAiSuggestions) {
+      return;
+    }
+    loadAiSuggestions();
+  }, [dialogueMode, loadAiSuggestions, showAiSuggestions, threadMessages.length, conversation?.yourTurn]);
 
   if (!conversation) {
     return (
@@ -186,50 +264,9 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
     return status;
   };
 
-  const showAiSuggestions =
-    conversation.messages.length === 0 || (conversation.yourTurn && conversation.messages.length > 0);
-
   const handleApplySuggestion = (text: string) => {
     setDraft(text);
   };
-
-  const loadAiSuggestions = useCallback(() => {
-    const requestId = suggestRequestRef.current + 1;
-    suggestRequestRef.current = requestId;
-    setAiSuggestionsLoading(true);
-    setAiSuggestionsFailed(false);
-    const task =
-      conversation.messages.length === 0
-        ? generateOpenerSuggestions(profile, user, locale)
-        : generateReplySuggestions(profile, user, conversation.messages, locale);
-    void task
-      .then((result) => {
-        if (requestId !== suggestRequestRef.current) {
-          return;
-        }
-        setAiSuggestions([...result.options]);
-        setAiSuggestionSource(result.source);
-      })
-      .catch(() => {
-        if (requestId !== suggestRequestRef.current) {
-          return;
-        }
-        setAiSuggestionsFailed(true);
-      })
-      .finally(() => {
-        if (requestId !== suggestRequestRef.current) {
-          return;
-        }
-        setAiSuggestionsLoading(false);
-      });
-  }, [conversation.messages, locale, profile, user]);
-
-  useEffect(() => {
-    if (!showAiSuggestions) {
-      return;
-    }
-    loadAiSuggestions();
-  }, [loadAiSuggestions, showAiSuggestions, conversation.messages.length, conversation.yourTurn]);
 
   const renderMessage = ({ item }: { item: Message }) => (
     <View style={[styles.bubbleRow, item.isMine ? styles.bubbleRowMine : styles.bubbleRowTheirs]}>
@@ -381,12 +418,16 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
               </>
             )}
             <ChatReplySuggestions
-              title={t('chat.aiSuggestOpener')}
+              title={dialogueTitle}
               options={aiSuggestions}
               loading={aiSuggestionsLoading}
               failed={aiSuggestionsFailed}
               hint={t('chat.applySuggestionHint')}
               source={aiSuggestionSource}
+              mode={dialogueMode}
+              availableModes={dialogueModes}
+              onModeChange={setDialogueMode}
+              onOpenHelper={() => setShowDialogueHelper(true)}
               onSelect={handleApplySuggestion}
               onRefresh={loadAiSuggestions}
             />
@@ -451,12 +492,16 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
 
       {showAiSuggestions && conversation.messages.length > 0 ? (
         <ChatReplySuggestions
-          title={t('chat.aiSuggestReply')}
+          title={dialogueTitle}
           options={aiSuggestions}
           loading={aiSuggestionsLoading}
           failed={aiSuggestionsFailed}
           hint={t('chat.applySuggestionHint')}
           source={aiSuggestionSource}
+          mode={dialogueMode}
+          availableModes={dialogueModes}
+          onModeChange={setDialogueMode}
+          onOpenHelper={() => setShowDialogueHelper(true)}
           onSelect={handleApplySuggestion}
           onRefresh={loadAiSuggestions}
         />
@@ -471,8 +516,18 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         onSuggestDate={() => setShowSuggestDate(true)}
         onVibeGame={() => setShowVibeGame(true)}
         onVoiceNote={() => setShowVoiceNote(true)}
-        onAiSuggest={showAiSuggestions ? loadAiSuggestions : undefined}
+        onAiSuggest={showAiSuggestions ? () => setShowDialogueHelper(true) : undefined}
         paddingBottom={insets.bottom + spacing.sm}
+      />
+
+      <ChatDialogueHelperSheet
+        visible={showDialogueHelper}
+        profile={profile}
+        user={user}
+        messages={conversation.messages}
+        initialMode={dialogueMode}
+        onClose={() => setShowDialogueHelper(false)}
+        onSelect={handleApplySuggestion}
       />
 
       <GifPickerSheet

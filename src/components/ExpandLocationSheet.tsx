@@ -289,7 +289,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     reportProfile(profileId);
     setDetailProfile(null);
     setSelectedPinId(null);
-    Alert.alert(t('discover.reportSubmitted'), t('discover.blockedHint'));
+    Alert.alert(t('discover.reportSubmitted'), t('discover.reportThanksSimple'));
   };
 
   const detailDistanceMiles = useMemo(() => {

@@ -24,8 +24,8 @@ import { WaitingForMatchModal } from '../components/WaitingForMatchModal';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Profile, ProfilePrompt } from '../types/profile';
-import { getSparkSectionEmpty } from '../i18n/labels';
-import { useTranslation } from '../i18n';
+import { getPromptQuestionLabel, getSparkSectionEmpty } from '../i18n/labels';
+import { translate, useTranslation } from '../i18n';
 import { resolveSparkSection } from '../types/preferences';
 import { spacing } from '../theme';
 import { dailyLikeLimitForGender } from '../utils/genderAccountPerks';
@@ -309,15 +309,18 @@ export function DiscoverScreen() {
       if (!promptLikeTarget) {
         return;
       }
+      const question = getPromptQuestionLabel(locale, promptLikeTarget.prompt.question);
       const note = comment
-        ? `Liked "${promptLikeTarget.prompt.question}": ${comment}`
-        : `Liked your answer: "${promptLikeTarget.prompt.answer}"`;
+        ? translate(locale, 'discover.promptLikeWithComment', { question, comment })
+        : translate(locale, 'discover.promptLikeAnswerOnly', {
+            answer: promptLikeTarget.prompt.answer,
+          });
       setShowPromptLike(false);
       setDetailProfile(null);
       processLike(promptLikeTarget.profile, note);
       setPromptLikeTarget(null);
     },
-    [processLike, promptLikeTarget],
+    [locale, processLike, promptLikeTarget],
   );
 
   const handleSuperLikeChatNow = useCallback(() => {

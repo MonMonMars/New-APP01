@@ -1,4 +1,6 @@
 import { DisguisedProfilePost, FeedItem } from '../data/disguiseFeed';
+import { translate } from '../i18n';
+import { AppLocale, resolveAppLocale } from '../types/locale';
 import { getAllProfiles, getIncomingLikeProfilesForSection } from '../data/profiles';
 import { matchesSparkSection, resolveSparkSection, SparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
@@ -24,25 +26,34 @@ export function rotatePulseList<T>(items: readonly T[], generation: number): T[]
   return [...items.slice(offset), ...items.slice(0, offset)];
 }
 
-function formatRefreshedTimeAgo(index: number, generation: number): string {
+function formatRefreshedTimeAgo(
+  index: number,
+  generation: number,
+  locale: AppLocale,
+): string {
   const minutes = ((index + generation * 5) % 58) + 1;
   if (minutes <= 2) {
-    return 'Just now';
+    return translate(locale, 'time.justNow');
   }
   if (minutes < 60) {
-    return `${minutes}m ago`;
+    return translate(locale, 'time.minutesAgo', { n: minutes });
   }
-  return `${Math.floor(minutes / 60)}h ago`;
+  return translate(locale, 'time.hoursAgo', { n: Math.floor(minutes / 60) });
 }
 
 /** Refresh relative timestamps on feed cards after a bottom reload. */
-export function freshenPulseFeedTimestamps(items: FeedItem[], generation: number): FeedItem[] {
+export function freshenPulseFeedTimestamps(
+  items: FeedItem[],
+  generation: number,
+  locale?: AppLocale | null,
+): FeedItem[] {
+  const resolvedLocale = resolveAppLocale(locale);
   if (generation === 0) {
     return items;
   }
 
   return items.map((item, index) => {
-    const timeAgo = formatRefreshedTimeAgo(index, generation);
+    const timeAgo = formatRefreshedTimeAgo(index, generation, resolvedLocale);
     if (item.type === 'news' || item.type === 'social' || item.type === 'disguised_profile') {
       return { ...item, timeAgo };
     }

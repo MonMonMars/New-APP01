@@ -1,6 +1,7 @@
 import { FeedItem } from '../data/disguiseFeed';
 import { getProfileById } from '../data/profiles';
 import { DisguiseAdCreative } from '../types/disguise';
+import { AppLocale } from '../types/locale';
 import { SparkSection } from '../types/preferences';
 import { UserProfile } from '../types/profile';
 import { disguiseFeedItemsForGender } from './disguiseFeedCatalog';
@@ -118,11 +119,16 @@ export function buildDisguiseFeed(
   creative: DisguiseAdCreative | null,
   section?: SparkSection | string | null,
   refreshGeneration = 0,
+  locale?: AppLocale | null,
 ): FeedItem[] {
   const profileCards = buildDisguisedProfileFeedItems(section, refreshGeneration);
   let baseFeed = disguiseFeedItemsForGender(user.gender);
   if (refreshGeneration > 0) {
-    baseFeed = freshenPulseFeedTimestamps(rotatePulseList(baseFeed, refreshGeneration), refreshGeneration);
+    baseFeed = freshenPulseFeedTimestamps(
+      rotatePulseList(baseFeed, refreshGeneration),
+      refreshGeneration,
+      locale,
+    );
   }
   const withProfiles = weaveProfileCards(baseFeed, profileCards);
 

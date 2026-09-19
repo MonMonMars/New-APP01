@@ -16,7 +16,7 @@ export function ReferralCard() {
   const inviteLink = buildInviteLink(userId);
 
   const handleInvite = async () => {
-    const message = buildInviteMessage(user.name, inviteLink);
+    const message = buildInviteMessage(user.name, inviteLink, locale);
     const shared = await shareWithFallback({
       message,
       title: t('referral.shareTitle'),

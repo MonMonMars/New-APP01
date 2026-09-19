@@ -1,3 +1,6 @@
+import { translate } from '../i18n';
+import { AppLocale, resolveAppLocale } from '../types/locale';
+
 const INVITE_BASE = 'https://spark.app/invite';
 
 /** Personalised invite URL — stable suffix from account id when available. */
@@ -9,7 +12,12 @@ export function buildInviteLink(userId: string | null | undefined): string {
   return suffix.length >= 4 ? `${INVITE_BASE}/${suffix}` : INVITE_BASE;
 }
 
-export function buildInviteMessage(userName: string, inviteLink: string): string {
+export function buildInviteMessage(
+  userName: string,
+  inviteLink: string,
+  locale?: AppLocale | null,
+): string {
+  const resolvedLocale = resolveAppLocale(locale);
   const first = userName.trim().split(/\s+/)[0] || 'I';
-  return `Join ${first} on Spark — dating with a private disguise mode when you need it. ${inviteLink}`;
+  return translate(resolvedLocale, 'referral.shareMessage', { name: first, link: inviteLink });
 }

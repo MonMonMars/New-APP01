@@ -55,10 +55,13 @@ export type PurchaseFailure = {
 
 export type PurchaseResult = PurchaseSuccess | PurchaseFailure;
 
+export type PurchaseRestoreReason = 'store_unavailable' | 'none_found';
+
 export type PurchaseRestoreResult = {
   ok: boolean;
   restoredSubscriptions: number;
   message: string;
+  reason?: PurchaseRestoreReason;
   grant?: EntitlementGrant;
 };
 

@@ -129,6 +129,7 @@ export async function restorePurchases(): Promise<PurchaseRestoreResult> {
     return {
       ok: false,
       restoredSubscriptions: 0,
+      reason: 'store_unavailable',
       message: 'Restore requires a production build with store billing configured.',
     };
   }
@@ -142,6 +143,7 @@ export async function restorePurchases(): Promise<PurchaseRestoreResult> {
     return {
       ok: false,
       restoredSubscriptions: 0,
+      reason: 'none_found',
       message: 'No active Spark+ subscription found for this account.',
     };
   }

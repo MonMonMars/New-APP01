@@ -775,7 +775,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return false;
     }
 
-    const result = await unlockSpark(securitySettings, undefined, leaveLabel);
+    const result = await unlockSpark(
+      securitySettings,
+      undefined,
+      leaveLabel,
+      resolveAppLocale(preferences.appLocale),
+    );
     if (result.ok) {
       await clearFailedUnlockAttempts();
       void logSecurityEvent(userId, 'spark_unlock_success', { method: result.method });
@@ -805,7 +810,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const result = await unlockSpark(securitySettings, pin, leaveLabel);
+      const result = await unlockSpark(
+        securitySettings,
+        pin,
+        leaveLabel,
+        resolveAppLocale(preferences.appLocale),
+      );
       if (result.ok) {
         await clearFailedUnlockAttempts();
         void logSecurityEvent(userId, 'spark_unlock_success', { method: 'pin' });
@@ -846,7 +856,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const handleRetryBiometric = useCallback(async () => {
     const leaveLabel = disguiseWorldMeta(preferences.sparkSection, user.gender, resolveAppLocale(preferences.appLocale)).unlockLabel;
-    const result = await unlockSpark(securitySettings, undefined, leaveLabel);
+    const result = await unlockSpark(
+      securitySettings,
+      undefined,
+      leaveLabel,
+      resolveAppLocale(preferences.appLocale),
+    );
     if (result.ok) {
       setUnlockModalVisible(false);
       setUnlockError(null);
@@ -1244,30 +1259,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const signInWithEmailMagicLink = useCallback(async (email: string) => {
+    const locale = resolveAppLocale(preferences.appLocale);
     const trimmed = email.trim().toLowerCase();
     if (!trimmed.includes('@')) {
-      return { ok: false, message: 'Enter a valid email address.' };
+      return { ok: false, message: translate(locale, 'onboarding.emailInvalid') };
     }
 
     if (isSupabaseConfigured()) {
       const result = await signInWithMagicLink(trimmed);
       if (!result.ok) {
-        return { ok: false, message: result.error ?? 'Could not send magic link.' };
+        return {
+          ok: false,
+          message: result.error ?? translate(locale, 'onboarding.magicLinkFailed'),
+        };
       }
       return {
         ok: true,
-        message: 'Magic link sent! Check your email to complete sign-in before continuing.',
+        message: translate(locale, 'onboarding.magicLinkSent'),
       };
     }
 
     if (isProductionBuild()) {
-      return { ok: false, message: 'Email sign-in requires Supabase configuration.' };
+      return { ok: false, message: translate(locale, 'onboarding.emailRequiresSupabase') };
     }
 
     setIsAuthenticated(true);
     setUserId(`demo-email-${Date.now()}`);
-    return { ok: true, message: 'Signed in locally. Connect Supabase for cloud email sign-in.' };
-  }, []);
+    return { ok: true, message: translate(locale, 'onboarding.signedInLocally') };
+  }, [preferences.appLocale]);
 
   const completeOnboarding = useCallback(
     (nextUser: UserProfile) => {
@@ -2383,7 +2402,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     async (overlayText: string, variant: DisguiseOverlayVariant) => {
       const sourcePhotoUrl = user.photos[0];
       if (!sourcePhotoUrl) {
-        return { ok: false, message: 'Add a profile photo first.' };
+        return {
+          ok: false,
+          message: translate(resolveAppLocale(preferences.appLocale), 'disguiseAd.photoRequired'),
+        };
       }
 
       setIsGeneratingDisguiseAd(true);
@@ -2397,7 +2419,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setDisguiseAdCreative(creative);
         return { ok: true };
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Generation failed.';
+        const locale = resolveAppLocale(preferences.appLocale);
+        const message =
+          error instanceof Error && error.message !== 'Generation failed.'
+            ? error.message
+            : translate(locale, 'disguiseAd.generationFailed');
         return { ok: false, message };
       } finally {
         setIsGeneratingDisguiseAd(false);

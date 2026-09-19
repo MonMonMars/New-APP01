@@ -154,7 +154,7 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
   }, [visible, user]);
 
   const handleAddPhoto = async () => {
-    const uri = await pickProfilePhoto();
+    const uri = await pickProfilePhoto(locale);
     if (uri) {
       setPhotos((prev) => [...prev, uri]);
     }

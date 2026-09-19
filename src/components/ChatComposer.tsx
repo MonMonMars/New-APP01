@@ -121,7 +121,7 @@ export function ChatComposer({
             scaleTo={0.9}
             onPress={onAiSuggest}
             style={[styles.plusButton, { backgroundColor: colors.surface }]}
-            accessibilityLabel={t('chat.refreshSuggestions')}
+            accessibilityLabel={t('chat.openDialogueHelper')}
           >
             <Ionicons name="sparkles" size={20} color={colors.gradientEnd} />
           </AnimatedPressable>

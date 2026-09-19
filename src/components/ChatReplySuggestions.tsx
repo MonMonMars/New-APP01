@@ -3,6 +3,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-nat
 
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
+import type { ChatDialogueMode } from '../services/chatReplyCoach';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
 
@@ -13,9 +14,28 @@ type ChatReplySuggestionsProps = {
   failed?: boolean;
   hint?: string;
   source?: 'llm' | 'local';
+  mode?: ChatDialogueMode;
+  availableModes?: ChatDialogueMode[];
+  onModeChange?: (mode: ChatDialogueMode) => void;
+  onOpenHelper?: () => void;
   onSelect: (text: string) => void;
   onRefresh?: () => void;
 };
+
+function modeLabel(t: (key: string) => string, mode: ChatDialogueMode): string {
+  switch (mode) {
+    case 'reply':
+      return t('chat.aiModeReply');
+    case 'topic':
+      return t('chat.aiModeTopic');
+    case 'opener':
+      return t('chat.aiModeOpener');
+    default: {
+      const _exhaustive: never = mode;
+      return _exhaustive;
+    }
+  }
+}
 
 /** Three tappable AI reply / opener suggestions above the composer. */
 export function ChatReplySuggestions({
@@ -25,33 +45,69 @@ export function ChatReplySuggestions({
   failed = false,
   hint,
   source,
+  mode,
+  availableModes,
+  onModeChange,
+  onOpenHelper,
   onSelect,
   onRefresh,
 }: ChatReplySuggestionsProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const showModeTabs =
+    availableModes && availableModes.length > 1 && mode && onModeChange;
 
   return (
     <View style={[styles.wrap, { borderTopColor: colors.border, backgroundColor: colors.background }]}>
       <View style={styles.headerRow}>
-        <View style={styles.titleRow}>
+        <AnimatedPressable
+          style={styles.titleRow}
+          onPress={onOpenHelper}
+          disabled={!onOpenHelper}
+          accessibilityLabel={onOpenHelper ? t('chat.openDialogueHelper') : title}
+        >
           <Ionicons name="sparkles" size={14} color={colors.gradientEnd} />
           <Text style={[styles.title, { color: colors.textMuted }]}>{title}</Text>
           {source === 'llm' ? (
             <Text style={[styles.badge, { color: colors.gradientEnd }]}>{t('chat.aiPowered')}</Text>
           ) : null}
+          {onOpenHelper ? (
+            <Ionicons name="chevron-forward" size={14} color={colors.textMuted} />
+          ) : null}
+        </AnimatedPressable>
+        <View style={styles.headerActions}>
+          {onRefresh ? (
+            <AnimatedPressable
+              onPress={onRefresh}
+              disabled={loading}
+              accessibilityLabel={t('chat.refreshSuggestions')}
+              hitSlop={8}
+            >
+              <Ionicons name="refresh" size={18} color={loading ? colors.textMuted : colors.text} />
+            </AnimatedPressable>
+          ) : null}
         </View>
-        {onRefresh ? (
-          <AnimatedPressable
-            onPress={onRefresh}
-            disabled={loading}
-            accessibilityLabel={t('chat.refreshSuggestions')}
-            hitSlop={8}
-          >
-            <Ionicons name="refresh" size={18} color={loading ? colors.textMuted : colors.text} />
-          </AnimatedPressable>
-        ) : null}
       </View>
+
+      {showModeTabs ? (
+        <View style={[styles.segment, { backgroundColor: colors.surface }]}>
+          {availableModes.map((item) => {
+            const active = mode === item;
+            return (
+              <AnimatedPressable
+                key={item}
+                style={[styles.segmentItem, active ? { backgroundColor: colors.gradientEnd } : null]}
+                onPress={() => onModeChange(item)}
+                accessibilityLabel={modeLabel(t, item)}
+              >
+                <Text style={[styles.segmentText, { color: active ? colors.text : colors.textMuted }]}>
+                  {modeLabel(t, item)}
+                </Text>
+              </AnimatedPressable>
+            );
+          })}
+        </View>
+      ) : null}
 
       {hint ? (
         <Text style={[styles.hint, { color: colors.textMuted }]}>{hint}</Text>
@@ -104,11 +160,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
     flex: 1,
+  },
+  segment: {
+    flexDirection: 'row',
+    borderRadius: radii.button,
+    padding: 3,
+    gap: 3,
+  },
+  segmentItem: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: spacing.xs + 2,
+    borderRadius: radii.button,
+  },
+  segmentText: {
+    fontSize: 12,
+    fontWeight: '800',
   },
   title: {
     fontSize: 12,

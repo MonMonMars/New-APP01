@@ -16,6 +16,9 @@ export type ChatCoachSuggestions = {
   source: 'llm' | 'local';
 };
 
+/** What the dialogue helper is generating: first message, direct reply, or fresh topic. */
+export type ChatDialogueMode = 'opener' | 'reply' | 'topic';
+
 function getGroqApiKey(): string | null {
   const key = process.env.EXPO_PUBLIC_GROQ_API_KEY?.trim();
   return key && key.length > 10 ? key : null;
@@ -224,6 +227,64 @@ function buildLocalReplies(
   return { options: options.slice(0, CHAT_SUGGESTION_COUNT), source: 'local' };
 }
 
+function chatTranscriptText(messages: Message[]): string {
+  return messages
+    .map((message) => message.text ?? '')
+    .join(' ')
+    .toLowerCase();
+}
+
+function interestMentionedInChat(transcript: string, interest: string): boolean {
+  return transcript.includes(interest.toLowerCase());
+}
+
+function localeInstruction(locale: AppLocale): string {
+  return locale === 'zh-TW'
+    ? 'Write every suggestion in Traditional Chinese (zh-TW).'
+    : 'Write every suggestion in English.';
+}
+
+function buildLocalTopics(
+  profile: Profile,
+  user: UserProfile,
+  recentMessages: Message[],
+  locale: AppLocale,
+): ChatCoachSuggestions {
+  const transcript = chatTranscriptText(recentMessages);
+  const unexplored = profile.interests.filter(
+    (interest) => !interestMentionedInChat(transcript, interest),
+  );
+  const shared = sharedInterests(profile, user).filter(
+    (interest) => !interestMentionedInChat(transcript, interest),
+  );
+  const promptTopic = profile.prompts?.[1]?.question ?? profile.prompts?.[0]?.question;
+  const matchName = profile.name.split(' ')[0];
+
+  if (locale === 'zh-TW') {
+    const options = [
+      unexplored[0]
+        ? `我們還沒聊過${unexplored[0]} — 你是怎麼開始喜歡的？`
+        : `如果${matchName}只能推薦一個週末活動，會是什麼？`,
+      shared[0] ? `我們都喜歡${shared[0]} — 有什麼小眾推薦？` : '最近有發現什麼新的好去處嗎？',
+      promptTopic ? `想聽你聊聊「${promptTopic}」` : '有什麼事是最近讓你特別開心的？',
+      '如果明天可以飛任何地方，你會選哪？',
+      '你平常怎麼放鬆 — 獨處還是跟朋友？',
+    ];
+    return { options: options.slice(0, CHAT_SUGGESTION_COUNT), source: 'local' };
+  }
+
+  const options = [
+    unexplored[0]
+      ? `We have not talked about ${unexplored[0]} yet — how did you get into it?`
+      : `If you could plan the perfect weekend, what would ${matchName} pick?`,
+    shared[0] ? `We both like ${shared[0]} — any hidden gems?` : 'Found any new spots in the city lately?',
+    promptTopic ? `Curious about your take on "${promptTopic}"` : 'What has been making you happy lately?',
+    'If you could fly anywhere tomorrow, where would you go?',
+    'How do you recharge — solo time or with friends?',
+  ];
+  return { options: options.slice(0, CHAT_SUGGESTION_COUNT), source: 'local' };
+}
+
 async function fetchGroqJson(prompt: string): Promise<string[] | null> {
   const apiKey = getGroqApiKey();
   if (!apiKey) {
@@ -323,6 +384,7 @@ export async function generateOpenerSuggestions(
     profileContext(profile),
     `Write exactly ${CHAT_SUGGESTION_COUNT} distinct first messages the user could send (max 90 chars each).`,
     'Warm, specific, not cringe. Reference their bio, prompts, or interests when possible.',
+    localeInstruction(locale),
     'Return JSON array of 5 strings only.',
   ].join('\n');
 
@@ -359,6 +421,7 @@ export async function generateReplySuggestions(
     recentTranscript(recentMessages, user.name, profile.name),
     `Write exactly ${CHAT_SUGGESTION_COUNT} reply options the user could send next (max 90 chars each).`,
     'Match their tone. Include playful, curious, and forward-about-meeting options.',
+    localeInstruction(locale),
     'Return JSON array of 5 strings only.',
   ].join('\n');
 
@@ -368,4 +431,54 @@ export async function generateReplySuggestions(
     return { options: normalized, source: 'llm' };
   }
   return buildLocalReplies(profile, user, recentMessages, locale);
+}
+
+/** Five fresh conversation topics to pivot or re-energize the chat. */
+export async function generateTopicSuggestions(
+  profile: Profile,
+  user: UserProfile,
+  recentMessages: Message[],
+  locale: AppLocale = 'en',
+): Promise<ChatCoachSuggestions> {
+  const prompt = [
+    'You are a dating chat coach for Spark.',
+    `User: ${user.name}, ${user.age}. Interests: ${user.interests.join(', ')}`,
+    profileContext(profile),
+    'Recent chat:',
+    recentTranscript(recentMessages, user.name, profile.name),
+    `Suggest exactly ${CHAT_SUGGESTION_COUNT} NEW conversation topics or pivot questions (max 90 chars each).`,
+    'Do not repeat what was already discussed. Draw from their bio, prompts, or interests not yet mentioned.',
+    'Mix light/fun with deeper getting-to-know-you angles.',
+    localeInstruction(locale),
+    'Return JSON array of 5 strings only.',
+  ].join('\n');
+
+  const llm = await fetchGroqJson(prompt);
+  const normalized = llm ? normalizeOptions(llm) : null;
+  if (normalized) {
+    return { options: normalized, source: 'llm' };
+  }
+  return buildLocalTopics(profile, user, recentMessages, locale);
+}
+
+/** Unified entry for the dialogue helper UI. */
+export async function generateDialogueSuggestions(
+  mode: ChatDialogueMode,
+  profile: Profile,
+  user: UserProfile,
+  recentMessages: Message[],
+  locale: AppLocale = 'en',
+): Promise<ChatCoachSuggestions> {
+  switch (mode) {
+    case 'opener':
+      return generateOpenerSuggestions(profile, user, locale);
+    case 'reply':
+      return generateReplySuggestions(profile, user, recentMessages, locale);
+    case 'topic':
+      return generateTopicSuggestions(profile, user, recentMessages, locale);
+    default: {
+      const _exhaustive: never = mode;
+      return _exhaustive;
+    }
+  }
 }

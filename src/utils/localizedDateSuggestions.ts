@@ -39,5 +39,20 @@ export function getLocalizedDateSuggestions(locale: AppLocale): LocalizedDateSug
       label: translate(locale, 'chat.dateSuggestionVideo'),
       message: translate(locale, 'chat.dateSuggestionVideoMsg'),
     },
+    {
+      id: 'brunch',
+      label: translate(locale, 'chat.dateSuggestionBrunch'),
+      message: translate(locale, 'chat.dateSuggestionBrunchMsg'),
+    },
+    {
+      id: 'museum',
+      label: translate(locale, 'chat.dateSuggestionMuseum'),
+      message: translate(locale, 'chat.dateSuggestionMuseumMsg'),
+    },
+    {
+      id: 'live',
+      label: translate(locale, 'chat.dateSuggestionLive'),
+      message: translate(locale, 'chat.dateSuggestionLiveMsg'),
+    },
   ];
 }

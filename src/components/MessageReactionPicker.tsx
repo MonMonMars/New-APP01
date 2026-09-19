@@ -8,11 +8,17 @@ const REACTIONS = ['❤️', '😂', '🔥', '👍', '😮', '🙏'];
 
 type MessageReactionPickerProps = {
   visible: boolean;
+  currentReaction?: string;
   onSelect: (emoji: string) => void;
   onClose: () => void;
 };
 
-export function MessageReactionPicker({ visible, onSelect, onClose }: MessageReactionPickerProps) {
+export function MessageReactionPicker({
+  visible,
+  currentReaction,
+  onSelect,
+  onClose,
+}: MessageReactionPickerProps) {
   const { colors } = useTheme();
 
   if (!visible) {
@@ -21,18 +27,21 @@ export function MessageReactionPicker({ visible, onSelect, onClose }: MessageRea
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      {REACTIONS.map((emoji) => (
-        <AnimatedPressable
-          key={emoji}
-          style={styles.emojiButton}
-          onPress={() => {
-            onSelect(emoji);
-            onClose();
-          }}
-        >
-          <Text style={styles.emoji}>{emoji}</Text>
-        </AnimatedPressable>
-      ))}
+      {REACTIONS.map((emoji) => {
+        const selected = currentReaction === emoji;
+        return (
+          <AnimatedPressable
+            key={emoji}
+            style={[styles.emojiButton, selected ? { backgroundColor: colors.border } : null]}
+            onPress={() => {
+              onSelect(emoji);
+              onClose();
+            }}
+          >
+            <Text style={styles.emoji}>{emoji}</Text>
+          </AnimatedPressable>
+        );
+      })}
     </View>
   );
 }

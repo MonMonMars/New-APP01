@@ -102,7 +102,8 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const [searchCenter, setSearchCenter] = useState<GeoPoint>(() => resolveInitialMapCenter(preferences));
   const [mapZoom, setMapZoom] = useState(() => zoomForRadius(currentRadius));
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
-  const [nameQuery, setNameQuery] = useState('');
+  const [queryMode, setQueryMode] = useState<'people' | 'places'>('people');
+  const [searchQuery, setSearchQuery] = useState('');
   const [detailProfile, setDetailProfile] = useState<Profile | null>(null);
   const [deckToast, setDeckToast] = useState<string | null>(null);
   const [showLikeLimit, setShowLikeLimit] = useState(false);
@@ -162,19 +163,22 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   );
 
   const placeSuggestions = useMemo(
-    () => searchMapPlaces(nameQuery, locale),
-    [locale, nameQuery],
+    () => (queryMode === 'places' ? searchMapPlaces(searchQuery, locale) : []),
+    [locale, queryMode, searchQuery],
   );
 
   const mapPins = useMemo(() => areaPins.slice(0, MAP_PIN_LIMIT), [areaPins]);
 
   const visiblePins = useMemo(() => {
-    const query = nameQuery.trim().toLowerCase();
+    if (queryMode !== 'people') {
+      return mapPins;
+    }
+    const query = searchQuery.trim().toLowerCase();
     if (!query) {
       return mapPins;
     }
     return mapPins.filter((profile) => profile.name.toLowerCase().includes(query));
-  }, [mapPins, nameQuery]);
+  }, [mapPins, queryMode, searchQuery]);
 
   const pinsTruncated = areaPins.length > MAP_PIN_LIMIT;
 
@@ -190,7 +194,8 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     searchMapAt(mapCenter);
     searchMorePeople();
     setSelectedPinId(null);
-    setNameQuery('');
+    setSearchQuery('');
+    setQueryMode('people');
     setDeckToast(t('mapDiscover.areaLoaded'));
   }, [mapCenter, searchMapAt, searchMorePeople, t]);
 
@@ -213,7 +218,8 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     setMapCenter(target);
     setSearchCenter(target);
     setSelectedPinId(null);
-    setNameQuery('');
+    setSearchQuery('');
+    setQueryMode('people');
     setDeckToast(t('mapDiscover.resetSearchArea'));
   }, [clearMapSearch, preferences.passportCity, preferences.travelMode, searchMorePeople, t, userLocation]);
 
@@ -224,7 +230,8 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
       setMapZoom(zoomForRadius(currentRadius));
       searchMapAt(place.coords);
       searchMorePeople();
-      setNameQuery('');
+      setSearchQuery('');
+      setQueryMode('people');
       setSelectedPinId(null);
       setDeckToast(t('mapDiscover.areaLoaded'));
     },
@@ -399,23 +406,57 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
       </View>
 
       <View style={[styles.searchBarWrap, { top: insets.top + spacing.sm + 52 }]}>
+        <View style={[styles.queryModeRow, { backgroundColor: chromeBg }]}>
+          {(['people', 'places'] as const).map((mode) => {
+            const active = queryMode === mode;
+            return (
+              <AnimatedPressable
+                key={mode}
+                style={[styles.queryModeChip, active ? { backgroundColor: accent } : null]}
+                accessibilityLabel={
+                  mode === 'people'
+                    ? t('mapDiscover.searchModePeopleA11y')
+                    : t('mapDiscover.searchModePlacesA11y')
+                }
+                onPress={() => {
+                  setQueryMode(mode);
+                  setSearchQuery('');
+                }}
+              >
+                <Text style={[styles.queryModeText, { color: active ? onAccentText : chromeText }]}>
+                  {mode === 'people'
+                    ? t('mapDiscover.searchModePeople')
+                    : t('mapDiscover.searchModePlaces')}
+                </Text>
+              </AnimatedPressable>
+            );
+          })}
+        </View>
         <View style={[styles.searchBar, { backgroundColor: chromeBg }]}>
           <Ionicons name="search" size={18} color={chromeMuted} />
           <TextInput
-            value={nameQuery}
-            onChangeText={setNameQuery}
-            placeholder={t('mapDiscover.searchPeoplePlaceholder')}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder={
+              queryMode === 'people'
+                ? t('mapDiscover.searchPeoplePlaceholder')
+                : t('mapDiscover.searchPlacesPlaceholder')
+            }
             placeholderTextColor={chromeMuted}
             style={[styles.searchInput, { color: chromeText }]}
             returnKeyType="search"
             clearButtonMode="while-editing"
-            accessibilityLabel={t('mapDiscover.searchPeopleA11y')}
+            accessibilityLabel={
+              queryMode === 'people'
+                ? t('mapDiscover.searchPeopleA11y')
+                : t('mapDiscover.searchPlacesA11y')
+            }
           />
-          {nameQuery.length > 0 ? (
+          {searchQuery.length > 0 ? (
             <AnimatedPressable
               hitSlop={8}
               accessibilityLabel={t('common.close')}
-              onPress={() => setNameQuery('')}
+              onPress={() => setSearchQuery('')}
             >
               <Ionicons name="close-circle" size={18} color={chromeMuted} />
             </AnimatedPressable>
@@ -446,7 +487,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         ) : null}
       </View>
 
-      <View style={[styles.zoomControls, { top: insets.top + spacing.sm + 104 }]}>
+      <View style={[styles.zoomControls, { top: insets.top + spacing.sm + 152 }]}>
         <AnimatedPressable
           onPress={handleZoomIn}
           hitSlop={8}
@@ -466,7 +507,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
       </View>
 
       {showSearchArea ? (
-        <View style={[styles.searchAreaWrap, { top: insets.top + spacing.sm + 104 }]}>
+        <View style={[styles.searchAreaWrap, { top: insets.top + spacing.sm + 152 }]}>
           <AnimatedPressable
             style={[styles.searchAreaButton, { backgroundColor: accent }]}
             onPress={handleSearchThisArea}
@@ -523,7 +564,9 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
       <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
         {visiblePins.length === 0 ? (
           <Text style={[styles.emptyHint, { color: chromeText, backgroundColor: chromeBg }]}>
-            {nameQuery.trim() ? t('mapDiscover.noSearchResults') : t('mapDiscover.emptyArea')}
+            {queryMode === 'people' && searchQuery.trim()
+              ? t('mapDiscover.noSearchResults')
+              : t('mapDiscover.emptyArea')}
           </Text>
         ) : pinsTruncated ? (
           <Text style={[styles.emptyHint, { color: chromeMuted, backgroundColor: chromeBg }]}>
@@ -675,6 +718,23 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: spacing.md,
     right: spacing.md,
+    gap: spacing.xs,
+  },
+  queryModeRow: {
+    flexDirection: 'row',
+    borderRadius: radii.button,
+    padding: 3,
+    gap: 3,
+  },
+  queryModeChip: {
+    flex: 1,
+    alignItems: 'center',
+    borderRadius: radii.button - 2,
+    paddingVertical: spacing.xs,
+  },
+  queryModeText: {
+    fontSize: 13,
+    fontWeight: '800',
   },
   searchBar: {
     flexDirection: 'row',

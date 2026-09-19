@@ -55,6 +55,7 @@ import {
 } from '../utils/conversationMerge';
 import {
   deleteSupabaseAccount,
+  ensureProfileRow,
   getSupabaseClient,
   getSupabaseSession,
   isSupabaseConfigured,
@@ -1368,9 +1369,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setUser(nextUser);
       setHasOnboarded(true);
       setDisguiseModeState(false);
-      if (!userId && isSupabaseConfigured()) {
-        setUserId(`user-${Date.now()}`);
-      }
+      void (async () => {
+        let activeUserId = userId;
+        if (!activeUserId) {
+          const session = await getSupabaseSession();
+          if (session?.userId) {
+            activeUserId = session.userId;
+            setUserId(session.userId);
+            setIsAuthenticated(true);
+          } else if (isSupabaseConfigured()) {
+            activeUserId = `user-${Date.now()}`;
+            setUserId(activeUserId);
+          }
+        }
+        if (activeUserId && isSupabaseConfigured()) {
+          await ensureProfileRow(activeUserId, nextUser);
+        }
+      })();
     },
     [userId],
   );
@@ -1379,6 +1394,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     (nextUser: UserProfile) => {
       setUser(nextUser);
       if (userId && isSupabaseConfigured()) {
+        void ensureProfileRow(userId, nextUser);
         void uploadPhotosToCloud(userId, nextUser.photos).then((cloudPhotos) => {
           const changed = cloudPhotos.some((url, index) => url !== nextUser.photos[index]);
           if (changed) {

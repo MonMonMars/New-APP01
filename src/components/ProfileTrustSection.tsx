@@ -3,7 +3,9 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { getVerificationHowItWorksSteps } from '../content/verificationPolicy';
+import { useApp } from '../context/AppContext';
 import { useAppLocale } from '../hooks/useAppLocale';
+import { logSecurityEvent } from '../services/securityReports';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
 import { UserProfile } from '../types/profile';
@@ -30,6 +32,7 @@ export function ProfileTrustSection({ user, onUpdate, onOpenPolicy }: ProfileTru
   const { colors } = useTheme();
   const { t } = useTranslation();
   const { locale } = useAppLocale();
+  const { userId } = useApp();
   const [activeKind, setActiveKind] = useState<'photo' | 'person' | 'age' | null>(null);
 
   const items: TrustItem[] = [
@@ -60,6 +63,9 @@ export function ProfileTrustSection({ user, onUpdate, onOpenPolicy }: ProfileTru
   const howItWorksSteps = getVerificationHowItWorksSteps(locale);
 
   const handleComplete = (kind: 'photo' | 'person' | 'age') => {
+    if (userId) {
+      void logSecurityEvent(userId, 'verification_completed', { kind });
+    }
     if (kind === 'photo') {
       onUpdate({ photoVerified: true });
       return;

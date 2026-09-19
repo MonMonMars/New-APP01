@@ -48,13 +48,14 @@ export function searchMapPlaces(query: string, locale: AppLocale, limit = 6): Ma
 
   const scored = allPlaces.flatMap((place) => {
     const label = place.searchKey;
+    const display = place.label.toLowerCase();
     const cityPart = label.split(',')[0].toLowerCase();
     let score = 0;
-    if (label.startsWith(normalized)) {
+    if (label.startsWith(normalized) || display.startsWith(normalized)) {
       score = 100;
     } else if (cityPart.startsWith(normalized)) {
       score = 80;
-    } else if (label.includes(normalized)) {
+    } else if (label.includes(normalized) || display.includes(normalized)) {
       score = 60;
     } else if (cityPart.includes(normalized)) {
       score = 40;

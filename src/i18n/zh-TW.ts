@@ -80,6 +80,7 @@ export const zhTw = {
     emailInvalid: '請輸入有效的電子郵件地址。',
     magicLinkFailed: '無法傳送魔法連結。',
     magicLinkSent: '魔法連結已傳送！請查看電子郵件以完成登入後再繼續。',
+    magicLinkWaiting: '請在此裝置上開啟電子郵件中的連結，完成後會自動繼續。',
     emailRequiresSupabase: '電子郵件登入需要 Supabase 設定。',
     signedInLocally: '已在本機登入。連接 Supabase 以使用雲端電子郵件登入。',
   },
@@ -478,6 +479,10 @@ export const zhTw = {
     subscriptionActivated: 'Spark+ 已在你的帳號上啟用。',
     cancelled: '已取消購買',
     demoNote: '示範計費 — 不會真的扣款。交易會儲存於本機以供恢復購買測試。',
+    demoModeHint:
+      '目前為示範計費 — 購買會立即生效且不會向 App Store 扣款。正式環境請設定 EXPO_PUBLIC_PURCHASES_MODE=store。',
+    storeModeHint:
+      '已啟用商店計費模式 — 需使用已設定 App Store 或 Google Play 的原生版本（RevenueCat 整合待完成）。',
     boostActivated: 'Boost 已啟用！',
     boostActivatedWithSaved: 'Boost 已啟用 30 分鐘。另有 {count} 次已存入帳戶。',
     boostAdded: 'Boost 已新增！',

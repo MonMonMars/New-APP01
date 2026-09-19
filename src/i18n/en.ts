@@ -80,6 +80,7 @@ export const en = {
     emailInvalid: 'Enter a valid email address.',
     magicLinkFailed: 'Could not send magic link.',
     magicLinkSent: 'Magic link sent! Check your email to complete sign-in before continuing.',
+    magicLinkWaiting: 'Open the link in your email on this device. This screen will continue automatically.',
     emailRequiresSupabase: 'Email sign-in requires Supabase configuration.',
     signedInLocally: 'Signed in locally. Connect Supabase for cloud email sign-in.',
   },
@@ -478,6 +479,10 @@ export const en = {
     subscriptionActivated: 'Spark+ is now active on your account.',
     cancelled: 'Purchase cancelled',
     demoNote: 'Demo billing — no real charge. Transactions are saved locally for restore testing.',
+    demoModeHint:
+      'Demo billing is on — purchases apply instantly with no App Store charge. Set EXPO_PUBLIC_PURCHASES_MODE=store for production IAP.',
+    storeModeHint:
+      'Store billing mode — purchases need a native build with App Store or Google Play configured (RevenueCat wiring pending).',
     boostActivated: 'Boost activated!',
     boostActivatedWithSaved: 'Boost is live for 30 minutes. {count} more saved for later.',
     boostAdded: 'Boost added!',

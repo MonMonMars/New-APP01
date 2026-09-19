@@ -48,6 +48,7 @@ import { generateDisguiseAdImage } from '../services/disguiseImageGeneration';
 import { registerCloudPushToken } from '../services/pushCloud';
 import { scheduleDateCheckInReminder } from '../utils/notifications';
 import type { ConversationRealtimeUpdate } from '../services/realtimeChat';
+import { mergeConversationMessages } from '../utils/conversationMerge';
 import {
   deleteSupabaseAccount,
   getSupabaseSession,
@@ -1327,9 +1328,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
           conversation.id === conversationId
             ? {
                 ...conversation,
-                messages: update.messages,
+                messages: mergeConversationMessages(conversation.messages, update.messages),
                 yourTurn: update.yourTurn,
                 unread: conversation.unread === false ? false : update.unread,
+                isTyping: false,
                 lastMessage: update.lastMessage ?? conversation.lastMessage,
                 lastMessageAt: update.lastMessageAt ?? conversation.lastMessageAt,
               }

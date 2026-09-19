@@ -14,12 +14,14 @@ type WaitingForMatchModalProps = {
   visible: boolean;
   profile: Profile | null;
   onFindMorePeople: () => void;
+  onClose?: () => void;
 };
 
 export function WaitingForMatchModal({
   visible,
   profile,
   onFindMorePeople,
+  onClose,
 }: WaitingForMatchModalProps) {
   const { colors } = useTheme();
   const { t, locale } = useTranslation();
@@ -29,9 +31,23 @@ export function WaitingForMatchModal({
 
   const emberStatus = getEmberRelationshipLabel(locale, profile.relationshipStatus);
 
+  const handleClose = () => {
+    onClose?.();
+  };
+
   return (
-    <Modal visible={visible} animationType="fade" transparent>
+    <Modal
+      visible={visible}
+      animationType="fade"
+      transparent
+      onRequestClose={handleClose}
+    >
       <View style={[styles.overlay, modalFill]}>
+        <AnimatedPressable
+          style={styles.backdrop}
+          onPress={handleClose}
+          accessibilityLabel={t('common.close')}
+        />
         <LinearGradient
           colors={[colors.gradientStart, colors.gradientEnd]}
           style={styles.sheet}
@@ -77,6 +93,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.75)',
     justifyContent: 'center',
     padding: spacing.lg,
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFill,
   },
   sheet: {
     borderRadius: radii.card,

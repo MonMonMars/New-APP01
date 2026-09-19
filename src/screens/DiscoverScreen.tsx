@@ -66,7 +66,6 @@ export function DiscoverScreen() {
     isBoosted,
     showMomentumUpsell,
     dismissMomentumUpsell,
-    canRewind,
     hasRewindablePass,
     rewindLastPass,
     isSparkPlus,
@@ -468,6 +467,10 @@ export function DiscoverScreen() {
       <WaitingForMatchModal
         visible={showWaiting}
         profile={waitingProfile}
+        onClose={() => {
+          setShowWaiting(false);
+          setWaitingProfile(null);
+        }}
         onFindMorePeople={handleFindMorePeople}
       />
 

@@ -20,6 +20,11 @@ type ChatDialogueHelperSheetProps = {
   user: UserProfile;
   messages: Message[];
   initialMode: ChatDialogueMode;
+  seedOptions?: string[];
+  seedSource?: 'llm' | 'local';
+  seedLoading?: boolean;
+  seedFailed?: boolean;
+  onRefresh?: () => void;
   onClose: () => void;
   onSelect: (text: string) => void;
 };
@@ -61,6 +66,11 @@ export function ChatDialogueHelperSheet({
   user,
   messages,
   initialMode,
+  seedOptions,
+  seedSource,
+  seedLoading,
+  seedFailed,
+  onRefresh,
   onClose,
   onSelect,
 }: ChatDialogueHelperSheetProps) {
@@ -124,8 +134,47 @@ export function ChatDialogueHelperSheet({
       setMode(availableModes[0]);
       return;
     }
+
+    if (onRefresh && mode === initialMode) {
+      if (seedLoading) {
+        setLoading(true);
+        setFailed(false);
+        return;
+      }
+      if (seedOptions && seedOptions.length > 0) {
+        setOptions([...seedOptions]);
+        setSource(seedSource ?? 'local');
+        setLoading(false);
+        setFailed(seedFailed ?? false);
+        return;
+      }
+      if (!seedFailed) {
+        onRefresh();
+      }
+      return;
+    }
+
     loadSuggestions();
-  }, [availableModes, loadSuggestions, mode, visible]);
+  }, [
+    availableModes,
+    initialMode,
+    loadSuggestions,
+    mode,
+    onRefresh,
+    seedFailed,
+    seedLoading,
+    seedOptions,
+    seedSource,
+    visible,
+  ]);
+
+  const handleRefresh = () => {
+    if (onRefresh && mode === initialMode) {
+      onRefresh();
+      return;
+    }
+    loadSuggestions();
+  };
 
   const handleSelect = (text: string) => {
     onSelect(text);
@@ -176,7 +225,7 @@ export function ChatDialogueHelperSheet({
         <View style={styles.hintRow}>
           <Text style={[styles.hint, { color: colors.textMuted }]}>{modeHint(t, mode)}</Text>
           <AnimatedPressable
-            onPress={loadSuggestions}
+            onPress={handleRefresh}
             disabled={loading}
             accessibilityLabel={t('chat.refreshSuggestions')}
             hitSlop={8}

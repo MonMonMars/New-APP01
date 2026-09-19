@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
+import { getPulseCategoryLabel } from '../../i18n/labels';
 import { NewsPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { openExternalUrl } from '../../utils/openExternalUrl';
@@ -67,7 +68,9 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
           <View style={[disguiseReadSheetStyles.toolbar, { borderBottomColor: colors.border }]}>
             <View style={styles.toolbarMeta}>
               <Text style={[styles.source, { color: meta.accent }]}>{post.source}</Text>
-              <Text style={[styles.category, { color: colors.textMuted }]}>{post.category}</Text>
+              <Text style={[styles.category, { color: colors.textMuted }]}>
+                {getPulseCategoryLabel(locale, post.category)}
+              </Text>
             </View>
             <View style={styles.toolbarActions}>
               <SavePostButton postId={post.id} />

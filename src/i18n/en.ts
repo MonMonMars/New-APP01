@@ -1121,6 +1121,8 @@ export const en = {
     film: 'Film',
     music: 'Music',
     style: 'Style',
+    weather: 'Weather',
+    climate: 'Climate',
   },
   verificationPolicy: {
     headerTitle: 'Verification policy',
@@ -1183,11 +1185,15 @@ export const en = {
     postTitle: 'Post',
     addComment: 'Add a comment...',
     sendComment: 'Send comment',
+    seedReply1: 'Hard agree on this one.',
+    seedReply2: 'Saving this thread for later.',
+    seedReply3: 'Needed this today — thanks for posting.',
   },
   time: {
     justNow: 'Just now',
     minutesAgo: '{n}m ago',
     hoursAgo: '{n}h ago',
+    daysAgo: '{n}d ago',
   },
   utils: {
     photoPermissionTitle: 'Photo access needed',
@@ -1304,6 +1310,8 @@ export const en = {
     stocks: 'Stocks',
     cryptoFx: 'Crypto & FX',
     topMovers: 'Top movers',
+    sessionLabel: 'US markets open · UK close in 2h 14m',
+    volumeLabel: '{value} vol',
   },
   newsArticle: {
     readOn: 'Read on {source}',

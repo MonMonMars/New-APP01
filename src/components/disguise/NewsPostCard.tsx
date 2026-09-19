@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
+import { getPulseCategoryLabel } from '../../i18n/labels';
 import { getProfileById } from '../../data/profiles';
 import { NewsPost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
@@ -23,7 +24,7 @@ type NewsPostCardProps = {
 
 export function NewsPostCard({ post }: NewsPostCardProps) {
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const { preferences } = useApp();
   const accent = useDisguiseWorld().accent;
   const [articleOpen, setArticleOpen] = useState(false);
@@ -62,7 +63,9 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
           <View style={styles.metaRow}>
             <Text style={[styles.source, { color: accent }]}>{post.source}</Text>
             <Text style={[styles.dot, { color: colors.textMuted }]}>·</Text>
-            <Text style={[styles.category, { color: colors.textMuted }]}>{post.category}</Text>
+            <Text style={[styles.category, { color: colors.textMuted }]}>
+              {getPulseCategoryLabel(locale, post.category)}
+            </Text>
             <Text style={[styles.time, { color: colors.textMuted }]}>{post.timeAgo}</Text>
           </View>
           <Text style={[styles.headline, { color: colors.text }]}>{post.headline}</Text>

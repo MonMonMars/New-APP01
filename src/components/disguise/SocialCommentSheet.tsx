@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
+import { formatHoursAgoLocalized, formatRelativeTimeLocalized } from '../../i18n/labels';
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
@@ -21,24 +22,11 @@ type SocialCommentSheetProps = {
   sheetTitle?: string;
 };
 
-const SEED_REPLIES = [
-  { author: 'Jamie L.', handle: '@jamiel', body: 'Hard agree on this one.', timeAgo: '2h' },
-  { author: 'Rina P.', handle: '@rinap', body: 'Saving this thread for later.', timeAgo: '4h' },
-  { author: 'Omar K.', handle: '@omark', body: 'Needed this today — thanks for posting.', timeAgo: '6h' },
-];
-
-function formatTimeAgo(iso: string): string {
-  const diffMs = Date.now() - new Date(iso).getTime();
-  const minutes = Math.max(1, Math.floor(diffMs / 60_000));
-  if (minutes < 60) {
-    return `${minutes}m`;
-  }
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) {
-    return `${hours}h`;
-  }
-  return `${Math.floor(hours / 24)}d`;
-}
+const SEED_REPLY_SPECS = [
+  { author: 'Jamie L.', handle: '@jamiel', bodyKey: 'pulseSocial.seedReply1', hoursAgo: 2 },
+  { author: 'Rina P.', handle: '@rinap', bodyKey: 'pulseSocial.seedReply2', hoursAgo: 4 },
+  { author: 'Omar K.', handle: '@omark', bodyKey: 'pulseSocial.seedReply3', hoursAgo: 6 },
+] as const;
 
 export function SocialCommentSheet({
   visible,
@@ -48,7 +36,7 @@ export function SocialCommentSheet({
 }: SocialCommentSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const resolvedTitle = sheetTitle ?? t('pulseSocial.comments');
   const { addPulseComment, getPulseComments, preferences } = useApp();
   const accent = useDisguiseWorld().accent;
@@ -59,7 +47,7 @@ export function SocialCommentSheet({
   }
 
   const userComments = getPulseComments(post.id);
-  const seedReplies = SEED_REPLIES.slice(0, Math.min(post.comments, SEED_REPLIES.length));
+  const seedReplies = SEED_REPLY_SPECS.slice(0, Math.min(post.comments, SEED_REPLY_SPECS.length));
   const linkedAuthorProfile = resolveDisguiseProfile(
     `social-${post.id}`,
     undefined,
@@ -107,8 +95,10 @@ export function SocialCommentSheet({
               <Text style={[styles.replyAuthor, { color: colors.text }]}>
                 {reply.author} <Text style={{ color: colors.textMuted }}>{reply.handle}</Text>
               </Text>
-              <Text style={[styles.replyBody, { color: colors.text }]}>{reply.body}</Text>
-              <Text style={[styles.replyTime, { color: colors.textMuted }]}>{reply.timeAgo}</Text>
+              <Text style={[styles.replyBody, { color: colors.text }]}>{t(reply.bodyKey)}</Text>
+              <Text style={[styles.replyTime, { color: colors.textMuted }]}>
+                {formatHoursAgoLocalized(locale, reply.hoursAgo)}
+              </Text>
             </View>
           ))}
 
@@ -118,7 +108,9 @@ export function SocialCommentSheet({
                 {reply.author} <Text style={{ color: colors.textMuted }}>{reply.handle}</Text>
               </Text>
               <Text style={[styles.replyBody, { color: colors.text }]}>{reply.body}</Text>
-              <Text style={[styles.replyTime, { color: colors.textMuted }]}>{formatTimeAgo(reply.sentAt)}</Text>
+              <Text style={[styles.replyTime, { color: colors.textMuted }]}>
+                {formatRelativeTimeLocalized(locale, reply.sentAt)}
+              </Text>
             </View>
           ))}
         </ScrollView>

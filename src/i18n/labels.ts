@@ -388,7 +388,34 @@ const PULSE_CATEGORY_KEYS: Record<string, string> = {
   Film: 'pulseCategory.film',
   Music: 'pulseCategory.music',
   Style: 'pulseCategory.style',
+  Weather: 'pulseCategory.weather',
+  Climate: 'pulseCategory.climate',
 };
+
+export function formatRelativeTimeLocalized(locale: AppLocale, iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const minutes = Math.max(1, Math.floor(diffMs / 60_000));
+  if (minutes < 60) {
+    return translate(locale, 'time.minutesAgo', { n: minutes });
+  }
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) {
+    return translate(locale, 'time.hoursAgo', { n: hours });
+  }
+  return translate(locale, 'time.daysAgo', { n: Math.floor(hours / 24) });
+}
+
+export function formatHoursAgoLocalized(locale: AppLocale, hours: number): string {
+  if (hours <= 1) {
+    return translate(locale, 'time.justNow');
+  }
+  return translate(locale, 'time.hoursAgo', { n: hours });
+}
+
+export function getMarketVolumeLabel(locale: AppLocale, volumeLabel: string): string {
+  const value = volumeLabel.replace(/\s*vol$/i, '').trim();
+  return translate(locale, 'disguiseMarkets.volumeLabel', { value });
+}
 
 export function getPulseCategoryLabel(locale: AppLocale, category: string): string {
   const key = PULSE_CATEGORY_KEYS[category];

@@ -1,7 +1,7 @@
 import type { ServerProductId } from './paymentProducts.ts';
 import { SERVER_PRODUCT_CATALOG } from './paymentProducts.ts';
 
-export type CheckoutCurrency = 'usd' | 'eur' | 'gbp' | 'cad' | 'aud' | 'jpy' | 'twd';
+export type CheckoutCurrency = 'usd' | 'eur' | 'gbp' | 'cad' | 'aud' | 'jpy' | 'twd' | 'cny';
 
 const USD_TO: Record<CheckoutCurrency, number> = {
   usd: 1,
@@ -11,6 +11,7 @@ const USD_TO: Record<CheckoutCurrency, number> = {
   aud: 1.52,
   jpy: 149,
   twd: 32,
+  cny: 7.2,
 };
 
 export function currencyForCountry(country: string | undefined): CheckoutCurrency {
@@ -31,6 +32,8 @@ export function currencyForCountry(country: string | undefined): CheckoutCurrenc
       return 'jpy';
     case 'TW':
       return 'twd';
+    case 'CN':
+      return 'cny';
     default:
       return 'usd';
   }
@@ -44,7 +47,7 @@ export function regionalCentsForProduct(productId: ServerProductId, country: str
   const usd = product.amountCents / 100;
   const currency = currencyForCountry(country);
   const rate = USD_TO[currency];
-  if (currency === 'jpy' || currency === 'twd') {
+  if (currency === 'jpy' || currency === 'twd' || currency === 'cny') {
     const units = Math.round(usd * rate);
     return { currency, amountCents: units };
   }

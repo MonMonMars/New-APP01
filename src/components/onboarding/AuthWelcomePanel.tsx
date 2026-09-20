@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TextInput, View } from 'react-native';
 
@@ -7,8 +7,16 @@ import { useTranslation } from '../../i18n';
 import { colors, radii, spacing } from '../../theme';
 import { pulseBrand } from '../../theme/pulseBrand';
 import { signInWithApple } from '../../utils/appleAuth';
-import { regionalAuthTabOrder, regionalDefaultAuthTab } from '../../utils/accountRegion';
+import {
+  regionalAuthTabOrder,
+  regionalDefaultAuthTab,
+} from '../../utils/accountRegion';
 import type { RegionalAuthTab } from '../../types/accountRegion';
+import {
+  regionalPhonePlaceholderKey,
+  regionalSocialAuthProviders,
+  type RegionalSocialProvider,
+} from '../../config/regionalAuthProviders';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type AuthWelcomePanelProps = {
@@ -43,6 +51,8 @@ export function AuthWelcomePanel({
     signInWithAppleStub,
     signInWithEmailMagicLink,
     signInWithGoogle,
+    signInWithWeChat,
+    signInWithQq,
     signInWithPhoneOtp,
     verifyPhoneSignIn,
     signUpWithPassword,
@@ -53,6 +63,11 @@ export function AuthWelcomePanel({
   } = useApp();
 
   const authTabOrder = useMemo(() => regionalAuthTabOrder(accountRegion), [accountRegion]);
+  const socialProviders = useMemo(
+    () => regionalSocialAuthProviders(accountRegion),
+    [accountRegion],
+  );
+  const phonePlaceholderKey = regionalPhonePlaceholderKey(accountRegion);
   const [tab, setTab] = useState<RegionalAuthTab>(() => regionalDefaultAuthTab(accountRegion));
 
   useEffect(() => {
@@ -89,6 +104,51 @@ export function AuthWelcomePanel({
       }
     } finally {
       setAuthLoading(false);
+    }
+  };
+
+  const handleWeChat = async () => {
+    setAuthLoading(true);
+    setEmailMessage(null);
+    try {
+      const result = await signInWithWeChat();
+      setEmailMessage(result.message);
+      if (result.ok && !isSupabaseEnabled) {
+        onAuthenticated();
+      }
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleQq = async () => {
+    setAuthLoading(true);
+    setEmailMessage(null);
+    try {
+      const result = await signInWithQq();
+      setEmailMessage(result.message);
+      if (result.ok && !isSupabaseEnabled) {
+        onAuthenticated();
+      }
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const runSocialProvider = (provider: RegionalSocialProvider) => {
+    switch (provider) {
+      case 'apple':
+        return handleApple();
+      case 'google':
+        return handleGoogle();
+      case 'wechat':
+        return handleWeChat();
+      case 'qq':
+        return handleQq();
+      default: {
+        const _exhaustive: never = provider;
+        return _exhaustive;
+      }
     }
   };
 
@@ -168,24 +228,56 @@ export function AuthWelcomePanel({
 
   return (
     <>
-      <AnimatedPressable style={styles.appleButton} onPress={() => void handleApple()} disabled={authLoading}>
-        {authLoading ? (
-          <ActivityIndicator color={colors.textDark} />
-        ) : (
-          <>
-            <Ionicons name="logo-apple" size={20} color={colors.textDark} />
-            <Text style={styles.appleButtonText}>{t('onboarding.continueApple')}</Text>
-          </>
-        )}
-      </AnimatedPressable>
-
-      <AnimatedPressable style={styles.googleButton} onPress={() => void handleGoogle()} disabled={authLoading}>
-        <Ionicons name="logo-google" size={18} color={colors.textDark} />
-        <Text style={styles.googleButtonText}>{t('auth.continueGoogle')}</Text>
-      </AnimatedPressable>
+      {socialProviders.map((provider) => {
+        const labelKey =
+          provider === 'apple'
+            ? 'onboarding.continueApple'
+            : provider === 'google'
+              ? 'auth.continueGoogle'
+              : provider === 'wechat'
+                ? 'auth.continueWeChat'
+                : 'auth.continueQq';
+        const buttonStyle =
+          provider === 'wechat'
+            ? styles.wechatButton
+            : provider === 'qq'
+              ? styles.qqButton
+              : provider === 'apple'
+                ? styles.appleButton
+                : styles.googleButton;
+        const textStyle =
+          provider === 'wechat' || provider === 'qq' ? styles.socialLightText : styles.appleButtonText;
+        return (
+          <AnimatedPressable
+            key={provider}
+            style={buttonStyle}
+            onPress={() => void runSocialProvider(provider)}
+            disabled={authLoading}
+          >
+            {authLoading ? (
+              <ActivityIndicator color={provider === 'wechat' || provider === 'qq' ? '#fff' : colors.textDark} />
+            ) : (
+              <>
+                {provider === 'wechat' ? (
+                  <MaterialCommunityIcons name="wechat" size={22} color="#fff" />
+                ) : provider === 'qq' ? (
+                  <MaterialCommunityIcons name="qqchat" size={22} color="#fff" />
+                ) : provider === 'apple' ? (
+                  <Ionicons name="logo-apple" size={20} color={colors.textDark} />
+                ) : (
+                  <Ionicons name="logo-google" size={18} color={colors.textDark} />
+                )}
+                <Text style={textStyle}>{t(labelKey)}</Text>
+              </>
+            )}
+          </AnimatedPressable>
+        );
+      })}
 
       <Text style={styles.regionalHint}>
-        {t('auth.regionalSignInHint', { region: accountRegion.countryCode })}
+        {accountRegion.chinaMainlandAuth
+          ? t('auth.regionalSignInHintCN')
+          : t('auth.regionalSignInHint', { region: accountRegion.countryCode })}
       </Text>
 
       <View style={styles.tabRow}>
@@ -238,7 +330,7 @@ export function AuthWelcomePanel({
         <View style={styles.emailBlock}>
           <TextInput
             style={styles.emailInput}
-            placeholder={t('auth.phonePlaceholder')}
+            placeholder={t(phonePlaceholderKey)}
             placeholderTextColor={colors.textMuted}
             value={phone}
             onChangeText={setPhone}
@@ -398,10 +490,35 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: radii.button,
     paddingVertical: spacing.md,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
   googleButtonText: {
     color: colors.textDark,
+    fontWeight: '700',
+    fontSize: 16,
+  },
+  wechatButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    backgroundColor: '#07C160',
+    borderRadius: radii.button,
+    paddingVertical: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  qqButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    backgroundColor: '#12B7F5',
+    borderRadius: radii.button,
+    paddingVertical: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  socialLightText: {
+    color: '#fff',
     fontWeight: '700',
     fontSize: 16,
   },

@@ -79,6 +79,8 @@ import {
   sendPhoneLoginOtp,
   signInWithEmailPassword,
   signInWithGoogleOAuth,
+  signInWithQqOAuth,
+  signInWithWeChatOAuth,
   signUpWithEmailPassword,
   requestPasswordResetEmail,
   updateAccountPassword,
@@ -410,6 +412,8 @@ type AppContextValue = {
   signInWithAppleStub: (identityToken?: string, displayName?: string) => Promise<void>;
   signInWithEmailMagicLink: (email: string) => Promise<{ ok: boolean; message: string }>;
   signInWithGoogle: () => Promise<{ ok: boolean; message: string }>;
+  signInWithWeChat: () => Promise<{ ok: boolean; message: string }>;
+  signInWithQq: () => Promise<{ ok: boolean; message: string }>;
   signInWithPhoneOtp: (phone: string) => Promise<{ ok: boolean; message: string }>;
   verifyPhoneSignIn: (phone: string, code: string) => Promise<{ ok: boolean; message: string }>;
   signUpWithPassword: (email: string, password: string) => Promise<{ ok: boolean; message: string }>;
@@ -1606,6 +1610,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return { ok: false, message: result.error ?? translate(locale, 'auth.googleFailed') };
     }
     return { ok: true, message: translate(locale, 'auth.googleContinue') };
+  }, [preferences.appLocale]);
+
+  const signInWithWeChat = useCallback(async () => {
+    const locale = resolveAppLocale(preferences.appLocale);
+    if (!isSupabaseConfigured()) {
+      if (isProductionBuild()) {
+        return { ok: false, message: translate(locale, 'onboarding.emailRequiresSupabase') };
+      }
+      setIsAuthenticated(true);
+      setUserId(`demo-wechat-${Date.now()}`);
+      return { ok: true, message: translate(locale, 'onboarding.signedInLocally') };
+    }
+    const result = await signInWithWeChatOAuth();
+    if (!result.ok) {
+      return { ok: false, message: result.error ?? translate(locale, 'auth.wechatFailed') };
+    }
+    return { ok: true, message: translate(locale, 'auth.wechatContinue') };
+  }, [preferences.appLocale]);
+
+  const signInWithQq = useCallback(async () => {
+    const locale = resolveAppLocale(preferences.appLocale);
+    if (!isSupabaseConfigured()) {
+      if (isProductionBuild()) {
+        return { ok: false, message: translate(locale, 'onboarding.emailRequiresSupabase') };
+      }
+      setIsAuthenticated(true);
+      setUserId(`demo-qq-${Date.now()}`);
+      return { ok: true, message: translate(locale, 'onboarding.signedInLocally') };
+    }
+    const result = await signInWithQqOAuth();
+    if (!result.ok) {
+      return { ok: false, message: result.error ?? translate(locale, 'auth.qqFailed') };
+    }
+    return { ok: true, message: translate(locale, 'auth.qqContinue') };
   }, [preferences.appLocale]);
 
   const signInWithPhoneOtp = useCallback(
@@ -3291,6 +3329,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       signInWithAppleStub,
       signInWithEmailMagicLink,
       signInWithGoogle,
+      signInWithWeChat,
+      signInWithQq,
       signInWithPhoneOtp,
       verifyPhoneSignIn,
       signUpWithPassword,
@@ -3447,6 +3487,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       signInWithAppleStub,
       signInWithEmailMagicLink,
       signInWithGoogle,
+      signInWithWeChat,
+      signInWithQq,
       signInWithPhoneOtp,
       verifyPhoneSignIn,
       signUpWithPassword,

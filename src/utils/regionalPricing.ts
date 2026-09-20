@@ -10,11 +10,12 @@ const USD_TO_DISPLAY: Record<AccountRegionContext['currency'], number> = {
   AUD: 1.52,
   JPY: 149,
   TWD: 32,
+  CNY: 7.2,
 };
 
 export function convertUsdForDisplay(usd: number, currency: AccountRegionContext['currency']): number {
   const rate = USD_TO_DISPLAY[currency];
-  if (currency === 'JPY' || currency === 'TWD') {
+  if (currency === 'JPY' || currency === 'TWD' || currency === 'CNY') {
     return Math.round(usd * rate);
   }
   return Math.round(usd * rate * 100) / 100;
@@ -34,7 +35,7 @@ export function formatRegionalPrice(usd: number, region: AccountRegionContext): 
 }
 
 function currencyHasCents(currency: AccountRegionContext['currency']): boolean {
-  return currency !== 'JPY' && currency !== 'TWD';
+  return currency !== 'JPY' && currency !== 'TWD' && currency !== 'CNY';
 }
 
 /** Server-side cents for Stripe — mirrors display conversion. */

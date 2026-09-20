@@ -23,6 +23,8 @@ function marketForCountry(country: AccountCountryCode): AccountMarketGroup {
       return 'europe';
     case 'TW':
       return 'taiwan';
+    case 'CN':
+      return 'china_mainland';
     case 'JP':
     case 'AU':
       return 'apac';
@@ -47,6 +49,8 @@ function currencyForCountry(country: AccountCountryCode): AccountRegionContext['
       return 'JPY';
     case 'TW':
       return 'TWD';
+    case 'CN':
+      return 'CNY';
     case 'US':
     default:
       return 'USD';
@@ -54,6 +58,9 @@ function currencyForCountry(country: AccountCountryCode): AccountRegionContext['
 }
 
 function localeTagFor(country: AccountCountryCode, appLocale?: AppLocale | null): string {
+  if (country === 'CN') {
+    return 'zh-CN';
+  }
   if (appLocale === 'zh-TW' || country === 'TW') {
     return 'zh-TW';
   }
@@ -94,11 +101,24 @@ export function countryCodeFromPassportCity(passportCity: string | undefined): A
     if (passportCity === 'Taipei, Taiwan') {
       return 'TW';
     }
+    if (passportCity === 'Shanghai, China' || passportCity === 'Beijing, China') {
+      return 'CN';
+    }
     return 'US';
   }
   const lower = passportCity.toLowerCase();
-  if (lower.includes('taiwan') || lower.includes('taipei') || lower.includes('台')) {
+  if (lower.includes('taiwan') || lower.includes('taipei') || lower.includes('台湾') || lower.includes('台北')) {
     return 'TW';
+  }
+  if (
+    lower.includes('china') ||
+    lower.includes('shanghai') ||
+    lower.includes('beijing') ||
+    lower.includes('北京') ||
+    lower.includes('上海') ||
+    lower.includes('大陆')
+  ) {
+    return 'CN';
   }
   if (lower.includes('uk') || lower.includes('london')) {
     return 'GB';
@@ -126,6 +146,14 @@ function inferCountryFromTimezone(): AccountCountryCode | null {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone ?? '';
     if (tz.includes('Taipei') || tz === 'Asia/Taipei') {
       return 'TW';
+    }
+    if (
+      tz === 'Asia/Shanghai' ||
+      tz === 'Asia/Chongqing' ||
+      tz === 'Asia/Urumqi' ||
+      tz.startsWith('Asia/Shanghai')
+    ) {
+      return 'CN';
     }
     if (tz.startsWith('Europe/London')) {
       return 'GB';
@@ -159,7 +187,19 @@ function normalizeCountryCode(raw: string | undefined | null): AccountCountryCod
   if (code === 'UK') {
     return 'GB';
   }
-  const allowed: AccountCountryCode[] = ['US', 'GB', 'FR', 'DE', 'EU', 'CA', 'AU', 'JP', 'TW', 'OTHER'];
+  const allowed: AccountCountryCode[] = [
+    'US',
+    'GB',
+    'FR',
+    'DE',
+    'EU',
+    'CA',
+    'AU',
+    'JP',
+    'TW',
+    'CN',
+    'OTHER',
+  ];
   if (allowed.includes(code as AccountCountryCode)) {
     return code as AccountCountryCode;
   }
@@ -191,20 +231,27 @@ export function resolveAccountRegion(preferences: DiscoveryPreferences): Account
     countryCode === 'TW' ||
     EU_COUNTRY_CODES.has(countryCode);
 
-  const phoneAuthPrimary = countryCode === 'TW' || countryCode === 'JP' || market === 'apac';
+  const phoneAuthPrimary =
+    countryCode === 'CN' || countryCode === 'TW' || countryCode === 'JP' || market === 'apac';
+
+  const chinaMainlandAuth = countryCode === 'CN';
 
   return {
     countryCode,
     market,
     localeTag,
     currency,
-    stripeWebCheckout,
+    stripeWebCheckout: stripeWebCheckout && countryCode !== 'CN',
     phoneAuthPrimary,
+    chinaMainlandAuth,
   };
 }
 
 /** Auth tab order — phone-first in APAC/Taiwan like LINE-style apps; email-first in US/EU like Hinge. */
 export function regionalAuthTabOrder(region: AccountRegionContext): RegionalAuthTab[] {
+  if (region.chinaMainlandAuth) {
+    return ['phone', 'password', 'email'];
+  }
   if (region.phoneAuthPrimary) {
     return ['phone', 'email', 'password'];
   }

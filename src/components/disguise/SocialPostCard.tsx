@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 
+import { PULSE_BOOKMARKS_ENABLED } from '../../config/pulseFeatures';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
@@ -142,7 +143,9 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
           style={styles.moreButton}
           onPress={() => {
             Alert.alert(t('pulseSocial.postOptions'), undefined, [
-              { text: isSaved ? t('pulseSocial.unsavePost') : t('pulseSocial.savePost'), onPress: handleSave },
+              ...(PULSE_BOOKMARKS_ENABLED
+                ? [{ text: isSaved ? t('pulseSocial.unsavePost') : t('pulseSocial.savePost'), onPress: handleSave }]
+                : []),
               { text: t('pulseSocial.muteAuthor'), onPress: handleMute },
               { text: t('pulseSocial.report'), style: 'destructive', onPress: handleReport },
               { text: t('pulseSocial.cancel'), style: 'cancel' },

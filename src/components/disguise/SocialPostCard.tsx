@@ -13,6 +13,7 @@ import { buildSocialReporter, socialReporterPhotoIndex } from '../../utils/disgu
 import { profileIntroCaption } from '../../utils/profileIntroCaption';
 import { resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
+import { usePulseContextSection } from '../../hooks/usePulseContextSection';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
 import { DisguisePhotoLightbox } from './DisguisePhotoLightbox';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
@@ -38,8 +39,8 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
     togglePulseLike,
     mutePulseAuthor,
     reportPulsePost,
-    preferences,
   } = useApp();
+  const pulseSection = usePulseContextSection();
   const accent = useDisguiseWorld().accent;
   const upvoted = pulseSocial.likedPostIds.includes(post.id);
   const [photoOpen, setPhotoOpen] = useState(false);
@@ -48,11 +49,11 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
   const isSaved = pulseSocial.savedPostIds.includes(post.id);
   const likeCount = upvoted ? post.likes + 1 : post.likes;
 
-  const photoReporter = buildSocialReporter(post, preferences.sparkSection);
-  const feedPhotoIndex = socialReporterPhotoIndex(photoReporter, post.imageUrl, preferences.sparkSection);
+  const photoReporter = buildSocialReporter(post, pulseSection);
+  const feedPhotoIndex = socialReporterPhotoIndex(photoReporter, post.imageUrl, pulseSection);
   const linkedAuthorProfile = resolveExplicitDatingProfile(
     post.datingProfileId,
-    preferences.sparkSection,
+    pulseSection,
   );
   const authorContentKind = linkedAuthorProfile ? 'profile' : 'social';
   const authorCaption = linkedAuthorProfile ? profileIntroCaption(linkedAuthorProfile) : undefined;

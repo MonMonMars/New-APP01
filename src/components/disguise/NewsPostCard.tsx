@@ -10,6 +10,7 @@ import { radii, spacing } from '../../theme';
 import { profileIntroCaption } from '../../utils/profileIntroCaption';
 import { resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
+import { usePulseContextSection } from '../../hooks/usePulseContextSection';
 import { pulseFeedCardShell } from './pulseFeedCardLayout';
 import { MediaWithContentBadge } from './ContentTypeIcon';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
@@ -26,13 +27,13 @@ type NewsPostCardProps = {
 export function NewsPostCard({ post }: NewsPostCardProps) {
   const { colors } = useTheme();
   const { locale, t } = useTranslation();
-  const { preferences } = useApp();
+  const pulseSection = usePulseContextSection();
   const accent = useDisguiseWorld().accent;
   const [articleOpen, setArticleOpen] = useState(false);
   const [selectedReporter, setSelectedReporter] = useState<NewsReporter | null>(null);
 
   const openReporter = (reporter: NewsReporter) => {
-    const linked = resolveExplicitDatingProfile(reporter.profileId, preferences.sparkSection);
+    const linked = resolveExplicitDatingProfile(reporter.profileId, pulseSection);
     if (!linked) {
       return;
     }
@@ -44,7 +45,7 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
   };
 
   const reporterCaption = (reporter: NewsReporter): string => {
-    const linked = resolveExplicitDatingProfile(reporter.profileId, preferences.sparkSection);
+    const linked = resolveExplicitDatingProfile(reporter.profileId, pulseSection);
     if (linked) {
       return profileIntroCaption(linked);
     }
@@ -87,7 +88,7 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
               {post.reporters.map((reporter) => {
                 const linkedProfile = resolveExplicitDatingProfile(
                   reporter.profileId,
-                  preferences.sparkSection,
+                  pulseSection,
                 );
                 const reporterKind = linkedProfile ? 'profile' : 'news';
                 return (

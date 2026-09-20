@@ -12,6 +12,7 @@ import { radii, spacing } from '../../theme';
 import { getEmberLocationLabel, getEmberRelationshipLabel } from '../../i18n/labels';
 import { buildReporterPhotoUrls } from '../../utils/disguiseReporterPhotos';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
+import { usePulseContextSection } from '../../hooks/usePulseContextSection';
 import { webClass } from '../../motion/webMotion';
 import { resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
 import { MatchToast } from '../MatchToast';
@@ -65,6 +66,7 @@ export function PersonPreviewSheet({
   const cardOpacity = useSharedValue(1);
   const cardScale = useSharedValue(1);
   const worldMeta = useDisguiseWorld();
+  const pulseSection = usePulseContextSection();
 
   useEffect(() => {
     if (visible) {
@@ -132,7 +134,7 @@ export function PersonPreviewSheet({
   }));
 
   const linkedProfile = reporter
-    ? resolveExplicitDatingProfile(reporter.profileId, preferences.sparkSection)
+    ? resolveExplicitDatingProfile(reporter.profileId, pulseSection)
     : null;
 
   const displayPhotos = useMemo(() => {

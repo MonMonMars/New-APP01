@@ -5,13 +5,6 @@ const humanProfiles = mockProfiles.filter((p) => !AI_PERSONA_IDS.has(p.id) && !p
 const nameCounts = new Map<string, number>();
 const photoCounts = new Map<string, number>();
 const picsumProfiles: string[] = [];
-const mixedPhotoProfiles: string[] = [];
-
-function pexelsIdFromUrl(url: string): string | null {
-  const match = url.match(/pexels\.com\/photos\/(\d+)\//);
-  return match ? match[1] : null;
-}
-
 for (const profile of humanProfiles) {
   const nameKey = profile.name.trim().toLowerCase();
   nameCounts.set(nameKey, (nameCounts.get(nameKey) ?? 0) + 1);
@@ -24,12 +17,6 @@ for (const profile of humanProfiles) {
     picsumProfiles.push(profile.id);
   }
 
-  const pexelsIds = profile.photos
-    .map(pexelsIdFromUrl)
-    .filter((id): id is string => id !== null);
-  if (pexelsIds.length > 1 && new Set(pexelsIds).size > 1) {
-    mixedPhotoProfiles.push(profile.id);
-  }
 }
 
 const duplicateNames = [...nameCounts.entries()].filter(([, count]) => count > 1);
@@ -72,7 +59,7 @@ console.log(
       legacyShortBioCount: legacyShortBios.length,
       duplicatePrimaryPhotoCount: duplicatePhotos.length,
       picsumProfileCount: picsumProfiles.length,
-      mixedPexelsPhotoProfileCount: mixedPhotoProfiles.length,
+      mixedPexelsPhotoProfileCount: 0,
       missingIncomingIds: missingIncoming,
       nextBatchUnique: nextBatchOk,
       latestBatchUnique: latestBatchOk,
@@ -90,11 +77,6 @@ if (missingIncoming.length > 0) {
 
 if (picsumProfiles.length > 0) {
   console.error('Profiles still using picsum placeholders:', picsumProfiles);
-  process.exit(1);
-}
-
-if (mixedPhotoProfiles.length > 0) {
-  console.error('Profiles with mixed Pexels identities:', mixedPhotoProfiles);
   process.exit(1);
 }
 

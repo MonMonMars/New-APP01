@@ -40,7 +40,7 @@ export const DEMO_PHOTO_SET_PRIMARY = {
   vera: 1181686,
   clara: 1587009,
   iris: 1858175,
-  stephanie: 3771835,
+  stephanie: 1926769,
   mathilde: 2062362,
   lucas: 1743394,
   daniel: 1755383,
@@ -72,42 +72,42 @@ export const DEMO_PHOTO_SET_PRIMARY = {
   caleb: 1043474,
   henrik: 1181244,
   dorian: 2379005,
-  vivian: 3781544,
+  vivian: 1988681,
   malcolm: 2710279,
-  selena: 3791137,
-  tristan: 3804757,
+  selena: 2014422,
+  tristan: 2042109,
   noor: 2755038,
-  garrett: 3824779,
+  garrett: 2064340,
   paloma: 2774556,
-  ellis: 3842778,
+  ellis: 2087360,
   marisol: 2819543,
   desmond: 2835562,
-  anika: 3866325,
+  anika: 2103808,
   willem: 2867470,
   zara: 2878372,
   matteo: 2887719,
   brielle: 2896438,
-  sven: 3896329,
+  sven: 2122961,
   naia: 2916828,
   idris: 2927434,
-  leila: 3917832,
-  rhys: 3924811,
-  corinne: 3938475,
-  devon: 3958236,
-  miriam: 3977115,
-  jonah: 3995112,
-  kira: 4006620,
-  lars: 4017736,
-  ophelia: 4028460,
-  paco: 4048924,
-  ruth: 2373775,
-  stefan: 2379050,
-  tara: 2382861,
-  ulrich: 2364613,
-  wren: 2364727,
-  xavier: 2319676,
-  yasmin: 2318122,
-  zion: 2292838,
+  leila: 2148535,
+  rhys: 2165644,
+  corinne: 2182970,
+  devon: 2194794,
+  miriam: 2212476,
+  jonah: 2233348,
+  kira: 2256940,
+  lars: 2272949,
+  ophelia: 2291367,
+  paco: 2302632,
+  ruth: 2317953,
+  stefan: 2471178,
+  tara: 2480592,
+  ulrich: 2500450,
+  wren: 2523941,
+  xavier: 2539781,
+  yasmin: 2558604,
+  zion: 2570591,
   alondra: 1916917,
   benji: 1933922,
   claudia: 1942095,
@@ -122,29 +122,30 @@ const AI_PERSONA_PEXELS_ID_LIST = [
   1774960, 1784754, 1805418, 1814894, 1842478, 1861704, 1880318, 1889563, 1898633, 1907618,
 ] as const;
 
+/** World / passport-only portraits (ids 201–218) — kept out of NYC batch sets. */
+const PASSPORT_PORTRAIT_IDS = [
+  3398464, 3408744, 3417775, 3423564, 3433333, 3443584, 3455279, 3465021, 3474219, 3483471,
+  3493974, 3506189, 3516064, 3525544, 3535077, 3544825, 3554575, 3564325,
+] as const;
+
 /** Verified portrait ids (HTTP 200 JPEG) used for hero + companion shots. */
 export const VERIFIED_PORTRAIT_IDS: readonly number[] = [
-  ...new Set([...LEGACY_PEXELS_IDS, ...demoPrimaryIds, ...AI_PERSONA_PEXELS_ID_LIST]),
+  ...new Set([
+    ...LEGACY_PEXELS_IDS,
+    ...demoPrimaryIds,
+    ...AI_PERSONA_PEXELS_ID_LIST,
+    ...PASSPORT_PORTRAIT_IDS,
+  ]),
 ].filter((id) => !INVALID_PEXELS_IDS.has(id));
 
-/** Three distinct portrait photos — hero plus two different face shots (varied crops). */
+/** Three photos of the same person — one Pexels id, varied crops (carousel-safe). */
 export function galleryForPrimary(primaryId: number): string[] {
   const pool = VERIFIED_PORTRAIT_IDS;
   let hero = primaryId;
   if (!pool.includes(hero) || INVALID_PEXELS_IDS.has(hero)) {
     hero = pool[hashNumber(primaryId) % pool.length] ?? pool[0];
   }
-  const idx = Math.max(0, pool.indexOf(hero));
-  const n = pool.length;
-  let second = pool[(idx + 11) % n] ?? hero;
-  let third = pool[(idx + 23) % n] ?? hero;
-  if (second === hero) {
-    second = pool[(idx + 12) % n] ?? hero;
-  }
-  if (third === hero || third === second) {
-    third = pool[(idx + 24) % n] ?? hero;
-  }
-  return [portraitCrop(hero, 0), portraitCrop(second, 1), portraitCrop(third, 2)];
+  return [portraitCrop(hero, 0), portraitCrop(hero, 1), portraitCrop(hero, 2)];
 }
 
 /** Build a demo photo array from a Pexels portrait id. */

@@ -2,11 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://michael-michigan-desired-treasurer.trycloudflare.com**
+**https://municipal-experience-caroline-richmond.trycloudflare.com**
 
-- **Built from branch:** `cursor/demo-cache-bust-7b60` (includes tooling fixes + cache bust)
-- **Build ID:** `844e065-20260920T162055Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-20 16:21 UTC — HTTP 200 (local `:8090` + trycloudflare)
+- **Built from branch:** `cursor/complete-app-restore-7b60` (auth + map + photos + action bar)
+- **Build ID:** `731643d-20260920T164721Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
+- **Verified:** 2026-09-20 16:48 UTC — `verify-demo-link` PASS 9/9 (local `:8090`)
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

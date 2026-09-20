@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AnimatedPressable } from '../components/AnimatedPressable';
+import { useOptionalAdmin } from '../context/AdminContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
 import { loadPurchaseHistory } from '../services/purchaseHistory';
@@ -37,6 +38,7 @@ export function PurchaseHistoryScreen({ onClose }: PurchaseHistoryScreenProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { t, locale } = useTranslation();
+  const showDemoBillingHints = useOptionalAdmin()?.showDemoBillingHints ?? false;
   const [history, setHistory] = useState<PurchaseTransaction[]>([]);
   const [loading, setLoading] = useState(true);
 

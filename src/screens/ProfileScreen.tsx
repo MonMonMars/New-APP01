@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import Constants from 'expo-constants';
 import { useRef, useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import type { ScrollView as ScrollViewType } from 'react-native';
@@ -97,6 +98,24 @@ export function ProfileScreen() {
   const [showPreferences, setShowPreferences] = useState(false);
   const [showDisguiseGenerator, setShowDisguiseGenerator] = useState(false);
   const scrollRef = useRef<ScrollViewType>(null);
+  const versionTapCount = useRef(0);
+  const versionTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const appVersion = Constants.expoConfig?.version ?? '1.0.0';
+
+  const handleVersionTap = () => {
+    if (versionTapTimer.current) {
+      clearTimeout(versionTapTimer.current);
+    }
+    versionTapCount.current += 1;
+    if (versionTapCount.current >= 7) {
+      versionTapCount.current = 0;
+      navigation.getParent()?.navigate('Admin');
+      return;
+    }
+    versionTapTimer.current = setTimeout(() => {
+      versionTapCount.current = 0;
+    }, 2500);
+  };
 
   const handleRowPress = (route: SettingsRoute) => {
     if (route === 'DiscoveryPreferences') {
@@ -416,6 +435,10 @@ export function ProfileScreen() {
           ))}
         </View>
 
+        <AnimatedPressable style={styles.versionRow} onPress={handleVersionTap}>
+          <Text style={[styles.versionText, { color: colors.textMuted }]}>Spark {appVersion}</Text>
+        </AnimatedPressable>
+
         <AnimatedPressable style={styles.deleteRow} onPress={handleDeleteAccount}>
           <Ionicons name="trash-outline" size={20} color={colors.nope} />
           <Text style={[styles.deleteText, { color: colors.nope }]}>{t('profile.deleteAccount')}</Text>
@@ -681,12 +704,21 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
   },
+  versionRow: {
+    alignItems: 'center',
+    marginTop: spacing.xl,
+    paddingVertical: spacing.sm,
+  },
+  versionText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
   deleteRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
     marginHorizontal: spacing.lg,
-    marginTop: spacing.xl,
+    marginTop: spacing.md,
     paddingVertical: spacing.md,
   },
   deleteText: {

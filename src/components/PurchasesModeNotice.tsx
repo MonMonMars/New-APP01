@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../context/AppContext';
+import { useOptionalAdmin } from '../context/AdminContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
 import { isNativeStoreBillingLinked } from '../services/storePurchases';
@@ -11,6 +12,12 @@ export function PurchasesModeNotice() {
   const { purchasesMode } = useApp();
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const admin = useOptionalAdmin();
+  const showDemoHints = admin?.showDemoBillingHints ?? false;
+
+  if (purchasesMode !== 'store' && !showDemoHints) {
+    return null;
+  }
 
   if (purchasesMode === 'store') {
     const revenueCatKeySet = Boolean(process.env.EXPO_PUBLIC_REVENUECAT_API_KEY?.trim());

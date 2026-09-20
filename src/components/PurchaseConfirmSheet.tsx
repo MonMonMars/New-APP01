@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { getLegalUiStrings } from '../content/legal';
 import { isDemoPurchases } from '../services/purchases';
+import { useOptionalAdmin } from '../context/AdminContext';
 import { useAppLocale } from '../hooks/useAppLocale';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
@@ -46,7 +47,12 @@ export function PurchaseConfirmSheet({
   const { t } = useTranslation();
   const legalUi = getLegalUiStrings(locale);
   const accent = iconColor ?? colors.gradientEnd;
+  const showDemoBillingHints = useOptionalAdmin()?.showDemoBillingHints ?? false;
   const demoNote = isDemoPurchases() ? t('payments.demoNote') : legalUi.purchaseDemoNote;
+  const purchaseFooter =
+    isDemoPurchases() && !showDemoBillingHints
+      ? legalUi.purchaseAutoRenew
+      : `${demoNote} ${legalUi.purchaseAutoRenew}`;
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -65,7 +71,7 @@ export function PurchaseConfirmSheet({
             <Text style={[styles.error, { color: '#ef4444' }]}>{errorMessage}</Text>
           ) : null}
           <Text style={[styles.legal, { color: colors.textMuted }]}>
-            {demoNote} {legalUi.purchaseAutoRenew}
+            {purchaseFooter}
             {onOpenSubscriptionTerms ? (
               <>
                 {' '}

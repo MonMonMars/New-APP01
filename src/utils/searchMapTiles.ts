@@ -1,5 +1,6 @@
 import { PixelRatio } from 'react-native';
 
+import { resolveMapBasemapProvider } from '../config/mapProvider';
 import { PASSPORT_CITIES } from '../types/preferences';
 import type { GeoPoint } from './geoMap';
 
@@ -7,19 +8,49 @@ import type { GeoPoint } from './geoMap';
 export const TILE_PX = 256;
 
 const ESRI_STREET_SERVERS = ['services', 'server'] as const;
+const CARTO_SUBDOMAINS = ['a', 'b', 'c', 'd'] as const;
 
 /** Prefer @2x raster tiles on retina — keeps sharpness without changing layout math. */
 export function mapTilePixelRatio(): number {
   return PixelRatio.get() >= 2 ? 2 : 1;
 }
 
-/**
- * Esri World Street Map — dense road labels and POI detail (Google/Apple-style street basemap).
- * @see https://services.arcgisonline.com/arcgis/rest/services/World_Street_Map
- */
-export function buildMapTileUri(zoom: number, x: number, y: number): string {
+function buildCartoVoyagerTileUri(zoom: number, x: number, y: number): string {
+  const host = CARTO_SUBDOMAINS[Math.abs(x + y) % CARTO_SUBDOMAINS.length];
+  const retina = mapTilePixelRatio() >= 2 ? '@2x' : '';
+  return `https://${host}.basemaps.cartocdn.com/rastertiles/voyager/${zoom}/${x}/${y}${retina}.png`;
+}
+
+function buildEsriStreetTileUri(zoom: number, x: number, y: number): string {
   const host = ESRI_STREET_SERVERS[Math.abs(x + y) % ESRI_STREET_SERVERS.length];
   return `https://${host}.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/${zoom}/${y}/${x}`;
+}
+
+/** Bing-style road labels (requires `EXPO_PUBLIC_BING_MAPS_KEY`). */
+function buildBingRoadTileUri(zoom: number, x: number, y: number): string | null {
+  const key = process.env.EXPO_PUBLIC_BING_MAPS_KEY?.trim();
+  if (!key) {
+    return null;
+  }
+  return `https://t0.tiles.virtualearth.net/tiles/r${zoom}/${x}/${y}.png?key=${encodeURIComponent(key)}`;
+}
+
+/**
+ * Modern street basemap — default Carto Voyager (Google/Apple-like).
+ * Set `EXPO_PUBLIC_MAP_PROVIDER=esri|bing|carto`. Bing needs `EXPO_PUBLIC_BING_MAPS_KEY`.
+ */
+export function buildMapTileUri(zoom: number, x: number, y: number): string {
+  const provider = resolveMapBasemapProvider();
+  if (provider === 'bing') {
+    const bing = buildBingRoadTileUri(zoom, x, y);
+    if (bing) {
+      return bing;
+    }
+  }
+  if (provider === 'esri') {
+    return buildEsriStreetTileUri(zoom, x, y);
+  }
+  return buildCartoVoyagerTileUri(zoom, x, y);
 }
 
 export const DEFAULT_MAP_CENTER = { lat: 40.758, lng: -73.985 };

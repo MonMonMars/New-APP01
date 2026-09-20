@@ -4,7 +4,7 @@ export type MapBasemapProvider = 'carto' | 'esri' | 'bing';
 const VALID: MapBasemapProvider[] = ['carto', 'esri', 'bing'];
 
 export function resolveMapBasemapProvider(): MapBasemapProvider {
-  const raw = (process.env.EXPO_PUBLIC_MAP_PROVIDER ?? 'esri').toLowerCase();
+  const raw = (process.env.EXPO_PUBLIC_MAP_PROVIDER ?? 'carto').toLowerCase();
   if (VALID.includes(raw as MapBasemapProvider)) {
     return raw as MapBasemapProvider;
   }

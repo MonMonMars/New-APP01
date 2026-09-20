@@ -7,6 +7,7 @@ cd "$ROOT"
 echo "Building web demo (root-hosted for tunnels)..."
 npm run build:web
 cp dist/index.html dist/404.html
+cp -r public/. dist/ 2>/dev/null || true
 
 echo "Starting static server on :8090..."
 npx --yes serve dist -s -l 8090 &

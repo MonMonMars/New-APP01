@@ -79,6 +79,7 @@ export function OnboardingLocationMap({
           showAvatarPins={false}
           interactive
           showLocateButton
+          showZoomControls
           onLocatePress={handleUseGps}
           locateLoading={gpsLoading}
           locateAccessibilityLabel={t('mapDiscover.locateGpsA11y')}

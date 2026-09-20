@@ -6,6 +6,7 @@ import {
   Dimensions,
   LayoutChangeEvent,
   Platform,
+  ImageStyle,
   StyleSheet,
   View,
   ViewStyle,
@@ -318,14 +319,18 @@ export function SearchMapView({
       borderRadius: half,
     };
 
-    const pinVisualStyle = [
+    const pinShellStyle: ViewStyle[] = [
       useAvatar ? styles.avatarPin : styles.pin,
-      selected && (useAvatar ? styles.avatarPinSelected : styles.pinSelected),
+      positionStyle,
       {
         backgroundColor: useAvatar ? '#fff' : selected ? accentColor : pinColor,
         borderColor: selected ? accentColor : '#fff',
       },
     ];
+    if (selected) {
+      pinShellStyle.push(useAvatar ? styles.avatarPinSelected : styles.pinSelected);
+    }
+    const avatarImageStyle: ImageStyle = styles.avatarImage;
 
     const a11yLabel = pin.name
       ? pinAccessibilityLabel?.(pin.name) ?? pin.name
@@ -333,9 +338,9 @@ export function SearchMapView({
 
     if (!onPinPress) {
       return (
-        <View key={pin.id} pointerEvents="none" style={[...pinVisualStyle, positionStyle]}>
+        <View key={pin.id} pointerEvents="none" style={pinShellStyle}>
           {useAvatar ? (
-            <Image source={{ uri: pin.photoUrl }} style={styles.avatarImage} contentFit="cover" />
+            <Image source={{ uri: pin.photoUrl }} style={avatarImageStyle} contentFit="cover" />
           ) : null}
         </View>
       );
@@ -348,10 +353,10 @@ export function SearchMapView({
         accessibilityRole="button"
         accessibilityLabel={a11yLabel}
         onPress={() => onPinPress(pin.id)}
-        style={[...pinVisualStyle, positionStyle]}
+        style={pinShellStyle}
       >
         {useAvatar ? (
-          <Image source={{ uri: pin.photoUrl }} style={styles.avatarImage} contentFit="cover" />
+          <Image source={{ uri: pin.photoUrl }} style={avatarImageStyle} contentFit="cover" />
         ) : null}
       </AnimatedPressable>
     );
@@ -409,9 +414,14 @@ export function SearchMapView({
     </>
   );
 
+  const mapWebCursor =
+    mapInteractive && Platform.OS === 'web'
+      ? ({ cursor: 'grab' } as unknown as ViewStyle)
+      : undefined;
+
   const mapBody = (
     <View
-      style={[styles.map, mapInteractive && Platform.OS === 'web' ? styles.mapWebInteractive : null, style]}
+      style={[styles.map, mapWebCursor, style]}
       onLayout={onMapLayout}
       {...webMapHandlers}
     >
@@ -479,10 +489,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#f2f2f2',
     minHeight: 120,
   },
-  mapWebInteractive: Platform.select({
-    web: { cursor: 'grab' as const },
-    default: {},
-  }),
   zoomStack: {
     position: 'absolute',
     zIndex: 12,

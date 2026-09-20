@@ -73,6 +73,19 @@ Redirect URLs for Checkout success/cancel match your web origin (same as auth re
 4. Webhook marks ledger `completed` with `grant` JSON; Spark+ also sets `user_state.is_spark_plus`.
 5. App polls ledger / sync on load and applies entitlements once.
 
+### Stripe return edge cases
+
+| URL | Behavior |
+|-----|----------|
+| `?checkout=success&session_id=…` | Poll `purchase_ledger` by session id; apply grant when `completed`. |
+| `?checkout=success` (no session id) | Cloud entitlement sync + user message to wait or **Restore purchases**. |
+| Poll timeout (webhook slow) | Same fallback sync + restore hint; no duplicate checkout charge. |
+| `?checkout=cancel` | Alert only — no charge. |
+
+**Restore purchases** (Spark+ screen) reconciles native store receipts and cloud ledger entitlements after reinstall or a slow webhook.
+
+**Mainland China (CN)** on web: paid checkout is blocked consistently on Spark+ and consumables; users see the regional notice and must use the native app (or demo billing in dev).
+
 ## Flow (native / IAP)
 
 1. Same approval + step-up.

@@ -58,10 +58,13 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodKind>('platform_default');
   const webCheckoutBlocked = isWebPaidCheckoutBlocked(accountRegion);
   const regionalNoticeKey = regionalPaymentNoticeKey(accountRegion);
+  const webCheckoutBlockMessage = regionalNoticeKey
+    ? t(regionalNoticeKey)
+    : t('payments.webPaidCheckoutBlocked');
 
   const handleSubscribe = async () => {
     if (webCheckoutBlocked) {
-      Alert.alert(t('payments.webCheckoutUnavailable'), t('payments.cnConsumerNotice'));
+      Alert.alert(t('payments.webCheckoutUnavailable'), webCheckoutBlockMessage);
       return;
     }
     setPurchasing(true);
@@ -241,6 +244,7 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
             </Text>
           )}
         </AnimatedPressable>
+        <Text style={[styles.restoreHint, { color: colors.textMuted }]}>{t('sparkPlus.restorePurchasesHint')}</Text>
 
         <Text style={[styles.legal, { color: colors.textMuted }]}>
           {t('sparkPlus.billingNote')}{' '}
@@ -426,6 +430,13 @@ const styles = StyleSheet.create({
   restoreText: {
     fontSize: 14,
     fontWeight: '600',
+  },
+  restoreHint: {
+    fontSize: 11,
+    lineHeight: 16,
+    textAlign: 'center',
+    marginTop: spacing.xs,
+    paddingHorizontal: spacing.lg,
   },
   legal: {
     fontSize: 11,

@@ -96,9 +96,13 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
     [accountRegion, t],
   );
 
+  const webCheckoutBlockMessage = regionalNoticeKey
+    ? t(regionalNoticeKey)
+    : t('payments.webPaidCheckoutBlocked');
+
   const openPackConfirm = (pack: Pack) => {
     if (webCheckoutBlocked) {
-      Alert.alert(t('payments.webCheckoutUnavailable'), t('payments.cnConsumerNotice'));
+      Alert.alert(t('payments.webCheckoutUnavailable'), webCheckoutBlockMessage);
       return;
     }
     setPendingPack(pack);

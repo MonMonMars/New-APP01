@@ -223,7 +223,12 @@ export const en = {
     signOutConfirm: 'Sign out',
     reauthTitle: 'Cloud sign-in needed',
     reauthBody: 'Your Supabase session ended. Sign in again to sync matches, chat, and purchases.',
+    reauthPurchasesHint: 'After signing in, open Spark+ and tap Restore purchases if a subscription is missing.',
     reauthAction: 'Sign in again',
+    mfaRecommendedTitle: 'Protect purchases with 2FA',
+    mfaRecommendedBody: 'Authenticator codes help secure sign-in and approve every purchase on web.',
+    accountHomeMarketTravelNote:
+      'Travel mode is on — changing home market updates sign-in and billing only, not your travel discovery city.',
     profileStrength: 'Profile strength',
     percentComplete: '{score}% complete',
     whoViewedYou: 'Who viewed you',
@@ -537,6 +542,8 @@ export const en = {
     bestValue: 'Best value',
     continuePrice: 'Continue — {price}',
     restorePurchases: 'Restore purchases',
+    restorePurchasesHint:
+      'Use after reinstalling or if Spark+ did not appear after web checkout. Restores App Store, Google Play, or synced cloud entitlements.',
     restored: 'Purchases restored',
     restoredBody: 'Your Spark+ subscription has been restored.',
     noneFound: 'No purchases found',
@@ -860,6 +867,9 @@ export const en = {
     boostActive: 'Boost active',
     homeMarket: 'Home · {city}',
     billingHome: 'Billing · {city}',
+    travelModeHint:
+      'Travel city affects discovery only. Billing and sign-in follow your home market chip above.',
+    homeModeHint: 'Discovery uses your home market. Enable Passport in Preferences to browse another city.',
     world: 'World',
     filters: 'Filters',
     mostCompatible: 'Most compatible today',

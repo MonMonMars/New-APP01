@@ -2990,13 +2990,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return;
     }
     void pollStripeCheckoutFulfillment(userId, sessionId).then((grant) => {
+      const locale = resolveAppLocale(preferences.appLocale, preferences.accountCountryCode);
       if (grant) {
         applyEntitlementGrant(grant);
-        const locale = resolveAppLocale(preferences.appLocale, preferences.accountCountryCode);
         window.alert(
           `${translate(locale, 'payments.purchaseSuccess')}\n${translate(locale, 'payments.subscriptionActivated')}`,
         );
+        return;
       }
+      void syncPurchaseEntitlementsFromCloud().then(() => {
+        window.alert(
+          `${translate(locale, 'payments.purchaseSuccess')}\n${translate(locale, 'payments.checkoutSuccessSyncBody')}`,
+        );
+      });
     });
     window.history.replaceState({}, document.title, window.location.pathname);
   }, [

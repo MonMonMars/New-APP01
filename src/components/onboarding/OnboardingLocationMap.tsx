@@ -1,13 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useTranslation } from '../../i18n';
 import { resolveUserLocation } from '../../services/userLocation';
@@ -85,6 +78,11 @@ export function OnboardingLocationMap({
           showYouMarker={false}
           showAvatarPins={false}
           interactive
+          showLocateButton
+          onLocatePress={handleUseGps}
+          locateLoading={gpsLoading}
+          locateAccessibilityLabel={t('mapDiscover.locateGpsA11y')}
+          locateInsetBottom={spacing.sm}
           onCenterChange={(next) => {
             setMapCenter(next);
             setPassportCity(undefined);
@@ -151,17 +149,6 @@ export function OnboardingLocationMap({
           ))}
         </ScrollView>
       ) : null}
-
-      <AnimatedPressable style={styles.secondaryButton} onPress={handleUseGps} disabled={gpsLoading}>
-        {gpsLoading ? (
-          <ActivityIndicator color={pulseBrand.accent} />
-        ) : (
-          <>
-            <Ionicons name="locate-outline" size={18} color={pulseBrand.accent} />
-            <Text style={styles.secondaryButtonText}>{t('onboarding.useMyLocation')}</Text>
-          </>
-        )}
-      </AnimatedPressable>
 
       <AnimatedPressable style={styles.primaryButton} onPress={handleContinue}>
         <Text style={styles.primaryButtonText}>{t('onboarding.confirmLocation')}</Text>

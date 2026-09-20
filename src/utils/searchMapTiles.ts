@@ -6,18 +6,20 @@ import type { GeoPoint } from './geoMap';
 /** Logical tile size on screen (Slippy Map 256 world units). */
 export const TILE_PX = 256;
 
-const CARTO_SUBDOMAINS = ['a', 'b', 'c', 'd'] as const;
+const ESRI_STREET_SERVERS = ['services', 'server'] as const;
 
 /** Prefer @2x raster tiles on retina — keeps sharpness without changing layout math. */
 export function mapTilePixelRatio(): number {
   return PixelRatio.get() >= 2 ? 2 : 1;
 }
 
-/** Carto Voyager — cleaner street basemap than legacy Esri World Street (OSM data). */
+/**
+ * Esri World Street Map — dense road labels and POI detail (Google/Apple-style street basemap).
+ * @see https://services.arcgisonline.com/arcgis/rest/services/World_Street_Map
+ */
 export function buildMapTileUri(zoom: number, x: number, y: number): string {
-  const retinaSuffix = mapTilePixelRatio() >= 2 ? '@2x' : '';
-  const subdomain = CARTO_SUBDOMAINS[Math.abs(x + y) % CARTO_SUBDOMAINS.length];
-  return `https://${subdomain}.basemaps.cartocdn.com/rastertiles/voyager/${zoom}/${x}/${y}${retinaSuffix}.png`;
+  const host = ESRI_STREET_SERVERS[Math.abs(x + y) % ESRI_STREET_SERVERS.length];
+  return `https://${host}.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/${zoom}/${y}/${x}`;
 }
 
 export const DEFAULT_MAP_CENTER = { lat: 40.758, lng: -73.985 };
@@ -53,9 +55,9 @@ export function zoomForRadius(miles: number): number {
     return 8;
   }
   if (miles >= 50) {
-    return 10;
+    return 11;
   }
-  return 12;
+  return 13;
 }
 
 export function mapCenterForCity(city?: string | null): GeoPoint {

@@ -52,11 +52,18 @@ async function clickContinue(page) {
   return false;
 }
 
-async function completeOnboarding(page) {
-  await page.getByText(/continue without account/i).click();
-  await page.waitForTimeout(800);
+async function tapContinueWithoutAccount(page) {
+  const guest = page.getByText(/continue without account/i).first();
+  if (await guest.isVisible({ timeout: 4000 }).catch(() => false)) {
+    await guest.click();
+    await page.waitForTimeout(800);
+    return true;
+  }
+  return false;
+}
 
-  for (let step = 0; step < 22; step++) {
+async function completeOnboarding(page) {
+  for (let step = 0; step < 24; step++) {
     await dismissCookies(page);
 
     if (
@@ -80,13 +87,19 @@ async function completeOnboarding(page) {
 
     const text = await page.locator('body').innerText();
 
-    if (/i have read and agree|terms of service/i.test(text)) {
+    if (/i have read and agree|terms of service|community guidelines/i.test(text)) {
       const box = page.getByText(/i have read and agree/i).first();
       if (await box.isVisible({ timeout: 1500 }).catch(() => false)) {
         await box.click();
         await page.waitForTimeout(300);
       }
       if (await clickContinue(page)) {
+        continue;
+      }
+    }
+
+    if (/continue without account/i.test(text)) {
+      if (await tapContinueWithoutAccount(page)) {
         continue;
       }
     }
@@ -193,10 +206,14 @@ async function main() {
 
     await page.waitForTimeout(1500);
     const landing = await page.locator('body').innerText();
-    if (!/continue without account|welcome to pulse/i.test(landing)) {
-      fail('Landing screen', 'welcome/sign-in not visible');
+    if (
+      !/continue without account|welcome to pulse|terms of service|community guidelines|i have read and agree/i.test(
+        landing,
+      )
+    ) {
+      fail('Landing screen', 'welcome/sign-in or legal step not visible');
     } else {
-      pass('Landing screen', 'welcome visible');
+      pass('Landing screen', 'onboarding entry visible');
     }
 
     await completeOnboarding(page);

@@ -6,10 +6,10 @@ import {
 import { photosForLegacyProfile } from '../data/legacyProfilePhotos';
 import { Profile } from '../types/profile';
 
-/** Extra Pexels portrait ids for passport / high-id profiles without a legacy mapping. */
+/** Passport deck (ids 201–218) — disjoint from legacy + batch `photosForSet` primaries. */
 const PASSPORT_PEXELS_IDS: readonly number[] = [
-  1926769, 1988681, 2014422, 2042109, 2064340, 2087360, 2103808, 2122961, 2148535, 2165644,
-  2182970, 2194794, 220453, 2212476, 2233348, 2256940, 2272949, 2291367, 2302632, 2317953,
+  3398464, 3408744, 3417775, 3423564, 3433333, 3443584, 3455279, 3465021, 3474219, 3483471,
+  3493974, 3506189, 3516064, 3525544, 3535077, 3544825, 3554575, 3564325,
 ];
 
 
@@ -19,6 +19,23 @@ function hashProfileId(profileId: string): number {
     hash = (hash * 31 + profileId.charCodeAt(i)) | 0;
   }
   return Math.abs(hash);
+}
+
+function pexelsIdFromUrl(url: string): string | null {
+  const match = url.match(/pexels\.com\/photos\/(\d+)\//);
+  return match ? match[1] : null;
+}
+
+/** Raw batches 97–176 already use `photosForSet` — do not re-hash over them. */
+function hasCuratedPexelsGallery(photos: string[]): boolean {
+  if (photos.length === 0) {
+    return false;
+  }
+  const ids = photos.map(pexelsIdFromUrl);
+  if (ids.some((id) => id === null)) {
+    return false;
+  }
+  return new Set(ids).size === 1;
 }
 
 function isDemoSeedProfile(profile: Profile): boolean {
@@ -38,6 +55,11 @@ function photosForExtendedProfile(profileId: string): string[] {
     const index = numericId - 201;
     return photosForPexelsId(PASSPORT_PEXELS_IDS[index % PASSPORT_PEXELS_IDS.length]);
   }
+  if (Number.isFinite(numericId) && numericId >= 1) {
+    const primary =
+      VERIFIED_PORTRAIT_IDS[(numericId - 1) % VERIFIED_PORTRAIT_IDS.length] ?? VERIFIED_PORTRAIT_IDS[0];
+    return photosForPexelsId(primary);
+  }
   const index = hashProfileId(profileId);
   const primary = VERIFIED_PORTRAIT_IDS[index % VERIFIED_PORTRAIT_IDS.length] ?? VERIFIED_PORTRAIT_IDS[0];
   return photosForPexelsId(primary);
@@ -54,6 +76,10 @@ export function withDemoProfilePhotos(profile: Profile): Profile {
   }
 
   if (!isDemoSeedProfile(profile)) {
+    return profile;
+  }
+
+  if (hasCuratedPexelsGallery(profile.photos)) {
     return profile;
   }
 

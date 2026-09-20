@@ -2,13 +2,26 @@
 
 ## Demo link (verified working)
 
-**https://formerly-para-school-logs.trycloudflare.com**
+**https://boundaries-hose-factor-interesting.trycloudflare.com**
 
-- **Built from branch:** `cursor/tinder-action-bar-7b60` (commit `fa6dc0e`, base: `cursor/world-map-search-accounts-ac0d`)
-- **Build:** World map discover + account search stack, Tinder-style 5-button discover action bar (Rewind · Pass · Super Like · Like · Boost)
-- **Bundle:** `index-2fe7e7dd45036aef52c8b34ff2c02aca.js`
-- **Verified:** 2026-09-20 12:09 UTC — HTTP 200 on tunnel and local `:8090`
-- **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps. Hard-refresh (Cmd/Ctrl+Shift+R) if stale.
+- **Built from branch:** `cursor/demo-cache-bust-7b60` (base: `cursor/tinder-action-bar-7b60`)
+- **Build:** World map discover + Tinder-style 5-button action bar; **cache-busted** HTML + `serve.json` headers
+- **Build ID:** `2d4da74-20260920T121239Z` (see HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer version line)
+- **Bundle:** `index-78ebf2a6145c4ef9c463eff2f43ca4fa.js`
+- **Verified:** 2026-09-20 12:15 UTC — HTTP 200 on local `:8090` with no-store HTML + immutable `_expo/static` assets
+- **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
+
+### If you still see an old demo (browser cache)
+
+1. **Check build ID** — Profile → **Privacy controls** → scroll to footer: `App version 1.0.0 · <build-id>`. It must match the **Build ID** line above.
+2. **Hard refresh** — Chrome/Edge: `Ctrl+Shift+R` (Windows/Linux) or `Cmd+Shift+R` (Mac). Safari: hold **Reload** → **Empty Caches and Reload**.
+3. **Incognito / private window** — fastest way to bypass a stale tab.
+4. **View page source** on the demo URL — first lines in `<head>` should include `<!-- spark-demo-build: … -->` and `Cache-Control` meta tags.
+
+Server-side (already applied on each `npm run build:web:demo`):
+
+- `dist/index.html` — `Cache-Control` / `Pragma` / `Expires` meta tags + build timestamp comment
+- `serve.json` — `no-store` for HTML; `immutable` long cache for hashed `_expo/static/**` only
 
 ### Quick start
 
@@ -26,9 +39,10 @@
 |------|---------|
 | `loca.lt` tunnels | Time out / unreliable from this environment |
 | `monmonmars.github.io/New-APP01/` | Repo is **private** — GitHub Pages needs Pro or a public repo (returns 404) |
-| Old Cloudflare URLs | Were serving a **GitHub Pages build** (`/New-APP01/` paths) at the tunnel root → blank white screen |
+| Old Cloudflare URLs (e.g. `formerly-para-school-logs`, `proportion-julie-reflected-had`) | **Dead** — workspace restarted; use the current link above |
+| GitHub Pages paths on tunnel root | Were serving a **GitHub Pages build** (`/New-APP01/` paths) → blank white screen |
 
-**Fix applied:** tunnel demos now use `npm run build:web` (root paths), not `build:web:pages`.
+**Fix applied:** tunnel demos use `npm run build:web:demo` + `serve -c serve.json` (root paths), not `build:web:pages`.
 
 ---
 
@@ -43,7 +57,7 @@ Private repo → use **Vercel** or **Netlify** (free, stable URL, auto-deploy on
 3. Build: `npm run build:web` · Output: `dist`
 4. Deploy → stable URL like `https://new-app01.vercel.app`
 
-`vercel.json` is already in the repo.
+`vercel.json` includes the same cache header split as `serve.json`.
 
 ### GitHub Pages (public repo or GitHub Pro only)
 
@@ -58,9 +72,9 @@ Uses `npm run build:web:pages` (base path `/New-APP01`). Enable at [repo Pages s
 ```bash
 git clone https://github.com/MonMonMars/New-APP01.git
 cd New-APP01
-git checkout cursor/tinder-action-bar-7b60
+git checkout cursor/demo-cache-bust-7b60
 npm install
-npm run demo          # http://localhost:8090
+npm run demo          # http://localhost:8090 (build:web:demo + serve.json)
 npm run demo:tunnel   # Cloudflare public URL (install cloudflared)
 ```
 

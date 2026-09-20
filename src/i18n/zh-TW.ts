@@ -996,6 +996,7 @@ export const zhTw = {
     deleteAccountHint: '永久 — 無法復原',
     policies: '政策',
     controller: '資料控制者：{name} · {email}',
+    appVersion: 'App 版本 {version}',
     exportShareTitle: 'Spark 資料匯出',
     exportShareBody: 'Spark 資料匯出（{date}）\n\n{content}',
     exportTruncated: '\n\n…（分享表單已截斷）',

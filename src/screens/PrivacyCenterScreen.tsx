@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import { useNavigation } from '@react-navigation/native';
 import { Alert, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { getAppVersionLabel } from '../constants/buildInfo';
 import { LEGAL_ENTITY } from '../constants/legalEntity';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
@@ -240,6 +242,11 @@ export function PrivacyCenterScreen({ onClose }: PrivacyCenterScreenProps) {
           </AnimatedPressable>
         ))}
 
+        <Text style={[styles.footer, { color: colors.textMuted }]}>
+          {t('privacy.appVersion', {
+            version: getAppVersionLabel(Constants.expoConfig?.version ?? '1.0.0'),
+          })}
+        </Text>
         <Text style={[styles.footer, { color: colors.textMuted }]}>
           {t('privacy.controller', { name: LEGAL_ENTITY.name, email: LEGAL_ENTITY.privacyEmail })}
         </Text>

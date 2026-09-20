@@ -999,6 +999,7 @@ export const en = {
     deleteAccountHint: 'Permanent — cannot be undone',
     policies: 'Policies',
     controller: 'Controller: {name} · {email}',
+    appVersion: 'App version {version}',
     exportShareTitle: 'Spark data export',
     exportShareBody: 'Spark data export ({date})\n\n{content}',
     exportTruncated: '\n\n…(truncated for share sheet)',

@@ -345,6 +345,14 @@ export async function loadFromSupabase(userId: string): Promise<Partial<SyncPayl
   };
 }
 
+export async function signOutSupabaseSession(): Promise<void> {
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    return;
+  }
+  await supabase.auth.signOut();
+}
+
 export async function deleteSupabaseAccount(userId: string): Promise<void> {
   const supabase = getSupabaseClient();
   if (!supabase) {

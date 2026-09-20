@@ -122,6 +122,8 @@ export const en = {
     phoneVerified: 'Phone verified — you\'re signed in.',
     googleFailed: 'Google sign-in failed.',
     googleContinue: 'Complete sign-in in the browser, then return here.',
+    oauthRefresh: 'I finished sign-in — refresh',
+    oauthNotYet: 'Sign-in not detected yet. Finish in WeChat, QQ, or the browser, then tap refresh.',
     passwordTooShort: 'Use at least 8 characters.',
     signUpFailed: 'Could not create account.',
     signUpSuccess: 'Account created.',
@@ -210,6 +212,10 @@ export const en = {
     interests: 'Interests',
     addInterestsHint: 'Add interests when editing your profile.',
     deleteAccount: 'Delete account',
+    signOut: 'Sign out',
+    signOutTitle: 'Sign out?',
+    signOutBody: 'You will need to sign in again to sync matches and purchases.',
+    signOutConfirm: 'Sign out',
     profileStrength: 'Profile strength',
     percentComplete: '{score}% complete',
     whoViewedYou: 'Who viewed you',
@@ -584,6 +590,7 @@ export const en = {
     accountMarketLabel: 'Account region {region} · prices in {currency}',
     cnConsumerNotice:
       'Mainland China accounts: pay in the iOS or Android app (App Store / Google Play). Web card checkout is not offered; WeChat Pay / Alipay integration is planned.',
+    webCheckoutUnavailable: 'Web checkout unavailable',
     euConsumerNotice:
       'EU/UK: Subscriptions renew until cancelled in your store or Stripe account. Statutory withdrawal rights may apply to digital content — see Subscription Terms.',
     methodRecommendedDesc:
@@ -1085,6 +1092,10 @@ export const en = {
     title: 'Privacy controls',
     bannerTitle: 'Your data, your choices',
     bannerBody: 'Control what Spark collects, how we personalise your experience, and when we contact you.',
+    accountRegion: 'Account home market',
+    accountRegionValue: '{city} · account {code}',
+    accountRegionHint:
+      'Sign-in methods and billing currency follow this market. Change it in Profile → Account home market.',
     dataUse: 'Data use',
     analytics: 'Analytics & crash reports',
     analyticsHint: 'Help improve Spark with anonymised usage and stability data',

@@ -6,7 +6,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
+import { useApp } from '../context/AppContext';
 import { loadPurchaseHistory } from '../services/purchaseHistory';
+import {
+  formatDateForAccountRegion,
+  formatDateShortForAccountRegion,
+} from '../utils/localeFormat';
 import { PurchaseTransaction } from '../types/purchases';
 import { getProductLabel } from '../utils/productLabels';
 import { radii, spacing } from '../theme';
@@ -14,20 +19,6 @@ import { radii, spacing } from '../theme';
 type PurchaseHistoryScreenProps = {
   onClose: () => void;
 };
-
-function formatDate(iso: string, locale: string): string {
-  try {
-    return new Date(iso).toLocaleDateString(locale === 'zh-TW' ? 'zh-TW' : 'en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    });
-  } catch {
-    return iso;
-  }
-}
 
 function isSubscription(productId: string): boolean {
   return productId.startsWith('spark_plus_');
@@ -37,6 +28,7 @@ export function PurchaseHistoryScreen({ onClose }: PurchaseHistoryScreenProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { t, locale } = useTranslation();
+  const { accountRegion } = useApp();
   const [history, setHistory] = useState<PurchaseTransaction[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -87,12 +79,12 @@ export function PurchaseHistoryScreen({ onClose }: PurchaseHistoryScreenProps) {
                   {getProductLabel(locale, tx.productId)}
                 </Text>
                 <Text style={[styles.date, { color: colors.textMuted }]}>
-                  {formatDate(tx.purchasedAt, locale)}
+                  {formatDateForAccountRegion(tx.purchasedAt, accountRegion, locale)}
                 </Text>
                 {tx.expiresAt && (
                   <Text style={[styles.expiry, { color: colors.gradientEnd }]}>
                     {t('payments.historyExpires', {
-                      date: formatDate(tx.expiresAt, locale),
+                      date: formatDateShortForAccountRegion(tx.expiresAt, accountRegion, locale),
                     })}
                   </Text>
                 )}

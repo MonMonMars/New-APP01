@@ -89,6 +89,8 @@ export function ProfileScreen() {
     setThemeMode,
     deleteAccount,
     isSupabaseEnabled,
+    isAuthenticated,
+    signOut,
     disguiseMode,
     setDisguiseMode,
     disguiseAdCreative,
@@ -447,6 +449,27 @@ export function ProfileScreen() {
           ))}
         </View>
 
+        {isSupabaseEnabled && isAuthenticated ? (
+          <AnimatedPressable
+            style={[styles.signOutRow, { borderBottomColor: colors.border }]}
+            onPress={() => {
+              Alert.alert(t('profile.signOutTitle'), t('profile.signOutBody'), [
+                { text: t('common.cancel'), style: 'cancel' },
+                {
+                  text: t('profile.signOutConfirm'),
+                  style: 'destructive',
+                  onPress: () => {
+                    void signOut();
+                  },
+                },
+              ]);
+            }}
+          >
+            <Ionicons name="log-out-outline" size={20} color={colors.textMuted} />
+            <Text style={[styles.signOutText, { color: colors.text }]}>{t('profile.signOut')}</Text>
+          </AnimatedPressable>
+        ) : null}
+
         <AnimatedPressable style={styles.deleteRow} onPress={handleDeleteAccount}>
           <Ionicons name="trash-outline" size={20} color={colors.nope} />
           <Text style={[styles.deleteText, { color: colors.nope }]}>{t('profile.deleteAccount')}</Text>
@@ -719,6 +742,19 @@ const styles = StyleSheet.create({
   settingsLabel: {
     flex: 1,
     fontSize: 16,
+  },
+  signOutRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.lg,
+    paddingVertical: spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  signOutText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
   deleteRow: {
     flexDirection: 'row',

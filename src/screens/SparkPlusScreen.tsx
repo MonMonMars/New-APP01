@@ -44,6 +44,8 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
   const { colors } = useTheme();
   const {
     purchaseProduct,
+    mfaEnabled,
+    paymentVerificationRequired,
     restorePurchases,
     openManageSubscriptions,
     user,
@@ -59,12 +61,16 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
   const [purchasing, setPurchasing] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
+  const [verificationCode, setVerificationCode] = useState('');
 
   const handleSubscribe = async () => {
     setPurchasing(true);
     setPurchaseError(null);
     const productId = sparkPlusProductForPlan(selectedPlan);
-    const result = await purchaseProduct(productId);
+    const result = await purchaseProduct(
+      productId,
+      paymentVerificationRequired && mfaEnabled ? verificationCode : undefined,
+    );
     setPurchasing(false);
 
     if (result.ok) {
@@ -248,8 +254,12 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
           if (!purchasing) {
             setShowConfirm(false);
             setPurchaseError(null);
+            setVerificationCode('');
           }
         }}
+        requireVerificationCode={paymentVerificationRequired && mfaEnabled}
+        verificationCode={verificationCode}
+        onVerificationCodeChange={setVerificationCode}
         onConfirm={handleSubscribe}
         onOpenSubscriptionTerms={() => navigation.navigate('LegalDocument', { documentId: 'subscription' })}
       />

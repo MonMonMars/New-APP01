@@ -17,6 +17,8 @@ export type PurchaseErrorCode =
   | 'store_unavailable'
   | 'product_unavailable'
   | 'payment_failed'
+  | 'verification_required'
+  | 'verification_failed'
   | 'already_owned'
   | 'unknown';
 

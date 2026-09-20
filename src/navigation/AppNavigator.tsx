@@ -35,7 +35,9 @@ import { SecuritySettingsScreen } from '../screens/SecuritySettingsScreen';
 import { VerificationPolicyScreen } from '../screens/VerificationPolicyScreen';
 import { PurchaseHistoryScreen } from '../screens/PurchaseHistoryScreen';
 import { SparkPlusScreen } from '../screens/SparkPlusScreen';
+import { MfaLoginGate } from '../components/auth/MfaLoginGate';
 import { OnboardingFlow } from '../screens/onboarding/OnboardingFlow';
+import { TwoFactorScreen } from '../screens/TwoFactorScreen';
 import { TabBarButton } from '../components/TabBarButton';
 import { pulseBrand } from '../theme/pulseBrand';
 import { WorldSwitchVeil } from '../components/motion/WorldSwitchVeil';
@@ -221,6 +223,10 @@ function SecurityProtocolsWrapper({
   return <SecurityProtocolsScreen onClose={() => navigation.goBack()} />;
 }
 
+function TwoFactorWrapper({ navigation }: NativeStackScreenProps<RootStackParamList, 'TwoFactor'>) {
+  return <TwoFactorScreen onClose={() => navigation.goBack()} />;
+}
+
 function NotificationPreferencesWrapper({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, 'NotificationPreferences'>) {
@@ -328,6 +334,11 @@ function RootNavigator() {
             options={{ animation: 'slide_from_right' }}
           />
           <Stack.Screen
+            name="TwoFactor"
+            component={TwoFactorWrapper}
+            options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
             name="NotificationPreferences"
             component={NotificationPreferencesWrapper}
             options={{ animation: 'slide_from_right' }}
@@ -393,7 +404,9 @@ function ThemedNavigator() {
     >
       <NavigationContainer ref={navigationRef}>
         <HydrationGate>
-          <RootNavigator />
+          <MfaLoginGate>
+            <RootNavigator />
+          </MfaLoginGate>
         </HydrationGate>
         <CookieConsentBanner
           onOpenLegal={(documentId) => {

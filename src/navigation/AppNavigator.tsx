@@ -36,6 +36,7 @@ import { VerificationPolicyScreen } from '../screens/VerificationPolicyScreen';
 import { PurchaseHistoryScreen } from '../screens/PurchaseHistoryScreen';
 import { SparkPlusScreen } from '../screens/SparkPlusScreen';
 import { MfaLoginGate } from '../components/auth/MfaLoginGate';
+import { PasswordRecoveryGate } from '../components/auth/PasswordRecoveryGate';
 import { OnboardingFlow } from '../screens/onboarding/OnboardingFlow';
 import { TwoFactorScreen } from '../screens/TwoFactorScreen';
 import { TabBarButton } from '../components/TabBarButton';
@@ -404,9 +405,11 @@ function ThemedNavigator() {
     >
       <NavigationContainer ref={navigationRef}>
         <HydrationGate>
-          <MfaLoginGate>
-            <RootNavigator />
-          </MfaLoginGate>
+          <PasswordRecoveryGate>
+            <MfaLoginGate>
+              <RootNavigator />
+            </MfaLoginGate>
+          </PasswordRecoveryGate>
         </HydrationGate>
         <CookieConsentBanner
           onOpenLegal={(documentId) => {

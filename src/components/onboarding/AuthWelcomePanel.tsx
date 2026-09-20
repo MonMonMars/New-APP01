@@ -47,6 +47,7 @@ export function AuthWelcomePanel({
     verifyPhoneSignIn,
     signUpWithPassword,
     signInWithPassword,
+    requestPasswordReset,
     isSupabaseEnabled,
   } = useApp();
 
@@ -56,6 +57,7 @@ export function AuthWelcomePanel({
   const [phoneSent, setPhoneSent] = useState(false);
   const [password, setPassword] = useState('');
   const [passwordMode, setPasswordMode] = useState<'signIn' | 'signUp'>('signIn');
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
 
   const handleApple = async () => {
     setAuthLoading(true);
@@ -142,6 +144,17 @@ export function AuthWelcomePanel({
       if (result.ok) {
         onAuthenticated();
       }
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleForgotPasswordSend = async () => {
+    setAuthLoading(true);
+    setEmailMessage(null);
+    try {
+      const result = await requestPasswordReset(email);
+      setEmailMessage(result.message);
     } finally {
       setAuthLoading(false);
     }
@@ -256,46 +269,89 @@ export function AuthWelcomePanel({
 
       {tab === 'password' ? (
         <View style={styles.emailBlock}>
-          <View style={styles.tabRow}>
-            {(['signIn', 'signUp'] as const).map((mode) => (
+          {forgotPasswordOpen ? (
+            <>
+              <Text style={styles.forgotHint}>{t('auth.forgotPasswordBody')}</Text>
+              <TextInput
+                style={styles.emailInput}
+                placeholder={t('onboarding.emailPlaceholder')}
+                placeholderTextColor={colors.textMuted}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
               <AnimatedPressable
-                key={mode}
-                style={[styles.tabChip, passwordMode === mode && styles.tabChipActive]}
-                onPress={() => setPasswordMode(mode)}
+                style={styles.emailButton}
+                onPress={() => void handleForgotPasswordSend()}
+                disabled={authLoading || !email.trim()}
               >
-                <Text style={[styles.tabText, passwordMode === mode && styles.tabTextActive]}>
-                  {mode === 'signIn' ? t('auth.signIn') : t('auth.signUp')}
+                <Ionicons name="mail-outline" size={18} color={colors.text} />
+                <Text style={styles.emailButtonText}>{t('auth.sendPasswordReset')}</Text>
+              </AnimatedPressable>
+              <AnimatedPressable
+                onPress={() => {
+                  setForgotPasswordOpen(false);
+                  setEmailMessage(null);
+                }}
+              >
+                <Text style={styles.link}>{t('auth.backToSignIn')}</Text>
+              </AnimatedPressable>
+            </>
+          ) : (
+            <>
+              <View style={styles.tabRow}>
+                {(['signIn', 'signUp'] as const).map((mode) => (
+                  <AnimatedPressable
+                    key={mode}
+                    style={[styles.tabChip, passwordMode === mode && styles.tabChipActive]}
+                    onPress={() => setPasswordMode(mode)}
+                  >
+                    <Text style={[styles.tabText, passwordMode === mode && styles.tabTextActive]}>
+                      {mode === 'signIn' ? t('auth.signIn') : t('auth.signUp')}
+                    </Text>
+                  </AnimatedPressable>
+                ))}
+              </View>
+              <TextInput
+                style={styles.emailInput}
+                placeholder={t('onboarding.emailPlaceholder')}
+                placeholderTextColor={colors.textMuted}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+              <TextInput
+                style={styles.emailInput}
+                placeholder={t('auth.passwordPlaceholder')}
+                placeholderTextColor={colors.textMuted}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+              {passwordMode === 'signIn' && isSupabaseEnabled ? (
+                <AnimatedPressable
+                  onPress={() => {
+                    setForgotPasswordOpen(true);
+                    setEmailMessage(null);
+                  }}
+                >
+                  <Text style={styles.forgotLink}>{t('auth.forgotPassword')}</Text>
+                </AnimatedPressable>
+              ) : null}
+              <AnimatedPressable
+                style={styles.emailButton}
+                onPress={() => void handlePassword()}
+                disabled={authLoading || !email.trim() || password.length < 8}
+              >
+                <Ionicons name="key-outline" size={18} color={colors.text} />
+                <Text style={styles.emailButtonText}>
+                  {passwordMode === 'signIn' ? t('auth.signIn') : t('auth.signUp')}
                 </Text>
               </AnimatedPressable>
-            ))}
-          </View>
-          <TextInput
-            style={styles.emailInput}
-            placeholder={t('onboarding.emailPlaceholder')}
-            placeholderTextColor={colors.textMuted}
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-          <TextInput
-            style={styles.emailInput}
-            placeholder={t('auth.passwordPlaceholder')}
-            placeholderTextColor={colors.textMuted}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-          <AnimatedPressable
-            style={styles.emailButton}
-            onPress={() => void handlePassword()}
-            disabled={authLoading || !email.trim() || password.length < 8}
-          >
-            <Ionicons name="key-outline" size={18} color={colors.text} />
-            <Text style={styles.emailButtonText}>
-              {passwordMode === 'signIn' ? t('auth.signIn') : t('auth.signUp')}
-            </Text>
-          </AnimatedPressable>
+            </>
+          )}
         </View>
       ) : null}
 
@@ -400,6 +456,18 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: 'center',
     marginBottom: spacing.sm,
+  },
+  forgotHint: {
+    color: colors.textMuted,
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
+  },
+  forgotLink: {
+    color: pulseBrand.accent,
+    textAlign: 'right',
+    fontWeight: '600',
+    fontSize: 14,
   },
   link: {
     color: pulseBrand.accent,

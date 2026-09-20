@@ -40,7 +40,6 @@ import { PasswordRecoveryGate } from '../components/auth/PasswordRecoveryGate';
 import { OnboardingFlow } from '../screens/onboarding/OnboardingFlow';
 import { TwoFactorScreen } from '../screens/TwoFactorScreen';
 import { TabBarButton } from '../components/TabBarButton';
-import { pulseBrand } from '../theme/pulseBrand';
 import { WorldSwitchVeil } from '../components/motion/WorldSwitchVeil';
 import { DisguiseNavigator } from './DisguiseNavigator';
 import { MainTabParamList, RootStackParamList } from '../types/navigation';
@@ -91,9 +90,11 @@ function MatchesTabScreen() {
 }
 
 function MainTabs() {
-  const { likesTabBadge, matchesTabBadge } = useApp();
+  const { likesTabBadge, matchesTabBadge, preferences } = useApp();
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const section = resolveSparkSection(preferences.sparkSection);
+  const sectionAccent = section === 'ember' ? colors.ember : colors.gradientEnd;
 
   return (
     <Tab.Navigator
@@ -110,10 +111,10 @@ function MainTabs() {
           paddingTop: 6,
           height: 72,
         },
-        tabBarActiveTintColor: colors.gradientEnd,
+        tabBarActiveTintColor: sectionAccent,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarBadgeStyle: {
-          backgroundColor: colors.gradientEnd,
+          backgroundColor: sectionAccent,
           color: '#111111',
           fontSize: 11,
         },
@@ -140,7 +141,6 @@ function MainTabs() {
         options={{
           tabBarLabel: t('tabs.pulse'),
           tabBarAccessibilityLabel: t('pulseEntry.tabA11y'),
-          tabBarActiveTintColor: pulseBrand.accent,
         }}
       />
       <Tab.Screen

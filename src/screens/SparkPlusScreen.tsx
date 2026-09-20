@@ -7,7 +7,8 @@ import { ActivityIndicator, Alert, Platform, ScrollView, StyleSheet, Text, View 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { SparkPlusComparisonTable } from '../components/SparkPlusComparisonTable';
-import { formatProductPrice, PRODUCT_CATALOG, sparkPlusProductForPlan } from '../constants/products';
+import { PRODUCT_CATALOG, sparkPlusProductForPlan } from '../constants/products';
+import { formatRegionalPrice } from '../utils/regionalPricing';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { getLegalUiStrings } from '../content/legal';
@@ -52,6 +53,7 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
     isSubscriptionActive,
     subscriptionPlan,
     subscriptionExpiresAt,
+    accountRegion,
   } = useApp();
   const { t, locale } = useTranslation();
   const legalUi = getLegalUiStrings(locale);
@@ -157,7 +159,7 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
             {(Object.keys(SPARK_PLUS_PRICING) as SparkPlusPlan[]).map((plan) => {
               const pricing = SPARK_PLUS_PRICING[plan];
               const product = PRODUCT_CATALOG[sparkPlusProductForPlan(plan)];
-              const displayPrice = formatProductPrice(product.displayPriceUsd);
+              const displayPrice = formatRegionalPrice(product.displayPriceUsd, accountRegion);
               const isSelected = selectedPlan === plan;
               return (
                 <AnimatedPressable
@@ -200,8 +202,9 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
             >
               <Text style={[styles.subscribeText, { color: colors.text }]}>
                 {t('sparkPlus.continuePrice', {
-                  price: formatProductPrice(
+                  price: formatRegionalPrice(
                     PRODUCT_CATALOG[sparkPlusProductForPlan(selectedPlan)].displayPriceUsd,
+                    accountRegion,
                   ),
                 })}
               </Text>
@@ -243,8 +246,9 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
         visible={showConfirm}
         title={t('sparkPlus.confirmTitle', { plan: getSparkPlusPlanLabel(locale, selectedPlan) })}
         description={t('sparkPlus.confirmDesc')}
-        price={formatProductPrice(
+        price={formatRegionalPrice(
           PRODUCT_CATALOG[sparkPlusProductForPlan(selectedPlan)].displayPriceUsd,
+          accountRegion,
         )}
         quantity={
           SPARK_PLUS_PRICING[selectedPlan].perMonth !== '—'

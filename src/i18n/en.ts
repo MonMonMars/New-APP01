@@ -92,6 +92,7 @@ export const en = {
     signedInLocally: 'Signed in locally. Connect Supabase for cloud email sign-in.',
   },
   auth: {
+    regionalSignInHint: 'Sign-in options for your account region ({region}).',
     continueGoogle: 'Continue with Google',
     tabEmail: 'Email',
     tabPhone: 'Phone',
@@ -562,9 +563,13 @@ export const en = {
     secondAuthenticatorHint: 'Step 2 of 2 — enter a new 6-digit code from your authenticator.',
     secondAuthenticatorPlaceholder: 'Second 6-digit code',
     requiresMfaOrApp: 'Enable two-factor authentication in Profile, or use the iOS/Android app to pay on this device.',
+    accountMarketLabel: 'Account region {region} · prices in {currency}',
+    euConsumerNotice:
+      'EU/UK: Subscriptions renew until cancelled in your store or Stripe account. Statutory withdrawal rights may apply to digital content — see Subscription Terms.',
+    methodRecommendedDesc:
+      'Uses your account region: App Store / Google Play in-app, or secure Stripe checkout on web (cards & wallets).',
     paymentMethodTitle: 'Payment method',
     methodRecommended: 'Recommended',
-    methodRecommendedDesc: 'Best option for your device (App Store, Google Play, or secure web checkout).',
     methodStripe: 'Card & wallets',
     methodStripeDesc: 'Pay with card, Apple Pay, Google Pay, or Link via Stripe.',
     methodApplePay: 'App Store billing',
@@ -1094,6 +1099,7 @@ export const en = {
     paris: 'Paris, France',
     tokyo: 'Tokyo, Japan',
     sydney: 'Sydney, Australia',
+    taipei: 'Taipei, Taiwan',
   },
   mapNeighborhoods: {
     astoriaNy: 'Astoria, NY',

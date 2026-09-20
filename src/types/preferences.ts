@@ -48,6 +48,7 @@ export const PASSPORT_CITIES = [
   'Paris, France',
   'Tokyo, Japan',
   'Sydney, Australia',
+  'Taipei, Taiwan',
 ] as const;
 
 export type SparkSection = 'spark' | 'ember';
@@ -110,6 +111,8 @@ export type DiscoveryPreferences = {
   sparkSection?: SparkSection;
   /** In-app language for legal docs and policy UI */
   appLocale?: AppLocale;
+  /** Home account country (ISO alpha-2) — drives auth + payment rails like major dating apps */
+  accountCountryCode?: string;
   /** Map "search this area" center — filters discover pool by geo radius */
   mapSearchLat?: number;
   mapSearchLng?: number;

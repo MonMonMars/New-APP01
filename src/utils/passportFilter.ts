@@ -40,6 +40,7 @@ const PASSPORT_METRO_KEYWORDS: Record<(typeof PASSPORT_CITIES)[number], string[]
   'Paris, France': ['paris', 'france'],
   'Tokyo, Japan': ['tokyo', 'japan', 'shibuya', 'shinjuku'],
   'Sydney, Australia': ['sydney', 'australia'],
+  'Taipei, Taiwan': ['taipei', 'taiwan', '台灣', '台北'],
 };
 
 export const PASSPORT_COORDINATES: Record<
@@ -56,6 +57,7 @@ export const PASSPORT_COORDINATES: Record<
   'Paris, France': { lat: 48.8566, lon: 2.3522, region: 'Île-de-France · FR' },
   'Tokyo, Japan': { lat: 35.6762, lon: 139.6503, region: 'Kantō · JP' },
   'Sydney, Australia': { lat: -33.8688, lon: 151.2093, region: 'NSW · AU' },
+  'Taipei, Taiwan': { lat: 25.033, lon: 121.5654, region: 'Taipei · TW' },
 };
 
 export function matchesPassportCity(profileCity: string | undefined, passportCity: string): boolean {

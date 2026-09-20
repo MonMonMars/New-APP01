@@ -14,7 +14,7 @@ import {
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
-import { resolveDisguiseProfile } from '../../utils/resolveDisguiseProfile';
+import { resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
 import { FeedPersonRow } from './FeedPersonRow';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -52,9 +52,8 @@ export function SocialCommentSheet({
 
   const userComments = getPulseComments(post.id);
   const seedReplies = SEED_REPLY_SPECS.slice(0, Math.min(post.comments, SEED_REPLY_SPECS.length));
-  const linkedAuthorProfile = resolveDisguiseProfile(
-    `social-${post.id}`,
-    undefined,
+  const linkedAuthorProfile = resolveExplicitDatingProfile(
+    post.datingProfileId,
     preferences.sparkSection,
   );
   const authorContentKind = linkedAuthorProfile ? 'profile' : 'social';

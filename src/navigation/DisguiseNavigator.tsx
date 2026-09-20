@@ -11,6 +11,7 @@ import { DisguiseProfileScreen } from '../screens/disguise/DisguiseProfileScreen
 import { DisguiseTrendingScreen } from '../screens/disguise/DisguiseTrendingScreen';
 import { useTranslation } from '../i18n';
 import { disguiseWorldMeta } from '../utils/disguiseWorld';
+import { resolveSparkSection } from '../types/preferences';
 
 export type DisguiseTabParamList = {
   Home: { topic?: string } | undefined;
@@ -26,6 +27,8 @@ export function DisguiseNavigator() {
   const { t, locale } = useTranslation();
   const { pulseSocial, preferences, user } = useApp();
   const meta = disguiseWorldMeta(preferences.sparkSection, user.gender, locale);
+  const section = resolveSparkSection(preferences.sparkSection);
+  const sectionAccent = section === 'ember' ? colors.ember : colors.gradientEnd;
   const activityBadge =
     !pulseSocial.activityAlertsRead && disguiseAlerts.length > 0
       ? disguiseAlerts.length
@@ -44,10 +47,10 @@ export function DisguiseNavigator() {
           paddingTop: 6,
           height: 72,
         },
-        tabBarActiveTintColor: meta.accent,
+        tabBarActiveTintColor: sectionAccent,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarBadgeStyle: {
-          backgroundColor: meta.accent,
+          backgroundColor: sectionAccent,
           color: '#FFFFFF',
           fontSize: 11,
         },

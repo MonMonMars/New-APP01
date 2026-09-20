@@ -183,9 +183,12 @@ export function DropTargets({
     reportStarZone();
   }, [reportHeartZone, reportStarZone, reportTrashZone]);
 
+  const slotWidth = compact ? TARGET_SIZE_COMPACT : TARGET_SIZE;
+  const starSlotWidth = compact ? STAR_SIZE_COMPACT + 16 : STAR_SIZE + 20;
+
   return (
     <View style={[styles.row, compact && styles.rowCompact]} pointerEvents="box-none" onLayout={reportZones}>
-      <View style={styles.actionSlot}>
+      <View style={[styles.actionSlot, { width: slotWidth }]}>
         <TargetButton
           icon="trash-outline"
           iconColor={colors.card}
@@ -201,7 +204,7 @@ export function DropTargets({
       </View>
 
       {onStarPress ? (
-        <View style={styles.actionSlot}>
+        <View style={[styles.actionSlot, { width: starSlotWidth }]}>
           <View style={styles.starWrap}>
             <View
               style={[
@@ -231,7 +234,7 @@ export function DropTargets({
         </View>
       ) : null}
 
-      <View style={styles.actionSlot}>
+      <View style={[styles.actionSlot, { width: slotWidth }]}>
         <TargetButton
           icon="heart"
           iconColor={colors.card}
@@ -247,7 +250,7 @@ export function DropTargets({
       </View>
 
       {showRewind && onRewindPress ? (
-        <View style={styles.actionSlot}>
+        <View style={[styles.actionSlot, { width: slotWidth }]}>
           <View style={styles.rewindWrap}>
             <TargetButton
               icon="arrow-undo"
@@ -281,6 +284,7 @@ const styles = StyleSheet.create({
     right: spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     zIndex: 20,
   },
   rowCompact: {
@@ -291,7 +295,6 @@ const styles = StyleSheet.create({
   actionSlot: {
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
   },
   target: {
     borderWidth: 2,

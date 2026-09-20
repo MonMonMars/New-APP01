@@ -136,6 +136,24 @@ export function resolveDisguiseProfile(
   return getProfileById(id) ?? null;
 }
 
+/** Only link Pulse UI to dating profiles when an explicit profile id is provided. */
+export function resolveExplicitDatingProfile(
+  profileId: string | undefined,
+  section?: SparkSection | string | null,
+): Profile | null {
+  if (!profileId) {
+    return null;
+  }
+  const profile = getProfileById(profileId);
+  if (!profile) {
+    return null;
+  }
+  if (!matchesSparkSection(profile, resolveSparkSection(section))) {
+    return null;
+  }
+  return profile;
+}
+
 /**
  * Resolve a Pulse / Harbor persona to a real dating profile for like, unlike, pass, and match.
  * Returns null only for the user's own disguised ad slot.

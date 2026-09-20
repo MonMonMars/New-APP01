@@ -134,6 +134,36 @@ export async function signInWithEmailPassword(
   return { userId: data.user.id };
 }
 
+export async function requestPasswordResetEmail(email: string): Promise<{ ok: boolean; error?: string }> {
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    return { ok: false, error: 'Supabase not configured' };
+  }
+  const redirectTo = getMagicLinkRedirectTo();
+  const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+    redirectTo,
+  });
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+  return { ok: true };
+}
+
+export async function updateAccountPassword(newPassword: string): Promise<{ ok: boolean; error?: string }> {
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    return { ok: false, error: 'Supabase not configured' };
+  }
+  if (newPassword.length < 8) {
+    return { ok: false, error: 'Password too short' };
+  }
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+  return { ok: true };
+}
+
 export async function getAuthUserEmail(): Promise<string | null> {
   const supabase = getSupabaseClient();
   if (!supabase) {

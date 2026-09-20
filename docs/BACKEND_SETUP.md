@@ -55,6 +55,12 @@ Add these under **Authentication → URL configuration → Redirect URLs** (adju
 
 The app sets `emailRedirectTo` to the web origin or `spark://auth/callback` and completes the session via `src/services/supabaseAuthCallback.ts` (hash tokens, PKCE `code`, and deep links).
 
+### Password reset emails
+
+Use the same **Redirect URLs** as magic links. The app calls `resetPasswordForEmail` with that redirect; when the user opens the link, Supabase includes `type=recovery` in the URL hash and the app shows **Choose a new password** (`PasswordRecoveryGate`) before continuing.
+
+In Supabase Dashboard → Authentication → Email templates, customize the **Reset password** message if needed. Ensure **Email** provider is enabled.
+
 ## 5. What syncs
 
 When configured, `AppContext` calls `syncToSupabase()` after state changes:
@@ -75,7 +81,7 @@ No env vars? Everything works exactly as before — AsyncStorage persistence onl
 
 - [ ] Enable RLS policies (included in schema)
 - [ ] Set up Apple Sign-In service ID + redirect URLs
-- [ ] Configure email templates for magic links
+- [ ] Configure email templates for magic links and password reset
 - [ ] Add server-side matchmaking (currently client-side demo)
 - [ ] Wire real-time subscriptions for chat (`supabase.channel`)
 - [ ] Store photos in Supabase Storage (currently URLs / local URIs)

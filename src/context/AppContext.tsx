@@ -72,6 +72,7 @@ import {
 } from '../services/supabase';
 import {
   applySupabaseAuthFromUrl,
+  authFlowTypeFromUrl,
   recoverSupabaseAuthFromLaunchUrl,
 } from '../services/supabaseAuthCallback';
 import { deleteAccountViaEdgeFunction } from '../services/accountDeletion';
@@ -80,6 +81,8 @@ import {
   signInWithEmailPassword,
   signInWithGoogleOAuth,
   signUpWithEmailPassword,
+  requestPasswordResetEmail,
+  updateAccountPassword,
   verifyPhoneLoginOtp,
 } from '../services/supabaseAuthExtended';
 import {
@@ -398,6 +401,10 @@ type AppContextValue = {
   verifyPhoneSignIn: (phone: string, code: string) => Promise<{ ok: boolean; message: string }>;
   signUpWithPassword: (email: string, password: string) => Promise<{ ok: boolean; message: string }>;
   signInWithPassword: (email: string, password: string) => Promise<{ ok: boolean; message: string }>;
+  requestPasswordReset: (email: string) => Promise<{ ok: boolean; message: string }>;
+  passwordRecoveryActive: boolean;
+  completePasswordReset: (password: string) => Promise<{ ok: boolean; message: string }>;
+  clearPasswordRecovery: () => void;
   refreshAuthFromCloud: () => Promise<boolean>;
   mfaLoginRequired: boolean;
   mfaEnabled: boolean;
@@ -547,6 +554,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [emberLastPassedProfileId, setEmberLastPassedProfileId] = useState<string | null>(null);
   const [mfaLoginRequired, setMfaLoginRequired] = useState(false);
   const [mfaEnabled, setMfaEnabled] = useState(false);
+  const [passwordRecoveryActive, setPasswordRecoveryActive] = useState(false);
   const [emberSparkNotesUsedToday, setEmberSparkNotesUsedToday] = useState(0);
   const [emberLastSparkNoteDate, setEmberLastSparkNoteDate] = useState<string | null>(null);
   const [isPaused, setIsPaused] = useState(false);
@@ -729,6 +737,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setDateCheckIns(saved.dateCheckIns ?? []);
 
         if (isSupabaseConfigured()) {
+          if (typeof window !== 'undefined' && authFlowTypeFromUrl(window.location.href) === 'recovery') {
+            setPasswordRecoveryActive(true);
+          }
           await recoverSupabaseAuthFromLaunchUrl();
           const session = await getSupabaseSession();
           const cloudUserId = session?.userId ?? saved.userId;
@@ -778,10 +789,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     const {
       data: { subscription },
-    } =     supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setPasswordRecoveryActive(true);
+      }
       if (!session?.user) {
         setMfaLoginRequired(false);
         setMfaEnabled(false);
+        setPasswordRecoveryActive(false);
         return;
       }
       const cloudUserId = session.user.id;
@@ -806,6 +821,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const syncSessionFromUrl = (url: string | null) => {
       if (!url) {
         return;
+      }
+      if (authFlowTypeFromUrl(url) === 'recovery') {
+        setPasswordRecoveryActive(true);
       }
       void applySupabaseAuthFromUrl(url).then(async (ok) => {
         if (!ok) {
@@ -1649,6 +1667,45 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     [preferences.appLocale, refreshMfaLoginRequirement],
   );
+
+  const requestPasswordReset = useCallback(
+    async (email: string) => {
+      const locale = resolveAppLocale(preferences.appLocale);
+      if (!isSupabaseConfigured()) {
+        return { ok: false, message: translate(locale, 'onboarding.emailRequiresSupabase') };
+      }
+      const trimmed = email.trim().toLowerCase();
+      if (!trimmed.includes('@')) {
+        return { ok: false, message: translate(locale, 'onboarding.emailInvalid') };
+      }
+      const result = await requestPasswordResetEmail(trimmed);
+      if (!result.ok) {
+        return { ok: false, message: result.error ?? translate(locale, 'auth.passwordResetFailed') };
+      }
+      return { ok: true, message: translate(locale, 'auth.passwordResetEmailSent') };
+    },
+    [preferences.appLocale],
+  );
+
+  const completePasswordReset = useCallback(
+    async (password: string) => {
+      const locale = resolveAppLocale(preferences.appLocale);
+      if (password.length < 8) {
+        return { ok: false, message: translate(locale, 'auth.passwordTooShort') };
+      }
+      const result = await updateAccountPassword(password);
+      if (!result.ok) {
+        return { ok: false, message: result.error ?? translate(locale, 'auth.passwordResetFailed') };
+      }
+      await refreshMfaLoginRequirement();
+      return { ok: true, message: translate(locale, 'auth.passwordResetSuccessTitle') };
+    },
+    [preferences.appLocale, refreshMfaLoginRequirement],
+  );
+
+  const clearPasswordRecovery = useCallback(() => {
+    setPasswordRecoveryActive(false);
+  }, []);
 
   const paymentVerificationRequired = isSupabaseConfigured();
 
@@ -3191,6 +3248,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       verifyPhoneSignIn,
       signUpWithPassword,
       signInWithPassword,
+      requestPasswordReset,
+      passwordRecoveryActive,
+      completePasswordReset,
+      clearPasswordRecovery,
       refreshAuthFromCloud,
       mfaLoginRequired,
       mfaEnabled,
@@ -3341,6 +3402,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       verifyPhoneSignIn,
       signUpWithPassword,
       signInWithPassword,
+      requestPasswordReset,
+      passwordRecoveryActive,
+      completePasswordReset,
+      clearPasswordRecovery,
       refreshAuthFromCloud,
       mfaLoginRequired,
       mfaEnabled,

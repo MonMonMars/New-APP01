@@ -205,12 +205,11 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const handleSearchThisArea = useCallback(() => {
     setSearchCenter(mapCenter);
     searchMapAt(mapCenter);
-    searchMorePeople();
     setSelectedPinId(null);
     setSearchQuery('');
     setQueryMode('people');
     setDeckToast(t('mapDiscover.areaLoaded'));
-  }, [mapCenter, searchMapAt, searchMorePeople, t]);
+  }, [mapCenter, searchMapAt, t]);
 
   const handleLocateGps = useCallback(() => {
     setLocatingGps(true);
@@ -231,7 +230,6 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
 
   const handleResetSearchArea = useCallback(() => {
     clearMapSearch();
-    searchMorePeople();
     const target =
       preferences.travelMode && preferences.passportCity
         ? mapCenterForCity(preferences.passportCity)
@@ -242,7 +240,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     setSearchQuery('');
     setQueryMode('people');
     setDeckToast(t('mapDiscover.resetSearchArea'));
-  }, [clearMapSearch, preferences.passportCity, preferences.travelMode, searchMorePeople, t, userLocation]);
+  }, [clearMapSearch, preferences.passportCity, preferences.travelMode, t, userLocation]);
 
   const handleSelectPlace = useCallback(
     (place: MapPlaceSuggestion) => {
@@ -250,13 +248,12 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
       setSearchCenter(place.coords);
       setMapZoom(zoomForRadius(currentRadius));
       searchMapAt(place.coords);
-      searchMorePeople();
       setSearchQuery('');
       setQueryMode('people');
       setSelectedPinId(null);
       setDeckToast(t('mapDiscover.areaLoaded'));
     },
-    [currentRadius, searchMapAt, searchMorePeople, t],
+    [currentRadius, searchMapAt, t],
   );
 
   const handlePinPress = (profileId: string) => {

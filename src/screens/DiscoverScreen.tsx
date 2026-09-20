@@ -7,7 +7,6 @@ import { Alert, Dimensions, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BoostBanner } from '../components/BoostBanner';
-import { RewindButton } from '../components/RewindButton';
 import { LikeLimitModal } from '../components/LikeLimitModal';
 import { PostMatchMomentumModal } from '../components/PostMatchMomentumModal';
 import { MatchModal } from '../components/MatchModal';
@@ -72,6 +71,8 @@ export function DiscoverScreen() {
     hasRewindablePass,
     rewindLastPass,
     isSparkPlus,
+    activateBoost,
+    bonusBoosts,
   } = useApp();
 
   const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
@@ -347,6 +348,36 @@ export function DiscoverScreen() {
     setShowWaiting(true);
   }, [dismissSuperLikeResult, getConversationIdForProfile, navigation, superLikeIsMatch, superLikeProfileState]);
 
+  const handleRewindPress = useCallback(() => {
+    if (!hasRewindablePass) {
+      return;
+    }
+    if (isSparkPlus) {
+      rewindLastPass();
+      return;
+    }
+    navigation.getParent()?.navigate('SparkPlus');
+  }, [hasRewindablePass, isSparkPlus, navigation, rewindLastPass]);
+
+  const handleBoostPress = useCallback(() => {
+    const result = activateBoost();
+    if (!result.ok) {
+      if (result.reason === 'already_active') {
+        Alert.alert(t('alerts.boostAlreadyActive'), t('alerts.boostRunning'));
+        return;
+      }
+      navigation.getParent()?.navigate('ConsumablesShop');
+      return;
+    }
+    const message =
+      result.source === 'free_weekly'
+        ? t('alerts.boostActivatedFreeWeekly')
+        : result.source === 'bonus'
+          ? t('alerts.boostActivatedBonus', { remaining: Math.max(0, bonusBoosts - 1) })
+          : t('alerts.boostActivatedDefault');
+    Alert.alert(t('alerts.boostActivated'), message);
+  }, [activateBoost, bonusBoosts, navigation, t]);
+
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <View style={[styles.emergencyBar, { paddingTop: insets.top }]}>
@@ -357,13 +388,6 @@ export function DiscoverScreen() {
         />
         <View style={styles.headerSpacer} />
         <View style={styles.headerActions}>
-          <RewindButton
-            variant="header"
-            visible={hasRewindablePass && !isPaused}
-            isSparkPlus={isSparkPlus}
-            onPress={rewindLastPass}
-            onUpgrade={() => navigation.getParent()?.navigate('SparkPlus')}
-          />
           <AnimatedPressable
             style={styles.hubButton}
             onPress={() => navigation.getParent()?.navigate('MapDiscover')}
@@ -439,6 +463,10 @@ export function DiscoverScreen() {
             canLike={canLike}
             onLikeBlocked={() => setShowLikeLimit(true)}
             compact
+            onRewindPress={!isPaused ? handleRewindPress : undefined}
+            onBoostPress={!isPaused ? handleBoostPress : undefined}
+            rewindEnabled={hasRewindablePass && !isPaused}
+            isSparkPlus={isSparkPlus}
           />
         )}
 

@@ -225,7 +225,7 @@ export function DropTargets({
           size={targetSize}
           iconSize={compact ? 26 : 30}
           accessibilityLabel={t('discover.rewindA11y')}
-          disabled={!rewindEnabled || !onRewindPress}
+          disabled={!onRewindPress}
           onLayout={() => undefined}
           onPress={onRewindPress}
         />

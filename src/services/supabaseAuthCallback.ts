@@ -16,6 +16,7 @@ function parseAuthParams(url: string): {
   accessToken?: string;
   refreshToken?: string;
   code?: string;
+  type?: string;
 } {
   const read = (query: string) => {
     const params = new URLSearchParams(query);
@@ -23,6 +24,7 @@ function parseAuthParams(url: string): {
       accessToken: params.get('access_token') ?? undefined,
       refreshToken: params.get('refresh_token') ?? undefined,
       code: params.get('code') ?? undefined,
+      type: params.get('type') ?? undefined,
     };
   };
 
@@ -40,6 +42,10 @@ function parseAuthParams(url: string): {
   }
 
   return {};
+}
+
+export function authFlowTypeFromUrl(url: string): string | undefined {
+  return parseAuthParams(url).type;
 }
 
 export async function applySupabaseAuthFromUrl(url: string): Promise<boolean> {

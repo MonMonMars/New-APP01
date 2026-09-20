@@ -37,6 +37,8 @@ export function getSupabaseClient(): SupabaseClient | null {
 type PreferencesExtraRow = {
   sparkSection?: SparkSection;
   appLocale?: AppLocale;
+  accountCountryCode?: string;
+  homePassportCity?: string;
   mapSearchLat?: number;
   mapSearchLng?: number;
   advancedFilters?: DiscoveryPreferences['advancedFilters'];
@@ -46,6 +48,8 @@ function buildPreferencesExtra(preferences: DiscoveryPreferences): PreferencesEx
   return {
     sparkSection: preferences.sparkSection,
     appLocale: preferences.appLocale,
+    accountCountryCode: preferences.accountCountryCode,
+    homePassportCity: preferences.homePassportCity,
     mapSearchLat: preferences.mapSearchLat,
     mapSearchLng: preferences.mapSearchLng,
     advancedFilters: preferences.advancedFilters,
@@ -68,6 +72,14 @@ function applyPreferencesExtra(
         ? row.sparkSection
         : preferences.sparkSection,
     appLocale: row.appLocale === 'zh-TW' || row.appLocale === 'en' ? row.appLocale : preferences.appLocale,
+    accountCountryCode:
+      typeof row.accountCountryCode === 'string' && row.accountCountryCode.length === 2
+        ? row.accountCountryCode.toUpperCase()
+        : preferences.accountCountryCode,
+    homePassportCity:
+      typeof row.homePassportCity === 'string' && row.homePassportCity.length > 0
+        ? row.homePassportCity
+        : preferences.homePassportCity,
     mapSearchLat: typeof row.mapSearchLat === 'number' ? row.mapSearchLat : preferences.mapSearchLat,
     mapSearchLng: typeof row.mapSearchLng === 'number' ? row.mapSearchLng : preferences.mapSearchLng,
     advancedFilters: row.advancedFilters ?? preferences.advancedFilters,
@@ -331,6 +343,14 @@ export async function loadFromSupabase(userId: string): Promise<Partial<SyncPayl
     isSparkPlus: state?.is_spark_plus ?? false,
     isPaused: state?.is_paused ?? false,
   };
+}
+
+export async function signOutSupabaseSession(): Promise<void> {
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    return;
+  }
+  await supabase.auth.signOut();
 }
 
 export async function deleteSupabaseAccount(userId: string): Promise<void> {

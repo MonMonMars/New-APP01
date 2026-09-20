@@ -57,8 +57,8 @@ type ExpandSearchMapProps = {
 
 function centersDiffer(a: GeoPoint, b: GeoPoint): boolean {
   return (
-    Math.abs(a.lat - b.lat) > 0.004 ||
-    Math.abs(a.lng - b.lng) > 0.004
+    Math.abs(a.lat - b.lat) > 0.002 ||
+    Math.abs(a.lng - b.lng) > 0.002
   );
 }
 
@@ -208,16 +208,13 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const showSearchArea = centersDiffer(mapCenter, searchCenter);
 
   const handleSearchThisArea = useCallback(() => {
-    if (!centersDiffer(mapCenter, searchCenter)) {
-      return;
-    }
     setSearchCenter(mapCenter);
     searchMapAt(mapCenter);
     setSelectedPinId(null);
     setSearchQuery('');
     setQueryMode('people');
     setDeckToast(t('mapDiscover.areaLoaded'));
-  }, [mapCenter, searchCenter, searchMapAt, t]);
+  }, [mapCenter, searchMapAt, t]);
 
   const handleLocateGps = useCallback(() => {
     setLocatingGps(true);
@@ -560,21 +557,6 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         </AnimatedPressable>
       </View>
 
-      {showSearchArea ? (
-        <View style={[styles.searchAreaWrap, { top: insets.top + spacing.sm + 152 }]}>
-          <AnimatedPressable
-            style={[styles.searchAreaButton, { backgroundColor: accent }]}
-            onPress={handleSearchThisArea}
-            accessibilityLabel={t('mapDiscover.searchThisArea')}
-          >
-            <Ionicons name="search" size={16} color={onAccentText} />
-            <Text style={[styles.searchAreaText, { color: onAccentText }]}>
-              {t('mapDiscover.searchThisArea')}
-            </Text>
-          </AnimatedPressable>
-        </View>
-      ) : null}
-
       {selectedProfile ? (
         <View
           style={[
@@ -616,6 +598,23 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
       ) : null}
 
       <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
+        <AnimatedPressable
+          style={[
+            styles.searchAreaButton,
+            styles.searchAreaBottom,
+            {
+              backgroundColor: accent,
+              opacity: showSearchArea ? 1 : 0.78,
+            },
+          ]}
+          onPress={handleSearchThisArea}
+          accessibilityLabel={t('mapDiscover.searchThisArea')}
+        >
+          <Ionicons name="search" size={16} color={onAccentText} />
+          <Text style={[styles.searchAreaText, { color: onAccentText }]}>
+            {t('mapDiscover.searchThisArea')}
+          </Text>
+        </AnimatedPressable>
         {visiblePins.length === 0 ? (
           <Text style={[styles.emptyHint, { color: chromeText, backgroundColor: chromeBg }]}>
             {queryMode === 'people' && searchQuery.trim()
@@ -836,15 +835,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
-  searchAreaWrap: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-  },
   searchAreaButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: spacing.xs,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
@@ -853,6 +847,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
+  },
+  searchAreaBottom: {
+    alignSelf: 'center',
+    minWidth: '72%',
+    marginBottom: spacing.xs,
   },
   searchAreaText: {
     fontSize: 14,

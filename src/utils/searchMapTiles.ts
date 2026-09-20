@@ -13,20 +13,18 @@ export { CITY_COORDS, DEFAULT_MAP_CENTER, mapCenterForCity, zoomForRadius };
 /** Logical tile size on screen (Slippy Map 256 world units). */
 export const TILE_PX = 256;
 
-const ESRI_STREET_SERVERS = ['services', 'server'] as const;
+const CARTO_SUBDOMAINS = ['a', 'b', 'c', 'd'] as const;
 
 /** Prefer @2x raster tiles on retina — keeps sharpness without changing layout math. */
 export function mapTilePixelRatio(): number {
   return PixelRatio.get() >= 2 ? 2 : 1;
 }
 
-/**
- * Esri World Street Map — dense road labels and POI detail (Google/Apple-style street basemap).
- * @see https://services.arcgisonline.com/arcgis/rest/services/World_Street_Map
- */
+/** Carto Voyager — clean Google/Apple-like street basemap (OSM-based). */
 export function buildMapTileUri(zoom: number, x: number, y: number): string {
-  const host = ESRI_STREET_SERVERS[Math.abs(x + y) % ESRI_STREET_SERVERS.length];
-  return `https://${host}.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/${zoom}/${y}/${x}`;
+  const retinaSuffix = mapTilePixelRatio() >= 2 ? '@2x' : '';
+  const subdomain = CARTO_SUBDOMAINS[Math.abs(x + y) % CARTO_SUBDOMAINS.length];
+  return `https://${subdomain}.basemaps.cartocdn.com/rastertiles/voyager/${zoom}/${x}/${y}${retinaSuffix}.png`;
 }
 
 export type MapTile = {

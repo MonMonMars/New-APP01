@@ -40,7 +40,6 @@ import {
   getActiveSubscriptionFromHistory,
   getManageSubscriptionsUrl,
   getPurchasesMode,
-  purchaseProduct as runPurchaseProduct,
   restorePurchases as runRestorePurchases,
 } from '../services/purchases';
 import { configureStorePurchases } from '../services/storePurchases';
@@ -68,12 +67,41 @@ import {
   type SyncPayload,
   signInWithAppleToken,
   signInWithMagicLink,
+  signOutSupabaseSession,
   syncToSupabase,
 } from '../services/supabase';
 import {
   applySupabaseAuthFromUrl,
+  authFlowTypeFromUrl,
   recoverSupabaseAuthFromLaunchUrl,
 } from '../services/supabaseAuthCallback';
+import { deleteAccountViaEdgeFunction } from '../services/accountDeletion';
+import {
+  sendPhoneLoginOtp,
+  signInWithEmailPassword,
+  signInWithGoogleOAuth,
+  signInWithQqOAuth,
+  signInWithWeChatOAuth,
+  signUpWithEmailPassword,
+  requestPasswordResetEmail,
+  updateAccountPassword,
+  verifyPhoneLoginOtp,
+} from '../services/supabaseAuthExtended';
+import {
+  DEMO_PHONE_OTP_CODE,
+  demoPhoneOtpMarkSent,
+  demoPhoneOtpVerify,
+} from '../services/demoPhoneAuth';
+import {
+  mfaEnrollTotp,
+  mfaHasVerifiedFactor,
+  mfaNeedsVerificationStep,
+  mfaUnenrollAll,
+  mfaVerifyEnrollment,
+  mfaVerifyLoginStep,
+  mfaVerifySensitiveAction,
+} from '../services/supabaseMfa';
+import * as LocalAuthentication from 'expo-local-authentication';
 import { ChatSendOutcome } from '../types/chatSend';
 import { Conversation, Match, Message } from '../types/match';
 import {
@@ -100,7 +128,19 @@ import {
 } from '../types/settings';
 import { defaultSecuritySettings, SecuritySettings } from '../types/security';
 import { BoostActivationResult, getIsoWeekKey } from '../utils/boostQuota';
-import { EntitlementGrant, PurchaseProductId, PurchaseResult, PurchaseRestoreResult } from '../types/purchases';
+import {
+  EntitlementGrant,
+  PaymentMethodKind,
+  PurchaseProductId,
+  PurchaseResult,
+  PurchaseRestoreResult,
+} from '../types/purchases';
+import { purchaseProductSecure } from '../services/paymentOrchestrator';
+import {
+  fetchUnappliedPurchaseGrants,
+  markPurchaseLedgerApplied,
+  pollStripeCheckoutFulfillment,
+} from '../services/purchaseEntitlementsSync';
 import { BOOST_DURATION_MS, SparkPlusPlan } from '../types/subscription';
 import { entitlementPatchFromGrant, isSubscriptionActive } from '../utils/applyEntitlementGrant';
 import {
@@ -133,6 +173,12 @@ import {
 import { clearVaultKey } from '../utils/secureStorage';
 import { translate } from '../i18n';
 import { resolveAppLocale } from '../types/locale';
+import type { AccountRegionContext } from '../types/accountRegion';
+import {
+  normalizePreferencesAccountMarket,
+  resolveAccountRegion,
+  withSyncedAccountCountry,
+} from '../utils/accountRegion';
 import { messagePreviewText, sentGifContext, sentPhotoContext, sentVoiceContext } from '../utils/messageFormat';
 import { disguiseWorldMeta } from '../utils/disguiseWorld';
 import { DisguiseUnlockConfirm } from '../components/disguise/DisguiseUnlockConfirm';
@@ -145,11 +191,7 @@ import {
 } from '../types/privacy';
 import { generateDemoReply, generateMatchOpener } from '../services/demoChatLlm';
 import { isDemoChatProfile } from '../utils/demoProfileChat';
-import {
-  filterProfilesInRadius,
-  relocateProfilesForMapSearch,
-  sortProfilesByDistance,
-} from '../utils/geoMap';
+import { filterProfilesInRadius, relocateProfilesForMapSearch } from '../utils/geoMap';
 import { buildUserDataExport, shareUserDataExport } from '../utils/dataExport';
 import {
   clearPersistedState,
@@ -379,7 +421,28 @@ type AppContextValue = {
   completeOnboarding: (user: UserProfile) => void;
   signInWithAppleStub: (identityToken?: string, displayName?: string) => Promise<void>;
   signInWithEmailMagicLink: (email: string) => Promise<{ ok: boolean; message: string }>;
+  signInWithGoogle: () => Promise<{ ok: boolean; message: string }>;
+  signInWithWeChat: () => Promise<{ ok: boolean; message: string }>;
+  signInWithQq: () => Promise<{ ok: boolean; message: string }>;
+  signInWithPhoneOtp: (phone: string) => Promise<{ ok: boolean; message: string }>;
+  verifyPhoneSignIn: (phone: string, code: string) => Promise<{ ok: boolean; message: string }>;
+  signUpWithPassword: (email: string, password: string) => Promise<{ ok: boolean; message: string }>;
+  signInWithPassword: (email: string, password: string) => Promise<{ ok: boolean; message: string }>;
+  requestPasswordReset: (email: string) => Promise<{ ok: boolean; message: string }>;
+  passwordRecoveryActive: boolean;
+  completePasswordReset: (password: string) => Promise<{ ok: boolean; message: string }>;
+  clearPasswordRecovery: () => void;
   refreshAuthFromCloud: () => Promise<boolean>;
+  mfaLoginRequired: boolean;
+  mfaEnabled: boolean;
+  refreshMfaLoginRequirement: () => Promise<void>;
+  refreshMfaStatus: () => Promise<void>;
+  verifyMfaLogin: (code: string) => Promise<{ ok: boolean; message: string }>;
+  startMfaEnrollment: () => Promise<{ ok: boolean; factorId?: string; secret?: string; message: string }>;
+  completeMfaEnrollment: (factorId: string, code: string) => Promise<{ ok: boolean; message: string }>;
+  disableMfa: () => Promise<{ ok: boolean; message: string }>;
+  paymentVerificationRequired: boolean;
+  accountRegion: AccountRegionContext;
   updateUser: (user: UserProfile) => void;
   applyCloudConversationUpdate: (
     conversationId: string,
@@ -429,7 +492,13 @@ type AppContextValue = {
   getPulseComments: (postId: string) => PulseComment[];
   recordReferralShare: () => number;
   activateSparkPlus: () => void;
-  purchaseProduct: (productId: PurchaseProductId) => Promise<PurchaseResult>;
+  purchaseProduct: (
+    productId: PurchaseProductId,
+    verificationCode?: string,
+    paymentMethod?: PaymentMethodKind,
+    verificationCodeConfirm?: string,
+  ) => Promise<PurchaseResult>;
+  syncPurchaseEntitlementsFromCloud: () => Promise<void>;
   restorePurchases: () => Promise<PurchaseRestoreResult>;
   openManageSubscriptions: () => void;
   activateBoost: (options?: { purchased?: boolean }) => BoostActivationResult;
@@ -473,6 +542,9 @@ type AppContextValue = {
   clearDisguiseAd: () => void;
   setPaused: (paused: boolean) => void;
   deleteAccount: () => Promise<void>;
+  signOut: () => Promise<void>;
+  /** Return to onboarding welcome to sign in again (keeps local profile data). */
+  restartCloudSignIn: () => void;
 };
 
 const defaultPersisted = createDefaultPersistedState();
@@ -517,6 +589,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [lastPassedProfileId, setLastPassedProfileId] = useState<string | null>(null);
   const [emberDailyLikesUsed, setEmberDailyLikesUsed] = useState(0);
   const [emberLastPassedProfileId, setEmberLastPassedProfileId] = useState<string | null>(null);
+  const [mfaLoginRequired, setMfaLoginRequired] = useState(false);
+  const [mfaEnabled, setMfaEnabled] = useState(false);
+  const [passwordRecoveryActive, setPasswordRecoveryActive] = useState(false);
   const [emberSparkNotesUsedToday, setEmberSparkNotesUsedToday] = useState(0);
   const [emberLastSparkNoteDate, setEmberLastSparkNoteDate] = useState<string | null>(null);
   const [isPaused, setIsPaused] = useState(false);
@@ -556,7 +631,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setUser(remote.user);
       }
       if (remote.preferences) {
-        setPreferences((prev) => ({ ...prev, ...remote.preferences }));
+        setPreferences((prev) =>
+          normalizePreferencesAccountMarket({ ...prev, ...remote.preferences }),
+        );
       }
       setPassedIds(arrayToSet(remote.passedIds ?? []));
       setLikedIds(arrayToSet(remote.likedIds ?? []));
@@ -602,7 +679,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       if (saved) {
         setUser(saved.user);
-        setPreferences(saved.preferences);
+        setPreferences(normalizePreferencesAccountMarket(saved.preferences));
         setHasOnboarded(saved.hasOnboarded);
         setIsAuthenticated(saved.isAuthenticated);
         setUserId(saved.userId);
@@ -699,6 +776,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setDateCheckIns(saved.dateCheckIns ?? []);
 
         if (isSupabaseConfigured()) {
+          if (typeof window !== 'undefined' && authFlowTypeFromUrl(window.location.href) === 'recovery') {
+            setPasswordRecoveryActive(true);
+          }
           await recoverSupabaseAuthFromLaunchUrl();
           const session = await getSupabaseSession();
           const cloudUserId = session?.userId ?? saved.userId;
@@ -748,8 +828,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     const {
       data: { subscription },
-    } =     supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setPasswordRecoveryActive(true);
+      }
       if (!session?.user) {
+        setMfaLoginRequired(false);
+        setMfaEnabled(false);
+        setPasswordRecoveryActive(false);
         return;
       }
       const cloudUserId = session.user.id;
@@ -761,6 +847,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       });
       void registerCloudPushToken(cloudUserId);
+      void mfaNeedsVerificationStep().then(setMfaLoginRequired);
+      void mfaHasVerifiedFactor().then(setMfaEnabled);
     });
     return () => subscription.unsubscribe();
   }, [applyCloudSnapshot]);
@@ -772,6 +860,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const syncSessionFromUrl = (url: string | null) => {
       if (!url) {
         return;
+      }
+      if (authFlowTypeFromUrl(url) === 'recovery') {
+        setPasswordRecoveryActive(true);
       }
       void applySupabaseAuthFromUrl(url).then(async (ok) => {
         if (!ok) {
@@ -1180,17 +1271,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       );
     }
     if (preferences.mapSearchLat != null && preferences.mapSearchLng != null) {
-      const mapCenter = {
-        lat: preferences.mapSearchLat,
-        lng: preferences.mapSearchLng,
-      };
-      filtered = relocateProfilesForMapSearch(
-        filtered,
-        mapCenter,
-        preferences.maxDistanceMiles,
-      );
-      filtered = filterProfilesInRadius(filtered, mapCenter, preferences.maxDistanceMiles);
-      filtered = sortProfilesByDistance(filtered, mapCenter);
+      const searchCenter = { lat: preferences.mapSearchLat, lng: preferences.mapSearchLng };
+      filtered = relocateProfilesForMapSearch(filtered, searchCenter, preferences.maxDistanceMiles);
+      filtered = filterProfilesInRadius(filtered, searchCenter, preferences.maxDistanceMiles);
     }
     return filtered;
   }, [
@@ -1388,8 +1471,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
       applyCloudSnapshot(remote, setToArray(superLikedIdsRef.current));
     }
     void registerCloudPushToken(session.userId);
+    void mfaNeedsVerificationStep().then(setMfaLoginRequired);
     return true;
   }, [applyCloudSnapshot]);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured()) {
+      return;
+    }
+    const onForeground = (nextState: AppStateStatus) => {
+      if (nextState === 'active') {
+        void refreshAuthFromCloud();
+      }
+    };
+    const subscription = AppState.addEventListener('change', onForeground);
+    return () => subscription.remove();
+  }, [refreshAuthFromCloud]);
 
   const signInWithAppleStub = useCallback(
     async (identityToken?: string, displayName?: string) => {
@@ -1448,6 +1545,271 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return { ok: true, message: translate(locale, 'onboarding.signedInLocally') };
   }, [preferences.appLocale]);
 
+  const refreshMfaLoginRequirement = useCallback(async () => {
+    if (!isSupabaseConfigured()) {
+      setMfaLoginRequired(false);
+      return;
+    }
+    setMfaLoginRequired(await mfaNeedsVerificationStep());
+  }, []);
+
+  const refreshMfaStatus = useCallback(async () => {
+    if (!isSupabaseConfigured()) {
+      setMfaEnabled(false);
+      return;
+    }
+    setMfaEnabled(await mfaHasVerifiedFactor());
+    await refreshMfaLoginRequirement();
+  }, [refreshMfaLoginRequirement]);
+
+  const verifyMfaLogin = useCallback(async (code: string) => {
+    const locale = resolveAppLocale(preferences.appLocale);
+    const result = await mfaVerifyLoginStep(code);
+    if (!result.ok) {
+      return {
+        ok: false,
+        message: result.error ?? translate(locale, 'auth.mfaInvalid'),
+      };
+    }
+    setMfaLoginRequired(false);
+    await refreshMfaStatus();
+    return { ok: true, message: translate(locale, 'auth.mfaVerified') };
+  }, [preferences.appLocale, refreshMfaStatus]);
+
+  const startMfaEnrollment = useCallback(async () => {
+    const locale = resolveAppLocale(preferences.appLocale);
+    const result = await mfaEnrollTotp('Spark Authenticator');
+    if (!result.ok || !result.factorId) {
+      return {
+        ok: false,
+        message: result.error ?? translate(locale, 'auth.mfaEnrollFailed'),
+      };
+    }
+    return {
+      ok: true,
+      factorId: result.factorId,
+      secret: result.secret,
+      message: translate(locale, 'auth.mfaScanHint'),
+    };
+  }, [preferences.appLocale]);
+
+  const completeMfaEnrollment = useCallback(
+    async (factorId: string, code: string) => {
+      const locale = resolveAppLocale(preferences.appLocale);
+      const result = await mfaVerifyEnrollment(factorId, code);
+      if (!result.ok) {
+        return {
+          ok: false,
+          message: result.error ?? translate(locale, 'auth.mfaInvalid'),
+        };
+      }
+      await refreshMfaStatus();
+      return { ok: true, message: translate(locale, 'auth.mfaEnabledSuccess') };
+    },
+    [preferences.appLocale, refreshMfaStatus],
+  );
+
+  const disableMfa = useCallback(async () => {
+    const locale = resolveAppLocale(preferences.appLocale);
+    const result = await mfaUnenrollAll();
+    if (!result.ok) {
+      return {
+        ok: false,
+        message: result.error ?? translate(locale, 'auth.mfaDisableFailed'),
+      };
+    }
+    await refreshMfaStatus();
+    return { ok: true, message: translate(locale, 'auth.mfaDisabledSuccess') };
+  }, [preferences.appLocale, refreshMfaStatus]);
+
+  const signInWithGoogle = useCallback(async () => {
+    const locale = resolveAppLocale(preferences.appLocale);
+    if (!isSupabaseConfigured()) {
+      if (isProductionBuild()) {
+        return { ok: false, message: translate(locale, 'onboarding.emailRequiresSupabase') };
+      }
+      setIsAuthenticated(true);
+      setUserId(`demo-google-${Date.now()}`);
+      return { ok: true, message: translate(locale, 'onboarding.signedInLocally') };
+    }
+    const result = await signInWithGoogleOAuth();
+    if (!result.ok) {
+      return { ok: false, message: result.error ?? translate(locale, 'auth.googleFailed') };
+    }
+    return { ok: true, message: translate(locale, 'auth.googleContinue') };
+  }, [preferences.appLocale]);
+
+  const signInWithWeChat = useCallback(async () => {
+    const locale = resolveAppLocale(preferences.appLocale);
+    if (!isSupabaseConfigured()) {
+      if (isProductionBuild()) {
+        return { ok: false, message: translate(locale, 'onboarding.emailRequiresSupabase') };
+      }
+      setIsAuthenticated(true);
+      setUserId(`demo-wechat-${Date.now()}`);
+      return { ok: true, message: translate(locale, 'onboarding.signedInLocally') };
+    }
+    const result = await signInWithWeChatOAuth();
+    if (!result.ok) {
+      return { ok: false, message: result.error ?? translate(locale, 'auth.wechatFailed') };
+    }
+    return { ok: true, message: translate(locale, 'auth.wechatContinue') };
+  }, [preferences.appLocale]);
+
+  const signInWithQq = useCallback(async () => {
+    const locale = resolveAppLocale(preferences.appLocale);
+    if (!isSupabaseConfigured()) {
+      if (isProductionBuild()) {
+        return { ok: false, message: translate(locale, 'onboarding.emailRequiresSupabase') };
+      }
+      setIsAuthenticated(true);
+      setUserId(`demo-qq-${Date.now()}`);
+      return { ok: true, message: translate(locale, 'onboarding.signedInLocally') };
+    }
+    const result = await signInWithQqOAuth();
+    if (!result.ok) {
+      return { ok: false, message: result.error ?? translate(locale, 'auth.qqFailed') };
+    }
+    return { ok: true, message: translate(locale, 'auth.qqContinue') };
+  }, [preferences.appLocale]);
+
+  const signInWithPhoneOtp = useCallback(
+    async (phone: string) => {
+      const locale = resolveAppLocale(preferences.appLocale);
+      if (!isSupabaseConfigured()) {
+        if (isProductionBuild()) {
+          return { ok: false, message: translate(locale, 'onboarding.emailRequiresSupabase') };
+        }
+        if (!demoPhoneOtpMarkSent(phone)) {
+          return { ok: false, message: translate(locale, 'auth.phoneOtpFailed') };
+        }
+        return {
+          ok: true,
+          message: translate(locale, 'auth.phoneOtpSentDemo', { code: DEMO_PHONE_OTP_CODE }),
+        };
+      }
+      const result = await sendPhoneLoginOtp(phone);
+      if (!result.ok) {
+        return { ok: false, message: result.error ?? translate(locale, 'auth.phoneOtpFailed') };
+      }
+      return { ok: true, message: translate(locale, 'auth.phoneOtpSent') };
+    },
+    [preferences.appLocale],
+  );
+
+  const verifyPhoneSignIn = useCallback(
+    async (phone: string, code: string) => {
+      const locale = resolveAppLocale(preferences.appLocale);
+      if (!isSupabaseConfigured()) {
+        if (isProductionBuild()) {
+          return { ok: false, message: translate(locale, 'auth.phoneRequiresCloud') };
+        }
+        if (!demoPhoneOtpVerify(phone, code)) {
+          return { ok: false, message: translate(locale, 'auth.phoneVerifyFailed') };
+        }
+        setIsAuthenticated(true);
+        setUserId(`demo-phone-${Date.now()}`);
+        return { ok: true, message: translate(locale, 'auth.phoneVerified') };
+      }
+      const result = await verifyPhoneLoginOtp(phone, code);
+      if (!result.userId) {
+        return { ok: false, message: result.error ?? translate(locale, 'auth.phoneVerifyFailed') };
+      }
+      setUserId(result.userId);
+      setIsAuthenticated(true);
+      await refreshMfaLoginRequirement();
+      return { ok: true, message: translate(locale, 'auth.phoneVerified') };
+    },
+    [preferences.appLocale, refreshMfaLoginRequirement],
+  );
+
+  const signUpWithPassword = useCallback(
+    async (email: string, password: string) => {
+      const locale = resolveAppLocale(preferences.appLocale);
+      if (!isSupabaseConfigured()) {
+        return { ok: false, message: translate(locale, 'onboarding.emailRequiresSupabase') };
+      }
+      if (password.length < 8) {
+        return { ok: false, message: translate(locale, 'auth.passwordTooShort') };
+      }
+      const result = await signUpWithEmailPassword(email, password);
+      if (!result.ok) {
+        return { ok: false, message: result.error ?? translate(locale, 'auth.signUpFailed') };
+      }
+      if (result.needsEmailConfirm) {
+        return { ok: true, message: translate(locale, 'auth.confirmEmailSent') };
+      }
+      const session = await getSupabaseSession();
+      if (session?.userId) {
+        setUserId(session.userId);
+        setIsAuthenticated(true);
+      }
+      return { ok: true, message: translate(locale, 'auth.signUpSuccess') };
+    },
+    [preferences.appLocale],
+  );
+
+  const signInWithPassword = useCallback(
+    async (email: string, password: string) => {
+      const locale = resolveAppLocale(preferences.appLocale);
+      if (!isSupabaseConfigured()) {
+        return { ok: false, message: translate(locale, 'onboarding.emailRequiresSupabase') };
+      }
+      const result = await signInWithEmailPassword(email, password);
+      if (!result.userId) {
+        return { ok: false, message: result.error ?? translate(locale, 'auth.signInFailed') };
+      }
+      setUserId(result.userId);
+      setIsAuthenticated(true);
+      await refreshMfaLoginRequirement();
+      return { ok: true, message: translate(locale, 'auth.signInSuccess') };
+    },
+    [preferences.appLocale, refreshMfaLoginRequirement],
+  );
+
+  const requestPasswordReset = useCallback(
+    async (email: string) => {
+      const locale = resolveAppLocale(preferences.appLocale);
+      if (!isSupabaseConfigured()) {
+        return { ok: false, message: translate(locale, 'onboarding.emailRequiresSupabase') };
+      }
+      const trimmed = email.trim().toLowerCase();
+      if (!trimmed.includes('@')) {
+        return { ok: false, message: translate(locale, 'onboarding.emailInvalid') };
+      }
+      const result = await requestPasswordResetEmail(trimmed);
+      if (!result.ok) {
+        return { ok: false, message: result.error ?? translate(locale, 'auth.passwordResetFailed') };
+      }
+      return { ok: true, message: translate(locale, 'auth.passwordResetEmailSent') };
+    },
+    [preferences.appLocale],
+  );
+
+  const completePasswordReset = useCallback(
+    async (password: string) => {
+      const locale = resolveAppLocale(preferences.appLocale);
+      if (password.length < 8) {
+        return { ok: false, message: translate(locale, 'auth.passwordTooShort') };
+      }
+      const result = await updateAccountPassword(password);
+      if (!result.ok) {
+        return { ok: false, message: result.error ?? translate(locale, 'auth.passwordResetFailed') };
+      }
+      await refreshMfaLoginRequirement();
+      return { ok: true, message: translate(locale, 'auth.passwordResetSuccessTitle') };
+    },
+    [preferences.appLocale, refreshMfaLoginRequirement],
+  );
+
+  const clearPasswordRecovery = useCallback(() => {
+    setPasswordRecoveryActive(false);
+  }, []);
+
+  const paymentVerificationRequired = isSupabaseConfigured();
+
+  const accountRegion = useMemo(() => resolveAccountRegion(preferences), [preferences]);
+
   const completeOnboarding = useCallback(
     (nextUser: UserProfile) => {
       setUser(nextUser);
@@ -1461,13 +1823,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
             activeUserId = session.userId;
             setUserId(session.userId);
             setIsAuthenticated(true);
-          } else if (isSupabaseConfigured()) {
-            activeUserId = `user-${Date.now()}`;
+          } else if (!isSupabaseConfigured() && !isProductionBuild()) {
+            activeUserId = `demo-${Date.now()}`;
             setUserId(activeUserId);
+            setIsAuthenticated(true);
           }
         }
         if (activeUserId && isSupabaseConfigured()) {
-          await ensureProfileRow(activeUserId, nextUser);
+          const session = await getSupabaseSession();
+          if (session?.userId) {
+            await ensureProfileRow(session.userId, nextUser);
+          }
         }
       })();
     },
@@ -1519,17 +1885,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updatePreferences = useCallback((next: DiscoveryPreferences) => {
+    const synced = withSyncedAccountCountry(next);
     setPreferences((prev) => {
-      const travelChanged = prev.travelMode !== next.travelMode;
-      const passportChanged = prev.passportCity !== next.passportCity;
+      const travelChanged = prev.travelMode !== synced.travelMode;
+      const passportChanged = prev.passportCity !== synced.passportCity;
       if (travelChanged || passportChanged) {
         return {
-          ...next,
+          ...synced,
           mapSearchLat: undefined,
           mapSearchLng: undefined,
         };
       }
-      return next;
+      return synced;
     });
     setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
     setPriorityProfileId(null);
@@ -1557,14 +1924,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
   }, []);
 
-  const searchMorePeople = useCallback(() => {
-    setDiscoverUnlockedCount((count) => count + DISCOVER_BATCH_SIZE);
-  }, []);
-
   const resetDiscoverDeckForNewPool = useCallback(() => {
     setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
     setPriorityProfileId(null);
     setRewindKey((key) => key + 1);
+  }, []);
+
+  const searchMorePeople = useCallback(() => {
+    setDiscoverUnlockedCount((count) => count + DISCOVER_BATCH_SIZE);
   }, []);
 
   const expandSearchRadius = useCallback(
@@ -2582,15 +2949,110 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIsSparkPlus(true);
   }, []);
 
+  const syncPurchaseEntitlementsFromCloud = useCallback(async () => {
+    if (!userId || !isSupabaseConfigured()) {
+      return;
+    }
+    const pending = await fetchUnappliedPurchaseGrants(userId);
+    if (pending.length === 0) {
+      return;
+    }
+    for (const entry of pending) {
+      applyEntitlementGrant(entry.grant);
+    }
+    await markPurchaseLedgerApplied(pending.map((entry) => entry.ledgerId));
+  }, [applyEntitlementGrant, userId]);
+
+  useEffect(() => {
+    if (!isHydrated || !userId || !isSupabaseConfigured()) {
+      return;
+    }
+    void syncPurchaseEntitlementsFromCloud();
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const params = new URLSearchParams(window.location.search);
+    const checkoutOutcome = params.get('checkout');
+    if (checkoutOutcome === 'cancel') {
+      const locale = resolveAppLocale(preferences.appLocale, preferences.accountCountryCode);
+      window.alert(
+        `${translate(locale, 'payments.cancelled')}\n${translate(locale, 'payments.checkoutCancelledBody')}`,
+      );
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return;
+    }
+    if (checkoutOutcome !== 'success') {
+      return;
+    }
+    const sessionId = params.get('session_id');
+    if (!sessionId) {
+      void syncPurchaseEntitlementsFromCloud().then(() => {
+        const locale = resolveAppLocale(preferences.appLocale, preferences.accountCountryCode);
+        window.alert(
+          `${translate(locale, 'payments.purchaseSuccess')}\n${translate(locale, 'payments.checkoutSuccessSyncBody')}`,
+        );
+      });
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return;
+    }
+    void pollStripeCheckoutFulfillment(userId, sessionId).then((grant) => {
+      const locale = resolveAppLocale(preferences.appLocale, preferences.accountCountryCode);
+      if (grant) {
+        applyEntitlementGrant(grant);
+        window.alert(
+          `${translate(locale, 'payments.purchaseSuccess')}\n${translate(locale, 'payments.subscriptionActivated')}`,
+        );
+        return;
+      }
+      void syncPurchaseEntitlementsFromCloud().then(() => {
+        window.alert(
+          `${translate(locale, 'payments.purchaseSuccess')}\n${translate(locale, 'payments.checkoutSuccessSyncBody')}`,
+        );
+      });
+    });
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }, [
+    applyEntitlementGrant,
+    isHydrated,
+    preferences.accountCountryCode,
+    preferences.appLocale,
+    syncPurchaseEntitlementsFromCloud,
+    userId,
+  ]);
+
   const purchaseProduct = useCallback(
-    async (productId: PurchaseProductId): Promise<PurchaseResult> => {
-      const result = await runPurchaseProduct(productId);
+    async (
+      productId: PurchaseProductId,
+      verificationCode?: string,
+      paymentMethod?: PaymentMethodKind,
+      verificationCodeConfirm?: string,
+    ): Promise<PurchaseResult> => {
+      void logSecurityEvent(userId, 'purchase_attempt', { productId });
+
+      const result = await purchaseProductSecure({
+        productId,
+        userId,
+        verificationCode,
+        verificationCodeConfirm,
+        paymentMethod,
+        requireCloudStepUp: isSupabaseConfigured(),
+        accountRegion,
+      });
+
       if (result.ok) {
         applyEntitlementGrant(result.grant);
+        void logSecurityEvent(userId, 'purchase_success', { productId });
+        return result;
       }
+
+      if (result.code !== 'checkout_redirect' && result.code !== 'cancelled') {
+        void logSecurityEvent(userId, 'purchase_failed', { productId, code: result.code });
+      }
+
       return result;
     },
-    [applyEntitlementGrant],
+    [accountRegion, applyEntitlementGrant, userId],
   );
 
   const restorePurchases = useCallback(async () => {
@@ -2828,9 +3290,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIsPaused(paused);
   }, []);
 
+  const signOut = useCallback(async () => {
+    if (isSupabaseConfigured()) {
+      await signOutSupabaseSession();
+    }
+    setIsAuthenticated(false);
+    setUserId(null);
+    setMfaLoginRequired(false);
+  }, []);
+
+  const restartCloudSignIn = useCallback(() => {
+    setHasOnboarded(false);
+    setIsAuthenticated(false);
+    setUserId(null);
+    setMfaLoginRequired(false);
+  }, []);
+
   const deleteAccount = useCallback(async () => {
     if (userId && isSupabaseConfigured()) {
-      await deleteSupabaseAccount(userId);
+      const remote = await deleteAccountViaEdgeFunction();
+      if (!remote.ok) {
+        await deleteSupabaseAccount(userId);
+      }
     }
     await clearPersistedState();
     await clearVaultKey();
@@ -2947,7 +3428,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
       completeOnboarding,
       signInWithAppleStub,
       signInWithEmailMagicLink,
+      signInWithGoogle,
+      signInWithWeChat,
+      signInWithQq,
+      signInWithPhoneOtp,
+      verifyPhoneSignIn,
+      signUpWithPassword,
+      signInWithPassword,
+      requestPasswordReset,
+      passwordRecoveryActive,
+      completePasswordReset,
+      clearPasswordRecovery,
       refreshAuthFromCloud,
+      mfaLoginRequired,
+      mfaEnabled,
+      refreshMfaLoginRequirement,
+      refreshMfaStatus,
+      verifyMfaLogin,
+      startMfaEnrollment,
+      completeMfaEnrollment,
+      disableMfa,
+      paymentVerificationRequired,
+      accountRegion,
       updateUser,
       applyCloudConversationUpdate,
       updatePreferences,
@@ -2982,6 +3484,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       recordReferralShare,
       activateSparkPlus,
       purchaseProduct,
+      syncPurchaseEntitlementsFromCloud,
       restorePurchases,
       openManageSubscriptions,
       activateBoost,
@@ -3013,6 +3516,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       clearDisguiseAd,
       setPaused,
       deleteAccount,
+      signOut,
+      restartCloudSignIn,
     }),
     [
       hasOnboarded,
@@ -3083,7 +3588,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
       completeOnboarding,
       signInWithAppleStub,
       signInWithEmailMagicLink,
+      signInWithGoogle,
+      signInWithWeChat,
+      signInWithQq,
+      signInWithPhoneOtp,
+      verifyPhoneSignIn,
+      signUpWithPassword,
+      signInWithPassword,
+      requestPasswordReset,
+      passwordRecoveryActive,
+      completePasswordReset,
+      clearPasswordRecovery,
       refreshAuthFromCloud,
+      mfaLoginRequired,
+      mfaEnabled,
+      refreshMfaLoginRequirement,
+      refreshMfaStatus,
+      verifyMfaLogin,
+      startMfaEnrollment,
+      completeMfaEnrollment,
+      disableMfa,
+      paymentVerificationRequired,
+      accountRegion,
       updateUser,
       applyCloudConversationUpdate,
       updatePreferences,
@@ -3118,6 +3644,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       recordReferralShare,
       activateSparkPlus,
       purchaseProduct,
+      syncPurchaseEntitlementsFromCloud,
       restorePurchases,
       openManageSubscriptions,
       activateBoost,
@@ -3148,6 +3675,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       generateDisguiseAd,
       clearDisguiseAd,
       setPaused,
+      signOut,
+      restartCloudSignIn,
       deleteAccount,
     ],
   );

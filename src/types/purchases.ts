@@ -9,7 +9,15 @@ export type PurchaseProductId =
   | 'spark_notes_1'
   | 'spark_notes_5';
 
-export type PurchaseProvider = 'demo' | 'app_store' | 'play_store';
+export type PurchaseProvider = 'demo' | 'app_store' | 'play_store' | 'stripe';
+
+/** How the user pays — platform default picks the safest rail for the OS. */
+export type PaymentMethodKind =
+  | 'platform_default'
+  | 'native_store'
+  | 'stripe_checkout';
+
+export type PaymentRail = 'demo' | 'native_store' | 'stripe_checkout';
 
 export type PurchaseErrorCode =
   | 'cancelled'
@@ -17,6 +25,11 @@ export type PurchaseErrorCode =
   | 'store_unavailable'
   | 'product_unavailable'
   | 'payment_failed'
+  | 'verification_required'
+  | 'verification_failed'
+  | 'approval_failed'
+  | 'rate_limited'
+  | 'checkout_redirect'
   | 'already_owned'
   | 'unknown';
 
@@ -51,6 +64,8 @@ export type PurchaseFailure = {
   ok: false;
   code: PurchaseErrorCode;
   message: string;
+  /** Stripe Checkout — open this URL in the browser (web) or in-app browser. */
+  checkoutUrl?: string;
 };
 
 export type PurchaseResult = PurchaseSuccess | PurchaseFailure;

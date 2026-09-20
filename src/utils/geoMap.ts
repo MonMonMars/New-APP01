@@ -1,7 +1,7 @@
 import { emberHidesCity } from '../types/profile';
 import type { Profile } from '../types/profile';
 import { geocodeCity } from './neighborhoodCoords';
-import { DEFAULT_MAP_CENTER } from './searchMapTiles';
+import { CITY_COORDS, DEFAULT_MAP_CENTER } from './searchMapTiles';
 
 const EARTH_RADIUS_MILES = 3958.8;
 
@@ -47,15 +47,38 @@ export function offsetLatLng(
   };
 }
 
-/** Stable lat/lng for a demo profile from city + distance seed. */
+/** Passport + extra cities so demo accounts spread across continents on the map. */
+export const WORLD_DEMO_ANCHORS: GeoPoint[] = [
+  ...Object.values(CITY_COORDS),
+  { lat: 52.52, lng: 13.405 },
+  { lat: 55.755, lng: 37.617 },
+  { lat: 28.613, lng: 77.209 },
+  { lat: -23.55, lng: -46.633 },
+  { lat: 19.432, lng: -99.133 },
+  { lat: 25.204, lng: 55.271 },
+  { lat: 1.352, lng: 103.819 },
+  { lat: -33.924, lng: 18.424 },
+  { lat: 43.653, lng: -79.383 },
+];
+
+function isNearNycMetro(point: GeoPoint): boolean {
+  return haversineDistanceMiles(point, DEFAULT_MAP_CENTER) < 120;
+}
+
+/** Stable lat/lng for a demo profile — global anchors for NYC-metro seeds, geocode elsewhere. */
 export function profileGeoLocation(
   profile: Pick<Profile, 'city' | 'distanceMiles'>,
   seed: number,
 ): GeoPoint {
-  const base = geocodeCity(profile.city) ?? DEFAULT_MAP_CENTER;
+  const geocoded = geocodeCity(profile.city);
+  const base =
+    geocoded && !isNearNycMetro(geocoded)
+      ? geocoded
+      : WORLD_DEMO_ANCHORS[seed % WORLD_DEMO_ANCHORS.length];
   const bearing = (seed * 137.508) % 360;
-  const jitterMiles = Math.max(0.15, profile.distanceMiles * (0.08 + (seed % 17) / 100));
-  return offsetLatLng(base, jitterMiles, bearing);
+  const jitterMiles = Math.max(0.35, profile.distanceMiles * (0.12 + (seed % 17) / 90));
+  const spreadCap = base === geocoded ? 18 : 28;
+  return offsetLatLng(base, Math.min(jitterMiles, spreadCap), bearing);
 }
 
 export function profileHasGeo(profile: Profile): profile is Profile & { latitude: number; longitude: number } {

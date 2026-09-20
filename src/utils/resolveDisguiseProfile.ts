@@ -1,4 +1,5 @@
 import { NewsReporter } from '../data/disguiseFeed';
+import { reporterDemoProfileId } from '../data/disguiseReporterProfileLinks';
 import { getAllProfiles, getIncomingLikeProfilesForSection, getProfileById } from '../data/profiles';
 import { matchesSparkSection, resolveSparkSection, SparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
@@ -58,6 +59,16 @@ export function resolveDisguiseProfileId(reporterId: string): string | undefined
   const disguised = reporterId.match(/^disguised-(.+)$/);
   if (disguised) {
     return disguised[1];
+  }
+
+  const explicitReporter = reporterDemoProfileId(reporterId);
+  if (explicitReporter) {
+    return explicitReporter;
+  }
+
+  const liveReporter = reporterId.match(/^live-rep-(.+)$/);
+  if (liveReporter) {
+    return liveReporter[1];
   }
 
   return undefined;

@@ -6,25 +6,38 @@ import { spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 
 type PulseFeedRefreshFooterProps = {
-  refreshing: boolean;
+  pullRefreshing?: boolean;
+  loadingMore?: boolean;
+  /** @deprecated use pullRefreshing + loadingMore */
+  refreshing?: boolean;
   justUpdated?: boolean;
 };
 
-export function PulseFeedRefreshFooter({ refreshing, justUpdated = false }: PulseFeedRefreshFooterProps) {
+export function PulseFeedRefreshFooter({
+  pullRefreshing = false,
+  loadingMore = false,
+  refreshing = false,
+  justUpdated = false,
+}: PulseFeedRefreshFooterProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const accent = useDisguiseWorld().accent;
 
+  const isPull = pullRefreshing || (refreshing && !loadingMore);
+  const isMore = loadingMore;
+
   let message = t('disguiseFeed.scrollRefreshHint');
-  if (refreshing) {
-    message = t('disguiseFeed.refreshingFeed');
+  if (isPull) {
+    message = t('disguiseFeed.pullRefreshingFeed');
+  } else if (isMore) {
+    message = t('disguiseFeed.loadingMoreFeed');
   } else if (justUpdated) {
     message = t('disguiseFeed.feedUpdated');
   }
 
   return (
     <View style={styles.footer}>
-      {refreshing ? <ActivityIndicator color={accent} /> : null}
+      {isPull || isMore ? <ActivityIndicator color={accent} /> : null}
       <Text style={[styles.text, { color: colors.textMuted }]}>{message}</Text>
     </View>
   );

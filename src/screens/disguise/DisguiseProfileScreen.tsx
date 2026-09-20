@@ -33,7 +33,11 @@ import { PulseFeedItemViewer } from '../../components/disguise/PulseFeedItemView
 import { PulseListPickerSheet } from '../../components/disguise/PulseListPickerSheet';
 import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefreshFooter';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
-import { usePulseFeedRefreshGeneration, usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
+import {
+  usePulseFeedLoadMorePages,
+  usePulseFeedRefreshGeneration,
+  usePulseScrollRefresh,
+} from '../../hooks/usePulseFeedRefresh';
 
 type DetailSheetKey = 'saved' | 'history' | 'settings' | 'help' | null;
 
@@ -72,12 +76,23 @@ export function DisguiseProfileScreen() {
     generatedAt: new Date().toISOString(),
   };
   const refreshGeneration = usePulseFeedRefreshGeneration();
-  const { refreshing, justUpdated, scrollViewProps } = usePulseScrollRefresh();
+  const loadMorePages = usePulseFeedLoadMorePages();
+  const { pullRefreshing, loadingMore, justUpdated, scrollViewProps } = usePulseScrollRefresh();
   const profileFeedItem = buildDisguisedProfileFeedItem(user, profileCreative);
-  const recentPosts = useMemo(
-    () => buildDisguisedProfileFeedItems(preferences.sparkSection, refreshGeneration),
-    [preferences.sparkSection, refreshGeneration],
-  );
+  const recentPosts = useMemo(() => {
+    let posts = buildDisguisedProfileFeedItems(preferences.sparkSection, refreshGeneration);
+    for (let page = 1; page <= loadMorePages; page += 1) {
+      const batch = buildDisguisedProfileFeedItems(
+        preferences.sparkSection,
+        refreshGeneration + page,
+      ).map((item) => ({
+        ...item,
+        id: `${item.id}::p${page}`,
+      }));
+      posts = [...posts, ...batch];
+    }
+    return posts;
+  }, [loadMorePages, preferences.sparkSection, refreshGeneration]);
   const feedItems = useMemo(
     () => buildDisguiseFeed(user, disguiseAdCreative, preferences.sparkSection),
     [user, disguiseAdCreative, preferences.sparkSection],
@@ -298,7 +313,11 @@ export function DisguiseProfileScreen() {
           <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
         </AnimatedPressable>
 
-        <PulseFeedRefreshFooter refreshing={refreshing} justUpdated={justUpdated} />
+        <PulseFeedRefreshFooter
+          pullRefreshing={pullRefreshing}
+          loadingMore={loadingMore}
+          justUpdated={justUpdated}
+        />
       </ScrollView>
 
       <DisguiseAdGeneratorSheet visible={showGenerator} onClose={() => setShowGenerator(false)} />

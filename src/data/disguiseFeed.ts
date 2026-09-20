@@ -60,6 +60,8 @@ export type SocialPost = {
   likes: number;
   comments: number;
   timeAgo: string;
+  /** Linked Spark/Ember profile for mini-window actions. */
+  datingProfileId?: string;
 };
 
 export type DisguisedProfileVariant = 'news' | 'ad' | 'social';
@@ -300,6 +302,7 @@ export type DisguiseAlertPerson = {
   avatarUrl: string;
   overlayVariant?: 'news' | 'ad';
   overlayText?: string;
+  datingProfileId?: string;
 };
 
 export type DisguiseAlert = {

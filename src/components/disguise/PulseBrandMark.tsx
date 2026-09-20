@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { ImageStyle, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 
 import { BrandMark } from '../brand/BrandMark';
@@ -18,12 +19,15 @@ export function PulseBrandMark({ size = 'md', muted = false, style }: PulseBrand
 
 type PulseHeaderLogoProps = {
   size?: 'sm' | 'md';
+  /** Chevron cue matching Spark/Ember world picker (tap header to leave disguise). */
+  showChevron?: boolean;
 };
 
 /** Top-left Pulse masthead — blue P logomark + white “Pulse” wordmark. */
-export function PulseHeaderLogo({ size = 'sm' }: PulseHeaderLogoProps) {
+export function PulseHeaderLogo({ size = 'sm', showChevron = true }: PulseHeaderLogoProps) {
   const markSize = size === 'sm' ? 'sm' : 'md';
   const wordSize = size === 'sm' ? 22 : 26;
+  const chevronSize = size === 'sm' ? 13 : 14;
 
   return (
     <View style={styles.headerLogoRow} pointerEvents="none">
@@ -41,6 +45,15 @@ export function PulseHeaderLogo({ size = 'sm' }: PulseHeaderLogoProps) {
       >
         Pulse
       </Text>
+      {showChevron ? (
+        <Ionicons
+          name="chevron-down"
+          size={chevronSize}
+          color="rgba(255, 255, 255, 0.65)"
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+        />
+      ) : null}
     </View>
   );
 }

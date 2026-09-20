@@ -20,6 +20,12 @@ export function translatePurchaseError(
       return translate(locale, 'payments.verificationRequired');
     case 'verification_failed':
       return translate(locale, 'payments.verificationFailed');
+    case 'approval_failed':
+      return translate(locale, 'payments.approvalFailed');
+    case 'rate_limited':
+      return translate(locale, 'payments.rateLimited');
+    case 'checkout_redirect':
+      return translate(locale, 'payments.checkoutRedirect');
     case 'network':
     case 'already_owned':
     case 'unknown':

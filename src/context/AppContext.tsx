@@ -40,7 +40,6 @@ import {
   getActiveSubscriptionFromHistory,
   getManageSubscriptionsUrl,
   getPurchasesMode,
-  purchaseProduct as runPurchaseProduct,
   restorePurchases as runRestorePurchases,
 } from '../services/purchases';
 import { configureStorePurchases } from '../services/storePurchases';
@@ -121,7 +120,19 @@ import {
 } from '../types/settings';
 import { defaultSecuritySettings, SecuritySettings } from '../types/security';
 import { BoostActivationResult, getIsoWeekKey } from '../utils/boostQuota';
-import { EntitlementGrant, PurchaseProductId, PurchaseResult, PurchaseRestoreResult } from '../types/purchases';
+import {
+  EntitlementGrant,
+  PaymentMethodKind,
+  PurchaseProductId,
+  PurchaseResult,
+  PurchaseRestoreResult,
+} from '../types/purchases';
+import { purchaseProductSecure } from '../services/paymentOrchestrator';
+import {
+  fetchUnappliedPurchaseGrants,
+  markPurchaseLedgerApplied,
+  pollStripeCheckoutFulfillment,
+} from '../services/purchaseEntitlementsSync';
 import { BOOST_DURATION_MS, SparkPlusPlan } from '../types/subscription';
 import { entitlementPatchFromGrant, isSubscriptionActive } from '../utils/applyEntitlementGrant';
 import {
@@ -464,7 +475,12 @@ type AppContextValue = {
   getPulseComments: (postId: string) => PulseComment[];
   recordReferralShare: () => number;
   activateSparkPlus: () => void;
-  purchaseProduct: (productId: PurchaseProductId, verificationCode?: string) => Promise<PurchaseResult>;
+  purchaseProduct: (
+    productId: PurchaseProductId,
+    verificationCode?: string,
+    paymentMethod?: PaymentMethodKind,
+  ) => Promise<PurchaseResult>;
+  syncPurchaseEntitlementsFromCloud: () => Promise<void>;
   restorePurchases: () => Promise<PurchaseRestoreResult>;
   openManageSubscriptions: () => void;
   activateBoost: (options?: { purchased?: boolean }) => BoostActivationResult;
@@ -2838,52 +2854,74 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIsSparkPlus(true);
   }, []);
 
-  const purchaseProduct = useCallback(
-    async (productId: PurchaseProductId, verificationCode?: string): Promise<PurchaseResult> => {
-      if (isSupabaseConfigured()) {
-        const hasMfa = await mfaHasVerifiedFactor();
-        if (hasMfa) {
-          if (!verificationCode?.trim()) {
-            return {
-              ok: false,
-              code: 'verification_required',
-              message: 'Enter your authenticator code to approve this purchase.',
-            };
-          }
-          const verified = await mfaVerifySensitiveAction(verificationCode);
-          if (!verified.ok) {
-            return {
-              ok: false,
-              code: 'verification_failed',
-              message: verified.error ?? 'Invalid verification code.',
-            };
-          }
-        } else {
-          const hasHardware = await LocalAuthentication.hasHardwareAsync();
-          const enrolled = await LocalAuthentication.isEnrolledAsync();
-          if (hasHardware && enrolled) {
-            const bio = await LocalAuthentication.authenticateAsync({
-              promptMessage: 'Confirm purchase',
-              cancelLabel: 'Cancel',
-            });
-            if (!bio.success) {
-              return {
-                ok: false,
-                code: 'verification_failed',
-                message: 'Purchase confirmation was cancelled.',
-              };
-            }
-          }
-        }
-      }
+  const syncPurchaseEntitlementsFromCloud = useCallback(async () => {
+    if (!userId || !isSupabaseConfigured()) {
+      return;
+    }
+    const pending = await fetchUnappliedPurchaseGrants(userId);
+    if (pending.length === 0) {
+      return;
+    }
+    for (const entry of pending) {
+      applyEntitlementGrant(entry.grant);
+    }
+    await markPurchaseLedgerApplied(pending.map((entry) => entry.ledgerId));
+  }, [applyEntitlementGrant, userId]);
 
-      const result = await runPurchaseProduct(productId);
+  useEffect(() => {
+    if (!isHydrated || !userId || !isSupabaseConfigured()) {
+      return;
+    }
+    void syncPurchaseEntitlementsFromCloud();
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') !== 'success') {
+      return;
+    }
+    const sessionId = params.get('session_id');
+    if (!sessionId) {
+      return;
+    }
+    void pollStripeCheckoutFulfillment(userId, sessionId).then((grant) => {
+      if (grant) {
+        applyEntitlementGrant(grant);
+      }
+    });
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }, [applyEntitlementGrant, isHydrated, syncPurchaseEntitlementsFromCloud, userId]);
+
+  const purchaseProduct = useCallback(
+    async (
+      productId: PurchaseProductId,
+      verificationCode?: string,
+      paymentMethod?: PaymentMethodKind,
+    ): Promise<PurchaseResult> => {
+      void logSecurityEvent(userId, 'purchase_attempt', { productId });
+
+      const result = await purchaseProductSecure({
+        productId,
+        userId,
+        verificationCode,
+        paymentMethod,
+        requireCloudStepUp: isSupabaseConfigured(),
+      });
+
       if (result.ok) {
         applyEntitlementGrant(result.grant);
+        void logSecurityEvent(userId, 'purchase_success', { productId });
+        return result;
       }
+
+      if (result.code !== 'checkout_redirect' && result.code !== 'cancelled') {
+        void logSecurityEvent(userId, 'purchase_failed', { productId, code: result.code });
+      }
+
       return result;
     },
-    [applyEntitlementGrant],
+    [applyEntitlementGrant, userId],
   );
 
   const restorePurchases = useCallback(async () => {
@@ -3296,6 +3334,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       recordReferralShare,
       activateSparkPlus,
       purchaseProduct,
+      syncPurchaseEntitlementsFromCloud,
       restorePurchases,
       openManageSubscriptions,
       activateBoost,
@@ -3450,6 +3489,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       recordReferralShare,
       activateSparkPlus,
       purchaseProduct,
+      syncPurchaseEntitlementsFromCloud,
       restorePurchases,
       openManageSubscriptions,
       activateBoost,

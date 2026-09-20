@@ -26,6 +26,10 @@ npx expo prebuild
 
 5. Purchase and restore flow lives in `src/services/revenueCatBridge.native.ts` (configured on sign-in via `configureStorePurchases`). Web and builds without the SDK show guidance in `PurchasesModeNotice`.
 
+## Web payments (Stripe)
+
+See [`PAYMENTS_SECURITY.md`](./PAYMENTS_SECURITY.md). Set `EXPO_PUBLIC_WEB_PAYMENTS_ENABLED=true` and deploy Stripe Edge Functions for card + wallet checkout on web.
+
 ## Product catalog
 
 | In-app id | Store SKU (example) |

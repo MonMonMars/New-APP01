@@ -48,7 +48,7 @@ export const zhTw = {
     ruleAge: '限 18 歲以上 — 一人僅能擁有一個帳號。',
     locationTitle: '選擇你的地區',
     locationSubtitle:
-      '設定你想認識對象的區域。拖動地圖、搜尋城市或使用 GPS — 其他人不會看到你的精確位置。',
+      '先選歸屬地區 — 決定登入方式（例如中國用微信）與付款。可拖動地圖或搜尋；他人不會看到你的精確位置。',
     mapDragHint: '拖動並縮放地圖，圖釘代表你的探索範圍中心。',
     searchPlacePlaceholder: '搜尋城市或街區',
     clearPlaceSearch: '清除搜尋',
@@ -184,6 +184,13 @@ export const zhTw = {
     appearance: '外觀',
     language: '語言',
     languageHint: '應用程式顯示語言',
+    accountHomeMarket: '帳號歸屬地區',
+    accountHomeMarketValue: '{city} · {code} · {currency}',
+    accountHomeMarketUnset: '設定歸屬地區以決定登入與付款方式',
+    accountHomeMarketTitle: '歸屬地區',
+    accountHomeMarketHint:
+      '決定微信/QQ 或 Google、手機優先分頁與結帳幣別。旅行模式不會改變此設定。',
+    accountHomeMarketCurrent: '目前帳號地區：{code}',
     lightMode: '淺色模式',
     darkMode: '深色模式',
     systemMode: '跟隨系統',
@@ -949,6 +956,8 @@ export const zhTw = {
     discoverySettingsTitle: '探索設定',
     discoveryShowMe: '顯示對象',
     discoveryPassport: 'Passport / 旅行模式',
+    discoveryPassportTravelHint:
+      '旅行城市只影響探索對象。若要改登入與付款歸屬，請到個人檔案 → 帳號歸屬地區。',
     discoveryChangeLocation: '變更位置',
     discoveryDistance: '距離',
     discoveryMaxDistance: '最大距離',

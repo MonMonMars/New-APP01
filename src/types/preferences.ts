@@ -106,6 +106,8 @@ export type DiscoveryPreferences = {
   maxAge: number;
   showMe: ShowMePreference;
   passportCity?: string;
+  /** Home market city from onboarding — auth & billing follow this, not travel passport */
+  homePassportCity?: string;
   travelMode?: boolean;
   discoverFilters?: DiscoverFilter[];
   advancedFilters?: AdvancedDiscoverFilters;

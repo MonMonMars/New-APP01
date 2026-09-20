@@ -209,9 +209,19 @@ function normalizeCountryCode(raw: string | undefined | null): AccountCountryCod
   return null;
 }
 
+function passportCityForAccountMarket(preferences: DiscoveryPreferences): string | undefined {
+  if (preferences.homePassportCity) {
+    return preferences.homePassportCity;
+  }
+  if (preferences.travelMode) {
+    return undefined;
+  }
+  return preferences.passportCity;
+}
+
 export function resolveAccountRegion(preferences: DiscoveryPreferences): AccountRegionContext {
   const fromPref = normalizeCountryCode(preferences.accountCountryCode);
-  const fromCity = countryCodeFromPassportCity(preferences.passportCity);
+  const fromCity = countryCodeFromPassportCity(passportCityForAccountMarket(preferences));
   const fromLocale = preferences.appLocale === 'zh-TW' ? 'TW' : null;
   const fromTz = inferCountryFromTimezone();
 
@@ -265,9 +275,9 @@ export function regionalDefaultAuthTab(region: AccountRegionContext): RegionalAu
   return regionalAuthTabOrder(region)[0];
 }
 
-/** Keep `accountCountryCode` aligned with passport city (home market for auth & billing). */
+/** Keep `accountCountryCode` aligned with home passport (not travel city). */
 export function withSyncedAccountCountry(preferences: DiscoveryPreferences): DiscoveryPreferences {
-  const inferred = countryCodeFromPassportCity(preferences.passportCity);
+  const inferred = countryCodeFromPassportCity(passportCityForAccountMarket(preferences));
   if (!inferred) {
     return preferences;
   }
@@ -275,4 +285,27 @@ export function withSyncedAccountCountry(preferences: DiscoveryPreferences): Dis
     return preferences;
   }
   return { ...preferences, accountCountryCode: inferred };
+}
+
+export function withHomePassportCity(
+  preferences: DiscoveryPreferences,
+  homePassportCity: string,
+): DiscoveryPreferences {
+  const inferred = countryCodeFromPassportCity(homePassportCity);
+  return withSyncedAccountCountry({
+    ...preferences,
+    homePassportCity,
+    accountCountryCode: inferred ?? preferences.accountCountryCode,
+  });
+}
+
+/** Backfill home city for accounts created before `homePassportCity` existed. */
+export function normalizePreferencesAccountMarket(
+  preferences: DiscoveryPreferences,
+): DiscoveryPreferences {
+  let next = preferences;
+  if (!next.homePassportCity && next.passportCity && !next.travelMode) {
+    next = { ...next, homePassportCity: next.passportCity };
+  }
+  return withSyncedAccountCountry(next);
 }

@@ -15,7 +15,6 @@ import { useTranslation } from '../../i18n';
 import { getPassportCityLabel } from '../../i18n/labels';
 import { SparkSectionToggle } from '../../components/SparkSectionToggle';
 import { PASSPORT_CITIES, resolveSparkSection } from '../../types/preferences';
-import { countryCodeFromPassportCity, withSyncedAccountCountry } from '../../utils/accountRegion';
 import { ThemeMode } from '../../types/settings';
 import { LEGAL_ENTITY } from '../../constants/legalEntity';
 import { logSecurityEvent, submitSecurityReport } from '../../services/securityReports';
@@ -445,14 +444,7 @@ export function DisguiseProfileScreen() {
         onSelect={(id) => {
           if (id.startsWith('city:')) {
             const passportCity = id.replace('city:', '');
-            updatePreferences(
-              withSyncedAccountCountry({
-                ...preferences,
-                passportCity,
-                accountCountryCode:
-                  countryCodeFromPassportCity(passportCity) ?? preferences.accountCountryCode,
-              }),
-            );
+            updatePreferences({ ...preferences, passportCity });
           }
         }}
       />

@@ -61,11 +61,15 @@ export type AvailablePaymentMethod = {
 };
 
 export function listAvailablePaymentMethods(region?: AccountRegionContext): AvailablePaymentMethod[] {
+  const recommendedDescKey =
+    region?.countryCode === 'CN'
+      ? 'payments.methodRecommendedDescCN'
+      : 'payments.methodRecommendedDesc';
   const methods: AvailablePaymentMethod[] = [
     {
       kind: 'platform_default',
       labelKey: 'payments.methodRecommended',
-      descriptionKey: 'payments.methodRecommendedDesc',
+      descriptionKey: recommendedDescKey,
     },
   ];
 
@@ -86,4 +90,12 @@ export function listAvailablePaymentMethods(region?: AccountRegionContext): Avai
   }
 
   return methods;
+}
+
+/** User-facing checkout note when web card billing is unavailable for the account market. */
+export function regionalPaymentNoticeKey(region: AccountRegionContext): string | null {
+  if (region.countryCode === 'CN') {
+    return 'payments.cnConsumerNotice';
+  }
+  return null;
 }

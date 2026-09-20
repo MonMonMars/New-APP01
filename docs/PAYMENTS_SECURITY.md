@@ -7,9 +7,12 @@ Spark uses **defense in depth**: step-up auth on device, short-lived **purchase 
 Like Tinder/Bumble/Hinge, **auth and billing follow the user’s account region** — set at onboarding (map/passport city), stored in `user_preferences.preferences_extra.accountCountryCode`, not live GPS.
 
 - **APAC / Taiwan** — Phone sign-in tab first; local currency (JPY, TWD, AUD) on web Stripe when enabled.
+- **Mainland China (CN)** — WeChat / QQ / phone-first sign-in; **CNY** display; **no Stripe web checkout**; purchases via **native store** (or demo). WeChat Pay / Alipay are not wired yet.
 - **US / Americas** — Email-first sign-in; USD / CAD.
 - **EU / UK** — Email-first; EUR / GBP; EU consumer notice on checkout.
 - **Native apps** — Subscriptions and consumables bill through **App Store / Google Play** in the user’s store region (required for digital goods).
+
+Passport city changes in Settings sync `accountCountryCode` automatically (`withSyncedAccountCountry`).
 
 ## Rails
 

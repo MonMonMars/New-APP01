@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
 import { getLegalUiStrings } from '../content/legal';
 import { purchaseConfirmDisabled, usePurchaseDoubleAuthUi } from '../hooks/usePurchaseDoubleAuthUi';
-import { listAvailablePaymentMethods } from '../services/paymentRails';
+import { listAvailablePaymentMethods, regionalPaymentNoticeKey } from '../services/paymentRails';
 import { isDemoPurchases } from '../services/purchases';
 import { PaymentMethodKind } from '../types/purchases';
 import { useAppLocale } from '../hooks/useAppLocale';
@@ -67,6 +67,7 @@ export function PurchaseConfirmSheet({
   const demoNote = isDemoPurchases() ? t('payments.demoNote') : legalUi.purchaseDemoNote;
   const paymentMethods = listAvailablePaymentMethods(accountRegion);
   const showEuNotice = accountRegion.market === 'europe' || accountRegion.market === 'uk';
+  const cnNoticeKey = regionalPaymentNoticeKey(accountRegion);
   const confirmDisabled = purchaseConfirmDisabled({
     confirmLoading,
     showFirstTotp: doubleAuth.showFirstTotp,
@@ -94,6 +95,9 @@ export function PurchaseConfirmSheet({
           </Text>
           {showEuNotice ? (
             <Text style={[styles.verificationHint, { color: colors.textMuted }]}>{t('payments.euConsumerNotice')}</Text>
+          ) : null}
+          {cnNoticeKey ? (
+            <Text style={[styles.verificationHint, { color: colors.textMuted }]}>{t(cnNoticeKey)}</Text>
           ) : null}
           {errorMessage ? (
             <Text style={[styles.error, { color: '#ef4444' }]}>{errorMessage}</Text>

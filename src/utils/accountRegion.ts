@@ -264,3 +264,15 @@ export function regionalAuthTabOrder(region: AccountRegionContext): RegionalAuth
 export function regionalDefaultAuthTab(region: AccountRegionContext): RegionalAuthTab {
   return regionalAuthTabOrder(region)[0];
 }
+
+/** Keep `accountCountryCode` aligned with passport city (home market for auth & billing). */
+export function withSyncedAccountCountry(preferences: DiscoveryPreferences): DiscoveryPreferences {
+  const inferred = countryCodeFromPassportCity(preferences.passportCity);
+  if (!inferred) {
+    return preferences;
+  }
+  if (preferences.accountCountryCode === inferred) {
+    return preferences;
+  }
+  return { ...preferences, accountCountryCode: inferred };
+}

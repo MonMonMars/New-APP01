@@ -328,6 +328,9 @@ export function AuthWelcomePanel({
 
       {tab === 'phone' ? (
         <View style={styles.emailBlock}>
+          {!isSupabaseEnabled ? (
+            <Text style={styles.demoPhoneHint}>{t('auth.phoneDemoHint')}</Text>
+          ) : null}
           <TextInput
             style={styles.emailInput}
             placeholder={t(phonePlaceholderKey)}
@@ -521,6 +524,13 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '700',
     fontSize: 16,
+  },
+  demoPhoneHint: {
+    color: colors.textMuted,
+    fontSize: 12,
+    lineHeight: 17,
+    textAlign: 'center',
+    marginBottom: spacing.sm,
   },
   regionalHint: {
     color: colors.textMuted,

@@ -3,7 +3,7 @@ import { Linking, Platform } from 'react-native';
 import { getMagicLinkRedirectTo } from './supabaseAuthCallback';
 import { getSupabaseClient, isSupabaseConfigured } from './supabase';
 
-function normalizeE164Phone(raw: string): string | null {
+export function normalizeAuthPhone(raw: string): string | null {
   const trimmed = raw.trim();
   const digits = trimmed.replace(/\D/g, '');
   if (digits.length < 10) {
@@ -79,7 +79,7 @@ export async function sendPhoneLoginOtp(phoneRaw: string): Promise<{ ok: boolean
   if (!supabase) {
     return { ok: false, error: 'Supabase not configured' };
   }
-  const phone = normalizeE164Phone(phoneRaw);
+  const phone = normalizeAuthPhone(phoneRaw);
   if (!phone) {
     return { ok: false, error: 'Invalid phone number' };
   }
@@ -101,7 +101,7 @@ export async function verifyPhoneLoginOtp(
   if (!supabase) {
     return { userId: null, error: 'Supabase not configured' };
   }
-  const phone = normalizeE164Phone(phoneRaw);
+  const phone = normalizeAuthPhone(phoneRaw);
   if (!phone) {
     return { userId: null, error: 'Invalid phone number' };
   }

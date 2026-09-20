@@ -87,6 +87,11 @@ import {
   verifyPhoneLoginOtp,
 } from '../services/supabaseAuthExtended';
 import {
+  DEMO_PHONE_OTP_CODE,
+  demoPhoneOtpMarkSent,
+  demoPhoneOtpVerify,
+} from '../services/demoPhoneAuth';
+import {
   mfaEnrollTotp,
   mfaHasVerifiedFactor,
   mfaNeedsVerificationStep,
@@ -168,7 +173,7 @@ import { clearVaultKey } from '../utils/secureStorage';
 import { translate } from '../i18n';
 import { resolveAppLocale } from '../types/locale';
 import type { AccountRegionContext } from '../types/accountRegion';
-import { resolveAccountRegion } from '../utils/accountRegion';
+import { resolveAccountRegion, withSyncedAccountCountry } from '../utils/accountRegion';
 import { messagePreviewText, sentGifContext, sentPhotoContext, sentVoiceContext } from '../utils/messageFormat';
 import { disguiseWorldMeta } from '../utils/disguiseWorld';
 import { DisguiseUnlockConfirm } from '../components/disguise/DisguiseUnlockConfirm';
@@ -1653,7 +1658,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (isProductionBuild()) {
           return { ok: false, message: translate(locale, 'onboarding.emailRequiresSupabase') };
         }
-        return { ok: false, message: translate(locale, 'auth.phoneRequiresCloud') };
+        if (!demoPhoneOtpMarkSent(phone)) {
+          return { ok: false, message: translate(locale, 'auth.phoneOtpFailed') };
+        }
+        return {
+          ok: true,
+          message: translate(locale, 'auth.phoneOtpSentDemo', { code: DEMO_PHONE_OTP_CODE }),
+        };
       }
       const result = await sendPhoneLoginOtp(phone);
       if (!result.ok) {
@@ -1668,7 +1679,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     async (phone: string, code: string) => {
       const locale = resolveAppLocale(preferences.appLocale);
       if (!isSupabaseConfigured()) {
-        return { ok: false, message: translate(locale, 'auth.phoneRequiresCloud') };
+        if (isProductionBuild()) {
+          return { ok: false, message: translate(locale, 'auth.phoneRequiresCloud') };
+        }
+        if (!demoPhoneOtpVerify(phone, code)) {
+          return { ok: false, message: translate(locale, 'auth.phoneVerifyFailed') };
+        }
+        setIsAuthenticated(true);
+        setUserId(`demo-phone-${Date.now()}`);
+        return { ok: true, message: translate(locale, 'auth.phoneVerified') };
       }
       const result = await verifyPhoneLoginOtp(phone, code);
       if (!result.userId) {
@@ -1844,17 +1863,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updatePreferences = useCallback((next: DiscoveryPreferences) => {
+    const synced = withSyncedAccountCountry(next);
     setPreferences((prev) => {
-      const travelChanged = prev.travelMode !== next.travelMode;
-      const passportChanged = prev.passportCity !== next.passportCity;
+      const travelChanged = prev.travelMode !== synced.travelMode;
+      const passportChanged = prev.passportCity !== synced.passportCity;
       if (travelChanged || passportChanged) {
         return {
-          ...next,
+          ...synced,
           mapSearchLat: undefined,
           mapSearchLng: undefined,
         };
       }
-      return next;
+      return synced;
     });
     setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
     setPriorityProfileId(null);

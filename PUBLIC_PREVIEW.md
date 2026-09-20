@@ -2,13 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://boundaries-hose-factor-interesting.trycloudflare.com**
+**https://michael-michigan-desired-treasurer.trycloudflare.com**
 
-- **Built from branch:** `cursor/demo-cache-bust-7b60` (base: `cursor/tinder-action-bar-7b60`)
-- **Build:** World map discover + Tinder-style 5-button action bar; **cache-busted** HTML + `serve.json` headers
-- **Build ID:** `2d4da74-20260920T121239Z` (see HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer version line)
-- **Bundle:** `index-78ebf2a6145c4ef9c463eff2f43ca4fa.js`
-- **Verified:** 2026-09-20 12:15 UTC — HTTP 200 on local `:8090` with no-store HTML + immutable `_expo/static` assets
+- **Built from branch:** `cursor/demo-cache-bust-7b60` (includes tooling fixes + cache bust)
+- **Build ID:** `844e065-20260920T162055Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
+- **Verified:** 2026-09-20 16:21 UTC — HTTP 200 (local `:8090` + trycloudflare)
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

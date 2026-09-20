@@ -33,12 +33,18 @@ type DropTargetsProps = {
   onTrashPress?: () => void;
   onHeartPress?: () => void;
   onStarPress?: () => void;
+  /** Undo last pass — sits left of super like, white styling (Spark + Ember). */
+  showRewind?: boolean;
+  onRewindPress?: () => void;
+  isSparkPlus?: boolean;
 };
 
 const TARGET_SIZE = 68;
 const TARGET_SIZE_COMPACT = 52;
 const STAR_SIZE = 58;
 const STAR_SIZE_COMPACT = 44;
+const REWIND_WHITE = '#ffffff';
+const REWIND_BG = 'rgba(255, 255, 255, 0.22)';
 
 type TargetButtonProps = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -123,12 +129,17 @@ export function DropTargets({
   onTrashPress,
   onHeartPress,
   onStarPress,
+  showRewind = false,
+  onRewindPress,
+  isSparkPlus = true,
 }: DropTargetsProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const trashRef = useRef<View>(null);
   const heartRef = useRef<View>(null);
   const starRef = useRef<View>(null);
+  const rewindRef = useRef<View>(null);
+  const rewindActive = useSharedValue(0);
   const starActiveValue = starActive ?? trashActive;
   const targetSize = compact ? TARGET_SIZE_COMPACT : TARGET_SIZE;
   const starSize = compact ? STAR_SIZE_COMPACT : STAR_SIZE;
@@ -188,26 +199,49 @@ export function DropTargets({
       />
 
       {onStarPress && (
-        <View style={styles.starWrap}>
-          <View style={[styles.starGlow, {
-            width: starSize + 20,
-            height: starSize + 20,
-            borderRadius: (starSize + 20) / 2,
-            backgroundColor: `${colors.heartRed}40`,
-            borderColor: `${colors.heartPink}80`,
-          }]} />
-          <TargetButton
-            icon="star"
-            iconColor={colors.card}
-            backgroundColor={colors.heartRed}
-            borderColor={colors.heartRed}
-            active={starActiveValue}
-            targetRef={starRef}
-            size={starSize}
-            accessibilityLabel={t('discover.superLike')}
-            onLayout={reportStarZone}
-            onPress={onStarPress}
-          />
+        <View style={styles.centerCluster}>
+          {showRewind && onRewindPress ? (
+            <View style={styles.rewindWrap}>
+              <TargetButton
+                icon="arrow-undo"
+                iconColor={REWIND_WHITE}
+                backgroundColor={REWIND_BG}
+                borderColor={REWIND_WHITE}
+                active={rewindActive}
+                targetRef={rewindRef}
+                size={targetSize}
+                accessibilityLabel={t('discover.rewindA11y')}
+                onLayout={() => undefined}
+                onPress={onRewindPress}
+              />
+              {!isSparkPlus ? (
+                <View style={[styles.plusDot, { backgroundColor: colors.gradientEnd }]}>
+                  <Ionicons name="diamond" size={8} color={colors.text} />
+                </View>
+              ) : null}
+            </View>
+          ) : null}
+          <View style={styles.starWrap}>
+            <View style={[styles.starGlow, {
+              width: starSize + 20,
+              height: starSize + 20,
+              borderRadius: (starSize + 20) / 2,
+              backgroundColor: `${colors.heartRed}40`,
+              borderColor: `${colors.heartPink}80`,
+            }]} />
+            <TargetButton
+              icon="star"
+              iconColor={colors.card}
+              backgroundColor={colors.heartRed}
+              borderColor={colors.heartRed}
+              active={starActiveValue}
+              targetRef={starRef}
+              size={starSize}
+              accessibilityLabel={t('discover.superLike')}
+              onLayout={reportStarZone}
+              onPress={onStarPress}
+            />
+          </View>
         </View>
       )}
 
@@ -251,6 +285,26 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
     elevation: 6,
+  },
+  centerCluster: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  rewindWrap: {
+    position: 'relative',
+  },
+  plusDot: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: REWIND_WHITE,
   },
   starWrap: {
     alignItems: 'center',

@@ -139,7 +139,12 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
     const starActive = useSharedValue(0);
 
     useEffect(() => {
-      setActiveIndex(0);
+      setActiveIndex((index) => {
+        if (profiles.length === 0) {
+          return 0;
+        }
+        return Math.min(index, profiles.length - 1);
+      });
     }, [profiles]);
 
     const visibleProfiles = useMemo(
@@ -174,14 +179,12 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
 
         onSwipe(current, direction);
 
-        const nextIndex = activeIndex + 1;
-        setActiveIndex(nextIndex);
-
-        if (nextIndex >= profiles.length) {
+        // Front card is removed from `profiles` after pass/like — stay at 0 so the next profile fills the slot.
+        if (profiles.length <= 1) {
           onEmpty();
         }
       },
-      [activeIndex, onEmpty, onSwipe, profiles],
+      [onEmpty, onSwipe, profiles.length],
     );
 
     const resetPosition = useCallback(() => {
@@ -203,13 +206,10 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
       heartActive.value = 0;
       starActive.value = 0;
 
-      const nextIndex = activeIndex + 1;
-      setActiveIndex(nextIndex);
-      if (nextIndex >= profiles.length) {
+      if (profiles.length <= 1) {
         onEmpty();
       }
     }, [
-      activeIndex,
       cardScale,
       heartActive,
       onEmpty,

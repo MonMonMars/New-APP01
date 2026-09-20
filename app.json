@@ -59,7 +59,9 @@
       ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "themeColor": "#014ABC",
+      "backgroundColor": "#0F0F10"
     },
     "extra": {
       "disguiseAppName": "Pulse",

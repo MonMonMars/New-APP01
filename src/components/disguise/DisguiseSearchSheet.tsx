@@ -12,7 +12,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { femaleTrendingTopics } from '../../data/disguiseFemaleTrending';
 import { disguiseTrendingTopics } from '../../data/disguiseTrending';
 import { radii, spacing } from '../../theme';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { disguiseFeedItemsForGender } from '../../utils/disguiseFeedCatalog';
 import { FeedItem } from '../../data/disguiseFeed';
 import { usesFemalePulseExperience } from '../../utils/genderAccountPerks';
@@ -57,10 +57,10 @@ export function DisguiseSearchSheet({
 }: DisguiseSearchSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { user, preferences } = useApp();
+  const { user } = useApp();
   const { locale } = useAppLocale();
   const { t } = useTranslation();
-  const meta = disguiseWorldMeta(preferences.sparkSection, user.gender, locale);
+  const meta = useDisguiseWorld();
   const feedCatalog = disguiseFeedItemsForGender(user.gender);
   const baseTrendingTopics = usesFemalePulseExperience(user.gender)
     ? femaleTrendingTopics

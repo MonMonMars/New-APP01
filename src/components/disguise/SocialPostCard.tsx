@@ -10,8 +10,9 @@ import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { buildSocialReporter, socialReporterPhotoIndex } from '../../utils/disguiseReporterPhotos';
 import { profileIntroCaption } from '../../utils/profileIntroCaption';
-import { resolveDisguiseProfile } from '../../utils/resolveDisguiseProfile';
+import { resolveDisguiseProfile, resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
+import { usePulseContextSection } from '../../hooks/usePulseContextSection';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
 import { DisguisePhotoLightbox } from './DisguisePhotoLightbox';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
@@ -36,8 +37,8 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
     togglePulseLike,
     mutePulseAuthor,
     reportPulsePost,
-    preferences,
   } = useApp();
+  const pulseSection = usePulseContextSection();
   const accent = useDisguiseWorld().accent;
   const upvoted = pulseSocial.likedPostIds.includes(post.id);
   const [photoOpen, setPhotoOpen] = useState(false);
@@ -46,13 +47,11 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
   const isSaved = pulseSocial.savedPostIds.includes(post.id);
   const likeCount = upvoted ? post.likes + 1 : post.likes;
 
-  const photoReporter = buildSocialReporter(post, preferences.sparkSection);
-  const feedPhotoIndex = socialReporterPhotoIndex(photoReporter, post.imageUrl, preferences.sparkSection);
-  const linkedAuthorProfile = resolveDisguiseProfile(
-    `social-${post.id}`,
-    undefined,
-    preferences.sparkSection,
-  );
+  const photoReporter = buildSocialReporter(post, pulseSection);
+  const feedPhotoIndex = socialReporterPhotoIndex(photoReporter, post.imageUrl, pulseSection);
+  const linkedAuthorProfile =
+    resolveExplicitDatingProfile(post.datingProfileId, pulseSection) ??
+    resolveDisguiseProfile(`social-${post.id}`, undefined, pulseSection);
   const authorContentKind = linkedAuthorProfile ? 'profile' : 'social';
   const authorCaption = linkedAuthorProfile ? profileIntroCaption(linkedAuthorProfile) : undefined;
 

@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet } from 'react-native';
 
+import { PULSE_BOOKMARKS_ENABLED } from '../../config/pulseFeatures';
 import { useApp } from '../../context/AppContext';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { useTranslation } from '../../i18n';
@@ -16,6 +17,10 @@ export function SavePostButton({ postId, size = 22 }: SavePostButtonProps) {
   const { t } = useTranslation();
   const isSaved = pulseSocial.savedPostIds.includes(postId);
   const accent = useDisguiseWorld().accent;
+
+  if (!PULSE_BOOKMARKS_ENABLED) {
+    return null;
+  }
 
   return (
     <AnimatedPressable

@@ -5,6 +5,12 @@
  */
 import { chromium } from 'playwright';
 
+import {
+  completeDemoOnboarding,
+  dismissCookies,
+  unlockSparkFromPulse,
+} from './demo-onboarding.mjs';
+
 const DEMO_URL = process.argv[2];
 if (!DEMO_URL) {
   console.error('Usage: node scripts/verify-demo-link.mjs <demo-url>');
@@ -26,141 +32,6 @@ function fail(name, detail) {
 async function httpOk(url) {
   const res = await fetch(url, { redirect: 'follow' });
   return res.status;
-}
-
-async function dismissCookies(page) {
-  const btn = page.getByText(/essential only/i).first();
-  if (await btn.isVisible({ timeout: 1500 }).catch(() => false)) {
-    await btn.click();
-    await page.waitForTimeout(400);
-  }
-}
-
-async function clickContinue(page) {
-  const cont18 = page.getByText(/continue.*18/i).first();
-  if (await cont18.isVisible({ timeout: 1200 }).catch(() => false)) {
-    await cont18.click();
-    await page.waitForTimeout(700);
-    return true;
-  }
-  const cont = page.getByText(/^continue$/i).first();
-  if (await cont.isVisible({ timeout: 1200 }).catch(() => false)) {
-    await cont.click();
-    await page.waitForTimeout(700);
-    return true;
-  }
-  return false;
-}
-
-async function tapContinueWithoutAccount(page) {
-  const guest = page.getByText(/continue without account/i).first();
-  if (await guest.isVisible({ timeout: 4000 }).catch(() => false)) {
-    await guest.click();
-    await page.waitForTimeout(800);
-    return true;
-  }
-  return false;
-}
-
-async function completeOnboarding(page) {
-  for (let step = 0; step < 24; step++) {
-    await dismissCookies(page);
-
-    if (
-      await page
-        .getByLabel(/tap .+ logo to leave/i)
-        .first()
-        .isVisible()
-        .catch(() => false)
-    ) {
-      return;
-    }
-    if (
-      await page
-        .getByRole('tab', { name: /trending|cosmos|home|feed/i })
-        .first()
-        .isVisible()
-        .catch(() => false)
-    ) {
-      return;
-    }
-
-    const text = await page.locator('body').innerText();
-
-    if (/i have read and agree|terms of service|community guidelines/i.test(text)) {
-      const box = page.getByText(/i have read and agree/i).first();
-      if (await box.isVisible({ timeout: 1500 }).catch(() => false)) {
-        await box.click();
-        await page.waitForTimeout(300);
-      }
-      if (await clickContinue(page)) {
-        continue;
-      }
-    }
-
-    if (/continue without account/i.test(text)) {
-      if (await tapContinueWithoutAccount(page)) {
-        continue;
-      }
-    }
-
-    if (/choose your region/i.test(text)) {
-      const confirmArea = page.getByText(/continue with this area/i).first();
-      await confirmArea.scrollIntoViewIfNeeded().catch(() => {});
-      if (await confirmArea.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await confirmArea.click();
-        await page.waitForTimeout(900);
-        continue;
-      }
-    }
-
-    if (/personalize your feed/i.test(text)) {
-      if (await clickContinue(page)) {
-        continue;
-      }
-    }
-
-    if (/your public profile/i.test(text) && !/create your profile/i.test(text)) {
-      if (await clickContinue(page)) {
-        continue;
-      }
-    }
-
-    if (/create your profile/i.test(text)) {
-      const openPulse = page.getByText(/^open pulse$/i).first();
-      if (await openPulse.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await openPulse.click();
-        await page.waitForTimeout(1500);
-        return;
-      }
-    }
-
-    if (await clickContinue(page)) {
-      continue;
-    }
-
-    await page.waitForTimeout(400);
-  }
-}
-
-async function unlockSpark(page) {
-  await dismissCookies(page);
-  const unlock = page.getByLabel(/tap .+ logo to leave/i).first();
-  await unlock.waitFor({ state: 'visible', timeout: 8000 });
-  await unlock.click({ force: true });
-  await page.waitForTimeout(600);
-
-  const leave = page.getByText(/^Leave Spark$/i).first();
-  if (await leave.isVisible({ timeout: 3000 }).catch(() => false)) {
-    await leave.click();
-    await page.waitForTimeout(600);
-  }
-
-  const policy = page.getByText(/i understand — leave spark/i).first();
-  if (await policy.isVisible({ timeout: 3000 }).catch(() => false)) {
-    await policy.click();
-    await page.waitForTimeout(1200);
-  }
 }
 
 async function main() {
@@ -216,7 +87,7 @@ async function main() {
       pass('Landing screen', 'onboarding entry visible');
     }
 
-    await completeOnboarding(page);
+    await completeDemoOnboarding(page);
     await dismissCookies(page);
 
     const sparkVisible = /miles away|\d+\s*mi\b/i.test(await page.locator('body').innerText());
@@ -248,7 +119,7 @@ async function main() {
       }
     } else {
       await dismissCookies(page);
-      await unlockSpark(page);
+      await unlockSparkFromPulse(page);
       await dismissCookies(page);
       const afterUnlock = await page.locator('body').innerText();
       if (/miles away|\d+\s*mi\b/i.test(afterUnlock)) {

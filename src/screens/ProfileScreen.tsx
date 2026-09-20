@@ -91,6 +91,7 @@ export function ProfileScreen() {
     deleteAccount,
     isSupabaseEnabled,
     isAuthenticated,
+    mfaEnabled,
     signOut,
     restartCloudSignIn,
     hasOnboarded,
@@ -278,7 +279,11 @@ export function ProfileScreen() {
             <Ionicons name="cloud-offline-outline" size={20} color={colors.gradientEnd} />
             <View style={styles.reauthText}>
               <Text style={[styles.reauthTitle, { color: colors.text }]}>{t('profile.reauthTitle')}</Text>
-              <Text style={[styles.reauthBody, { color: colors.textMuted }]}>{t('profile.reauthBody')}</Text>
+              <Text style={[styles.reauthBody, { color: colors.textMuted }]}>
+                {t('profile.reauthBody')}
+                {' '}
+                {t('profile.reauthPurchasesHint')}
+              </Text>
             </View>
             <AnimatedPressable
               style={[styles.reauthButton, { backgroundColor: colors.gradientEnd }]}
@@ -457,6 +462,20 @@ export function ProfileScreen() {
 
         <ReferralCard />
 
+        {isSupabaseEnabled && isAuthenticated && !mfaEnabled ? (
+          <AnimatedPressable
+            style={[styles.mfaHintCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            onPress={() => handleRowPress('TwoFactor')}
+          >
+            <Ionicons name="shield-outline" size={20} color={colors.gradientEnd} />
+            <View style={styles.mfaHintText}>
+              <Text style={[styles.mfaHintTitle, { color: colors.text }]}>{t('profile.mfaRecommendedTitle')}</Text>
+              <Text style={[styles.mfaHintBody, { color: colors.textMuted }]}>{t('profile.mfaRecommendedBody')}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+          </AnimatedPressable>
+        ) : null}
+
         <View style={styles.section}>
           {settingsRows.map((row) => (
             <AnimatedPressable
@@ -522,6 +541,7 @@ export function ProfileScreen() {
         preferences={preferences}
         accountCountryCode={accountRegion.countryCode}
         accountRegion={accountRegion}
+        travelMode={preferences.travelMode ?? false}
         onClose={() => setShowAccountHomeMarket(false)}
         onSave={updatePreferences}
       />
@@ -796,6 +816,28 @@ const styles = StyleSheet.create({
     color: '#111',
     fontWeight: '800',
     fontSize: 14,
+  },
+  mfaHintCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
+    padding: spacing.md,
+    borderRadius: radii.card,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  mfaHintText: {
+    flex: 1,
+  },
+  mfaHintTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  mfaHintBody: {
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 2,
   },
   signOutRow: {
     flexDirection: 'row',

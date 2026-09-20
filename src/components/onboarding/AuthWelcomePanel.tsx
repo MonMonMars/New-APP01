@@ -250,7 +250,12 @@ export function AuthWelcomePanel({
     setEmailMessage(null);
     try {
       const result = await requestPasswordReset(email);
-      setEmailMessage(result.message);
+      if (result.ok) {
+        setEmailMessage(t('auth.passwordResetEmailSent'));
+        setForgotPasswordOpen(false);
+      } else {
+        setEmailMessage(result.message);
+      }
     } finally {
       setAuthLoading(false);
     }

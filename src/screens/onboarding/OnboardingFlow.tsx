@@ -96,6 +96,13 @@ export function OnboardingFlow() {
     }
   }, [awaitingMagicLink, isAuthenticated, isSupabaseEnabled, step, userId]);
 
+  useEffect(() => {
+    if (!isHydrated || step !== 'welcome' || !isAuthenticated || !userId) {
+      return;
+    }
+    setStep('intent');
+  }, [isAuthenticated, isHydrated, step, userId]);
+
   const genderOptions: ProfileGender[] = ['woman', 'man', 'nonbinary'];
   const orientationOptions: Orientation[] = ['straight', 'gay', 'lesbian', 'bisexual', 'pansexual', 'queer', 'asexual', 'other'];
 

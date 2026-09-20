@@ -17,6 +17,7 @@ type AccountHomeMarketSheetProps = {
   preferences: DiscoveryPreferences;
   accountCountryCode: string;
   accountRegion: AccountRegionContext;
+  travelMode?: boolean;
   onClose: () => void;
   onSave: (preferences: DiscoveryPreferences) => void;
 };
@@ -26,6 +27,7 @@ export function AccountHomeMarketSheet({
   preferences,
   accountCountryCode,
   accountRegion,
+  travelMode = false,
   onClose,
   onSave,
 }: AccountHomeMarketSheetProps) {
@@ -55,6 +57,11 @@ export function AccountHomeMarketSheet({
         <Text style={[styles.methods, { color: colors.textMuted }]}>
           {t(regionalAuthMethodsDescriptionKey(accountRegion))}
         </Text>
+        {travelMode ? (
+          <Text style={[styles.travelNote, { color: colors.textMuted }]}>
+            {t('profile.accountHomeMarketTravelNote')}
+          </Text>
+        ) : null}
         <ScrollView contentContainerStyle={styles.grid}>
           {PASSPORT_CITIES.map((city) => {
             const selected = homeCity === city;
@@ -120,6 +127,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     marginBottom: spacing.md,
+  },
+  travelNote: {
+    fontSize: 12,
+    lineHeight: 17,
+    marginBottom: spacing.md,
+    fontStyle: 'italic',
   },
   grid: {
     flexDirection: 'row',

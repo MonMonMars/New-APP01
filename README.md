@@ -35,8 +35,9 @@ npm run demo:tunnel   # public Cloudflare URL (requires cloudflared)
 - Trending, Activity alerts, disguise profile
 
 ### Onboarding
-- Apple Sign-In stub (real on iOS, demo on web)
-- Community guidelines, region, feed interests
+- Regional **home market** map (auth + billing), then welcome sign-in (WeChat/QQ/phone in CN)
+- Resumes at the right step if terms/location were saved; active cloud session skips to intent
+- Password reset via email link (`PasswordRecoveryGate`)
 - Profile setup with **photo upload** (expo-image-picker)
 - Lands in **Pulse** by default after onboarding
 

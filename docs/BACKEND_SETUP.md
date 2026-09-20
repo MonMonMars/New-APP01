@@ -89,6 +89,10 @@ Use the same **Redirect URLs** as magic links. The app calls `resetPasswordForEm
 
 In Supabase Dashboard → Authentication → Email templates, customize the **Reset password** message if needed. Ensure **Email** provider is enabled.
 
+### Onboarding resume
+
+If the user already accepted terms and picked a **home market** city, onboarding resumes at the welcome sign-in step (not rules/location). When a Supabase session is already active, the app skips welcome and continues at **relationship intent**. Magic-link and OAuth return polling behave the same way.
+
 ## 5. What syncs
 
 When configured, `AppContext` calls `syncToSupabase()` after state changes:

@@ -230,6 +230,15 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
                 ) : null}
               </View>
             )}
+            {preferences.travelMode ? (
+              <Text style={[styles.travelHint, { color: colors.textMuted }]}>
+                {t('discoverHub.travelModeHint')}
+              </Text>
+            ) : homePassportCity ? (
+              <Text style={[styles.travelHint, { color: colors.textMuted }]}>
+                {t('discoverHub.homeModeHint')}
+              </Text>
+            ) : null}
           </View>
         )}
 
@@ -519,6 +528,11 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: spacing.xs,
     marginTop: spacing.xs,
+  },
+  travelHint: {
+    fontSize: 11,
+    lineHeight: 16,
+    marginTop: spacing.sm,
   },
   statusPill: {
     borderRadius: 999,

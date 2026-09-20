@@ -51,7 +51,6 @@ export function DisguiseProfileScreen() {
     setThemeMode,
     updatePreferences,
     preferences,
-    accountRegion,
     pulseSocial,
     setSparkSection,
   } = useApp();
@@ -139,9 +138,8 @@ export function DisguiseProfileScreen() {
           id: 'st3',
           title: t('disguiseProfile.region'),
           subtitle: preferences.passportCity
-            ? t('disguiseProfile.regionSubtitle', {
+            ? t('disguiseProfile.regionPulseSubtitle', {
                 city: getPassportCityLabel(locale, preferences.passportCity),
-                code: accountRegion.countryCode,
               })
             : t('disguiseProfile.regionFallback'),
           icon: 'globe-outline' as const,

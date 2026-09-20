@@ -18,8 +18,14 @@ export function MfaLoginGate({ children }: MfaLoginGateProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { mfaLoginRequired, verifyMfaLogin, refreshMfaLoginRequirement, isAuthenticated, isSupabaseEnabled } =
-    useApp();
+  const {
+    mfaLoginRequired,
+    verifyMfaLogin,
+    refreshMfaLoginRequirement,
+    isAuthenticated,
+    isSupabaseEnabled,
+    signOut,
+  } = useApp();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,6 +79,14 @@ export function MfaLoginGate({ children }: MfaLoginGateProps) {
         }}
       >
         {loading ? <ActivityIndicator color="#111" /> : <Text style={styles.buttonText}>{t('auth.mfaVerify')}</Text>}
+      </AnimatedPressable>
+      <AnimatedPressable
+        style={styles.signOutLink}
+        onPress={() => {
+          void signOut();
+        }}
+      >
+        <Text style={[styles.signOutText, { color: colors.textMuted }]}>{t('profile.signOut')}</Text>
       </AnimatedPressable>
     </View>
   );
@@ -130,5 +144,14 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#111',
     fontSize: 16,
+  },
+  signOutLink: {
+    marginTop: spacing.lg,
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+  },
+  signOutText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

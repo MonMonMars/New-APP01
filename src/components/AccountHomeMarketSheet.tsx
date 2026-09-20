@@ -6,6 +6,8 @@ import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
 import { getPassportCityLabel } from '../i18n/labels';
 import { DiscoveryPreferences, PASSPORT_CITIES } from '../types/preferences';
+import { regionalAuthMethodsDescriptionKey } from '../config/regionalAuthProviders';
+import type { AccountRegionContext } from '../types/accountRegion';
 import { withHomePassportCity } from '../utils/accountRegion';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -14,6 +16,7 @@ type AccountHomeMarketSheetProps = {
   visible: boolean;
   preferences: DiscoveryPreferences;
   accountCountryCode: string;
+  accountRegion: AccountRegionContext;
   onClose: () => void;
   onSave: (preferences: DiscoveryPreferences) => void;
 };
@@ -22,6 +25,7 @@ export function AccountHomeMarketSheet({
   visible,
   preferences,
   accountCountryCode,
+  accountRegion,
   onClose,
   onSave,
 }: AccountHomeMarketSheetProps) {
@@ -47,6 +51,9 @@ export function AccountHomeMarketSheet({
         <Text style={[styles.hint, { color: colors.textMuted }]}>{t('profile.accountHomeMarketHint')}</Text>
         <Text style={[styles.current, { color: colors.text }]}>
           {t('profile.accountHomeMarketCurrent', { code: accountCountryCode })}
+        </Text>
+        <Text style={[styles.methods, { color: colors.textMuted }]}>
+          {t(regionalAuthMethodsDescriptionKey(accountRegion))}
         </Text>
         <ScrollView contentContainerStyle={styles.grid}>
           {PASSPORT_CITIES.map((city) => {
@@ -107,6 +114,11 @@ const styles = StyleSheet.create({
   current: {
     fontSize: 14,
     fontWeight: '700',
+    marginBottom: spacing.xs,
+  },
+  methods: {
+    fontSize: 13,
+    lineHeight: 18,
     marginBottom: spacing.md,
   },
   grid: {

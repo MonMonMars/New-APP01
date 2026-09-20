@@ -21,12 +21,23 @@ export async function requestPurchaseApproval(options: {
 }
 
 function checkoutRedirectUrls(): { successUrl: string; cancelUrl: string } {
+  const appendCheckoutParam = (base: string, outcome: 'success' | 'cancel') => {
+    const separator = base.includes('?') ? '&' : '?';
+    return `${base}${separator}checkout=${outcome}`;
+  };
+
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
     const base = `${window.location.origin}${window.location.pathname}`;
-    return { successUrl: base, cancelUrl: base };
+    return {
+      successUrl: appendCheckoutParam(base, 'success'),
+      cancelUrl: appendCheckoutParam(base, 'cancel'),
+    };
   }
   const redirect = getMagicLinkRedirectTo() ?? 'spark://payments/return';
-  return { successUrl: redirect, cancelUrl: redirect };
+  return {
+    successUrl: appendCheckoutParam(redirect, 'success'),
+    cancelUrl: appendCheckoutParam(redirect, 'cancel'),
+  };
 }
 
 export async function beginStripeCheckout(options: {

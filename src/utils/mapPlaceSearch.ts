@@ -3,7 +3,7 @@ import { PASSPORT_CITIES } from '../types/preferences';
 import type { AppLocale } from '../types/locale';
 import { NEIGHBORHOOD_COORDS } from './neighborhoodCoords';
 import type { GeoPoint } from './geoMap';
-import { CITY_COORDS } from './searchMapTiles';
+import { CITY_COORDS } from './mapConstants';
 
 export type MapPlaceSuggestion = {
   id: string;

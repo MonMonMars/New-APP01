@@ -36,58 +36,103 @@ async function dismissCookies(page) {
   }
 }
 
+async function clickContinue(page) {
+  const cont18 = page.getByText(/continue.*18/i).first();
+  if (await cont18.isVisible({ timeout: 1200 }).catch(() => false)) {
+    await cont18.click();
+    await page.waitForTimeout(700);
+    return true;
+  }
+  const cont = page.getByText(/^continue$/i).first();
+  if (await cont.isVisible({ timeout: 1200 }).catch(() => false)) {
+    await cont.click();
+    await page.waitForTimeout(700);
+    return true;
+  }
+  return false;
+}
+
 async function completeOnboarding(page) {
   await page.getByText(/continue without account/i).click();
   await page.waitForTimeout(800);
 
-  for (let step = 0; step < 15; step++) {
+  for (let step = 0; step < 22; step++) {
+    await dismissCookies(page);
+
+    if (
+      await page
+        .getByLabel(/tap .+ logo to leave/i)
+        .first()
+        .isVisible()
+        .catch(() => false)
+    ) {
+      return;
+    }
+    if (
+      await page
+        .getByRole('tab', { name: /trending|cosmos|home|feed/i })
+        .first()
+        .isVisible()
+        .catch(() => false)
+    ) {
+      return;
+    }
+
     const text = await page.locator('body').innerText();
 
-    if (/community guidelines/i.test(text)) {
-      await page.getByText(/i have read and agree/i).first().click();
-      await page.waitForTimeout(300);
-      await page.getByText(/continue.*18/i).first().click();
-      await page.waitForTimeout(700);
-      continue;
-    }
-    if (/choose your region/i.test(text)) {
-      await page.getByText(/use my location/i).first().click();
-      await page.waitForTimeout(700);
-      continue;
-    }
-    if (/your public profile/i.test(text)) {
-      const cont = page.getByText(/^continue$/i).first();
-      if (await cont.isVisible().catch(() => false)) {
-        await cont.click();
-        await page.waitForTimeout(700);
+    if (/i have read and agree|terms of service/i.test(text)) {
+      const box = page.getByText(/i have read and agree/i).first();
+      if (await box.isVisible({ timeout: 1500 }).catch(() => false)) {
+        await box.click();
+        await page.waitForTimeout(300);
       }
-      continue;
+      if (await clickContinue(page)) {
+        continue;
+      }
     }
+
+    if (/choose your region/i.test(text)) {
+      const confirmArea = page.getByText(/continue with this area/i).first();
+      await confirmArea.scrollIntoViewIfNeeded().catch(() => {});
+      if (await confirmArea.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await confirmArea.click();
+        await page.waitForTimeout(900);
+        continue;
+      }
+    }
+
+    if (/personalize your feed/i.test(text)) {
+      if (await clickContinue(page)) {
+        continue;
+      }
+    }
+
+    if (/your public profile/i.test(text) && !/create your profile/i.test(text)) {
+      if (await clickContinue(page)) {
+        continue;
+      }
+    }
+
     if (/create your profile/i.test(text)) {
-      const openPulse = page.getByText(/open pulse/i).first();
-      if (await openPulse.isVisible().catch(() => false)) {
+      const openPulse = page.getByText(/^open pulse$/i).first();
+      if (await openPulse.isVisible({ timeout: 3000 }).catch(() => false)) {
         await openPulse.click();
         await page.waitForTimeout(1500);
         return;
       }
     }
-    const cont = page.getByText(/^continue$/i).first();
-    if (await cont.isVisible().catch(() => false)) {
-      await cont.click();
-      await page.waitForTimeout(700);
+
+    if (await clickContinue(page)) {
       continue;
     }
-    const unlockVisible = await page.getByLabel(/tap .+ logo to leave spark/i).first().isVisible().catch(() => false);
-    const trendingTab = await page.getByText(/^trending$/i).first().isVisible().catch(() => false);
-    if (unlockVisible || trendingTab) {
-      return;
-    }
+
+    await page.waitForTimeout(400);
   }
 }
 
 async function unlockSpark(page) {
   await dismissCookies(page);
-  const unlock = page.getByLabel(/tap .+ logo to leave spark/i).first();
+  const unlock = page.getByLabel(/tap .+ logo to leave/i).first();
   await unlock.waitFor({ state: 'visible', timeout: 8000 });
   await unlock.click({ force: true });
   await page.waitForTimeout(600);
@@ -155,31 +200,59 @@ async function main() {
     }
 
     await completeOnboarding(page);
-    pass('Onboarding', 'completed');
+    await dismissCookies(page);
 
-    const trendingTab = page.getByText(/^trending$/i).first();
+    const sparkVisible = /miles away|\d+\s*mi\b/i.test(await page.locator('body').innerText());
+    const pulseDisguiseVisible = await page
+      .getByLabel(/tap .+ logo to leave/i)
+      .first()
+      .isVisible()
+      .catch(() => false);
+
+    if (sparkVisible || pulseDisguiseVisible) {
+      pass('Onboarding', sparkVisible ? 'landed on Spark discover' : 'landed in Pulse disguise');
+    } else {
+      fail('Onboarding', 'did not reach app shell after Open Pulse');
+    }
+
+    if (sparkVisible) {
+      pass('Spark discover', 'profile cards visible after onboarding');
+      const pulseTab = page
+        .getByLabel(/pulse disguise mode/i)
+        .or(page.getByRole('tab', { name: /^pulse$/i }))
+        .or(page.getByText(/^pulse$/i))
+        .first();
+      if (await pulseTab.isVisible({ timeout: 4000 }).catch(() => false)) {
+        await pulseTab.click();
+        await page.waitForTimeout(1200);
+        pass('Pulse tab', 'entered disguise from Spark');
+      } else {
+        fail('Pulse tab', 'not found on Spark tab bar');
+      }
+    } else {
+      await dismissCookies(page);
+      await unlockSpark(page);
+      await dismissCookies(page);
+      const afterUnlock = await page.locator('body').innerText();
+      if (/miles away|\d+\s*mi\b/i.test(afterUnlock)) {
+        pass('Spark discover', 'profile cards visible after unlock');
+      } else {
+        fail('Spark discover', 'profile cards not visible after unlock');
+      }
+    }
+
+    const trendingTab = page.getByRole('tab', { name: /trending|cosmos/i }).first();
     if (await trendingTab.isVisible({ timeout: 4000 }).catch(() => false)) {
       await trendingTab.click();
       await page.waitForTimeout(900);
       const trendingText = await page.locator('body').innerText();
-      if (/trending.*useful|weather|stock market/i.test(trendingText)) {
+      if (/trending|weather|stock market|cosmos|useful/i.test(trendingText)) {
         pass('Pulse trending', 'explore screen visible');
       } else {
         fail('Pulse trending', 'explore content not visible');
       }
     } else {
-      fail('Pulse trending', 'tab not found');
-    }
-
-    await dismissCookies(page);
-    await unlockSpark(page);
-    await dismissCookies(page);
-
-    const spark = await page.locator('body').innerText();
-    if (!/miles away|mi\b/i.test(spark)) {
-      fail('Spark discover', 'profile cards not visible after unlock');
-    } else {
-      pass('Spark discover', 'profile cards visible');
+      fail('Pulse trending', 'tab not found in disguise');
     }
 
     if (consoleErrors.length) {

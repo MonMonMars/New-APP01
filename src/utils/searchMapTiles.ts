@@ -1,7 +1,14 @@
 import { PixelRatio } from 'react-native';
 
-import { PASSPORT_CITIES } from '../types/preferences';
 import type { GeoPoint } from './geoMap';
+import {
+  CITY_COORDS,
+  DEFAULT_MAP_CENTER,
+  mapCenterForCity,
+  zoomForRadius,
+} from './mapConstants';
+
+export { CITY_COORDS, DEFAULT_MAP_CENTER, mapCenterForCity, zoomForRadius };
 
 /** Logical tile size on screen (Slippy Map 256 world units). */
 export const TILE_PX = 256;
@@ -22,50 +29,12 @@ export function buildMapTileUri(zoom: number, x: number, y: number): string {
   return `https://${host}.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/${zoom}/${y}/${x}`;
 }
 
-export const DEFAULT_MAP_CENTER = { lat: 40.758, lng: -73.985 };
-
-export const CITY_COORDS: Record<(typeof PASSPORT_CITIES)[number], { lat: number; lng: number }> = {
-  'New York, NY': { lat: 40.758, lng: -73.985 },
-  'Los Angeles, CA': { lat: 34.052, lng: -118.244 },
-  'Chicago, IL': { lat: 41.878, lng: -87.63 },
-  'Miami, FL': { lat: 25.762, lng: -80.192 },
-  'Austin, TX': { lat: 30.267, lng: -97.743 },
-  'San Francisco, CA': { lat: 37.775, lng: -122.419 },
-  'London, UK': { lat: 51.507, lng: -0.128 },
-  'Paris, France': { lat: 48.857, lng: 2.352 },
-  'Tokyo, Japan': { lat: 35.676, lng: 139.65 },
-  'Sydney, Australia': { lat: -33.869, lng: 151.209 },
-};
-
 export type MapTile = {
   key: string;
   uri: string;
   left: number;
   top: number;
 };
-
-export function zoomForRadius(miles: number): number {
-  if (miles >= 9999) {
-    return 4;
-  }
-  if (miles >= 250) {
-    return 7;
-  }
-  if (miles >= 100) {
-    return 8;
-  }
-  if (miles >= 50) {
-    return 11;
-  }
-  return 13;
-}
-
-export function mapCenterForCity(city?: string | null): GeoPoint {
-  if (city && city in CITY_COORDS) {
-    return CITY_COORDS[city as (typeof PASSPORT_CITIES)[number]];
-  }
-  return DEFAULT_MAP_CENTER;
-}
 
 export function lonToTile(lon: number, zoom: number): number {
   return ((lon + 180) / 360) * 2 ** zoom;

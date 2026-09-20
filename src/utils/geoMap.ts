@@ -1,7 +1,7 @@
 import { emberHidesCity } from '../types/profile';
 import type { Profile } from '../types/profile';
 import { geocodeCity } from './neighborhoodCoords';
-import { CITY_COORDS, DEFAULT_MAP_CENTER } from './searchMapTiles';
+import { CITY_COORDS, DEFAULT_MAP_CENTER } from './mapConstants';
 
 const EARTH_RADIUS_MILES = 3958.8;
 

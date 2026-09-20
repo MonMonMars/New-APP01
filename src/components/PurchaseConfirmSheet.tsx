@@ -3,7 +3,9 @@ import { ActivityIndicator, Modal, StyleSheet, Text, TextInput, View } from 'rea
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { getLegalUiStrings } from '../content/legal';
+import { listAvailablePaymentMethods } from '../services/paymentRails';
 import { isDemoPurchases } from '../services/purchases';
+import { PaymentMethodKind } from '../types/purchases';
 import { useAppLocale } from '../hooks/useAppLocale';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
@@ -26,6 +28,8 @@ type PurchaseConfirmSheetProps = {
   verificationCode?: string;
   onVerificationCodeChange?: (code: string) => void;
   verificationHint?: string;
+  paymentMethod?: PaymentMethodKind;
+  onPaymentMethodChange?: (method: PaymentMethodKind) => void;
   onConfirm: () => void | Promise<void>;
   onClose: () => void;
   onOpenSubscriptionTerms?: () => void;
@@ -45,6 +49,8 @@ export function PurchaseConfirmSheet({
   verificationCode = '',
   onVerificationCodeChange,
   verificationHint,
+  paymentMethod = 'platform_default',
+  onPaymentMethodChange,
   onConfirm,
   onClose,
   onOpenSubscriptionTerms,
@@ -56,6 +62,7 @@ export function PurchaseConfirmSheet({
   const legalUi = getLegalUiStrings(locale);
   const accent = iconColor ?? colors.gradientEnd;
   const demoNote = isDemoPurchases() ? t('payments.demoNote') : legalUi.purchaseDemoNote;
+  const paymentMethods = listAvailablePaymentMethods();
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -72,6 +79,29 @@ export function PurchaseConfirmSheet({
           <Text style={[styles.price, { color: colors.text }]}>{price}</Text>
           {errorMessage ? (
             <Text style={[styles.error, { color: '#ef4444' }]}>{errorMessage}</Text>
+          ) : null}
+          {paymentMethods.length > 1 && onPaymentMethodChange ? (
+            <View style={styles.methodBlock}>
+              <Text style={[styles.methodTitle, { color: colors.text }]}>{t('payments.paymentMethodTitle')}</Text>
+              {paymentMethods.map((method) => {
+                const active = paymentMethod === method.kind;
+                return (
+                  <AnimatedPressable
+                    key={method.kind}
+                    style={[
+                      styles.methodRow,
+                      { borderColor: colors.border, backgroundColor: active ? `${accent}18` : colors.background },
+                    ]}
+                    onPress={() => onPaymentMethodChange(method.kind)}
+                  >
+                    <Text style={[styles.methodLabel, { color: active ? accent : colors.text }]}>
+                      {t(method.labelKey)}
+                    </Text>
+                    <Text style={[styles.methodDesc, { color: colors.textMuted }]}>{t(method.descriptionKey)}</Text>
+                  </AnimatedPressable>
+                );
+              })}
+            </View>
           ) : null}
           {requireVerificationCode ? (
             <>
@@ -178,6 +208,30 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: spacing.sm,
     fontWeight: '600',
+  },
+  methodBlock: {
+    width: '100%',
+    marginBottom: spacing.md,
+    gap: spacing.xs,
+  },
+  methodTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    marginBottom: spacing.xs,
+  },
+  methodRow: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radii.button,
+    padding: spacing.sm,
+  },
+  methodLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  methodDesc: {
+    fontSize: 11,
+    lineHeight: 15,
+    marginTop: 2,
   },
   verificationHint: {
     fontSize: 13,

@@ -16,7 +16,7 @@ import { getLegalUiStrings } from '../content/legal';
 import { useTranslation } from '../i18n';
 import { translatePurchaseError } from '../utils/purchaseMessages';
 import { RootStackParamList } from '../types/navigation';
-import { PurchaseProductId } from '../types/purchases';
+import { PaymentMethodKind, PurchaseProductId } from '../types/purchases';
 import { useTheme } from '../context/ThemeContext';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -48,6 +48,7 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
   const [purchasing, setPurchasing] = useState(false);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
   const [verificationCode, setVerificationCode] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodKind>('platform_default');
 
   const packs: Pack[] = useMemo(
     () => [
@@ -98,10 +99,15 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
     const result = await purchaseProduct(
       productId,
       paymentVerificationRequired && mfaEnabled ? verificationCode : undefined,
+      paymentMethod,
     );
     setPurchasing(false);
 
     if (!result.ok) {
+      if (result.code === 'checkout_redirect') {
+        setPurchaseError(null);
+        return;
+      }
       if (result.code !== 'cancelled') {
         setPurchaseError(translatePurchaseError(locale, result.code, result.message));
       }
@@ -219,6 +225,8 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
         requireVerificationCode={paymentVerificationRequired && mfaEnabled}
         verificationCode={verificationCode}
         onVerificationCodeChange={setVerificationCode}
+        paymentMethod={paymentMethod}
+        onPaymentMethodChange={setPaymentMethod}
         onConfirm={() => {
           if (pendingPack) {
             return handlePurchase(pendingPack);

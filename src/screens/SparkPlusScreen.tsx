@@ -15,6 +15,7 @@ import { useTranslation } from '../i18n';
 import { formatSparkPlusPerMonth, getSparkPlusPlanLabel } from '../i18n/labels';
 import { translateRestoreMessage, translatePurchaseError } from '../utils/purchaseMessages';
 import { RootStackParamList } from '../types/navigation';
+import { PaymentMethodKind } from '../types/purchases';
 import { SPARK_PLUS_PRICING, SparkPlusPlan } from '../types/subscription';
 import { sparkPlusFeatureDescriptions } from '../utils/genderAccountPerks';
 import { radii, spacing } from '../theme';
@@ -62,6 +63,7 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
   const [verificationCode, setVerificationCode] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodKind>('platform_default');
 
   const handleSubscribe = async () => {
     setPurchasing(true);
@@ -70,6 +72,7 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
     const result = await purchaseProduct(
       productId,
       paymentVerificationRequired && mfaEnabled ? verificationCode : undefined,
+      paymentMethod,
     );
     setPurchasing(false);
 
@@ -80,7 +83,7 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
       return;
     }
 
-    if (result.code === 'cancelled') {
+    if (result.code === 'cancelled' || result.code === 'checkout_redirect') {
       return;
     }
 
@@ -260,6 +263,8 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
         requireVerificationCode={paymentVerificationRequired && mfaEnabled}
         verificationCode={verificationCode}
         onVerificationCodeChange={setVerificationCode}
+        paymentMethod={paymentMethod}
+        onPaymentMethodChange={setPaymentMethod}
         onConfirm={handleSubscribe}
         onOpenSubscriptionTerms={() => navigation.navigate('LegalDocument', { documentId: 'subscription' })}
       />

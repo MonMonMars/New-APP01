@@ -4,7 +4,7 @@
 
 **https://hop-dependence-rack-cosmetic.trycloudflare.com**
 
-- **Build:** Current `cursor/complete-app-details-pass5-7b60` web export (regional auth, payments polish, pass4–5 details)
+- **Build:** Run `npm run demo:tunnel` on latest `main` / polish branches (root `build:web`, not Pages paths)
 - **Verified:** 2026-09-20 — HTTP 200 on tunnel + local `:8093` serve
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps. Hard-refresh (Cmd/Ctrl+Shift+R) if stale.
 

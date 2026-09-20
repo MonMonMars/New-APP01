@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -42,9 +42,12 @@ export function OnboardingFlow() {
     userId,
     isSupabaseEnabled,
     refreshAuthFromCloud,
+    legalConsent,
+    isHydrated,
   } = useApp();
   const [step, setStep] = useState<Step>('rules');
   const [legalAccepted, setLegalAccepted] = useState(false);
+  const onboardingResumeAppliedRef = useRef(false);
   const [legalPreviewId, setLegalPreviewId] = useState<LegalDocumentId | null>(null);
   const legalUi = getLegalUiStrings(locale);
   const [email, setEmail] = useState('');
@@ -59,6 +62,29 @@ export function OnboardingFlow() {
   const [authLoading, setAuthLoading] = useState(false);
   const [showLocationInfo, setShowLocationInfo] = useState(false);
   const [awaitingMagicLink, setAwaitingMagicLink] = useState(false);
+
+  useEffect(() => {
+    if (!isHydrated || onboardingResumeAppliedRef.current) {
+      return;
+    }
+    onboardingResumeAppliedRef.current = true;
+    if (legalConsent.termsAcceptedAt) {
+      setLegalAccepted(true);
+    }
+    const homeCity = preferences.homePassportCity ?? preferences.passportCity;
+    if (!legalConsent.termsAcceptedAt) {
+      setStep('rules');
+    } else if (!homeCity) {
+      setStep('location');
+    } else {
+      setStep('welcome');
+    }
+  }, [
+    isHydrated,
+    legalConsent.termsAcceptedAt,
+    preferences.homePassportCity,
+    preferences.passportCity,
+  ]);
 
   useEffect(() => {
     if (!isSupabaseEnabled || !awaitingMagicLink) {

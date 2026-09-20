@@ -2980,6 +2980,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     const sessionId = params.get('session_id');
     if (!sessionId) {
+      void syncPurchaseEntitlementsFromCloud().then(() => {
+        const locale = resolveAppLocale(preferences.appLocale, preferences.accountCountryCode);
+        window.alert(
+          `${translate(locale, 'payments.purchaseSuccess')}\n${translate(locale, 'payments.checkoutSuccessSyncBody')}`,
+        );
+      });
       window.history.replaceState({}, document.title, window.location.pathname);
       return;
     }

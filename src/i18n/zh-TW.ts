@@ -151,6 +151,8 @@ export const zhTw = {
     continueAfterReset: '繼續',
     mfaLoginTitle: '雙重驗證',
     mfaLoginBody: '請輸入驗證器 App 的 6 位數代碼。',
+    mfaLoginHint:
+      '無法使用裝置？請在下方登出後重新登入，或在已信任的裝置上前往個人檔案 → 雙重驗證關閉 2FA。',
     mfaCodePlaceholder: '6 位數代碼',
     mfaVerify: '驗證',
     mfaInvalid: '代碼無效，請重試。',
@@ -598,6 +600,8 @@ export const zhTw = {
     webCheckoutUnavailable: '網頁結帳不可用',
     webPaidCheckoutBlocked: '你的帳號地區請使用 iOS 或 Android App 完成付費結帳。',
     checkoutCancelledBody: '未扣款。你可隨時再試。',
+    checkoutSuccessSyncBody:
+      '正在同步你的購買。若一分鐘內未看到 Spark+，請開啟 Spark+ 並點「還原購買」。',
     euConsumerNotice: '歐盟/英國：訂閱將自動續訂，直至於商店或 Stripe 取消。數位內容可能適用法定撤銷權 — 見訂閱條款。',
     methodRecommendedDesc: '依帳號地區：App 內走 App Store / Google Play，網頁走 Stripe 安全結帳（卡片與錢包）。',
     methodRecommendedDescCN:
@@ -850,6 +854,8 @@ export const zhTw = {
     likesLeft: '今日剩餘 {n} 次喜歡',
     paused: '已暫停',
     boostActive: 'Boost 進行中',
+    homeMarket: '歸屬地 · {city}',
+    billingHome: '帳單 · {city}',
     world: '世界',
     filters: '篩選',
     mostCompatible: '今日最合拍',

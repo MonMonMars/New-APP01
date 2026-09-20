@@ -78,6 +78,9 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
   const [closeAfterToast, setCloseAfterToast] = useState(false);
 
   const activeFilters = preferences.discoverFilters ?? [];
+  const homePassportCity =
+    preferences.homePassportCity ??
+    (!preferences.travelMode ? preferences.passportCity : undefined);
 
   const mapPreviewCenter = useMemo(() => {
     if (preferences.mapSearchLat != null && preferences.mapSearchLng != null) {
@@ -185,23 +188,46 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
           />
         </View>
 
-        {(!isSparkPlus || isPaused || isBoosted || (preferences.travelMode && preferences.passportCity)) && (
+        {(!isSparkPlus ||
+          isPaused ||
+          isBoosted ||
+          homePassportCity ||
+          (preferences.travelMode && preferences.passportCity)) && (
           <View style={[styles.metaCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             {!isSparkPlus && (
               <Text style={[styles.metaSub, { color: colors.gradientEnd }]}>
                 {t('discoverHub.likesLeft', { n: remainingLikes })}
               </Text>
             )}
-            {(isPaused || isBoosted || (preferences.travelMode && preferences.passportCity)) && (
+            {(isPaused ||
+              isBoosted ||
+              homePassportCity ||
+              (preferences.travelMode && preferences.passportCity)) && (
               <View style={styles.statusRow}>
                 {isPaused && <StatusPill label={t('discoverHub.paused')} color={colors.rewind} />}
                 {isBoosted && <StatusPill label={t('discoverHub.boostActive')} color={colors.boost} />}
-                {preferences.travelMode && preferences.passportCity && (
+                {homePassportCity && !preferences.travelMode ? (
+                  <StatusPill
+                    label={t('discoverHub.homeMarket', {
+                      city: getPassportCityLabel(locale, homePassportCity),
+                    })}
+                    color={colors.gradientEnd}
+                  />
+                ) : null}
+                {preferences.travelMode && preferences.passportCity ? (
                   <StatusPill
                     label={getPassportCityLabel(locale, preferences.passportCity)}
                     color={colors.superLike}
                   />
-                )}
+                ) : null}
+                {preferences.travelMode && preferences.homePassportCity ? (
+                  <StatusPill
+                    label={t('discoverHub.billingHome', {
+                      city: getPassportCityLabel(locale, preferences.homePassportCity),
+                    })}
+                    color={colors.textMuted}
+                  />
+                ) : null}
               </View>
             )}
           </View>

@@ -191,7 +191,11 @@ import {
 } from '../types/privacy';
 import { generateDemoReply, generateMatchOpener } from '../services/demoChatLlm';
 import { isDemoChatProfile } from '../utils/demoProfileChat';
-import { filterProfilesInRadius } from '../utils/geoMap';
+import {
+  filterProfilesInRadius,
+  relocateProfilesForMapSearch,
+  sortProfilesByDistance,
+} from '../utils/geoMap';
 import { buildUserDataExport, shareUserDataExport } from '../utils/dataExport';
 import {
   clearPersistedState,
@@ -1271,11 +1275,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       );
     }
     if (preferences.mapSearchLat != null && preferences.mapSearchLng != null) {
-      filtered = filterProfilesInRadius(
+      const mapCenter = {
+        lat: preferences.mapSearchLat,
+        lng: preferences.mapSearchLng,
+      };
+      filtered = relocateProfilesForMapSearch(
         filtered,
-        { lat: preferences.mapSearchLat, lng: preferences.mapSearchLng },
+        mapCenter,
         preferences.maxDistanceMiles,
       );
+      filtered = filterProfilesInRadius(filtered, mapCenter, preferences.maxDistanceMiles);
+      filtered = sortProfilesByDistance(filtered, mapCenter);
     }
     return filtered;
   }, [
@@ -1930,21 +1940,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setDiscoverUnlockedCount((count) => count + DISCOVER_BATCH_SIZE);
   }, []);
 
-  const expandSearchRadius = useCallback((miles: number) => {
-    setPreferences((prev) => ({ ...prev, maxDistanceMiles: miles }));
-    setDiscoverUnlockedCount((count) => Math.max(count, DISCOVER_BATCH_SIZE));
+  const resetDiscoverDeckForNewPool = useCallback(() => {
+    setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
     setPriorityProfileId(null);
+    setRewindKey((key) => key + 1);
   }, []);
 
-  const searchMapAt = useCallback((center: { lat: number; lng: number }) => {
-    setPreferences((prev) => ({
-      ...prev,
-      mapSearchLat: center.lat,
-      mapSearchLng: center.lng,
-    }));
-    setDiscoverUnlockedCount((count) => Math.max(count, DISCOVER_BATCH_SIZE));
-    setPriorityProfileId(null);
-  }, []);
+  const expandSearchRadius = useCallback(
+    (miles: number) => {
+      setPreferences((prev) => ({ ...prev, maxDistanceMiles: miles }));
+      resetDiscoverDeckForNewPool();
+    },
+    [resetDiscoverDeckForNewPool],
+  );
+
+  const searchMapAt = useCallback(
+    (center: { lat: number; lng: number }) => {
+      setPreferences((prev) => ({
+        ...prev,
+        mapSearchLat: center.lat,
+        mapSearchLng: center.lng,
+      }));
+      resetDiscoverDeckForNewPool();
+    },
+    [resetDiscoverDeckForNewPool],
+  );
 
   const clearMapSearch = useCallback(() => {
     setPreferences((prev) => ({
@@ -1952,9 +1972,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       mapSearchLat: undefined,
       mapSearchLng: undefined,
     }));
-    setDiscoverUnlockedCount((count) => Math.max(count, DISCOVER_BATCH_SIZE));
-    setPriorityProfileId(null);
-  }, []);
+    resetDiscoverDeckForNewPool();
+  }, [resetDiscoverDeckForNewPool]);
 
   const prioritizeProfileInDeck = useCallback(
     (profileId: string): boolean => {

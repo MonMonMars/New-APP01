@@ -36,7 +36,7 @@ import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { usePulseContextSection } from '../../hooks/usePulseContextSection';
 import { useRotatedPulseContent } from '../../hooks/useRotatedPulseContent';
 import { usePulseFeedRefreshGeneration, usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
-import { resolveDisguiseProfile } from '../../utils/resolveDisguiseProfile';
+import { resolveDisguiseProfile, resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
 import { profileIntroCaption } from '../../utils/profileIntroCaption';
 
 export function DisguiseAlertsScreen() {

@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useOptionalAdmin } from '../context/AdminContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
 import { Profile } from '../types/profile';
 import { isAiPersonaProfile } from '../data/aiPersonas';
+import { ACCOUNT_KIND_LABELS, resolveAccountKind } from '../types/accountKind';
 import { radii, spacing } from '../theme';
 
 type AiPersonaBadgeProps = {
@@ -15,10 +17,21 @@ type AiPersonaBadgeProps = {
 export function AiPersonaBadge({ profile, compact = false }: AiPersonaBadgeProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const admin = useOptionalAdmin();
+  const showInternal = admin?.showInternalProfileLabels ?? false;
 
-  if (!isAiPersonaProfile(profile)) {
+  if (!showInternal) {
     return null;
   }
+
+  const kind = resolveAccountKind(profile);
+  const isInternal = isAiPersonaProfile(profile) || kind === 'demo' || kind === 'ai_persona';
+  if (!isInternal) {
+    return null;
+  }
+
+  const label =
+    kind === 'ai_persona' ? t('chat.aiPowered') : ACCOUNT_KIND_LABELS[kind];
 
   return (
     <View
@@ -30,7 +43,7 @@ export function AiPersonaBadge({ profile, compact = false }: AiPersonaBadgeProps
     >
       <Ionicons name="sparkles" size={compact ? 10 : 12} color={colors.text} />
       <Text style={[styles.text, compact && styles.textCompact, { color: colors.text }]}>
-        {t('chat.aiPowered')}
+        {label}
       </Text>
     </View>
   );

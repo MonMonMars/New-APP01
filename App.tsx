@@ -4,6 +4,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AppErrorBoundary } from './src/components/AppErrorBoundary';
 import { PrivacyShield } from './src/components/security/PrivacyShield';
+import { AdminProvider } from './src/context/AdminContext';
 import { AppProvider, useApp } from './src/context/AppContext';
 import { ensureWebMotionCss } from './src/motion/webMotion';
 import { AppNavigator } from './src/navigation/AppNavigator';
@@ -21,9 +22,11 @@ export default function App() {
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
           <AppProvider>
-            <StatusBarWrapper />
-            <AppNavigator />
-            <PrivacyShield />
+            <AdminProvider>
+              <StatusBarWrapper />
+              <AppNavigator />
+              <PrivacyShield />
+            </AdminProvider>
           </AppProvider>
         </SafeAreaProvider>
       </GestureHandlerRootView>

@@ -6,6 +6,7 @@ import { AiPersonaBadge } from './AiPersonaBadge';
 import { VoicePromptCard } from './VoicePromptCard';
 import { ProfileVerificationDisplay } from './ProfileVerificationDisplay';
 import { VerificationBadges } from './VerificationBadges';
+import { useOptionalAdmin } from '../context/AdminContext';
 import { isAiPersonaProfile } from '../data/aiPersonas';
 import { useTranslation } from '../i18n';
 import {
@@ -66,6 +67,7 @@ export function ProfileDetailSheet({
 }: ProfileDetailSheetProps) {
   const { colors } = useTheme();
   const { t, locale } = useTranslation();
+  const showInternalProfileLabels = useOptionalAdmin()?.showInternalProfileLabels ?? false;
   const insets = useSafeAreaInsets();
 
   if (!profile) {
@@ -178,13 +180,13 @@ export function ProfileDetailSheet({
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('profileDetail.about')}</Text>
             <Text style={[styles.bio, { color: colors.text }]}>{profile.bio}</Text>
-            {isAiPersonaProfile(profile) && (
+            {showInternalProfileLabels && isAiPersonaProfile(profile) ? (
               <View style={styles.aiDisclaimer}>
                 <Text style={styles.aiDisclaimerText}>
                   {t('profileDetail.aiPersonaDisclaimer')}
                 </Text>
               </View>
-            )}
+            ) : null}
           </View>
 
           <ProfileVerificationDisplay profile={profile} />

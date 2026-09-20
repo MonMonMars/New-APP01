@@ -9,7 +9,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
 import { type ReactNode, useEffect, useRef } from 'react';
 import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
 
 import { PulseTabIcon } from '../components/disguise/ModeToggleLogo';
 import { useTranslation } from '../i18n';
@@ -40,6 +40,7 @@ import { TabBarButton } from '../components/TabBarButton';
 import { pulseBrand } from '../theme/pulseBrand';
 import { WorldSwitchVeil } from '../components/motion/WorldSwitchVeil';
 import { DisguiseNavigator } from './DisguiseNavigator';
+import { AdminNavigator } from './AdminNavigator';
 import { MainTabParamList, RootStackParamList } from '../types/navigation';
 import { resolveSparkSection } from '../types/preferences';
 
@@ -257,6 +258,10 @@ function PurchaseHistoryWrapper({
   return <PurchaseHistoryScreen onClose={() => navigation.goBack()} />;
 }
 
+function AdminWrapper({ navigation }: NativeStackScreenProps<RootStackParamList, 'Admin'>) {
+  return <AdminNavigator onClose={() => navigation.goBack()} />;
+}
+
 function MainShell() {
   const { disguiseMode } = useApp();
   // Mount only one tab navigator at a time — React Navigation rejects two Tab.Navigators
@@ -357,6 +362,11 @@ function RootNavigator() {
             component={PurchaseHistoryWrapper}
             options={{ animation: 'slide_from_right' }}
           />
+          <Stack.Screen
+            name="Admin"
+            component={AdminWrapper}
+            options={{ animation: 'fade', presentation: 'fullScreenModal' }}
+          />
         </>
       )}
     </Stack.Navigator>
@@ -371,6 +381,13 @@ function ThemedNavigator() {
   useEffect(() => {
     if (!isHydrated || !hasOnboarded || !navigationRef.isReady()) {
       return;
+    }
+
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const path = window.location.pathname.replace(/\/$/, '');
+      if (path.endsWith('/admin') && navigationRef.getCurrentRoute()?.name !== 'Admin') {
+        navigationRef.navigate('Admin');
+      }
     }
 
     if (disguiseMode && !wasDisguiseMode.current) {

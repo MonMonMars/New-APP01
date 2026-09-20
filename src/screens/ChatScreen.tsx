@@ -16,6 +16,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AiPersonaBadge } from '../components/AiPersonaBadge';
+import { useOptionalAdmin } from '../context/AdminContext';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { EmberStatusChips } from '../components/EmberStatusChips';
 import { ChatComposer } from '../components/ChatComposer';
@@ -80,6 +81,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
     setActiveConversationId,
     preferences,
   } = useApp();
+  const showInternalProfileLabels = useOptionalAdmin()?.showInternalProfileLabels ?? false;
   const [draft, setDraft] = useState('');
   const [showGifPicker, setShowGifPicker] = useState(false);
   const [reactionMessageId, setReactionMessageId] = useState<string | null>(null);
@@ -483,13 +485,13 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         </View>
       )}
 
-      {isAiPersonaProfile(profile) && (
+      {showInternalProfileLabels && isAiPersonaProfile(profile) ? (
         <View style={[styles.aiBanner, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <Text style={[styles.aiBannerText, { color: colors.textMuted }]}>
             {t('chat.aiPracticeBanner')}
           </Text>
         </View>
-      )}
+      ) : null}
 
       {conversation.messages.length === 0 ? (
         <View style={styles.emptyThread}>

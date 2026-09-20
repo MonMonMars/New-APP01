@@ -1,6 +1,14 @@
 import { Image } from 'expo-image';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Dimensions, LayoutChangeEvent, StyleSheet, View, ViewStyle } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import {
+  ActivityIndicator,
+  Dimensions,
+  LayoutChangeEvent,
+  StyleSheet,
+  View,
+  ViewStyle,
+} from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
@@ -9,6 +17,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { spacing } from '../theme';
 import type { GeoPoint } from '../utils/geoMap';
 import {
   buildMapTiles,
@@ -51,11 +60,19 @@ type SearchMapViewProps = {
   pinAccessibilityLabel?: (name: string) => string;
   youMarkerA11y?: string;
   style?: ViewStyle;
+  /** Floating GPS / “my location” control overlaid on the map (Google Maps style). */
+  showLocateButton?: boolean;
+  onLocatePress?: () => void;
+  locateLoading?: boolean;
+  locateAccessibilityLabel?: string;
+  /** Extra inset for the locate control (e.g. sit above bottom sheets). */
+  locateInsetBottom?: number;
+  locateInsetRight?: number;
 };
 
 const windowSize = Dimensions.get('window');
 export const MAP_MIN_ZOOM = 3;
-export const MAP_MAX_ZOOM = 16;
+export const MAP_MAX_ZOOM = 18;
 
 const AVATAR_PIN_SIZE = 28;
 const AVATAR_PIN_SELECTED = 34;
@@ -68,7 +85,7 @@ function zoomFromPinchScale(baseZoom: number, scale: number): number {
   return clampZoom(baseZoom + Math.log2(scale) * 1.5);
 }
 
-/** Carto Voyager raster map with real lat/lng pins, live pan, and pinch zoom. */
+/** Esri World Street raster map with real lat/lng pins, live pan, pinch zoom, and optional GPS control. */
 export function SearchMapView({
   center,
   zoom,
@@ -89,6 +106,12 @@ export function SearchMapView({
   pinAccessibilityLabel,
   youMarkerA11y,
   style,
+  showLocateButton = false,
+  onLocatePress,
+  locateLoading = false,
+  locateAccessibilityLabel,
+  locateInsetBottom = spacing.md,
+  locateInsetRight = spacing.md,
 }: SearchMapViewProps) {
   const [mapSize, setMapSize] = useState({
     width: windowSize.width,
@@ -307,6 +330,26 @@ export function SearchMapView({
       ) : (
         <View style={styles.mapLayer}>{mapLayer}</View>
       )}
+      {showLocateButton && onLocatePress ? (
+        <AnimatedPressable
+          onPress={locateLoading ? undefined : onLocatePress}
+          accessibilityRole="button"
+          accessibilityLabel={locateAccessibilityLabel}
+          style={[
+            styles.locateButton,
+            {
+              right: locateInsetRight,
+              bottom: locateInsetBottom,
+            },
+          ]}
+        >
+          {locateLoading ? (
+            <ActivityIndicator color="#1a73e8" />
+          ) : (
+            <Ionicons name="locate" size={22} color="#1a73e8" />
+          )}
+        </AnimatedPressable>
+      ) : null}
     </View>
   );
 
@@ -317,7 +360,7 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
     overflow: 'hidden',
-    backgroundColor: '#e6eed8',
+    backgroundColor: '#e8e4df',
     minHeight: 120,
   },
   mapLayer: {
@@ -325,7 +368,22 @@ const styles = StyleSheet.create({
   },
   mapFill: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: '#e6eed8',
+    backgroundColor: '#e8e4df',
+  },
+  locateButton: {
+    position: 'absolute',
+    zIndex: 12,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.22,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
   },
   tile: {
     position: 'absolute',

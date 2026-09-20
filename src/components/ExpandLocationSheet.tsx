@@ -2,7 +2,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../context/AppContext';
@@ -114,6 +123,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const [showWaiting, setShowWaiting] = useState(false);
   const [reportProfileId, setReportProfileId] = useState<string | null>(null);
   const [reportProfileName, setReportProfileName] = useState('');
+  const [locatingGps, setLocatingGps] = useState(false);
   const hasActiveMapSearch =
     preferences.mapSearchLat != null && preferences.mapSearchLng != null;
 
@@ -202,14 +212,22 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     setDeckToast(t('mapDiscover.areaLoaded'));
   }, [mapCenter, searchMapAt, searchMorePeople, t]);
 
-  const handleRecenter = useCallback(() => {
-    const target = userLocation ?? mapCenterForCity(preferences.passportCity);
-    setMapCenter(target);
-    if (!hasActiveMapSearch) {
-      setSearchCenter(target);
-    }
-    setSelectedPinId(null);
-  }, [hasActiveMapSearch, preferences.passportCity, userLocation]);
+  const handleLocateGps = useCallback(() => {
+    setLocatingGps(true);
+    void resolveUserLocation(preferences.passportCity)
+      .then((result) => {
+        setUserLocation(result.coords);
+        setMapCenter(result.coords);
+        if (!hasActiveMapSearch) {
+          setSearchCenter(result.coords);
+        }
+        setMapZoom((prev) => Math.min(MAP_MAX_ZOOM, Math.max(prev, 14)));
+        setSelectedPinId(null);
+      })
+      .finally(() => {
+        setLocatingGps(false);
+      });
+  }, [hasActiveMapSearch, preferences.passportCity]);
 
   const handleResetSearchArea = useCallback(() => {
     clearMapSearch();
@@ -386,6 +404,11 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         onPinPress={handlePinPress}
         pinAccessibilityLabel={(name) => t('mapDiscover.selectPinA11y', { name })}
         youMarkerA11y={t('mapDiscover.youMarkerA11y')}
+        showLocateButton
+        onLocatePress={handleLocateGps}
+        locateLoading={locatingGps}
+        locateAccessibilityLabel={t('mapDiscover.locateGpsA11y')}
+        locateInsetBottom={Math.max(insets.bottom, spacing.md) + 132}
         style={styles.fullMap}
       />
 
@@ -417,12 +440,16 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
           </AnimatedPressable>
         ) : (
           <AnimatedPressable
-            onPress={handleRecenter}
+            onPress={handleLocateGps}
             hitSlop={12}
-            accessibilityLabel={t('mapDiscover.recenterA11y')}
+            accessibilityLabel={t('mapDiscover.locateGpsA11y')}
             style={[styles.iconButton, { backgroundColor: chromeBg }]}
           >
-            <Ionicons name="locate" size={20} color={chromeText} />
+            {locatingGps ? (
+              <ActivityIndicator size="small" color={chromeText} />
+            ) : (
+              <Ionicons name="locate" size={20} color={chromeText} />
+            )}
           </AnimatedPressable>
         )}
       </View>

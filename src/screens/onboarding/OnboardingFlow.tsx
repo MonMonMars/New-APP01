@@ -23,7 +23,7 @@ import { AuthWelcomePanel } from '../../components/onboarding/AuthWelcomePanel';
 import { OnboardingLocationMap } from '../../components/onboarding/OnboardingLocationMap';
 import { deriveShowMe } from '../../utils/deriveShowMe';
 import { mapCenterForCity } from '../../utils/searchMapTiles';
-import { countryCodeFromPassportCity } from '../../utils/accountRegion';
+import { countryCodeFromPassportCity, withSyncedAccountCountry } from '../../utils/accountRegion';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 
 type Step = 'welcome' | 'rules' | 'location' | 'intent' | 'identity' | 'profile';
@@ -237,14 +237,16 @@ export function OnboardingFlow() {
             onConfirm={(center, passportCity) => {
               const nextCity = passportCity ?? preferences.passportCity;
               const inferred = countryCodeFromPassportCity(nextCity);
-              updatePreferences({
-                ...preferences,
-                travelMode: false,
-                passportCity: nextCity,
-                accountCountryCode: inferred ?? preferences.accountCountryCode,
-                mapSearchLat: center.lat,
-                mapSearchLng: center.lng,
-              });
+              updatePreferences(
+                withSyncedAccountCountry({
+                  ...preferences,
+                  travelMode: false,
+                  passportCity: nextCity,
+                  accountCountryCode: inferred ?? preferences.accountCountryCode,
+                  mapSearchLat: center.lat,
+                  mapSearchLng: center.lng,
+                }),
+              );
               setStep('intent');
             }}
           />

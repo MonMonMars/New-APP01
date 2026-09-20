@@ -15,6 +15,7 @@ import { useTranslation } from '../../i18n';
 import { getPassportCityLabel } from '../../i18n/labels';
 import { SparkSectionToggle } from '../../components/SparkSectionToggle';
 import { PASSPORT_CITIES, resolveSparkSection } from '../../types/preferences';
+import { countryCodeFromPassportCity, withSyncedAccountCountry } from '../../utils/accountRegion';
 import { ThemeMode } from '../../types/settings';
 import { LEGAL_ENTITY } from '../../constants/legalEntity';
 import { logSecurityEvent, submitSecurityReport } from '../../services/securityReports';
@@ -51,6 +52,7 @@ export function DisguiseProfileScreen() {
     setThemeMode,
     updatePreferences,
     preferences,
+    accountRegion,
     pulseSocial,
     setSparkSection,
   } = useApp();
@@ -138,7 +140,10 @@ export function DisguiseProfileScreen() {
           id: 'st3',
           title: t('disguiseProfile.region'),
           subtitle: preferences.passportCity
-            ? getPassportCityLabel(locale, preferences.passportCity)
+            ? t('disguiseProfile.regionSubtitle', {
+                city: getPassportCityLabel(locale, preferences.passportCity),
+                code: accountRegion.countryCode,
+              })
             : t('disguiseProfile.regionFallback'),
           icon: 'globe-outline' as const,
         },
@@ -439,7 +444,15 @@ export function DisguiseProfileScreen() {
         onClose={() => setRegionPickerOpen(false)}
         onSelect={(id) => {
           if (id.startsWith('city:')) {
-            updatePreferences({ ...preferences, passportCity: id.replace('city:', '') });
+            const passportCity = id.replace('city:', '');
+            updatePreferences(
+              withSyncedAccountCountry({
+                ...preferences,
+                passportCity,
+                accountCountryCode:
+                  countryCodeFromPassportCity(passportCity) ?? preferences.accountCountryCode,
+              }),
+            );
           }
         }}
       />

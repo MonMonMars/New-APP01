@@ -67,6 +67,8 @@ Spark picks auth buttons and tab order from **account region** (`accountCountryC
 
 Without Dashboard setup, WeChat/QQ buttons show provider errors in production; **demo mode** (no Supabase env) stubs WeChat/QQ sign-in locally.
 
+**Demo phone OTP (no Supabase):** send code flow accepts any valid number; enter **`123456`** to sign in (preview builds only).
+
 **Payments:** mainland accounts use **CNY** display and **no Stripe web checkout**; WeChat Pay / Alipay rails are not wired yet — use native IAP or demo purchase flows until a CN payment integration is added.
 
 ### Magic link redirect URLs

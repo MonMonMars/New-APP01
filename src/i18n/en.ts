@@ -115,6 +115,8 @@ export const en = {
     verifyPhoneCode: 'Verify & continue',
     phoneRequiresCloud: 'Phone sign-in requires Supabase with SMS enabled.',
     phoneOtpSent: 'Verification code sent by SMS.',
+    phoneOtpSentDemo: 'Demo mode — use SMS code {code} (no real text sent).',
+    phoneDemoHint: 'Preview mode: tap Send, then enter 123456.',
     phoneOtpFailed: 'Could not send SMS code.',
     phoneVerifyFailed: 'Invalid or expired SMS code.',
     phoneVerified: 'Phone verified — you\'re signed in.',
@@ -573,10 +575,14 @@ export const en = {
     secondAuthenticatorPlaceholder: 'Second 6-digit code',
     requiresMfaOrApp: 'Enable two-factor authentication in Profile, or use the iOS/Android app to pay on this device.',
     accountMarketLabel: 'Account region {region} · prices in {currency}',
+    cnConsumerNotice:
+      'Mainland China accounts: pay in the iOS or Android app (App Store / Google Play). Web card checkout is not offered; WeChat Pay / Alipay integration is planned.',
     euConsumerNotice:
       'EU/UK: Subscriptions renew until cancelled in your store or Stripe account. Statutory withdrawal rights may apply to digital content — see Subscription Terms.',
     methodRecommendedDesc:
       'Uses your account region: App Store / Google Play in-app, or secure Stripe checkout on web (cards & wallets).',
+    methodRecommendedDescCN:
+      'Mainland China: bill through App Store or Google Play in the native app (CNY). Web card checkout is not available.',
     paymentMethodTitle: 'Payment method',
     methodRecommended: 'Recommended',
     methodStripe: 'Card & wallets',
@@ -808,6 +814,7 @@ export const en = {
     disguiseToggleHint:
       'Turn off disguise here, or tap the {appName} logo in the header to leave {unlockLabel}.',
     regionFallback: 'United Kingdom',
+    regionSubtitle: '{city} · account {code}',
     defaultOverlayText: 'Weekend reads you should not miss',
     emailSupport: 'Email support',
     supportEmailSubject: '{appName} support',

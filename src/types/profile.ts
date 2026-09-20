@@ -1,3 +1,5 @@
+import type { AccountKind } from './accountKind';
+
 export type ProfilePrompt = {
   question: string;
   answer: string;
@@ -90,6 +92,10 @@ export type Profile = {
   openingMove?: string;
   /** Hinge-style voice prompt on profile */
   voicePrompt?: VoicePrompt;
+  /** Internal: demo / seed catalog profile (not the signed-in member). */
+  isDemoProfile?: boolean;
+  /** Internal: real member vs demo seed vs AI persona — admin-only in UI. */
+  accountKind?: AccountKind;
   /** Spark AI practice persona — not a real person */
   isAiPersona?: boolean;
   /** Links to AI_PERSONA_CONFIGS for chat personality */

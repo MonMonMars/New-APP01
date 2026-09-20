@@ -173,7 +173,11 @@ import { clearVaultKey } from '../utils/secureStorage';
 import { translate } from '../i18n';
 import { resolveAppLocale } from '../types/locale';
 import type { AccountRegionContext } from '../types/accountRegion';
-import { resolveAccountRegion, withSyncedAccountCountry } from '../utils/accountRegion';
+import {
+  normalizePreferencesAccountMarket,
+  resolveAccountRegion,
+  withSyncedAccountCountry,
+} from '../utils/accountRegion';
 import { messagePreviewText, sentGifContext, sentPhotoContext, sentVoiceContext } from '../utils/messageFormat';
 import { disguiseWorldMeta } from '../utils/disguiseWorld';
 import { DisguiseUnlockConfirm } from '../components/disguise/DisguiseUnlockConfirm';
@@ -623,7 +627,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setUser(remote.user);
       }
       if (remote.preferences) {
-        setPreferences((prev) => ({ ...prev, ...remote.preferences }));
+        setPreferences((prev) =>
+          normalizePreferencesAccountMarket({ ...prev, ...remote.preferences }),
+        );
       }
       setPassedIds(arrayToSet(remote.passedIds ?? []));
       setLikedIds(arrayToSet(remote.likedIds ?? []));
@@ -669,7 +675,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       if (saved) {
         setUser(saved.user);
-        setPreferences(saved.preferences);
+        setPreferences(normalizePreferencesAccountMarket(saved.preferences));
         setHasOnboarded(saved.hasOnboarded);
         setIsAuthenticated(saved.isAuthenticated);
         setUserId(saved.userId);
@@ -2952,10 +2958,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     void pollStripeCheckoutFulfillment(userId, sessionId).then((grant) => {
       if (grant) {
         applyEntitlementGrant(grant);
+        if (typeof window !== 'undefined') {
+          const locale = resolveAppLocale(preferences.appLocale);
+          window.alert(
+            `${translate(locale, 'payments.purchaseSuccess')}\n${translate(locale, 'payments.subscriptionActivated')}`,
+          );
+        }
       }
     });
     window.history.replaceState({}, document.title, window.location.pathname);
-  }, [applyEntitlementGrant, isHydrated, syncPurchaseEntitlementsFromCloud, userId]);
+  }, [applyEntitlementGrant, isHydrated, preferences.appLocale, syncPurchaseEntitlementsFromCloud, userId]);
 
   const purchaseProduct = useCallback(
     async (

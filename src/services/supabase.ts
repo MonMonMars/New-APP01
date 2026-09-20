@@ -38,6 +38,7 @@ type PreferencesExtraRow = {
   sparkSection?: SparkSection;
   appLocale?: AppLocale;
   accountCountryCode?: string;
+  homePassportCity?: string;
   mapSearchLat?: number;
   mapSearchLng?: number;
   advancedFilters?: DiscoveryPreferences['advancedFilters'];
@@ -48,6 +49,7 @@ function buildPreferencesExtra(preferences: DiscoveryPreferences): PreferencesEx
     sparkSection: preferences.sparkSection,
     appLocale: preferences.appLocale,
     accountCountryCode: preferences.accountCountryCode,
+    homePassportCity: preferences.homePassportCity,
     mapSearchLat: preferences.mapSearchLat,
     mapSearchLng: preferences.mapSearchLng,
     advancedFilters: preferences.advancedFilters,
@@ -74,6 +76,10 @@ function applyPreferencesExtra(
       typeof row.accountCountryCode === 'string' && row.accountCountryCode.length === 2
         ? row.accountCountryCode.toUpperCase()
         : preferences.accountCountryCode,
+    homePassportCity:
+      typeof row.homePassportCity === 'string' && row.homePassportCity.length > 0
+        ? row.homePassportCity
+        : preferences.homePassportCity,
     mapSearchLat: typeof row.mapSearchLat === 'number' ? row.mapSearchLat : preferences.mapSearchLat,
     mapSearchLng: typeof row.mapSearchLng === 'number' ? row.mapSearchLng : preferences.mapSearchLng,
     advancedFilters: row.advancedFilters ?? preferences.advancedFilters,

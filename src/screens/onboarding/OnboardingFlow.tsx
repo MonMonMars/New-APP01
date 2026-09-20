@@ -43,7 +43,7 @@ export function OnboardingFlow() {
     isSupabaseEnabled,
     refreshAuthFromCloud,
   } = useApp();
-  const [step, setStep] = useState<Step>('welcome');
+  const [step, setStep] = useState<Step>('rules');
   const [legalAccepted, setLegalAccepted] = useState(false);
   const [legalPreviewId, setLegalPreviewId] = useState<LegalDocumentId | null>(null);
   const legalUi = getLegalUiStrings(locale);
@@ -66,7 +66,7 @@ export function OnboardingFlow() {
     }
     if (isAuthenticated && userId && step === 'welcome') {
       setAwaitingMagicLink(false);
-      setStep('rules');
+      setStep('intent');
     }
   }, [awaitingMagicLink, isAuthenticated, isSupabaseEnabled, step, userId]);
 
@@ -133,10 +133,10 @@ export function OnboardingFlow() {
           <AuthWelcomePanel
             authLoading={authLoading}
             setAuthLoading={setAuthLoading}
-            onAuthenticated={() => setStep('rules')}
+            onAuthenticated={() => setStep('intent')}
             onGuest={() => {
               signInWithAppleStub();
-              setStep('rules');
+              setStep('intent');
             }}
             email={email}
             setEmail={setEmail}
@@ -241,13 +241,14 @@ export function OnboardingFlow() {
                 withSyncedAccountCountry({
                   ...preferences,
                   travelMode: false,
+                  homePassportCity: nextCity,
                   passportCity: nextCity,
                   accountCountryCode: inferred ?? preferences.accountCountryCode,
                   mapSearchLat: center.lat,
                   mapSearchLng: center.lng,
                 }),
               );
-              setStep('intent');
+              setStep('welcome');
             }}
           />
           {showLocationInfo ? (

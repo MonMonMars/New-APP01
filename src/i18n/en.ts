@@ -48,7 +48,7 @@ export const en = {
     ruleAge: '18+ only — one person, one account.',
     locationTitle: 'Choose your region',
     locationSubtitle:
-      'Set where you want to discover people. Pan the map, search for a city, or use GPS — others never see your exact pin.',
+      'Pick your home market first — it sets sign-in options (e.g. WeChat in China) and billing. Pan the map or search; others never see your exact pin.',
     mapDragHint: 'Drag and zoom the map. The pin marks your discovery area.',
     searchPlacePlaceholder: 'Search city or neighborhood',
     clearPlaceSearch: 'Clear search',
@@ -185,6 +185,13 @@ export const en = {
     appearance: 'Appearance',
     language: 'Language',
     languageHint: 'App display language',
+    accountHomeMarket: 'Account home market',
+    accountHomeMarketValue: '{city} · {code} · {currency}',
+    accountHomeMarketUnset: 'Set your home market for sign-in and billing',
+    accountHomeMarketTitle: 'Home market',
+    accountHomeMarketHint:
+      'Controls WeChat/QQ vs Google, phone-first tabs, and checkout currency. Travel mode does not change this.',
+    accountHomeMarketCurrent: 'Current account region: {code}',
     lightMode: 'Light mode',
     darkMode: 'Dark mode',
     systemMode: 'System',
@@ -955,6 +962,8 @@ export const en = {
     discoverySettingsTitle: 'Discovery settings',
     discoveryShowMe: 'Show me',
     discoveryPassport: 'Passport / Travel mode',
+    discoveryPassportTravelHint:
+      'Travel city only affects discovery. Change home market in Profile → Account home market.',
     discoveryChangeLocation: 'Change location',
     discoveryDistance: 'Distance',
     discoveryMaxDistance: 'Maximum distance',

@@ -128,6 +128,9 @@ export function DiscoveryPreferencesSheet({
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
             {t('preferences.discoveryPassport')}
           </Text>
+          <Text style={[styles.passportHint, { color: colors.textMuted }]}>
+            {t('preferences.discoveryPassportTravelHint')}
+          </Text>
           <View style={[styles.passportRow, { backgroundColor: colors.surface }]}>
             <Ionicons name="airplane" size={20} color={colors.superLike} />
             <Text style={[styles.passportLabel, { color: colors.text }]}>
@@ -285,6 +288,12 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     fontWeight: '600',
+  },
+  passportHint: {
+    fontSize: 12,
+    lineHeight: 17,
+    marginBottom: spacing.sm,
+    paddingHorizontal: spacing.xs,
   },
   cityGrid: {
     flexDirection: 'row',

@@ -32,7 +32,9 @@ import { resolveSparkSection } from '../types/preferences';
 import { radii, spacing } from '../theme';
 import { LocaleToggle } from '../components/legal/LocaleToggle';
 import { APP_LOCALE_LABELS } from '../types/locale';
+import { AccountHomeMarketSheet } from '../components/AccountHomeMarketSheet';
 import { AnimatedPressable } from '../components/AnimatedPressable';
+import { getPassportCityLabel } from '../i18n/labels';
 
 type SettingsRoute =
   | 'Safety'
@@ -92,12 +94,19 @@ export function ProfileScreen() {
     disguiseAdCreative,
     profileViewers,
     profileViewCount,
+    accountRegion,
   } = useApp();
   const section = resolveSparkSection(preferences.sparkSection);
   const disguiseMeta = useDisguiseWorld();
   const [showEdit, setShowEdit] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
   const [showDisguiseGenerator, setShowDisguiseGenerator] = useState(false);
+  const [showAccountHomeMarket, setShowAccountHomeMarket] = useState(false);
+  const homeCityLabel = preferences.homePassportCity
+    ? getPassportCityLabel(locale, preferences.homePassportCity)
+    : preferences.passportCity
+      ? getPassportCityLabel(locale, preferences.passportCity)
+      : null;
   const scrollRef = useRef<ScrollViewType>(null);
 
   const handleRowPress = (route: SettingsRoute) => {
@@ -314,6 +323,26 @@ export function ProfileScreen() {
           <LocaleToggle compact inline />
         </View>
 
+        <AnimatedPressable
+          style={[styles.toggleRow, { borderBottomColor: colors.border }]}
+          onPress={() => setShowAccountHomeMarket(true)}
+        >
+          <Ionicons name="globe-outline" size={22} color={colors.textMuted} />
+          <View style={styles.toggleText}>
+            <Text style={[styles.toggleLabel, { color: colors.text }]}>{t('profile.accountHomeMarket')}</Text>
+            <Text style={[styles.toggleDesc, { color: colors.textMuted }]}>
+              {homeCityLabel
+                ? t('profile.accountHomeMarketValue', {
+                    city: homeCityLabel,
+                    code: accountRegion.countryCode,
+                    currency: accountRegion.currency,
+                  })
+                : t('profile.accountHomeMarketUnset')}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+        </AnimatedPressable>
+
         <View style={[styles.toggleRow, { borderBottomColor: colors.border }]}>
           <Ionicons name="eye-off-outline" size={22} color={colors.textMuted} />
           <View style={styles.toggleText}>
@@ -441,6 +470,14 @@ export function ProfileScreen() {
       <DisguiseAdGeneratorSheet
         visible={showDisguiseGenerator}
         onClose={() => setShowDisguiseGenerator(false)}
+      />
+
+      <AccountHomeMarketSheet
+        visible={showAccountHomeMarket}
+        preferences={preferences}
+        accountCountryCode={accountRegion.countryCode}
+        onClose={() => setShowAccountHomeMarket(false)}
+        onSave={updatePreferences}
       />
     </View>
   );

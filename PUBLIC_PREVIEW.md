@@ -2,11 +2,12 @@
 
 ## Demo link (verified working)
 
-**https://proportion-julie-reflected-had.trycloudflare.com**
+**https://formerly-para-school-logs.trycloudflare.com**
 
-- **Built from branch:** `cursor/tinder-action-bar-7b60` (base: `cursor/world-map-search-accounts-ac0d`)
+- **Built from branch:** `cursor/tinder-action-bar-7b60` (commit `fa6dc0e`, base: `cursor/world-map-search-accounts-ac0d`)
 - **Build:** World map discover + account search stack, Tinder-style 5-button discover action bar (Rewind · Pass · Super Like · Like · Boost)
-- **Verified:** 2026-09-20 — HTTP 200 on tunnel and local `:8090`
+- **Bundle:** `index-2fe7e7dd45036aef52c8b34ff2c02aca.js`
+- **Verified:** 2026-09-20 12:09 UTC — HTTP 200 on tunnel and local `:8090`
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps. Hard-refresh (Cmd/Ctrl+Shift+R) if stale.
 
 ### Quick start

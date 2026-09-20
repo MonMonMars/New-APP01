@@ -13,7 +13,7 @@ import { getEmberLocationLabel, getEmberRelationshipLabel } from '../../i18n/lab
 import { buildReporterPhotoUrls } from '../../utils/disguiseReporterPhotos';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { webClass } from '../../motion/webMotion';
-import { resolveReporterSparkProfile } from '../../utils/resolveDisguiseProfile';
+import { resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
 import { MatchToast } from '../MatchToast';
 import { EmberStatusChips } from '../EmberStatusChips';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
@@ -131,7 +131,9 @@ export function PersonPreviewSheet({
     opacity: cardOpacity.value,
   }));
 
-  const linkedProfile = reporter ? resolveReporterSparkProfile(reporter, preferences.sparkSection) : null;
+  const linkedProfile = reporter
+    ? resolveExplicitDatingProfile(reporter.profileId, preferences.sparkSection)
+    : null;
 
   const displayPhotos = useMemo(() => {
     if (!reporter) {

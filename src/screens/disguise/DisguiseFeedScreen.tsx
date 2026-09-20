@@ -21,6 +21,7 @@ import { spacing } from '../../theme';
 import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefreshFooter';
+import { pulseFeedCardShell } from '../../components/disguise/pulseFeedCardLayout';
 import { FadeSlideIn } from '../../components/motion/FadeSlideIn';
 import { usePulseFeedRefreshGeneration, usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
 
@@ -43,7 +44,7 @@ function renderFeedItem({ item, index }: { item: FeedItem; index: number }) {
   })();
 
   return (
-    <FadeSlideIn index={index % 10} distance={18}>
+    <FadeSlideIn index={index % 10} distance={18} style={pulseFeedCardShell}>
       {card}
     </FadeSlideIn>
   );
@@ -142,6 +143,9 @@ const styles = StyleSheet.create({
   list: {
     padding: spacing.md,
     paddingBottom: spacing.xl,
+    width: '100%',
+    maxWidth: '100%',
+    alignSelf: 'center',
   },
   headerRow: {
     flexDirection: 'row',

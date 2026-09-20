@@ -45,6 +45,14 @@ export function profileIdFromPostId(postId: string): string | undefined {
 }
 
 /** Map disguise reporter / card ids back to a dating profile when woven from seed data. */
+/** Profile link only when seed data or woven card ids provide one — never hash-mapped random names. */
+export function explicitReporterProfileId(reporter: {
+  id: string;
+  profileId?: string;
+}): string | undefined {
+  return reporter.profileId ?? resolveDisguiseProfileId(reporter.id);
+}
+
 export function resolveDisguiseProfileId(reporterId: string): string | undefined {
   if (reporterId === 'disguised-user') {
     return undefined;

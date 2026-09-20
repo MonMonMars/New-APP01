@@ -1,6 +1,7 @@
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 
 import { radii, spacing } from '../../theme';
+import { PULSE_FEED_CARD_MAX_WIDTH } from './pulseFeedCardLayout';
 
 /** Almost full-screen read panels for news, tarot, and sponsored landing content. */
 export const DISGUISE_READ_SHEET_RATIO = 0.94;
@@ -15,6 +16,9 @@ export const disguiseReadSheetStyles = StyleSheet.create({
     borderTopRightRadius: radii.card + 4,
     borderWidth: StyleSheet.hairlineWidth,
     overflow: 'hidden',
+    width: '100%',
+    maxWidth: Platform.OS === 'web' ? PULSE_FEED_CARD_MAX_WIDTH : '100%',
+    alignSelf: 'center',
   },
   scroll: {
     flex: 1,

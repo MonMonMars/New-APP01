@@ -12,7 +12,7 @@ import {
   renewPulseFeedProfiles,
   rotatePulseList,
 } from './refreshPulseFeed';
-import { pinnedReporterProfileId, resolveDisguiseProfileId } from './resolveDisguiseProfile';
+import { explicitReporterProfileId } from './resolveDisguiseProfile';
 
 function weaveProfileCards(base: FeedItem[], profileCards: FeedItem[]): FeedItem[] {
   if (profileCards.length === 0) {
@@ -72,10 +72,7 @@ export function pinFeedProfileLinks(items: FeedItem[], section?: SparkSection | 
       ...item,
       reporters: item.reporters.map((reporter) => ({
         ...reporter,
-        profileId:
-          reporter.profileId ??
-          resolveDisguiseProfileId(reporter.id) ??
-          pinnedReporterProfileId(reporter.id, section),
+        profileId: explicitReporterProfileId(reporter),
       })),
     };
   });
@@ -90,10 +87,7 @@ export function syncReporterPhotos(items: FeedItem[], section?: SparkSection | s
     return {
       ...item,
       reporters: item.reporters.map((reporter) => {
-        const profileId =
-          reporter.profileId ??
-          resolveDisguiseProfileId(reporter.id) ??
-          pinnedReporterProfileId(reporter.id, section);
+        const profileId = explicitReporterProfileId(reporter);
         if (!profileId) {
           return reporter;
         }

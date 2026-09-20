@@ -21,6 +21,7 @@ import { SocialCommentSheet } from './SocialCommentSheet';
 import { SavePostButton } from './SavePostButton';
 import { shareWithFallback } from '../../utils/shareWithFallback';
 import { PulseProfileSwap } from '../motion/PulseProfileSwap';
+import { pulseFeedCardShell } from './pulseFeedCardLayout';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type SocialPostCardProps = {
@@ -96,7 +97,13 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
   };
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+    <View
+      style={[
+        styles.card,
+        pulseFeedCardShell,
+        { backgroundColor: colors.surface, borderColor: colors.border },
+      ]}
+    >
       <View style={styles.header}>
         <View style={styles.headerMain}>
           <PulseProfileSwap

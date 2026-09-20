@@ -62,6 +62,38 @@ export function profileHasGeo(profile: Profile): profile is Profile & { latitude
   return typeof profile.latitude === 'number' && typeof profile.longitude === 'number';
 }
 
+/**
+ * Demo map search: deterministically scatter profiles around the searched center so
+ * every filtered profile can appear as a pin/deck card in the new area.
+ */
+export function relocateProfilesForMapSearch(
+  profiles: Profile[],
+  center: GeoPoint,
+  radiusMiles: number,
+): Profile[] {
+  const spreadMiles =
+    radiusMiles >= 9999 ? 30 : Math.max(1, radiusMiles);
+
+  return profiles.map((profile, index) => {
+    if (emberHidesCity(profile.emberDiscretion)) {
+      return profile;
+    }
+    const seed = Number(profile.id) || index + 1;
+    const bearing = (seed * 137.508) % 360;
+    const dist =
+      spreadMiles >= 9999
+        ? 0.5 + ((seed * 19) % 100) / 100 * (spreadMiles - 0.5)
+        : Math.max(0.2, ((seed * 17) % 1000) / 1000 * spreadMiles);
+    const coords = offsetLatLng(center, dist, bearing);
+    return {
+      ...profile,
+      latitude: coords.lat,
+      longitude: coords.lng,
+      distanceMiles: Math.round(dist * 10) / 10,
+    };
+  });
+}
+
 /** Profiles within radius of map center; hidden Ember profiles excluded from pins. */
 export function filterProfilesInRadius(
   profiles: Profile[],

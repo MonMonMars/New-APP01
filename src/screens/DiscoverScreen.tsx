@@ -7,7 +7,6 @@ import { Alert, Dimensions, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BoostBanner } from '../components/BoostBanner';
-import { RewindButton } from '../components/RewindButton';
 import { LikeLimitModal } from '../components/LikeLimitModal';
 import { PostMatchMomentumModal } from '../components/PostMatchMomentumModal';
 import { MatchModal } from '../components/MatchModal';
@@ -326,6 +325,14 @@ export function DiscoverScreen() {
     [locale, processLike, promptLikeTarget],
   );
 
+  const handleRewindPress = useCallback(() => {
+    if (isSparkPlus) {
+      rewindLastPass();
+      return;
+    }
+    navigation.getParent()?.navigate('SparkPlus');
+  }, [isSparkPlus, navigation, rewindLastPass]);
+
   const handleSuperLikeChatNow = useCallback(() => {
     if (!superLikeProfileState) {
       return;
@@ -357,13 +364,6 @@ export function DiscoverScreen() {
         />
         <View style={styles.headerSpacer} />
         <View style={styles.headerActions}>
-          <RewindButton
-            variant="header"
-            visible={hasRewindablePass && !isPaused}
-            isSparkPlus={isSparkPlus}
-            onPress={rewindLastPass}
-            onUpgrade={() => navigation.getParent()?.navigate('SparkPlus')}
-          />
           <AnimatedPressable
             style={styles.hubButton}
             onPress={() => navigation.getParent()?.navigate('MapDiscover')}
@@ -439,6 +439,9 @@ export function DiscoverScreen() {
             canLike={canLike}
             onLikeBlocked={() => setShowLikeLimit(true)}
             compact
+            showRewind={hasRewindablePass && !isPaused}
+            onRewindPress={handleRewindPress}
+            isSparkPlus={isSparkPlus}
           />
         )}
 

@@ -33,7 +33,7 @@ type DropTargetsProps = {
   onTrashPress?: () => void;
   onHeartPress?: () => void;
   onStarPress?: () => void;
-  /** Undo last pass — sits left of super like, white styling (Spark + Ember). */
+  /** Undo last pass — fourth action button, even spacing with pass / super like / like. */
   showRewind?: boolean;
   onRewindPress?: () => void;
   isSparkPlus?: boolean;
@@ -185,50 +185,36 @@ export function DropTargets({
 
   return (
     <View style={[styles.row, compact && styles.rowCompact]} pointerEvents="box-none" onLayout={reportZones}>
-      <TargetButton
-        icon="trash-outline"
-        iconColor={colors.card}
-        backgroundColor={colors.heartRed}
-        borderColor={colors.heartRed}
-        active={trashActive}
-        targetRef={trashRef}
-        size={targetSize}
-        accessibilityLabel={t('discover.pass')}
-        onLayout={reportTrashZone}
-        onPress={onTrashPress}
-      />
+      <View style={styles.actionSlot}>
+        <TargetButton
+          icon="trash-outline"
+          iconColor={colors.card}
+          backgroundColor={colors.heartRed}
+          borderColor={colors.heartRed}
+          active={trashActive}
+          targetRef={trashRef}
+          size={targetSize}
+          accessibilityLabel={t('discover.pass')}
+          onLayout={reportTrashZone}
+          onPress={onTrashPress}
+        />
+      </View>
 
-      {onStarPress && (
-        <View style={styles.centerCluster}>
-          {showRewind && onRewindPress ? (
-            <View style={styles.rewindWrap}>
-              <TargetButton
-                icon="arrow-undo"
-                iconColor={REWIND_WHITE}
-                backgroundColor={REWIND_BG}
-                borderColor={REWIND_WHITE}
-                active={rewindActive}
-                targetRef={rewindRef}
-                size={targetSize}
-                accessibilityLabel={t('discover.rewindA11y')}
-                onLayout={() => undefined}
-                onPress={onRewindPress}
-              />
-              {!isSparkPlus ? (
-                <View style={[styles.plusDot, { backgroundColor: colors.gradientEnd }]}>
-                  <Ionicons name="diamond" size={8} color={colors.text} />
-                </View>
-              ) : null}
-            </View>
-          ) : null}
+      {onStarPress ? (
+        <View style={styles.actionSlot}>
           <View style={styles.starWrap}>
-            <View style={[styles.starGlow, {
-              width: starSize + 20,
-              height: starSize + 20,
-              borderRadius: (starSize + 20) / 2,
-              backgroundColor: `${colors.heartRed}40`,
-              borderColor: `${colors.heartPink}80`,
-            }]} />
+            <View
+              style={[
+                styles.starGlow,
+                {
+                  width: starSize + 20,
+                  height: starSize + 20,
+                  borderRadius: (starSize + 20) / 2,
+                  backgroundColor: `${colors.heartRed}40`,
+                  borderColor: `${colors.heartPink}80`,
+                },
+              ]}
+            />
             <TargetButton
               icon="star"
               iconColor={colors.card}
@@ -243,20 +229,46 @@ export function DropTargets({
             />
           </View>
         </View>
-      )}
+      ) : null}
 
-      <TargetButton
-        icon="heart"
-        iconColor={colors.card}
-        backgroundColor={colors.heartRed}
-        borderColor={colors.heartRed}
-        active={heartActive}
-        targetRef={heartRef}
-        size={targetSize}
-        accessibilityLabel={t('discover.like')}
-        onLayout={reportHeartZone}
-        onPress={onHeartPress}
-      />
+      <View style={styles.actionSlot}>
+        <TargetButton
+          icon="heart"
+          iconColor={colors.card}
+          backgroundColor={colors.heartRed}
+          borderColor={colors.heartRed}
+          active={heartActive}
+          targetRef={heartRef}
+          size={targetSize}
+          accessibilityLabel={t('discover.like')}
+          onLayout={reportHeartZone}
+          onPress={onHeartPress}
+        />
+      </View>
+
+      {showRewind && onRewindPress ? (
+        <View style={styles.actionSlot}>
+          <View style={styles.rewindWrap}>
+            <TargetButton
+              icon="arrow-undo"
+              iconColor={REWIND_WHITE}
+              backgroundColor={REWIND_BG}
+              borderColor={REWIND_WHITE}
+              active={rewindActive}
+              targetRef={rewindRef}
+              size={targetSize}
+              accessibilityLabel={t('discover.rewindA11y')}
+              onLayout={() => undefined}
+              onPress={onRewindPress}
+            />
+            {!isSparkPlus ? (
+              <View style={[styles.plusDot, { backgroundColor: colors.gradientEnd }]}>
+                <Ionicons name="diamond" size={8} color={colors.text} />
+              </View>
+            ) : null}
+          </View>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -268,7 +280,6 @@ const styles = StyleSheet.create({
     left: spacing.lg,
     right: spacing.lg,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     zIndex: 20,
   },
@@ -276,6 +287,11 @@ const styles = StyleSheet.create({
     bottom: spacing.md,
     left: spacing.md,
     right: spacing.md,
+  },
+  actionSlot: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
   },
   target: {
     borderWidth: 2,
@@ -285,11 +301,6 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
     elevation: 6,
-  },
-  centerCluster: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
   },
   rewindWrap: {
     position: 'relative',

@@ -10,6 +10,7 @@ import { DisguiseFeedScreen } from '../screens/disguise/DisguiseFeedScreen';
 import { DisguiseProfileScreen } from '../screens/disguise/DisguiseProfileScreen';
 import { DisguiseTrendingScreen } from '../screens/disguise/DisguiseTrendingScreen';
 import { useTranslation } from '../i18n';
+import { pulseBrand } from '../theme/pulseBrand';
 import { disguiseWorldMeta } from '../utils/disguiseWorld';
 import { resolveSparkSection } from '../types/preferences';
 
@@ -29,6 +30,9 @@ export function DisguiseNavigator() {
   const meta = disguiseWorldMeta(preferences.sparkSection, user.gender, locale);
   const section = resolveSparkSection(preferences.sparkSection);
   const sectionAccent = section === 'ember' ? colors.ember : colors.gradientEnd;
+  /** Pulse disguise tabs stay on-brand blue in Ember; Spark section keeps pink accent. */
+  const tabActiveTint = section === 'ember' ? meta.accent : sectionAccent;
+  const tabInactiveTint = section === 'ember' ? pulseBrand.navyMuted : colors.textMuted;
   const activityBadge =
     !pulseSocial.activityAlertsRead && disguiseAlerts.length > 0
       ? disguiseAlerts.length
@@ -47,10 +51,10 @@ export function DisguiseNavigator() {
           paddingTop: 6,
           height: 72,
         },
-        tabBarActiveTintColor: sectionAccent,
-        tabBarInactiveTintColor: colors.textMuted,
+        tabBarActiveTintColor: tabActiveTint,
+        tabBarInactiveTintColor: tabInactiveTint,
         tabBarBadgeStyle: {
-          backgroundColor: sectionAccent,
+          backgroundColor: tabActiveTint,
           color: '#FFFFFF',
           fontSize: 11,
         },

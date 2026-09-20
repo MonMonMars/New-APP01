@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from '
 import { NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 
 import { MOTION } from '../motion/presets';
+import { refreshPulseLiveNews } from '../services/pulseLiveNews';
 
 let refreshGeneration = 0;
 const subscribers = new Set<() => void>();
@@ -74,9 +75,12 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
     setRefreshing(true);
     bumpPulseFeedRefreshGeneration();
 
-    await new Promise((resolve) => {
-      setTimeout(resolve, MOTION.duration.slow);
-    });
+    await Promise.all([
+      refreshPulseLiveNews({ force: true }),
+      new Promise((resolve) => {
+        setTimeout(resolve, MOTION.duration.slow);
+      }),
+    ]);
 
     setRefreshing(false);
     setJustUpdated(true);

@@ -50,33 +50,40 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
 
   return (
     <>
-      <AnimatedPressable
-        accessibilityRole="button"
-        accessibilityLabel={t('newsArticle.readArticleA11y', { headline: post.headline })}
-        onPress={() => setArticleOpen(true)}
-        style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
-      >
-        <MediaWithContentBadge kind="news">
-          <NewsHeroImage uri={post.imageUrl} style={styles.image} accessibilityLabel={post.headline} />
-        </MediaWithContentBadge>
+      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <AnimatedPressable
+          accessibilityRole="button"
+          accessibilityLabel={t('newsArticle.readArticleA11y', { headline: post.headline })}
+          onPress={() => setArticleOpen(true)}
+        >
+          <MediaWithContentBadge kind="news">
+            <NewsHeroImage uri={post.imageUrl} style={styles.image} accessibilityLabel={post.headline} />
+          </MediaWithContentBadge>
+        </AnimatedPressable>
         <View style={styles.body}>
-          <View style={styles.metaRow}>
-            <Text style={[styles.source, { color: accent }]}>{post.source}</Text>
-            <Text style={[styles.dot, { color: colors.textMuted }]}>·</Text>
-            <Text style={[styles.category, { color: colors.textMuted }]}>
-              {getPulseCategoryLabel(locale, post.category)}
+          <AnimatedPressable
+            accessibilityRole="button"
+            accessibilityLabel={t('newsArticle.readArticleA11y', { headline: post.headline })}
+            onPress={() => setArticleOpen(true)}
+          >
+            <View style={styles.metaRow}>
+              <Text style={[styles.source, { color: accent }]}>{post.source}</Text>
+              <Text style={[styles.dot, { color: colors.textMuted }]}>·</Text>
+              <Text style={[styles.category, { color: colors.textMuted }]}>
+                {getPulseCategoryLabel(locale, post.category)}
+              </Text>
+              <Text style={[styles.time, { color: colors.textMuted }]}>
+                {localizeTimeAgoLabel(locale, post.timeAgo)}
+              </Text>
+            </View>
+            <Text style={[styles.headline, { color: colors.text }]}>{post.headline}</Text>
+            <Text style={[styles.summary, { color: colors.textMuted }]} numberOfLines={3}>
+              {post.summary}
             </Text>
-            <Text style={[styles.time, { color: colors.textMuted }]}>
-              {localizeTimeAgoLabel(locale, post.timeAgo)}
-            </Text>
-          </View>
-          <Text style={[styles.headline, { color: colors.text }]}>{post.headline}</Text>
-          <Text style={[styles.summary, { color: colors.textMuted }]} numberOfLines={3}>
-            {post.summary}
-          </Text>
+          </AnimatedPressable>
 
           {post.reporters.length > 0 && (
-            <View style={styles.reportersRow}>
+            <View style={styles.reportersRow} accessibilityRole="list">
               {post.reporters.map((reporter) => (
                 <PulseProfileSwap
                   key={reporter.id}
@@ -97,7 +104,7 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
             </View>
           )}
         </View>
-      </AnimatedPressable>
+      </View>
 
       <NewsArticleSheet visible={articleOpen} post={post} onClose={() => setArticleOpen(false)} />
       <PersonPreviewSheet

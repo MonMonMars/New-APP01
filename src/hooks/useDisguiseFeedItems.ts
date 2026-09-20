@@ -7,6 +7,7 @@ import { buildDisguiseFeed } from '../utils/buildDisguiseFeed';
 import { filterActionedDisguiseFeed } from '../utils/filterActionedDisguiseFeed';
 import { filterDisguiseFeed } from '../utils/disguiseFeedFilter';
 import { usePulseFeedRefreshGeneration } from './usePulseFeedRefresh';
+import { usePulseLiveNewsRevision } from './usePulseLiveNews';
 
 function disguiseFeedSignature(
   userId: string,
@@ -21,6 +22,7 @@ function disguiseFeedSignature(
 export function useDisguiseFeedItems(topic?: string): FeedItem[] {
   const { user, userId, disguiseAdCreative, preferences, pulseSocial, likedIds, passedIds, superLikedIds } = useApp();
   const refreshGeneration = usePulseFeedRefreshGeneration();
+  const liveNewsRevision = usePulseLiveNewsRevision();
   const cacheRef = useRef<{ signature: string; base: FeedItem[] } | null>(null);
 
   const creativeKey = disguiseAdCreative
@@ -32,7 +34,7 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
     user.gender,
     preferences.sparkSection ?? 'spark',
     creativeKey,
-  )}|refresh:${refreshGeneration}`;
+  )}|refresh:${refreshGeneration}|news:${liveNewsRevision}`;
 
   const baseFeed = useMemo(() => {
     if (cacheRef.current?.signature === signature) {

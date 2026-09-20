@@ -14,7 +14,9 @@ import { useTheme } from '../context/ThemeContext';
 import { getLegalUiStrings } from '../content/legal';
 import { useTranslation } from '../i18n';
 import { formatSparkPlusPerMonth, getSparkPlusPlanLabel } from '../i18n/labels';
+import { isWebPaidCheckoutBlocked, regionalPaymentNoticeKey } from '../services/paymentRails';
 import { translateRestoreMessage, translatePurchaseError } from '../utils/purchaseMessages';
+import { formatDateShortForAccountRegion } from '../utils/localeFormat';
 import { RootStackParamList } from '../types/navigation';
 import { PaymentMethodKind } from '../types/purchases';
 import { SPARK_PLUS_PRICING, SparkPlusPlan } from '../types/subscription';
@@ -27,18 +29,6 @@ import { PurchasesModeNotice } from '../components/PurchasesModeNotice';
 type SparkPlusScreenProps = {
   onClose: () => void;
 };
-
-function formatExpiryDate(iso: string, locale: string): string {
-  try {
-    return new Date(iso).toLocaleDateString(locale === 'zh-TW' ? 'zh-TW' : 'en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  } catch {
-    return iso;
-  }
-}
 
 export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
   const insets = useSafeAreaInsets();
@@ -66,8 +56,14 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
   const [verificationCode, setVerificationCode] = useState('');
   const [verificationCodeConfirm, setVerificationCodeConfirm] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodKind>('platform_default');
+  const webCheckoutBlocked = isWebPaidCheckoutBlocked(accountRegion);
+  const regionalNoticeKey = regionalPaymentNoticeKey(accountRegion);
 
   const handleSubscribe = async () => {
+    if (webCheckoutBlocked) {
+      Alert.alert(t('payments.webCheckoutUnavailable'), t('payments.cnConsumerNotice'));
+      return;
+    }
     setPurchasing(true);
     setPurchaseError(null);
     const productId = sparkPlusProductForPlan(selectedPlan);
@@ -126,13 +122,24 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
         <Text style={styles.heroSubtitle}>{t('sparkPlus.hero')}</Text>
         {isSubscriptionActive && subscriptionExpiresAt ? (
           <Text style={styles.activeBadge}>
-            {t('sparkPlus.activeUntil', { date: formatExpiryDate(subscriptionExpiresAt, locale) })}
+            {t('sparkPlus.activeUntil', {
+              date: formatDateShortForAccountRegion(subscriptionExpiresAt, accountRegion, locale),
+            })}
           </Text>
         ) : null}
       </LinearGradient>
 
       <ScrollView contentContainerStyle={styles.content}>
         <PurchasesModeNotice />
+        <Text style={[styles.regionalMarket, { color: colors.textMuted }]}>
+          {t('payments.accountMarketLabel', {
+            region: accountRegion.countryCode,
+            currency: accountRegion.currency,
+          })}
+        </Text>
+        {regionalNoticeKey ? (
+          <Text style={[styles.regionalNotice, { color: colors.textMuted }]}>{t(regionalNoticeKey)}</Text>
+        ) : null}
         <SparkPlusComparisonTable />
 
         {features.map((feature) => (
@@ -194,11 +201,15 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
             })}
 
             <AnimatedPressable
-              style={[styles.subscribeButton, { backgroundColor: colors.gradientEnd }]}
+              style={[
+                styles.subscribeButton,
+                { backgroundColor: colors.gradientEnd, opacity: webCheckoutBlocked ? 0.55 : 1 },
+              ]}
               onPress={() => {
                 setPurchaseError(null);
                 setShowConfirm(true);
               }}
+              disabled={webCheckoutBlocked}
             >
               <Text style={[styles.subscribeText, { color: colors.text }]}>
                 {t('sparkPlus.continuePrice', {
@@ -383,6 +394,19 @@ const styles = StyleSheet.create({
   },
   planPerMonth: {
     fontSize: 12,
+  },
+  regionalMarket: {
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: spacing.sm,
+  },
+  regionalNotice: {
+    fontSize: 12,
+    lineHeight: 17,
+    textAlign: 'center',
+    marginTop: spacing.xs,
+    marginBottom: spacing.sm,
+    paddingHorizontal: spacing.md,
   },
   subscribeButton: {
     borderRadius: radii.button,

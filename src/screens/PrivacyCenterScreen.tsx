@@ -11,6 +11,7 @@ import { getLegalDocumentLinks, getLegalUiStrings, LegalDocumentId } from '../co
 import { useAppLocale } from '../hooks/useAppLocale';
 import { useTranslation } from '../i18n';
 import { PrivacyPreferences } from '../types/privacy';
+import { getPassportCityLabel } from '../i18n/labels';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 
@@ -56,6 +57,8 @@ export function PrivacyCenterScreen({ onClose }: PrivacyCenterScreenProps) {
     deleteAccount,
     isSparkPlus,
     setIncognitoMode,
+    accountRegion,
+    preferences,
   } = useApp();
   const { locale } = useAppLocale();
   const { t } = useTranslation();
@@ -112,6 +115,24 @@ export function PrivacyCenterScreen({ onClose }: PrivacyCenterScreenProps) {
           <Text style={[styles.bannerTitle, { color: colors.text }]}>{t('privacy.bannerTitle')}</Text>
           <Text style={[styles.bannerBody, { color: colors.textMuted }]}>
             {t('privacy.bannerBody')}
+          </Text>
+        </View>
+
+        <Text style={[styles.section, { color: colors.textMuted }]}>{t('privacy.accountRegion')}</Text>
+        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border, marginBottom: spacing.lg }]}>
+          <Text style={[styles.rowLabel, { color: colors.text, padding: spacing.md }]}>
+            {preferences.homePassportCity || preferences.passportCity
+              ? t('privacy.accountRegionValue', {
+                  city: getPassportCityLabel(
+                    locale,
+                    preferences.homePassportCity ?? preferences.passportCity ?? '',
+                  ),
+                  code: accountRegion.countryCode,
+                })
+              : t('profile.accountHomeMarketUnset')}
+          </Text>
+          <Text style={[styles.rowHint, { color: colors.textMuted, paddingHorizontal: spacing.md, paddingBottom: spacing.md }]}>
+            {t('privacy.accountRegionHint')}
           </Text>
         </View>
 

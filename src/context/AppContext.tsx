@@ -67,6 +67,7 @@ import {
   type SyncPayload,
   signInWithAppleToken,
   signInWithMagicLink,
+  signOutSupabaseSession,
   syncToSupabase,
 } from '../services/supabase';
 import {
@@ -541,6 +542,7 @@ type AppContextValue = {
   clearDisguiseAd: () => void;
   setPaused: (paused: boolean) => void;
   deleteAccount: () => Promise<void>;
+  signOut: () => Promise<void>;
 };
 
 const defaultPersisted = createDefaultPersistedState();
@@ -1469,8 +1471,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
       applyCloudSnapshot(remote, setToArray(superLikedIdsRef.current));
     }
     void registerCloudPushToken(session.userId);
+    void mfaNeedsVerificationStep().then(setMfaLoginRequired);
     return true;
   }, [applyCloudSnapshot]);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured()) {
+      return;
+    }
+    const onForeground = (nextState: AppStateStatus) => {
+      if (nextState === 'active') {
+        void refreshAuthFromCloud();
+      }
+    };
+    const subscription = AppState.addEventListener('change', onForeground);
+    return () => subscription.remove();
+  }, [refreshAuthFromCloud]);
 
   const signInWithAppleStub = useCallback(
     async (identityToken?: string, displayName?: string) => {
@@ -3238,6 +3254,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIsPaused(paused);
   }, []);
 
+  const signOut = useCallback(async () => {
+    if (isSupabaseConfigured()) {
+      await signOutSupabaseSession();
+    }
+    setIsAuthenticated(false);
+    setUserId(null);
+    setMfaLoginRequired(false);
+  }, []);
+
   const deleteAccount = useCallback(async () => {
     if (userId && isSupabaseConfigured()) {
       const remote = await deleteAccountViaEdgeFunction();
@@ -3448,6 +3473,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       clearDisguiseAd,
       setPaused,
       deleteAccount,
+      signOut,
     }),
     [
       hasOnboarded,
@@ -3605,6 +3631,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       generateDisguiseAd,
       clearDisguiseAd,
       setPaused,
+      signOut,
       deleteAccount,
     ],
   );

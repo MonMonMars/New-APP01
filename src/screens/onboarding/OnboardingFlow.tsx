@@ -100,11 +100,14 @@ export function OnboardingFlow() {
       ? parsedAge
       : user.age;
 
-    updatePreferences({
-      ...preferences,
-      showMe: deriveShowMe(gender, orientation),
-      passportCity: preferences.passportCity ?? 'New York, NY',
-    });
+    updatePreferences(
+      withSyncedAccountCountry({
+        ...preferences,
+        showMe: deriveShowMe(gender, orientation),
+        passportCity: preferences.passportCity ?? preferences.homePassportCity ?? 'New York, NY',
+        homePassportCity: preferences.homePassportCity ?? preferences.passportCity ?? 'New York, NY',
+      }),
+    );
 
     completeOnboarding({
       ...user,

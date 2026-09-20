@@ -171,6 +171,12 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
         </LinearGradient>
 
         <PurchasesModeNotice />
+        <Text style={[styles.marketLabel, { color: colors.textMuted }]}>
+          {t('payments.accountMarketLabel', {
+            region: accountRegion.countryCode,
+            currency: accountRegion.currency,
+          })}
+        </Text>
 
         {packs.map((pack) => {
           const packAccent = colors.gradientEnd;
@@ -271,6 +277,11 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 22,
     fontWeight: '800',
+  },
+  marketLabel: {
+    fontSize: 12,
+    textAlign: 'center',
+    marginBottom: spacing.md,
   },
   heroSubtitle: {
     color: '#FFFFFF',

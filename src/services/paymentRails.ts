@@ -99,3 +99,8 @@ export function regionalPaymentNoticeKey(region: AccountRegionContext): string |
   }
   return null;
 }
+
+/** Web paid checkout unavailable (e.g. CN account) while not in demo billing mode. */
+export function isWebPaidCheckoutBlocked(region?: AccountRegionContext): boolean {
+  return Platform.OS === 'web' && !isDemoPurchases() && !isWebStripeCheckoutEnabled(region);
+}

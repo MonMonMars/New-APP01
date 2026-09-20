@@ -295,6 +295,7 @@ export function withHomePassportCity(
   return withSyncedAccountCountry({
     ...preferences,
     homePassportCity,
+    passportCity: preferences.travelMode ? preferences.passportCity : homePassportCity,
     accountCountryCode: inferred ?? preferences.accountCountryCode,
   });
 }

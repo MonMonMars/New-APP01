@@ -60,6 +60,9 @@ export function AuthWelcomePanel({
     requestPasswordReset,
     isSupabaseEnabled,
     accountRegion,
+    refreshAuthFromCloud,
+    isAuthenticated,
+    userId,
   } = useApp();
 
   const authTabOrder = useMemo(() => regionalAuthTabOrder(accountRegion), [accountRegion]);
@@ -79,6 +82,27 @@ export function AuthWelcomePanel({
   const [password, setPassword] = useState('');
   const [passwordMode, setPasswordMode] = useState<'signIn' | 'signUp'>('signIn');
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [awaitingOAuthReturn, setAwaitingOAuthReturn] = useState(false);
+
+  useEffect(() => {
+    if (!awaitingOAuthReturn || !isSupabaseEnabled) {
+      return;
+    }
+    if (isAuthenticated && userId) {
+      setAwaitingOAuthReturn(false);
+      onAuthenticated();
+    }
+  }, [awaitingOAuthReturn, isAuthenticated, isSupabaseEnabled, onAuthenticated, userId]);
+
+  useEffect(() => {
+    if (!awaitingOAuthReturn || !isSupabaseEnabled) {
+      return;
+    }
+    const intervalId = setInterval(() => {
+      void refreshAuthFromCloud();
+    }, 2500);
+    return () => clearInterval(intervalId);
+  }, [awaitingOAuthReturn, isSupabaseEnabled, refreshAuthFromCloud]);
 
   const handleApple = async () => {
     setAuthLoading(true);
@@ -99,7 +123,9 @@ export function AuthWelcomePanel({
     try {
       const result = await signInWithGoogle();
       setEmailMessage(result.message);
-      if (result.ok && !isSupabaseEnabled) {
+      if (result.ok && isSupabaseEnabled) {
+        setAwaitingOAuthReturn(true);
+      } else if (result.ok && !isSupabaseEnabled) {
         onAuthenticated();
       }
     } finally {
@@ -113,7 +139,9 @@ export function AuthWelcomePanel({
     try {
       const result = await signInWithWeChat();
       setEmailMessage(result.message);
-      if (result.ok && !isSupabaseEnabled) {
+      if (result.ok && isSupabaseEnabled) {
+        setAwaitingOAuthReturn(true);
+      } else if (result.ok && !isSupabaseEnabled) {
         onAuthenticated();
       }
     } finally {
@@ -127,7 +155,9 @@ export function AuthWelcomePanel({
     try {
       const result = await signInWithQq();
       setEmailMessage(result.message);
-      if (result.ok && !isSupabaseEnabled) {
+      if (result.ok && isSupabaseEnabled) {
+        setAwaitingOAuthReturn(true);
+      } else if (result.ok && !isSupabaseEnabled) {
         onAuthenticated();
       }
     } finally {
@@ -228,6 +258,26 @@ export function AuthWelcomePanel({
 
   return (
     <>
+      {awaitingOAuthReturn ? (
+        <AnimatedPressable
+          style={styles.emailButton}
+          disabled={authLoading}
+          onPress={() => {
+            setAuthLoading(true);
+            void refreshAuthFromCloud()
+              .then((ok) => {
+                if (!ok) {
+                  setEmailMessage(t('auth.oauthNotYet'));
+                }
+              })
+              .finally(() => setAuthLoading(false));
+          }}
+        >
+          <Ionicons name="refresh-outline" size={18} color={colors.text} />
+          <Text style={styles.emailButtonText}>{t('auth.oauthRefresh')}</Text>
+        </AnimatedPressable>
+      ) : null}
+
       {socialProviders.map((provider) => {
         const labelKey =
           provider === 'apple'

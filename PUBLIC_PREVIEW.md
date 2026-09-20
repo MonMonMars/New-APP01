@@ -2,10 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://distribution-doom-dropped-belly.trycloudflare.com**
+**https://proportion-julie-reflected-had.trycloudflare.com**
 
-- **Build:** Map discover, language settings, Cosmos gender feed, disguise i18n, debug details pass
-- **Verified:** 2026-09-18 — 8/8 checks (HTTP, JS bundle, onboarding, Pulse, Spark discover)
+- **Built from branch:** `cursor/tinder-action-bar-7b60` (base: `cursor/world-map-search-accounts-ac0d`)
+- **Build:** World map discover + account search stack, Tinder-style 5-button discover action bar (Rewind · Pass · Super Like · Like · Boost)
+- **Verified:** 2026-09-20 — HTTP 200 on tunnel and local `:8090`
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps. Hard-refresh (Cmd/Ctrl+Shift+R) if stale.
 
 ### Quick start
@@ -56,7 +57,7 @@ Uses `npm run build:web:pages` (base path `/New-APP01`). Enable at [repo Pages s
 ```bash
 git clone https://github.com/MonMonMars/New-APP01.git
 cd New-APP01
-git checkout cursor/app-i18n-7b60
+git checkout cursor/tinder-action-bar-7b60
 npm install
 npm run demo          # http://localhost:8090
 npm run demo:tunnel   # Cloudflare public URL (install cloudflared)

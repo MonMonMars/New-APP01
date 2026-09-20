@@ -45,6 +45,10 @@ type SwipeDeckProps = {
   onSuperLike?: (profile: Profile) => void;
   onOpenProfile?: (profile: Profile) => void;
   compact?: boolean;
+  onRewindPress?: () => void;
+  onBoostPress?: () => void;
+  rewindEnabled?: boolean;
+  isSparkPlus?: boolean;
 };
 
 type ActiveEffect = {
@@ -100,7 +104,23 @@ function zoneProximity(
 }
 
 export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
-  function SwipeDeck({ profiles, onSwipe, onEmpty, canLike = true, onLikeBlocked, onSuperLike, onOpenProfile, compact = false }, ref) {
+  function SwipeDeck(
+    {
+      profiles,
+      onSwipe,
+      onEmpty,
+      canLike = true,
+      onLikeBlocked,
+      onSuperLike,
+      onOpenProfile,
+      compact = false,
+      onRewindPress,
+      onBoostPress,
+      rewindEnabled = false,
+      isSparkPlus = true,
+    },
+    ref,
+  ) {
     const { colors } = useTheme();
     const { t } = useTranslation();
     const containerRef = useRef<View>(null);
@@ -518,6 +538,10 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           onTrashPress={() => dropToTarget('left')}
           onHeartPress={() => dropToTarget('right')}
           onStarPress={() => dropToTarget('right', true)}
+          onRewindPress={onRewindPress}
+          onBoostPress={onBoostPress}
+          rewindEnabled={rewindEnabled}
+          isSparkPlus={isSparkPlus}
         />
 
         <SwipeBurstEffect

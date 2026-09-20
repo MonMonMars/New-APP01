@@ -1,39 +1,16 @@
 #!/usr/bin/env node
 import { chromium } from 'playwright';
 
-const url = process.argv[2] ?? 'http://localhost:8090';
+import { completeDemoOnboarding, dismissCookies, enterPulseForYouFeed } from './demo-onboarding.mjs';
 
-async function completeOnboarding(page) {
-  await page.getByText(/continue without account/i).click();
-  for (let step = 0; step < 15; step++) {
-    const text = await page.locator('body').innerText();
-    if (/community guidelines/i.test(text)) {
-      await page.getByText(/i have read and agree/i).first().click();
-      await page.getByText(/continue.*18/i).first().click();
-      continue;
-    }
-    if (/choose your region/i.test(text)) {
-      await page.getByText(/use my location/i).first().click();
-      continue;
-    }
-    if (/create your profile/i.test(text) && (await page.getByText(/open pulse/i).first().isVisible().catch(() => false))) {
-      await page.getByText(/open pulse/i).first().click();
-      return;
-    }
-    const cont = page.getByText(/^continue$/i).first();
-    if (await cont.isVisible().catch(() => false)) {
-      await cont.click();
-      continue;
-    }
-    if (/for you|trending/i.test(text)) return;
-    await page.waitForTimeout(400);
-  }
-}
+const url = process.argv[2] ?? 'http://localhost:8090';
 
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
 await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
-await completeOnboarding(page);
+await completeDemoOnboarding(page);
+await dismissCookies(page);
+await enterPulseForYouFeed(page);
 const essential = page.getByText(/essential only/i).first();
 if (await essential.isVisible({ timeout: 1500 }).catch(() => false)) {
   await essential.click();

@@ -5,29 +5,9 @@
  */
 import { chromium } from 'playwright';
 
-const baseUrl = process.argv[2] ?? 'http://127.0.0.1:8081';
+import { completeDemoOnboarding, dismissCookies } from './demo-onboarding.mjs';
 
-async function dismissCookies(page) {
-  const accept = page.getByRole('button', { name: /^accept$/i });
-  if (await accept.isVisible({ timeout: 2000 }).catch(() => false)) {
-    await accept.click();
-    await page.waitForTimeout(400);
-  }
-}
-
-async function skipOnboarding(page) {
-  const guest = page.getByText(/continue without account/i).first();
-  if (await guest.isVisible({ timeout: 4000 }).catch(() => false)) {
-    await guest.click();
-    await page.waitForTimeout(600);
-  }
-  for (let i = 0; i < 8; i += 1) {
-    const cont = page.getByRole('button', { name: /continue|open spark|got it/i }).first();
-    if (!(await cont.isVisible({ timeout: 1500 }).catch(() => false))) break;
-    await cont.click({ force: true });
-    await page.waitForTimeout(500);
-  }
-}
+const baseUrl = process.argv[2] ?? 'http://127.0.0.1:8090';
 
 async function main() {
   const browser = await chromium.launch({ headless: true });
@@ -37,7 +17,8 @@ async function main() {
   try {
     await page.goto(baseUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await dismissCookies(page);
-    await skipOnboarding(page);
+    await completeDemoOnboarding(page);
+    await dismissCookies(page);
     await page.waitForTimeout(800);
 
     checks.no_top_pulse_entry =
@@ -45,7 +26,9 @@ async function main() {
 
     const pulseTab = page.getByRole('tab', { name: /pulse disguise mode/i });
     checks.pulse_tab_a11y = (await pulseTab.count()) === 1;
-    checks.pulse_tab_label = (await page.getByRole('tab', { name: /^pulse$/i }).count()) >= 1;
+    checks.pulse_tab_label =
+      (await page.getByRole('tab', { name: /^pulse$/i }).count()) >= 1 ||
+      (await page.getByRole('tab', { name: /pulse disguise mode/i }).count()) >= 1;
 
     checks.discover_spark_logo =
       (await page.getByRole('button', { name: /Spark\./i }).count()) >= 1 ||

@@ -2,11 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://sculpture-tuition-friendly-doctors.trycloudflare.com**
+**https://passes-recently-stripes-scholarship.trycloudflare.com**
 
 - **Built from branch:** `cursor/complete-app-7b60` (full stack: auth, map, Pulse, admin, live news)
-- **Build ID:** `1b6beee-20260920T173924Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-20 17:40 UTC — `npm run verify:all` PASS (local `:8090`)
+- **Build ID:** `6af9699-20260920T174425Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
+- **Verified:** 2026-09-20 17:44 UTC — `verify-demo-link` PASS on public tunnel
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

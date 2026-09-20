@@ -14,8 +14,12 @@ Users pick **Recommended** or an explicit method on the purchase confirmation sh
 
 ## Client security
 
+- **Double authorization (every purchase)** — Two independent checks before any charge:
+  - **MFA on + biometrics** — Authenticator code, then Face ID / Touch ID / device PIN.
+  - **MFA on + web (no biometrics)** — Two consecutive authenticator codes (must differ).
+  - **No MFA + mobile** — Two biometric prompts (identity, then confirm payment).
+  - **Web without MFA/biometrics** — Blocked; user must enable 2FA or pay in the native app.
 - **Rate limit** — 8 purchase attempts per 10 minutes per account (client throttle).
-- **Step-up** — With Supabase: TOTP if enrolled, else device biometrics when available.
 - **Sign-in required** — Cloud purchases require an authenticated user.
 - **Production** — Demo billing is blocked when Supabase is configured and `__DEV__` is false.
 - **Audit** — `purchase_attempt`, `purchase_success`, and `purchase_failed` in `security_audit_events`.

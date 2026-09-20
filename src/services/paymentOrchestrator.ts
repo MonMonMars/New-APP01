@@ -13,7 +13,7 @@ import { getSupabaseClient } from './supabase';
 import {
   createPurchaseIdempotencyKey,
   isDemoPurchaseBlockedInProduction,
-  runPurchaseStepUp,
+  runPurchaseDoubleAuthorization,
 } from './paymentSecurity';
 import { resolvePaymentRail } from './paymentRails';
 import { beginStripeCheckout, requestPurchaseApproval } from './stripePayments';
@@ -27,6 +27,7 @@ export async function purchaseProductSecure(options: {
   productId: PurchaseProductId;
   userId: string | null;
   verificationCode?: string;
+  verificationCodeConfirm?: string;
   paymentMethod?: PaymentMethodKind;
   requireCloudStepUp: boolean;
 }): Promise<PurchaseResult> {
@@ -46,10 +47,12 @@ export async function purchaseProductSecure(options: {
     return failure('store_unavailable', 'Sign in to complete a secure purchase.');
   }
 
-  const stepUp = await runPurchaseStepUp({
+  void options.requireCloudStepUp;
+
+  const stepUp = await runPurchaseDoubleAuthorization({
     userId: options.userId,
     verificationCode: options.verificationCode,
-    requireCloudStepUp: options.requireCloudStepUp,
+    verificationCodeConfirm: options.verificationCodeConfirm,
   });
   if (!stepUp.ok) {
     return failure(stepUp.code, stepUp.message);

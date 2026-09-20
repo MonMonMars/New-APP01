@@ -479,6 +479,7 @@ type AppContextValue = {
     productId: PurchaseProductId,
     verificationCode?: string,
     paymentMethod?: PaymentMethodKind,
+    verificationCodeConfirm?: string,
   ) => Promise<PurchaseResult>;
   syncPurchaseEntitlementsFromCloud: () => Promise<void>;
   restorePurchases: () => Promise<PurchaseRestoreResult>;
@@ -2898,6 +2899,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       productId: PurchaseProductId,
       verificationCode?: string,
       paymentMethod?: PaymentMethodKind,
+      verificationCodeConfirm?: string,
     ): Promise<PurchaseResult> => {
       void logSecurityEvent(userId, 'purchase_attempt', { productId });
 
@@ -2905,6 +2907,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         productId,
         userId,
         verificationCode,
+        verificationCodeConfirm,
         paymentMethod,
         requireCloudStepUp: isSupabaseConfigured(),
       });

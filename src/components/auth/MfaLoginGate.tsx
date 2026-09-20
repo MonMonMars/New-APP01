@@ -59,6 +59,7 @@ export function MfaLoginGate({ children }: MfaLoginGateProps) {
       </View>
       <Text style={[styles.title, { color: colors.text }]}>{t('auth.mfaLoginTitle')}</Text>
       <Text style={[styles.body, { color: colors.textMuted }]}>{t('auth.mfaLoginBody')}</Text>
+      <Text style={[styles.hint, { color: colors.textMuted }]}>{t('auth.mfaLoginHint')}</Text>
       <TextInput
         value={code}
         onChangeText={(value) => setCode(value.replace(/\D/g, '').slice(0, 6))}
@@ -116,6 +117,12 @@ const styles = StyleSheet.create({
   body: {
     fontSize: 15,
     lineHeight: 22,
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+  },
+  hint: {
+    fontSize: 13,
+    lineHeight: 18,
     textAlign: 'center',
     marginBottom: spacing.lg,
   },

@@ -152,6 +152,7 @@ export const en = {
     continueAfterReset: 'Continue',
     mfaLoginTitle: 'Two-factor authentication',
     mfaLoginBody: 'Enter the 6-digit code from your authenticator app.',
+    mfaLoginHint: 'Lost your device? Sign out below and sign in again, or disable 2FA from a trusted session in Profile → Two-factor authentication.',
     mfaCodePlaceholder: '6-digit code',
     mfaVerify: 'Verify',
     mfaInvalid: 'Invalid code. Try again.',
@@ -600,6 +601,8 @@ export const en = {
     webCheckoutUnavailable: 'Web checkout unavailable',
     webPaidCheckoutBlocked: 'Use the iOS or Android app for paid checkout in your account region.',
     checkoutCancelledBody: 'No charge was made. You can try again anytime.',
+    checkoutSuccessSyncBody:
+      'We are syncing your purchase. If Spark+ does not appear within a minute, open Spark+ and tap Restore purchases.',
     euConsumerNotice:
       'EU/UK: Subscriptions renew until cancelled in your store or Stripe account. Statutory withdrawal rights may apply to digital content — see Subscription Terms.',
     methodRecommendedDesc:
@@ -855,6 +858,8 @@ export const en = {
     likesLeft: '{n} likes left today',
     paused: 'Paused',
     boostActive: 'Boost active',
+    homeMarket: 'Home · {city}',
+    billingHome: 'Billing · {city}',
     world: 'World',
     filters: 'Filters',
     mostCompatible: 'Most compatible today',

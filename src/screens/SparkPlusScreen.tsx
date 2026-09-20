@@ -46,7 +46,6 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
   const {
     purchaseProduct,
     mfaEnabled,
-    paymentVerificationRequired,
     restorePurchases,
     openManageSubscriptions,
     user,
@@ -63,6 +62,7 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
   const [verificationCode, setVerificationCode] = useState('');
+  const [verificationCodeConfirm, setVerificationCodeConfirm] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodKind>('platform_default');
 
   const handleSubscribe = async () => {
@@ -71,8 +71,9 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
     const productId = sparkPlusProductForPlan(selectedPlan);
     const result = await purchaseProduct(
       productId,
-      paymentVerificationRequired && mfaEnabled ? verificationCode : undefined,
+      mfaEnabled ? verificationCode : undefined,
       paymentMethod,
+      mfaEnabled ? verificationCodeConfirm : undefined,
     );
     setPurchasing(false);
 
@@ -258,11 +259,13 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
             setShowConfirm(false);
             setPurchaseError(null);
             setVerificationCode('');
+            setVerificationCodeConfirm('');
           }
         }}
-        requireVerificationCode={paymentVerificationRequired && mfaEnabled}
         verificationCode={verificationCode}
         onVerificationCodeChange={setVerificationCode}
+        verificationCodeConfirm={verificationCodeConfirm}
+        onVerificationCodeConfirmChange={setVerificationCodeConfirm}
         paymentMethod={paymentMethod}
         onPaymentMethodChange={setPaymentMethod}
         onConfirm={handleSubscribe}

@@ -41,13 +41,14 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { colors } = useTheme();
-  const { purchaseProduct, mfaEnabled, paymentVerificationRequired } = useApp();
+  const { purchaseProduct, mfaEnabled } = useApp();
   const { t, locale } = useTranslation();
   const legalUi = getLegalUiStrings(locale);
   const [pendingPack, setPendingPack] = useState<Pack | null>(null);
   const [purchasing, setPurchasing] = useState(false);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
   const [verificationCode, setVerificationCode] = useState('');
+  const [verificationCodeConfirm, setVerificationCodeConfirm] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodKind>('platform_default');
 
   const packs: Pack[] = useMemo(
@@ -98,8 +99,9 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
     const productId = SHOP_PACK_TO_PRODUCT[pack.id] ?? pack.productId;
     const result = await purchaseProduct(
       productId,
-      paymentVerificationRequired && mfaEnabled ? verificationCode : undefined,
+      mfaEnabled ? verificationCode : undefined,
       paymentMethod,
+      mfaEnabled ? verificationCodeConfirm : undefined,
     );
     setPurchasing(false);
 
@@ -220,11 +222,13 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
             setPendingPack(null);
             setPurchaseError(null);
             setVerificationCode('');
+            setVerificationCodeConfirm('');
           }
         }}
-        requireVerificationCode={paymentVerificationRequired && mfaEnabled}
         verificationCode={verificationCode}
         onVerificationCodeChange={setVerificationCode}
+        verificationCodeConfirm={verificationCodeConfirm}
+        onVerificationCodeConfirmChange={setVerificationCodeConfirm}
         paymentMethod={paymentMethod}
         onPaymentMethodChange={setPaymentMethod}
         onConfirm={() => {

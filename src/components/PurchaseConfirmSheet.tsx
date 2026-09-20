@@ -2,7 +2,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { ActivityIndicator, Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useApp } from '../context/AppContext';
 import { getLegalUiStrings } from '../content/legal';
+import { purchaseConfirmDisabled, usePurchaseDoubleAuthUi } from '../hooks/usePurchaseDoubleAuthUi';
 import { listAvailablePaymentMethods } from '../services/paymentRails';
 import { isDemoPurchases } from '../services/purchases';
 import { PaymentMethodKind } from '../types/purchases';
@@ -23,11 +25,10 @@ type PurchaseConfirmSheetProps = {
   iconColor?: string;
   confirmLoading?: boolean;
   errorMessage?: string | null;
-  /** When set, user must enter a 6-digit authenticator code before purchase completes. */
-  requireVerificationCode?: boolean;
   verificationCode?: string;
   onVerificationCodeChange?: (code: string) => void;
-  verificationHint?: string;
+  verificationCodeConfirm?: string;
+  onVerificationCodeConfirmChange?: (code: string) => void;
   paymentMethod?: PaymentMethodKind;
   onPaymentMethodChange?: (method: PaymentMethodKind) => void;
   onConfirm: () => void | Promise<void>;
@@ -45,10 +46,10 @@ export function PurchaseConfirmSheet({
   iconColor,
   confirmLoading = false,
   errorMessage = null,
-  requireVerificationCode = false,
   verificationCode = '',
   onVerificationCodeChange,
-  verificationHint,
+  verificationCodeConfirm = '',
+  onVerificationCodeConfirmChange,
   paymentMethod = 'platform_default',
   onPaymentMethodChange,
   onConfirm,
@@ -60,9 +61,19 @@ export function PurchaseConfirmSheet({
   const { locale } = useAppLocale();
   const { t } = useTranslation();
   const legalUi = getLegalUiStrings(locale);
+  const { mfaEnabled } = useApp();
+  const doubleAuth = usePurchaseDoubleAuthUi(mfaEnabled);
   const accent = iconColor ?? colors.gradientEnd;
   const demoNote = isDemoPurchases() ? t('payments.demoNote') : legalUi.purchaseDemoNote;
   const paymentMethods = listAvailablePaymentMethods();
+  const confirmDisabled = purchaseConfirmDisabled({
+    confirmLoading,
+    showFirstTotp: doubleAuth.showFirstTotp,
+    showSecondTotp: doubleAuth.showSecondTotp,
+    verificationCode,
+    verificationCodeConfirm,
+    webPaymentBlocked: doubleAuth.webPaymentBlocked,
+  });
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -103,10 +114,23 @@ export function PurchaseConfirmSheet({
               })}
             </View>
           ) : null}
-          {requireVerificationCode ? (
+          {doubleAuth.webPaymentBlocked ? (
+            <Text style={[styles.error, { color: '#ef4444' }]}>{t('payments.requiresMfaOrApp')}</Text>
+          ) : null}
+          {doubleAuth.showDoubleBiometricHint ? (
+            <Text style={[styles.verificationHint, { color: colors.textMuted }]}>
+              {t('payments.doubleBiometricHint')}
+            </Text>
+          ) : null}
+          {doubleAuth.showBiometricStepTwoHint ? (
+            <Text style={[styles.verificationHint, { color: colors.textMuted }]}>
+              {t('payments.mfaPlusBiometricHint')}
+            </Text>
+          ) : null}
+          {doubleAuth.showFirstTotp ? (
             <>
               <Text style={[styles.verificationHint, { color: colors.textMuted }]}>
-                {verificationHint ?? t('auth.paymentVerificationHint')}
+                {t('auth.paymentVerificationHintStep1')}
               </Text>
               <TextInput
                 value={verificationCode}
@@ -117,6 +141,26 @@ export function PurchaseConfirmSheet({
                 textContentType="oneTimeCode"
                 autoComplete="one-time-code"
                 placeholder={t('auth.mfaCodePlaceholder')}
+                placeholderTextColor={colors.textMuted}
+                style={[styles.verificationInput, { color: colors.text, borderColor: colors.border }]}
+                maxLength={6}
+              />
+            </>
+          ) : null}
+          {doubleAuth.showSecondTotp ? (
+            <>
+              <Text style={[styles.verificationHint, { color: colors.textMuted }]}>
+                {t('payments.secondAuthenticatorHint')}
+              </Text>
+              <TextInput
+                value={verificationCodeConfirm}
+                onChangeText={(value) =>
+                  onVerificationCodeConfirmChange?.(value.replace(/\D/g, '').slice(0, 6))
+                }
+                keyboardType="number-pad"
+                textContentType="oneTimeCode"
+                autoComplete="one-time-code"
+                placeholder={t('payments.secondAuthenticatorPlaceholder')}
                 placeholderTextColor={colors.textMuted}
                 style={[styles.verificationInput, { color: colors.text, borderColor: colors.border }]}
                 maxLength={6}
@@ -139,11 +183,10 @@ export function PurchaseConfirmSheet({
               styles.confirmButton,
               {
                 backgroundColor: colors.gradientEnd,
-                opacity:
-                  confirmLoading || (requireVerificationCode && verificationCode.length !== 6) ? 0.7 : 1,
+                opacity: confirmDisabled ? 0.7 : 1,
               },
             ]}
-            disabled={confirmLoading || (requireVerificationCode && verificationCode.length !== 6)}
+            disabled={confirmDisabled}
             onPress={() => void onConfirm()}
           >
             {confirmLoading ? (

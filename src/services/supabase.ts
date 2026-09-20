@@ -37,6 +37,7 @@ export function getSupabaseClient(): SupabaseClient | null {
 type PreferencesExtraRow = {
   sparkSection?: SparkSection;
   appLocale?: AppLocale;
+  accountCountryCode?: string;
   mapSearchLat?: number;
   mapSearchLng?: number;
   advancedFilters?: DiscoveryPreferences['advancedFilters'];
@@ -46,6 +47,7 @@ function buildPreferencesExtra(preferences: DiscoveryPreferences): PreferencesEx
   return {
     sparkSection: preferences.sparkSection,
     appLocale: preferences.appLocale,
+    accountCountryCode: preferences.accountCountryCode,
     mapSearchLat: preferences.mapSearchLat,
     mapSearchLng: preferences.mapSearchLng,
     advancedFilters: preferences.advancedFilters,
@@ -68,6 +70,10 @@ function applyPreferencesExtra(
         ? row.sparkSection
         : preferences.sparkSection,
     appLocale: row.appLocale === 'zh-TW' || row.appLocale === 'en' ? row.appLocale : preferences.appLocale,
+    accountCountryCode:
+      typeof row.accountCountryCode === 'string' && row.accountCountryCode.length === 2
+        ? row.accountCountryCode.toUpperCase()
+        : preferences.accountCountryCode,
     mapSearchLat: typeof row.mapSearchLat === 'number' ? row.mapSearchLat : preferences.mapSearchLat,
     mapSearchLng: typeof row.mapSearchLng === 'number' ? row.mapSearchLng : preferences.mapSearchLng,
     advancedFilters: row.advancedFilters ?? preferences.advancedFilters,

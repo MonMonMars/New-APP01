@@ -1,10 +1,14 @@
 import { Platform } from 'react-native';
 
+import type { AccountRegionContext } from '../types/accountRegion';
 import { PaymentMethodKind, PaymentRail } from '../types/purchases';
 import { getPurchasesMode, isDemoPurchases } from './purchases';
 import { isSupabaseConfigured } from './supabase';
 
-export function isWebStripeCheckoutEnabled(): boolean {
+export function isWebStripeCheckoutEnabled(region?: AccountRegionContext): boolean {
+  if (region && !region.stripeWebCheckout) {
+    return false;
+  }
   return (
     process.env.EXPO_PUBLIC_WEB_PAYMENTS_ENABLED === 'true' &&
     isSupabaseConfigured() &&
@@ -12,15 +16,15 @@ export function isWebStripeCheckoutEnabled(): boolean {
   );
 }
 
-export function resolvePaymentRail(method: PaymentMethodKind): PaymentRail {
+export function resolvePaymentRail(method: PaymentMethodKind, region?: AccountRegionContext): PaymentRail {
   const resolved =
     method === 'platform_default'
-      ? railForPlatformDefault()
+      ? railForPlatformDefault(region)
       : method === 'stripe_checkout'
         ? 'stripe_checkout'
         : 'native_store';
 
-  if (resolved === 'stripe_checkout' && !isWebStripeCheckoutEnabled()) {
+  if (resolved === 'stripe_checkout' && !isWebStripeCheckoutEnabled(region)) {
     if (getPurchasesMode() === 'store' && Platform.OS !== 'web') {
       return 'native_store';
     }
@@ -29,7 +33,7 @@ export function resolvePaymentRail(method: PaymentMethodKind): PaymentRail {
 
   if (resolved === 'native_store') {
     if (Platform.OS === 'web') {
-      return isWebStripeCheckoutEnabled() ? 'stripe_checkout' : isDemoPurchases() ? 'demo' : 'stripe_checkout';
+      return isWebStripeCheckoutEnabled(region) ? 'stripe_checkout' : isDemoPurchases() ? 'demo' : 'stripe_checkout';
     }
     return getPurchasesMode() === 'store' ? 'native_store' : 'demo';
   }
@@ -37,9 +41,12 @@ export function resolvePaymentRail(method: PaymentMethodKind): PaymentRail {
   return resolved;
 }
 
-function railForPlatformDefault(): PaymentRail {
-  if (Platform.OS === 'web' && isWebStripeCheckoutEnabled()) {
+function railForPlatformDefault(region?: AccountRegionContext): PaymentRail {
+  if (Platform.OS === 'web' && isWebStripeCheckoutEnabled(region)) {
     return 'stripe_checkout';
+  }
+  if (Platform.OS !== 'web' && region && !region.stripeWebCheckout) {
+    return getPurchasesMode() === 'store' ? 'native_store' : 'demo';
   }
   if (Platform.OS === 'ios' || Platform.OS === 'android') {
     return getPurchasesMode() === 'store' ? 'native_store' : 'demo';
@@ -53,7 +60,7 @@ export type AvailablePaymentMethod = {
   descriptionKey: string;
 };
 
-export function listAvailablePaymentMethods(): AvailablePaymentMethod[] {
+export function listAvailablePaymentMethods(region?: AccountRegionContext): AvailablePaymentMethod[] {
   const methods: AvailablePaymentMethod[] = [
     {
       kind: 'platform_default',
@@ -62,7 +69,7 @@ export function listAvailablePaymentMethods(): AvailablePaymentMethod[] {
     },
   ];
 
-  if (Platform.OS === 'web' && isWebStripeCheckoutEnabled()) {
+  if (Platform.OS === 'web' && isWebStripeCheckoutEnabled(region)) {
     methods.push({
       kind: 'stripe_checkout',
       labelKey: 'payments.methodStripe',

@@ -257,6 +257,7 @@ const PASSPORT_CITY_I18N_KEYS: Record<(typeof PASSPORT_CITIES)[number], string> 
   'Paris, France': 'passportCities.paris',
   'Tokyo, Japan': 'passportCities.tokyo',
   'Sydney, Australia': 'passportCities.sydney',
+  'Taipei, Taiwan': 'passportCities.taipei',
 };
 
 export function getPassportCityLabel(locale: AppLocale, city: string): string {

@@ -61,11 +61,12 @@ export function PurchaseConfirmSheet({
   const { locale } = useAppLocale();
   const { t } = useTranslation();
   const legalUi = getLegalUiStrings(locale);
-  const { mfaEnabled } = useApp();
+  const { mfaEnabled, accountRegion } = useApp();
   const doubleAuth = usePurchaseDoubleAuthUi(mfaEnabled);
   const accent = iconColor ?? colors.gradientEnd;
   const demoNote = isDemoPurchases() ? t('payments.demoNote') : legalUi.purchaseDemoNote;
-  const paymentMethods = listAvailablePaymentMethods();
+  const paymentMethods = listAvailablePaymentMethods(accountRegion);
+  const showEuNotice = accountRegion.market === 'europe' || accountRegion.market === 'uk';
   const confirmDisabled = purchaseConfirmDisabled({
     confirmLoading,
     showFirstTotp: doubleAuth.showFirstTotp,
@@ -88,6 +89,12 @@ export function PurchaseConfirmSheet({
             <Text style={[styles.quantity, { color: accent }]}>{quantity}</Text>
           ) : null}
           <Text style={[styles.price, { color: colors.text }]}>{price}</Text>
+          <Text style={[styles.regionalMarket, { color: colors.textMuted }]}>
+            {t('payments.accountMarketLabel', { region: accountRegion.countryCode, currency: accountRegion.currency })}
+          </Text>
+          {showEuNotice ? (
+            <Text style={[styles.verificationHint, { color: colors.textMuted }]}>{t('payments.euConsumerNotice')}</Text>
+          ) : null}
           {errorMessage ? (
             <Text style={[styles.error, { color: '#ef4444' }]}>{errorMessage}</Text>
           ) : null}
@@ -244,6 +251,11 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 24,
     fontWeight: '800',
+    marginBottom: spacing.xs,
+  },
+  regionalMarket: {
+    fontSize: 12,
+    textAlign: 'center',
     marginBottom: spacing.md,
   },
   error: {

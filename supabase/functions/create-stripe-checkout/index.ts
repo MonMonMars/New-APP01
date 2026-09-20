@@ -6,6 +6,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 import { isServerProductId, SERVER_PRODUCT_CATALOG } from '../_shared/paymentProducts.ts';
+import { regionalCentsForProduct } from '../_shared/regionalPricing.ts';
 
 async function stripeCreateCheckoutSession(params: Record<string, string>): Promise<{ url?: string; id?: string; error?: string }> {
   const secret = Deno.env.get('STRIPE_SECRET_KEY');
@@ -113,8 +114,17 @@ Deno.serve(async (req) => {
     });
   }
 
+  const { data: prefRow } = await admin
+    .from('user_preferences')
+    .select('preferences_extra')
+    .eq('user_id', userId)
+    .maybeSingle();
+  const extra = prefRow?.preferences_extra as { accountCountryCode?: string } | null;
+  const accountCountry = extra?.accountCountryCode;
+
   const product = SERVER_PRODUCT_CATALOG[productId];
   const mode = product.kind === 'subscription' ? 'subscription' : 'payment';
+  const regional = regionalCentsForProduct(productId, accountCountry);
 
   const params: Record<string, string> = {
     mode,
@@ -124,9 +134,10 @@ Deno.serve(async (req) => {
     'metadata[product_id]': productId,
     'metadata[approval_id]': approvalId,
     'metadata[idempotency_key]': approval.idempotency_key,
+    'metadata[account_country]': accountCountry ?? 'US',
     'line_items[0][quantity]': '1',
-    'line_items[0][price_data][currency]': product.currency,
-    'line_items[0][price_data][unit_amount]': String(product.amountCents),
+    'line_items[0][price_data][currency]': regional.currency,
+    'line_items[0][price_data][unit_amount]': String(regional.amountCents),
     'line_items[0][price_data][product_data][name]': `Spark ${productId.replace(/_/g, ' ')}`,
   };
 
@@ -149,8 +160,8 @@ Deno.serve(async (req) => {
     provider: 'stripe',
     external_id: stripe.id,
     status: 'pending',
-    amount_cents: product.amountCents,
-    currency: product.currency,
+    amount_cents: regional.amountCents,
+    currency: regional.currency,
     idempotency_key: approval.idempotency_key,
   });
 

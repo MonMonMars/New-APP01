@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
@@ -7,6 +7,8 @@ import { useTranslation } from '../../i18n';
 import { colors, radii, spacing } from '../../theme';
 import { pulseBrand } from '../../theme/pulseBrand';
 import { signInWithApple } from '../../utils/appleAuth';
+import { regionalAuthTabOrder, regionalDefaultAuthTab } from '../../utils/accountRegion';
+import type { RegionalAuthTab } from '../../types/accountRegion';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type AuthWelcomePanelProps = {
@@ -22,8 +24,6 @@ type AuthWelcomePanelProps = {
   setAwaitingMagicLink: (value: boolean) => void;
   onRefreshMagicLink: () => void;
 };
-
-type AuthTab = 'email' | 'phone' | 'password';
 
 export function AuthWelcomePanel({
   authLoading,
@@ -49,9 +49,15 @@ export function AuthWelcomePanel({
     signInWithPassword,
     requestPasswordReset,
     isSupabaseEnabled,
+    accountRegion,
   } = useApp();
 
-  const [tab, setTab] = useState<AuthTab>('email');
+  const authTabOrder = useMemo(() => regionalAuthTabOrder(accountRegion), [accountRegion]);
+  const [tab, setTab] = useState<RegionalAuthTab>(() => regionalDefaultAuthTab(accountRegion));
+
+  useEffect(() => {
+    setTab(regionalDefaultAuthTab(accountRegion));
+  }, [accountRegion.countryCode]);
   const [phone, setPhone] = useState('');
   const [phoneCode, setPhoneCode] = useState('');
   const [phoneSent, setPhoneSent] = useState(false);
@@ -178,8 +184,12 @@ export function AuthWelcomePanel({
         <Text style={styles.googleButtonText}>{t('auth.continueGoogle')}</Text>
       </AnimatedPressable>
 
+      <Text style={styles.regionalHint}>
+        {t('auth.regionalSignInHint', { region: accountRegion.countryCode })}
+      </Text>
+
       <View style={styles.tabRow}>
-        {(['email', 'phone', 'password'] as const).map((key) => (
+        {authTabOrder.map((key) => (
           <AnimatedPressable
             key={key}
             style={[styles.tabChip, tab === key && styles.tabChipActive]}
@@ -394,6 +404,13 @@ const styles = StyleSheet.create({
     color: colors.textDark,
     fontWeight: '700',
     fontSize: 16,
+  },
+  regionalHint: {
+    color: colors.textMuted,
+    fontSize: 12,
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+    lineHeight: 16,
   },
   tabRow: {
     flexDirection: 'row',

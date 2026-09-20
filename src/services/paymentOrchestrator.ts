@@ -15,6 +15,7 @@ import {
   isDemoPurchaseBlockedInProduction,
   runPurchaseDoubleAuthorization,
 } from './paymentSecurity';
+import type { AccountRegionContext } from '../types/accountRegion';
 import { resolvePaymentRail } from './paymentRails';
 import { beginStripeCheckout, requestPurchaseApproval } from './stripePayments';
 import { isSupabaseConfigured } from './supabase';
@@ -30,6 +31,7 @@ export async function purchaseProductSecure(options: {
   verificationCodeConfirm?: string;
   paymentMethod?: PaymentMethodKind;
   requireCloudStepUp: boolean;
+  accountRegion: AccountRegionContext;
 }): Promise<PurchaseResult> {
   const product = PRODUCT_CATALOG[options.productId];
   if (!product) {
@@ -58,7 +60,14 @@ export async function purchaseProductSecure(options: {
     return failure(stepUp.code, stepUp.message);
   }
 
-  const rail = resolvePaymentRail(options.paymentMethod ?? 'platform_default');
+  const rail = resolvePaymentRail(options.paymentMethod ?? 'platform_default', options.accountRegion);
+
+  if (rail === 'stripe_checkout' && !options.accountRegion.stripeWebCheckout) {
+    return failure(
+      'store_unavailable',
+      'Web card checkout is not available for your account region. Use the iOS or Android app.',
+    );
+  }
   const idempotencyKey = createPurchaseIdempotencyKey(options.userId, options.productId);
 
   let approvalId: string | undefined;

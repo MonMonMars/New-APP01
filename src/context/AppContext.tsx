@@ -165,6 +165,8 @@ import {
 import { clearVaultKey } from '../utils/secureStorage';
 import { translate } from '../i18n';
 import { resolveAppLocale } from '../types/locale';
+import type { AccountRegionContext } from '../types/accountRegion';
+import { resolveAccountRegion } from '../utils/accountRegion';
 import { messagePreviewText, sentGifContext, sentPhotoContext, sentVoiceContext } from '../utils/messageFormat';
 import { disguiseWorldMeta } from '../utils/disguiseWorld';
 import { DisguiseUnlockConfirm } from '../components/disguise/DisguiseUnlockConfirm';
@@ -426,6 +428,7 @@ type AppContextValue = {
   completeMfaEnrollment: (factorId: string, code: string) => Promise<{ ok: boolean; message: string }>;
   disableMfa: () => Promise<{ ok: boolean; message: string }>;
   paymentVerificationRequired: boolean;
+  accountRegion: AccountRegionContext;
   updateUser: (user: UserProfile) => void;
   applyCloudConversationUpdate: (
     conversationId: string,
@@ -1726,6 +1729,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const paymentVerificationRequired = isSupabaseConfigured();
 
+  const accountRegion = useMemo(() => resolveAccountRegion(preferences), [preferences]);
+
   const completeOnboarding = useCallback(
     (nextUser: UserProfile) => {
       setUser(nextUser);
@@ -2910,6 +2915,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         verificationCodeConfirm,
         paymentMethod,
         requireCloudStepUp: isSupabaseConfigured(),
+        accountRegion,
       });
 
       if (result.ok) {
@@ -2924,7 +2930,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       return result;
     },
-    [applyEntitlementGrant, userId],
+    [accountRegion, applyEntitlementGrant, userId],
   );
 
   const restorePurchases = useCallback(async () => {
@@ -3303,6 +3309,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       completeMfaEnrollment,
       disableMfa,
       paymentVerificationRequired,
+      accountRegion,
       updateUser,
       applyCloudConversationUpdate,
       updatePreferences,
@@ -3458,6 +3465,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       completeMfaEnrollment,
       disableMfa,
       paymentVerificationRequired,
+      accountRegion,
       updateUser,
       applyCloudConversationUpdate,
       updatePreferences,

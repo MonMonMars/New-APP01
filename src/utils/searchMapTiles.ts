@@ -35,6 +35,7 @@ export const CITY_COORDS: Record<(typeof PASSPORT_CITIES)[number], { lat: number
   'Paris, France': { lat: 48.857, lng: 2.352 },
   'Tokyo, Japan': { lat: 35.676, lng: 139.65 },
   'Sydney, Australia': { lat: -33.869, lng: 151.209 },
+  'Taipei, Taiwan': { lat: 25.033, lng: 121.565 },
 };
 
 export type MapTile = {

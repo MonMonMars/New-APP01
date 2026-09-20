@@ -7,11 +7,11 @@ import { useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
-  formatProductPrice,
   PRODUCT_CATALOG,
   SHOP_PACK_TO_PRODUCT,
 } from '../constants/products';
 import { useApp } from '../context/AppContext';
+import { formatRegionalPrice } from '../utils/regionalPricing';
 import { getLegalUiStrings } from '../content/legal';
 import { useTranslation } from '../i18n';
 import { translatePurchaseError } from '../utils/purchaseMessages';
@@ -41,7 +41,7 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { colors } = useTheme();
-  const { purchaseProduct, mfaEnabled } = useApp();
+  const { purchaseProduct, mfaEnabled, accountRegion } = useApp();
   const { t, locale } = useTranslation();
   const legalUi = getLegalUiStrings(locale);
   const [pendingPack, setPendingPack] = useState<Pack | null>(null);
@@ -59,7 +59,7 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
         icon: 'flash',
         title: t('shop.boostPack'),
         description: t('shop.boostPackDesc'),
-        price: formatProductPrice(PRODUCT_CATALOG.boost_3.displayPriceUsd),
+        price: formatRegionalPrice(PRODUCT_CATALOG.boost_3.displayPriceUsd, accountRegion),
         quantity: t('shop.boostPackQty'),
       },
       {
@@ -68,7 +68,7 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
         icon: 'flash',
         title: t('shop.singleBoost'),
         description: t('shop.singleBoostDesc'),
-        price: formatProductPrice(PRODUCT_CATALOG.boost_1.displayPriceUsd),
+        price: formatRegionalPrice(PRODUCT_CATALOG.boost_1.displayPriceUsd, accountRegion),
         quantity: t('shop.singleBoostQty'),
       },
       {
@@ -77,7 +77,7 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
         icon: 'chatbubble-ellipses',
         title: t('shop.notesPack'),
         description: t('shop.notesPackDesc'),
-        price: formatProductPrice(PRODUCT_CATALOG.spark_notes_5.displayPriceUsd),
+        price: formatRegionalPrice(PRODUCT_CATALOG.spark_notes_5.displayPriceUsd, accountRegion),
         quantity: t('shop.notesPackQty'),
       },
       {
@@ -86,11 +86,11 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
         icon: 'chatbubble-ellipses',
         title: t('shop.singleNote'),
         description: t('shop.singleNoteDesc'),
-        price: formatProductPrice(PRODUCT_CATALOG.spark_notes_1.displayPriceUsd),
+        price: formatRegionalPrice(PRODUCT_CATALOG.spark_notes_1.displayPriceUsd, accountRegion),
         quantity: t('shop.singleNoteQty'),
       },
     ],
-    [t],
+    [accountRegion, t],
   );
 
   const handlePurchase = async (pack: Pack) => {

@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { AppState, Linking, type AppStateStatus } from 'react-native';
 
+import { hydrateAdminProfileOverrides } from '../admin/adminProfileStore';
 import { seedConversations } from '../data/conversations';
 import {
   AI_PERSONA_IDS,
@@ -671,8 +672,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const hydrationTimeout = setTimeout(finishHydration, 8000);
 
-    void loadPersistedState()
-      .then(async (saved) => {
+    void Promise.all([loadPersistedState(), hydrateAdminProfileOverrides()])
+      .then(async ([saved]) => {
       if (cancelled) {
         return;
       }

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useOptionalAdmin } from '../../context/AdminContext';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { isDisguiseAiConfigured } from '../../services/disguiseImageGeneration';
@@ -27,6 +28,7 @@ export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGenerat
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { t, locale } = useTranslation();
+  const showInternalProfileLabels = useOptionalAdmin()?.showInternalProfileLabels ?? false;
   const {
     user,
     disguiseAdCreative,
@@ -137,15 +139,19 @@ export function DisguiseAdGeneratorSheet({ visible, onClose }: DisguiseAdGenerat
                 height={220}
               />
             )}
-            {previewCreative && (
+            {previewCreative ? (
               <Text style={[styles.previewMeta, { color: colors.textMuted }]}>
-                {previewCreative.isAiGenerated ? t('disguiseAd.aiGenerated') : t('disguiseAd.smartOverlay')} ·{' '}
+                {previewCreative.isAiGenerated && showInternalProfileLabels
+                  ? `${t('disguiseAd.aiGenerated')} · `
+                  : !previewCreative.isAiGenerated
+                    ? `${t('disguiseAd.smartOverlay')} · `
+                    : ''}
                 {new Date(previewCreative.generatedAt).toLocaleString(
                   locale === 'zh-TW' ? 'zh-TW' : 'en-US',
                   { dateStyle: 'medium', timeStyle: 'short' },
                 )}
               </Text>
-            )}
+            ) : null}
           </View>
 
           {error && <Text style={styles.error}>{error}</Text>}

@@ -21,6 +21,7 @@ export type RootStackParamList = {
   Explore: undefined;
   DiscoverHub: undefined;
   PurchaseHistory: undefined;
+  Admin: undefined;
 };
 
 export type MainTabParamList = {

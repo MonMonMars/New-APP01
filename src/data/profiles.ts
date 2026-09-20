@@ -7,6 +7,8 @@ import { newestRawProfiles } from './newestProfiles';
 import { nextRawProfiles } from './nextProfiles';
 import { applyLegacyProfileEnrichment } from './legacyProfileEnrichment';
 import { profileGeoLocation } from '../utils/geoMap';
+import { applyAdminProfileOverride } from '../admin/adminProfileStore';
+import { setCatalogProfileIds } from '../types/accountKind';
 import { withDemoProfilePhotos } from '../utils/withDemoProfilePhotos';
 import {
   matchesSparkSection,
@@ -1204,8 +1206,14 @@ export function getAllProfiles(): Profile[] {
 }
 
 export function getProfileById(id: string): Profile | undefined {
-  return getAllProfiles().find((p) => p.id === id);
+  const base = getAllProfiles().find((p) => p.id === id);
+  if (!base) {
+    return undefined;
+  }
+  return applyAdminProfileOverride(base);
 }
+
+setCatalogProfileIds(new Set(mockProfiles.map((p) => p.id)));
 
 /** Incoming likes for the active world — Spark and Ember never share this pool. */
 export function getIncomingLikeProfilesForSection(

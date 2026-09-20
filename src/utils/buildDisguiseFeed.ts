@@ -12,7 +12,9 @@ import {
   renewPulseFeedProfiles,
   rotatePulseList,
 } from './refreshPulseFeed';
+import { mergeLiveNewsIntoFeed, densifyPulseNewsBlocks } from './mergeLivePulseNews';
 import { pinnedReporterProfileId, resolveDisguiseProfileId } from './resolveDisguiseProfile';
+import { getPulseLiveNewsSnapshot } from '../services/pulseLiveNews';
 
 function weaveProfileCards(base: FeedItem[], profileCards: FeedItem[]): FeedItem[] {
   if (profileCards.length === 0) {
@@ -130,6 +132,14 @@ export function buildDisguiseFeed(
       locale,
     );
   }
+
+  const liveSnapshot = getPulseLiveNewsSnapshot();
+  const livePosts = liveSnapshot?.posts ?? [];
+  if (livePosts.length > 0) {
+    baseFeed = mergeLiveNewsIntoFeed(baseFeed, livePosts, refreshGeneration);
+    baseFeed = densifyPulseNewsBlocks(baseFeed, livePosts, refreshGeneration);
+  }
+
   const withProfiles = weaveProfileCards(baseFeed, profileCards);
 
   let linked = syncReporterPhotos(pinFeedProfileLinks(withProfiles, section), section);

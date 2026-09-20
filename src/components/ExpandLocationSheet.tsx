@@ -27,6 +27,7 @@ import type { Profile } from '../types/profile';
 import {
   distanceFromCenter,
   filterProfilesInRadius,
+  relocateProfilesForMapSearch,
   sortProfilesByDistance,
   type GeoPoint,
 } from '../utils/geoMap';
@@ -166,14 +167,18 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     }
   }, [hasActiveMapSearch, preferences.passportCity, preferences.travelMode]);
 
-  const areaPins = useMemo(
-    () =>
-      sortProfilesByDistance(
-        filterProfilesInRadius(discoverPool, searchCenter, currentRadius),
-        searchCenter,
-      ),
-    [currentRadius, discoverPool, searchCenter],
-  );
+  const areaPins = useMemo(() => {
+    const previewingNewArea = centersDiffer(mapCenter, searchCenter);
+    const pinCenter = previewingNewArea ? mapCenter : searchCenter;
+    let pool = discoverPool;
+    if (previewingNewArea) {
+      pool = relocateProfilesForMapSearch(pool, mapCenter, currentRadius);
+    }
+    return sortProfilesByDistance(
+      filterProfilesInRadius(pool, pinCenter, currentRadius),
+      pinCenter,
+    );
+  }, [currentRadius, discoverPool, mapCenter, searchCenter]);
 
   const placeSuggestions = useMemo(
     () => (queryMode === 'places' ? searchMapPlaces(searchQuery, locale) : []),
@@ -203,13 +208,16 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const showSearchArea = centersDiffer(mapCenter, searchCenter);
 
   const handleSearchThisArea = useCallback(() => {
+    if (!centersDiffer(mapCenter, searchCenter)) {
+      return;
+    }
     setSearchCenter(mapCenter);
     searchMapAt(mapCenter);
     setSelectedPinId(null);
     setSearchQuery('');
     setQueryMode('people');
     setDeckToast(t('mapDiscover.areaLoaded'));
-  }, [mapCenter, searchMapAt, t]);
+  }, [mapCenter, searchCenter, searchMapAt, t]);
 
   const handleLocateGps = useCallback(() => {
     setLocatingGps(true);
@@ -630,7 +638,12 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
                 key={preset.labelKey}
                 accessibilityLabel={radiusA11y(preset.labelKey)}
                 style={[styles.segmentItem, isActive ? { backgroundColor: accent } : null]}
-                onPress={() => expandSearchRadius(preset.value)}
+                onPress={() => {
+                  expandSearchRadius(preset.value);
+                  if (hasActiveMapSearch) {
+                    searchMapAt(searchCenter);
+                  }
+                }}
               >
                 <Text style={[styles.segmentText, { color: isActive ? onAccentText : chromeText }]}>
                   {radiusChipLabel(preset.labelKey)}

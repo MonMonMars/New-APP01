@@ -4,12 +4,11 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-echo "Building web demo (root-hosted for tunnels)..."
-npm run build:web
-cp dist/index.html dist/404.html
+echo "Building web demo (root-hosted for tunnels, cache-busted)..."
+npm run build:web:demo
 
-echo "Starting static server on :8090..."
-npx --yes serve dist -s -l 8090 &
+echo "Starting static server on :8090 (serve.json cache headers)..."
+npx --yes serve -s -l 8090 -c serve.json &
 SERVE_PID=$!
 
 cleanup() {

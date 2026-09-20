@@ -5,7 +5,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
 import { getLegalUiStrings } from '../content/legal';
 import { purchaseConfirmDisabled, usePurchaseDoubleAuthUi } from '../hooks/usePurchaseDoubleAuthUi';
-import { listAvailablePaymentMethods, regionalPaymentNoticeKey } from '../services/paymentRails';
+import {
+  isWebPaidCheckoutBlocked,
+  listAvailablePaymentMethods,
+  regionalPaymentNoticeKey,
+} from '../services/paymentRails';
 import { isDemoPurchases } from '../services/purchases';
 import { PaymentMethodKind } from '../types/purchases';
 import { useAppLocale } from '../hooks/useAppLocale';
@@ -68,14 +72,17 @@ export function PurchaseConfirmSheet({
   const paymentMethods = listAvailablePaymentMethods(accountRegion);
   const showEuNotice = accountRegion.market === 'europe' || accountRegion.market === 'uk';
   const cnNoticeKey = regionalPaymentNoticeKey(accountRegion);
-  const confirmDisabled = purchaseConfirmDisabled({
-    confirmLoading,
-    showFirstTotp: doubleAuth.showFirstTotp,
-    showSecondTotp: doubleAuth.showSecondTotp,
-    verificationCode,
-    verificationCodeConfirm,
-    webPaymentBlocked: doubleAuth.webPaymentBlocked,
-  });
+  const webPaidBlocked = isWebPaidCheckoutBlocked(accountRegion);
+  const confirmDisabled =
+    webPaidBlocked ||
+    purchaseConfirmDisabled({
+      confirmLoading,
+      showFirstTotp: doubleAuth.showFirstTotp,
+      showSecondTotp: doubleAuth.showSecondTotp,
+      verificationCode,
+      verificationCodeConfirm,
+      webPaymentBlocked: doubleAuth.webPaymentBlocked,
+    });
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -98,6 +105,9 @@ export function PurchaseConfirmSheet({
           ) : null}
           {cnNoticeKey ? (
             <Text style={[styles.verificationHint, { color: colors.textMuted }]}>{t(cnNoticeKey)}</Text>
+          ) : null}
+          {webPaidBlocked ? (
+            <Text style={[styles.error, { color: '#ef4444' }]}>{t('payments.webPaidCheckoutBlocked')}</Text>
           ) : null}
           {errorMessage ? (
             <Text style={[styles.error, { color: '#ef4444' }]}>{errorMessage}</Text>

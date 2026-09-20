@@ -34,6 +34,7 @@ import { LocaleToggle } from '../components/legal/LocaleToggle';
 import { APP_LOCALE_LABELS } from '../types/locale';
 import { AccountHomeMarketSheet } from '../components/AccountHomeMarketSheet';
 import { AnimatedPressable } from '../components/AnimatedPressable';
+import { regionalAuthMethodsDescriptionKey } from '../config/regionalAuthProviders';
 import { getPassportCityLabel } from '../i18n/labels';
 
 type SettingsRoute =
@@ -91,6 +92,8 @@ export function ProfileScreen() {
     isSupabaseEnabled,
     isAuthenticated,
     signOut,
+    restartCloudSignIn,
+    hasOnboarded,
     disguiseMode,
     setDisguiseMode,
     disguiseAdCreative,
@@ -263,12 +266,28 @@ export function ProfileScreen() {
           </View>
         )}
 
-        {isSupabaseEnabled && (
+        {isSupabaseEnabled && isAuthenticated ? (
           <View style={[styles.syncBadge, { backgroundColor: colors.surface }]}>
             <Ionicons name="cloud-done" size={14} color={colors.like} />
             <Text style={[styles.syncText, { color: colors.like }]}>{t('profile.cloudSync')}</Text>
           </View>
-        )}
+        ) : null}
+
+        {isSupabaseEnabled && hasOnboarded && !isAuthenticated ? (
+          <View style={[styles.reauthBanner, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Ionicons name="cloud-offline-outline" size={20} color={colors.gradientEnd} />
+            <View style={styles.reauthText}>
+              <Text style={[styles.reauthTitle, { color: colors.text }]}>{t('profile.reauthTitle')}</Text>
+              <Text style={[styles.reauthBody, { color: colors.textMuted }]}>{t('profile.reauthBody')}</Text>
+            </View>
+            <AnimatedPressable
+              style={[styles.reauthButton, { backgroundColor: colors.gradientEnd }]}
+              onPress={restartCloudSignIn}
+            >
+              <Text style={styles.reauthButtonText}>{t('profile.reauthAction')}</Text>
+            </AnimatedPressable>
+          </View>
+        ) : null}
 
         <BoostCard
           boostActiveUntil={boostActiveUntil}
@@ -340,6 +359,9 @@ export function ProfileScreen() {
                     currency: accountRegion.currency,
                   })
                 : t('profile.accountHomeMarketUnset')}
+            </Text>
+            <Text style={[styles.toggleDesc, { color: colors.textMuted }]}>
+              {t(regionalAuthMethodsDescriptionKey(accountRegion))}
             </Text>
           </View>
           <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
@@ -499,6 +521,7 @@ export function ProfileScreen() {
         visible={showAccountHomeMarket}
         preferences={preferences}
         accountCountryCode={accountRegion.countryCode}
+        accountRegion={accountRegion}
         onClose={() => setShowAccountHomeMarket(false)}
         onSave={updatePreferences}
       />
@@ -742,6 +765,37 @@ const styles = StyleSheet.create({
   settingsLabel: {
     flex: 1,
     fontSize: 16,
+  },
+  reauthBanner: {
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+    padding: spacing.md,
+    borderRadius: radii.card,
+    borderWidth: StyleSheet.hairlineWidth,
+    gap: spacing.sm,
+  },
+  reauthText: {
+    gap: spacing.xs,
+  },
+  reauthTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  reauthBody: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  reauthButton: {
+    alignSelf: 'flex-start',
+    borderRadius: radii.button,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  reauthButtonText: {
+    color: '#111',
+    fontWeight: '800',
+    fontSize: 14,
   },
   signOutRow: {
     flexDirection: 'row',

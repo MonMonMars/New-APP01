@@ -31,9 +31,15 @@ export function resolveDeviceLocale(): AppLocale {
   return 'en';
 }
 
-export function resolveAppLocale(preferred?: AppLocale | null): AppLocale {
+export function resolveAppLocale(
+  preferred?: AppLocale | null,
+  accountCountryCode?: string | null,
+): AppLocale {
   if (preferred && APP_LOCALES.includes(preferred)) {
     return preferred;
+  }
+  if (accountCountryCode === 'CN' || accountCountryCode === 'TW') {
+    return 'zh-TW';
   }
   return resolveDeviceLocale();
 }

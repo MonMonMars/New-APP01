@@ -22,6 +22,20 @@ export function regionalSocialAuthProviders(region: AccountRegionContext): Regio
   return providers;
 }
 
+/** Short copy for settings / privacy explaining sign-in rails for this market. */
+export function regionalAuthMethodsDescriptionKey(region: AccountRegionContext): string {
+  if (region.chinaMainlandAuth) {
+    return 'auth.regionalMethodsCN';
+  }
+  if (region.phoneAuthPrimary) {
+    return 'auth.regionalMethodsPhoneFirst';
+  }
+  if (region.market === 'europe' || region.market === 'uk') {
+    return 'auth.regionalMethodsEmailFirst';
+  }
+  return 'auth.regionalMethodsDefault';
+}
+
 export function regionalPhonePlaceholderKey(region: AccountRegionContext): string {
   if (region.countryCode === 'CN') {
     return 'auth.phonePlaceholderCN';

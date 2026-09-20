@@ -52,7 +52,7 @@ export function SecuritySettingsScreen({ onClose }: SecuritySettingsScreenProps)
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { colors } = useTheme();
-  const { securitySettings, updateSecuritySettings, preferences } = useApp();
+  const { securitySettings, updateSecuritySettings, preferences, accountRegion } = useApp();
   const world = useDisguiseWorld();
   const { t } = useTranslation();
   const [pinDraft, setPinDraft] = useState('');
@@ -199,6 +199,12 @@ export function SecuritySettingsScreen({ onClose }: SecuritySettingsScreenProps)
           <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
         </AnimatedPressable>
 
+        <Text style={[styles.footer, { color: colors.textMuted, marginBottom: spacing.sm }]}>
+          {t('security.accountRegionFooter', {
+            code: accountRegion.countryCode,
+            currency: accountRegion.currency,
+          })}
+        </Text>
         <Text style={[styles.footer, { color: colors.textMuted }]}>{t('security.footer')}</Text>
       </ScrollView>
     </View>

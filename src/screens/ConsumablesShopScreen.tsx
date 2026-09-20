@@ -14,6 +14,7 @@ import { useApp } from '../context/AppContext';
 import { formatRegionalPrice } from '../utils/regionalPricing';
 import { getLegalUiStrings } from '../content/legal';
 import { useTranslation } from '../i18n';
+import { isWebPaidCheckoutBlocked, regionalPaymentNoticeKey } from '../services/paymentRails';
 import { translatePurchaseError } from '../utils/purchaseMessages';
 import { RootStackParamList } from '../types/navigation';
 import { PaymentMethodKind, PurchaseProductId } from '../types/purchases';
@@ -50,6 +51,8 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
   const [verificationCode, setVerificationCode] = useState('');
   const [verificationCodeConfirm, setVerificationCodeConfirm] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodKind>('platform_default');
+  const webCheckoutBlocked = isWebPaidCheckoutBlocked(accountRegion);
+  const regionalNoticeKey = regionalPaymentNoticeKey(accountRegion);
 
   const packs: Pack[] = useMemo(
     () => [
@@ -93,7 +96,19 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
     [accountRegion, t],
   );
 
+  const openPackConfirm = (pack: Pack) => {
+    if (webCheckoutBlocked) {
+      Alert.alert(t('payments.webCheckoutUnavailable'), t('payments.cnConsumerNotice'));
+      return;
+    }
+    setPendingPack(pack);
+    setPurchaseError(null);
+  };
+
   const handlePurchase = async (pack: Pack) => {
+    if (webCheckoutBlocked) {
+      return;
+    }
     setPurchasing(true);
     setPurchaseError(null);
     const productId = SHOP_PACK_TO_PRODUCT[pack.id] ?? pack.productId;
@@ -177,6 +192,9 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
             currency: accountRegion.currency,
           })}
         </Text>
+        {regionalNoticeKey ? (
+          <Text style={[styles.marketLabel, { color: colors.textMuted }]}>{t(regionalNoticeKey)}</Text>
+        ) : null}
 
         {packs.map((pack) => {
           const packAccent = colors.gradientEnd;
@@ -186,7 +204,7 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
               style={[styles.packCard, { backgroundColor: colors.surface }]}
               onPress={() => {
                 setPurchaseError(null);
-                setPendingPack(pack);
+                openPackConfirm(pack);
               }}
             >
               <View style={[styles.packIcon, { backgroundColor: `${packAccent}22` }]}>

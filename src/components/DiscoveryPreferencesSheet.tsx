@@ -15,6 +15,7 @@ import {
   ShowMePreference,
   resolveSparkSection,
 } from '../types/preferences';
+import { withSyncedAccountCountry } from '../utils/accountRegion';
 import { radii, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
 
@@ -138,13 +139,26 @@ export function DiscoveryPreferencesSheet({
             </Text>
             <Switch
               value={preferences.travelMode ?? false}
-              onValueChange={(travelMode) =>
-                onChange({
-                  ...preferences,
-                  travelMode,
-                  passportCity: travelMode ? (preferences.passportCity ?? PASSPORT_CITIES[0]) : undefined,
-                })
-              }
+              onValueChange={(travelMode) => {
+                if (travelMode) {
+                  onChange({
+                    ...preferences,
+                    travelMode: true,
+                    passportCity:
+                      preferences.passportCity ??
+                      preferences.homePassportCity ??
+                      PASSPORT_CITIES[0],
+                  });
+                  return;
+                }
+                onChange(
+                  withSyncedAccountCountry({
+                    ...preferences,
+                    travelMode: false,
+                    passportCity: preferences.homePassportCity ?? preferences.passportCity,
+                  }),
+                );
+              }}
               trackColor={{ false: colors.border, true: colors.gradientEnd }}
               thumbColor={colors.text}
             />

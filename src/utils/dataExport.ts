@@ -2,11 +2,17 @@ import { Share, Platform } from 'react-native';
 
 import { translate } from '../i18n';
 import { AppLocale, resolveAppLocale } from '../types/locale';
+import { resolveAccountRegion } from './accountRegion';
 import { PersistedAppState } from './persistence';
 
 export type ExportableUserData = {
   exportedAt: string;
   userId: string | null;
+  accountHomeMarket: {
+    countryCode: string;
+    currency: string;
+    homePassportCity?: string;
+  };
   profile: PersistedAppState['user'];
   preferences: PersistedAppState['preferences'];
   matches: PersistedAppState['matches'];
@@ -18,9 +24,15 @@ export type ExportableUserData = {
 };
 
 export function buildUserDataExport(state: PersistedAppState): ExportableUserData {
+  const region = resolveAccountRegion(state.preferences);
   return {
     exportedAt: new Date().toISOString(),
     userId: state.userId,
+    accountHomeMarket: {
+      countryCode: region.countryCode,
+      currency: region.currency,
+      homePassportCity: state.preferences.homePassportCity,
+    },
     profile: state.user,
     preferences: state.preferences,
     matches: state.matches,

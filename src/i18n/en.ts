@@ -124,6 +124,10 @@ export const en = {
     googleContinue: 'Complete sign-in in the browser, then return here.',
     oauthRefresh: 'I finished sign-in — refresh',
     oauthNotYet: 'Sign-in not detected yet. Finish in WeChat, QQ, or the browser, then tap refresh.',
+    regionalMethodsCN: 'Sign-in: WeChat, QQ, phone, email, or password.',
+    regionalMethodsPhoneFirst: 'Sign-in: phone-first, then email and password.',
+    regionalMethodsEmailFirst: 'Sign-in: email-first, then phone and password.',
+    regionalMethodsDefault: 'Sign-in: Apple, Google, email, and phone.',
     passwordTooShort: 'Use at least 8 characters.',
     signUpFailed: 'Could not create account.',
     signUpSuccess: 'Account created.',
@@ -216,6 +220,9 @@ export const en = {
     signOutTitle: 'Sign out?',
     signOutBody: 'You will need to sign in again to sync matches and purchases.',
     signOutConfirm: 'Sign out',
+    reauthTitle: 'Cloud sign-in needed',
+    reauthBody: 'Your Supabase session ended. Sign in again to sync matches, chat, and purchases.',
+    reauthAction: 'Sign in again',
     profileStrength: 'Profile strength',
     percentComplete: '{score}% complete',
     whoViewedYou: 'Who viewed you',
@@ -591,6 +598,8 @@ export const en = {
     cnConsumerNotice:
       'Mainland China accounts: pay in the iOS or Android app (App Store / Google Play). Web card checkout is not offered; WeChat Pay / Alipay integration is planned.',
     webCheckoutUnavailable: 'Web checkout unavailable',
+    webPaidCheckoutBlocked: 'Use the iOS or Android app for paid checkout in your account region.',
+    checkoutCancelledBody: 'No charge was made. You can try again anytime.',
     euConsumerNotice:
       'EU/UK: Subscriptions renew until cancelled in your store or Stripe account. Statutory withdrawal rights may apply to digital content — see Subscription Terms.',
     methodRecommendedDesc:
@@ -829,6 +838,7 @@ export const en = {
       'Turn off disguise here, or tap the {appName} logo in the header to leave {unlockLabel}.',
     regionFallback: 'United Kingdom',
     regionSubtitle: '{city} · account {code}',
+    regionPulseSubtitle: '{city} · Pulse feed headlines (not billing home market)',
     defaultOverlayText: 'Weekend reads you should not miss',
     emailSupport: 'Email support',
     supportEmailSubject: '{appName} support',
@@ -1255,6 +1265,7 @@ export const en = {
     privacyShield: 'Privacy shield',
     privacyShieldHint: 'Hide {unlock} in app switcher with {name} overlay',
     protocolLink: 'Read security protocols — anti-phishing & hacker protection',
+    accountRegionFooter: 'Account home market for auth & billing: {code} · {currency}',
     footer:
       'Local chat data is encrypted on device. Never share your PIN, magic links, or verification selfies with anyone claiming to be Spark support.',
     unlockLockoutMinutes: 'Too many failed attempts. Try again in {minutes} min.',

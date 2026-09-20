@@ -543,6 +543,8 @@ type AppContextValue = {
   setPaused: (paused: boolean) => void;
   deleteAccount: () => Promise<void>;
   signOut: () => Promise<void>;
+  /** Return to onboarding welcome to sign in again (keeps local profile data). */
+  restartCloudSignIn: () => void;
 };
 
 const defaultPersisted = createDefaultPersistedState();
@@ -2964,26 +2966,41 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return;
     }
     const params = new URLSearchParams(window.location.search);
-    if (params.get('checkout') !== 'success') {
+    const checkoutOutcome = params.get('checkout');
+    if (checkoutOutcome === 'cancel') {
+      const locale = resolveAppLocale(preferences.appLocale, preferences.accountCountryCode);
+      window.alert(
+        `${translate(locale, 'payments.cancelled')}\n${translate(locale, 'payments.checkoutCancelledBody')}`,
+      );
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return;
+    }
+    if (checkoutOutcome !== 'success') {
       return;
     }
     const sessionId = params.get('session_id');
     if (!sessionId) {
+      window.history.replaceState({}, document.title, window.location.pathname);
       return;
     }
     void pollStripeCheckoutFulfillment(userId, sessionId).then((grant) => {
       if (grant) {
         applyEntitlementGrant(grant);
-        if (typeof window !== 'undefined') {
-          const locale = resolveAppLocale(preferences.appLocale);
-          window.alert(
-            `${translate(locale, 'payments.purchaseSuccess')}\n${translate(locale, 'payments.subscriptionActivated')}`,
-          );
-        }
+        const locale = resolveAppLocale(preferences.appLocale, preferences.accountCountryCode);
+        window.alert(
+          `${translate(locale, 'payments.purchaseSuccess')}\n${translate(locale, 'payments.subscriptionActivated')}`,
+        );
       }
     });
     window.history.replaceState({}, document.title, window.location.pathname);
-  }, [applyEntitlementGrant, isHydrated, preferences.appLocale, syncPurchaseEntitlementsFromCloud, userId]);
+  }, [
+    applyEntitlementGrant,
+    isHydrated,
+    preferences.accountCountryCode,
+    preferences.appLocale,
+    syncPurchaseEntitlementsFromCloud,
+    userId,
+  ]);
 
   const purchaseProduct = useCallback(
     async (
@@ -3263,6 +3280,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setMfaLoginRequired(false);
   }, []);
 
+  const restartCloudSignIn = useCallback(() => {
+    setHasOnboarded(false);
+    setIsAuthenticated(false);
+    setUserId(null);
+    setMfaLoginRequired(false);
+  }, []);
+
   const deleteAccount = useCallback(async () => {
     if (userId && isSupabaseConfigured()) {
       const remote = await deleteAccountViaEdgeFunction();
@@ -3474,6 +3498,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setPaused,
       deleteAccount,
       signOut,
+      restartCloudSignIn,
     }),
     [
       hasOnboarded,
@@ -3632,6 +3657,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       clearDisguiseAd,
       setPaused,
       signOut,
+      restartCloudSignIn,
       deleteAccount,
     ],
   );

@@ -32,6 +32,8 @@ npm start
 |--------|--------|-------|
 | **Apple Sign-In** | Supabase | iOS via `expo-apple-authentication` → `signInWithIdToken` |
 | **Google** | Supabase OAuth | `signInWithGoogleOAuth()` — enable Google provider + redirect URLs |
+| **WeChat** | Supabase custom OAuth | Mainland China welcome screen — `signInWithWeChatOAuth()` |
+| **QQ (Tencent)** | Supabase custom OAuth | Mainland China welcome screen — `signInWithQqOAuth()` |
 | **Magic link email** | Supabase | `signInWithMagicLink()` |
 | **Email + password** | Supabase | Sign up / sign in tabs on onboarding welcome |
 | **Phone SMS OTP** | Supabase | Enable Phone provider + SMS (Twilio/MessageBird) |
@@ -42,6 +44,30 @@ Run [`supabase-auth-trigger.sql`](./supabase-auth-trigger.sql) after the main sc
 Deploy Edge Function `delete-account` and set secrets (`SUPABASE_SERVICE_ROLE_KEY`). The app calls it on account deletion.
 
 Enable providers in Supabase Dashboard → Authentication → Providers (Apple, Google, Email, Phone). Enable **MFA** under Authentication settings.
+
+### Regional sign-in (account home market)
+
+Spark picks auth buttons and tab order from **account region** (`accountCountryCode`, onboarding passport city, locale, timezone) — not live GPS. See `src/utils/accountRegion.ts` and `src/config/regionalAuthProviders.ts`.
+
+| Region | Social buttons | Default tab |
+|--------|----------------|-------------|
+| **CN** (mainland) | WeChat, QQ, Apple (iOS only) — no Google | Phone → Password → Email |
+| **TW / APAC** | Apple + Google (web/iOS) | Phone-first |
+| **US / Americas** | Apple + Google | Email-first |
+| **EU / UK** | Apple + Google | Email-first |
+
+**Mainland China phone OTP:** users can enter an 11-digit mobile; the app normalizes to E.164 `+86…`. Configure Supabase **Phone** auth with an SMS provider that delivers in China (commonly **Tencent Cloud SMS**).
+
+**WeChat Open Platform + QQ Connect (custom OAuth in Supabase):**
+
+1. Register apps at [WeChat Open Platform](https://open.weixin.qq.com/) (Website / Mobile) and [QQ Connect](https://connect.qq.com/).
+2. Set authorized redirect URIs to match Supabase OAuth callback URLs (same host as magic links + Supabase project callback).
+3. In Supabase Dashboard → Authentication → Providers, add **custom OAuth** providers (names must match app code: `wechat`, `qq`) with authorize/token/userinfo endpoints from Tencent docs.
+4. Test on web and native: `signInWithOAuth` opens the system browser; session completes via `supabaseAuthCallback.ts`.
+
+Without Dashboard setup, WeChat/QQ buttons show provider errors in production; **demo mode** (no Supabase env) stubs WeChat/QQ sign-in locally.
+
+**Payments:** mainland accounts use **CNY** display and **no Stripe web checkout**; WeChat Pay / Alipay rails are not wired yet — use native IAP or demo purchase flows until a CN payment integration is added.
 
 ### Magic link redirect URLs
 

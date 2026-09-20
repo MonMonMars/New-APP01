@@ -49,6 +49,8 @@ export const PASSPORT_CITIES = [
   'Tokyo, Japan',
   'Sydney, Australia',
   'Taipei, Taiwan',
+  'Shanghai, China',
+  'Beijing, China',
 ] as const;
 
 export type SparkSection = 'spark' | 'ember';

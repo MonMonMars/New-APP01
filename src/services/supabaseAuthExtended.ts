@@ -4,30 +4,41 @@ import { getMagicLinkRedirectTo } from './supabaseAuthCallback';
 import { getSupabaseClient, isSupabaseConfigured } from './supabase';
 
 function normalizeE164Phone(raw: string): string | null {
-  const digits = raw.replace(/\D/g, '');
+  const trimmed = raw.trim();
+  const digits = trimmed.replace(/\D/g, '');
   if (digits.length < 10) {
     return null;
   }
-  if (raw.trim().startsWith('+')) {
+  if (trimmed.startsWith('+')) {
     return `+${digits}`;
+  }
+  if (/^1[3-9]\d{9}$/.test(digits)) {
+    return `+86${digits}`;
+  }
+  if (/^09\d{8}$/.test(digits)) {
+    return `+886${digits.slice(1)}`;
   }
   if (digits.length === 10) {
     return `+1${digits}`;
   }
   if (digits.length === 11 && digits.startsWith('1')) {
-    return `+${digits}`;
+    return `+1${digits}`;
   }
   return `+${digits}`;
 }
 
-export async function signInWithGoogleOAuth(): Promise<{ ok: boolean; error?: string }> {
+/** Supabase OAuth — provider must be enabled in Dashboard (Google, or custom WeChat / QQ). */
+async function signInWithOAuthProvider(
+  provider: 'google' | 'wechat' | 'qq',
+): Promise<{ ok: boolean; error?: string }> {
   const supabase = getSupabaseClient();
   if (!supabase) {
     return { ok: false, error: 'Supabase not configured' };
   }
   const redirectTo = getMagicLinkRedirectTo();
   const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
+    // Custom providers (wechat, qq) are enabled in Supabase Dashboard → Auth → Providers.
+    provider: provider as 'google',
     options: {
       redirectTo,
       skipBrowserRedirect: Platform.OS !== 'web',
@@ -46,9 +57,21 @@ export async function signInWithGoogleOAuth(): Promise<{ ok: boolean; error?: st
       await Linking.openURL(data.url);
       return { ok: true };
     }
-    return { ok: false, error: 'Cannot open Google sign-in link' };
+    return { ok: false, error: 'Cannot open sign-in link' };
   }
-  return { ok: false, error: 'Google sign-in unavailable' };
+  return { ok: false, error: 'Sign-in unavailable' };
+}
+
+export async function signInWithGoogleOAuth(): Promise<{ ok: boolean; error?: string }> {
+  return signInWithOAuthProvider('google');
+}
+
+export async function signInWithWeChatOAuth(): Promise<{ ok: boolean; error?: string }> {
+  return signInWithOAuthProvider('wechat');
+}
+
+export async function signInWithQqOAuth(): Promise<{ ok: boolean; error?: string }> {
+  return signInWithOAuthProvider('qq');
 }
 
 export async function sendPhoneLoginOtp(phoneRaw: string): Promise<{ ok: boolean; error?: string }> {

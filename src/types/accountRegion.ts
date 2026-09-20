@@ -9,9 +9,17 @@ export type AccountCountryCode =
   | 'AU'
   | 'JP'
   | 'TW'
+  | 'CN'
   | 'OTHER';
 
-export type AccountMarketGroup = 'americas' | 'europe' | 'uk' | 'apac' | 'taiwan' | 'other';
+export type AccountMarketGroup =
+  | 'americas'
+  | 'europe'
+  | 'uk'
+  | 'apac'
+  | 'taiwan'
+  | 'china_mainland'
+  | 'other';
 
 export type AccountRegionContext = {
   countryCode: AccountCountryCode;
@@ -19,11 +27,13 @@ export type AccountRegionContext = {
   /** BCP 47 for formatting prices and dates */
   localeTag: string;
   /** ISO 4217 checkout / display currency */
-  currency: 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'JPY' | 'TWD';
+  currency: 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'JPY' | 'TWD' | 'CNY';
   /** Stripe Checkout supported for this account market (web) */
   stripeWebCheckout: boolean;
   /** Phone OTP is a primary sign-in method in this market */
   phoneAuthPrimary: boolean;
+  /** Mainland China — WeChat / QQ / local phone (not Google-first) */
+  chinaMainlandAuth: boolean;
 };
 
 export type RegionalAuthTab = 'email' | 'phone' | 'password';

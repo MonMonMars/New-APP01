@@ -5,11 +5,12 @@ import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
 import { getPulseCategoryLabel, localizeTimeAgoLabel } from '../../i18n/labels';
-import { getProfileById } from '../../data/profiles';
 import { NewsPost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { profileIntroCaption } from '../../utils/profileIntroCaption';
+import { resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
+import { pulseFeedCardShell } from './pulseFeedCardLayout';
 import { MediaWithContentBadge } from './ContentTypeIcon';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { NewsArticleSheet } from './NewsArticleSheet';
@@ -31,7 +32,11 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
   const [selectedReporter, setSelectedReporter] = useState<NewsReporter | null>(null);
 
   const openReporter = (reporter: NewsReporter) => {
-    setSelectedReporter(reporter);
+    const linked = resolveExplicitDatingProfile(reporter.profileId, preferences.sparkSection);
+    if (!linked) {
+      return;
+    }
+    setSelectedReporter({ ...reporter, profileId: linked.id });
   };
 
   const closeReporter = () => {
@@ -39,11 +44,9 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
   };
 
   const reporterCaption = (reporter: NewsReporter): string => {
-    if (reporter.profileId) {
-      const profile = getProfileById(reporter.profileId);
-      if (profile) {
-        return profileIntroCaption(profile);
-      }
+    const linked = resolveExplicitDatingProfile(reporter.profileId, preferences.sparkSection);
+    if (linked) {
+      return profileIntroCaption(linked);
     }
     return reporter.quote;
   };
@@ -54,7 +57,11 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
         accessibilityRole="button"
         accessibilityLabel={t('newsArticle.readArticleA11y', { headline: post.headline })}
         onPress={() => setArticleOpen(true)}
-        style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
+        style={[
+          styles.card,
+          pulseFeedCardShell,
+          { backgroundColor: colors.surface, borderColor: colors.border },
+        ]}
       >
         <MediaWithContentBadge kind="news">
           <NewsHeroImage uri={post.imageUrl} style={styles.image} accessibilityLabel={post.headline} />
@@ -77,23 +84,34 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
 
           {post.reporters.length > 0 && (
             <View style={styles.reportersRow}>
-              {post.reporters.map((reporter) => (
-                <PulseProfileSwap
-                  key={reporter.id}
-                  profileKey={reporter.profileId ?? reporter.id}
-                  style={styles.reporterRow}
-                >
-                  <FeedPersonThumbnail
-                    plainAvatar
-                    contentKind="profile"
-                    hideLabel
-                    imageUrl={reporter.avatarUrl}
-                    caption={reporterCaption(reporter)}
-                    onPress={() => openReporter(reporter)}
-                    accessibilityLabel={t('disguiseMiniWindow.viewPhotosFrom', { name: reporter.name })}
-                  />
-                </PulseProfileSwap>
-              ))}
+              {post.reporters.map((reporter) => {
+                const linkedProfile = resolveExplicitDatingProfile(
+                  reporter.profileId,
+                  preferences.sparkSection,
+                );
+                const reporterKind = linkedProfile ? 'profile' : 'news';
+                return (
+                  <PulseProfileSwap
+                    key={reporter.id}
+                    profileKey={linkedProfile?.id ?? reporter.id}
+                    style={styles.reporterRow}
+                  >
+                    <FeedPersonThumbnail
+                      plainAvatar
+                      contentKind={reporterKind}
+                      hideLabel
+                      imageUrl={reporter.avatarUrl}
+                      caption={reporterCaption(reporter)}
+                      onPress={linkedProfile ? () => openReporter(reporter) : undefined}
+                      accessibilityLabel={
+                        linkedProfile
+                          ? t('disguiseMiniWindow.viewPhotosFrom', { name: reporter.name })
+                          : reporter.name
+                      }
+                    />
+                  </PulseProfileSwap>
+                );
+              })}
             </View>
           )}
         </View>

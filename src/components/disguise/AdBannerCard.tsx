@@ -13,7 +13,7 @@ import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { ContentTypeIcon, MediaWithContentBadge } from './ContentTypeIcon';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { AdLandingSheet } from './AdLandingSheet';
-import { PersonPreviewSheet } from './PersonPreviewSheet';
+import { pulseFeedCardShell } from './pulseFeedCardLayout';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 const AD_TESTIMONIAL_PROFILES = mockProfiles.filter(
@@ -29,7 +29,6 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
   const { t } = useTranslation();
   const meta = useDisguiseWorld();
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [testimonialOpen, setTestimonialOpen] = useState(false);
   const testimonialProfile =
     AD_TESTIMONIAL_PROFILES[ad.id.length % AD_TESTIMONIAL_PROFILES.length] ?? AD_TESTIMONIAL_PROFILES[0];
   const testimonialReporter = testimonialProfile
@@ -49,7 +48,7 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
         accessibilityRole="button"
         accessibilityLabel={t('adBanner.sponsoredA11y', { brand: ad.brand })}
         onPress={() => setSheetOpen(true)}
-        style={[styles.card, { backgroundColor: '#1a1a2e', borderColor: colors.border }]}
+        style={[styles.card, pulseFeedCardShell, { backgroundColor: '#1a1a2e', borderColor: colors.border }]}
       >
         <View style={styles.sponsoredRow}>
           <Text style={styles.sponsored}>{t('disguiseAd.sponsored')}</Text>
@@ -62,20 +61,15 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
           <Text style={styles.brand}>{ad.brand}</Text>
           <Text style={styles.tagline}>{ad.tagline}</Text>
           {testimonialReporter ? (
-            <AnimatedPressable
-              onPress={() => setTestimonialOpen(true)}
-              accessibilityRole="button"
-              accessibilityLabel={t('adBanner.viewProfileA11y', { name: testimonialReporter.name })}
-              style={styles.testimonialRow}
-            >
+            <View style={styles.testimonialRow} accessibilityLabel={t('adBanner.sponsoredA11y', { brand: ad.brand })}>
               <FeedPersonThumbnail
                 plainAvatar
-                contentKind="profile"
+                contentKind="sponsored"
                 imageUrl={testimonialReporter.avatarUrl}
                 caption={testimonialReporter.quote}
-                accessibilityLabel={t('adBanner.profilePhotoA11y', { name: testimonialReporter.name })}
+                accessibilityLabel={testimonialReporter.name}
               />
-            </AnimatedPressable>
+            </View>
           ) : null}
           <View style={[styles.cta, { backgroundColor: meta.accent }]}>
             <Text style={styles.ctaText}>{ad.cta}</Text>
@@ -85,13 +79,6 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
       </AnimatedPressable>
 
       <AdLandingSheet visible={sheetOpen} ad={ad} onClose={() => setSheetOpen(false)} />
-      {testimonialReporter ? (
-        <PersonPreviewSheet
-          visible={testimonialOpen}
-          reporter={testimonialReporter}
-          onClose={() => setTestimonialOpen(false)}
-        />
-      ) : null}
     </>
   );
 }

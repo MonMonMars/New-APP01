@@ -7,6 +7,8 @@ import { buildDisguiseFeed } from '../../utils/buildDisguiseFeed';
 import { isCosmosTarotFeedItem } from '../../utils/disguiseFeedCatalog';
 import { usesFemalePulseExperience } from '../../utils/genderAccountPerks';
 import { findFeedItemById, findNewsPostByHeadline } from '../../utils/findFeedItem';
+import { useAppLocale } from '../../hooks/useAppLocale';
+import { disguisedProfileAsAdPost, disguisedProfileAsNewsPost } from '../../utils/disguiseFeedPresentation';
 import { profileIdFromPostId } from '../../utils/resolveDisguiseProfile';
 import { AdLandingSheet } from './AdLandingSheet';
 import { NewsArticleSheet } from './NewsArticleSheet';
@@ -23,6 +25,7 @@ type PulseFeedItemViewerProps = {
 /** Opens the correct disguise sheet for a saved or history item. */
 export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItemViewerProps) {
   const { user, disguiseAdCreative, preferences } = useApp();
+  const { locale } = useAppLocale();
   const { t } = useTranslation();
 
   const feedItem = useMemo((): FeedItem | null => {
@@ -109,6 +112,20 @@ export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItem
           />
         );
       }
+      if (feedItem.variant === 'ad') {
+        return (
+          <AdLandingSheet visible ad={disguisedProfileAsAdPost(feedItem)} onClose={onClose} />
+        );
+      }
+      if (feedItem.variant === 'news') {
+        return (
+          <NewsArticleSheet
+            visible
+            post={disguisedProfileAsNewsPost(feedItem, locale)}
+            onClose={onClose}
+          />
+        );
+      }
       return (
         <PersonPreviewSheet
           visible
@@ -118,7 +135,7 @@ export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItem
             avatarUrl: feedItem.avatarUrl,
             quote: feedItem.overlayText,
             photos: feedItem.photos,
-            profileId: profileIdFromPostId(feedItem.id),
+            profileId: feedItem.profileId ?? profileIdFromPostId(feedItem.id),
           }}
           onClose={onClose}
         />

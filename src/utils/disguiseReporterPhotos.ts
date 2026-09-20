@@ -3,7 +3,7 @@ import { disguiseSocialPosts } from '../data/disguiseSocialPosts';
 import { SparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
 import { profileIntroCaption } from './profileIntroCaption';
-import { resolveDisguiseProfile, resolveExplicitDatingProfile } from './resolveDisguiseProfile';
+import { resolveExplicitDatingProfile } from './resolveDisguiseProfile';
 
 /** Build a de-duplicated photo list for disguise mini-window previews. */
 export function buildReporterPhotoUrls(
@@ -56,7 +56,7 @@ export function socialReporterPhotoIndex(
   if (!targetUrl?.trim()) {
     return 0;
   }
-  const linkedProfile = resolveDisguiseProfile(reporter.id, reporter.profileId, section);
+  const linkedProfile = resolveExplicitDatingProfile(reporter.profileId, section);
   const urls = buildReporterPhotoUrls(reporter, linkedProfile);
   const index = urls.indexOf(targetUrl.trim());
   return index >= 0 ? index : 0;

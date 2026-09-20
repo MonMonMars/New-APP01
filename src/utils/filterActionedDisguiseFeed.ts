@@ -5,10 +5,9 @@ import { Profile } from '../types/profile';
 import { disguiseDisplayName } from './disguiseProfileFeed';
 import { profileIntroCaption } from './profileIntroCaption';
 import {
+  explicitReporterProfileId,
   profileIdFromPostId,
-  resolveDisguiseProfileId,
   syncActionedProfileIds,
-  pinnedReporterProfileId,
 } from './resolveDisguiseProfile';
 
 function actionedProfileIds(
@@ -31,12 +30,8 @@ function hashSlotId(id: string): number {
   return Math.abs(hash);
 }
 
-function reporterProfileId(reporter: NewsReporter, section?: SparkSection | string | null): string | undefined {
-  return (
-    reporter.profileId ??
-    resolveDisguiseProfileId(reporter.id) ??
-    pinnedReporterProfileId(reporter.id, section)
-  );
+function reporterProfileId(reporter: NewsReporter): string | undefined {
+  return explicitReporterProfileId(reporter);
 }
 
 function disguisedProfileId(item: DisguisedProfilePost): string | undefined {
@@ -117,7 +112,7 @@ function collectReservedProfileIds(items: FeedItem[], section?: SparkSection | s
 
     if (item.type === 'news') {
       item.reporters.forEach((reporter) => {
-        const profileId = reporterProfileId(reporter, section);
+        const profileId = reporterProfileId(reporter);
         if (profileId) {
           reserved.add(profileId);
         }
@@ -178,7 +173,7 @@ export function filterActionedDisguiseFeed(
     if (item.type === 'news') {
       let changed = false;
       const reporters = item.reporters.flatMap((reporter) => {
-        const profileId = reporterProfileId(reporter, section);
+        const profileId = reporterProfileId(reporter);
         if (!profileId || !actioned.has(profileId)) {
           return [reporter];
         }

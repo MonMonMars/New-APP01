@@ -18,10 +18,14 @@ import { ContentTypeIcon, MediaWithContentBadge } from './ContentTypeIcon';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { PROFILE_AVATAR_SIZE } from './DisguiseOverlayAvatar';
 import { NewsHeroImage } from './NewsHeroImage';
+import { AdLandingSheet } from './AdLandingSheet';
+import { NewsArticleSheet } from './NewsArticleSheet';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
 import { SocialCommentSheet } from './SocialCommentSheet';
+import { pulseFeedCardShell } from './pulseFeedCardLayout';
 import { getProfileById } from '../../data/profiles';
 import { profileIntroCaption } from '../../utils/profileIntroCaption';
+import { disguisedProfileAsAdPost, disguisedProfileAsNewsPost } from '../../utils/disguiseFeedPresentation';
 import { profileIdFromPostId } from '../../utils/resolveDisguiseProfile';
 import { PulseProfileSwap } from '../motion/PulseProfileSwap';
 import { AnimatedPressable } from '../AnimatedPressable';
@@ -46,6 +50,8 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   const meta = useDisguiseWorld();
   const [previewOpen, setPreviewOpen] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [articleOpen, setArticleOpen] = useState(false);
+  const [adSheetOpen, setAdSheetOpen] = useState(false);
   const upvoted = pulseSocial.likedPostIds.includes(post.id);
 
   const linkedProfileId = post.profileId ?? profileIdFromPostId(post.id);
@@ -65,6 +71,8 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   const maskSnippet = post.overlayText.split(' ').slice(0, 2).join(' ');
 
   const openPreview = () => setPreviewOpen(true);
+  const newsSheetPost = disguisedProfileAsNewsPost(post, locale);
+  const adSheetPost = disguisedProfileAsAdPost(post);
 
   const previewSheet = (
     <PersonPreviewSheet
@@ -93,7 +101,13 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   if (post.variant === 'social') {
     return (
       <>
-        <View style={[styles.socialCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View
+          style={[
+            styles.socialCard,
+            pulseFeedCardShell,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
           <PulseProfileSwap profileKey={linkedProfileId ?? post.id}>
             <FeedPersonThumbnail
               imageUrl={post.avatarUrl}
@@ -150,8 +164,8 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
     return (
       <>
         <AnimatedPressable
-          style={[styles.card, { backgroundColor: '#1a1a2e', borderColor: colors.border }]}
-          onPress={openPreview}
+          style={[styles.card, pulseFeedCardShell, { backgroundColor: '#1a1a2e', borderColor: colors.border }]}
+          onPress={() => setAdSheetOpen(true)}
           accessibilityRole="button"
           accessibilityLabel={t('disguisedProfile.disguisedAsAdA11y', { headline: post.headline })}
         >
@@ -177,6 +191,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
           </View>
         </AnimatedPressable>
         {previewSheet}
+        <AdLandingSheet visible={adSheetOpen} ad={adSheetPost} onClose={() => setAdSheetOpen(false)} />
       </>
     );
   }
@@ -184,8 +199,8 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   return (
     <>
       <AnimatedPressable
-        style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
-        onPress={openPreview}
+        style={[styles.card, pulseFeedCardShell, { backgroundColor: colors.surface, borderColor: colors.border }]}
+        onPress={() => setArticleOpen(true)}
         accessibilityRole="button"
         accessibilityLabel={t('disguisedProfile.disguisedAsNewsA11y', { headline: post.headline })}
       >
@@ -217,6 +232,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
         </View>
       </AnimatedPressable>
       {previewSheet}
+      <NewsArticleSheet visible={articleOpen} post={newsSheetPost} onClose={() => setArticleOpen(false)} />
     </>
   );
 }

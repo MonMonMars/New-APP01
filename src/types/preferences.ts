@@ -48,6 +48,9 @@ export const PASSPORT_CITIES = [
   'Paris, France',
   'Tokyo, Japan',
   'Sydney, Australia',
+  'Taipei, Taiwan',
+  'Shanghai, China',
+  'Beijing, China',
 ] as const;
 
 export type SparkSection = 'spark' | 'ember';
@@ -103,6 +106,8 @@ export type DiscoveryPreferences = {
   maxAge: number;
   showMe: ShowMePreference;
   passportCity?: string;
+  /** Home market city from onboarding — auth & billing follow this, not travel passport */
+  homePassportCity?: string;
   travelMode?: boolean;
   discoverFilters?: DiscoverFilter[];
   advancedFilters?: AdvancedDiscoverFilters;
@@ -110,6 +115,8 @@ export type DiscoveryPreferences = {
   sparkSection?: SparkSection;
   /** In-app language for legal docs and policy UI */
   appLocale?: AppLocale;
+  /** Home account country (ISO alpha-2) — drives auth + payment rails like major dating apps */
+  accountCountryCode?: string;
   /** Map "search this area" center — filters discover pool by geo radius */
   mapSearchLat?: number;
   mapSearchLng?: number;

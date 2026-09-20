@@ -350,6 +350,7 @@ export function DiscoverScreen() {
 
   const handleRewindPress = useCallback(() => {
     if (!hasRewindablePass) {
+      Alert.alert(t('discover.rewind'), t('discover.rewindA11y'));
       return;
     }
     if (isSparkPlus) {
@@ -357,7 +358,7 @@ export function DiscoverScreen() {
       return;
     }
     navigation.getParent()?.navigate('SparkPlus');
-  }, [hasRewindablePass, isSparkPlus, navigation, rewindLastPass]);
+  }, [hasRewindablePass, isSparkPlus, navigation, rewindLastPass, t]);
 
   const handleBoostPress = useCallback(() => {
     const result = activateBoost();

@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -16,13 +16,14 @@ import {
   ProfileGender,
   RelationshipIntent,
 } from '../../types/profile';
-import { signInWithApple } from '../../utils/appleAuth';
 import { pickProfilePhoto } from '../../utils/photoPicker';
 import { colors, radii, spacing } from '../../theme';
 import { pulseBrand } from '../../theme/pulseBrand';
+import { AuthWelcomePanel } from '../../components/onboarding/AuthWelcomePanel';
 import { OnboardingLocationMap } from '../../components/onboarding/OnboardingLocationMap';
 import { deriveShowMe } from '../../utils/deriveShowMe';
 import { mapCenterForCity } from '../../utils/searchMapTiles';
+import { countryCodeFromPassportCity, withSyncedAccountCountry } from '../../utils/accountRegion';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 
 type Step = 'welcome' | 'rules' | 'location' | 'intent' | 'identity' | 'profile';
@@ -33,7 +34,6 @@ export function OnboardingFlow() {
   const {
     completeOnboarding,
     signInWithAppleStub,
-    signInWithEmailMagicLink,
     acceptOnboardingLegal,
     updatePreferences,
     preferences,
@@ -42,9 +42,12 @@ export function OnboardingFlow() {
     userId,
     isSupabaseEnabled,
     refreshAuthFromCloud,
+    legalConsent,
+    isHydrated,
   } = useApp();
-  const [step, setStep] = useState<Step>('welcome');
+  const [step, setStep] = useState<Step>('rules');
   const [legalAccepted, setLegalAccepted] = useState(false);
+  const onboardingResumeAppliedRef = useRef(false);
   const [legalPreviewId, setLegalPreviewId] = useState<LegalDocumentId | null>(null);
   const legalUi = getLegalUiStrings(locale);
   const [email, setEmail] = useState('');
@@ -61,14 +64,44 @@ export function OnboardingFlow() {
   const [awaitingMagicLink, setAwaitingMagicLink] = useState(false);
 
   useEffect(() => {
+    if (!isHydrated || onboardingResumeAppliedRef.current) {
+      return;
+    }
+    onboardingResumeAppliedRef.current = true;
+    if (legalConsent.termsAcceptedAt) {
+      setLegalAccepted(true);
+    }
+    const homeCity = preferences.homePassportCity ?? preferences.passportCity;
+    if (!legalConsent.termsAcceptedAt) {
+      setStep('rules');
+    } else if (!homeCity) {
+      setStep('location');
+    } else {
+      setStep('welcome');
+    }
+  }, [
+    isHydrated,
+    legalConsent.termsAcceptedAt,
+    preferences.homePassportCity,
+    preferences.passportCity,
+  ]);
+
+  useEffect(() => {
     if (!isSupabaseEnabled || !awaitingMagicLink) {
       return;
     }
     if (isAuthenticated && userId && step === 'welcome') {
       setAwaitingMagicLink(false);
-      setStep('rules');
+      setStep('intent');
     }
   }, [awaitingMagicLink, isAuthenticated, isSupabaseEnabled, step, userId]);
+
+  useEffect(() => {
+    if (!isHydrated || step !== 'welcome' || !isAuthenticated || !userId) {
+      return;
+    }
+    setStep('intent');
+  }, [isAuthenticated, isHydrated, step, userId]);
 
   const genderOptions: ProfileGender[] = ['woman', 'man', 'nonbinary'];
   const orientationOptions: Orientation[] = ['straight', 'gay', 'lesbian', 'bisexual', 'pansexual', 'queer', 'asexual', 'other'];
@@ -87,40 +120,6 @@ export function OnboardingFlow() {
     { value: 'not_sure', label: t('onboarding.intentNotSure'), hint: t('onboarding.intentNotSureHint') },
   ];
 
-  const handleEmailSignIn = async () => {
-    setAuthLoading(true);
-    setEmailMessage(null);
-    try {
-      const result = await signInWithEmailMagicLink(email);
-      setEmailMessage(result.message);
-      if (result.ok) {
-        if (isSupabaseEnabled) {
-          setAwaitingMagicLink(true);
-        } else {
-          setStep('rules');
-        }
-      }
-    } finally {
-      setAuthLoading(false);
-    }
-  };
-
-  const handleAppleSignIn = async () => {
-    setAuthLoading(true);
-    try {
-      const result = await signInWithApple();
-      if (result.success) {
-        await signInWithAppleStub(result.identityToken, result.displayName);
-        if (result.displayName) {
-          setName(result.displayName);
-        }
-        setStep('rules');
-      }
-    } finally {
-      setAuthLoading(false);
-    }
-  };
-
   const handleAddPhoto = async () => {
     const uri = await pickProfilePhoto(locale);
     if (uri) {
@@ -134,11 +133,14 @@ export function OnboardingFlow() {
       ? parsedAge
       : user.age;
 
-    updatePreferences({
-      ...preferences,
-      showMe: deriveShowMe(gender, orientation),
-      passportCity: preferences.passportCity ?? 'New York, NY',
-    });
+    updatePreferences(
+      withSyncedAccountCountry({
+        ...preferences,
+        showMe: deriveShowMe(gender, orientation),
+        passportCity: preferences.passportCity ?? preferences.homePassportCity ?? 'New York, NY',
+        homePassportCity: preferences.homePassportCity ?? preferences.passportCity ?? 'New York, NY',
+      }),
+    );
 
     completeOnboarding({
       ...user,
@@ -164,68 +166,33 @@ export function OnboardingFlow() {
           <Text style={styles.subtitle}>
             {t('onboarding.welcomeSubtitle')}
           </Text>
-          <AnimatedPressable
-            style={styles.appleButton}
-            onPress={handleAppleSignIn}
-            disabled={authLoading}
-          >
-            {authLoading ? (
-              <ActivityIndicator color={colors.textDark} />
-            ) : (
-              <>
-                <Ionicons name="logo-apple" size={20} color={colors.textDark} />
-                <Text style={styles.appleButtonText}>{t('onboarding.continueApple')}</Text>
-              </>
-            )}
-          </AnimatedPressable>
-          <View style={styles.emailBlock}>
-            <TextInput
-              style={styles.emailInput}
-              placeholder={t('onboarding.emailPlaceholder')}
-              placeholderTextColor={colors.textMuted}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-            <AnimatedPressable
-              style={styles.emailButton}
-              onPress={handleEmailSignIn}
-              disabled={authLoading || !email.trim()}
-            >
-              <Ionicons name="mail-outline" size={18} color={colors.text} />
-              <Text style={styles.emailButtonText}>{t('onboarding.continueEmail')}</Text>
-            </AnimatedPressable>
-            {emailMessage ? <Text style={styles.emailHint}>{emailMessage}</Text> : null}
-            {awaitingMagicLink ? (
-              <>
-                <Text style={styles.emailHint}>{t('onboarding.magicLinkWaiting')}</Text>
-                <AnimatedPressable
-                  style={styles.emailButton}
-                  disabled={authLoading}
-                  onPress={() => {
-                    setAuthLoading(true);
-                    void refreshAuthFromCloud()
-                      .then((ok) => {
-                        if (!ok) {
-                          setEmailMessage(t('onboarding.magicLinkNotYet'));
-                        }
-                      })
-                      .finally(() => {
-                        setAuthLoading(false);
-                      });
-                  }}
-                >
-                  <Ionicons name="refresh-outline" size={18} color={colors.text} />
-                  <Text style={styles.emailButtonText}>{t('onboarding.magicLinkRefresh')}</Text>
-                </AnimatedPressable>
-              </>
-            ) : null}
-          </View>
-          <AnimatedPressable onPress={() => { signInWithAppleStub(); setStep('rules'); }}>
-            <Text style={styles.link}>{t('onboarding.continueGuest')}</Text>
-          </AnimatedPressable>
+          <AuthWelcomePanel
+            authLoading={authLoading}
+            setAuthLoading={setAuthLoading}
+            onAuthenticated={() => setStep('intent')}
+            onGuest={() => {
+              signInWithAppleStub();
+              setStep('intent');
+            }}
+            email={email}
+            setEmail={setEmail}
+            emailMessage={emailMessage}
+            setEmailMessage={setEmailMessage}
+            awaitingMagicLink={awaitingMagicLink}
+            setAwaitingMagicLink={setAwaitingMagicLink}
+            onRefreshMagicLink={() => {
+              setAuthLoading(true);
+              void refreshAuthFromCloud()
+                .then((ok) => {
+                  if (!ok) {
+                    setEmailMessage(t('onboarding.magicLinkNotYet'));
+                  }
+                })
+                .finally(() => {
+                  setAuthLoading(false);
+                });
+            }}
+          />
         </View>
       )}
 
@@ -304,14 +271,20 @@ export function OnboardingFlow() {
             initialCenter={mapCenterForCity(preferences.passportCity ?? 'New York, NY')}
             radiusMiles={preferences.maxDistanceMiles}
             onConfirm={(center, passportCity) => {
-              updatePreferences({
-                ...preferences,
-                travelMode: false,
-                passportCity: passportCity ?? preferences.passportCity,
-                mapSearchLat: center.lat,
-                mapSearchLng: center.lng,
-              });
-              setStep('intent');
+              const nextCity = passportCity ?? preferences.passportCity;
+              const inferred = countryCodeFromPassportCity(nextCity);
+              updatePreferences(
+                withSyncedAccountCountry({
+                  ...preferences,
+                  travelMode: false,
+                  homePassportCity: nextCity,
+                  passportCity: nextCity,
+                  accountCountryCode: inferred ?? preferences.accountCountryCode,
+                  mapSearchLat: center.lat,
+                  mapSearchLng: center.lng,
+                }),
+              );
+              setStep('welcome');
             }}
           />
           {showLocationInfo ? (

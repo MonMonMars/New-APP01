@@ -14,6 +14,7 @@ export type RootStackParamList = {
   SecuritySettings: undefined;
   PrivacyCenter: undefined;
   SecurityProtocols: undefined;
+  TwoFactor: undefined;
   NotificationPreferences: undefined;
   ConsumablesShop: undefined;
   MapDiscover: undefined;

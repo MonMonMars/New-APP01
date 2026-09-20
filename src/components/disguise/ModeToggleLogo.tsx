@@ -1,9 +1,11 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { BrandMark } from '../brand/BrandMark';
 import { useTranslation } from '../../i18n';
 import { useApp } from '../../context/AppContext';
+import { useTheme } from '../../context/ThemeContext';
 import { resolveSparkSection } from '../../types/preferences';
+import { pulseTimesFontFamily } from '../../theme/pulseBrand';
 
 type ModeToggleLogoProps = {
   variant: 'pulse' | 'spark';
@@ -11,7 +13,7 @@ type ModeToggleLogoProps = {
   compact?: boolean;
 };
 
-/** Pulse P mark — lower-left tab bar in Spark/Ember (matches other tab icons). */
+/** Pulse P mark — lower-left tab; tints Spark pink or Ember amber (not disguise blue). */
 export function PulseTabIcon({
   size = 24,
   focused = false,
@@ -20,9 +22,45 @@ export function PulseTabIcon({
   focused?: boolean;
 }) {
   const { t } = useTranslation();
+  const { preferences } = useApp();
+  const { colors } = useTheme();
+  const section = resolveSparkSection(preferences.sparkSection);
+  const accent = section === 'ember' ? colors.ember : colors.gradientEnd;
+  const onAccent = section === 'ember' ? colors.text : '#ffffff';
+  const dim = focused ? 1 : 0.55;
+
   return (
-    <View accessibilityRole="image" accessibilityLabel={t('tabs.pulse')}>
-      <BrandMark world="pulse" size={size} muted={!focused} />
+    <View
+      accessibilityRole="image"
+      accessibilityLabel={t('tabs.pulse')}
+      style={[styles.pulseTabOuter, { width: size + 4, height: size + 4 }]}
+    >
+      <View
+        style={[
+          styles.pulseTabInner,
+          {
+            width: size,
+            height: size,
+            borderRadius: size / 2,
+            backgroundColor: focused ? accent : 'transparent',
+            borderColor: accent,
+            borderWidth: 2,
+            opacity: dim,
+          },
+        ]}
+      >
+        <Text
+          style={[
+            styles.pulseTabLetter,
+            {
+              fontSize: Math.round(size * 0.52),
+              color: focused ? onAccent : accent,
+            },
+          ]}
+        >
+          P
+        </Text>
+      </View>
     </View>
   );
 }
@@ -73,6 +111,20 @@ export function ModeToggleLogo({ variant, compact = false }: ModeToggleLogoProps
 }
 
 const styles = StyleSheet.create({
+  pulseTabOuter: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pulseTabInner: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+  },
+  pulseTabLetter: {
+    fontFamily: pulseTimesFontFamily,
+    fontWeight: '600',
+    marginTop: -1,
+  },
   leftMark: {
     width: 40,
     height: 40,

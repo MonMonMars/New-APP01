@@ -158,7 +158,7 @@ export function DisguiseTrendingScreen() {
       ? preferences.passportCity
       : preferences.passportCity ?? 'New York, NY';
   const { weather, isLive } = useDisguiseWeather(weatherCity, locale);
-  const { refreshing, justUpdated, scrollViewProps } = usePulseScrollRefresh();
+  const { pullRefreshing, loadingMore, justUpdated, scrollViewProps } = usePulseScrollRefresh();
 
   const openTopic = (topic?: string) => {
     navigateDisguiseFeedTopic(navigation, topic);
@@ -373,7 +373,11 @@ export function DisguiseTrendingScreen() {
           </AnimatedPressable>
         ))}
 
-        <PulseFeedRefreshFooter refreshing={refreshing} justUpdated={justUpdated} />
+        <PulseFeedRefreshFooter
+          pullRefreshing={pullRefreshing}
+          loadingMore={loadingMore}
+          justUpdated={justUpdated}
+        />
       </ScrollView>
 
       <NewsArticleSheet

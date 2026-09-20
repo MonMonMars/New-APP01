@@ -6,7 +6,8 @@ import { resolveAppLocale } from '../types/locale';
 import { buildDisguiseFeed } from '../utils/buildDisguiseFeed';
 import { filterActionedDisguiseFeed } from '../utils/filterActionedDisguiseFeed';
 import { filterDisguiseFeed } from '../utils/disguiseFeedFilter';
-import { usePulseFeedRefreshGeneration } from './usePulseFeedRefresh';
+import { suffixPulseFeedPage } from '../utils/pulseFeedPaging';
+import { usePulseFeedLoadMorePages, usePulseFeedRefreshGeneration } from './usePulseFeedRefresh';
 
 function disguiseFeedSignature(
   userId: string,
@@ -21,6 +22,7 @@ function disguiseFeedSignature(
 export function useDisguiseFeedItems(topic?: string): FeedItem[] {
   const { user, userId, disguiseAdCreative, preferences, pulseSocial, likedIds, passedIds, superLikedIds } = useApp();
   const refreshGeneration = usePulseFeedRefreshGeneration();
+  const loadMorePages = usePulseFeedLoadMorePages();
   const cacheRef = useRef<{ signature: string; base: FeedItem[] } | null>(null);
 
   const creativeKey = disguiseAdCreative
@@ -32,22 +34,41 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
     user.gender,
     preferences.sparkSection ?? 'spark',
     creativeKey,
-  )}|refresh:${refreshGeneration}`;
+  )}|refresh:${refreshGeneration}|pages:${loadMorePages}`;
 
   const baseFeed = useMemo(() => {
     if (cacheRef.current?.signature === signature) {
       return cacheRef.current.base;
     }
-    const built = buildDisguiseFeed(
+    const locale = resolveAppLocale(preferences.appLocale);
+    let built = buildDisguiseFeed(
       user,
       disguiseAdCreative,
       preferences.sparkSection,
       refreshGeneration,
-      resolveAppLocale(preferences.appLocale),
+      locale,
     );
+    for (let page = 1; page <= loadMorePages; page += 1) {
+      const nextPage = buildDisguiseFeed(
+        user,
+        disguiseAdCreative,
+        preferences.sparkSection,
+        refreshGeneration + page,
+        locale,
+      );
+      built = [...built, ...suffixPulseFeedPage(nextPage, page)];
+    }
     cacheRef.current = { signature, base: built };
     return built;
-  }, [disguiseAdCreative, preferences.sparkSection, refreshGeneration, signature, user]);
+  }, [
+    disguiseAdCreative,
+    loadMorePages,
+    preferences.appLocale,
+    preferences.sparkSection,
+    refreshGeneration,
+    signature,
+    user,
+  ]);
 
   return useMemo(() => {
     const filtered = filterDisguiseFeed(baseFeed, topic, user.gender);

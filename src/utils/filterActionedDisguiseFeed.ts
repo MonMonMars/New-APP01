@@ -61,12 +61,21 @@ function pickReplacementProfile(
   slotId: string,
   pool: Profile[],
   reserved: Set<string>,
+  fallbackPool?: Profile[],
+  excludeProfileId?: string,
 ): Profile | undefined {
-  const available = pool.filter((profile) => !reserved.has(profile.id));
-  if (available.length === 0) {
+  const notReserved = (profile: Profile) =>
+    !reserved.has(profile.id) && profile.id !== excludeProfileId;
+
+  const available = pool.filter(notReserved);
+  if (available.length > 0) {
+    return available[hashSlotId(slotId) % available.length];
+  }
+  const fallback = (fallbackPool ?? pool).filter(notReserved);
+  if (fallback.length === 0) {
     return undefined;
   }
-  return available[hashSlotId(slotId) % available.length];
+  return fallback[hashSlotId(`${slotId}:fallback`) % fallback.length];
 }
 
 function profileToReporter(reporter: NewsReporter, profile: Profile): NewsReporter {
@@ -138,6 +147,7 @@ export function filterActionedDisguiseFeed(
   actioned.forEach((id) => reserved.delete(id));
 
   const pool = buildReplacementPool(section, actioned);
+  const displayFallbackPool = buildReplacementPool(section, new Set());
 
   return items.flatMap((item): FeedItem[] => {
     if (item.type === 'disguised_profile') {
@@ -150,9 +160,15 @@ export function filterActionedDisguiseFeed(
         return [item];
       }
 
-      const replacement = pickReplacementProfile(item.id, pool, reserved);
+      const replacement = pickReplacementProfile(
+        item.id,
+        pool,
+        reserved,
+        displayFallbackPool,
+        profileId,
+      );
       if (!replacement) {
-        return [];
+        return [item];
       }
 
       reserved.add(replacement.id);
@@ -167,10 +183,15 @@ export function filterActionedDisguiseFeed(
           return [reporter];
         }
 
-        const replacement = pickReplacementProfile(reporter.id, pool, reserved);
+        const replacement = pickReplacementProfile(
+          reporter.id,
+          pool,
+          reserved,
+          displayFallbackPool,
+          profileId,
+        );
         if (!replacement) {
-          changed = true;
-          return [];
+          return [reporter];
         }
 
         changed = true;

@@ -74,14 +74,12 @@ export function FeedPersonThumbnail({
 
   const content = (
     <View style={[styles.row, onPress ? undefined : style]}>
-      <View style={styles.avatarCol}>
-        {avatar}
-        {showProfileBadge ? (
-          <View style={styles.iconBadge}>
-            <ContentTypeIcon kind={badgeKind} size={PROFILE_THUMB_ICON_SIZE} />
-          </View>
-        ) : null}
-      </View>
+      {avatar}
+      {showProfileBadge ? (
+        <View style={styles.iconBesideAvatar}>
+          <ContentTypeIcon kind={badgeKind} size={PROFILE_THUMB_ICON_SIZE} />
+        </View>
+      ) : null}
       {showCaption ? (
         <View style={styles.captionCol}>
           {showCaptionIcon ? (
@@ -133,22 +131,9 @@ const styles = StyleSheet.create({
     maxWidth: '100%',
     minWidth: 0,
   },
-  avatarCol: {
-    position: 'relative',
+  iconBesideAvatar: {
     flexShrink: 0,
-  },
-  iconBadge: {
-    position: 'absolute',
-    right: 0,
-    bottom: 0,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: 'rgba(255,255,255,0.96)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(0,0,0,0.08)',
+    alignSelf: 'center',
   },
   plainWrap: {
     overflow: 'hidden',

@@ -20,26 +20,14 @@ type PulseHeaderLogoProps = {
   size?: 'sm' | 'md';
 };
 
-/** Top-left Pulse masthead — white Times “P” + “Pulse”. */
+/** Top-left Pulse masthead — blue P logomark + white “Pulse” wordmark. */
 export function PulseHeaderLogo({ size = 'sm' }: PulseHeaderLogoProps) {
-  const pSize = size === 'sm' ? 24 : 28;
+  const markSize = size === 'sm' ? 'sm' : 'md';
   const wordSize = size === 'sm' ? 22 : 26;
 
   return (
     <View style={styles.headerLogoRow} pointerEvents="none">
-      <Text
-        style={[
-          styles.headerP,
-          {
-            fontSize: pSize,
-            lineHeight: pSize + 2,
-            color: pulseBrand.mastheadText,
-            fontFamily: pulseTimesFontFamily,
-          },
-        ]}
-      >
-        P
-      </Text>
+      <PulseBrandMark size={markSize} />
       <Text
         style={[
           styles.headerWordmark,
@@ -112,8 +100,8 @@ export function PulseBrand({ size = 'md', showTagline = false, tagline, style }:
 const styles = StyleSheet.create({
   headerLogoRow: {
     flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 5,
+    alignItems: 'center',
+    gap: 6,
   },
   headerP: {
     fontWeight: '700',

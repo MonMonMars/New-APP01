@@ -106,11 +106,13 @@ export function paletteForSection(
         ? { ...base, ...buttonTokens(pulseBrand.accent) }
         : base;
     case 'ember':
-      return {
-        ...base,
-        ember: harborBrand.accent,
-        ...buttonTokens(harborBrand.accent),
-      };
+      return disguise
+        ? { ...base, ...buttonTokens(pulseBrand.accent) }
+        : {
+            ...base,
+            ember: harborBrand.accent,
+            ...buttonTokens(harborBrand.accent),
+          };
     default: {
       const _exhaustive: never = section;
       return _exhaustive;

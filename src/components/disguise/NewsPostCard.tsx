@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
 import { getPulseCategoryLabel, localizeTimeAgoLabel } from '../../i18n/labels';
-import { getProfileById } from '../../data/profiles';
 import { NewsPost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { profileIntroCaption } from '../../utils/profileIntroCaption';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
+import { usePulseContextSection } from '../../hooks/usePulseContextSection';
+import { resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
 import { MediaWithContentBadge } from './ContentTypeIcon';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { NewsArticleSheet } from './NewsArticleSheet';
@@ -25,13 +25,17 @@ type NewsPostCardProps = {
 export function NewsPostCard({ post }: NewsPostCardProps) {
   const { colors } = useTheme();
   const { locale, t } = useTranslation();
-  const { preferences } = useApp();
+  const pulseSection = usePulseContextSection();
   const accent = useDisguiseWorld().accent;
   const [articleOpen, setArticleOpen] = useState(false);
   const [selectedReporter, setSelectedReporter] = useState<NewsReporter | null>(null);
 
   const openReporter = (reporter: NewsReporter) => {
-    setSelectedReporter(reporter);
+    const linked = resolveExplicitDatingProfile(reporter.profileId, pulseSection);
+    if (!linked) {
+      return;
+    }
+    setSelectedReporter({ ...reporter, profileId: linked.id });
   };
 
   const closeReporter = () => {
@@ -39,11 +43,9 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
   };
 
   const reporterCaption = (reporter: NewsReporter): string => {
-    if (reporter.profileId) {
-      const profile = getProfileById(reporter.profileId);
-      if (profile) {
-        return profileIntroCaption(profile);
-      }
+    const linked = resolveExplicitDatingProfile(reporter.profileId, pulseSection);
+    if (linked) {
+      return profileIntroCaption(linked);
     }
     return reporter.quote;
   };
@@ -84,23 +86,31 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
 
           {post.reporters.length > 0 && (
             <View style={styles.reportersRow} accessibilityRole="list">
-              {post.reporters.map((reporter) => (
-                <PulseProfileSwap
-                  key={reporter.id}
-                  profileKey={reporter.profileId ?? reporter.id}
-                  style={styles.reporterRow}
-                >
-                  <FeedPersonThumbnail
-                    plainAvatar
-                    contentKind="profile"
-                    hideLabel
-                    imageUrl={reporter.avatarUrl}
-                    caption={reporterCaption(reporter)}
-                    onPress={() => openReporter(reporter)}
-                    accessibilityLabel={t('disguiseMiniWindow.viewPhotosFrom', { name: reporter.name })}
-                  />
-                </PulseProfileSwap>
-              ))}
+              {post.reporters.map((reporter) => {
+                const linkedProfile = resolveExplicitDatingProfile(reporter.profileId, pulseSection);
+                const reporterKind = linkedProfile ? 'profile' : 'news';
+                return (
+                  <PulseProfileSwap
+                    key={reporter.id}
+                    profileKey={linkedProfile?.id ?? reporter.id}
+                    style={styles.reporterRow}
+                  >
+                    <FeedPersonThumbnail
+                      plainAvatar
+                      contentKind={reporterKind}
+                      hideLabel
+                      imageUrl={reporter.avatarUrl}
+                      caption={reporterCaption(reporter)}
+                      onPress={linkedProfile ? () => openReporter(reporter) : undefined}
+                      accessibilityLabel={
+                        linkedProfile
+                          ? t('disguiseMiniWindow.viewPhotosFrom', { name: reporter.name })
+                          : reporter.name
+                      }
+                    />
+                  </PulseProfileSwap>
+                );
+              })}
             </View>
           )}
         </View>
@@ -129,6 +139,7 @@ const styles = StyleSheet.create({
   },
   body: {
     padding: spacing.md,
+    gap: spacing.sm,
   },
   metaRow: {
     flexDirection: 'row',
@@ -139,16 +150,15 @@ const styles = StyleSheet.create({
   },
   source: {
     fontSize: 12,
-    fontWeight: '800',
-    textTransform: 'uppercase',
+    fontWeight: '700',
     letterSpacing: 0.4,
+    textTransform: 'uppercase',
   },
   dot: {
     fontSize: 12,
   },
   category: {
     fontSize: 12,
-    fontWeight: '600',
   },
   time: {
     fontSize: 12,
@@ -156,20 +166,16 @@ const styles = StyleSheet.create({
   },
   headline: {
     fontSize: 18,
-    fontWeight: '800',
+    fontWeight: '700',
     lineHeight: 24,
     marginBottom: spacing.xs,
   },
   summary: {
     fontSize: 14,
     lineHeight: 20,
-    marginBottom: spacing.sm,
   },
   reportersRow: {
-    marginTop: spacing.xs,
-    paddingTop: spacing.sm,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(128,128,128,0.25)',
+    marginTop: spacing.sm,
     gap: spacing.sm,
   },
   reporterRow: {

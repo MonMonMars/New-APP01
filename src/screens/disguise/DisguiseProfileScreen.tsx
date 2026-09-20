@@ -11,6 +11,7 @@ import { LocaleToggle } from '../../components/legal/LocaleToggle';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
+import { usePulseContextSection } from '../../hooks/usePulseContextSection';
 import { useTranslation } from '../../i18n';
 import { getPassportCityLabel } from '../../i18n/labels';
 import { SparkSectionToggle } from '../../components/SparkSectionToggle';
@@ -55,6 +56,7 @@ export function DisguiseProfileScreen() {
     setSparkSection,
   } = useApp();
   const sparkSection = resolveSparkSection(preferences.sparkSection);
+  const pulseSection = usePulseContextSection();
   const meta = useDisguiseWorld();
   const { t, locale } = useTranslation();
   const [showGenerator, setShowGenerator] = useState(false);
@@ -75,12 +77,12 @@ export function DisguiseProfileScreen() {
   const { refreshing, justUpdated, scrollViewProps } = usePulseScrollRefresh();
   const profileFeedItem = buildDisguisedProfileFeedItem(user, profileCreative);
   const recentPosts = useMemo(
-    () => buildDisguisedProfileFeedItems(preferences.sparkSection, refreshGeneration),
-    [preferences.sparkSection, refreshGeneration],
+    () => buildDisguisedProfileFeedItems(pulseSection, refreshGeneration),
+    [pulseSection, refreshGeneration],
   );
   const feedItems = useMemo(
-    () => buildDisguiseFeed(user, disguiseAdCreative, preferences.sparkSection),
-    [user, disguiseAdCreative, preferences.sparkSection],
+    () => buildDisguiseFeed(user, disguiseAdCreative, pulseSection),
+    [user, disguiseAdCreative, pulseSection],
   );
   const savedPosts = useMemo(
     () => resolveSavedPulsePosts(pulseSocial.savedPostIds, feedItems, user.gender, locale),

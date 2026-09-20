@@ -406,6 +406,8 @@ type AppContextValue = {
   isPaused: boolean;
   themeMode: ThemeMode;
   disguiseMode: boolean;
+  /** Section whose dating pool Pulse weaves in — set on disguise entry from sparkSection. */
+  pulseContextSection: SparkSection;
   disguiseAdCreative: DisguiseAdCreative | null;
   isGeneratingDisguiseAd: boolean;
   securitySettings: SecuritySettings;
@@ -598,6 +600,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [isPaused, setIsPaused] = useState(false);
   const [themeMode, setThemeModeState] = useState<ThemeMode>('dark');
   const [disguiseMode, setDisguiseModeState] = useState(true);
+  const [pulseContextSection, setPulseContextSection] = useState<SparkSection>('spark');
   const [disguiseAdCreative, setDisguiseAdCreative] = useState<DisguiseAdCreative | null>(null);
   const [isGeneratingDisguiseAd, setIsGeneratingDisguiseAd] = useState(false);
   const [securitySettings, setSecuritySettings] = useState<SecuritySettings>(defaultSecuritySettings);
@@ -756,6 +759,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setIsPaused(saved.isPaused);
         setThemeModeState(saved.themeMode);
         setDisguiseModeState(saved.disguiseMode ?? true);
+        setPulseContextSection(resolveSparkSection(saved.preferences?.sparkSection));
         setDisguiseAdCreative(saved.disguiseAdCreative ?? null);
         setSecuritySettings({
           ...defaultSecuritySettings,
@@ -1910,6 +1914,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       return { ...prev, sparkSection: section };
     });
+    setPulseContextSection(section);
     setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
     setPriorityProfileId(null);
   }, []);
@@ -3113,12 +3118,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const setDisguiseMode = useCallback(async (enabled: boolean): Promise<boolean> => {
     if (enabled) {
+      setPulseContextSection(resolveSparkSection(preferences.sparkSection));
       setDisguiseModeState(true);
       return true;
     }
     setUnlockConfirmVisible(true);
     return false;
-  }, []);
+  }, [preferences.sparkSection]);
 
   const confirmLeaveDisguise = useCallback(async () => {
     setUnlockConfirmVisible(false);
@@ -3338,6 +3344,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setBoostActiveUntil(null);
     setIsPaused(false);
     setDisguiseModeState(true);
+    setPulseContextSection('spark');
     setDisguiseAdCreative(null);
     setSecuritySettings(defaultSecuritySettings);
     setPrivacyPreferences(defaultPrivacyPreferences);
@@ -3408,6 +3415,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       isPaused,
       themeMode,
       disguiseMode,
+      pulseContextSection,
       disguiseAdCreative,
       isGeneratingDisguiseAd,
       securitySettings,
@@ -3569,6 +3577,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       isPaused,
       themeMode,
       disguiseMode,
+      pulseContextSection,
       disguiseAdCreative,
       isGeneratingDisguiseAd,
       securitySettings,
@@ -3683,7 +3692,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const appLocale = resolveAppLocale(preferences.appLocale);
-  const disguiseMeta = disguiseWorldMeta(preferences.sparkSection, user.gender, appLocale);
+  const leaveDisguiseSection = disguiseMode ? pulseContextSection : resolveSparkSection(preferences.sparkSection);
+  const disguiseMeta = disguiseWorldMeta(leaveDisguiseSection, user.gender, appLocale);
 
   return (
     <AppContext.Provider value={value}>

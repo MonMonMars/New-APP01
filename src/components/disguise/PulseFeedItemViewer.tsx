@@ -7,6 +7,7 @@ import { buildDisguiseFeed } from '../../utils/buildDisguiseFeed';
 import { isCosmosTarotFeedItem } from '../../utils/disguiseFeedCatalog';
 import { usesFemalePulseExperience } from '../../utils/genderAccountPerks';
 import { findFeedItemById, findNewsPostByHeadline } from '../../utils/findFeedItem';
+import { usePulseContextSection } from '../../hooks/usePulseContextSection';
 import { profileIdFromPostId } from '../../utils/resolveDisguiseProfile';
 import { AdLandingSheet } from './AdLandingSheet';
 import { NewsArticleSheet } from './NewsArticleSheet';
@@ -22,7 +23,8 @@ type PulseFeedItemViewerProps = {
 
 /** Opens the correct disguise sheet for a saved or history item. */
 export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItemViewerProps) {
-  const { user, disguiseAdCreative, preferences } = useApp();
+  const { user, disguiseAdCreative } = useApp();
+  const pulseSection = usePulseContextSection();
   const { t } = useTranslation();
 
   const feedItem = useMemo((): FeedItem | null => {
@@ -37,7 +39,7 @@ export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItem
     };
 
     if (itemId && !itemId.startsWith('empty-') && !itemId.startsWith('hist-')) {
-      const fromFeed = buildDisguiseFeed(user, disguiseAdCreative, preferences.sparkSection).find((item) => item.id === itemId);
+      const fromFeed = buildDisguiseFeed(user, disguiseAdCreative, pulseSection).find((item) => item.id === itemId);
       const resolved = allowItem(fromFeed) ?? allowItem(findFeedItemById(itemId, user.gender));
       if (resolved) {
         return resolved;
@@ -47,7 +49,7 @@ export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItem
       return allowItem(findNewsPostByHeadline(headline, user.gender));
     }
     return null;
-  }, [itemId, headline, user, disguiseAdCreative, preferences.sparkSection]);
+  }, [itemId, headline, user, disguiseAdCreative, pulseSection]);
 
   const visible = Boolean(itemId || headline);
   const newsPost = feedItem?.type === 'news' ? feedItem : null;

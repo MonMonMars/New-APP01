@@ -8,8 +8,8 @@ import { DisguisedProfileCard } from '../../components/disguise/DisguisedProfile
 import { DisguiseHeader } from '../../components/disguise/DisguiseHeader';
 import { NewsPostCard } from '../../components/disguise/NewsPostCard';
 import { SocialPostCard } from '../../components/disguise/SocialPostCard';
-import { useApp } from '../../context/AppContext';
 import { useAppLocale } from '../../hooks/useAppLocale';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { useTranslation } from '../../i18n';
 import { useTheme } from '../../context/ThemeContext';
 import { FeedItem } from '../../data/disguiseFeed';
@@ -18,7 +18,6 @@ import { useDisguiseFeedItems } from '../../hooks/useDisguiseFeedItems';
 import { topicFilterLabel } from '../../utils/disguiseFeedFilter';
 import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
 import { spacing } from '../../theme';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefreshFooter';
 import { FadeSlideIn } from '../../components/motion/FadeSlideIn';
@@ -52,10 +51,9 @@ function renderFeedItem({ item, index }: { item: FeedItem; index: number }) {
 export function DisguiseFeedScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { user, preferences } = useApp();
   const { locale } = useAppLocale();
   const { t } = useTranslation();
-  const meta = disguiseWorldMeta(preferences.sparkSection, user.gender, locale);
+  const meta = useDisguiseWorld();
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
   const route = useRoute<RouteProp<DisguiseTabParamList, 'Home'>>();
   const topic = route.params?.topic;

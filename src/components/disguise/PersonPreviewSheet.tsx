@@ -12,8 +12,9 @@ import { radii, spacing } from '../../theme';
 import { getEmberLocationLabel, getEmberRelationshipLabel } from '../../i18n/labels';
 import { buildReporterPhotoUrls } from '../../utils/disguiseReporterPhotos';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
+import { usePulseContextSection } from '../../hooks/usePulseContextSection';
 import { webClass } from '../../motion/webMotion';
-import { resolveReporterSparkProfile } from '../../utils/resolveDisguiseProfile';
+import { resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
 import { MatchToast } from '../MatchToast';
 import { EmberStatusChips } from '../EmberStatusChips';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
@@ -65,6 +66,7 @@ export function PersonPreviewSheet({
   const cardOpacity = useSharedValue(1);
   const cardScale = useSharedValue(1);
   const worldMeta = useDisguiseWorld();
+  const pulseSection = usePulseContextSection();
 
   useEffect(() => {
     if (visible) {
@@ -131,7 +133,9 @@ export function PersonPreviewSheet({
     opacity: cardOpacity.value,
   }));
 
-  const linkedProfile = reporter ? resolveReporterSparkProfile(reporter, preferences.sparkSection) : null;
+  const linkedProfile = reporter
+    ? resolveExplicitDatingProfile(reporter.profileId, pulseSection)
+    : null;
 
   const displayPhotos = useMemo(() => {
     if (!reporter) {

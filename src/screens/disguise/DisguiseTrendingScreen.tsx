@@ -46,7 +46,7 @@ import { useDisguiseWeather } from '../../hooks/useDisguiseWeather';
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
 import { radii, spacing } from '../../theme';
 import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { usesFemalePulseExperience } from '../../utils/genderAccountPerks';
 import { briefToNewsPost, breakingToNewsPost, editorsPickToNewsPost } from '../../utils/disguiseTrendingArticles';
 import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefreshFooter';
@@ -138,7 +138,7 @@ export function DisguiseTrendingScreen() {
   const { user, preferences } = useApp();
   const { locale } = useAppLocale();
   const { t } = useTranslation();
-  const meta = disguiseWorldMeta(preferences.sparkSection, user.gender, locale);
+  const meta = useDisguiseWorld();
   const isFemalePulse = usesFemalePulseExperience(user.gender);
   const brief = isFemalePulse ? femalePulseBrief : pulseBrief;
   const categoryChips = useRotatedPulseContent(

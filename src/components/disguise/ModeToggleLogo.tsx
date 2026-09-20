@@ -27,12 +27,13 @@ export function PulseTabIcon({
   const section = resolveSparkSection(preferences.sparkSection);
   const accent = section === 'ember' ? colors.ember : colors.gradientEnd;
   const onAccent = section === 'ember' ? colors.text : '#ffffff';
+  const dim = focused ? 1 : 0.55;
 
   return (
     <View
       accessibilityRole="image"
       accessibilityLabel={t('tabs.pulse')}
-      style={[styles.pulseTabOuter, { width: size, height: size }]}
+      style={[styles.pulseTabOuter, { width: size + 4, height: size + 4 }]}
     >
       <View
         style={[
@@ -42,7 +43,9 @@ export function PulseTabIcon({
             height: size,
             borderRadius: size / 2,
             backgroundColor: focused ? accent : 'transparent',
-            borderColor: focused ? accent : colors.textMuted,
+            borderColor: accent,
+            borderWidth: 2,
+            opacity: dim,
           },
         ]}
       >
@@ -51,7 +54,7 @@ export function PulseTabIcon({
             styles.pulseTabLetter,
             {
               fontSize: Math.round(size * 0.52),
-              color: focused ? onAccent : colors.textMuted,
+              color: focused ? onAccent : accent,
             },
           ]}
         >

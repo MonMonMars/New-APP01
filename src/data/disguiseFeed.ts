@@ -48,6 +48,8 @@ export type SocialAvatarMask = {
 export type SocialPost = {
   id: string;
   type: 'social';
+  /** When set, avatar opens the dating mini-window; omit for plain social personas (e.g. Alex Chen). */
+  datingProfileId?: string;
   author: string;
   handle: string;
   avatarUrl: string;
@@ -300,6 +302,8 @@ export type DisguiseAlertPerson = {
   avatarUrl: string;
   overlayVariant?: 'news' | 'ad';
   overlayText?: string;
+  /** When set, avatar is a disguised dating profile; omit for activity-only names (e.g. Alex Chen). */
+  datingProfileId?: string;
 };
 
 export type DisguiseAlert = {

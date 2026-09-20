@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   Dimensions,
   LayoutChangeEvent,
+  Platform,
   StyleSheet,
   View,
   ViewStyle,
@@ -17,6 +18,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { useTranslation } from '../i18n';
 import { spacing } from '../theme';
 import type { GeoPoint } from '../utils/geoMap';
 import {
@@ -68,6 +70,8 @@ type SearchMapViewProps = {
   /** Extra inset for the locate control (e.g. sit above bottom sheets). */
   locateInsetBottom?: number;
   locateInsetRight?: number;
+  /** Google Maps–style +/- zoom (recommended for web and compact map previews). */
+  showZoomControls?: boolean;
 };
 
 const windowSize = Dimensions.get('window');
@@ -85,7 +89,7 @@ function zoomFromPinchScale(baseZoom: number, scale: number): number {
   return clampZoom(baseZoom + Math.log2(scale) * 1.5);
 }
 
-/** Esri World Street raster map with real lat/lng pins, live pan, pinch zoom, and optional GPS control. */
+/** Standard street basemap (Carto Voyager by default) with pan, pinch/wheel zoom, and GPS control. */
 export function SearchMapView({
   center,
   zoom,
@@ -112,7 +116,9 @@ export function SearchMapView({
   locateAccessibilityLabel,
   locateInsetBottom = spacing.md,
   locateInsetRight = spacing.md,
+  showZoomControls = false,
 }: SearchMapViewProps) {
+  const { t } = useTranslation();
   const [mapSize, setMapSize] = useState({
     width: windowSize.width,
     height: windowSize.height,
@@ -123,6 +129,14 @@ export function SearchMapView({
   const pinchBaseZoom = useSharedValue(zoom);
   const zoomRef = useRef(zoom);
   zoomRef.current = zoom;
+  const webDragRef = useRef<{ active: boolean; lastX: number; lastY: number }>({
+    active: false,
+    lastX: 0,
+    lastY: 0,
+  });
+
+  const mapInteractive =
+    interactive && (Boolean(onCenterChange) || Boolean(onZoomChange));
 
   useEffect(() => {
     panX.value = withTiming(0, { duration: 0 });
@@ -177,7 +191,7 @@ export function SearchMapView({
   };
 
   const panGesture = Gesture.Pan()
-    .enabled(interactive && Boolean(onCenterChange))
+    .enabled(mapInteractive && Boolean(onCenterChange))
     .onUpdate((event) => {
       panX.value = event.translationX;
       panY.value = event.translationY;
@@ -189,7 +203,7 @@ export function SearchMapView({
     });
 
   const pinchGesture = Gesture.Pinch()
-    .enabled(interactive && Boolean(onZoomChange))
+    .enabled(mapInteractive && Boolean(onZoomChange))
     .onBegin(() => {
       pinchBaseZoom.value = zoomRef.current;
     })
@@ -205,6 +219,81 @@ export function SearchMapView({
   const layerStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: panX.value }, { translateY: panY.value }],
   }));
+
+  const handleZoomStep = (delta: number) => {
+    if (!onZoomChange) {
+      return;
+    }
+    commitZoom(clampZoom(zoomRef.current + delta));
+  };
+
+  const handleWebWheel = (event: { deltaY?: number; preventDefault?: () => void }) => {
+    if (!mapInteractive || !onZoomChange) {
+      return;
+    }
+    event.preventDefault?.();
+    const deltaY = event.deltaY ?? 0;
+    if (Math.abs(deltaY) < 4) {
+      return;
+    }
+    handleZoomStep(deltaY > 0 ? -1 : 1);
+  };
+
+  const handleWebPointerDown = (clientX: number, clientY: number) => {
+    if (!mapInteractive || !onCenterChange) {
+      return;
+    }
+    webDragRef.current = { active: true, lastX: clientX, lastY: clientY };
+  };
+
+  const handleWebPointerMove = (clientX: number, clientY: number) => {
+    const drag = webDragRef.current;
+    if (!drag.active) {
+      return;
+    }
+    const dx = clientX - drag.lastX;
+    const dy = clientY - drag.lastY;
+    drag.lastX = clientX;
+    drag.lastY = clientY;
+    if (Math.abs(dx) > 0 || Math.abs(dy) > 0) {
+      panX.value += dx;
+      panY.value += dy;
+    }
+  };
+
+  const handleWebPointerUp = () => {
+    const drag = webDragRef.current;
+    if (drag.active && onCenterChange) {
+      commitPan(panX.value, panY.value);
+      panX.value = withTiming(0, { duration: 0 });
+      panY.value = withTiming(0, { duration: 0 });
+    }
+    drag.active = false;
+  };
+
+  const webMapHandlers =
+    Platform.OS === 'web' && mapInteractive
+      ? ({
+          onWheel: (e: { nativeEvent: { deltaY: number }; preventDefault?: () => void }) => {
+            handleWebWheel({
+              deltaY: e.nativeEvent.deltaY,
+              preventDefault: () => e.preventDefault?.(),
+            });
+          },
+          onMouseDown: (e: { nativeEvent: { clientX: number; clientY: number } }) => {
+            handleWebPointerDown(e.nativeEvent.clientX, e.nativeEvent.clientY);
+          },
+          onMouseMove: (e: { nativeEvent: { clientX: number; clientY: number } }) => {
+            handleWebPointerMove(e.nativeEvent.clientX, e.nativeEvent.clientY);
+          },
+          onMouseUp: () => {
+            handleWebPointerUp();
+          },
+          onMouseLeave: () => {
+            handleWebPointerUp();
+          },
+        } as const)
+      : {};
 
   const onMapLayout = (event: LayoutChangeEvent) => {
     const { width, height } = event.nativeEvent.layout;
@@ -229,10 +318,9 @@ export function SearchMapView({
       borderRadius: half,
     };
 
-    const pinStyle = [
+    const pinVisualStyle = [
       useAvatar ? styles.avatarPin : styles.pin,
       selected && (useAvatar ? styles.avatarPinSelected : styles.pinSelected),
-      positionStyle,
       {
         backgroundColor: useAvatar ? '#fff' : selected ? accentColor : pinColor,
         borderColor: selected ? accentColor : '#fff',
@@ -245,7 +333,7 @@ export function SearchMapView({
 
     if (!onPinPress) {
       return (
-        <View key={pin.id} pointerEvents="none" style={pinStyle}>
+        <View key={pin.id} pointerEvents="none" style={[...pinVisualStyle, positionStyle]}>
           {useAvatar ? (
             <Image source={{ uri: pin.photoUrl }} style={styles.avatarImage} contentFit="cover" />
           ) : null}
@@ -260,7 +348,7 @@ export function SearchMapView({
         accessibilityRole="button"
         accessibilityLabel={a11yLabel}
         onPress={() => onPinPress(pin.id)}
-        style={pinStyle}
+        style={[...pinVisualStyle, positionStyle]}
       >
         {useAvatar ? (
           <Image source={{ uri: pin.photoUrl }} style={styles.avatarImage} contentFit="cover" />
@@ -277,7 +365,7 @@ export function SearchMapView({
           key={tile.key}
           source={{ uri: tile.uri }}
           style={[styles.tile, { left: tile.left, top: tile.top }]}
-          contentFit="fill"
+          contentFit="cover"
           cachePolicy="memory-disk"
           recyclingKey={tile.key}
         />
@@ -322,14 +410,42 @@ export function SearchMapView({
   );
 
   const mapBody = (
-    <View style={[styles.map, style]} onLayout={onMapLayout}>
-      {interactive ? (
-        <GestureDetector gesture={mapGesture}>
+    <View
+      style={[styles.map, mapInteractive && Platform.OS === 'web' ? styles.mapWebInteractive : null, style]}
+      onLayout={onMapLayout}
+      {...webMapHandlers}
+    >
+      {mapInteractive ? (
+        Platform.OS === 'web' ? (
           <Animated.View style={[styles.mapLayer, layerStyle]}>{mapLayer}</Animated.View>
-        </GestureDetector>
+        ) : (
+          <GestureDetector gesture={mapGesture}>
+            <Animated.View style={[styles.mapLayer, layerStyle]}>{mapLayer}</Animated.View>
+          </GestureDetector>
+        )
       ) : (
         <View style={styles.mapLayer}>{mapLayer}</View>
       )}
+      {showZoomControls && mapInteractive && onZoomChange ? (
+        <View style={[styles.zoomStack, { top: spacing.sm, right: spacing.sm }]}>
+          <AnimatedPressable
+            onPress={() => handleZoomStep(1)}
+            accessibilityRole="button"
+            accessibilityLabel={t('mapDiscover.zoomInA11y')}
+            style={styles.zoomButton}
+          >
+            <Ionicons name="add" size={20} color="#1a73e8" />
+          </AnimatedPressable>
+          <AnimatedPressable
+            onPress={() => handleZoomStep(-1)}
+            accessibilityRole="button"
+            accessibilityLabel={t('mapDiscover.zoomOutA11y')}
+            style={styles.zoomButton}
+          >
+            <Ionicons name="remove" size={20} color="#1a73e8" />
+          </AnimatedPressable>
+        </View>
+      ) : null}
       {showLocateButton && onLocatePress ? (
         <AnimatedPressable
           onPress={locateLoading ? undefined : onLocatePress}
@@ -360,8 +476,30 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
     overflow: 'hidden',
-    backgroundColor: '#e8e4df',
+    backgroundColor: '#f2f2f2',
     minHeight: 120,
+  },
+  mapWebInteractive: Platform.select({
+    web: { cursor: 'grab' as const },
+    default: {},
+  }),
+  zoomStack: {
+    position: 'absolute',
+    zIndex: 12,
+    gap: 4,
+  },
+  zoomButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.18,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 3,
   },
   mapLayer: {
     ...StyleSheet.absoluteFill,

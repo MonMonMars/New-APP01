@@ -3,7 +3,7 @@ import { disguiseSocialPosts } from '../data/disguiseSocialPosts';
 import { SparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
 import { profileIntroCaption } from './profileIntroCaption';
-import { resolveDisguiseProfile } from './resolveDisguiseProfile';
+import { resolveDisguiseProfile, resolveExplicitDatingProfile } from './resolveDisguiseProfile';
 
 /** Build a de-duplicated photo list for disguise mini-window previews. */
 export function buildReporterPhotoUrls(
@@ -35,7 +35,7 @@ export function buildSocialReporter(
   post: SocialPost,
   section?: SparkSection | string | null,
 ): NewsReporter {
-  const linkedProfile = resolveDisguiseProfile(`social-${post.id}`, undefined, section);
+  const linkedProfile = resolveExplicitDatingProfile(post.datingProfileId, section);
   const feedPhotos = post.imageUrl ? [post.imageUrl] : [];
 
   return {
@@ -74,6 +74,18 @@ export function buildAlertReporter(
   person: DisguiseAlertPerson,
   section?: SparkSection | string | null,
 ): NewsReporter {
+  const linkedProfile = resolveExplicitDatingProfile(person.datingProfileId, section);
+  if (linkedProfile) {
+    return {
+      id: `alert-profile-${linkedProfile.id}`,
+      name: person.name,
+      avatarUrl: person.avatarUrl,
+      quote: profileIntroCaption(linkedProfile),
+      photos: linkedProfile.photos,
+      profileId: linkedProfile.id,
+    };
+  }
+
   const social = findSocialPostForAlertPerson(person);
   if (social) {
     return buildSocialReporter(social, section);

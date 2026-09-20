@@ -8,6 +8,7 @@ import { filterActionedDisguiseFeed } from '../utils/filterActionedDisguiseFeed'
 import { filterDisguiseFeed } from '../utils/disguiseFeedFilter';
 import { suffixPulseFeedPage } from '../utils/pulseFeedPaging';
 import { usePulseFeedLoadMorePages, usePulseFeedRefreshGeneration } from './usePulseFeedRefresh';
+import { usePulseContextSection } from './usePulseContextSection';
 
 function disguiseFeedSignature(
   userId: string,
@@ -21,6 +22,7 @@ function disguiseFeedSignature(
 /** Pulse feed layout stays cached; liked/passed profiles fade into fresh replacements in-place. */
 export function useDisguiseFeedItems(topic?: string): FeedItem[] {
   const { user, userId, disguiseAdCreative, preferences, pulseSocial, likedIds, passedIds, superLikedIds } = useApp();
+  const pulseSection = usePulseContextSection();
   const refreshGeneration = usePulseFeedRefreshGeneration();
   const loadMorePages = usePulseFeedLoadMorePages();
   const cacheRef = useRef<{ signature: string; base: FeedItem[] } | null>(null);
@@ -32,7 +34,7 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
   const signature = `${disguiseFeedSignature(
     userId ?? 'local-user',
     user.gender,
-    preferences.sparkSection ?? 'spark',
+    pulseSection,
     creativeKey,
   )}|refresh:${refreshGeneration}|pages:${loadMorePages}`;
 
@@ -44,7 +46,7 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
     let built = buildDisguiseFeed(
       user,
       disguiseAdCreative,
-      preferences.sparkSection,
+      pulseSection,
       refreshGeneration,
       locale,
     );
@@ -52,7 +54,7 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
       const nextPage = buildDisguiseFeed(
         user,
         disguiseAdCreative,
-        preferences.sparkSection,
+        pulseSection,
         refreshGeneration + page,
         locale,
       );
@@ -64,7 +66,7 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
     disguiseAdCreative,
     loadMorePages,
     preferences.appLocale,
-    preferences.sparkSection,
+    pulseSection,
     refreshGeneration,
     signature,
     user,
@@ -77,7 +79,7 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
       likedIds,
       passedIds,
       superLikedIds,
-      preferences.sparkSection,
+      pulseSection,
     );
     return withoutActioned.filter((item) => {
       if (item.type !== 'social') {
@@ -94,7 +96,7 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
     likedIds,
     passedIds,
     superLikedIds,
-    preferences.sparkSection,
+    pulseSection,
     pulseSocial.mutedAuthors,
     pulseSocial.reportedPostIds,
     topic,

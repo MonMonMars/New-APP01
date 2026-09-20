@@ -33,6 +33,7 @@ import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefre
 import { PulseProfileSwap } from '../../components/motion/PulseProfileSwap';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
+import { usePulseContextSection } from '../../hooks/usePulseContextSection';
 import { useRotatedPulseContent } from '../../hooks/useRotatedPulseContent';
 import { usePulseFeedRefreshGeneration, usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
 import { resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
@@ -42,7 +43,8 @@ export function DisguiseAlertsScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { locale, t } = useTranslation();
-  const { markActivityAlertsRead, preferences } = useApp();
+  const { markActivityAlertsRead } = useApp();
+  const pulseSection = usePulseContextSection();
   const meta = useDisguiseWorld();
   const refreshGeneration = usePulseFeedRefreshGeneration();
   const alerts = useRotatedPulseContent(disguiseAlerts);
@@ -62,7 +64,7 @@ export function DisguiseAlertsScreen() {
     if (!alert.person?.datingProfileId) {
       return;
     }
-    setPreviewReporter(buildAlertReporter(alert.person, preferences.sparkSection));
+    setPreviewReporter(buildAlertReporter(alert.person, pulseSection));
   };
 
   return (
@@ -96,7 +98,7 @@ export function DisguiseAlertsScreen() {
 
           const linkedProfile = resolveExplicitDatingProfile(
             item.person?.datingProfileId,
-            preferences.sparkSection,
+            pulseSection,
           );
           const profileKey = linkedProfile?.id ?? `alert-${item.id}-${refreshGeneration}`;
           const avatarUrl = linkedProfile?.photos[0] ?? item.person?.avatarUrl ?? '';

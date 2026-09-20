@@ -10,7 +10,7 @@ type WorldSwitchVeilProps<T> = {
   children: (shown: T) => ReactNode;
 };
 
-/** Brief fade veil when swapping Spark ↔ Pulse / Ember ↔ Harbor so the switch feels like a page change. */
+/** Brief fade veil when swapping dating (Spark/Ember) ↔ Pulse disguise so the switch feels like a page change. */
 export function WorldSwitchVeil<T>({ activeKey, children }: WorldSwitchVeilProps<T>) {
   const shownRef = useRef(activeKey);
   const [shown, setShown] = useState(activeKey);

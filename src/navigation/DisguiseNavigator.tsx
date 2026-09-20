@@ -12,7 +12,7 @@ import { DisguiseTrendingScreen } from '../screens/disguise/DisguiseTrendingScre
 import { useTranslation } from '../i18n';
 import { pulseBrand } from '../theme/pulseBrand';
 import { disguiseWorldMeta } from '../utils/disguiseWorld';
-import { resolveSparkSection } from '../types/preferences';
+import { usePulseContextSection } from '../hooks/usePulseContextSection';
 
 export type DisguiseTabParamList = {
   Home: { topic?: string } | undefined;
@@ -26,13 +26,12 @@ const Tab = createBottomTabNavigator<DisguiseTabParamList>();
 export function DisguiseNavigator() {
   const { colors } = useTheme();
   const { t, locale } = useTranslation();
-  const { pulseSocial, preferences, user } = useApp();
-  const meta = disguiseWorldMeta(preferences.sparkSection, user.gender, locale);
-  const section = resolveSparkSection(preferences.sparkSection);
-  const sectionAccent = section === 'ember' ? colors.ember : colors.gradientEnd;
-  /** Pulse disguise tabs stay on-brand blue in Ember; Spark section keeps pink accent. */
-  const tabActiveTint = section === 'ember' ? meta.accent : sectionAccent;
-  const tabInactiveTint = section === 'ember' ? pulseBrand.navyMuted : colors.textMuted;
+  const { pulseSocial, user } = useApp();
+  const pulseSection = usePulseContextSection();
+  const meta = disguiseWorldMeta(pulseSection, user.gender, locale);
+  /** One Pulse shell — tab bar always uses Pulse blue regardless of Spark vs Ember content pool. */
+  const tabActiveTint = meta.accent;
+  const tabInactiveTint = pulseBrand.navyMuted;
   const activityBadge =
     !pulseSocial.activityAlertsRead && disguiseAlerts.length > 0
       ? disguiseAlerts.length

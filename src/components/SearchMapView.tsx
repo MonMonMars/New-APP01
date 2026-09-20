@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import {
   ActivityIndicator,
@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
+  Easing,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
@@ -82,12 +83,28 @@ export const MAP_MAX_ZOOM = 18;
 const AVATAR_PIN_SIZE = 28;
 const AVATAR_PIN_SELECTED = 34;
 
+const PAN_RESET_MS = 120;
+const ZOOM_SETTLE_MS = 220;
+const WHEEL_ZOOM_COMMIT_MS = 140;
+
 function clampZoom(value: number): number {
   return Math.round(Math.min(MAP_MAX_ZOOM, Math.max(MAP_MIN_ZOOM, value)));
 }
 
-function zoomFromPinchScale(baseZoom: number, scale: number): number {
-  return clampZoom(baseZoom + Math.log2(scale) * 1.5);
+function fractionalZoomFromPinch(baseZoom: number, scale: number): number {
+  return baseZoom + Math.log2(Math.max(scale, 0.12)) * 1.35;
+}
+
+function visualScaleForZoom(baseZoom: number, scale: number): number {
+  const fractional = fractionalZoomFromPinch(baseZoom, scale);
+  const clamped = Math.min(MAP_MAX_ZOOM + 0.85, Math.max(MAP_MIN_ZOOM - 0.85, fractional));
+  return 2 ** (clamped - baseZoom);
+}
+
+function clampVisualScale(baseZoom: number, scale: number): number {
+  const minScale = 2 ** (MAP_MIN_ZOOM - 0.85 - baseZoom);
+  const maxScale = 2 ** (MAP_MAX_ZOOM + 0.85 - baseZoom);
+  return Math.min(maxScale, Math.max(minScale, scale));
 }
 
 /** Standard street basemap (Carto Voyager by default) with pan, pinch/wheel zoom, and GPS control. */
@@ -124,25 +141,53 @@ export function SearchMapView({
     width: windowSize.width,
     height: windowSize.height,
   });
+  const [webDragging, setWebDragging] = useState(false);
 
   const panX = useSharedValue(0);
   const panY = useSharedValue(0);
+  const visualZoomScale = useSharedValue(1);
+  const mapWidthSv = useSharedValue(mapSize.width);
+  const mapHeightSv = useSharedValue(mapSize.height);
   const pinchBaseZoom = useSharedValue(zoom);
+
   const zoomRef = useRef(zoom);
   zoomRef.current = zoom;
+  const centerRef = useRef(center);
+  centerRef.current = center;
+
   const webDragRef = useRef<{ active: boolean; lastX: number; lastY: number }>({
     active: false,
     lastX: 0,
     lastY: 0,
   });
+  const wheelCommitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wheelPinchBaseZoom = useRef(zoom);
+  const wheelAccumScale = useRef(1);
 
   const mapInteractive =
     interactive && (Boolean(onCenterChange) || Boolean(onZoomChange));
 
+  const resetPanOffset = useCallback(() => {
+    panX.value = withTiming(0, { duration: PAN_RESET_MS, easing: Easing.out(Easing.cubic) });
+    panY.value = withTiming(0, { duration: PAN_RESET_MS, easing: Easing.out(Easing.cubic) });
+  }, [panX, panY]);
+
   useEffect(() => {
-    panX.value = withTiming(0, { duration: 0 });
-    panY.value = withTiming(0, { duration: 0 });
-  }, [center.lat, center.lng, panX, panY]);
+    mapWidthSv.value = mapSize.width;
+    mapHeightSv.value = mapSize.height;
+  }, [mapHeightSv, mapSize.height, mapSize.width, mapWidthSv]);
+
+  useEffect(() => {
+    zoomRef.current = zoom;
+    pinchBaseZoom.value = zoom;
+    visualZoomScale.value = 1;
+    wheelPinchBaseZoom.current = zoom;
+    wheelAccumScale.current = 1;
+  }, [pinchBaseZoom, visualZoomScale, zoom]);
+
+  useEffect(() => {
+    resetPanOffset();
+  }, [center.lat, center.lng, resetPanOffset]);
 
   const tiles = useMemo(
     () => buildMapTiles(zoom, mapSize.width, mapSize.height, center.lat, center.lng),
@@ -181,15 +226,44 @@ export function SearchMapView({
     return latLngToPixel(userLocation, center, zoom, mapSize.width, mapSize.height);
   }, [center, mapSize.height, mapSize.width, userLocation, zoom]);
 
-  const commitPan = (dx: number, dy: number) => {
-    onCenterChange?.(moveMapCenter(center, dx, dy, zoom));
-  };
+  const commitPan = useCallback(
+    (dx: number, dy: number) => {
+      if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) {
+        resetPanOffset();
+        return;
+      }
+      onCenterChange?.(moveMapCenter(centerRef.current, dx, dy, zoomRef.current));
+    },
+    [onCenterChange, resetPanOffset],
+  );
 
-  const commitZoom = (nextZoom: number) => {
-    if (nextZoom !== zoomRef.current) {
-      onZoomChange?.(nextZoom);
-    }
-  };
+  const settleVisualZoom = useCallback(() => {
+    visualZoomScale.value = withTiming(1, {
+      duration: ZOOM_SETTLE_MS,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [visualZoomScale]);
+
+  const commitZoom = useCallback(
+    (nextZoom: number) => {
+      const clamped = clampZoom(nextZoom);
+      if (clamped !== zoomRef.current) {
+        onZoomChange?.(clamped);
+      } else {
+        settleVisualZoom();
+      }
+    },
+    [onZoomChange, settleVisualZoom],
+  );
+
+  const commitPinchZoom = useCallback(
+    (baseZoom: number, scale: number) => {
+      const nextZoom = clampZoom(fractionalZoomFromPinch(baseZoom, scale));
+      commitZoom(nextZoom);
+      settleVisualZoom();
+    },
+    [commitZoom, settleVisualZoom],
+  );
 
   const panGesture = Gesture.Pan()
     .enabled(mapInteractive && Boolean(onCenterChange))
@@ -199,33 +273,74 @@ export function SearchMapView({
     })
     .onEnd((event) => {
       runOnJS(commitPan)(event.translationX, event.translationY);
-      panX.value = withTiming(0, { duration: 0 });
-      panY.value = withTiming(0, { duration: 0 });
     });
 
   const pinchGesture = Gesture.Pinch()
     .enabled(mapInteractive && Boolean(onZoomChange))
     .onBegin(() => {
       pinchBaseZoom.value = zoomRef.current;
+      visualZoomScale.value = 1;
     })
     .onUpdate((event) => {
-      const nextZoom = zoomFromPinchScale(pinchBaseZoom.value, event.scale);
-      if (nextZoom !== zoomRef.current) {
-        runOnJS(commitZoom)(nextZoom);
-      }
+      visualZoomScale.value = clampVisualScale(
+        pinchBaseZoom.value,
+        visualScaleForZoom(pinchBaseZoom.value, event.scale),
+      );
+    })
+    .onEnd((event) => {
+      runOnJS(commitPinchZoom)(pinchBaseZoom.value, event.scale);
     });
 
   const mapGesture = Gesture.Simultaneous(panGesture, pinchGesture);
 
-  const layerStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: panX.value }, { translateY: panY.value }],
-  }));
+  const layerStyle = useAnimatedStyle(() => {
+    const halfW = mapWidthSv.value / 2;
+    const halfH = mapHeightSv.value / 2;
+    const scale = visualZoomScale.value;
+    return {
+      transform: [
+        { translateX: halfW },
+        { translateY: halfH },
+        { scale },
+        { translateX: -halfW + panX.value },
+        { translateY: -halfH + panY.value },
+      ],
+    };
+  });
+
+  const scheduleWheelZoomCommit = useCallback(() => {
+    if (wheelCommitTimer.current) {
+      clearTimeout(wheelCommitTimer.current);
+    }
+    wheelCommitTimer.current = setTimeout(() => {
+      wheelCommitTimer.current = null;
+      const base = wheelPinchBaseZoom.current;
+      const scale = wheelAccumScale.current;
+      const nextZoom = clampZoom(fractionalZoomFromPinch(base, scale));
+      wheelPinchBaseZoom.current = nextZoom;
+      wheelAccumScale.current = 1;
+      commitZoom(nextZoom);
+      settleVisualZoom();
+    }, WHEEL_ZOOM_COMMIT_MS);
+  }, [commitZoom, settleVisualZoom]);
+
+  useEffect(
+    () => () => {
+      if (wheelCommitTimer.current) {
+        clearTimeout(wheelCommitTimer.current);
+      }
+    },
+    [],
+  );
 
   const handleZoomStep = (delta: number) => {
     if (!onZoomChange) {
       return;
     }
-    commitZoom(clampZoom(zoomRef.current + delta));
+    const next = clampZoom(zoomRef.current + delta);
+    visualZoomScale.value = delta > 0 ? 0.88 : 1.14;
+    commitZoom(next);
+    settleVisualZoom();
   };
 
   const handleWebWheel = (event: { deltaY?: number; preventDefault?: () => void }) => {
@@ -234,10 +349,19 @@ export function SearchMapView({
     }
     event.preventDefault?.();
     const deltaY = event.deltaY ?? 0;
-    if (Math.abs(deltaY) < 4) {
+    if (Math.abs(deltaY) < 1) {
       return;
     }
-    handleZoomStep(deltaY > 0 ? -1 : 1);
+    const factor = deltaY > 0 ? 0.94 : 1.06;
+    wheelAccumScale.current = Math.min(
+      4,
+      Math.max(0.25, wheelAccumScale.current * factor),
+    );
+    visualZoomScale.value = clampVisualScale(
+      wheelPinchBaseZoom.current,
+      visualScaleForZoom(wheelPinchBaseZoom.current, wheelAccumScale.current),
+    );
+    scheduleWheelZoomCommit();
   };
 
   const handleWebPointerDown = (clientX: number, clientY: number) => {
@@ -245,6 +369,7 @@ export function SearchMapView({
       return;
     }
     webDragRef.current = { active: true, lastX: clientX, lastY: clientY };
+    setWebDragging(true);
   };
 
   const handleWebPointerMove = (clientX: number, clientY: number) => {
@@ -266,10 +391,9 @@ export function SearchMapView({
     const drag = webDragRef.current;
     if (drag.active && onCenterChange) {
       commitPan(panX.value, panY.value);
-      panX.value = withTiming(0, { duration: 0 });
-      panY.value = withTiming(0, { duration: 0 });
     }
     drag.active = false;
+    setWebDragging(false);
   };
 
   const webMapHandlers =
@@ -370,9 +494,10 @@ export function SearchMapView({
           key={tile.key}
           source={{ uri: tile.uri }}
           style={[styles.tile, { left: tile.left, top: tile.top }]}
-          contentFit="cover"
+          contentFit="fill"
           cachePolicy="memory-disk"
           recyclingKey={tile.key}
+          transition={80}
         />
       ))}
 
@@ -416,7 +541,9 @@ export function SearchMapView({
 
   const mapWebCursor =
     mapInteractive && Platform.OS === 'web'
-      ? ({ cursor: 'grab' } as unknown as ViewStyle)
+      ? ({
+          cursor: webDragging ? 'grabbing' : 'grab',
+        } as unknown as ViewStyle)
       : undefined;
 
   const mapBody = (

@@ -5,14 +5,13 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
-import { useAppLocale } from '../../hooks/useAppLocale';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { useTranslation } from '../../i18n';
 import { FeedItem } from '../../data/disguiseFeed';
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
 import { spacing } from '../../theme';
 import { pulseBrand } from '../../theme/pulseBrand';
 import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
-import { disguiseWorldMeta } from '../../utils/disguiseWorld';
 import { DisguiseSearchSheet } from './DisguiseSearchSheet';
 import { DisguiseHeaderLogo } from './DisguiseBrand';
 import { PulseFeedItemViewer } from './PulseFeedItemViewer';
@@ -25,10 +24,9 @@ type DisguiseHeaderProps = {
 };
 
 export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps) {
-  const { user, preferences, setDisguiseMode } = useApp();
-  const { locale } = useAppLocale();
+  const { setDisguiseMode } = useApp();
   const { t } = useTranslation();
-  const meta = disguiseWorldMeta(preferences.sparkSection, user.gender, locale);
+  const meta = useDisguiseWorld();
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchItemId, setSearchItemId] = useState<string | null>(null);

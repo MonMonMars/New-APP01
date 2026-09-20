@@ -74,6 +74,24 @@ import {
   applySupabaseAuthFromUrl,
   recoverSupabaseAuthFromLaunchUrl,
 } from '../services/supabaseAuthCallback';
+import { deleteAccountViaEdgeFunction } from '../services/accountDeletion';
+import {
+  sendPhoneLoginOtp,
+  signInWithEmailPassword,
+  signInWithGoogleOAuth,
+  signUpWithEmailPassword,
+  verifyPhoneLoginOtp,
+} from '../services/supabaseAuthExtended';
+import {
+  mfaEnrollTotp,
+  mfaHasVerifiedFactor,
+  mfaNeedsVerificationStep,
+  mfaUnenrollAll,
+  mfaVerifyEnrollment,
+  mfaVerifyLoginStep,
+  mfaVerifySensitiveAction,
+} from '../services/supabaseMfa';
+import * as LocalAuthentication from 'expo-local-authentication';
 import { ChatSendOutcome } from '../types/chatSend';
 import { Conversation, Match, Message } from '../types/match';
 import {
@@ -375,7 +393,21 @@ type AppContextValue = {
   completeOnboarding: (user: UserProfile) => void;
   signInWithAppleStub: (identityToken?: string, displayName?: string) => Promise<void>;
   signInWithEmailMagicLink: (email: string) => Promise<{ ok: boolean; message: string }>;
+  signInWithGoogle: () => Promise<{ ok: boolean; message: string }>;
+  signInWithPhoneOtp: (phone: string) => Promise<{ ok: boolean; message: string }>;
+  verifyPhoneSignIn: (phone: string, code: string) => Promise<{ ok: boolean; message: string }>;
+  signUpWithPassword: (email: string, password: string) => Promise<{ ok: boolean; message: string }>;
+  signInWithPassword: (email: string, password: string) => Promise<{ ok: boolean; message: string }>;
   refreshAuthFromCloud: () => Promise<boolean>;
+  mfaLoginRequired: boolean;
+  mfaEnabled: boolean;
+  refreshMfaLoginRequirement: () => Promise<void>;
+  refreshMfaStatus: () => Promise<void>;
+  verifyMfaLogin: (code: string) => Promise<{ ok: boolean; message: string }>;
+  startMfaEnrollment: () => Promise<{ ok: boolean; factorId?: string; secret?: string; message: string }>;
+  completeMfaEnrollment: (factorId: string, code: string) => Promise<{ ok: boolean; message: string }>;
+  disableMfa: () => Promise<{ ok: boolean; message: string }>;
+  paymentVerificationRequired: boolean;
   updateUser: (user: UserProfile) => void;
   applyCloudConversationUpdate: (
     conversationId: string,
@@ -425,7 +457,7 @@ type AppContextValue = {
   getPulseComments: (postId: string) => PulseComment[];
   recordReferralShare: () => number;
   activateSparkPlus: () => void;
-  purchaseProduct: (productId: PurchaseProductId) => Promise<PurchaseResult>;
+  purchaseProduct: (productId: PurchaseProductId, verificationCode?: string) => Promise<PurchaseResult>;
   restorePurchases: () => Promise<PurchaseRestoreResult>;
   openManageSubscriptions: () => void;
   activateBoost: (options?: { purchased?: boolean }) => BoostActivationResult;
@@ -513,6 +545,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [lastPassedProfileId, setLastPassedProfileId] = useState<string | null>(null);
   const [emberDailyLikesUsed, setEmberDailyLikesUsed] = useState(0);
   const [emberLastPassedProfileId, setEmberLastPassedProfileId] = useState<string | null>(null);
+  const [mfaLoginRequired, setMfaLoginRequired] = useState(false);
+  const [mfaEnabled, setMfaEnabled] = useState(false);
   const [emberSparkNotesUsedToday, setEmberSparkNotesUsedToday] = useState(0);
   const [emberLastSparkNoteDate, setEmberLastSparkNoteDate] = useState<string | null>(null);
   const [isPaused, setIsPaused] = useState(false);
@@ -746,6 +780,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       data: { subscription },
     } =     supabase.auth.onAuthStateChange((_event, session) => {
       if (!session?.user) {
+        setMfaLoginRequired(false);
+        setMfaEnabled(false);
         return;
       }
       const cloudUserId = session.user.id;
@@ -757,6 +793,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       });
       void registerCloudPushToken(cloudUserId);
+      void mfaNeedsVerificationStep().then(setMfaLoginRequired);
+      void mfaHasVerifiedFactor().then(setMfaEnabled);
     });
     return () => subscription.unsubscribe();
   }, [applyCloudSnapshot]);
@@ -1438,6 +1476,182 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return { ok: true, message: translate(locale, 'onboarding.signedInLocally') };
   }, [preferences.appLocale]);
 
+  const refreshMfaLoginRequirement = useCallback(async () => {
+    if (!isSupabaseConfigured()) {
+      setMfaLoginRequired(false);
+      return;
+    }
+    setMfaLoginRequired(await mfaNeedsVerificationStep());
+  }, []);
+
+  const refreshMfaStatus = useCallback(async () => {
+    if (!isSupabaseConfigured()) {
+      setMfaEnabled(false);
+      return;
+    }
+    setMfaEnabled(await mfaHasVerifiedFactor());
+    await refreshMfaLoginRequirement();
+  }, [refreshMfaLoginRequirement]);
+
+  const verifyMfaLogin = useCallback(async (code: string) => {
+    const locale = resolveAppLocale(preferences.appLocale);
+    const result = await mfaVerifyLoginStep(code);
+    if (!result.ok) {
+      return {
+        ok: false,
+        message: result.error ?? translate(locale, 'auth.mfaInvalid'),
+      };
+    }
+    setMfaLoginRequired(false);
+    await refreshMfaStatus();
+    return { ok: true, message: translate(locale, 'auth.mfaVerified') };
+  }, [preferences.appLocale, refreshMfaStatus]);
+
+  const startMfaEnrollment = useCallback(async () => {
+    const locale = resolveAppLocale(preferences.appLocale);
+    const result = await mfaEnrollTotp('Spark Authenticator');
+    if (!result.ok || !result.factorId) {
+      return {
+        ok: false,
+        message: result.error ?? translate(locale, 'auth.mfaEnrollFailed'),
+      };
+    }
+    return {
+      ok: true,
+      factorId: result.factorId,
+      secret: result.secret,
+      message: translate(locale, 'auth.mfaScanHint'),
+    };
+  }, [preferences.appLocale]);
+
+  const completeMfaEnrollment = useCallback(
+    async (factorId: string, code: string) => {
+      const locale = resolveAppLocale(preferences.appLocale);
+      const result = await mfaVerifyEnrollment(factorId, code);
+      if (!result.ok) {
+        return {
+          ok: false,
+          message: result.error ?? translate(locale, 'auth.mfaInvalid'),
+        };
+      }
+      await refreshMfaStatus();
+      return { ok: true, message: translate(locale, 'auth.mfaEnabledSuccess') };
+    },
+    [preferences.appLocale, refreshMfaStatus],
+  );
+
+  const disableMfa = useCallback(async () => {
+    const locale = resolveAppLocale(preferences.appLocale);
+    const result = await mfaUnenrollAll();
+    if (!result.ok) {
+      return {
+        ok: false,
+        message: result.error ?? translate(locale, 'auth.mfaDisableFailed'),
+      };
+    }
+    await refreshMfaStatus();
+    return { ok: true, message: translate(locale, 'auth.mfaDisabledSuccess') };
+  }, [preferences.appLocale, refreshMfaStatus]);
+
+  const signInWithGoogle = useCallback(async () => {
+    const locale = resolveAppLocale(preferences.appLocale);
+    if (!isSupabaseConfigured()) {
+      if (isProductionBuild()) {
+        return { ok: false, message: translate(locale, 'onboarding.emailRequiresSupabase') };
+      }
+      setIsAuthenticated(true);
+      setUserId(`demo-google-${Date.now()}`);
+      return { ok: true, message: translate(locale, 'onboarding.signedInLocally') };
+    }
+    const result = await signInWithGoogleOAuth();
+    if (!result.ok) {
+      return { ok: false, message: result.error ?? translate(locale, 'auth.googleFailed') };
+    }
+    return { ok: true, message: translate(locale, 'auth.googleContinue') };
+  }, [preferences.appLocale]);
+
+  const signInWithPhoneOtp = useCallback(
+    async (phone: string) => {
+      const locale = resolveAppLocale(preferences.appLocale);
+      if (!isSupabaseConfigured()) {
+        if (isProductionBuild()) {
+          return { ok: false, message: translate(locale, 'onboarding.emailRequiresSupabase') };
+        }
+        return { ok: false, message: translate(locale, 'auth.phoneRequiresCloud') };
+      }
+      const result = await sendPhoneLoginOtp(phone);
+      if (!result.ok) {
+        return { ok: false, message: result.error ?? translate(locale, 'auth.phoneOtpFailed') };
+      }
+      return { ok: true, message: translate(locale, 'auth.phoneOtpSent') };
+    },
+    [preferences.appLocale],
+  );
+
+  const verifyPhoneSignIn = useCallback(
+    async (phone: string, code: string) => {
+      const locale = resolveAppLocale(preferences.appLocale);
+      if (!isSupabaseConfigured()) {
+        return { ok: false, message: translate(locale, 'auth.phoneRequiresCloud') };
+      }
+      const result = await verifyPhoneLoginOtp(phone, code);
+      if (!result.userId) {
+        return { ok: false, message: result.error ?? translate(locale, 'auth.phoneVerifyFailed') };
+      }
+      setUserId(result.userId);
+      setIsAuthenticated(true);
+      await refreshMfaLoginRequirement();
+      return { ok: true, message: translate(locale, 'auth.phoneVerified') };
+    },
+    [preferences.appLocale, refreshMfaLoginRequirement],
+  );
+
+  const signUpWithPassword = useCallback(
+    async (email: string, password: string) => {
+      const locale = resolveAppLocale(preferences.appLocale);
+      if (!isSupabaseConfigured()) {
+        return { ok: false, message: translate(locale, 'onboarding.emailRequiresSupabase') };
+      }
+      if (password.length < 8) {
+        return { ok: false, message: translate(locale, 'auth.passwordTooShort') };
+      }
+      const result = await signUpWithEmailPassword(email, password);
+      if (!result.ok) {
+        return { ok: false, message: result.error ?? translate(locale, 'auth.signUpFailed') };
+      }
+      if (result.needsEmailConfirm) {
+        return { ok: true, message: translate(locale, 'auth.confirmEmailSent') };
+      }
+      const session = await getSupabaseSession();
+      if (session?.userId) {
+        setUserId(session.userId);
+        setIsAuthenticated(true);
+      }
+      return { ok: true, message: translate(locale, 'auth.signUpSuccess') };
+    },
+    [preferences.appLocale],
+  );
+
+  const signInWithPassword = useCallback(
+    async (email: string, password: string) => {
+      const locale = resolveAppLocale(preferences.appLocale);
+      if (!isSupabaseConfigured()) {
+        return { ok: false, message: translate(locale, 'onboarding.emailRequiresSupabase') };
+      }
+      const result = await signInWithEmailPassword(email, password);
+      if (!result.userId) {
+        return { ok: false, message: result.error ?? translate(locale, 'auth.signInFailed') };
+      }
+      setUserId(result.userId);
+      setIsAuthenticated(true);
+      await refreshMfaLoginRequirement();
+      return { ok: true, message: translate(locale, 'auth.signInSuccess') };
+    },
+    [preferences.appLocale, refreshMfaLoginRequirement],
+  );
+
+  const paymentVerificationRequired = isSupabaseConfigured();
+
   const completeOnboarding = useCallback(
     (nextUser: UserProfile) => {
       setUser(nextUser);
@@ -1451,13 +1665,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
             activeUserId = session.userId;
             setUserId(session.userId);
             setIsAuthenticated(true);
-          } else if (isSupabaseConfigured()) {
-            activeUserId = `user-${Date.now()}`;
+          } else if (!isSupabaseConfigured() && !isProductionBuild()) {
+            activeUserId = `demo-${Date.now()}`;
             setUserId(activeUserId);
+            setIsAuthenticated(true);
           }
         }
         if (activeUserId && isSupabaseConfigured()) {
-          await ensureProfileRow(activeUserId, nextUser);
+          const session = await getSupabaseSession();
+          if (session?.userId) {
+            await ensureProfileRow(session.userId, nextUser);
+          }
         }
       })();
     },
@@ -2564,7 +2782,44 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const purchaseProduct = useCallback(
-    async (productId: PurchaseProductId): Promise<PurchaseResult> => {
+    async (productId: PurchaseProductId, verificationCode?: string): Promise<PurchaseResult> => {
+      if (isSupabaseConfigured()) {
+        const hasMfa = await mfaHasVerifiedFactor();
+        if (hasMfa) {
+          if (!verificationCode?.trim()) {
+            return {
+              ok: false,
+              code: 'verification_required',
+              message: 'Enter your authenticator code to approve this purchase.',
+            };
+          }
+          const verified = await mfaVerifySensitiveAction(verificationCode);
+          if (!verified.ok) {
+            return {
+              ok: false,
+              code: 'verification_failed',
+              message: verified.error ?? 'Invalid verification code.',
+            };
+          }
+        } else {
+          const hasHardware = await LocalAuthentication.hasHardwareAsync();
+          const enrolled = await LocalAuthentication.isEnrolledAsync();
+          if (hasHardware && enrolled) {
+            const bio = await LocalAuthentication.authenticateAsync({
+              promptMessage: 'Confirm purchase',
+              cancelLabel: 'Cancel',
+            });
+            if (!bio.success) {
+              return {
+                ok: false,
+                code: 'verification_failed',
+                message: 'Purchase confirmation was cancelled.',
+              };
+            }
+          }
+        }
+      }
+
       const result = await runPurchaseProduct(productId);
       if (result.ok) {
         applyEntitlementGrant(result.grant);
@@ -2811,7 +3066,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const deleteAccount = useCallback(async () => {
     if (userId && isSupabaseConfigured()) {
-      await deleteSupabaseAccount(userId);
+      const remote = await deleteAccountViaEdgeFunction();
+      if (!remote.ok) {
+        await deleteSupabaseAccount(userId);
+      }
     }
     await clearPersistedState();
     await clearVaultKey();
@@ -2928,7 +3186,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
       completeOnboarding,
       signInWithAppleStub,
       signInWithEmailMagicLink,
+      signInWithGoogle,
+      signInWithPhoneOtp,
+      verifyPhoneSignIn,
+      signUpWithPassword,
+      signInWithPassword,
       refreshAuthFromCloud,
+      mfaLoginRequired,
+      mfaEnabled,
+      refreshMfaLoginRequirement,
+      refreshMfaStatus,
+      verifyMfaLogin,
+      startMfaEnrollment,
+      completeMfaEnrollment,
+      disableMfa,
+      paymentVerificationRequired,
       updateUser,
       applyCloudConversationUpdate,
       updatePreferences,
@@ -3064,7 +3336,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
       completeOnboarding,
       signInWithAppleStub,
       signInWithEmailMagicLink,
+      signInWithGoogle,
+      signInWithPhoneOtp,
+      verifyPhoneSignIn,
+      signUpWithPassword,
+      signInWithPassword,
       refreshAuthFromCloud,
+      mfaLoginRequired,
+      mfaEnabled,
+      refreshMfaLoginRequirement,
+      refreshMfaStatus,
+      verifyMfaLogin,
+      startMfaEnrollment,
+      completeMfaEnrollment,
+      disableMfa,
+      paymentVerificationRequired,
       updateUser,
       applyCloudConversationUpdate,
       updatePreferences,

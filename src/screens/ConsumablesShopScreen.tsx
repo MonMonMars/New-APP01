@@ -41,12 +41,13 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { colors } = useTheme();
-  const { purchaseProduct } = useApp();
+  const { purchaseProduct, mfaEnabled, paymentVerificationRequired } = useApp();
   const { t, locale } = useTranslation();
   const legalUi = getLegalUiStrings(locale);
   const [pendingPack, setPendingPack] = useState<Pack | null>(null);
   const [purchasing, setPurchasing] = useState(false);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
+  const [verificationCode, setVerificationCode] = useState('');
 
   const packs: Pack[] = useMemo(
     () => [
@@ -94,7 +95,10 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
     setPurchasing(true);
     setPurchaseError(null);
     const productId = SHOP_PACK_TO_PRODUCT[pack.id] ?? pack.productId;
-    const result = await purchaseProduct(productId);
+    const result = await purchaseProduct(
+      productId,
+      paymentVerificationRequired && mfaEnabled ? verificationCode : undefined,
+    );
     setPurchasing(false);
 
     if (!result.ok) {
@@ -209,8 +213,12 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
           if (!purchasing) {
             setPendingPack(null);
             setPurchaseError(null);
+            setVerificationCode('');
           }
         }}
+        requireVerificationCode={paymentVerificationRequired && mfaEnabled}
+        verificationCode={verificationCode}
+        onVerificationCodeChange={setVerificationCode}
         onConfirm={() => {
           if (pendingPack) {
             return handlePurchase(pendingPack);

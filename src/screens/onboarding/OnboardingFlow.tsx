@@ -16,10 +16,10 @@ import {
   ProfileGender,
   RelationshipIntent,
 } from '../../types/profile';
-import { signInWithApple } from '../../utils/appleAuth';
 import { pickProfilePhoto } from '../../utils/photoPicker';
 import { colors, radii, spacing } from '../../theme';
 import { pulseBrand } from '../../theme/pulseBrand';
+import { AuthWelcomePanel } from '../../components/onboarding/AuthWelcomePanel';
 import { OnboardingLocationMap } from '../../components/onboarding/OnboardingLocationMap';
 import { deriveShowMe } from '../../utils/deriveShowMe';
 import { mapCenterForCity } from '../../utils/searchMapTiles';
@@ -33,7 +33,6 @@ export function OnboardingFlow() {
   const {
     completeOnboarding,
     signInWithAppleStub,
-    signInWithEmailMagicLink,
     acceptOnboardingLegal,
     updatePreferences,
     preferences,
@@ -87,40 +86,6 @@ export function OnboardingFlow() {
     { value: 'not_sure', label: t('onboarding.intentNotSure'), hint: t('onboarding.intentNotSureHint') },
   ];
 
-  const handleEmailSignIn = async () => {
-    setAuthLoading(true);
-    setEmailMessage(null);
-    try {
-      const result = await signInWithEmailMagicLink(email);
-      setEmailMessage(result.message);
-      if (result.ok) {
-        if (isSupabaseEnabled) {
-          setAwaitingMagicLink(true);
-        } else {
-          setStep('rules');
-        }
-      }
-    } finally {
-      setAuthLoading(false);
-    }
-  };
-
-  const handleAppleSignIn = async () => {
-    setAuthLoading(true);
-    try {
-      const result = await signInWithApple();
-      if (result.success) {
-        await signInWithAppleStub(result.identityToken, result.displayName);
-        if (result.displayName) {
-          setName(result.displayName);
-        }
-        setStep('rules');
-      }
-    } finally {
-      setAuthLoading(false);
-    }
-  };
-
   const handleAddPhoto = async () => {
     const uri = await pickProfilePhoto(locale);
     if (uri) {
@@ -164,68 +129,33 @@ export function OnboardingFlow() {
           <Text style={styles.subtitle}>
             {t('onboarding.welcomeSubtitle')}
           </Text>
-          <AnimatedPressable
-            style={styles.appleButton}
-            onPress={handleAppleSignIn}
-            disabled={authLoading}
-          >
-            {authLoading ? (
-              <ActivityIndicator color={colors.textDark} />
-            ) : (
-              <>
-                <Ionicons name="logo-apple" size={20} color={colors.textDark} />
-                <Text style={styles.appleButtonText}>{t('onboarding.continueApple')}</Text>
-              </>
-            )}
-          </AnimatedPressable>
-          <View style={styles.emailBlock}>
-            <TextInput
-              style={styles.emailInput}
-              placeholder={t('onboarding.emailPlaceholder')}
-              placeholderTextColor={colors.textMuted}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-            <AnimatedPressable
-              style={styles.emailButton}
-              onPress={handleEmailSignIn}
-              disabled={authLoading || !email.trim()}
-            >
-              <Ionicons name="mail-outline" size={18} color={colors.text} />
-              <Text style={styles.emailButtonText}>{t('onboarding.continueEmail')}</Text>
-            </AnimatedPressable>
-            {emailMessage ? <Text style={styles.emailHint}>{emailMessage}</Text> : null}
-            {awaitingMagicLink ? (
-              <>
-                <Text style={styles.emailHint}>{t('onboarding.magicLinkWaiting')}</Text>
-                <AnimatedPressable
-                  style={styles.emailButton}
-                  disabled={authLoading}
-                  onPress={() => {
-                    setAuthLoading(true);
-                    void refreshAuthFromCloud()
-                      .then((ok) => {
-                        if (!ok) {
-                          setEmailMessage(t('onboarding.magicLinkNotYet'));
-                        }
-                      })
-                      .finally(() => {
-                        setAuthLoading(false);
-                      });
-                  }}
-                >
-                  <Ionicons name="refresh-outline" size={18} color={colors.text} />
-                  <Text style={styles.emailButtonText}>{t('onboarding.magicLinkRefresh')}</Text>
-                </AnimatedPressable>
-              </>
-            ) : null}
-          </View>
-          <AnimatedPressable onPress={() => { signInWithAppleStub(); setStep('rules'); }}>
-            <Text style={styles.link}>{t('onboarding.continueGuest')}</Text>
-          </AnimatedPressable>
+          <AuthWelcomePanel
+            authLoading={authLoading}
+            setAuthLoading={setAuthLoading}
+            onAuthenticated={() => setStep('rules')}
+            onGuest={() => {
+              signInWithAppleStub();
+              setStep('rules');
+            }}
+            email={email}
+            setEmail={setEmail}
+            emailMessage={emailMessage}
+            setEmailMessage={setEmailMessage}
+            awaitingMagicLink={awaitingMagicLink}
+            setAwaitingMagicLink={setAwaitingMagicLink}
+            onRefreshMagicLink={() => {
+              setAuthLoading(true);
+              void refreshAuthFromCloud()
+                .then((ok) => {
+                  if (!ok) {
+                    setEmailMessage(t('onboarding.magicLinkNotYet'));
+                  }
+                })
+                .finally(() => {
+                  setAuthLoading(false);
+                });
+            }}
+          />
         </View>
       )}
 

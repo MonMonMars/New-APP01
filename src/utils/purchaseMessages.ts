@@ -16,8 +16,19 @@ export function translatePurchaseError(
       return translate(locale, 'payments.cancelled');
     case 'payment_failed':
       return translate(locale, 'payments.purchaseFailed');
-    default:
+    case 'verification_required':
+      return translate(locale, 'payments.verificationRequired');
+    case 'verification_failed':
+      return translate(locale, 'payments.verificationFailed');
+    case 'network':
+    case 'already_owned':
+    case 'unknown':
       return fallback ?? translate(locale, 'payments.purchaseFailed');
+    default: {
+      const _exhaustive: never = code;
+      void _exhaustive;
+      return fallback ?? translate(locale, 'payments.purchaseFailed');
+    }
   }
 }
 

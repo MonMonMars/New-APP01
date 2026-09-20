@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { ActivityIndicator, Modal, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { getLegalUiStrings } from '../content/legal';
@@ -21,6 +21,11 @@ type PurchaseConfirmSheetProps = {
   iconColor?: string;
   confirmLoading?: boolean;
   errorMessage?: string | null;
+  /** When set, user must enter a 6-digit authenticator code before purchase completes. */
+  requireVerificationCode?: boolean;
+  verificationCode?: string;
+  onVerificationCodeChange?: (code: string) => void;
+  verificationHint?: string;
   onConfirm: () => void | Promise<void>;
   onClose: () => void;
   onOpenSubscriptionTerms?: () => void;
@@ -36,6 +41,10 @@ export function PurchaseConfirmSheet({
   iconColor,
   confirmLoading = false,
   errorMessage = null,
+  requireVerificationCode = false,
+  verificationCode = '',
+  onVerificationCodeChange,
+  verificationHint,
   onConfirm,
   onClose,
   onOpenSubscriptionTerms,
@@ -64,6 +73,26 @@ export function PurchaseConfirmSheet({
           {errorMessage ? (
             <Text style={[styles.error, { color: '#ef4444' }]}>{errorMessage}</Text>
           ) : null}
+          {requireVerificationCode ? (
+            <>
+              <Text style={[styles.verificationHint, { color: colors.textMuted }]}>
+                {verificationHint ?? t('auth.paymentVerificationHint')}
+              </Text>
+              <TextInput
+                value={verificationCode}
+                onChangeText={(value) =>
+                  onVerificationCodeChange?.(value.replace(/\D/g, '').slice(0, 6))
+                }
+                keyboardType="number-pad"
+                textContentType="oneTimeCode"
+                autoComplete="one-time-code"
+                placeholder={t('auth.mfaCodePlaceholder')}
+                placeholderTextColor={colors.textMuted}
+                style={[styles.verificationInput, { color: colors.text, borderColor: colors.border }]}
+                maxLength={6}
+              />
+            </>
+          ) : null}
           <Text style={[styles.legal, { color: colors.textMuted }]}>
             {demoNote} {legalUi.purchaseAutoRenew}
             {onOpenSubscriptionTerms ? (
@@ -78,9 +107,13 @@ export function PurchaseConfirmSheet({
           <AnimatedPressable
             style={[
               styles.confirmButton,
-              { backgroundColor: colors.gradientEnd, opacity: confirmLoading ? 0.7 : 1 },
+              {
+                backgroundColor: colors.gradientEnd,
+                opacity:
+                  confirmLoading || (requireVerificationCode && verificationCode.length !== 6) ? 0.7 : 1,
+              },
             ]}
-            disabled={confirmLoading}
+            disabled={confirmLoading || (requireVerificationCode && verificationCode.length !== 6)}
             onPress={() => void onConfirm()}
           >
             {confirmLoading ? (
@@ -145,6 +178,24 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: spacing.sm,
     fontWeight: '600',
+  },
+  verificationHint: {
+    fontSize: 13,
+    lineHeight: 18,
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+  },
+  verificationInput: {
+    width: '100%',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radii.button,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    fontSize: 20,
+    letterSpacing: 6,
+    textAlign: 'center',
+    fontWeight: '700',
+    marginBottom: spacing.md,
   },
   legal: {
     fontSize: 11,

@@ -44,12 +44,14 @@ type SettingsRoute =
   | 'NotificationPreferences'
   | 'ConsumablesShop'
   | 'PurchaseHistory'
+  | 'TwoFactor'
   | null;
 
 const settingsRows: { icon: keyof typeof Ionicons.glyphMap; labelKey: string; route: SettingsRoute }[] = [
   { icon: 'flame-outline', labelKey: 'profile.discoverTools', route: 'DiscoverHub' },
   { icon: 'options-outline', labelKey: 'profile.discoveryPreferences', route: 'DiscoveryPreferences' },
   { icon: 'lock-closed-outline', labelKey: 'profile.securityAppLock', route: 'SecuritySettings' },
+  { icon: 'key-outline', labelKey: 'profile.twoFactorAuth', route: 'TwoFactor' },
   { icon: 'hand-left-outline', labelKey: 'profile.privacyControls', route: 'PrivacyCenter' },
   { icon: 'shield-checkmark-outline', labelKey: 'profile.safetyPrivacy', route: 'Safety' },
   { icon: 'notifications-outline', labelKey: 'profile.notifications', route: 'NotificationPreferences' },

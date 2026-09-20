@@ -30,11 +30,18 @@ npm start
 
 | Method | Status | Notes |
 |--------|--------|-------|
-| **Apple Sign-In** | Stub + Supabase | Real on iOS via `expo-apple-authentication`; creates/updates `profiles` row when Supabase is configured |
-| **Magic link email** | Supabase | `signInWithMagicLink()` in `src/services/supabase.ts` |
-| **Phone** | Prototype stub | Skips auth, local-only until backend wired |
+| **Apple Sign-In** | Supabase | iOS via `expo-apple-authentication` → `signInWithIdToken` |
+| **Google** | Supabase OAuth | `signInWithGoogleOAuth()` — enable Google provider + redirect URLs |
+| **Magic link email** | Supabase | `signInWithMagicLink()` |
+| **Email + password** | Supabase | Sign up / sign in tabs on onboarding welcome |
+| **Phone SMS OTP** | Supabase | Enable Phone provider + SMS (Twilio/MessageBird) |
+| **TOTP 2FA** | Supabase MFA | Profile → Two-factor authentication; login AAL2 gate + purchase verify |
 
-Enable Apple provider in Supabase Dashboard → Authentication → Providers.
+Run [`supabase-auth-trigger.sql`](./supabase-auth-trigger.sql) after the main schema to auto-create `profiles` / prefs / state rows for new auth users.
+
+Deploy Edge Function `delete-account` and set secrets (`SUPABASE_SERVICE_ROLE_KEY`). The app calls it on account deletion.
+
+Enable providers in Supabase Dashboard → Authentication → Providers (Apple, Google, Email, Phone). Enable **MFA** under Authentication settings.
 
 ### Magic link redirect URLs
 

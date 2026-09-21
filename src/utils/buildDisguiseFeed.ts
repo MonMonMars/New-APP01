@@ -13,6 +13,7 @@ import {
   rotatePulseList,
 } from './refreshPulseFeed';
 import { mergeLiveNewsIntoFeed, densifyPulseNewsBlocks } from './mergeLivePulseNews';
+import { socialAuthorDemoProfileId } from '../data/disguiseReporterProfileLinks';
 import { explicitReporterProfileId } from './resolveDisguiseProfile';
 import { getPulseLiveNewsSnapshot } from '../services/pulseLiveNews';
 
@@ -80,6 +81,28 @@ export function pinFeedProfileLinks(items: FeedItem[], section?: SparkSection | 
   });
 }
 
+/** Social avatars use the same Pexels identity as the linked discover profile. */
+export function syncSocialPostProfiles(items: FeedItem[]): FeedItem[] {
+  return items.map((item) => {
+    if (item.type !== 'social') {
+      return item;
+    }
+    const profileId = item.datingProfileId ?? socialAuthorDemoProfileId(item.author);
+    if (!profileId) {
+      return item;
+    }
+    const profile = getProfileById(profileId);
+    if (!profile || profile.photos.length === 0) {
+      return { ...item, datingProfileId: profileId };
+    }
+    return {
+      ...item,
+      datingProfileId: profileId,
+      avatarUrl: profile.photos[0],
+    };
+  });
+}
+
 /** Use linked dating profile photos so Pulse reporters match their mini-window identity. */
 export function syncReporterPhotos(items: FeedItem[], section?: SparkSection | string | null): FeedItem[] {
   return items.map((item) => {
@@ -136,17 +159,21 @@ export function buildDisguiseFeed(
 
   const withProfiles = weaveProfileCards(baseFeed, profileCards);
 
-  let linked = syncReporterPhotos(pinFeedProfileLinks(withProfiles, section), section);
+  let linked = syncSocialPostProfiles(
+    syncReporterPhotos(pinFeedProfileLinks(withProfiles, section), section),
+  );
 
   if (creative) {
     const userItem = buildDisguisedProfileFeedItem(user, creative);
     const withoutUserSlot = linked.filter((item) => item.id !== 'disguised-user');
-    linked = syncReporterPhotos(
-      pinFeedProfileLinks(
-        [withoutUserSlot[0], withoutUserSlot[1], userItem, ...withoutUserSlot.slice(2)],
+    linked = syncSocialPostProfiles(
+      syncReporterPhotos(
+        pinFeedProfileLinks(
+          [withoutUserSlot[0], withoutUserSlot[1], userItem, ...withoutUserSlot.slice(2)],
+          section,
+        ),
         section,
       ),
-      section,
     );
   }
 

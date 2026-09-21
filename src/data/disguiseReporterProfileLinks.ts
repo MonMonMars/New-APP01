@@ -27,6 +27,28 @@ export function reporterDemoProfileId(reporterId: string): string | undefined {
   return REPORTER_DEMO_PROFILE_IDS[reporterId];
 }
 
+/** Social post display name → woven demo profile (Activity + feed avatars). */
+export const SOCIAL_AUTHOR_DEMO_PROFILE_IDS: Record<string, string> = {
+  'Alex Chen': '82',
+  'Maya O.': '97',
+  'Jordan Lee': '2',
+  'Priya N.': '37',
+  'Marcus T.': '38',
+  'Elena R.': '99',
+  'Sam K.': '101',
+  'Luca M.': '103',
+  'Maya T.': '97',
+  'Iris K.': '111',
+  'Phoenix W.': '106',
+  'Clara D.': '109',
+  'Simon R.': '108',
+  'Jade L.': '105',
+};
+
+export function socialAuthorDemoProfileId(author: string): string | undefined {
+  return SOCIAL_AUTHOR_DEMO_PROFILE_IDS[author.trim()];
+}
+
 /** Demo profiles cycled onto live-fetched headlines (world / tech / culture). */
 export const LIVE_NEWS_REPORTER_ROTATION: readonly string[] = [
   '37',

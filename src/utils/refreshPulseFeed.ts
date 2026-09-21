@@ -4,7 +4,12 @@ import { AppLocale, resolveAppLocale } from '../types/locale';
 import { getAllProfiles, getIncomingLikeProfilesForSection } from '../data/profiles';
 import { matchesSparkSection, resolveSparkSection, SparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
-import { pinFeedProfileLinks, stripPulseProfileLinks, syncReporterPhotos } from './buildDisguiseFeed';
+import {
+  pinFeedProfileLinks,
+  stripPulseProfileLinks,
+  syncReporterPhotos,
+  syncSocialPostProfiles,
+} from './buildDisguiseFeed';
 import { disguiseDisplayName } from './disguiseProfileFeed';
 import { profileIntroCaption } from './profileIntroCaption';
 import { clearReporterProfileCache, setPulseProfileMappingGeneration } from './resolveDisguiseProfile';
@@ -127,7 +132,9 @@ export function renewPulseFeedProfiles(
 
   const stripped = stripPulseProfileLinks(items);
   const withRotatedCards = renewDisguisedProfiles(stripped, section, generation);
-  return syncReporterPhotos(pinFeedProfileLinks(withRotatedCards, section), section);
+  return syncSocialPostProfiles(
+    syncReporterPhotos(pinFeedProfileLinks(withRotatedCards, section), section),
+  );
 }
 
 /** Full Pulse page reload — rotate stories, freshen timestamps, renew profile photos. */

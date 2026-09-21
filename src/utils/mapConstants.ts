@@ -42,3 +42,27 @@ export function mapCenterForCity(city?: string | null): MapPoint {
   }
   return DEFAULT_MAP_CENTER;
 }
+
+/** Extra global metros for demo pins and map place search (beyond passport list). */
+export const EXTRA_WORLD_MAP_CITIES: { id: string; label: string; lat: number; lng: number }[] = [
+  { id: 'berlin', label: 'Berlin, Germany', lat: 52.52, lng: 13.405 },
+  { id: 'moscow', label: 'Moscow, Russia', lat: 55.755, lng: 37.617 },
+  { id: 'delhi', label: 'New Delhi, India', lat: 28.613, lng: 77.209 },
+  { id: 'saopaulo', label: 'São Paulo, Brazil', lat: -23.55, lng: -46.633 },
+  { id: 'mexicocity', label: 'Mexico City, Mexico', lat: 19.432, lng: -99.133 },
+  { id: 'dubai', label: 'Dubai, UAE', lat: 25.204, lng: 55.271 },
+  { id: 'singapore', label: 'Singapore', lat: 1.352, lng: 103.819 },
+  { id: 'capetown', label: 'Cape Town, South Africa', lat: -33.924, lng: 18.424 },
+  { id: 'toronto', label: 'Toronto, Canada', lat: 43.653, lng: -79.383 },
+  { id: 'seoul', label: 'Seoul, South Korea', lat: 37.566, lng: 126.978 },
+  { id: 'bangkok', label: 'Bangkok, Thailand', lat: 13.756, lng: 100.501 },
+  { id: 'istanbul', label: 'Istanbul, Turkey', lat: 41.008, lng: 28.978 },
+  { id: 'cairo', label: 'Cairo, Egypt', lat: 30.044, lng: 31.235 },
+  { id: 'lagos', label: 'Lagos, Nigeria', lat: 6.524, lng: 3.379 },
+  { id: 'mumbai', label: 'Mumbai, India', lat: 19.076, lng: 72.877 },
+  { id: 'hongkong', label: 'Hong Kong', lat: 22.319, lng: 114.169 },
+  { id: 'rome', label: 'Rome, Italy', lat: 41.902, lng: 12.496 },
+  { id: 'madrid', label: 'Madrid, Spain', lat: 40.416, lng: -3.703 },
+  { id: 'amsterdam', label: 'Amsterdam, Netherlands', lat: 52.367, lng: 4.904 },
+  { id: 'stockholm', label: 'Stockholm, Sweden', lat: 59.329, lng: 18.068 },
+];

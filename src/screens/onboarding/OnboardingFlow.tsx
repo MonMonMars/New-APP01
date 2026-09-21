@@ -264,6 +264,7 @@ export function OnboardingFlow() {
           style={styles.stepScroll}
           contentContainerStyle={styles.stepScrollContent}
           keyboardShouldPersistTaps="handled"
+          scrollEnabled={false}
         >
           <Text style={styles.title}>{t('onboarding.locationTitle')}</Text>
           <Text style={styles.subtitle}>{t('onboarding.locationSubtitle')}</Text>

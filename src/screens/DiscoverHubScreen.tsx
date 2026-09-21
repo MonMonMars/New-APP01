@@ -30,7 +30,7 @@ import { radii, spacing } from '../theme';
 import { ActionToast } from '../components/ActionToast';
 import { SearchMapView } from '../components/SearchMapView';
 import { AnimatedPressable } from '../components/AnimatedPressable';
-import { filterProfilesInRadius } from '../utils/geoMap';
+import { filterProfilesInRadius, relocateProfilesForMapSearch } from '../utils/geoMap';
 import { mapCenterForCity, zoomForRadius } from '../utils/searchMapTiles';
 
 type DiscoverHubScreenProps = {
@@ -49,6 +49,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
     toggleDiscoverFilter,
     discoverQueue,
     discoverPool,
+    mapDiscoverPool,
     discoverPoolTotal,
     hasMoreInPool,
     searchMorePeople,
@@ -88,15 +89,18 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
       : mapCenterForCity(null);
   }, [preferences.mapSearchLat, preferences.mapSearchLng, preferences.passportCity, preferences.travelMode]);
 
-  const mapPreviewPins = useMemo(
-    () =>
-      filterProfilesInRadius(
-        discoverPool,
-        mapPreviewCenter,
-        preferences.maxDistanceMiles,
-      ).slice(0, 16),
-    [discoverPool, mapPreviewCenter, preferences.maxDistanceMiles],
-  );
+  const mapPreviewPins = useMemo(() => {
+    const localized = relocateProfilesForMapSearch(
+      mapDiscoverPool,
+      mapPreviewCenter,
+      preferences.maxDistanceMiles,
+    );
+    return filterProfilesInRadius(
+      localized,
+      mapPreviewCenter,
+      preferences.maxDistanceMiles,
+    ).slice(0, 16);
+  }, [mapDiscoverPool, mapPreviewCenter, preferences.maxDistanceMiles]);
 
   const openMap = () => {
     navigation.navigate('MapDiscover');

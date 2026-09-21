@@ -3,7 +3,7 @@ import { PASSPORT_CITIES } from '../types/preferences';
 import type { AppLocale } from '../types/locale';
 import { NEIGHBORHOOD_COORDS } from './neighborhoodCoords';
 import type { GeoPoint } from './geoMap';
-import { CITY_COORDS } from './mapConstants';
+import { CITY_COORDS, EXTRA_WORLD_MAP_CITIES } from './mapConstants';
 
 export type MapPlaceSuggestion = {
   id: string;
@@ -19,6 +19,16 @@ function buildPassportPlaces(locale: AppLocale): MapPlaceSuggestion[] {
     label: getPassportCityLabel(locale, city),
     searchKey: city.toLowerCase(),
     coords: CITY_COORDS[city],
+    kind: 'passport' as const,
+  }));
+}
+
+function buildWorldPlaces(): MapPlaceSuggestion[] {
+  return EXTRA_WORLD_MAP_CITIES.map((city) => ({
+    id: `world:${city.id}`,
+    label: city.label,
+    searchKey: city.label.toLowerCase(),
+    coords: { lat: city.lat, lng: city.lng },
     kind: 'passport' as const,
   }));
 }
@@ -44,7 +54,11 @@ export function searchMapPlaces(query: string, locale: AppLocale, limit = 6): Ma
     return [];
   }
 
-  const allPlaces = [...buildPassportPlaces(locale), ...buildNeighborhoodPlaces(locale)];
+  const allPlaces = [
+    ...buildPassportPlaces(locale),
+    ...buildWorldPlaces(),
+    ...buildNeighborhoodPlaces(locale),
+  ];
 
   const scored = allPlaces.flatMap((place) => {
     const label = place.searchKey;

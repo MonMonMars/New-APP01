@@ -301,6 +301,11 @@ function matchesAdvancedFilters(
   return true;
 }
 
+type DiscoverProfileFilterOptions = {
+  /** Map search uses the worldwide demo pool (no home-radius / passport city gate). */
+  forMapSearch?: boolean;
+};
+
 function filterDiscoverProfiles(
   profiles: Profile[],
   preferences: DiscoveryPreferences,
@@ -308,8 +313,10 @@ function filterDiscoverProfiles(
   user: UserProfile,
   isSparkPlus: boolean,
   locationSharing = true,
+  options: DiscoverProfileFilterOptions = {},
 ): Profile[] {
   const filters = preferences.discoverFilters ?? [];
+  const forMapSearch = options.forMapSearch ?? false;
   const hasMapSearch =
     preferences.mapSearchLat != null && preferences.mapSearchLng != null;
   const maxDistance =
@@ -319,17 +326,19 @@ function filterDiscoverProfiles(
         ? preferences.maxDistanceMiles
         : 9999;
   const section = resolveSparkSection(preferences.sparkSection);
+  const skipHomeDistance = forMapSearch || hasMapSearch;
+  const skipPassportGate = forMapSearch || hasMapSearch;
   return profiles.filter(
     (profile) =>
       !excludedIds.has(profile.id) &&
-      (hasMapSearch || profile.distanceMiles <= maxDistance) &&
+      (skipHomeDistance || profile.distanceMiles <= maxDistance) &&
       profile.age >= preferences.minAge &&
       profile.age <= preferences.maxAge &&
       matchesGenderFilter(profile, preferences.showMe) &&
       matchesDiscoverFilters(profile, filters) &&
       matchesAdvancedFilters(profile, user, preferences.advancedFilters, isSparkPlus) &&
       matchesSparkSection(profile, section) &&
-      (hasMapSearch ||
+      (skipPassportGate ||
         !preferences.travelMode ||
         !preferences.passportCity ||
         matchesPassportCity(profile.city, preferences.passportCity)),
@@ -366,6 +375,8 @@ type AppContextValue = {
   preferences: DiscoveryPreferences;
   discoverQueue: Profile[];
   discoverPool: Profile[];
+  /** Worldwide demo pool for map pins (ignores home distance / passport filters). */
+  mapDiscoverPool: Profile[];
   discoverPoolTotal: number;
   hasMoreInPool: boolean;
   passedIds: Set<string>;
@@ -1249,6 +1260,46 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return new Date(boostActiveUntil).getTime() > Date.now();
   }, [boostActiveUntil]);
 
+  const mapDiscoverPool = useMemo(() => {
+    if (isPaused) {
+      return [];
+    }
+    const section = resolveSparkSection(preferences.sparkSection);
+    const incomingExcluded =
+      section === 'ember' ? EMBER_INCOMING_LIKE_IDS_SET : INCOMING_LIKE_IDS_SET;
+    const pool = mockProfiles.filter((p) => !incomingExcluded.has(p.id));
+    let filtered = filterDiscoverProfiles(
+      pool,
+      preferences,
+      excludedIds,
+      user,
+      isSparkPlus,
+      privacyPreferences.locationSharing,
+      { forMapSearch: true },
+    );
+    const incognitoActive = isSparkPlus && privacyPreferences.incognitoMode;
+    if (incognitoActive) {
+      filtered = filtered.filter(
+        (profile) =>
+          incomingExcluded.has(profile.id) ||
+          likedIds.has(profile.id) ||
+          pendingLikeIds.has(profile.id) ||
+          stableIncognitoVisible(profile.id),
+      );
+    }
+    return filtered;
+  }, [
+    excludedIds,
+    isPaused,
+    isSparkPlus,
+    likedIds,
+    pendingLikeIds,
+    preferences,
+    privacyPreferences.incognitoMode,
+    privacyPreferences.locationSharing,
+    user,
+  ]);
+
   const discoverPool = useMemo(() => {
     if (isPaused) {
       return [];
@@ -1277,7 +1328,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     if (preferences.mapSearchLat != null && preferences.mapSearchLng != null) {
       const searchCenter = { lat: preferences.mapSearchLat, lng: preferences.mapSearchLng };
-      filtered = relocateProfilesForMapSearch(filtered, searchCenter, preferences.maxDistanceMiles);
+      filtered = relocateProfilesForMapSearch(
+        mapDiscoverPool,
+        searchCenter,
+        preferences.maxDistanceMiles,
+      );
       filtered = filterProfilesInRadius(filtered, searchCenter, preferences.maxDistanceMiles);
     }
     return filtered;
@@ -1286,6 +1341,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     isPaused,
     isSparkPlus,
     likedIds,
+    mapDiscoverPool,
     pendingLikeIds,
     preferences,
     privacyPreferences.incognitoMode,
@@ -3375,6 +3431,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       preferences,
       discoverQueue,
       discoverPool,
+      mapDiscoverPool,
       discoverPoolTotal,
       hasMoreInPool,
       passedIds,
@@ -3537,6 +3594,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       preferences,
       discoverQueue,
       discoverPool,
+      mapDiscoverPool,
       discoverPoolTotal,
       hasMoreInPool,
       passedIds,

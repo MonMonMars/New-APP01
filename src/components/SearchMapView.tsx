@@ -267,6 +267,7 @@ export function SearchMapView({
 
   const panGesture = Gesture.Pan()
     .enabled(mapInteractive && Boolean(onCenterChange))
+    .minDistance(2)
     .onUpdate((event) => {
       panX.value = event.translationX;
       panY.value = event.translationY;
@@ -543,6 +544,8 @@ export function SearchMapView({
     mapInteractive && Platform.OS === 'web'
       ? ({
           cursor: webDragging ? 'grabbing' : 'grab',
+          touchAction: 'none',
+          userSelect: 'none',
         } as unknown as ViewStyle)
       : undefined;
 
@@ -553,13 +556,9 @@ export function SearchMapView({
       {...webMapHandlers}
     >
       {mapInteractive ? (
-        Platform.OS === 'web' ? (
+        <GestureDetector gesture={mapGesture}>
           <Animated.View style={[styles.mapLayer, layerStyle]}>{mapLayer}</Animated.View>
-        ) : (
-          <GestureDetector gesture={mapGesture}>
-            <Animated.View style={[styles.mapLayer, layerStyle]}>{mapLayer}</Animated.View>
-          </GestureDetector>
-        )
+        </GestureDetector>
       ) : (
         <View style={styles.mapLayer}>{mapLayer}</View>
       )}

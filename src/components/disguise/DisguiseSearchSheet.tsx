@@ -67,7 +67,7 @@ export function DisguiseSearchSheet({
     : disguiseTrendingTopics;
   const trendingTopics = useRotatedPulseContent(baseTrendingTopics);
   const rotatedFeedCatalog = useRotatedPulseContent(feedCatalog);
-  const { refreshing, justUpdated, scrollViewProps } = usePulseScrollRefresh();
+  const { refreshing, justUpdated, scrollViewProps, refresh } = usePulseScrollRefresh();
   const [query, setQuery] = useState('');
 
   const results = useMemo((): SearchResult[] => {
@@ -170,7 +170,13 @@ export function DisguiseSearchSheet({
               </AnimatedPressable>
             ))
           )}
-          <PulseFeedRefreshFooter refreshing={refreshing} justUpdated={justUpdated} />
+          <PulseFeedRefreshFooter
+            refreshing={refreshing}
+            justUpdated={justUpdated}
+            onPressRefresh={() => {
+              void refresh();
+            }}
+          />
         </ScrollView>
       </View>
     </Modal>

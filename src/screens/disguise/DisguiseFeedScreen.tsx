@@ -60,7 +60,7 @@ export function DisguiseFeedScreen() {
 
   const feedItems = useDisguiseFeedItems(topic);
   const refreshGeneration = usePulseFeedRefreshGeneration();
-  const { refreshing, justUpdated, flatListProps } = usePulseScrollRefresh();
+  const { refreshing, justUpdated, flatListProps, refresh } = usePulseScrollRefresh();
 
   const sectionLabel = topic ? topicFilterLabel(topic, locale) : meta.feedLabel;
 
@@ -74,7 +74,15 @@ export function DisguiseFeedScreen() {
         renderItem={({ item, index }) => renderFeedItem({ item, index })}
         contentContainerStyle={[styles.list, { paddingBottom: spacing.xl * 2 }]}
         {...flatListProps}
-        ListFooterComponent={<PulseFeedRefreshFooter refreshing={refreshing} justUpdated={justUpdated} />}
+        ListFooterComponent={
+          <PulseFeedRefreshFooter
+            refreshing={refreshing}
+            justUpdated={justUpdated}
+            onPressRefresh={() => {
+              void refresh();
+            }}
+          />
+        }
         ListHeaderComponent={
           <View style={styles.headerRow}>
             <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>{sectionLabel}</Text>

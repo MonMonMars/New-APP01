@@ -48,7 +48,7 @@ export function DisguiseAlertsScreen() {
   const meta = useDisguiseWorld();
   const refreshGeneration = usePulseFeedRefreshGeneration();
   const alerts = useRotatedPulseContent(disguiseAlerts);
-  const { refreshing, justUpdated, flatListProps } = usePulseScrollRefresh();
+  const { refreshing, justUpdated, flatListProps, refresh } = usePulseScrollRefresh();
 
   useFocusEffect(
     useCallback(() => {
@@ -76,7 +76,15 @@ export function DisguiseAlertsScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         {...flatListProps}
-        ListFooterComponent={<PulseFeedRefreshFooter refreshing={refreshing} justUpdated={justUpdated} />}
+        ListFooterComponent={
+          <PulseFeedRefreshFooter
+            refreshing={refreshing}
+            justUpdated={justUpdated}
+            onPressRefresh={() => {
+              void refresh();
+            }}
+          />
+        }
         renderItem={({ item }) => {
           const newsPost = item.articleUrl ? findNewsPostByArticleUrl(item.articleUrl) : undefined;
           const ad = item.landingUrl ? findAdPostByLandingUrl(item.landingUrl) : undefined;

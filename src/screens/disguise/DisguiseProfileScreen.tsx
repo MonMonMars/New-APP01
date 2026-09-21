@@ -74,15 +74,15 @@ export function DisguiseProfileScreen() {
     generatedAt: new Date().toISOString(),
   };
   const refreshGeneration = usePulseFeedRefreshGeneration();
-  const { refreshing, justUpdated, scrollViewProps } = usePulseScrollRefresh();
+  const { refreshing, justUpdated, scrollViewProps, refresh } = usePulseScrollRefresh();
   const profileFeedItem = buildDisguisedProfileFeedItem(user, profileCreative);
   const recentPosts = useMemo(
     () => buildDisguisedProfileFeedItems(pulseSection, refreshGeneration),
     [pulseSection, refreshGeneration],
   );
   const feedItems = useMemo(
-    () => buildDisguiseFeed(user, disguiseAdCreative, pulseSection),
-    [user, disguiseAdCreative, pulseSection],
+    () => buildDisguiseFeed(user, disguiseAdCreative, pulseSection, refreshGeneration),
+    [user, disguiseAdCreative, pulseSection, refreshGeneration],
   );
   const savedPosts = useMemo(
     () => resolveSavedPulsePosts(pulseSocial.savedPostIds, feedItems, user.gender, locale),
@@ -298,7 +298,13 @@ export function DisguiseProfileScreen() {
           <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
         </AnimatedPressable>
 
-        <PulseFeedRefreshFooter refreshing={refreshing} justUpdated={justUpdated} />
+        <PulseFeedRefreshFooter
+          refreshing={refreshing}
+          justUpdated={justUpdated}
+          onPressRefresh={() => {
+            void refresh();
+          }}
+        />
       </ScrollView>
 
       <DisguiseAdGeneratorSheet visible={showGenerator} onClose={() => setShowGenerator(false)} />

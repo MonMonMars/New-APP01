@@ -2,11 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://cage-rid-properties-bailey.trycloudflare.com**
+**https://bunch-pediatric-beside-happiness.trycloudflare.com**
 
-- **Built from branch:** `cursor/complete-app-7b60` (full stack: auth, map, Pulse, admin, live news)
-- **Build ID:** `6af9699-20260920T174425Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-20 23:56 UTC — `verify-demo-link` PASS 9/9 on public tunnel
+- **Built from branch:** `cursor/pulse-explicit-profile-links-7b60` (fresh `dist/` — pull refresh, explicit Pulse links, AI hub fix)
+- **Build ID:** `e9ebc48-20260921T060422Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
+- **Verified:** 2026-09-21 06:06 UTC — `verify:all` PASS on localhost; tunnel when workspace is awake
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

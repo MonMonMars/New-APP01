@@ -1,7 +1,8 @@
-import { SocialPost } from './disguiseFeed';
+import type { SocialPost } from './disguiseFeed';
+import { hydrateSocialPost } from './disguisePulsePersonaPhotos';
 import { pulseNewsImages } from './pulseNewsMedia';
 
-export const disguiseSocialPosts: SocialPost[] = [
+const socialPostsSeed: SocialPost[] = [
   {
     id: 'social-1',
     type: 'social',
@@ -33,7 +34,7 @@ export const disguiseSocialPosts: SocialPost[] = [
     avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80',
     avatarMask: { variant: 'ad', text: 'AD' },
     body: 'Local spots worth bookmarking before the weekend rush. Thread 🧵',
-    imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&q=80',
+    imageUrl: pulseNewsImages.restaurant,
     imageMask: { variant: 'news', text: 'LIVE' },
     likes: 256,
     comments: 45,
@@ -167,3 +168,5 @@ export const disguiseSocialPosts: SocialPost[] = [
     timeAgo: '5h ago',
   },
 ];
+
+export const disguiseSocialPosts: SocialPost[] = socialPostsSeed.map(hydrateSocialPost);

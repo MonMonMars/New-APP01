@@ -2,11 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://directive-cho-epson-pci.trycloudflare.com**
+**https://divisions-shadow-specialties-touring.trycloudflare.com**
 
-- **Built from branch:** `cursor/update-fake-accounts-7b60` (passport Pexels, unique demo names, Pulse persona avatars)
-- **Build ID:** `06b648f-20260921T111956Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-21 15:42 UTC — `verify-demo-link` PASS; workspace must stay awake
+- **Built from branch:** `cursor/world-map-touch-search-7b60` (world map search, finger pan/zoom, Pulse top refresh)
+- **Build ID:** `441b1cc-20260921T232412Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
+- **Verified:** 2026-09-21 23:25 UTC — `verify:all`, map world search (Tokyo), pulse refresh PASS
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)
@@ -27,7 +27,8 @@ Server-side (already applied on each `npm run build:web:demo`):
 2. Tap **Continue without account**
 3. Complete onboarding (defaults are fine)
 4. Tap the **Pulse logo** → **Leave Spark** to enter dating mode
-5. **Profile → Privacy controls → Language** to switch 繁體中文
+5. **Discover tools → Map** — drag/pinch the map; **Places → Tokyo** → search this area
+6. **Profile → Privacy controls → Language** to switch 繁體中文
 
 ---
 
@@ -37,7 +38,7 @@ Server-side (already applied on each `npm run build:web:demo`):
 |------|---------|
 | `loca.lt` tunnels | Time out / unreliable from this environment |
 | `monmonmars.github.io/New-APP01/` | Repo is **private** — GitHub Pages needs Pro or a public repo (returns 404) |
-| Old Cloudflare URLs (e.g. `formerly-para-school-logs`, `proportion-julie-reflected-had`) | **Dead** — workspace restarted; use the current link above |
+| Old Cloudflare URLs | **Dead** — workspace restarted; use the current link above |
 | GitHub Pages paths on tunnel root | Were serving a **GitHub Pages build** (`/New-APP01/` paths) → blank white screen |
 
 **Fix applied:** tunnel demos use `npm run build:web:demo` + `serve -c serve.json` (root paths), not `build:web:pages`.
@@ -51,7 +52,7 @@ Private repo → use **Vercel** or **Netlify** (free, stable URL, auto-deploy on
 ### Vercel
 
 1. [vercel.com/new](https://vercel.com/new) → Import `MonMonMars/New-APP01`
-2. Branch: `cursor/app-i18n-7b60` (or `main`)
+2. Branch: `cursor/world-map-touch-search-7b60` (or `main`)
 3. Build: `npm run build:web` · Output: `dist`
 4. Deploy → stable URL like `https://new-app01.vercel.app`
 
@@ -59,21 +60,14 @@ Private repo → use **Vercel** or **Netlify** (free, stable URL, auto-deploy on
 
 ### GitHub Pages (public repo or GitHub Pro only)
 
-**URL:** `https://monmonmars.github.io/New-APP01/`
-
-Uses `npm run build:web:pages` (base path `/New-APP01`). Enable at [repo Pages settings](https://github.com/MonMonMars/New-APP01/settings/pages) → `gh-pages` branch.
+Push to a branch listed in `.github/workflows/deploy-web.yml`, enable Pages from `gh-pages` branch.
 
 ---
 
-## Run locally
+## Local verify
 
 ```bash
-git clone https://github.com/MonMonMars/New-APP01.git
-cd New-APP01
-git checkout cursor/demo-cache-bust-7b60
-npm install
-npm run demo          # http://localhost:8090 (build:web:demo + serve.json)
-npm run demo:tunnel   # Cloudflare public URL (install cloudflared)
+npm run build:web:demo
+npx serve -c serve.json -l 8090 dist
+npm run verify:extended
 ```
-
-Phone (best UX): `npm start` → Expo Go

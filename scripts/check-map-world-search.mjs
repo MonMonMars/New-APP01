@@ -37,9 +37,9 @@ await page.getByText(/Tokyo/i).first().click({ force: true });
 await page.waitForTimeout(1200);
 
 const meta = await page.locator('body').innerText();
-const peopleMatch = meta.match(/(\d+)\s+people/i);
+const peopleMatch = meta.match(/·\s*(\d+)\s+people/i);
 const count = peopleMatch ? Number(peopleMatch[1]) : 0;
-const ok = count > 0;
+const ok = count >= 5;
 
 console.log(JSON.stringify({ worldMapSearch: true, tokyoPeopleCount: count, ok }, null, 2));
 await browser.close();

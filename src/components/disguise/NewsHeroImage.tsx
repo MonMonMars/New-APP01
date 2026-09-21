@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { pulseNewsImages } from '../../data/pulseNewsMedia';
+import { newsHeroFallbackUri } from '../../utils/pulseNewsHeroImage';
 
 type NewsHeroImageProps = {
   uri: string;
@@ -18,7 +18,7 @@ export function NewsHeroImage({ uri, style, accessibilityLabel }: NewsHeroImageP
     setFailed(false);
   }, [uri]);
 
-  const src = failed || !uri ? pulseNewsImages.fallback : uri;
+  const src = failed || !uri ? newsHeroFallbackUri(uri || 'pulse-news') : uri;
 
   return (
     <View style={[styles.frame, style]}>

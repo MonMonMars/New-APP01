@@ -8,8 +8,9 @@ import { AppLocale, resolveAppLocale } from '../types/locale';
 import { translate } from '../i18n';
 import { disguiseDisplayName } from '../utils/disguiseProfileFeed';
 import { profileIntroCaption } from '../utils/profileIntroCaption';
+import { extractRssItemImage, resolveNewsHeroImage } from '../utils/pulseNewsHeroImage';
 
-const CACHE_KEY = '@pulse/live-news/v1';
+const CACHE_KEY = '@pulse/live-news/v2';
 const CACHE_TTL_MS = 45 * 60 * 1000;
 
 type PulseNewsCachePayload = {
@@ -97,8 +98,12 @@ function decodeEntities(text: string): string {
     .replace(/&gt;/g, '>');
 }
 
-function parseRssItems(xml: string, maxItems: number): Array<{ title: string; link: string; summary: string; pubDate?: string }> {
-  const items: Array<{ title: string; link: string; summary: string; pubDate?: string }> = [];
+function parseRssItems(
+  xml: string,
+  maxItems: number,
+): Array<{ title: string; link: string; summary: string; pubDate?: string; wireImageUrl?: string }> {
+  const items: Array<{ title: string; link: string; summary: string; pubDate?: string; wireImageUrl?: string }> =
+    [];
   const chunks = xml.split(/<item[\s>]/i).slice(1);
   for (const chunk of chunks) {
     if (items.length >= maxItems) {
@@ -114,8 +119,9 @@ function parseRssItems(xml: string, maxItems: number): Array<{ title: string; li
     const title = decodeEntities(stripHtml(titleRaw));
     const link = decodeEntities(stripHtml(linkRaw));
     const summary = decodeEntities(stripHtml(descRaw)).slice(0, 280);
+    const wireImageUrl = extractRssItemImage(chunk);
     if (title.length > 0 && link.startsWith('http')) {
-      items.push({ title, link, summary, pubDate: pubRaw ? stripHtml(pubRaw) : undefined });
+      items.push({ title, link, summary, pubDate: pubRaw ? stripHtml(pubRaw) : undefined, wireImageUrl });
     }
   }
   return items;
@@ -148,7 +154,12 @@ async function fetchRssFeed(spec: RssFeedSpec, perFeed: number): Promise<NewsPos
       headline: item.title,
       summary: item.summary || item.title,
       articleBody: item.summary || item.title,
-      imageUrl: pulseNewsImages[spec.imageKey],
+      imageUrl: resolveNewsHeroImage({
+        category: spec.category,
+        seed: item.link,
+        wireImageUrl: item.wireImageUrl,
+        defaultKey: spec.imageKey,
+      }),
       timeAgo: 'just now',
       category: spec.category,
       articleUrl: item.link,
@@ -203,7 +214,12 @@ async function fetchNewsApiHeadlines(): Promise<NewsPost[]> {
           headline: article.title.trim(),
           summary: (article.description ?? article.title).trim().slice(0, 280),
           articleBody: (article.description ?? article.title).trim(),
-          imageUrl: article.urlToImage?.startsWith('http') ? article.urlToImage : pulseNewsImages[spec.imageKey],
+          imageUrl: resolveNewsHeroImage({
+            category: spec.category,
+            seed: article.url ?? article.title ?? String(index),
+            wireImageUrl: article.urlToImage,
+            defaultKey: spec.imageKey,
+          }),
           timeAgo: 'just now',
           category: spec.category,
           articleUrl: article.url,

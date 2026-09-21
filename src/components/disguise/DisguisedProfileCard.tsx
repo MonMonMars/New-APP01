@@ -11,13 +11,16 @@ import {
   getPulseCategoryLabel,
   localizeTimeAgoLabel,
 } from '../../i18n/labels';
-import { DisguisedProfilePost, NewsReporter } from '../../data/disguiseFeed';
+import { AdPost, DisguisedProfilePost, NewsPost, NewsReporter } from '../../data/disguiseFeed';
+import { disguiseClientAds } from '../../data/disguiseClientAds';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { ContentTypeIcon, MediaWithContentBadge } from './ContentTypeIcon';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { PROFILE_AVATAR_SIZE } from './DisguiseOverlayAvatar';
 import { NewsHeroImage } from './NewsHeroImage';
+import { AdLandingSheet } from './AdLandingSheet';
+import { NewsArticleSheet } from './NewsArticleSheet';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
 import { SocialCommentSheet } from './SocialCommentSheet';
 import { getProfileById } from '../../data/profiles';
@@ -45,6 +48,8 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   const { pulseSocial, togglePulseLike, preferences } = useApp();
   const meta = useDisguiseWorld();
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [articleOpen, setArticleOpen] = useState(false);
+  const [adOpen, setAdOpen] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const upvoted = pulseSocial.likedPostIds.includes(post.id);
 
@@ -65,6 +70,32 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   const maskSnippet = post.overlayText.split(' ').slice(0, 2).join(' ');
 
   const openPreview = () => setPreviewOpen(true);
+
+  const articlePost: NewsPost = {
+    id: post.id,
+    type: 'news',
+    source: getDisguisedSourceLabel(locale, post.sourceLabel),
+    headline: post.headline,
+    summary: post.summary,
+    articleBody: post.summary,
+    imageUrl: post.coverImageUrl,
+    timeAgo: post.timeAgo,
+    category: post.category ?? 'News',
+    articleUrl: '',
+    reporters: [],
+  };
+
+  const adPost: AdPost = {
+    id: post.id,
+    type: 'ad',
+    brand: post.headline,
+    tagline: post.summary,
+    description: post.summary,
+    imageUrl: post.coverImageUrl,
+    cta: post.cta ?? t('disguiseAd.learnMore'),
+    landingUrl: disguiseClientAds[0]?.landingUrl ?? 'https://example.com',
+    sponsored: true,
+  };
 
   const previewSheet = (
     <PersonPreviewSheet
@@ -149,33 +180,37 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   if (post.variant === 'ad') {
     return (
       <>
-        <AnimatedPressable
-          style={[styles.card, { backgroundColor: '#1a1a2e', borderColor: colors.border }]}
-          onPress={openPreview}
-          accessibilityRole="button"
-          accessibilityLabel={t('disguisedProfile.disguisedAsAdA11y', { headline: post.headline })}
-        >
-          <View style={styles.sponsoredRow}>
-            <Text style={styles.sponsored}>{t('disguiseAd.sponsored')}</Text>
-            <ContentTypeIcon kind="sponsored" />
-          </View>
-          <MediaWithContentBadge kind="ad">
-            <NewsHeroImage uri={post.coverImageUrl} style={styles.adImage} accessibilityLabel={post.headline} />
-          </MediaWithContentBadge>
-          <View style={styles.body}>
-            <Text style={styles.brand}>{post.headline}</Text>
-            <Text style={styles.tagline}>{post.summary}</Text>
-            {avatarRow}
-            <Text style={styles.spotlightHint} numberOfLines={2}>
-              {t('disguisedProfile.spotlightHint')}
-            </Text>
-            <View style={[styles.cta, { backgroundColor: meta.accent }]}>
-              <Text style={styles.ctaText}>{post.cta ?? t('disguiseAd.learnMore')}</Text>
-              <Ionicons name="chevron-forward" size={14} color="#fff" />
+        <View style={[styles.card, { backgroundColor: '#1a1a2e', borderColor: colors.border }]}>
+          <AnimatedPressable
+            onPress={() => setAdOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel={t('disguisedProfile.disguisedAsAdA11y', { headline: post.headline })}
+          >
+            <View style={styles.sponsoredRow}>
+              <Text style={styles.sponsored}>{t('disguiseAd.sponsored')}</Text>
+              <ContentTypeIcon kind="sponsored" />
             </View>
+            <MediaWithContentBadge kind="ad">
+              <NewsHeroImage uri={post.coverImageUrl} style={styles.adImage} accessibilityLabel={post.headline} />
+            </MediaWithContentBadge>
+            <View style={styles.body}>
+              <Text style={styles.brand}>{post.headline}</Text>
+              <Text style={styles.tagline}>{post.summary}</Text>
+              <Text style={styles.spotlightHint} numberOfLines={2}>
+                {t('disguisedProfile.spotlightHint')}
+              </Text>
+              <View style={[styles.cta, { backgroundColor: meta.accent }]}>
+                <Text style={styles.ctaText}>{post.cta ?? t('disguiseAd.learnMore')}</Text>
+                <Ionicons name="chevron-forward" size={14} color="#fff" />
+              </View>
+            </View>
+          </AnimatedPressable>
+          <View style={[styles.body, styles.adAvatarSection]}>
+            {avatarRow}
             <OwnerHint label={getDisguisedProfileHintLabel(locale, post.hintLabel)} color={meta.accent} />
           </View>
-        </AnimatedPressable>
+        </View>
+        <AdLandingSheet visible={adOpen} ad={adPost} onClose={() => setAdOpen(false)} />
         {previewSheet}
       </>
     );
@@ -183,39 +218,42 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
 
   return (
     <>
-      <AnimatedPressable
-        style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
-        onPress={openPreview}
-        accessibilityRole="button"
-        accessibilityLabel={t('disguisedProfile.disguisedAsNewsA11y', { headline: post.headline })}
-      >
-        <MediaWithContentBadge kind="news">
-          <NewsHeroImage uri={post.coverImageUrl} style={styles.newsImage} accessibilityLabel={post.headline} />
-        </MediaWithContentBadge>
-        <View style={styles.body}>
-          <View style={styles.metaRow}>
-            <Text style={[styles.source, { color: meta.accent }]}>
-              {getDisguisedSourceLabel(locale, post.sourceLabel)}
-            </Text>
-            <Text style={[styles.dot, { color: colors.textMuted }]}>·</Text>
-            {post.category ? (
-              <Text style={[styles.category, { color: meta.accent }]}>
-                {getPulseCategoryLabel(locale, post.category)}
+      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <AnimatedPressable
+          onPress={() => setArticleOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t('newsArticle.readArticleA11y', { headline: post.headline })}
+        >
+          <MediaWithContentBadge kind="news">
+            <NewsHeroImage uri={post.coverImageUrl} style={styles.newsImage} accessibilityLabel={post.headline} />
+          </MediaWithContentBadge>
+          <View style={styles.body}>
+            <View style={styles.metaRow}>
+              <Text style={[styles.source, { color: meta.accent }]}>
+                {getDisguisedSourceLabel(locale, post.sourceLabel)}
               </Text>
-            ) : null}
-            <Text style={[styles.time, { color: colors.textMuted }]}>
-              {localizeTimeAgoLabel(locale, post.timeAgo)}
+              <Text style={[styles.dot, { color: colors.textMuted }]}>·</Text>
+              {post.category ? (
+                <Text style={[styles.category, { color: meta.accent }]}>
+                  {getPulseCategoryLabel(locale, post.category)}
+                </Text>
+              ) : null}
+              <Text style={[styles.time, { color: colors.textMuted }]}>
+                {localizeTimeAgoLabel(locale, post.timeAgo)}
+              </Text>
+            </View>
+            <Text style={[styles.headline, { color: colors.text }]}>{post.headline}</Text>
+            <Text style={[styles.summary, { color: colors.textMuted }]} numberOfLines={3}>
+              {post.summary}
             </Text>
           </View>
-          <Text style={[styles.headline, { color: colors.text }]}>{post.headline}</Text>
-          <Text style={[styles.summary, { color: colors.textMuted }]} numberOfLines={3}>
-            {post.summary}
-          </Text>
-
-          <View style={styles.reportersRow}>{avatarRow}</View>
+        </AnimatedPressable>
+        <View style={[styles.body, styles.reportersRow]}>{avatarRow}</View>
+        <View style={[styles.body, styles.hintSection]}>
           <OwnerHint label={getDisguisedProfileHintLabel(locale, post.hintLabel)} color={meta.accent} />
         </View>
-      </AnimatedPressable>
+      </View>
+      <NewsArticleSheet visible={articleOpen} post={articlePost} onClose={() => setArticleOpen(false)} />
       {previewSheet}
     </>
   );
@@ -336,6 +374,14 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(128,128,128,0.25)',
+  },
+  adAvatarSection: {
+    paddingTop: 0,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(255,255,255,0.12)',
+  },
+  hintSection: {
+    paddingTop: 0,
   },
   socialBody: {
     fontSize: 15,

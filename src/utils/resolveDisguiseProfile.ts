@@ -188,10 +188,7 @@ export function resolveReporterSparkProfile(
     return null;
   }
 
-  const profileId =
-    reporter.profileId ??
-    resolveDisguiseProfileId(reporter.id) ??
-    mappedProfileIdForReporter(reporter.id, section);
+  const profileId = reporter.profileId ?? resolveDisguiseProfileId(reporter.id);
 
   if (!profileId) {
     return null;

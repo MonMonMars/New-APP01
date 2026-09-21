@@ -1,4 +1,6 @@
 import { NewsReporter } from '../../data/disguiseFeed';
+import { usePulseContextSection } from '../../hooks/usePulseContextSection';
+import { resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
 
 type DisguisePhotoLightboxProps = {
@@ -17,6 +19,15 @@ export function DisguisePhotoLightbox({
   photoIndex,
   onClose,
 }: DisguisePhotoLightboxProps) {
+  const pulseSection = usePulseContextSection();
+  const linkedProfile = reporter
+    ? resolveExplicitDatingProfile(reporter.profileId, pulseSection)
+    : null;
+
+  if (!linkedProfile) {
+    return null;
+  }
+
   return (
     <PersonPreviewSheet
       visible={visible}

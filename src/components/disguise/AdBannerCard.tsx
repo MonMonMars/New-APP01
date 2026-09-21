@@ -4,21 +4,12 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
-import { AI_PERSONA_IDS, mockProfiles } from '../../data/profiles';
 import { AdPost } from '../../data/disguiseFeed';
-import { disguiseDisplayName } from '../../utils/disguiseProfileFeed';
-import { profileIntroCaption } from '../../utils/profileIntroCaption';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { ContentTypeIcon, MediaWithContentBadge } from './ContentTypeIcon';
-import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { AdLandingSheet } from './AdLandingSheet';
-import { PersonPreviewSheet } from './PersonPreviewSheet';
 import { AnimatedPressable } from '../AnimatedPressable';
-
-const AD_TESTIMONIAL_PROFILES = mockProfiles.filter(
-  (profile) => !AI_PERSONA_IDS.has(profile.id) && !profile.isAiPersona && profile.photos.length > 0,
-);
 
 type AdBannerCardProps = {
   ad: AdPost;
@@ -29,19 +20,6 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
   const { t } = useTranslation();
   const meta = useDisguiseWorld();
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [testimonialOpen, setTestimonialOpen] = useState(false);
-  const testimonialProfile =
-    AD_TESTIMONIAL_PROFILES[ad.id.length % AD_TESTIMONIAL_PROFILES.length] ?? AD_TESTIMONIAL_PROFILES[0];
-  const testimonialReporter = testimonialProfile
-    ? {
-        id: `ad-testimonial-${testimonialProfile.id}`,
-        name: disguiseDisplayName(testimonialProfile.name),
-        avatarUrl: testimonialProfile.photos[0],
-        quote: profileIntroCaption(testimonialProfile),
-        photos: testimonialProfile.photos,
-        profileId: testimonialProfile.id,
-      }
-    : null;
 
   return (
     <>
@@ -61,22 +39,6 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
         <View style={styles.body}>
           <Text style={styles.brand}>{ad.brand}</Text>
           <Text style={styles.tagline}>{ad.tagline}</Text>
-          {testimonialReporter ? (
-            <AnimatedPressable
-              onPress={() => setTestimonialOpen(true)}
-              accessibilityRole="button"
-              accessibilityLabel={t('adBanner.viewProfileA11y', { name: testimonialReporter.name })}
-              style={styles.testimonialRow}
-            >
-              <FeedPersonThumbnail
-                plainAvatar
-                contentKind="profile"
-                imageUrl={testimonialReporter.avatarUrl}
-                caption={testimonialReporter.quote}
-                accessibilityLabel={t('adBanner.profilePhotoA11y', { name: testimonialReporter.name })}
-              />
-            </AnimatedPressable>
-          ) : null}
           <View style={[styles.cta, { backgroundColor: meta.accent }]}>
             <Text style={styles.ctaText}>{ad.cta}</Text>
             <Ionicons name="chevron-forward" size={14} color="#fff" />
@@ -85,13 +47,6 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
       </AnimatedPressable>
 
       <AdLandingSheet visible={sheetOpen} ad={ad} onClose={() => setSheetOpen(false)} />
-      {testimonialReporter ? (
-        <PersonPreviewSheet
-          visible={testimonialOpen}
-          reporter={testimonialReporter}
-          onClose={() => setTestimonialOpen(false)}
-        />
-      ) : null}
     </>
   );
 }

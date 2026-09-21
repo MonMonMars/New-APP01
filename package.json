@@ -60,7 +60,7 @@
     "validate:profiles": "npx --yes tsx scripts/validate-demo-profiles.ts && npx --yes tsx scripts/check-pexels-ids.mjs",
     "verify:all": "node scripts/verify-demo-link.mjs http://127.0.0.1:8090 && node scripts/check-mini-window.mjs http://127.0.0.1:8090 && node scripts/check-activity-preview.mjs http://127.0.0.1:8090 && node scripts/verify-spark-ember-pulse-buttons.mjs http://127.0.0.1:8090",
     "verify:qa-smoke": "node scripts/qa-smoke-test.mjs http://127.0.0.1:8090",
-    "verify:extended": "npm run verify:all && npm run verify:qa-smoke && DEMO_URL=http://127.0.0.1:8090 node scripts/verify-compact-mini.mjs && DEMO_URL=http://127.0.0.1:8090 node scripts/verify-female-pulse.mjs && DEMO_URL=http://127.0.0.1:8090 node scripts/verify-leave-spark-news.mjs && DEMO_URL=http://127.0.0.1:8090 node scripts/verify-disguise-ux.mjs && DEMO_URL=http://127.0.0.1:8090 node scripts/verify-world-picker.mjs"
+    "verify:extended": "npm run verify:all && npm run verify:qa-smoke && node scripts/check-pulse-link-routing.mjs http://127.0.0.1:8090 && DEMO_URL=http://127.0.0.1:8090 node scripts/verify-compact-mini.mjs && DEMO_URL=http://127.0.0.1:8090 node scripts/verify-female-pulse.mjs && DEMO_URL=http://127.0.0.1:8090 node scripts/verify-leave-spark-news.mjs && DEMO_URL=http://127.0.0.1:8090 node scripts/verify-disguise-ux.mjs && DEMO_URL=http://127.0.0.1:8090 node scripts/verify-world-picker.mjs"
   },
   "private": true
 }

@@ -29,6 +29,8 @@ type FeedPersonThumbnailProps = {
   hideLabel?: boolean;
   /** Show a small type icon badge on the avatar (e.g. activity rows with external text). */
   showIconBadge?: boolean;
+  /** When set, only the avatar (not caption) is tappable — default for profile mini-windows. */
+  pressTarget?: 'avatar' | 'row';
   style?: StyleProp<ViewStyle>;
 };
 
@@ -45,6 +47,7 @@ export function FeedPersonThumbnail({
   caption,
   hideLabel = false,
   showIconBadge = false,
+  pressTarget = 'avatar',
   style,
 }: FeedPersonThumbnailProps) {
   const { colors } = useTheme();
@@ -72,47 +75,75 @@ export function FeedPersonThumbnail({
   const showCaptionIcon = showCaption && !isProfile;
   const showTypeLabel = !hideLabel && !showCaption && !showProfileBadge;
 
-  const content = (
-    <View style={[styles.row, onPress ? undefined : style]}>
-      {avatar}
-      {showProfileBadge ? (
-        <View style={styles.iconBesideAvatar}>
-          <ContentTypeIcon kind={badgeKind} size={PROFILE_THUMB_ICON_SIZE} />
+  const captionBlock = showCaption ? (
+    <View style={styles.captionCol}>
+      {showCaptionIcon ? (
+        <View style={styles.captionIcon}>
+          <ContentTypeIcon kind={contentKind} size={13} />
         </View>
       ) : null}
-      {showCaption ? (
-        <View style={styles.captionCol}>
-          {showCaptionIcon ? (
-            <View style={styles.captionIcon}>
-              <ContentTypeIcon kind={contentKind} size={13} />
-            </View>
-          ) : null}
-          <Text style={[styles.caption, { color: colors.text }]} numberOfLines={2}>
-            {trimmedCaption}
-          </Text>
-        </View>
-      ) : showTypeLabel ? (
-        <ContentTypeLabel kind={contentKind} />
-      ) : null}
+      <Text style={[styles.caption, { color: colors.text }]} numberOfLines={2} testID="feed-person-caption">
+        {trimmedCaption}
+      </Text>
     </View>
-  );
+  ) : showTypeLabel ? (
+    <ContentTypeLabel kind={contentKind} />
+  ) : null;
+
+  const profileBadge = showProfileBadge ? (
+    <View style={styles.iconBesideAvatar}>
+      <ContentTypeIcon kind={badgeKind} size={PROFILE_THUMB_ICON_SIZE} />
+    </View>
+  ) : null;
+
+  const runPress = (event?: { stopPropagation?: () => void }) => {
+    event?.stopPropagation?.();
+    onPress?.();
+  };
 
   if (!onPress) {
-    return content;
+    return (
+      <View style={[styles.row, style]}>
+        {avatar}
+        {profileBadge}
+        {captionBlock}
+      </View>
+    );
+  }
+
+  const a11yLabel =
+    accessibilityLabel ?? t('feedPerson.viewA11y', { kind: contentTypeLabel(contentKind, t) });
+
+  if (pressTarget === 'row') {
+    return (
+      <AnimatedPressable
+        onPress={runPress}
+        accessibilityRole="button"
+        accessibilityLabel={a11yLabel}
+        style={[styles.pressable, style]}
+      >
+        <View style={styles.row}>
+          {avatar}
+          {profileBadge}
+          {captionBlock}
+        </View>
+      </AnimatedPressable>
+    );
   }
 
   return (
-    <AnimatedPressable
-      onPress={(event) => {
-        event?.stopPropagation?.();
-        onPress?.();
-      }}
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel ?? t('feedPerson.viewA11y', { kind: contentTypeLabel(contentKind, t) })}
-      style={[styles.pressable, style]}
-    >
-      {content}
-    </AnimatedPressable>
+    <View style={[styles.row, styles.pressable, style]}>
+      <AnimatedPressable
+        onPress={runPress}
+        accessibilityRole="button"
+        accessibilityLabel={a11yLabel}
+        style={styles.avatarPressTarget}
+      >
+        {avatar}
+        {profileBadge}
+      </AnimatedPressable>
+      {captionBlock}
+    </View>
   );
 }
 
@@ -122,6 +153,12 @@ const styles = StyleSheet.create({
     maxWidth: '100%',
     alignSelf: 'stretch',
     minWidth: 0,
+  },
+  avatarPressTarget: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    flexShrink: 0,
   },
   row: {
     flexDirection: 'row',

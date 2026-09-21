@@ -237,7 +237,7 @@ export function PersonPreviewSheet({
     dismissWithStat('pass');
   }, [dismissWithStat, isDismissing, liked, linkedProfile, passProfile, superLiked, unlikeProfile]);
 
-  if (!reporter) {
+  if (!reporter || !linkedProfile) {
     return null;
   }
 

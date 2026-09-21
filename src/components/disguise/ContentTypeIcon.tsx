@@ -118,9 +118,9 @@ export function MediaWithContentBadge({
   }
 
   return (
-    <View style={[styles.cornerWrap, style]}>
+    <View style={[styles.cornerWrap, style]} pointerEvents="box-none">
       {children}
-      <View style={styles.cornerBadge} accessibilityLabel={kindMeta[kind].label}>
+      <View style={styles.cornerBadge} accessibilityLabel={kindMeta[kind].label} pointerEvents="none">
         <ContentTypeIcon kind={kind} size={14} />
       </View>
     </View>

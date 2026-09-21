@@ -27,6 +27,7 @@ npm run demo:tunnel   # public Cloudflare URL (requires cloudflared)
 
 ### Pulse disguise mode
 - News feed with reporter avatars, in-app article reader (BBC, Guardian, NPR — free sources)
+- **Pull / scroll-to-top / tab re-tap refresh** — new stories and updated woven profile photos
 - **Women:** Cosmos disguise — 星座 zodiac, tarot, entertainment feed + Cosmos tab
 - **Men:** World & local news, markets, weather trending
 - Sponsored ads with real client landing pages
@@ -43,6 +44,7 @@ npm run demo:tunnel   # public Cloudflare URL (requires cloudflared)
 ### Spark discovery
 - One profile card at a time
 - **Drag to trash** (pass) · **Drag to heart** (like) · **Red star** (super-like)
+- **World map search** — pan/pinch street map, search cities, **Search this area** reloads demo profiles globally
 - Spark Note, Rewind (Spark+), Boost, profile sheet, report/block
 
 ### Main tabs (Spark)
@@ -78,6 +80,8 @@ npm start          # Expo Go on iPhone (scan QR)
 npm run web        # Browser preview at localhost:8081
 npm run ios        # Mac + Xcode simulator
 npx tsc --noEmit   # Type check
+npm run verify:ci  # CI gate: tsc + profile validation + demo build
+npm run verify:extended  # Full Playwright QA (serve demo on :8090 first)
 ```
 
 ## Project structure

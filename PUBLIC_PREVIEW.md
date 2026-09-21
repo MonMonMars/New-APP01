@@ -5,8 +5,8 @@
 **https://divisions-shadow-specialties-touring.trycloudflare.com**
 
 - **Built from branch:** `cursor/world-map-touch-search-7b60` (world map search, finger pan/zoom, Pulse top refresh)
-- **Build ID:** `441b1cc-20260921T232412Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-21 23:25 UTC — `verify:all`, map world search (Tokyo), pulse refresh PASS
+- **Build ID:** `9d58c7f-20260921T233121Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
+- **Verified:** 2026-09-21 23:31 UTC — `verify:ci`, map world search (Tokyo), pulse refresh PASS
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

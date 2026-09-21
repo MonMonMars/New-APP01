@@ -2,7 +2,7 @@
 
 ## Demo link (verified working)
 
-**https://booth-understanding-civic-identifying.trycloudflare.com**
+**https://create-might-limitations-assessed.trycloudflare.com**
 
 - **Built from branch:** `cursor/update-fake-accounts-7b60` (passport Pexels, unique demo names, Pulse persona avatars)
 - **Build ID:** `06b648f-20260921T111956Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)

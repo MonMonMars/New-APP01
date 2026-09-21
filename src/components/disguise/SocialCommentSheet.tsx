@@ -15,6 +15,7 @@ import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { usePulseContextSection } from '../../hooks/usePulseContextSection';
+import { resolveSocialPostProfileId } from '../../utils/disguiseReporterPhotos';
 import { resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
 import { FeedPersonRow } from './FeedPersonRow';
 import { AnimatedPressable } from '../AnimatedPressable';
@@ -54,7 +55,11 @@ export function SocialCommentSheet({
 
   const userComments = getPulseComments(post.id);
   const seedReplies = SEED_REPLY_SPECS.slice(0, Math.min(post.comments, SEED_REPLY_SPECS.length));
-  const linkedAuthorProfile = resolveExplicitDatingProfile(post.datingProfileId, pulseSection);
+  const linkedAuthorProfile = resolveExplicitDatingProfile(
+    resolveSocialPostProfileId(post),
+    pulseSection,
+  );
+  const authorAvatarUrl = linkedAuthorProfile?.photos[0] ?? post.avatarUrl;
   const authorContentKind = linkedAuthorProfile ? 'profile' : 'social';
 
   const handlePost = () => {
@@ -80,7 +85,7 @@ export function SocialCommentSheet({
           <View style={[styles.original, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <FeedPersonRow
               plainAvatar={post.maskAvatar === false || !post.avatarMask}
-              imageUrl={post.avatarUrl}
+              imageUrl={authorAvatarUrl}
               overlayText={post.avatarMask?.text.split(' ').slice(0, 2).join(' ') ?? ''}
               overlayVariant={post.avatarMask?.variant ?? 'news'}
               contentKind={authorContentKind}

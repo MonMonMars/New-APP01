@@ -10,6 +10,7 @@ import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { buildSocialReporter, socialReporterPhotoIndex } from '../../utils/disguiseReporterPhotos';
 import { profileIntroCaption } from '../../utils/profileIntroCaption';
+import { resolveSocialPostProfileId } from '../../utils/disguiseReporterPhotos';
 import { resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { usePulseContextSection } from '../../hooks/usePulseContextSection';
@@ -49,7 +50,11 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
 
   const photoReporter = buildSocialReporter(post, pulseSection);
   const feedPhotoIndex = socialReporterPhotoIndex(photoReporter, post.imageUrl, pulseSection);
-  const linkedAuthorProfile = resolveExplicitDatingProfile(post.datingProfileId, pulseSection);
+  const linkedAuthorProfile = resolveExplicitDatingProfile(
+    resolveSocialPostProfileId(post),
+    pulseSection,
+  );
+  const authorAvatarUrl = linkedAuthorProfile?.photos[0] ?? post.avatarUrl;
   const authorContentKind = linkedAuthorProfile ? 'profile' : 'social';
   const authorCaption = linkedAuthorProfile ? profileIntroCaption(linkedAuthorProfile) : undefined;
 
@@ -102,7 +107,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
           >
             {post.maskAvatar !== false && post.avatarMask ? (
               <FeedPersonThumbnail
-                imageUrl={post.avatarUrl}
+                imageUrl={authorAvatarUrl}
                 overlayText={maskSnippet}
                 overlayVariant={post.avatarMask.variant}
                 contentKind={authorContentKind}
@@ -123,7 +128,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
                 caption={authorCaption}
                 hideLabel
                 showIconBadge={authorContentKind !== 'profile'}
-                imageUrl={post.avatarUrl}
+                imageUrl={authorAvatarUrl}
                 onPress={linkedAuthorProfile ? () => setAuthorOpen(true) : undefined}
                 accessibilityLabel={
                   linkedAuthorProfile

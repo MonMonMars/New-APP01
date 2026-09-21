@@ -1,4 +1,5 @@
 import { alertDemoProfileId } from '../data/disguiseAlertProfileLinks';
+import { socialAuthorDemoProfileId } from '../data/disguiseReporterProfileLinks';
 import { DisguiseAlertPerson, NewsReporter, SocialPost } from '../data/disguiseFeed';
 import { disguiseSocialPosts } from '../data/disguiseSocialPosts';
 import { SparkSection } from '../types/preferences';
@@ -32,19 +33,25 @@ export function buildReporterPhotoUrls(
 }
 
 /** Reporter + photo list for a social post (feed image always included when present). */
+export function resolveSocialPostProfileId(post: SocialPost): string | undefined {
+  return post.datingProfileId ?? socialAuthorDemoProfileId(post.author);
+}
+
 export function buildSocialReporter(
   post: SocialPost,
   section?: SparkSection | string | null,
 ): NewsReporter {
-  const linkedProfile = resolveExplicitDatingProfile(post.datingProfileId, section);
+  const profileId = resolveSocialPostProfileId(post);
+  const linkedProfile = resolveExplicitDatingProfile(profileId, section);
   const feedPhotos = post.imageUrl ? [post.imageUrl] : [];
+  const avatarUrl = linkedProfile?.photos[0] ?? post.avatarUrl;
 
   return {
     id: `social-${post.id}`,
-    name: post.author,
-    avatarUrl: post.avatarUrl,
+    name: linkedProfile?.name ?? post.author,
+    avatarUrl,
     quote: linkedProfile ? profileIntroCaption(linkedProfile) : post.body,
-    photos: feedPhotos,
+    photos: linkedProfile ? [...linkedProfile.photos, ...feedPhotos] : feedPhotos,
     profileId: linkedProfile?.id,
   };
 }

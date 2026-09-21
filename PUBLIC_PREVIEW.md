@@ -2,11 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://simpsons-intend-reputation-non.trycloudflare.com**
+**https://cage-rid-properties-bailey.trycloudflare.com**
 
 - **Built from branch:** `cursor/complete-app-7b60` (full stack: auth, map, Pulse, admin, live news)
 - **Build ID:** `6af9699-20260920T174425Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-20 17:44 UTC — `verify-demo-link` PASS on public tunnel
+- **Verified:** 2026-09-20 23:56 UTC — `verify-demo-link` PASS 9/9 on public tunnel
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

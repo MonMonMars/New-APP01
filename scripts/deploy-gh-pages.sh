@@ -7,8 +7,8 @@ cd "$ROOT"
 
 echo "Building for GitHub Pages (/New-APP01 base path)..."
 npm run build:web:pages
-cp dist/index.html dist/404.html
-touch dist/.nojekyll
+cp dist-pages/index.html dist-pages/404.html
+touch dist-pages/.nojekyll
 
 WORKTREE="/tmp/spark-gh-pages-deploy"
 rm -rf "$WORKTREE"
@@ -16,7 +16,7 @@ git fetch origin gh-pages
 git worktree add "$WORKTREE" origin/gh-pages
 
 find "$WORKTREE" -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
-cp -r dist/. "$WORKTREE"/
+cp -r dist-pages/. "$WORKTREE"/
 
 cd "$WORKTREE"
 git add -A

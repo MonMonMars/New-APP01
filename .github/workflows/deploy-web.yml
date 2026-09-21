@@ -17,6 +17,7 @@ on:
       - cursor/competitor-features-7b60
       - cursor/cloud-complete-7b60
       - cursor/red-star-superlike-7b60
+      - cursor/pulse-explicit-profile-links-7b60
       - cursor/compact-mini-window-7b60
       - cursor/mini-xsl-buttons-7b60
       - cursor/pulse-icons-blue-7b60
@@ -47,15 +48,15 @@ jobs:
       - run: npm run build:web:pages
       - name: Add SPA fallback for GitHub Pages
         run: |
-          cp dist/index.html dist/404.html
-          touch dist/.nojekyll
+          cp dist-pages/index.html dist-pages/404.html
+          touch dist-pages/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: dist-pages
       - uses: actions/upload-artifact@v4
         with:
           name: web-dist
-          path: dist
+          path: dist-pages
 
   deploy:
     needs: build

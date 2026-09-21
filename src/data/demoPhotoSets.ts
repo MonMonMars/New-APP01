@@ -6,10 +6,13 @@ const p = (id: number, w = 800, h = 1000) =>
   `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}&h=${h}&fit=crop`;
 
 /** Pexels ids that 404 or are not reliable portrait sources. */
-const INVALID_PEXELS_IDS = new Set<number>([
+export const INVALID_PEXELS_IDS = new Set<number>([
   1771024, 2699703, 2723894, 2752802, 2760245, 2800895, 2859040, 2906829, 2938299, 2948298,
   3028298, 3038298, 3048298, 3068298, 3078298, 3088298, 3098298, 3108298, 3168298, 3188298,
   3208298, 3218298, 3248298, 3258298, 3268298, 3288298,
+  /** Removed from Pexels CDN — caused blank profile heroes. */
+  2064340, 2103808, 2148535, 2194794, 2212476, 2256940, 2471178, 2480592, 2500450, 2523941,
+  2539781, 2558604, 2570591, 3423564, 3443584, 3465021, 3474219, 3544825, 3554575,
 ]);
 
 function hashNumber(value: number): number {
@@ -77,12 +80,12 @@ export const DEMO_PHOTO_SET_PRIMARY = {
   selena: 2014422,
   tristan: 2042109,
   noor: 2755038,
-  garrett: 2064340,
+  garrett: 1181690,
   paloma: 2774556,
   ellis: 2087360,
   marisol: 2819543,
   desmond: 2835562,
-  anika: 2103808,
+  anika: 1181715,
   willem: 2867470,
   zara: 2878372,
   matteo: 2887719,
@@ -90,24 +93,24 @@ export const DEMO_PHOTO_SET_PRIMARY = {
   sven: 2122961,
   naia: 2916828,
   idris: 2927434,
-  leila: 2148535,
+  leila: 1816352,
   rhys: 2165644,
   corinne: 2182970,
-  devon: 2194794,
-  miriam: 2212476,
+  devon: 2653687,
+  miriam: 3184405,
   jonah: 2233348,
-  kira: 2256940,
+  kira: 3184611,
   lars: 2272949,
   ophelia: 2291367,
   paco: 2302632,
   ruth: 2317953,
-  stefan: 2471178,
-  tara: 2480592,
-  ulrich: 2500450,
-  wren: 2523941,
-  xavier: 2539781,
-  yasmin: 2558604,
-  zion: 2570591,
+  stefan: 3324685,
+  tara: 3394655,
+  ulrich: 3398494,
+  wren: 3626403,
+  xavier: 3642639,
+  yasmin: 3763184,
+  zion: 3765538,
   alondra: 1916917,
   benji: 1933922,
   claudia: 1942095,
@@ -124,8 +127,8 @@ const AI_PERSONA_PEXELS_ID_LIST = [
 
 /** World / passport-only portraits (ids 201–218) — kept out of NYC batch sets. */
 const PASSPORT_PORTRAIT_IDS = [
-  3398464, 3408744, 3417775, 3423564, 3433333, 3443584, 3455279, 3465021, 3474219, 3483471,
-  3493974, 3506189, 3516064, 3525544, 3535077, 3544825, 3554575, 3564325,
+  3398464, 3408744, 3417775, 3389938, 3433333, 3409031, 3455279, 3468371, 3512868, 3483471,
+  3493974, 3506189, 3516064, 3525544, 3535077, 3525074, 3558529, 3564325,
 ] as const;
 
 /** Verified portrait ids (HTTP 200 JPEG) used for hero + companion shots. */

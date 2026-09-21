@@ -1,5 +1,6 @@
 import {
   AI_PERSONA_PEXELS_IDS,
+  INVALID_PEXELS_IDS,
   photosForPexelsId,
   VERIFIED_PORTRAIT_IDS,
 } from '../data/demoPhotoSets';
@@ -8,8 +9,8 @@ import { Profile } from '../types/profile';
 
 /** Passport deck (ids 201–218) — disjoint from legacy + batch `photosForSet` primaries. */
 const PASSPORT_PEXELS_IDS: readonly number[] = [
-  3398464, 3408744, 3417775, 3423564, 3433333, 3443584, 3455279, 3465021, 3474219, 3483471,
-  3493974, 3506189, 3516064, 3525544, 3535077, 3544825, 3554575, 3564325,
+  3398464, 3408744, 3417775, 3389938, 3433333, 3409031, 3455279, 3468371, 3512868, 3483471,
+  3493974, 3506189, 3516064, 3525544, 3535077, 3525074, 3558529, 3564325,
 ];
 
 
@@ -80,7 +81,11 @@ export function withDemoProfilePhotos(profile: Profile): Profile {
   }
 
   if (hasCuratedPexelsGallery(profile.photos)) {
-    return profile;
+    const primaryRaw = pexelsIdFromUrl(profile.photos[0] ?? '');
+    const primaryId = primaryRaw ? Number(primaryRaw) : NaN;
+    if (Number.isFinite(primaryId) && !INVALID_PEXELS_IDS.has(primaryId)) {
+      return profile;
+    }
   }
 
   const legacyPhotos = photosForLegacyProfile(profile.id);

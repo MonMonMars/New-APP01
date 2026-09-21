@@ -1,3 +1,4 @@
+import { INVALID_PEXELS_IDS } from '../src/data/demoPhotoSets';
 import { AI_PERSONA_IDS, INCOMING_LIKE_IDS, mockProfiles, getProfileById } from '../src/data/profiles';
 
 const humanProfiles = mockProfiles.filter((p) => !AI_PERSONA_IDS.has(p.id) && !p.isAiPersona);
@@ -6,6 +7,7 @@ const nameCounts = new Map<string, number>();
 const photoCounts = new Map<string, number>();
 const picsumProfiles: string[] = [];
 const mixedPhotoProfiles: string[] = [];
+const invalidPexelsProfiles: string[] = [];
 
 function pexelsIdFromUrl(url: string): string | null {
   const match = url.match(/pexels\.com\/photos\/(\d+)\//);
@@ -29,6 +31,15 @@ for (const profile of humanProfiles) {
     .filter((id): id is string => id !== null);
   if (pexelsIds.length > 1 && new Set(pexelsIds).size > 1) {
     mixedPhotoProfiles.push(profile.id);
+  }
+
+  const primaryPexelsId = pexelsIds[0] ? Number(pexelsIds[0]) : NaN;
+  if (Number.isFinite(primaryPexelsId) && INVALID_PEXELS_IDS.has(primaryPexelsId)) {
+    invalidPexelsProfiles.push(profile.id);
+  }
+
+  if (profile.photos.length === 0) {
+    invalidPexelsProfiles.push(profile.id);
   }
 }
 
@@ -73,6 +84,8 @@ console.log(
       duplicatePrimaryPhotoCount: duplicatePhotos.length,
       picsumProfileCount: picsumProfiles.length,
       mixedPexelsPhotoProfileCount: mixedPhotoProfiles.length,
+      invalidPexelsProfileCount: invalidPexelsProfiles.length,
+      invalidPexelsProfileIds: invalidPexelsProfiles.slice(0, 20),
       missingIncomingIds: missingIncoming,
       nextBatchUnique: nextBatchOk,
       latestBatchUnique: latestBatchOk,
@@ -95,6 +108,11 @@ if (picsumProfiles.length > 0) {
 
 if (mixedPhotoProfiles.length > 0) {
   console.error('Profiles with mixed Pexels identities:', mixedPhotoProfiles);
+  process.exit(1);
+}
+
+if (invalidPexelsProfiles.length > 0) {
+  console.error('Profiles with missing or invalid Pexels portraits:', invalidPexelsProfiles);
   process.exit(1);
 }
 

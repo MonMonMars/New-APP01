@@ -1,6 +1,15 @@
 import '../src/data/demoPortraitPools';
 import { INVALID_PEXELS_IDS } from '../src/data/demoPhotoSets';
+import { LEGACY_PEXELS_IDS } from '../src/data/legacyPexelsIds';
+import { LEGACY_PROFILE_IDS } from '../src/data/legacyProfilePhotos';
 import { AI_PERSONA_IDS, INCOMING_LIKE_IDS, mockProfiles, getProfileById } from '../src/data/profiles';
+
+if (LEGACY_PEXELS_IDS.length !== LEGACY_PROFILE_IDS.length) {
+  console.error(
+    `LEGACY_PEXELS_IDS (${LEGACY_PEXELS_IDS.length}) must match LEGACY_PROFILE_IDS (${LEGACY_PROFILE_IDS.length})`,
+  );
+  process.exit(1);
+}
 
 const humanProfiles = mockProfiles.filter((p) => !AI_PERSONA_IDS.has(p.id) && !p.isAiPersona);
 

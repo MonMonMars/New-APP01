@@ -44,3 +44,7 @@ yarn-error.*
 /android
 .vercel
 .netlify/
+
+# local tunnel binary + logs
+/cloudflared
+tmp-cloudflared.log

@@ -25,25 +25,45 @@ const activityTab = page.getByText('Activity', { exact: true }).last();
 await activityTab.click();
 await page.waitForTimeout(800);
 
-// Tap first person alert (Alex Chen)
+const feedBody = await page.locator('body').innerText();
+const hasSocialQuote = /hot take: the best productivity hack/i.test(feedBody);
+
+// Row tap should open the activity sheet — not force a dating mini-window.
 const alertRow = page.getByText(/alex chen upvoted/i).first();
 await alertRow.click();
 await page.waitForTimeout(900);
 
-const body = await page.locator('body').innerText();
-const hasAlex = /alex chen/i.test(body);
-const hasPhotos = /photo \d+ of \d+/i.test(body);
-const hasSparkBar = /actions sync to|saved to likes|mi away|\d+ mi away/i.test(body);
-const hasSocialQuote = /hot take: the best productivity hack/i.test(body);
+const sheetBody = await page.locator('body').innerText();
+const hasAlex = /alex chen/i.test(sheetBody);
+const openedActivitySheet = /upvoted your comment|activity alert|notification/i.test(sheetBody);
+const hasPhotos = /photo \d+ of \d+/i.test(sheetBody);
+
+// Explicit woven reporter on the home feed still opens mini-window with photos.
+await page.keyboard.press('Escape').catch(() => {});
+await page.waitForTimeout(400);
+const homeTab = page.getByRole('tab', { name: /for you|home/i }).first();
+if (await homeTab.isVisible().catch(() => false)) {
+  await homeTab.click();
+  await page.waitForTimeout(800);
+}
+const reporterThumb = page.getByLabel(/view photos from/i).first();
+let reporterMiniWindow = false;
+if (await reporterThumb.isVisible({ timeout: 4000 }).catch(() => false)) {
+  await reporterThumb.click();
+  await page.waitForTimeout(900);
+  const miniBody = await page.locator('body').innerText();
+  reporterMiniWindow = /photo \d+ of \d+/i.test(miniBody);
+}
 
 console.log(
   JSON.stringify(
     {
       hasAlex,
+      openedActivitySheet,
       hasPhotos,
-      hasSparkBar,
+      reporterMiniWindow,
       hasSocialQuote,
-      sample: body.slice(0, 700),
+      sample: sheetBody.slice(0, 700),
     },
     null,
     2,
@@ -51,4 +71,5 @@ console.log(
 );
 
 await browser.close();
-process.exit(hasAlex && hasPhotos && hasSparkBar && hasSocialQuote ? 0 : 1);
+const ok = hasAlex && openedActivitySheet && hasSocialQuote && reporterMiniWindow;
+process.exit(ok ? 0 : 1);

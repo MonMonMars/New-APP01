@@ -18,7 +18,6 @@ import { RecentlyActiveStrip } from '../components/RecentlyActiveStrip';
 import { SparkSectionToggle } from '../components/SparkSectionToggle';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { StandoutsRow } from '../components/StandoutsRow';
-import { useOptionalAdmin } from '../context/AdminContext';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
@@ -43,7 +42,6 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { colors } = useTheme();
   const { t, locale } = useTranslation();
-  const showInternalProfileLabels = useOptionalAdmin()?.showInternalProfileLabels ?? false;
   const {
     preferences,
     updatePreferences,
@@ -233,8 +231,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
           onUpgrade={() => navigation.navigate('SparkPlus')}
         />
 
-        {showInternalProfileLabels &&
-        resolveSparkSection(preferences.sparkSection) === 'spark' ? (
+        {resolveSparkSection(preferences.sparkSection) === 'spark' ? (
           <AiPersonasRow onSelect={handleSelectAiPersona} />
         ) : null}
 

@@ -17,16 +17,9 @@ import {
   getDisguiseOverlaySnippet,
   localizeTimeAgoLabel,
 } from '../../i18n/labels';
-import {
-  AdPost,
-  DisguiseAlert,
-  disguiseAlerts,
-  findAdPostByLandingUrl,
-  findNewsPostByArticleUrl,
-  NewsPost,
-  NewsReporter,
-} from '../../data/disguiseFeed';
+import { AdPost, DisguiseAlert, disguiseAlerts, NewsPost, NewsReporter } from '../../data/disguiseFeed';
 import { buildAlertReporter, resolveAlertPersonProfile } from '../../utils/disguiseReporterPhotos';
+import { resolvePulseAlertTarget } from '../../utils/resolvePulseAlertTarget';
 import { radii, spacing } from '../../theme';
 import { useApp } from '../../context/AppContext';
 import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefreshFooter';
@@ -70,6 +63,25 @@ export function DisguiseAlertsScreen() {
     setPreviewReporter(reporter);
   };
 
+  const openAlertTarget = (alert: DisguiseAlert) => {
+    const target = resolvePulseAlertTarget(alert, locale);
+    switch (target.kind) {
+      case 'news':
+        setArticlePost(target.post);
+        break;
+      case 'ad':
+        setAdPost(target.ad);
+        break;
+      case 'activity':
+        setActivityAlert(alert);
+        break;
+      default: {
+        const _exhaustive: never = target;
+        return _exhaustive;
+      }
+    }
+  };
+
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader title={t('tabs.activity')} showSearch={false} />
@@ -89,25 +101,25 @@ export function DisguiseAlertsScreen() {
           />
         }
         renderItem={({ item }) => {
-          const newsPost = item.articleUrl ? findNewsPostByArticleUrl(item.articleUrl) : undefined;
-          const ad = item.landingUrl ? findAdPostByLandingUrl(item.landingUrl) : undefined;
           const linkedProfile = item.person ? resolveAlertPersonProfile(item.person, pulseSection) : null;
-
-          const handlePress = item.articleUrl && newsPost
-            ? () => setArticlePost(newsPost)
-            : item.landingUrl && ad
-              ? () => setAdPost(ad)
-              : () => setActivityAlert(item);
           const profileKey = linkedProfile?.id ?? `alert-${item.id}-${refreshGeneration}`;
           const avatarUrl = linkedProfile?.photos[0] ?? item.person?.avatarUrl ?? '';
           const avatarCaption = linkedProfile ? profileIntroCaption(linkedProfile) : undefined;
+          const alertText = getActivityAlertText(locale, item.id, item.text);
+
+          const textBlock = (
+            <>
+              <Text style={[styles.text, { color: colors.text }]} numberOfLines={3}>
+                {alertText}
+              </Text>
+              <Text style={[styles.time, { color: colors.textMuted }]}>
+                {localizeTimeAgoLabel(locale, item.time)}
+              </Text>
+            </>
+          );
 
           return (
-            <AnimatedPressable
-              accessibilityRole="button"
-              onPress={handlePress}
-              style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.border }]}
-            >
+            <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.border }]}>
               {item.person ? (
                 <View style={styles.personRow}>
                   <PulseProfileSwap profileKey={profileKey} style={styles.avatarSlot}>
@@ -132,31 +144,27 @@ export function DisguiseAlertsScreen() {
                       }
                     />
                   </PulseProfileSwap>
-                  <View style={styles.textWrap}>
-                    <Text style={[styles.text, { color: colors.text }]} numberOfLines={3}>
-                      {getActivityAlertText(locale, item.id, item.text)}
-                    </Text>
-                    <Text style={[styles.time, { color: colors.textMuted }]}>
-                      {localizeTimeAgoLabel(locale, item.time)}
-                    </Text>
-                  </View>
+                  <AnimatedPressable
+                    accessibilityRole="button"
+                    onPress={() => openAlertTarget(item)}
+                    style={styles.textWrap}
+                  >
+                    {textBlock}
+                  </AnimatedPressable>
                 </View>
               ) : (
-                <>
+                <AnimatedPressable
+                  accessibilityRole="button"
+                  onPress={() => openAlertTarget(item)}
+                  style={styles.iconRow}
+                >
                   <View style={[styles.iconWrap, { backgroundColor: meta.accentSoft }]}>
                     <Ionicons name={item.icon} size={20} color={meta.accent} />
                   </View>
-                  <View style={styles.textWrap}>
-                    <Text style={[styles.text, { color: colors.text }]} numberOfLines={3}>
-                      {getActivityAlertText(locale, item.id, item.text)}
-                    </Text>
-                    <Text style={[styles.time, { color: colors.textMuted }]}>
-                      {localizeTimeAgoLabel(locale, item.time)}
-                    </Text>
-                  </View>
-                </>
+                  <View style={styles.textWrap}>{textBlock}</View>
+                </AnimatedPressable>
               )}
-            </AnimatedPressable>
+            </View>
           );
         }}
       />
@@ -200,6 +208,13 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   personRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+    width: '100%',
+    minWidth: 0,
+  },
+  iconRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.sm,

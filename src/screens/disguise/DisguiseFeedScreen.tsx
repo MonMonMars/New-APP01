@@ -1,5 +1,6 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { useEffect } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -20,6 +21,7 @@ import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
 import { spacing } from '../../theme';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefreshFooter';
+import { PulseFeedRefreshHeader } from '../../components/disguise/PulseFeedRefreshHeader';
 import { FadeSlideIn } from '../../components/motion/FadeSlideIn';
 import { usePulseFeedRefreshGeneration, usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
 
@@ -60,7 +62,22 @@ export function DisguiseFeedScreen() {
 
   const feedItems = useDisguiseFeedItems(topic);
   const refreshGeneration = usePulseFeedRefreshGeneration();
-  const { refreshing, justUpdated, flatListProps, refresh } = usePulseScrollRefresh();
+  const {
+    refreshing,
+    justUpdated,
+    isAtTop,
+    flatListProps,
+    listRef,
+    refresh,
+    handleHomeTabRepress,
+  } = usePulseScrollRefresh();
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('tabPress', () => {
+      handleHomeTabRepress();
+    });
+    return unsubscribe;
+  }, [handleHomeTabRepress, navigation]);
 
   const sectionLabel = topic ? topicFilterLabel(topic, locale) : meta.feedLabel;
 
@@ -68,6 +85,7 @@ export function DisguiseFeedScreen() {
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader />
       <FlatList
+        ref={listRef}
         data={feedItems}
         extraData={refreshGeneration}
         keyExtractor={(item) => item.id}
@@ -84,19 +102,28 @@ export function DisguiseFeedScreen() {
           />
         }
         ListHeaderComponent={
-          <View style={styles.headerRow}>
-            <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>{sectionLabel}</Text>
-            {topic ? (
-              <AnimatedPressable
-                onPress={() => navigateDisguiseFeedTopic(navigation)}
-                accessibilityLabel={t('disguiseFeed.clearFilterA11y')}
-              >
-                <Text style={[styles.clearFilter, { color: meta.accent }]}>
-                  {t('disguiseFeed.clearFilter')}
-                </Text>
-              </AnimatedPressable>
-            ) : null}
-          </View>
+          <PulseFeedRefreshHeader
+            refreshing={refreshing}
+            justUpdated={justUpdated}
+            isAtTop={isAtTop}
+            onPullRefresh={() => {
+              void refresh();
+            }}
+          >
+            <View style={styles.headerRow}>
+              <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>{sectionLabel}</Text>
+              {topic ? (
+                <AnimatedPressable
+                  onPress={() => navigateDisguiseFeedTopic(navigation)}
+                  accessibilityLabel={t('disguiseFeed.clearFilterA11y')}
+                >
+                  <Text style={[styles.clearFilter, { color: meta.accent }]}>
+                    {t('disguiseFeed.clearFilter')}
+                  </Text>
+                </AnimatedPressable>
+              ) : null}
+            </View>
+          </PulseFeedRefreshHeader>
         }
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={

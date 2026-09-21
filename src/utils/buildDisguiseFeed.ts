@@ -8,9 +8,7 @@ import { disguiseFeedItemsForGender } from './disguiseFeedCatalog';
 import { buildDisguisedProfileFeedItem, buildDisguisedProfileFeedItems } from './disguiseProfileFeed';
 import { profileIntroCaption } from './profileIntroCaption';
 import {
-  freshenPulseFeedTimestamps,
-  renewPulseFeedProfiles,
-  rotatePulseList,
+  renewPulseFeedPage,
 } from './refreshPulseFeed';
 import { mergeLiveNewsIntoFeed, densifyPulseNewsBlocks } from './mergeLivePulseNews';
 import { socialAuthorDemoProfileId } from '../data/disguiseReporterProfileLinks';
@@ -142,13 +140,6 @@ export function buildDisguiseFeed(
 ): FeedItem[] {
   const profileCards = buildDisguisedProfileFeedItems(section, refreshGeneration);
   let baseFeed = disguiseFeedItemsForGender(user.gender);
-  if (refreshGeneration > 0) {
-    baseFeed = freshenPulseFeedTimestamps(
-      rotatePulseList(baseFeed, refreshGeneration),
-      refreshGeneration,
-      locale,
-    );
-  }
 
   const liveSnapshot = getPulseLiveNewsSnapshot();
   const livePosts = liveSnapshot?.posts ?? [];
@@ -178,7 +169,7 @@ export function buildDisguiseFeed(
   }
 
   if (refreshGeneration > 0) {
-    return renewPulseFeedProfiles(linked, section, refreshGeneration);
+    return renewPulseFeedPage(linked, section, refreshGeneration);
   }
 
   return linked;

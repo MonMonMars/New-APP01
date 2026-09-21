@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useState } from 'react';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { useCallback, useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -23,6 +24,8 @@ import { resolvePulseAlertTarget } from '../../utils/resolvePulseAlertTarget';
 import { radii, spacing } from '../../theme';
 import { useApp } from '../../context/AppContext';
 import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefreshFooter';
+import { PulseFeedRefreshHeader } from '../../components/disguise/PulseFeedRefreshHeader';
+import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
 import { PulseProfileSwap } from '../../components/motion/PulseProfileSwap';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
@@ -33,6 +36,7 @@ import { profileIntroCaption } from '../../utils/profileIntroCaption';
 
 export function DisguiseAlertsScreen() {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
   const { colors } = useTheme();
   const { locale, t } = useTranslation();
   const { markActivityAlertsRead } = useApp();
@@ -40,7 +44,22 @@ export function DisguiseAlertsScreen() {
   const meta = useDisguiseWorld();
   const refreshGeneration = usePulseFeedRefreshGeneration();
   const alerts = useRotatedPulseContent(disguiseAlerts);
-  const { refreshing, justUpdated, flatListProps, refresh } = usePulseScrollRefresh();
+  const {
+    refreshing,
+    justUpdated,
+    isAtTop,
+    flatListProps,
+    listRef,
+    refresh,
+    handleTabRepress,
+  } = usePulseScrollRefresh();
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('tabPress', () => {
+      handleTabRepress();
+    });
+    return unsubscribe;
+  }, [handleTabRepress, navigation]);
 
   useFocusEffect(
     useCallback(() => {
@@ -86,11 +105,22 @@ export function DisguiseAlertsScreen() {
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader title={t('tabs.activity')} showSearch={false} />
       <FlatList
+        ref={listRef}
         data={alerts}
         extraData={refreshGeneration}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         {...flatListProps}
+        ListHeaderComponent={
+          <PulseFeedRefreshHeader
+            refreshing={refreshing}
+            justUpdated={justUpdated}
+            isAtTop={isAtTop}
+            onPullRefresh={() => {
+              void refresh();
+            }}
+          />
+        }
         ListFooterComponent={
           <PulseFeedRefreshFooter
             refreshing={refreshing}

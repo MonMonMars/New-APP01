@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Pulse feed reload via footer tap (web-friendly alternative to pull-to-refresh).
+ * Pulse feed reload — scroll back to top (Instagram / YouTube) or re-tap Home at top.
  */
 import { chromium } from 'playwright';
 
@@ -8,34 +8,45 @@ import { completeDemoOnboarding, dismissCookies, enterPulseForYouFeed } from './
 
 const url = process.argv[2] ?? 'http://127.0.0.1:8090';
 
+async function waitForUpdated(page) {
+  await page
+    .getByText(/Updated just now|剛剛已更新/i)
+    .first()
+    .waitFor({ state: 'visible', timeout: 18000 })
+    .catch(() => {});
+  const body = await page.locator('body').innerText();
+  return /Updated just now|剛剛已更新/i.test(body);
+}
+
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
-page.setDefaultTimeout(15000);
+page.setDefaultTimeout(20000);
 
 await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
 await completeDemoOnboarding(page);
 await dismissCookies(page);
 await enterPulseForYouFeed(page);
 
-for (let i = 0; i < 6; i += 1) {
-  await page.evaluate(() => window.scrollBy(0, 520));
-  await page.waitForTimeout(250);
+await page.getByTestId('pulse-feed-refresh-footer').scrollIntoViewIfNeeded();
+await page.waitForTimeout(400);
+for (let i = 0; i < 14; i += 1) {
+  await page.mouse.wheel(0, -420);
+  await page.waitForTimeout(80);
+}
+await page.waitForTimeout(900);
+
+let updated = await waitForUpdated(page);
+
+if (!updated) {
+  const homeTab = page.getByRole('tab', { name: /For You|為你|Home|首頁/i }).first();
+  await homeTab.click();
+  await page.waitForTimeout(400);
+  await homeTab.click();
+  updated = await waitForUpdated(page);
 }
 
-const footerBtn = page.getByLabel(/^Refresh Pulse feed$/i);
-await footerBtn.scrollIntoViewIfNeeded().catch(() => {});
-await footerBtn.click({ force: true });
-await page.waitForTimeout(400);
-
-const loadingVisible = await page.getByText(/Loading latest stories/i).isVisible().catch(() => false);
-await page.getByText(/Updated just now/i).waitFor({ state: 'visible', timeout: 8000 }).catch(() => {});
-
-const body = await page.locator('body').innerText();
-const updated =
-  /Updated just now|剛剛已更新/i.test(body) ||
-  loadingVisible ||
-  (await page.getByText(/Updated just now|剛剛已更新/i).first().isVisible().catch(() => false));
-
-console.log(JSON.stringify({ footerRefreshTapped: true, showsUpdatedState: updated }, null, 2));
+console.log(
+  JSON.stringify({ scrollToTopRefresh: true, showsUpdatedState: updated }, null, 2),
+);
 await browser.close();
 process.exit(updated ? 0 : 1);

@@ -54,8 +54,17 @@ After onboarding, users land in **Pulse** — a news-and-social feed that disgui
 | **AI disguise** | Profile → generate ad/news overlay from user photo |
 | **Toggle** | Tap top-left **Pulse logo** → Spark; tap **Spark logo** or eye-off → Pulse |
 | **Tabs** | Home, Trending (topic filters), Activity, Profile |
+| **Feed refresh** | Pull down, scroll back to top, or re-tap tab — rotates stories and renews woven profile photos (`usePulseScrollRefresh`, `renewPulseFeedPage`) |
 
 Disguise mode persists in AsyncStorage (`disguiseMode`, default `true`). See `DisguiseNavigator`, `ModeToggleLogo`, and `buildDisguiseFeed`.
+
+### 1.2 Spark map discover
+
+| Feature | Implementation |
+|---------|----------------|
+| **Map UI** | Full-screen Carto Voyager tiles; finger pan/pinch (native + web touch) |
+| **World search** | `mapDiscoverPool` + `relocateProfilesForMapSearch`; Places search (passport + global cities) |
+| **Commit area** | **Search this area** → `searchMapAt` reloads discover deck for that region |
 
 ---
 

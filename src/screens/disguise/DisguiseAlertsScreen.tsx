@@ -100,9 +100,7 @@ export function DisguiseAlertsScreen() {
             ? () => setArticlePost(newsPost)
             : item.landingUrl && ad
               ? () => setAdPost(ad)
-              : linkedProfile
-                ? () => openPersonPreview(item)
-                : () => setActivityAlert(item);
+              : () => setActivityAlert(item);
           const profileKey = linkedProfile?.id ?? `alert-${item.id}-${refreshGeneration}`;
           const avatarUrl = linkedProfile?.photos[0] ?? item.person?.avatarUrl ?? '';
           const avatarCaption = linkedProfile ? profileIntroCaption(linkedProfile) : undefined;

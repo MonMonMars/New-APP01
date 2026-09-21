@@ -1,3 +1,4 @@
+import { alertDemoProfileId } from '../data/disguiseAlertProfileLinks';
 import { DisguiseAlertPerson, NewsReporter, SocialPost } from '../data/disguiseFeed';
 import { disguiseSocialPosts } from '../data/disguiseSocialPosts';
 import { SparkSection } from '../types/preferences';
@@ -69,12 +70,21 @@ export function findSocialPostForAlertPerson(person: DisguiseAlertPerson): Socia
   );
 }
 
+/** Resolve an explicit woven profile for an activity alert avatar (no hash assignment). */
+export function resolveAlertPersonProfile(
+  person: DisguiseAlertPerson,
+  section?: SparkSection | string | null,
+): Profile | null {
+  const explicitId = person.datingProfileId ?? alertDemoProfileId(person.name);
+  return resolveExplicitDatingProfile(explicitId, section);
+}
+
 /** Build a mini-window reporter for activity alerts — links to a dating profile when possible. */
 export function buildAlertReporter(
   person: DisguiseAlertPerson,
   section?: SparkSection | string | null,
 ): NewsReporter {
-  const linkedProfile = resolveExplicitDatingProfile(person.datingProfileId, section);
+  const linkedProfile = resolveAlertPersonProfile(person, section);
   if (linkedProfile) {
     const intro = profileIntroCaption(linkedProfile);
     return {

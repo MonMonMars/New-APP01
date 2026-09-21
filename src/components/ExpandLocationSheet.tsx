@@ -80,7 +80,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const { t, locale } = useTranslation();
   const {
     preferences,
-    discoverPool,
+    mapDiscoverPool,
     expandSearchRadius,
     searchMapAt,
     clearMapSearch,
@@ -170,7 +170,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const areaPins = useMemo(() => {
     const previewingNewArea = centersDiffer(mapCenter, searchCenter);
     const pinCenter = previewingNewArea ? mapCenter : searchCenter;
-    let pool = discoverPool;
+    let pool = mapDiscoverPool;
     if (previewingNewArea) {
       pool = relocateProfilesForMapSearch(pool, mapCenter, currentRadius);
     }
@@ -178,7 +178,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
       filterProfilesInRadius(pool, pinCenter, currentRadius),
       pinCenter,
     );
-  }, [currentRadius, discoverPool, mapCenter, searchCenter]);
+  }, [currentRadius, mapDiscoverPool, mapCenter, searchCenter]);
 
   const placeSuggestions = useMemo(
     () => (queryMode === 'places' ? searchMapPlaces(searchQuery, locale) : []),
@@ -328,7 +328,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     const profile =
       detailProfile?.id === profileId
         ? detailProfile
-        : discoverPool.find((item) => item.id === profileId);
+        : mapDiscoverPool.find((item) => item.id === profileId);
     setReportProfileId(profileId);
     setReportProfileName(profile?.name ?? '');
     setDetailProfile(null);

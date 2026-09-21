@@ -4,9 +4,9 @@
 
 **https://divisions-shadow-specialties-touring.trycloudflare.com**
 
-- **Built from branch:** `cursor/world-map-touch-search-7b60` (world map search, finger pan/zoom, Pulse top refresh)
-- **Build ID:** `9d58c7f-20260921T233121Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-21 23:31 UTC — `verify:ci`, map world search (Tokyo), pulse refresh PASS
+- **Integration branch:** `cursor/tinder-style-dating-app-7b60` (complete demo app)
+- **Build ID:** `f5a7196-20260921T234400Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
+- **Verified:** 2026-09-21 23:48 UTC — `verify:ci` + **`verify:extended`** PASS (Pulse refresh, map Tokyo search, routing, disguise UX)
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)
@@ -27,8 +27,9 @@ Server-side (already applied on each `npm run build:web:demo`):
 2. Tap **Continue without account**
 3. Complete onboarding (defaults are fine)
 4. Tap the **Pulse logo** → **Leave Spark** to enter dating mode
-5. **Discover tools → Map** — drag/pinch the map; **Places → Tokyo** → search this area
-6. **Profile → Privacy controls → Language** to switch 繁體中文
+5. **Discover tools → Map** — drag/pinch the map; **Places → Tokyo** → **Search this area**
+6. **Pulse Home** — scroll down, back to top → “Updated just now”
+7. **Profile → Privacy controls → Language** for 繁體中文
 
 ---
 
@@ -38,10 +39,8 @@ Server-side (already applied on each `npm run build:web:demo`):
 |------|---------|
 | `loca.lt` tunnels | Time out / unreliable from this environment |
 | `monmonmars.github.io/New-APP01/` | Repo is **private** — GitHub Pages needs Pro or a public repo (returns 404) |
-| Old Cloudflare URLs | **Dead** — workspace restarted; use the current link above |
-| GitHub Pages paths on tunnel root | Were serving a **GitHub Pages build** (`/New-APP01/` paths) → blank white screen |
-
-**Fix applied:** tunnel demos use `npm run build:web:demo` + `serve -c serve.json` (root paths), not `build:web:pages`.
+| Old Cloudflare URLs | **Dead** when workspace restarts — run `npm run demo:tunnel` for a fresh URL |
+| GitHub Pages paths on tunnel root | Use `build:web:demo` + `serve.json`, not `build:web:pages` |
 
 ---
 
@@ -52,7 +51,7 @@ Private repo → use **Vercel** or **Netlify** (free, stable URL, auto-deploy on
 ### Vercel
 
 1. [vercel.com/new](https://vercel.com/new) → Import `MonMonMars/New-APP01`
-2. Branch: `cursor/world-map-touch-search-7b60` (or `main`)
+2. Branch: **`cursor/tinder-style-dating-app-7b60`**
 3. Build: `npm run build:web` · Output: `dist`
 4. Deploy → stable URL like `https://new-app01.vercel.app`
 
@@ -60,14 +59,18 @@ Private repo → use **Vercel** or **Netlify** (free, stable URL, auto-deploy on
 
 ### GitHub Pages (public repo or GitHub Pro only)
 
-Push to a branch listed in `.github/workflows/deploy-web.yml`, enable Pages from `gh-pages` branch.
+Push to `cursor/tinder-style-dating-app-7b60` — workflow deploys `gh-pages` branch (see `.github/workflows/deploy-web.yml`).
 
 ---
 
 ## Local verify
 
 ```bash
+npm install
+npm run verify:ci
 npm run build:web:demo
 npx serve -c serve.json -l 8090 dist
 npm run verify:extended
 ```
+
+Full product reference: [`docs/SPARK_APP_DOCUMENT.md`](docs/SPARK_APP_DOCUMENT.md)

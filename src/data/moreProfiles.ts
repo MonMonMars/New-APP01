@@ -86,7 +86,7 @@ export const moreRawProfiles: Profile[] = [
   },
   {
     id: '102',
-    name: 'Marco',
+    name: 'Giovanni',
     age: 33,
     gender: 'man',
     bio: 'Sommelier turned wine importer. Knows every natural wine bar in the city.',
@@ -129,7 +129,7 @@ export const moreRawProfiles: Profile[] = [
   },
   {
     id: '105',
-    name: 'Jade',
+    name: 'Linnea',
     age: 28,
     gender: 'woman',
     bio: 'Brand strategist for indie musicians. Always has a show recommendation and a playlist ready.',

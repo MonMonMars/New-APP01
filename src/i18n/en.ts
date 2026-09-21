@@ -1190,7 +1190,7 @@ export const en = {
     emptyNoTopicBody: 'Check back soon — or explore Trending for more stories.',
     emptyTopicBody: 'Try another topic or clear the filter to see everything.',
     exploreTrending: 'Explore {tab}',
-    scrollRefreshHint: 'Scroll to the end for the latest stories',
+    scrollRefreshHint: 'Pull down or scroll to the end for the latest stories',
     refreshingFeed: 'Loading latest stories…',
     feedUpdated: 'Updated just now',
     forYou: 'For you',

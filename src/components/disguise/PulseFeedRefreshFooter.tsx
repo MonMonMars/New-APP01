@@ -4,13 +4,19 @@ import { useTranslation } from '../../i18n';
 import { useTheme } from '../../context/ThemeContext';
 import { spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
+import { AnimatedPressable } from '../AnimatedPressable';
 
 type PulseFeedRefreshFooterProps = {
   refreshing: boolean;
   justUpdated?: boolean;
+  onPressRefresh?: () => void;
 };
 
-export function PulseFeedRefreshFooter({ refreshing, justUpdated = false }: PulseFeedRefreshFooterProps) {
+export function PulseFeedRefreshFooter({
+  refreshing,
+  justUpdated = false,
+  onPressRefresh,
+}: PulseFeedRefreshFooterProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const accent = useDisguiseWorld().accent;
@@ -22,11 +28,26 @@ export function PulseFeedRefreshFooter({ refreshing, justUpdated = false }: Puls
     message = t('disguiseFeed.feedUpdated');
   }
 
-  return (
-    <View style={styles.footer}>
+  const body = (
+    <>
       {refreshing ? <ActivityIndicator color={accent} /> : null}
       <Text style={[styles.text, { color: colors.textMuted }]}>{message}</Text>
-    </View>
+    </>
+  );
+
+  if (!onPressRefresh || refreshing) {
+    return <View style={styles.footer}>{body}</View>;
+  }
+
+  return (
+    <AnimatedPressable
+      style={styles.footer}
+      onPress={onPressRefresh}
+      accessibilityRole="button"
+      accessibilityLabel={message}
+    >
+      {body}
+    </AnimatedPressable>
   );
 }
 

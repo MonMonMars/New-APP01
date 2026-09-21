@@ -1183,7 +1183,7 @@ export const zhTw = {
     emptyNoTopicBody: '稍後再回來看看 — 或前往熱門探索更多故事。',
     emptyTopicBody: '試試其他主題，或清除篩選以查看全部內容。',
     exploreTrending: '探索{tab}',
-    scrollRefreshHint: '滑到底部以載入最新內容',
+    scrollRefreshHint: '下拉或滑到底部以載入最新內容',
     refreshingFeed: '正在載入最新內容…',
     feedUpdated: '剛剛已更新',
     forYou: '為你推薦',

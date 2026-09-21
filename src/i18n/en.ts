@@ -1191,6 +1191,7 @@ export const en = {
     emptyTopicBody: 'Try another topic or clear the filter to see everything.',
     exploreTrending: 'Explore {tab}',
     scrollRefreshHint: 'Pull down or scroll to the end for the latest stories',
+    refreshFeedA11y: 'Refresh Pulse feed',
     refreshingFeed: 'Loading latest stories…',
     feedUpdated: 'Updated just now',
     forYou: 'For you',

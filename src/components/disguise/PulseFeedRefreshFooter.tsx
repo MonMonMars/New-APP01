@@ -44,7 +44,9 @@ export function PulseFeedRefreshFooter({
       style={styles.footer}
       onPress={onPressRefresh}
       accessibilityRole="button"
-      accessibilityLabel={message}
+      accessibilityLabel={t('disguiseFeed.refreshFeedA11y')}
+      accessibilityHint={message}
+      testID="pulse-feed-refresh-footer"
     >
       {body}
     </AnimatedPressable>

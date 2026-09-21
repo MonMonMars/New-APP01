@@ -1184,6 +1184,7 @@ export const zhTw = {
     emptyTopicBody: '試試其他主題，或清除篩選以查看全部內容。',
     exploreTrending: '探索{tab}',
     scrollRefreshHint: '下拉或滑到底部以載入最新內容',
+    refreshFeedA11y: '重新整理 Pulse 動態',
     refreshingFeed: '正在載入最新內容…',
     feedUpdated: '剛剛已更新',
     forYou: '為你推薦',

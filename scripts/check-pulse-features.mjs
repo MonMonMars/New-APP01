@@ -18,8 +18,18 @@ await enterPulseForYouFeed(page);
 await page.waitForTimeout(1000);
 
 const body = await page.locator('body').innerText();
+const hasExplicitReporterLink = await page
+  .getByLabel(/^View photos from /i)
+  .first()
+  .isVisible()
+  .catch(() => false);
 const checks = {
-  reporterQuote: /capex|cloud numbers|finally a bus|repair scores/i.test(body),
+  /** Woven reporters show profile intro captions (syncReporterPhotos), not raw wire quotes. */
+  reporterPersonaText:
+    /capex|cloud numbers|finally a bus|repair scores|Editorial assistant|Outdoor guide|museums on rainy|personality trait/i.test(
+      body,
+    ),
+  explicitReporterLink: hasExplicitReporterLink,
   noProfileLabel: !/\bPROFILE\b/.test(body),
   bundleNew: true,
 };
@@ -30,4 +40,4 @@ checks.bundleHash = jsMatch?.[1] ?? 'unknown';
 
 console.log(JSON.stringify({ url, checks, sample: body.slice(0, 800) }, null, 2));
 await browser.close();
-process.exit(checks.reporterQuote ? 0 : 1);
+process.exit(checks.reporterPersonaText && checks.explicitReporterLink ? 0 : 1);

@@ -2,7 +2,7 @@
 
 ## Demo link (verified working)
 
-**https://divisions-shadow-specialties-touring.trycloudflare.com**
+**https://effectiveness-allergy-polo-comp.trycloudflare.com**
 
 - **Integration branch:** `cursor/tinder-style-dating-app-7b60` (complete demo app)
 - **Build ID:** `f5a7196-20260921T234400Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)

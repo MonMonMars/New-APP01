@@ -69,15 +69,15 @@ export function DisguiseFeedScreen() {
     flatListProps,
     listRef,
     refresh,
-    handleHomeTabRepress,
+    handleTabRepress,
   } = usePulseScrollRefresh();
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('tabPress', () => {
-      handleHomeTabRepress();
+      handleTabRepress();
     });
     return unsubscribe;
-  }, [handleHomeTabRepress, navigation]);
+  }, [handleTabRepress, navigation]);
 
   const sectionLabel = topic ? topicFilterLabel(topic, locale) : meta.feedLabel;
 

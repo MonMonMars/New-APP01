@@ -49,7 +49,7 @@ export const zhTw = {
     locationTitle: '選擇你的地區',
     locationSubtitle:
       '先選歸屬地區 — 決定登入方式（例如中國用微信）與付款。可拖動地圖或搜尋；他人不會看到你的精確位置。',
-    mapDragHint: '拖動並縮放地圖，圖釘代表你的探索範圍中心。',
+    mapDragHint: '單指拖動、雙指縮放地圖，準心代表你的探索範圍中心。',
     searchPlacePlaceholder: '搜尋城市或街區',
     clearPlaceSearch: '清除搜尋',
     confirmLocation: '使用此區域繼續',

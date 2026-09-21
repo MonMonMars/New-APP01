@@ -167,18 +167,19 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     }
   }, [hasActiveMapSearch, preferences.passportCity, preferences.travelMode]);
 
+  const showSearchArea = centersDiffer(mapCenter, searchCenter);
+  const pinCenter = showSearchArea ? mapCenter : searchCenter;
+
   const areaPins = useMemo(() => {
-    const previewingNewArea = centersDiffer(mapCenter, searchCenter);
-    const pinCenter = previewingNewArea ? mapCenter : searchCenter;
     let pool = mapDiscoverPool;
-    if (previewingNewArea) {
+    if (showSearchArea) {
       pool = relocateProfilesForMapSearch(pool, mapCenter, currentRadius);
     }
     return sortProfilesByDistance(
       filterProfilesInRadius(pool, pinCenter, currentRadius),
       pinCenter,
     );
-  }, [currentRadius, mapDiscoverPool, mapCenter, searchCenter]);
+  }, [currentRadius, mapDiscoverPool, mapCenter, pinCenter, showSearchArea]);
 
   const placeSuggestions = useMemo(
     () => (queryMode === 'places' ? searchMapPlaces(searchQuery, locale) : []),
@@ -204,8 +205,6 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     () => visiblePins.find((profile) => profile.id === selectedPinId) ?? null,
     [selectedPinId, visiblePins],
   );
-
-  const showSearchArea = centersDiffer(mapCenter, searchCenter);
 
   const handleSearchThisArea = useCallback(() => {
     setSearchCenter(mapCenter);
@@ -274,10 +273,20 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   };
 
   const handleAddToDeck = (profile: Profile) => {
-    const added = prioritizeProfileInDeck(profile.id);
-    setDeckToast(
-      added ? t('discoverHub.addedToDeck', { name: profile.name }) : t('discoverHub.notInPool'),
-    );
+    const commitSearch = () => {
+      if (showSearchArea) {
+        setSearchCenter(mapCenter);
+        searchMapAt(mapCenter);
+      }
+    };
+    commitSearch();
+    const deferMs = showSearchArea ? 48 : 0;
+    setTimeout(() => {
+      const added = prioritizeProfileInDeck(profile.id);
+      setDeckToast(
+        added ? t('discoverHub.addedToDeck', { name: profile.name }) : t('discoverHub.notInPool'),
+      );
+    }, deferMs);
   };
 
   const handleOpenProfile = (profile: Profile) => {
@@ -291,6 +300,10 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     if (!canLike) {
       setShowLikeLimit(true);
       return;
+    }
+    if (showSearchArea) {
+      setSearchCenter(mapCenter);
+      searchMapAt(mapCenter);
     }
     const match = likeProfile(detailProfile);
     prioritizeProfileInDeck(detailProfile.id);
@@ -352,8 +365,8 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     if (!detailProfile) {
       return undefined;
     }
-    return Math.max(1, Math.round(distanceFromCenter(detailProfile, searchCenter)));
-  }, [detailProfile, searchCenter]);
+    return Math.max(1, Math.round(distanceFromCenter(detailProfile, pinCenter)));
+  }, [detailProfile, pinCenter]);
 
   const handleDetailPass = () => {
     if (!detailProfile) {
@@ -414,7 +427,10 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         style={styles.fullMap}
       />
 
-      <View style={[styles.topBar, { paddingTop: insets.top + spacing.sm }]}>
+      <View
+        pointerEvents="box-none"
+        style={[styles.topBar, { paddingTop: insets.top + spacing.sm }]}
+      >
         <AnimatedPressable
           onPress={onClose}
           hitSlop={12}
@@ -456,7 +472,10 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         )}
       </View>
 
-      <View style={[styles.searchBarWrap, { top: insets.top + spacing.sm + 52 }]}>
+      <View
+        pointerEvents="box-none"
+        style={[styles.searchBarWrap, { top: insets.top + spacing.sm + 52 }]}
+      >
         <View style={[styles.queryModeRow, { backgroundColor: chromeBg }]}>
           {(['people', 'places'] as const).map((mode) => {
             const active = queryMode === mode;
@@ -538,7 +557,10 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         ) : null}
       </View>
 
-      <View style={[styles.zoomControls, { top: insets.top + spacing.sm + 152 }]}>
+      <View
+        pointerEvents="box-none"
+        style={[styles.zoomControls, { top: insets.top + spacing.sm + 152 }]}
+      >
         <AnimatedPressable
           onPress={handleZoomIn}
           hitSlop={8}
@@ -581,7 +603,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
                 {t('mapDiscover.milesAway', {
                   miles: Math.max(
                     1,
-                    Math.round(distanceFromCenter(selectedProfile, searchCenter)),
+                    Math.round(distanceFromCenter(selectedProfile, pinCenter)),
                   ),
                 })}
               </Text>
@@ -597,7 +619,10 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         </View>
       ) : null}
 
-      <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
+      <View
+        pointerEvents="box-none"
+        style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}
+      >
         <AnimatedPressable
           style={[
             styles.searchAreaButton,

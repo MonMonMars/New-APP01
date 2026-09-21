@@ -166,15 +166,15 @@ export function DisguiseTrendingScreen() {
     scrollViewProps,
     scrollViewRef,
     refresh,
-    handleHomeTabRepress,
+    handleTabRepress,
   } = usePulseScrollRefresh();
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('tabPress', () => {
-      handleHomeTabRepress();
+      handleTabRepress();
     });
     return unsubscribe;
-  }, [handleHomeTabRepress, navigation]);
+  }, [handleTabRepress, navigation]);
 
   const openTopic = (topic?: string) => {
     navigateDisguiseFeedTopic(navigation, topic);

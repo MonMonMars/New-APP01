@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import {
   ActivityIndicator,
   Dimensions,
+  GestureResponderEvent,
   LayoutChangeEvent,
   Platform,
   ImageStyle,
@@ -418,6 +419,24 @@ export function SearchMapView({
           onMouseLeave: () => {
             handleWebPointerUp();
           },
+          onTouchStart: (e: GestureResponderEvent) => {
+            const touch = e.nativeEvent.touches[0];
+            if (touch) {
+              handleWebPointerDown(touch.pageX, touch.pageY);
+            }
+          },
+          onTouchMove: (e: GestureResponderEvent) => {
+            const touch = e.nativeEvent.touches[0];
+            if (touch) {
+              handleWebPointerMove(touch.pageX, touch.pageY);
+            }
+          },
+          onTouchEnd: () => {
+            handleWebPointerUp();
+          },
+          onTouchCancel: () => {
+            handleWebPointerUp();
+          },
         } as const)
       : {};
 
@@ -556,9 +575,13 @@ export function SearchMapView({
       {...webMapHandlers}
     >
       {mapInteractive ? (
-        <GestureDetector gesture={mapGesture}>
+        Platform.OS === 'web' ? (
           <Animated.View style={[styles.mapLayer, layerStyle]}>{mapLayer}</Animated.View>
-        </GestureDetector>
+        ) : (
+          <GestureDetector gesture={mapGesture}>
+            <Animated.View style={[styles.mapLayer, layerStyle]}>{mapLayer}</Animated.View>
+          </GestureDetector>
+        )
       ) : (
         <View style={styles.mapLayer}>{mapLayer}</View>
       )}

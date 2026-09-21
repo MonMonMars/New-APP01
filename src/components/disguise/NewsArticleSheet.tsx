@@ -9,6 +9,7 @@ import { useTranslation } from '../../i18n';
 import { getPulseCategoryLabel, localizeTimeAgoLabel } from '../../i18n/labels';
 import { NewsPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
+import { hasReadableArticleUrl } from '../../utils/disguisePulseDestinations';
 import { openExternalUrl } from '../../utils/openExternalUrl';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
@@ -52,6 +53,7 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
   }
 
   const paragraphs = post.articleBody.split('\n\n').filter(Boolean);
+  const showReadOriginal = hasReadableArticleUrl(post);
 
   return (
     <AnimatedOverlay visible={visible} onClose={onClose} variant="bottom">
@@ -108,19 +110,21 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
             </FadeSlideIn>
           ))}
         </ScrollView>
-        <View style={[disguiseReadSheetStyles.footer, { borderTopColor: colors.border }]}>
-          <AnimatedPressable
-            style={[styles.readOriginal, { backgroundColor: meta.accent }]}
-            onPress={() => {
-              void openExternalUrl(post.articleUrl, post.source, locale);
-            }}
-            scaleTo={0.97}
-            accessibilityLabel={t('newsArticle.readOnA11y', { source: post.source })}
-          >
-            <Text style={styles.readOriginalText}>{t('newsArticle.readOn', { source: post.source })}</Text>
-            <Ionicons name="open-outline" size={16} color="#fff" />
-          </AnimatedPressable>
-        </View>
+        {showReadOriginal ? (
+          <View style={[disguiseReadSheetStyles.footer, { borderTopColor: colors.border }]}>
+            <AnimatedPressable
+              style={[styles.readOriginal, { backgroundColor: meta.accent }]}
+              onPress={() => {
+                void openExternalUrl(post.articleUrl, post.source, locale);
+              }}
+              scaleTo={0.97}
+              accessibilityLabel={t('newsArticle.readOnA11y', { source: post.source })}
+            >
+              <Text style={styles.readOriginalText}>{t('newsArticle.readOn', { source: post.source })}</Text>
+              <Ionicons name="open-outline" size={16} color="#fff" />
+            </AnimatedPressable>
+          </View>
+        ) : null}
       </View>
     </AnimatedOverlay>
   );

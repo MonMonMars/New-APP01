@@ -2,10 +2,9 @@ import { useMemo } from 'react';
 
 import { useApp } from '../../context/AppContext';
 import { useTranslation } from '../../i18n';
-import { getDisguisedSourceLabel } from '../../i18n/labels';
-import { AdPost, DisguisedProfilePost, FeedItem, NewsPost } from '../../data/disguiseFeed';
-import { disguiseClientAds } from '../../data/disguiseClientAds';
+import { FeedItem } from '../../data/disguiseFeed';
 import { buildDisguiseFeed } from '../../utils/buildDisguiseFeed';
+import { disguisedProfileToAdPost, disguisedProfileToNewsPost } from '../../utils/disguisePulseDestinations';
 import { isCosmosTarotFeedItem } from '../../utils/disguiseFeedCatalog';
 import { usesFemalePulseExperience } from '../../utils/genderAccountPerks';
 import { findFeedItemById, findNewsPostByHeadline } from '../../utils/findFeedItem';
@@ -20,36 +19,6 @@ type PulseFeedItemViewerProps = {
   headline?: string | null;
   onClose: () => void;
 };
-
-function disguisedProfileAsNewsPost(post: DisguisedProfilePost, locale: Parameters<typeof getDisguisedSourceLabel>[0]): NewsPost {
-  return {
-    id: post.id,
-    type: 'news',
-    source: getDisguisedSourceLabel(locale, post.sourceLabel),
-    headline: post.headline,
-    summary: post.summary,
-    articleBody: post.summary,
-    imageUrl: post.coverImageUrl,
-    timeAgo: post.timeAgo,
-    category: post.category ?? 'News',
-    articleUrl: '',
-    reporters: [],
-  };
-}
-
-function disguisedProfileAsAdPost(post: DisguisedProfilePost, learnMoreLabel: string): AdPost {
-  return {
-    id: post.id,
-    type: 'ad',
-    brand: post.headline,
-    tagline: post.summary,
-    description: post.summary,
-    imageUrl: post.coverImageUrl,
-    cta: post.cta ?? learnMoreLabel,
-    landingUrl: disguiseClientAds[0]?.landingUrl ?? 'https://example.com',
-    sponsored: true,
-  };
-}
 
 /** Opens the correct disguise sheet for a saved or history item. */
 export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItemViewerProps) {
@@ -145,7 +114,7 @@ export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItem
         return (
           <AdLandingSheet
             visible
-            ad={disguisedProfileAsAdPost(feedItem, t('disguiseAd.learnMore'))}
+            ad={disguisedProfileToAdPost(feedItem, t('disguiseAd.learnMore'))}
             onClose={onClose}
           />
         );
@@ -153,7 +122,7 @@ export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItem
       return (
         <NewsArticleSheet
           visible
-          post={disguisedProfileAsNewsPost(feedItem, locale)}
+          post={disguisedProfileToNewsPost(feedItem, locale)}
           onClose={onClose}
         />
       );

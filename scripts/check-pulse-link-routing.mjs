@@ -79,6 +79,7 @@ await page.getByLabel('Close').last().click({ force: true }).catch(() => {});
 await page.waitForTimeout(400);
 
 let disguisedOk = true;
+let disguisedReadOnOk = true;
 let adOk = true;
 let socialOk = true;
 
@@ -88,6 +89,10 @@ for (let scroll = 0; scroll < 12; scroll += 1) {
     await disguisedHeadline.click({ force: true });
     await page.waitForTimeout(700);
     disguisedOk = (await hasArticleSheet(page)) && !(await hasMiniWindow(page));
+    if (disguisedOk) {
+      const readOn = page.getByLabel(/Read on /).first();
+      disguisedReadOnOk = await readOn.isVisible().catch(() => false);
+    }
     await page.getByLabel('Close').last().click({ force: true }).catch(() => {});
     await page.waitForTimeout(300);
   }
@@ -151,7 +156,7 @@ if (await newsAlert.isVisible().catch(() => false)) {
 
 console.log(
   JSON.stringify(
-    { articleOk, disguisedOk, adOk, socialOk, avatarOk, captionOk, activityOk, newsAlertOk },
+    { articleOk, disguisedOk, disguisedReadOnOk, adOk, socialOk, avatarOk, captionOk, activityOk, newsAlertOk },
     null,
     2,
   ),
@@ -161,6 +166,7 @@ await browser.close();
 const ok =
   articleOk &&
   disguisedOk &&
+  disguisedReadOnOk &&
   adOk &&
   socialOk &&
   activityOk &&

@@ -11,8 +11,7 @@ import {
   getPulseCategoryLabel,
   localizeTimeAgoLabel,
 } from '../../i18n/labels';
-import { AdPost, DisguisedProfilePost, NewsPost, NewsReporter } from '../../data/disguiseFeed';
-import { disguiseClientAds } from '../../data/disguiseClientAds';
+import { DisguisedProfilePost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { ContentTypeIcon, MediaWithContentBadge } from './ContentTypeIcon';
@@ -23,6 +22,7 @@ import { AdLandingSheet } from './AdLandingSheet';
 import { NewsArticleSheet } from './NewsArticleSheet';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
 import { SocialCommentSheet } from './SocialCommentSheet';
+import { disguisedProfileToAdPost, disguisedProfileToNewsPost } from '../../utils/disguisePulseDestinations';
 import { profileIntroCaption } from '../../utils/profileIntroCaption';
 import { profileIdFromPostId, resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
 import { usePulseContextSection } from '../../hooks/usePulseContextSection';
@@ -77,31 +77,8 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
     setPreviewOpen(true);
   };
 
-  const articlePost: NewsPost = {
-    id: post.id,
-    type: 'news',
-    source: getDisguisedSourceLabel(locale, post.sourceLabel),
-    headline: post.headline,
-    summary: post.summary,
-    articleBody: post.summary,
-    imageUrl: post.coverImageUrl,
-    timeAgo: post.timeAgo,
-    category: post.category ?? 'News',
-    articleUrl: '',
-    reporters: [],
-  };
-
-  const adPost: AdPost = {
-    id: post.id,
-    type: 'ad',
-    brand: post.headline,
-    tagline: post.summary,
-    description: post.summary,
-    imageUrl: post.coverImageUrl,
-    cta: post.cta ?? t('disguiseAd.learnMore'),
-    landingUrl: disguiseClientAds[0]?.landingUrl ?? 'https://example.com',
-    sponsored: true,
-  };
+  const articlePost = disguisedProfileToNewsPost(post, locale);
+  const adPost = disguisedProfileToAdPost(post, t('disguiseAd.learnMore'));
 
   const previewSheet = (
     <PersonPreviewSheet

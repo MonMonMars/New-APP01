@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useMemo, useState } from 'react';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { useEffect, useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -33,6 +34,8 @@ import { PulseDetailItem, PulseDetailSheet } from '../../components/disguise/Pul
 import { PulseFeedItemViewer } from '../../components/disguise/PulseFeedItemViewer';
 import { PulseListPickerSheet } from '../../components/disguise/PulseListPickerSheet';
 import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefreshFooter';
+import { PulseFeedRefreshHeader } from '../../components/disguise/PulseFeedRefreshHeader';
+import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { usePulseFeedRefreshGeneration, usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
 
@@ -40,7 +43,7 @@ type DetailSheetKey = 'saved' | 'history' | 'settings' | 'help' | null;
 
 export function DisguiseProfileScreen() {
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
+  const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
   const { colors } = useTheme();
   const {
     user,
@@ -74,7 +77,22 @@ export function DisguiseProfileScreen() {
     generatedAt: new Date().toISOString(),
   };
   const refreshGeneration = usePulseFeedRefreshGeneration();
-  const { refreshing, justUpdated, scrollViewProps, refresh } = usePulseScrollRefresh();
+  const {
+    refreshing,
+    justUpdated,
+    isAtTop,
+    scrollViewProps,
+    scrollViewRef,
+    refresh,
+    handleTabRepress,
+  } = usePulseScrollRefresh();
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('tabPress', () => {
+      handleTabRepress();
+    });
+    return unsubscribe;
+  }, [handleTabRepress, navigation]);
   const profileFeedItem = buildDisguisedProfileFeedItem(user, profileCreative);
   const recentPosts = useMemo(
     () => buildDisguisedProfileFeedItems(pulseSection, refreshGeneration),
@@ -181,9 +199,18 @@ export function DisguiseProfileScreen() {
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader title={t('tabs.settings')} showSearch={false} />
       <ScrollView
+        ref={scrollViewRef}
         contentContainerStyle={styles.content}
         {...scrollViewProps}
       >
+        <PulseFeedRefreshHeader
+          refreshing={refreshing}
+          justUpdated={justUpdated}
+          isAtTop={isAtTop}
+          onPullRefresh={() => {
+            void refresh();
+          }}
+        />
         <View style={styles.hero}>
           <DisguisedProfileCard post={profileFeedItem} />
           <Text style={[styles.name, { color: colors.text }]}>{user.name}</Text>

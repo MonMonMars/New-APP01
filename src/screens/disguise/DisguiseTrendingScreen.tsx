@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -50,6 +50,7 @@ import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { usesFemalePulseExperience } from '../../utils/genderAccountPerks';
 import { briefToNewsPost, breakingToNewsPost, editorsPickToNewsPost } from '../../utils/disguiseTrendingArticles';
 import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefreshFooter';
+import { PulseFeedRefreshHeader } from '../../components/disguise/PulseFeedRefreshHeader';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { useRotatedPulseContent } from '../../hooks/useRotatedPulseContent';
 import { usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
@@ -158,7 +159,22 @@ export function DisguiseTrendingScreen() {
       ? preferences.passportCity
       : preferences.passportCity ?? 'New York, NY';
   const { weather, isLive } = useDisguiseWeather(weatherCity, locale);
-  const { refreshing, justUpdated, scrollViewProps, refresh } = usePulseScrollRefresh();
+  const {
+    refreshing,
+    justUpdated,
+    isAtTop,
+    scrollViewProps,
+    scrollViewRef,
+    refresh,
+    handleHomeTabRepress,
+  } = usePulseScrollRefresh();
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('tabPress', () => {
+      handleHomeTabRepress();
+    });
+    return unsubscribe;
+  }, [handleHomeTabRepress, navigation]);
 
   const openTopic = (topic?: string) => {
     navigateDisguiseFeedTopic(navigation, topic);
@@ -176,10 +192,19 @@ export function DisguiseTrendingScreen() {
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader title={meta.trendingTab} showSearch={false} />
       <ScrollView
+        ref={scrollViewRef}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
         {...scrollViewProps}
       >
+        <PulseFeedRefreshHeader
+          refreshing={refreshing}
+          justUpdated={justUpdated}
+          isAtTop={isAtTop}
+          onPullRefresh={() => {
+            void refresh();
+          }}
+        />
         <Text style={[styles.pageTitle, { color: colors.text }]}>
           {isFemalePulse ? t('disguiseTrending.cosmosTitle') : t('disguiseTrending.trendingTitle')}
         </Text>

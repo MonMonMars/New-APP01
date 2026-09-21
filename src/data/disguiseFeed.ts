@@ -1,6 +1,7 @@
 import { disguiseClientAds } from './disguiseClientAds';
 import { disguiseNewsBatch2 } from './disguiseNewsBatch2';
 import { disguiseNewsExtra } from './disguiseNewsExtra';
+import { hydrateDisguiseAlert, hydrateNewsPost } from './disguisePulsePersonaPhotos';
 import { disguiseSocialPosts } from './disguiseSocialPosts';
 import { freeNewsLinks, pulseNewsImages } from './pulseNewsMedia';
 
@@ -238,7 +239,7 @@ export function findAdPostByLandingUrl(landingUrl: string): AdPost | undefined {
   return adItems.find((item) => item.landingUrl === landingUrl);
 }
 
-const allNewsItems = [...newsItems, ...disguiseNewsExtra, ...disguiseNewsBatch2];
+const allNewsItems = [...newsItems, ...disguiseNewsExtra, ...disguiseNewsBatch2].map(hydrateNewsPost);
 
 /** Static feed slots — disguised dating profiles are injected in buildDisguiseFeed(). */
 export const disguiseFeedItems: FeedItem[] = [
@@ -315,7 +316,7 @@ export type DisguiseAlert = {
   person?: DisguiseAlertPerson;
 };
 
-export const disguiseAlerts: DisguiseAlert[] = [
+const disguiseAlertsSeed: DisguiseAlert[] = [
   {
     id: 'a1',
     icon: 'arrow-up-outline',
@@ -555,3 +556,5 @@ export const disguiseAlerts: DisguiseAlert[] = [
     },
   },
 ];
+
+export const disguiseAlerts: DisguiseAlert[] = disguiseAlertsSeed.map(hydrateDisguiseAlert);

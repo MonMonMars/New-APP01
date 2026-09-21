@@ -15,7 +15,20 @@ await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
 await completeDemoOnboarding(page);
 await dismissCookies(page);
 await enterPulseForYouFeed(page);
-await page.waitForTimeout(1000);
+await page.waitForTimeout(1200);
+
+const avatarHosts = await page.evaluate(() =>
+  [...document.querySelectorAll('img')]
+    .filter((img) => img.clientWidth >= 36 && img.clientWidth <= 56)
+    .map((img) => {
+      try {
+        return new URL(img.currentSrc || img.src).hostname;
+      } catch {
+        return '';
+      }
+    })
+    .filter(Boolean),
+);
 
 const body = await page.locator('body').innerText();
 const hasExplicitReporterLink = await page
@@ -31,6 +44,11 @@ const checks = {
     ),
   explicitReporterLink: hasExplicitReporterLink,
   noProfileLabel: !/\bPROFILE\b/.test(body),
+  /** Woven persona avatars should come from Pexels, not stock Unsplash thumbs. */
+  personaAvatarsUsePexels:
+    avatarHosts.length > 0 &&
+    avatarHosts.every((host) => host === 'images.pexels.com') &&
+    !avatarHosts.some((host) => host.includes('unsplash')),
   bundleNew: true,
 };
 
@@ -40,4 +58,6 @@ checks.bundleHash = jsMatch?.[1] ?? 'unknown';
 
 console.log(JSON.stringify({ url, checks, sample: body.slice(0, 800) }, null, 2));
 await browser.close();
-process.exit(checks.reporterPersonaText && checks.explicitReporterLink ? 0 : 1);
+process.exit(
+  checks.reporterPersonaText && checks.explicitReporterLink && checks.personaAvatarsUsePexels ? 0 : 1,
+);

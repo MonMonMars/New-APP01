@@ -26,7 +26,7 @@ import {
   NewsPost,
   NewsReporter,
 } from '../../data/disguiseFeed';
-import { buildAlertReporter } from '../../utils/disguiseReporterPhotos';
+import { buildAlertReporter, resolveAlertPersonProfile } from '../../utils/disguiseReporterPhotos';
 import { radii, spacing } from '../../theme';
 import { useApp } from '../../context/AppContext';
 import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefreshFooter';
@@ -36,7 +36,6 @@ import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { usePulseContextSection } from '../../hooks/usePulseContextSection';
 import { useRotatedPulseContent } from '../../hooks/useRotatedPulseContent';
 import { usePulseFeedRefreshGeneration, usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
-import { resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
 import { profileIntroCaption } from '../../utils/profileIntroCaption';
 
 export function DisguiseAlertsScreen() {
@@ -61,7 +60,7 @@ export function DisguiseAlertsScreen() {
   const [previewReporter, setPreviewReporter] = useState<NewsReporter | null>(null);
 
   const openPersonPreview = (alert: DisguiseAlert) => {
-    if (!alert.person?.datingProfileId) {
+    if (!alert.person) {
       return;
     }
     const reporter = buildAlertReporter(alert.person, pulseSection);
@@ -92,9 +91,7 @@ export function DisguiseAlertsScreen() {
         renderItem={({ item }) => {
           const newsPost = item.articleUrl ? findNewsPostByArticleUrl(item.articleUrl) : undefined;
           const ad = item.landingUrl ? findAdPostByLandingUrl(item.landingUrl) : undefined;
-          const linkedProfile = item.person
-            ? resolveExplicitDatingProfile(item.person.datingProfileId, pulseSection)
-            : null;
+          const linkedProfile = item.person ? resolveAlertPersonProfile(item.person, pulseSection) : null;
 
           const handlePress = item.articleUrl && newsPost
             ? () => setArticlePost(newsPost)

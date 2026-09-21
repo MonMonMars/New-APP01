@@ -2,16 +2,16 @@ import { useMemo } from 'react';
 
 import { useApp } from '../../context/AppContext';
 import { useTranslation } from '../../i18n';
-import { FeedItem } from '../../data/disguiseFeed';
+import { getDisguisedSourceLabel } from '../../i18n/labels';
+import { AdPost, DisguisedProfilePost, FeedItem, NewsPost } from '../../data/disguiseFeed';
+import { disguiseClientAds } from '../../data/disguiseClientAds';
 import { buildDisguiseFeed } from '../../utils/buildDisguiseFeed';
 import { isCosmosTarotFeedItem } from '../../utils/disguiseFeedCatalog';
 import { usesFemalePulseExperience } from '../../utils/genderAccountPerks';
 import { findFeedItemById, findNewsPostByHeadline } from '../../utils/findFeedItem';
 import { usePulseContextSection } from '../../hooks/usePulseContextSection';
-import { profileIdFromPostId } from '../../utils/resolveDisguiseProfile';
 import { AdLandingSheet } from './AdLandingSheet';
 import { NewsArticleSheet } from './NewsArticleSheet';
-import { PersonPreviewSheet } from './PersonPreviewSheet';
 import { PulseUnavailableSheet } from './PulseUnavailableSheet';
 import { SocialCommentSheet } from './SocialCommentSheet';
 
@@ -21,11 +21,41 @@ type PulseFeedItemViewerProps = {
   onClose: () => void;
 };
 
+function disguisedProfileAsNewsPost(post: DisguisedProfilePost, locale: Parameters<typeof getDisguisedSourceLabel>[0]): NewsPost {
+  return {
+    id: post.id,
+    type: 'news',
+    source: getDisguisedSourceLabel(locale, post.sourceLabel),
+    headline: post.headline,
+    summary: post.summary,
+    articleBody: post.summary,
+    imageUrl: post.coverImageUrl,
+    timeAgo: post.timeAgo,
+    category: post.category ?? 'News',
+    articleUrl: '',
+    reporters: [],
+  };
+}
+
+function disguisedProfileAsAdPost(post: DisguisedProfilePost, learnMoreLabel: string): AdPost {
+  return {
+    id: post.id,
+    type: 'ad',
+    brand: post.headline,
+    tagline: post.summary,
+    description: post.summary,
+    imageUrl: post.coverImageUrl,
+    cta: post.cta ?? learnMoreLabel,
+    landingUrl: disguiseClientAds[0]?.landingUrl ?? 'https://example.com',
+    sponsored: true,
+  };
+}
+
 /** Opens the correct disguise sheet for a saved or history item. */
 export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItemViewerProps) {
   const { user, disguiseAdCreative } = useApp();
   const pulseSection = usePulseContextSection();
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
 
   const feedItem = useMemo((): FeedItem | null => {
     const allowItem = (item: FeedItem | undefined): FeedItem | null => {
@@ -111,17 +141,19 @@ export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItem
           />
         );
       }
+      if (feedItem.variant === 'ad') {
+        return (
+          <AdLandingSheet
+            visible
+            ad={disguisedProfileAsAdPost(feedItem, t('disguiseAd.learnMore'))}
+            onClose={onClose}
+          />
+        );
+      }
       return (
-        <PersonPreviewSheet
+        <NewsArticleSheet
           visible
-          reporter={{
-            id: feedItem.id,
-            name: feedItem.name,
-            avatarUrl: feedItem.avatarUrl,
-            quote: feedItem.overlayText,
-            photos: feedItem.photos,
-            profileId: profileIdFromPostId(feedItem.id),
-          }}
+          post={disguisedProfileAsNewsPost(feedItem, locale)}
           onClose={onClose}
         />
       );

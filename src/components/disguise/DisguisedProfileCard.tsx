@@ -23,9 +23,9 @@ import { AdLandingSheet } from './AdLandingSheet';
 import { NewsArticleSheet } from './NewsArticleSheet';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
 import { SocialCommentSheet } from './SocialCommentSheet';
-import { getProfileById } from '../../data/profiles';
 import { profileIntroCaption } from '../../utils/profileIntroCaption';
-import { profileIdFromPostId } from '../../utils/resolveDisguiseProfile';
+import { profileIdFromPostId, resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
+import { usePulseContextSection } from '../../hooks/usePulseContextSection';
 import { PulseProfileSwap } from '../motion/PulseProfileSwap';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -46,6 +46,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   const { colors } = useTheme();
   const { locale, t } = useTranslation();
   const { pulseSocial, togglePulseLike, preferences } = useApp();
+  const pulseSection = usePulseContextSection();
   const meta = useDisguiseWorld();
   const [previewOpen, setPreviewOpen] = useState(false);
   const [articleOpen, setArticleOpen] = useState(false);
@@ -54,7 +55,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   const upvoted = pulseSocial.likedPostIds.includes(post.id);
 
   const linkedProfileId = post.profileId ?? profileIdFromPostId(post.id);
-  const linkedProfile = linkedProfileId ? getProfileById(linkedProfileId) : undefined;
+  const linkedProfile = resolveExplicitDatingProfile(linkedProfileId, pulseSection);
   const profileCaption = linkedProfile ? profileIntroCaption(linkedProfile) : post.overlayText;
 
   const reporter: NewsReporter = {
@@ -63,13 +64,18 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
     avatarUrl: post.avatarUrl,
     quote: profileCaption,
     photos: post.photos,
-    profileId: linkedProfileId,
+    profileId: linkedProfile?.id,
   };
 
   const maskVariant = post.variant === 'ad' ? 'ad' : 'news';
   const maskSnippet = post.overlayText.split(' ').slice(0, 2).join(' ');
 
-  const openPreview = () => setPreviewOpen(true);
+  const openPreview = () => {
+    if (!linkedProfile) {
+      return;
+    }
+    setPreviewOpen(true);
+  };
 
   const articlePost: NewsPost = {
     id: post.id,

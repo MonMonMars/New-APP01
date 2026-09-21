@@ -147,15 +147,12 @@ export function resolveDisguiseProfile(
   profileId?: string,
   section?: SparkSection | string | null,
 ): Profile | null {
-  const id =
-    profileId ??
-    resolveDisguiseProfileId(reporterId) ??
-    mappedProfileIdForReporter(reporterId, section);
+  const id = profileId ?? resolveDisguiseProfileId(reporterId);
   if (!id) {
     return null;
   }
 
-  return getProfileById(id) ?? null;
+  return resolveExplicitDatingProfile(id, section);
 }
 
 /** Resolve a woven dating profile id for the active Spark/Ember section. */

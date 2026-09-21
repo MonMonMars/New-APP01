@@ -31,6 +31,7 @@ await dismissCookies(page);
 await enterPulseForYouFeed(page);
 
 let avatarOk = false;
+let captionOk = true;
 for (let scroll = 0; scroll < 8 && !avatarOk; scroll += 1) {
   const reporter = page.getByLabel(/^View photos from /i).first();
   if (await reporter.isVisible().catch(() => false)) {
@@ -40,6 +41,12 @@ for (let scroll = 0; scroll < 8 && !avatarOk; scroll += 1) {
     if (avatarOk) {
       await page.getByLabel('Close').last().click({ force: true }).catch(() => {});
       await page.waitForTimeout(400);
+      const caption = page.getByTestId('feed-person-caption').first();
+      if (await caption.isVisible().catch(() => false)) {
+        await caption.click({ force: true });
+        await page.waitForTimeout(500);
+        captionOk = !(await hasMiniWindow(page));
+      }
       break;
     }
   }
@@ -76,9 +83,9 @@ const activityOk =
   !(await hasMiniWindow(page));
 
 console.log(
-  JSON.stringify({ articleOk, disguisedOk, avatarOk, activityOk }, null, 2),
+  JSON.stringify({ articleOk, disguisedOk, avatarOk, captionOk, activityOk }, null, 2),
 );
 
 await browser.close();
-const ok = articleOk && disguisedOk && activityOk && avatarOk;
+const ok = articleOk && disguisedOk && activityOk && avatarOk && captionOk;
 process.exit(ok ? 0 : 1);

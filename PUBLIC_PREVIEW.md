@@ -2,11 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://bunch-pediatric-beside-happiness.trycloudflare.com**
+**https://slow-use-policies-bali.trycloudflare.com**
 
-- **Built from branch:** `cursor/pulse-explicit-profile-links-7b60` (fresh `dist/` — pull refresh, explicit Pulse links, AI hub fix)
-- **Build ID:** `e9ebc48-20260921T060422Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-21 06:06 UTC — `verify:all` PASS on localhost; tunnel when workspace is awake
+- **Built from branch:** `cursor/update-fake-accounts-7b60` (passport Pexels, unique demo names, Pulse persona avatars)
+- **Build ID:** `06b648f-20260921T111956Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
+- **Verified:** 2026-09-21 11:20 UTC — `verify-demo-link` PASS on this tunnel; workspace must stay awake
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

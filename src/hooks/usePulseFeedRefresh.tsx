@@ -169,6 +169,7 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
   );
 
   const maybeRefreshAfterScrollToTop = useCallback(() => {
+    clearTopArrivalTimer();
     if (
       wasScrolledDownRef.current &&
       scrollOffsetRef.current <= TOP_OFFSET_THRESHOLD &&
@@ -178,7 +179,7 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
       wasScrolledDownRef.current = false;
       void runRefresh('top');
     }
-  }, [refreshing, runRefresh]);
+  }, [clearTopArrivalTimer, refreshing, runRefresh]);
 
   const handleFlatListScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {

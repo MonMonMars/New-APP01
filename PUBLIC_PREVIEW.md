@@ -2,11 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://create-might-limitations-assessed.trycloudflare.com**
+**https://directive-cho-epson-pci.trycloudflare.com**
 
 - **Built from branch:** `cursor/update-fake-accounts-7b60` (passport Pexels, unique demo names, Pulse persona avatars)
 - **Build ID:** `06b648f-20260921T111956Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-21 11:55 UTC — tunnel refreshed; workspace must stay awake
+- **Verified:** 2026-09-21 15:42 UTC — `verify-demo-link` PASS; workspace must stay awake
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

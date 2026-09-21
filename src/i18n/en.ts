@@ -49,7 +49,7 @@ export const en = {
     locationTitle: 'Choose your region',
     locationSubtitle:
       'Pick your home market first — it sets sign-in options (e.g. WeChat in China) and billing. Pan the map or search; others never see your exact pin.',
-    mapDragHint: 'Drag and zoom the map. The pin marks your discovery area.',
+    mapDragHint: 'Drag with one finger and pinch to zoom. The crosshair marks your discovery area.',
     searchPlacePlaceholder: 'Search city or neighborhood',
     clearPlaceSearch: 'Clear search',
     confirmLocation: 'Continue with this area',

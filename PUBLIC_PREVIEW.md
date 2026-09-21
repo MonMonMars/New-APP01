@@ -52,7 +52,7 @@ Private repo → use **Vercel** or **Netlify** (free, stable URL, auto-deploy on
 
 1. [vercel.com/new](https://vercel.com/new) → Import `MonMonMars/New-APP01`
 2. Branch: **`cursor/tinder-style-dating-app-7b60`**
-3. Build: `npm run build:web` · Output: `dist`
+3. Build: `npm run build:web:demo` · Output: `dist` (build ID stamp + SPA 404 fallback)
 4. Deploy → stable URL like `https://new-app01.vercel.app`
 
 `vercel.json` includes the same cache header split as `serve.json`.

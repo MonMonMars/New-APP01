@@ -4,15 +4,12 @@ import {
   photosForPexelsId,
   VERIFIED_PORTRAIT_IDS,
 } from '../data/demoPhotoSets';
+import { PASSPORT_PORTRAIT_PRIMARY_IDS } from '../data/demoPortraitPools';
 import { photosForLegacyProfile } from '../data/legacyProfilePhotos';
 import { Profile } from '../types/profile';
 
 /** Passport deck (ids 201–218) — disjoint from legacy + batch `photosForSet` primaries. */
-const PASSPORT_PEXELS_IDS: readonly number[] = [
-  3398464, 3408744, 3417775, 3389938, 3433333, 3409031, 3455279, 3468371, 3512868, 3483471,
-  3493974, 3506189, 3516064, 3525544, 3535077, 3525074, 3558529, 3564325,
-];
-
+const PASSPORT_PEXELS_IDS = PASSPORT_PORTRAIT_PRIMARY_IDS;
 
 function hashProfileId(profileId: string): number {
   let hash = 0;

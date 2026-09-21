@@ -1,3 +1,4 @@
+import '../src/data/demoPortraitPools';
 import { INVALID_PEXELS_IDS } from '../src/data/demoPhotoSets';
 import { AI_PERSONA_IDS, INCOMING_LIKE_IDS, mockProfiles, getProfileById } from '../src/data/profiles';
 
@@ -48,6 +49,15 @@ const legacyShortBios = humanProfiles.filter(
   (p) => Number(p.id) < 97 && (p.bio?.length ?? 0) < 80,
 );
 const duplicatePhotos = [...photoCounts.entries()].filter(([, count]) => count > 1);
+const duplicatePrimaryProfileIds = duplicatePhotos.flatMap(([url]) => {
+  const ids: string[] = [];
+  for (const profile of humanProfiles) {
+    if (profile.photos[0] === url) {
+      ids.push(profile.id);
+    }
+  }
+  return ids;
+});
 
 const missingIncoming = INCOMING_LIKE_IDS.filter((id) => getProfileById(id) === undefined);
 
@@ -82,6 +92,10 @@ console.log(
       duplicateNameCount: duplicateNames.length,
       legacyShortBioCount: legacyShortBios.length,
       duplicatePrimaryPhotoCount: duplicatePhotos.length,
+      duplicatePrimaryProfileSample: duplicatePhotos.slice(0, 5).map(([url, count]) => ({
+        count,
+        pexelsId: url.match(/photos\/(\d+)\//)?.[1],
+      })),
       picsumProfileCount: picsumProfiles.length,
       mixedPexelsPhotoProfileCount: mixedPhotoProfiles.length,
       invalidPexelsProfileCount: invalidPexelsProfiles.length,
@@ -113,6 +127,14 @@ if (mixedPhotoProfiles.length > 0) {
 
 if (invalidPexelsProfiles.length > 0) {
   console.error('Profiles with missing or invalid Pexels portraits:', invalidPexelsProfiles);
+  process.exit(1);
+}
+
+if (duplicatePhotos.length > 0) {
+  console.error(
+    'Human demo profiles must not share the same primary portrait:',
+    duplicatePrimaryProfileIds.slice(0, 40),
+  );
   process.exit(1);
 }
 

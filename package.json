@@ -47,7 +47,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "build:web": "expo export -p web",
-    "build:web:demo": "EXPO_PUBLIC_BUILD_ID=\"$(bash scripts/resolve-build-id.sh)\" expo export -p web && bash scripts/prepare-demo-dist.sh",
+    "build:web:demo": "EXPO_PUBLIC_BASE_PATH= EXPO_PUBLIC_BUILD_ID=\"$(bash scripts/resolve-build-id.sh)\" expo export -p web && bash scripts/prepare-demo-dist.sh",
     "build:web:pages": "EXPO_PUBLIC_BASE_PATH=/New-APP01 expo export -p web",
     "demo": "npm run build:web:demo && npx --yes serve -s -l 8090 -c serve.json",
     "demo:tunnel": "bash scripts/start-demo-tunnel.sh",

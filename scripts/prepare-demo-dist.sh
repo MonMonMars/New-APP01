@@ -23,6 +23,9 @@ const stamp = process.env.STAMP;
 
 let html = fs.readFileSync(indexPath, 'utf8');
 
+// Root demo (`serve -s dist` on :8090) must not reference GitHub Pages base path.
+html = html.replace(/\/New-APP01\//g, '/');
+
 html = html.replace(/<!-- spark-demo-build:[^>]*-->\s*/g, '');
 html = html.replace(
   /<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"\s*\/?>\s*/gi,

@@ -72,8 +72,27 @@ async function reachedAppShell(page) {
   return false;
 }
 
+async function selectGenderChip(page, gender) {
+  if (!gender) {
+    return false;
+  }
+  const pattern =
+    gender === 'woman'
+      ? /^woman$/i
+      : gender === 'man'
+        ? /^man$/i
+        : /non-?binary/i;
+  const chip = page.getByText(pattern).first();
+  if (await chip.isVisible({ timeout: 1500 }).catch(() => false)) {
+    await chip.click();
+    await page.waitForTimeout(300);
+    return true;
+  }
+  return false;
+}
+
 /** Walk onboarding until Spark discover or Pulse disguise shell is visible. */
-export async function completeDemoOnboarding(page, { maxSteps = 26 } = {}) {
+export async function completeDemoOnboarding(page, { maxSteps = 26, gender } = {}) {
   for (let step = 0; step < maxSteps; step += 1) {
     await dismissCookies(page);
 
@@ -122,6 +141,13 @@ export async function completeDemoOnboarding(page, { maxSteps = 26 } = {}) {
       }
     }
 
+    if (/i am a/i.test(text)) {
+      await selectGenderChip(page, gender);
+      if (await clickContinue(page)) {
+        continue;
+      }
+    }
+
     if (/your public profile/i.test(text) && !/create your profile/i.test(text)) {
       if (await clickContinue(page)) {
         continue;
@@ -129,7 +155,10 @@ export async function completeDemoOnboarding(page, { maxSteps = 26 } = {}) {
     }
 
     if (/create your profile/i.test(text)) {
-      const openPulse = page.getByText(/^open pulse$/i).first();
+      const openPulse = page
+        .getByRole('button', { name: /^open pulse$/i })
+        .or(page.getByText(/^open pulse$/i))
+        .first();
       if (await openPulse.isVisible({ timeout: 3000 }).catch(() => false)) {
         await openPulse.click();
         await page.waitForTimeout(1500);
@@ -165,19 +194,32 @@ export async function unlockSparkFromPulse(page) {
   }
 }
 
-/** Open Pulse disguise feed (For You) from Spark discover. */
+/** Open Pulse disguise feed (For You) from Spark discover or confirm already in disguise. */
 export async function enterPulseForYouFeed(page) {
-  const pulseTab = page
-    .getByLabel(/pulse disguise mode/i)
-    .or(page.getByRole('tab', { name: /^pulse$/i }))
-    .first();
-  if (await pulseTab.isVisible({ timeout: 4000 }).catch(() => false)) {
-    await pulseTab.click();
-    await page.waitForTimeout(1000);
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const leave = page.getByLabel(/tap .+ logo to leave/i).first();
+    if (await leave.isVisible().catch(() => false)) {
+      break;
+    }
+
+    const pulseTab = page
+      .getByLabel(/pulse disguise mode/i)
+      .or(page.getByRole('tab', { name: /^pulse$/i }))
+      .first();
+    if (await pulseTab.isVisible({ timeout: 4000 }).catch(() => false)) {
+      await pulseTab.click();
+      await page.waitForTimeout(1000);
+    }
+
+    const forYou = page.getByRole('tab', { name: /for you/i }).first();
+    if (await forYou.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await forYou.click();
+      await page.waitForTimeout(800);
+    }
   }
-  const forYou = page.getByRole('tab', { name: /for you/i }).first();
-  if (await forYou.isVisible({ timeout: 3000 }).catch(() => false)) {
-    await forYou.click();
-    await page.waitForTimeout(800);
-  }
+
+  await page
+    .getByLabel(/tap .+ logo to leave/i)
+    .first()
+    .waitFor({ state: 'visible', timeout: 12000 });
 }

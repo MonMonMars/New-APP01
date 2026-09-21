@@ -75,10 +75,10 @@ const main = async () => {
     await page.getByText(/^Map$/).first().click({ force: true });
     await page.waitForTimeout(600);
     await shot(page, 'expand_search_map.png');
-    const mapVisible = await page.getByText('Expand search').count();
-    console.log('expand_search_title', mapVisible > 0);
-    if (mapVisible === 0) {
-      throw new Error('Expand search map screen not visible');
+    const searchAreaVisible = await page.getByText(/Search this area|搜尋此區域/i).count();
+    console.log('map_search_this_area', searchAreaVisible > 0);
+    if (searchAreaVisible === 0) {
+      throw new Error('Full-screen map discover not visible');
     }
 
     await browser.close();

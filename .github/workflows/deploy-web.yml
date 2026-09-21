@@ -28,8 +28,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
@@ -50,24 +48,10 @@ jobs:
         run: |
           cp dist-pages/index.html dist-pages/404.html
           touch dist-pages/.nojekyll
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist-pages
       - uses: actions/upload-artifact@v4
         with:
           name: web-dist
           path: dist-pages
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
 
   deploy-gh-pages-branch:
     needs: build

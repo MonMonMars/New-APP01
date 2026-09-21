@@ -46,6 +46,17 @@ export function profileIdFromPostId(postId: string): string | undefined {
 }
 
 /** Map disguise reporter / card ids back to a dating profile when woven from seed data. */
+/** Reporter id → demo profile only when explicitly mapped (not hash-assigned). */
+export function explicitReporterProfileId(
+  reporterId: string,
+  profileId?: string,
+): string | undefined {
+  if (profileId) {
+    return profileId;
+  }
+  return resolveDisguiseProfileId(reporterId);
+}
+
 export function resolveDisguiseProfileId(reporterId: string): string | undefined {
   if (reporterId === 'disguised-user') {
     return undefined;

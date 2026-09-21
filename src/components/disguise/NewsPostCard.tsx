@@ -9,7 +9,10 @@ import { radii, spacing } from '../../theme';
 import { profileIntroCaption } from '../../utils/profileIntroCaption';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { usePulseContextSection } from '../../hooks/usePulseContextSection';
-import { resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
+import {
+  explicitReporterProfileId,
+  resolveExplicitDatingProfile,
+} from '../../utils/resolveDisguiseProfile';
 import { MediaWithContentBadge } from './ContentTypeIcon';
 import { FeedPersonThumbnail } from './FeedPersonThumbnail';
 import { NewsArticleSheet } from './NewsArticleSheet';
@@ -30,8 +33,11 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
   const [articleOpen, setArticleOpen] = useState(false);
   const [selectedReporter, setSelectedReporter] = useState<NewsReporter | null>(null);
 
+  const linkedReporterProfile = (reporter: NewsReporter) =>
+    resolveExplicitDatingProfile(explicitReporterProfileId(reporter.id, reporter.profileId), pulseSection);
+
   const openReporter = (reporter: NewsReporter) => {
-    const linked = resolveExplicitDatingProfile(reporter.profileId, pulseSection);
+    const linked = linkedReporterProfile(reporter);
     if (!linked) {
       return;
     }
@@ -43,7 +49,7 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
   };
 
   const reporterCaption = (reporter: NewsReporter): string => {
-    const linked = resolveExplicitDatingProfile(reporter.profileId, pulseSection);
+    const linked = linkedReporterProfile(reporter);
     if (linked) {
       return profileIntroCaption(linked);
     }
@@ -87,7 +93,7 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
           {post.reporters.length > 0 && (
             <View style={styles.reportersRow} accessibilityRole="list">
               {post.reporters.map((reporter) => {
-                const linkedProfile = resolveExplicitDatingProfile(reporter.profileId, pulseSection);
+                const linkedProfile = linkedReporterProfile(reporter);
                 const reporterKind = linkedProfile ? 'profile' : 'news';
                 return (
                   <PulseProfileSwap

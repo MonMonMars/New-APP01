@@ -19,6 +19,8 @@ on:
       - cursor/red-star-superlike-7b60
       - cursor/pulse-explicit-profile-links-7b60
       - cursor/update-fake-accounts-7b60
+      - cursor/pulse-top-refresh-7b60
+      - cursor/world-map-touch-search-7b60
       - cursor/compact-mini-window-7b60
       - cursor/mini-xsl-buttons-7b60
       - cursor/pulse-icons-blue-7b60

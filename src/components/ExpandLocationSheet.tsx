@@ -171,15 +171,12 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const pinCenter = showSearchArea ? mapCenter : searchCenter;
 
   const areaPins = useMemo(() => {
-    let pool = mapDiscoverPool;
-    if (showSearchArea) {
-      pool = relocateProfilesForMapSearch(pool, mapCenter, currentRadius);
-    }
+    const pool = relocateProfilesForMapSearch(mapDiscoverPool, pinCenter, currentRadius);
     return sortProfilesByDistance(
       filterProfilesInRadius(pool, pinCenter, currentRadius),
       pinCenter,
     );
-  }, [currentRadius, mapDiscoverPool, mapCenter, pinCenter, showSearchArea]);
+  }, [currentRadius, mapDiscoverPool, pinCenter]);
 
   const placeSuggestions = useMemo(
     () => (queryMode === 'places' ? searchMapPlaces(searchQuery, locale) : []),

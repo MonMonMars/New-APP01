@@ -92,12 +92,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: spacing.sm,
   },
-  testimonialRow: {
-    marginBottom: spacing.md,
-    paddingTop: spacing.sm,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(255,255,255,0.12)',
-  },
   cta: {
     flexDirection: 'row',
     alignItems: 'center',

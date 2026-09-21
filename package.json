@@ -48,7 +48,7 @@
     "web": "expo start --web",
     "build:web": "expo export -p web",
     "build:web:demo": "EXPO_PUBLIC_BASE_PATH= EXPO_PUBLIC_BUILD_ID=\"$(bash scripts/resolve-build-id.sh)\" expo export -p web && bash scripts/prepare-demo-dist.sh",
-    "build:web:pages": "EXPO_PUBLIC_BASE_PATH=/New-APP01 expo export -p web",
+    "build:web:pages": "EXPO_PUBLIC_BASE_PATH=/New-APP01 expo export -p web --output-dir dist-pages",
     "demo": "npm run build:web:demo && npx --yes serve -s -l 8090 -c serve.json",
     "demo:tunnel": "bash scripts/start-demo-tunnel.sh",
     "deploy:pages": "bash scripts/deploy-gh-pages.sh",
@@ -59,7 +59,8 @@
     "verify:pulse-buttons": "node scripts/verify-spark-ember-pulse-buttons.mjs",
     "validate:profiles": "npx --yes tsx scripts/validate-demo-profiles.ts && npx --yes tsx scripts/check-pexels-ids.mjs",
     "verify:all": "node scripts/verify-demo-link.mjs http://127.0.0.1:8090 && node scripts/check-mini-window.mjs http://127.0.0.1:8090 && node scripts/check-activity-preview.mjs http://127.0.0.1:8090 && node scripts/verify-spark-ember-pulse-buttons.mjs http://127.0.0.1:8090",
-    "verify:qa-smoke": "node scripts/qa-smoke-test.mjs http://127.0.0.1:8090"
+    "verify:qa-smoke": "node scripts/qa-smoke-test.mjs http://127.0.0.1:8090",
+    "verify:extended": "npm run verify:all && npm run verify:qa-smoke && DEMO_URL=http://127.0.0.1:8090 node scripts/verify-compact-mini.mjs && DEMO_URL=http://127.0.0.1:8090 node scripts/verify-female-pulse.mjs && DEMO_URL=http://127.0.0.1:8090 node scripts/verify-leave-spark-news.mjs && DEMO_URL=http://127.0.0.1:8090 node scripts/verify-disguise-ux.mjs && DEMO_URL=http://127.0.0.1:8090 node scripts/verify-world-picker.mjs"
   },
   "private": true
 }

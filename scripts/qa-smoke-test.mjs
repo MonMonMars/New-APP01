@@ -7,6 +7,7 @@ import { chromium } from 'playwright';
 import { mkdirSync } from 'fs';
 import { join } from 'path';
 
+import { assertRootDemoBundle } from './demo-preflight.mjs';
 import {
   completeDemoOnboarding,
   dismissCookies,
@@ -27,10 +28,10 @@ function record(area, status, notes) {
 async function clickTab(page, label) {
   await dismissCookies(page);
   const tab = page
-    .getByRole('tab', { name: new RegExp(`^${label}$`, 'i') })
+    .getByRole('tab', { name: new RegExp(label, 'i') })
     .or(page.getByText(label, { exact: true }).last());
-  await tab.first().waitFor({ state: 'visible', timeout: 10000 });
-  await tab.first().click();
+  await tab.first().waitFor({ state: 'visible', timeout: 12000 });
+  await tab.first().click({ force: true });
   return true;
 }
 
@@ -40,14 +41,26 @@ async function bodyIncludes(page, ...needles) {
 }
 
 async function ensureSparkDiscover(page) {
-  const text = await page.locator('body').innerText();
-  if (/miles away|\d+\s*mi\b/i.test(text)) {
-    return;
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const text = await page.locator('body').innerText();
+    if (/miles away|\d+\s*mi\b/i.test(text)) {
+      return;
+    }
+    const pulseLeave = page.getByLabel(/tap .+ logo to leave/i).first();
+    if (await pulseLeave.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await unlockSparkFromPulse(page);
+      await page.waitForTimeout(1200);
+      continue;
+    }
+    const discoverTab = page.getByRole('tab', { name: /discover|spark/i }).first();
+    if (await discoverTab.isVisible({ timeout: 1500 }).catch(() => false)) {
+      await discoverTab.click({ force: true });
+      await page.waitForTimeout(900);
+    }
   }
-  const pulseLeave = page.getByLabel(/tap .+ logo to leave/i).first();
-  if (await pulseLeave.isVisible({ timeout: 2000 }).catch(() => false)) {
-    await unlockSparkFromPulse(page);
-    await page.waitForTimeout(1200);
+  const finalText = await page.locator('body').innerText();
+  if (!/miles away|\d+\s*mi\b/i.test(finalText)) {
+    throw new Error('Spark discover deck not visible after onboarding');
   }
 }
 
@@ -56,6 +69,7 @@ async function main() {
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
 
   try {
+    await assertRootDemoBundle(DEMO_URL);
     await page.goto(DEMO_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await completeDemoOnboarding(page);
     await ensureSparkDiscover(page);

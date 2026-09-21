@@ -36,7 +36,7 @@ import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { usePulseContextSection } from '../../hooks/usePulseContextSection';
 import { useRotatedPulseContent } from '../../hooks/useRotatedPulseContent';
 import { usePulseFeedRefreshGeneration, usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
-import { resolveDisguiseProfile, resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
+import { resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
 import { profileIntroCaption } from '../../utils/profileIntroCaption';
 
 export function DisguiseAlertsScreen() {
@@ -61,10 +61,14 @@ export function DisguiseAlertsScreen() {
   const [previewReporter, setPreviewReporter] = useState<NewsReporter | null>(null);
 
   const openPersonPreview = (alert: DisguiseAlert) => {
-    if (!alert.person) {
+    if (!alert.person?.datingProfileId) {
       return;
     }
-    setPreviewReporter(buildAlertReporter(alert.person, pulseSection));
+    const reporter = buildAlertReporter(alert.person, pulseSection);
+    if (!reporter.profileId) {
+      return;
+    }
+    setPreviewReporter(reporter);
   };
 
   return (
@@ -88,18 +92,17 @@ export function DisguiseAlertsScreen() {
         renderItem={({ item }) => {
           const newsPost = item.articleUrl ? findNewsPostByArticleUrl(item.articleUrl) : undefined;
           const ad = item.landingUrl ? findAdPostByLandingUrl(item.landingUrl) : undefined;
+          const linkedProfile = item.person
+            ? resolveExplicitDatingProfile(item.person.datingProfileId, pulseSection)
+            : null;
+
           const handlePress = item.articleUrl && newsPost
             ? () => setArticlePost(newsPost)
             : item.landingUrl && ad
               ? () => setAdPost(ad)
-              : item.person
+              : linkedProfile
                 ? () => openPersonPreview(item)
                 : () => setActivityAlert(item);
-
-          const linkedProfile = item.person
-            ? resolveExplicitDatingProfile(item.person.datingProfileId, pulseSection) ??
-              resolveDisguiseProfile(`alert-${item.id}`, undefined, pulseSection)
-            : null;
           const profileKey = linkedProfile?.id ?? `alert-${item.id}-${refreshGeneration}`;
           const avatarUrl = linkedProfile?.photos[0] ?? item.person?.avatarUrl ?? '';
           const avatarCaption = linkedProfile ? profileIntroCaption(linkedProfile) : undefined;
@@ -122,12 +125,16 @@ export function DisguiseAlertsScreen() {
                       }
                       overlayVariant={item.person.overlayVariant ?? 'news'}
                       plainAvatar={!item.person.overlayVariant}
-                      contentKind="profile"
+                      contentKind={linkedProfile ? 'profile' : item.person.overlayVariant === 'news' ? 'news' : 'alert'}
                       caption={avatarCaption}
                       hideLabel
-                      showIconBadge
-                      onPress={() => openPersonPreview(item)}
-                      accessibilityLabel={t('disguiseMiniWindow.viewProfile', { name: item.person.name })}
+                      showIconBadge={Boolean(linkedProfile)}
+                      onPress={linkedProfile ? () => openPersonPreview(item) : undefined}
+                      accessibilityLabel={
+                        linkedProfile
+                          ? t('disguiseMiniWindow.viewProfile', { name: item.person.name })
+                          : item.person.name
+                      }
                     />
                   </PulseProfileSwap>
                   <View style={styles.textWrap}>

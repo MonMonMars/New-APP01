@@ -10,7 +10,7 @@ import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { buildSocialReporter, socialReporterPhotoIndex } from '../../utils/disguiseReporterPhotos';
 import { profileIntroCaption } from '../../utils/profileIntroCaption';
-import { resolveDisguiseProfile, resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
+import { resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { usePulseContextSection } from '../../hooks/usePulseContextSection';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
@@ -49,9 +49,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
 
   const photoReporter = buildSocialReporter(post, pulseSection);
   const feedPhotoIndex = socialReporterPhotoIndex(photoReporter, post.imageUrl, pulseSection);
-  const linkedAuthorProfile =
-    resolveExplicitDatingProfile(post.datingProfileId, pulseSection) ??
-    resolveDisguiseProfile(`social-${post.id}`, undefined, pulseSection);
+  const linkedAuthorProfile = resolveExplicitDatingProfile(post.datingProfileId, pulseSection);
   const authorContentKind = linkedAuthorProfile ? 'profile' : 'social';
   const authorCaption = linkedAuthorProfile ? profileIntroCaption(linkedAuthorProfile) : undefined;
 
@@ -111,8 +109,12 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
                 caption={authorCaption}
                 hideLabel
                 showIconBadge={authorContentKind !== 'profile'}
-                onPress={() => setAuthorOpen(true)}
-                accessibilityLabel={t('disguiseMiniWindow.viewProfile', { name: post.author })}
+                onPress={linkedAuthorProfile ? () => setAuthorOpen(true) : undefined}
+                accessibilityLabel={
+                  linkedAuthorProfile
+                    ? t('disguiseMiniWindow.viewProfile', { name: post.author })
+                    : post.author
+                }
               />
             ) : (
               <FeedPersonThumbnail
@@ -122,8 +124,12 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
                 hideLabel
                 showIconBadge={authorContentKind !== 'profile'}
                 imageUrl={post.avatarUrl}
-                onPress={() => setAuthorOpen(true)}
-                accessibilityLabel={t('disguiseMiniWindow.viewProfile', { name: post.author })}
+                onPress={linkedAuthorProfile ? () => setAuthorOpen(true) : undefined}
+                accessibilityLabel={
+                  linkedAuthorProfile
+                    ? t('disguiseMiniWindow.viewProfile', { name: post.author })
+                    : post.author
+                }
               />
             )}
           </PulseProfileSwap>

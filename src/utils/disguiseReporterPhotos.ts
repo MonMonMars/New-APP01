@@ -3,7 +3,7 @@ import { disguiseSocialPosts } from '../data/disguiseSocialPosts';
 import { SparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
 import { profileIntroCaption } from './profileIntroCaption';
-import { resolveDisguiseProfile } from './resolveDisguiseProfile';
+import { resolveExplicitDatingProfile } from './resolveDisguiseProfile';
 
 /** Build a de-duplicated photo list for disguise mini-window previews. */
 export function buildReporterPhotoUrls(
@@ -35,7 +35,7 @@ export function buildSocialReporter(
   post: SocialPost,
   section?: SparkSection | string | null,
 ): NewsReporter {
-  const linkedProfile = resolveDisguiseProfile(`social-${post.id}`, undefined, section);
+  const linkedProfile = resolveExplicitDatingProfile(post.datingProfileId, section);
   const feedPhotos = post.imageUrl ? [post.imageUrl] : [];
 
   return {
@@ -56,7 +56,7 @@ export function socialReporterPhotoIndex(
   if (!targetUrl?.trim()) {
     return 0;
   }
-  const linkedProfile = resolveDisguiseProfile(reporter.id, reporter.profileId, section);
+  const linkedProfile = resolveExplicitDatingProfile(reporter.profileId, section);
   const urls = buildReporterPhotoUrls(reporter, linkedProfile);
   const index = urls.indexOf(targetUrl.trim());
   return index >= 0 ? index : 0;
@@ -74,8 +74,21 @@ export function buildAlertReporter(
   person: DisguiseAlertPerson,
   section?: SparkSection | string | null,
 ): NewsReporter {
+  const linkedProfile = resolveExplicitDatingProfile(person.datingProfileId, section);
+  if (linkedProfile) {
+    const intro = profileIntroCaption(linkedProfile);
+    return {
+      id: `alert-profile-${linkedProfile.id}`,
+      name: linkedProfile.name,
+      avatarUrl: linkedProfile.photos[0] ?? person.avatarUrl,
+      quote: intro,
+      photos: linkedProfile.photos,
+      profileId: linkedProfile.id,
+    };
+  }
+
   const social = findSocialPostForAlertPerson(person);
-  if (social) {
+  if (social?.datingProfileId) {
     return buildSocialReporter(social, section);
   }
 

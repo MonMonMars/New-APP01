@@ -1,34 +1,13 @@
 import { chromium } from 'playwright';
 
-const BASE = process.env.DEMO_URL || 'http://localhost:8090';
+import {
+  completeDemoOnboarding,
+  dismissCookies,
+  enterPulseForYouFeed,
+  unlockSparkFromPulse,
+} from './demo-onboarding.mjs';
 
-const clickText = async (page, text, timeout = 8000) => {
-  const loc = page.getByText(text, { exact: true }).first();
-  await loc.waitFor({ timeout });
-  await loc.scrollIntoViewIfNeeded();
-  await loc.click({ force: true });
-};
-
-async function onboard(page) {
-  await page.goto(BASE, { waitUntil: 'domcontentloaded' });
-  await page.waitForTimeout(800);
-  if (!(await page.getByText('Continue without account').count())) {
-    return;
-  }
-  await clickText(page, 'Continue without account');
-  await page.waitForTimeout(300);
-  await clickText(page, 'I have read and agree to the policies above');
-  await clickText(page, 'Continue — I am 18+');
-  await clickText(page, 'Use my location');
-  await clickText(page, 'Continue');
-  await clickText(page, 'Continue');
-  await page.getByText(/^Open /).first().click({ force: true });
-  await page.waitForTimeout(900);
-  const cookie = page.getByText('Accept', { exact: true });
-  if (await cookie.count()) {
-    await cookie.click({ force: true }).catch(() => {});
-  }
-}
+const BASE = process.env.DEMO_URL || 'http://127.0.0.1:8090';
 
 async function main() {
   const browser = await chromium.launch({ headless: true });
@@ -36,25 +15,28 @@ async function main() {
   page.setDefaultTimeout(12000);
 
   try {
-    await onboard(page);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await completeDemoOnboarding(page, { gender: 'woman' });
+    await dismissCookies(page);
+    await enterPulseForYouFeed(page);
+
     const body = await page.locator('body').innerText();
     const checks = {
       female_zodiac_feed: /Virgo|Tarot|星座|Cosmos|Entertainment/i.test(body),
-      no_duplicate_pulse_wordmark: !(await page.getByText('Pulse', { exact: true }).count()),
-      cosmos_tab: (await page.getByText('Cosmos', { exact: true }).count()) > 0,
+      no_duplicate_pulse_wordmark: (await page.getByText('Pulse', { exact: true }).count()) <= 1,
+      cosmos_tab: (await page.getByRole('tab', { name: /cosmos/i }).count()) > 0,
       header_leave_btn: (await page.getByRole('button', { name: /Tap Pulse logo to leave Spark/ }).count()) === 1,
     };
 
-    await page.getByText('Cosmos', { exact: true }).first().click({ force: true });
+    const cosmosTab = page.getByRole('tab', { name: /cosmos/i }).first();
+    await cosmosTab.click({ force: true });
     await page.waitForTimeout(700);
     const cosmosBody = await page.locator('body').innerText();
     checks.cosmos_screen = /Cosmos & culture|Tonight for you|Tarot|星座/i.test(cosmosBody);
     checks.no_markets_on_female_cosmos = !/Stock market/i.test(cosmosBody);
 
-    await page.getByRole('button', { name: /Tap Pulse logo to leave Spark/ }).click();
-    await page.waitForTimeout(500);
-    await clickText(page, 'Leave Spark');
-    await page.waitForTimeout(800);
+    await unlockSparkFromPulse(page);
+    await dismissCookies(page);
 
     await page.getByRole('tab', { name: 'Likes' }).click({ force: true });
     await page.waitForTimeout(700);

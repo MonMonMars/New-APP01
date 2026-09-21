@@ -23,17 +23,25 @@ async function onboard(page) {
 }
 
 async function openMini(page) {
-  const reporter = page.getByLabel(/^View photos from /).first();
-  if (await reporter.count()) {
-    await reporter.scrollIntoViewIfNeeded();
-    await reporter.click({ force: true });
-    await page.waitForTimeout(700);
-    return;
+  for (let scroll = 0; scroll < 6; scroll += 1) {
+    const reporter = page.getByLabel(/^View photos from /i).first();
+    if (await reporter.isVisible().catch(() => false)) {
+      await reporter.scrollIntoViewIfNeeded();
+      await reporter.click({ force: true });
+      await page.waitForTimeout(700);
+      return;
+    }
+    const profile = page.getByLabel(/^View profile:/i).first();
+    if (await profile.isVisible().catch(() => false)) {
+      await profile.scrollIntoViewIfNeeded();
+      await profile.click({ force: true });
+      await page.waitForTimeout(700);
+      return;
+    }
+    await page.evaluate(() => window.scrollBy(0, 420));
+    await page.waitForTimeout(400);
   }
-  const profile = page.getByLabel(/^View profile: /).first();
-  await profile.scrollIntoViewIfNeeded();
-  await profile.click({ force: true });
-  await page.waitForTimeout(700);
+  throw new Error('no profile photo link found on Pulse feed');
 }
 
 async function measureMini(page) {

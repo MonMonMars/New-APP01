@@ -51,11 +51,19 @@ async function main() {
       fail('JS bundle', 'script tag not found in HTML');
     } else {
       const jsUrl = new URL(jsMatch[1], DEMO_URL).href;
-      const jsStatus = await httpOk(jsUrl);
-      if (jsStatus !== 200) {
-        fail('JS bundle', `status ${jsStatus}`);
+      const jsRes = await fetch(jsUrl, { redirect: 'follow' });
+      if (jsRes.status !== 200) {
+        fail('JS bundle', `status ${jsRes.status} (${jsUrl})`);
       } else {
-        pass('JS bundle', '200 OK');
+        const jsHead = (await jsRes.text()).slice(0, 40);
+        if (jsHead.trimStart().startsWith('<')) {
+          fail(
+            'JS bundle',
+            'returned HTML (wrong base path?) — rebuild with npm run build:web:demo',
+          );
+        } else {
+          pass('JS bundle', '200 OK');
+        }
       }
     }
   } catch (err) {

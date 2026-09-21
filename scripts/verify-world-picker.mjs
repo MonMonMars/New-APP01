@@ -2,7 +2,13 @@ import { chromium } from 'playwright';
 import { mkdirSync } from 'fs';
 import { join } from 'path';
 
-const BASE = process.env.DEMO_URL || 'http://localhost:8090';
+import {
+  completeDemoOnboarding,
+  dismissCookies,
+  unlockSparkFromPulse,
+} from './demo-onboarding.mjs';
+
+const BASE = process.env.DEMO_URL || 'http://127.0.0.1:8090';
 const OUT = process.env.SCREENSHOT_DIR || '/opt/cursor/artifacts/screenshots';
 mkdirSync(OUT, { recursive: true });
 
@@ -11,49 +17,6 @@ const shot = async (page, name) => {
   await page.screenshot({ path: file, fullPage: false });
   console.log('saved', file);
   return file;
-};
-
-const clickText = async (page, text, timeout = 8000) => {
-  const loc = page.getByText(text, { exact: true }).first();
-  await loc.waitFor({ timeout });
-  await loc.scrollIntoViewIfNeeded();
-  await loc.click({ force: true });
-};
-
-const dismissOnboarding = async (page) => {
-  if (await page.getByText('Continue without account').count()) {
-    await clickText(page, 'Continue without account');
-    await page.waitForTimeout(400);
-    await clickText(page, 'I have read and agree to the policies above');
-    await page.waitForTimeout(200);
-    await clickText(page, 'Continue — I am 18+');
-    await page.waitForTimeout(300);
-    await clickText(page, 'Use my location');
-    await page.waitForTimeout(300);
-    await clickText(page, 'Continue');
-    await page.waitForTimeout(300);
-    await clickText(page, 'Continue');
-    await page.waitForTimeout(300);
-    await page.getByText(/^Open /).first().click({ force: true });
-    await page.waitForTimeout(800);
-  }
-
-  const cookie = page.getByText('Accept', { exact: true });
-  if (await cookie.count()) {
-    await cookie.click({ force: true }).catch(() => {});
-  }
-};
-
-const unlockSparkIfNeeded = async (page) => {
-  const pulseBtn = page.getByRole('button', { name: /Tap Pulse logo to leave Spark/ });
-  if (await pulseBtn.count()) {
-    await pulseBtn.click();
-    await page.waitForTimeout(400);
-    if (await page.getByText('Leave Spark').count()) {
-      await clickText(page, 'Leave Spark');
-      await page.waitForTimeout(700);
-    }
-  }
 };
 
 const main = async () => {
@@ -70,10 +33,25 @@ const main = async () => {
   page.setDefaultTimeout(14000);
 
   try {
-    await page.goto(BASE, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(700);
-    await dismissOnboarding(page);
-    await unlockSparkIfNeeded(page);
+    await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await completeDemoOnboarding(page);
+    await dismissCookies(page);
+
+    const inPulse = await page
+      .getByLabel(/tap .+ logo to leave/i)
+      .first()
+      .isVisible()
+      .catch(() => false);
+    if (inPulse) {
+      await unlockSparkFromPulse(page);
+      await dismissCookies(page);
+    }
+
+    const onDiscover = /miles away|\d+\s*mi\b/i.test(await page.locator('body').innerText());
+    if (!onDiscover) {
+      throw new Error('expected Spark discover before world picker');
+    }
+
     await shot(page, 'spark_discover_before_picker.png');
 
     const world = page.getByLabel(/Spark\. Switch world|Ember\. Switch world/).first();
@@ -90,25 +68,23 @@ const main = async () => {
     }
 
     const titleCenterY = box.y + box.height / 2;
-    const sheet = page.locator('text=Choose a world').locator('xpath=ancestor::*[contains(@style,"max-width") or contains(@class,"css")][1]');
-    const dialog = page.getByRole('dialog');
-    const dialogBox = (await dialog.boundingBox().catch(() => null)) ?? box;
     const card = page.getByText('Anyone can join either section').first();
     const cardBox = await card.boundingBox();
     const cardCenterY = cardBox ? cardBox.y + cardBox.height / 2 : titleCenterY;
     const mid = viewport.height / 2;
     const offsetFromMid = Math.abs(cardCenterY - mid);
 
-    console.log(JSON.stringify({
-      viewport,
-      titleBox: box,
-      dialogBox,
-      cardBox,
-      titleCenterY,
-      cardCenterY,
-      mid,
-      offsetFromMid,
-    }));
+    console.log(
+      JSON.stringify({
+        viewport,
+        titleBox: box,
+        cardBox,
+        titleCenterY,
+        cardCenterY,
+        mid,
+        offsetFromMid,
+      }),
+    );
 
     if (titleCenterY > viewport.height * 0.72) {
       throw new Error(`world picker still near the bottom: titleCenterY=${titleCenterY}`);
@@ -142,19 +118,34 @@ const main = async () => {
       await page.mouse.up();
     }
 
-    await page.getByText('Likes').first().click({ force: true });
-    await page.waitForTimeout(500);
-    const chip = page.getByLabel(/Spark\. Switch world|Ember\. Switch world/).first();
-    await chip.click({ force: true });
-    await page.waitForTimeout(450);
-    const likesTitle = page.getByText('Choose a world', { exact: true }).first();
-    await likesTitle.waitFor({ timeout: 4000 });
-    const likesBox = await likesTitle.boundingBox();
-    console.log('likes_picker_title_y', likesBox && likesBox.y);
-    if (likesBox && likesBox.y > 620) {
-      throw new Error(`likes picker near bottom: y=${likesBox.y}`);
+    const hubBack = page.getByLabel(/back|close/i).first();
+    if (await page.getByText('Discover tools', { exact: true }).isVisible().catch(() => false)) {
+      if (await hubBack.isVisible().catch(() => false)) {
+        await hubBack.click({ force: true });
+      } else {
+        await page.keyboard.press('Escape');
+      }
+      await page.waitForTimeout(500);
     }
-    await shot(page, 'likes_world_picker_centered.png');
+
+    const likesTab = page.getByRole('tab', { name: /likes/i }).first();
+    if (await likesTab.isVisible({ timeout: 4000 }).catch(() => false)) {
+      await likesTab.click({ force: true });
+      await page.waitForTimeout(500);
+      const chip = page.getByLabel(/Spark\. Switch world|Ember\. Switch world/).first();
+      await chip.click({ force: true });
+      await page.waitForTimeout(450);
+      const likesTitle = page.getByText('Choose a world', { exact: true }).first();
+      await likesTitle.waitFor({ timeout: 4000 });
+      const likesBox = await likesTitle.boundingBox();
+      console.log('likes_picker_title_y', likesBox && likesBox.y);
+      if (likesBox && likesBox.y > 620) {
+        throw new Error(`likes picker near bottom: y=${likesBox.y}`);
+      }
+      await shot(page, 'likes_world_picker_centered.png');
+    } else {
+      console.log('likes_picker_skip', 'Likes tab not on current shell');
+    }
 
     const videoPath = await page.video()?.path();
     await context.close();

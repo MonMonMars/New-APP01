@@ -77,7 +77,7 @@ export const nextRawProfiles: Profile[] = [
   },
   {
     id: '122',
-    name: 'Theo',
+    name: 'Hugo',
     age: 28,
     gender: 'man',
     bio: 'Frontend engineer building accessibility tools. Climbs before standup, reads before bed.',
@@ -91,7 +91,7 @@ export const nextRawProfiles: Profile[] = [
   },
   {
     id: '123',
-    name: 'Luna',
+    name: 'Celeste',
     age: 25,
     gender: 'woman',
     bio: 'Veterinary technician with three foster cats. Will send you updates on their chaos.',
@@ -105,7 +105,7 @@ export const nextRawProfiles: Profile[] = [
   },
   {
     id: '124',
-    name: 'Andre',
+    name: 'Marcel',
     age: 33,
     gender: 'man',
     bio: 'Commercial pilot on reserve weeks. Explores new neighborhoods like he is landing somewhere new.',
@@ -135,7 +135,7 @@ export const nextRawProfiles: Profile[] = [
   },
   {
     id: '126',
-    name: 'Rafael',
+    name: 'Santino',
     age: 31,
     gender: 'man',
     bio: 'Urban planner focused on bike lanes. Commutes everywhere on two wheels.',
@@ -149,7 +149,7 @@ export const nextRawProfiles: Profile[] = [
   },
   {
     id: '127',
-    name: 'Yuki',
+    name: 'Mika',
     age: 27,
     gender: 'woman',
     bio: 'Motion designer for streaming apps. Collects vintage movie posters and perfects matcha at home.',
@@ -177,7 +177,7 @@ export const nextRawProfiles: Profile[] = [
   },
   {
     id: '129',
-    name: 'Aaliyah',
+    name: 'Zola',
     age: 24,
     gender: 'woman',
     bio: 'Social media strategist for nonprofits. Turns down brand deals that feel icky.',
@@ -220,7 +220,7 @@ export const nextRawProfiles: Profile[] = [
   },
   {
     id: '132',
-    name: 'Caleb',
+    name: 'Owen',
     age: 27,
     gender: 'man',
     bio: 'Physical therapy student and part-time barista. Makes latte art that is too pretty to drink.',

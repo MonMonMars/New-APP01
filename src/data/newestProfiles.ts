@@ -62,7 +62,7 @@ export const newestRawProfiles: Profile[] = [
   },
   {
     id: '161',
-    name: 'Kira',
+    name: 'Petra',
     age: 26,
     gender: 'woman',
     bio: 'Freelance illustrator working from corner cafés. Keeps a sketchbook for interesting strangers.',
@@ -268,7 +268,7 @@ export const newestRawProfiles: Profile[] = [
   },
   {
     id: '176',
-    name: 'Derek',
+    name: 'Warren',
     age: 31,
     gender: 'man',
     bio: 'Electrician who restores motorcycles on weekends. Low-key, loyal, always on time.',

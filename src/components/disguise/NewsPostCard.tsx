@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
 import { getPulseCategoryLabel, localizeTimeAgoLabel } from '../../i18n/labels';
@@ -29,12 +30,17 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
   const { colors } = useTheme();
   const { locale, t } = useTranslation();
   const pulseSection = usePulseContextSection();
+  const { preferences } = useApp();
   const accent = useDisguiseWorld().accent;
   const [articleOpen, setArticleOpen] = useState(false);
   const [selectedReporter, setSelectedReporter] = useState<NewsReporter | null>(null);
 
   const linkedReporterProfile = (reporter: NewsReporter) =>
-    resolveExplicitDatingProfile(explicitReporterProfileId(reporter.id, reporter.profileId), pulseSection);
+    resolveExplicitDatingProfile(
+      explicitReporterProfileId(reporter.id, reporter.profileId, preferences.showMe, pulseSection),
+      pulseSection,
+      preferences.showMe,
+    );
 
   const openReporter = (reporter: NewsReporter) => {
     const linked = linkedReporterProfile(reporter);

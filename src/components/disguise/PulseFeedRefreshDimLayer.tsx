@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     opacity: 0.52,
   },
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     top: 44,
     backgroundColor: Platform.OS === 'web' ? 'rgba(235, 235, 240, 0.42)' : 'rgba(210, 210, 218, 0.38)',
   },

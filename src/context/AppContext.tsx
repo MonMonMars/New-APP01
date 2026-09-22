@@ -158,6 +158,7 @@ import {
   recordFailedUnlockAttempt,
 } from '../utils/unlockLockout';
 import { computeCompatibilityScore, pickDailyMostCompatible } from '../utils/compatibility';
+import { isDiscoverableDemoProfile, matchesShowMePreference } from '../utils/showMeFilter';
 import { matchesPassportCity } from '../utils/passportFilter';
 import {
   requestNotificationPermission,
@@ -202,20 +203,6 @@ import {
   savePersistedState,
 } from '../utils/persistence';
 
-function matchesGenderFilter(profile: Profile, showMe: ShowMePreference): boolean {
-  switch (showMe) {
-    case 'everyone':
-      return true;
-    case 'women':
-      return profile.gender === 'woman';
-    case 'men':
-      return profile.gender === 'man';
-    default: {
-      const _exhaustive: never = showMe;
-      return _exhaustive;
-    }
-  }
-}
 
 function matchesDiscoverFilters(profile: Profile, filters: DiscoverFilter[]): boolean {
   if (filters.length === 0) {
@@ -334,7 +321,8 @@ function filterDiscoverProfiles(
       (skipHomeDistance || profile.distanceMiles <= maxDistance) &&
       profile.age >= preferences.minAge &&
       profile.age <= preferences.maxAge &&
-      matchesGenderFilter(profile, preferences.showMe) &&
+      isDiscoverableDemoProfile(profile) &&
+      matchesShowMePreference(profile, preferences.showMe) &&
       matchesDiscoverFilters(profile, filters) &&
       matchesAdvancedFilters(profile, user, preferences.advancedFilters, isSparkPlus) &&
       matchesSparkSection(profile, section) &&
@@ -1223,9 +1211,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       (profile): profile is Profile =>
         profile !== undefined &&
         !excludedIds.has(profile.id) &&
-        matchesSparkSection(profile, section),
+        matchesSparkSection(profile, section) &&
+        isDiscoverableDemoProfile(profile) &&
+        matchesShowMePreference(profile, preferences.showMe),
     );
-  }, [excludedIds, preferences.sparkSection, privacyPreferences.personalisationEnabled]);
+  }, [excludedIds, preferences.showMe, preferences.sparkSection, privacyPreferences.personalisationEnabled]);
 
   const recentlyActiveProfiles = useMemo(() => {
     if (!privacyPreferences.showActiveStatus) {
@@ -1237,9 +1227,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       (profile): profile is Profile =>
         profile !== undefined &&
         !excludedIds.has(profile.id) &&
-        matchesSparkSection(profile, section),
+        matchesSparkSection(profile, section) &&
+        isDiscoverableDemoProfile(profile) &&
+        matchesShowMePreference(profile, preferences.showMe),
     );
-  }, [excludedIds, preferences.sparkSection, privacyPreferences.showActiveStatus]);
+  }, [excludedIds, preferences.showMe, preferences.sparkSection, privacyPreferences.showActiveStatus]);
 
   const blockedProfiles = useMemo(
     () =>
@@ -1445,9 +1437,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       (profile) =>
         !actioned.has(profile.id) &&
         !matches.some((match) => match.profile.id === profile.id) &&
-        matchesSparkSection(profile, activeSection),
+        matchesSparkSection(profile, activeSection) &&
+        isDiscoverableDemoProfile(profile) &&
+        matchesShowMePreference(profile, preferences.showMe),
     );
-  }, [activeSection, likedIds, passedIds, blockedIds, matches]);
+  }, [activeSection, likedIds, passedIds, blockedIds, matches, preferences.showMe]);
 
   const worldMatches = useMemo(
     () => matches.filter((match) => matchesSparkSection(match.profile, activeSection)),

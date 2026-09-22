@@ -575,7 +575,7 @@ const styles = StyleSheet.create({
   },
   infoButton: {
     position: 'absolute',
-    bottom: spacing.lg + 8,
+    top: spacing.md,
     right: spacing.md,
     width: 40,
     height: 40,
@@ -583,7 +583,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.45)',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 20,
-    elevation: 20,
+    zIndex: 30,
+    elevation: 30,
   },
 });

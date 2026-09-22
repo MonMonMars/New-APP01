@@ -166,12 +166,6 @@ export function ProfileCard({
 
       {profile.hasVideo && isTop && <VideoProfileOverlay visible profile={profile} />}
 
-      {isTop && onOpenDetail && (
-        <AnimatedPressable style={styles.infoButton} onPress={onOpenDetail}>
-          <Ionicons name="information-circle" size={28} color={colors.text} />
-        </AnimatedPressable>
-      )}
-
       {isTop && photoCount > 1 && (
         <>
           <View style={styles.dots}>
@@ -200,6 +194,12 @@ export function ProfileCard({
             <AnimatedPressable style={styles.tapZone} onPress={() => goToPhoto('right')} />
           </View>
         </>
+      )}
+
+      {isTop && onOpenDetail && (
+        <AnimatedPressable style={styles.infoButton} onPress={onOpenDetail}>
+          <Ionicons name="information-circle" size={28} color={colors.text} />
+        </AnimatedPressable>
       )}
 
       <View style={[styles.info, compact && styles.infoCompact]}>
@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
   },
   infoButton: {
     position: 'absolute',
-    bottom: spacing.lg + 8,
+    top: spacing.md,
     right: spacing.md,
     width: 40,
     height: 40,
@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.45)',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 7,
+    zIndex: 12,
   },
   info: {
     position: 'absolute',

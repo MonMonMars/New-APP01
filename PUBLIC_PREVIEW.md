@@ -2,11 +2,12 @@
 
 ## Demo link (verified working)
 
-**https://seventh-rear-loading-sewing.trycloudflare.com**
+**https://controlled-something-appeared-relates.trycloudflare.com**
 
+- **Fallback (same server):** https://seventh-rear-loading-sewing.trycloudflare.com
 - **Integration branch:** `cursor/fix-info-boost-buttons-7b60` (layout + scam detector)
-- **Build ID:** `df5a0ea-20260922T080955Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-22 08:12 UTC — HTTP 200, JS bundle 200, onboarding landing loads (fixed Pulse feed init hang)
+- **Build ID:** `dd9bbdf-20260922T082600Z` (HTML comment `spark-demo-build:` or loading screen footer)
+- **Verified:** 2026-09-22 08:26 UTC — Pulse feed init fix + loading shell; onboarding appears after bundle load
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

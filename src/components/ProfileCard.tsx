@@ -244,8 +244,9 @@ export function ProfileCard({
       >
         <View style={styles.nameRow}>
           <Text
-            style={[styles.name, compact && styles.nameCompact]}
-            numberOfLines={compact ? 1 : undefined}
+            style={[styles.name, compact && styles.nameCompact, styles.nameFlex]}
+            numberOfLines={compact ? 1 : 2}
+            ellipsizeMode="tail"
           >
             {profile.name}, {profile.age}
           </Text>
@@ -456,6 +457,10 @@ const styles = StyleSheet.create({
   },
   nameCompact: {
     fontSize: 24,
+  },
+  nameFlex: {
+    flexShrink: 1,
+    maxWidth: '100%',
   },
   discreetChipWrap: {
     maxWidth: '100%',

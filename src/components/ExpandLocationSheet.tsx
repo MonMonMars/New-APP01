@@ -34,6 +34,12 @@ import {
 import { resolveUserLocation } from '../services/userLocation';
 import { searchMapPlaces, type MapPlaceSuggestion } from '../utils/mapPlaceSearch';
 import { mapCenterForCity, zoomForRadius } from '../utils/searchMapTiles';
+import {
+  MAP_PROFILE_PREVIEW_BOTTOM_OFFSET,
+  MAP_SEARCH_STACK_TOP_OFFSET,
+  MAP_ZOOM_CONTROLS_TOP_OFFSET,
+  MAP_ZOOM_SUGGESTIONS_EXTRA_TOP,
+} from '../constants/mapDiscoverLayout';
 import { radii, spacing } from '../theme';
 import { ActionToast } from './ActionToast';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -437,7 +443,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
           <Ionicons name="close" size={22} color={chromeText} />
         </AnimatedPressable>
         <View style={[styles.metaPill, { backgroundColor: chromeBg }]}>
-          <Text style={[styles.metaText, { color: chromeText }]}>
+          <Text style={[styles.metaText, { color: chromeText }]} numberOfLines={1} ellipsizeMode="tail">
             {t('mapDiscover.meta', {
               radius: formatSearchRadiusLocalized(locale, currentRadius),
               count: visiblePins.length,
@@ -471,7 +477,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
 
       <View
         pointerEvents="box-none"
-        style={[styles.searchBarWrap, { top: insets.top + spacing.sm + 52 }]}
+        style={[styles.searchBarWrap, { top: insets.top + MAP_SEARCH_STACK_TOP_OFFSET }]}
       >
         <View style={[styles.queryModeRow, { backgroundColor: chromeBg }]}>
           {(['people', 'places'] as const).map((mode) => {
@@ -556,7 +562,15 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
 
       <View
         pointerEvents="box-none"
-        style={[styles.zoomControls, { top: insets.top + spacing.sm + 152 }]}
+        style={[
+          styles.zoomControls,
+          {
+            top:
+              insets.top +
+              MAP_ZOOM_CONTROLS_TOP_OFFSET +
+              (placeSuggestions.length > 0 ? MAP_ZOOM_SUGGESTIONS_EXTRA_TOP : 0),
+          },
+        ]}
       >
         <AnimatedPressable
           onPress={handleZoomIn}
@@ -581,7 +595,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
           style={[
             styles.previewCard,
             {
-              bottom: Math.max(insets.bottom, spacing.md) + 112,
+              bottom: Math.max(insets.bottom, spacing.md) + MAP_PROFILE_PREVIEW_BOTTOM_OFFSET,
               backgroundColor: chromeBg,
             },
           ]}
@@ -593,7 +607,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
           >
             <Image source={{ uri: selectedProfile.photos[0] }} style={styles.previewPhoto} contentFit="cover" />
             <View style={styles.previewBody}>
-              <Text style={[styles.previewName, { color: chromeText }]}>
+              <Text style={[styles.previewName, { color: chromeText }]} numberOfLines={1} ellipsizeMode="tail">
                 {selectedProfile.name}, {selectedProfile.age}
               </Text>
               <Text style={[styles.previewDistance, { color: chromeMuted }]}>
@@ -795,6 +809,7 @@ const styles = StyleSheet.create({
   },
   metaPill: {
     flex: 1,
+    minWidth: 0,
     alignItems: 'center',
     borderRadius: radii.button,
     paddingVertical: spacing.sm,
@@ -902,6 +917,7 @@ const styles = StyleSheet.create({
   },
   previewBody: {
     flex: 1,
+    minWidth: 0,
     gap: 2,
   },
   previewName: {

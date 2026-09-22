@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Platform } from 'react-native';
 
 import { TabBarButton } from '../components/TabBarButton';
 import { useApp } from '../context/AppContext';
@@ -45,6 +46,8 @@ export function DisguiseNavigator() {
           borderTopColor: colors.border,
           paddingTop: 6,
           height: 72,
+          // Web: default absolute tab bar sits on top of FlatList footers and eats taps.
+          ...(Platform.OS === 'web' ? { position: 'relative' as const } : null),
         },
         tabBarActiveTintColor: meta.accent,
         tabBarInactiveTintColor: colors.textMuted,

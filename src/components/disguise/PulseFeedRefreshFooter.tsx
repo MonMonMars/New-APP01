@@ -3,6 +3,7 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from '../../i18n';
 import { useTheme } from '../../context/ThemeContext';
 import { spacing } from '../../theme';
+import { PULSE_TAB_BAR_HEIGHT } from '../../theme/pulseFeedLayout';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -61,6 +62,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
     paddingHorizontal: spacing.md,
     minHeight: 72,
+    marginBottom: PULSE_TAB_BAR_HEIGHT + spacing.sm,
   },
   text: {
     fontSize: 13,

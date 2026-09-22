@@ -19,6 +19,7 @@ import { useDisguiseFeedItems } from '../../hooks/useDisguiseFeedItems';
 import { topicFilterLabel } from '../../utils/disguiseFeedFilter';
 import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
 import { spacing } from '../../theme';
+import { pulseFeedScrollPaddingBottom } from '../../theme/pulseFeedLayout';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefreshFooter';
 import { PulseFeedRefreshHeader } from '../../components/disguise/PulseFeedRefreshHeader';
@@ -90,7 +91,7 @@ export function DisguiseFeedScreen() {
         extraData={refreshGeneration}
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => renderFeedItem({ item, index })}
-        contentContainerStyle={[styles.list, { paddingBottom: spacing.xl * 2 }]}
+        contentContainerStyle={[styles.list, { paddingBottom: pulseFeedScrollPaddingBottom(insets.bottom) }]}
         {...flatListProps}
         ListFooterComponent={
           <PulseFeedRefreshFooter

@@ -1,14 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import {
-  FlatList,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  Platform,
-  RefreshControl,
-  ScrollView,
-} from 'react-native';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { FlatList, NativeScrollEvent, NativeSyntheticEvent, Platform, ScrollView } from 'react-native';
 
-import { useDisguiseWorld } from './useDisguiseWorld';
+import { useApp } from '../context/AppContext';
 import { refreshPulseLiveNews } from '../services/pulseLiveNews';
 
 let refreshGeneration = 0;
@@ -54,7 +47,7 @@ const REFRESH_COOLDOWN_MS = Platform.OS === 'web' ? 900 : 600;
 
 export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}) {
   const { onRefreshed } = options;
-  const meta = useDisguiseWorld();
+  const { dismissDisguiseLeaveConfirm } = useApp();
   const [refreshing, setRefreshing] = useState(false);
   const [justUpdated, setJustUpdated] = useState(false);
   const [isAtTop, setIsAtTop] = useState(true);
@@ -108,6 +101,7 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
       setRefreshing(true);
       try {
         // Reshuffle woven profiles immediately — do not block on RSS/network fetches.
+        dismissDisguiseLeaveConfirm();
         bumpPulseFeedRefreshGeneration();
         setJustUpdated(true);
         scrollToTop(true);
@@ -120,7 +114,7 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
         lastRefreshFinishedAtRef.current = Date.now();
       }
     },
-    [onRefreshed, refreshing, scrollToTop],
+    [dismissDisguiseLeaveConfirm, onRefreshed, refreshing, scrollToTop],
   );
 
   const refresh = useCallback(() => runRefresh('pull'), [runRefresh]);
@@ -170,7 +164,12 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
         clearTopArrivalTimer();
       }
 
-      if (!refreshing && y <= TOP_OVERSCROLL_THRESHOLD) {
+      // Web overscroll pull is handled by PulseFeedRefreshHeader; auto-overscroll here steals taps.
+      if (
+        Platform.OS !== 'web' &&
+        !refreshing &&
+        y <= TOP_OVERSCROLL_THRESHOLD
+      ) {
         void runRefresh('pull');
       }
     },
@@ -213,28 +212,11 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
     void runRefresh('top');
   }, [runRefresh, scrollToTop]);
 
-  const refreshControl = useMemo(
-    () =>
-      Platform.OS === 'web' ? undefined : (
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={() => {
-            void refresh();
-          }}
-          tintColor={meta.accent}
-          colors={[meta.accent]}
-          progressBackgroundColor="transparent"
-        />
-      ),
-    [meta.accent, refresh, refreshing],
-  );
-
   const flatListProps = {
     onScroll: handleFlatListScroll,
     onScrollEndDrag: maybeRefreshAfterScrollToTop,
     onMomentumScrollEnd: maybeRefreshAfterScrollToTop,
     scrollEventThrottle: 16 as const,
-    ...(refreshControl ? { refreshControl } : {}),
   };
 
   const scrollViewProps = {
@@ -242,7 +224,6 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
     onScrollEndDrag: maybeRefreshAfterScrollToTop,
     onMomentumScrollEnd: maybeRefreshAfterScrollToTop,
     scrollEventThrottle: 16 as const,
-    ...(refreshControl ? { refreshControl } : {}),
   };
 
   return {
@@ -257,7 +238,7 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
     scrollToTop,
     listRef,
     scrollViewRef,
-    refreshControl,
+    refreshControl: undefined,
     flatListProps,
     scrollViewProps,
   };

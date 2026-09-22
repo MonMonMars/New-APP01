@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
   },
   infoButton: {
     position: 'absolute',
-    bottom: spacing.lg + 8,
+    bottom: spacing.lg + 64,
     right: spacing.md,
     width: 40,
     height: 40,

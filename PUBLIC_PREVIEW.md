@@ -2,7 +2,7 @@
 
 ## Demo link (verified working)
 
-**https://limousines-phase-carmen-safe.trycloudflare.com**
+**https://dangerous-assumed-medicare-orbit.trycloudflare.com**
 
 - **Integration branch:** `cursor/fix-info-boost-buttons-7b60` (layout + scam detector)
 - **Build ID:** `aca70f2-20260922T173121Z` (HTML comment `spark-demo-build:` or loading screen footer)

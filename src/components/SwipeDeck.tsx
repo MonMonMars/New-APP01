@@ -22,6 +22,7 @@ import {
   DISCOVER_INFO_BUTTON_SIZE,
   DISCOVER_INFO_TOP,
   discoverActionRailHeight,
+  discoverInfoButtonRightInset,
 } from '../constants/discoverLayout';
 import { spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
@@ -480,9 +481,11 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
 
     const actionRailHeight = discoverActionRailHeight(compact);
 
+    const infoRightInset = discoverInfoButtonRightInset(compact);
+
     return (
       <View ref={containerRef} style={styles.container} onLayout={handleDeckLayout}>
-        <View style={[styles.deck, { paddingBottom: actionRailHeight }]}>
+        <View style={[styles.cardStage, { bottom: actionRailHeight }]}>
           {visibleProfiles
             .slice()
             .reverse()
@@ -523,6 +526,26 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
                 </View>
               );
             })}
+
+          {onOpenProfile && activeIndex < profiles.length ? (
+            <View
+              style={[
+                styles.infoButtonWrap,
+                { right: infoRightInset },
+              ]}
+              pointerEvents="box-none"
+            >
+              <AnimatedPressable
+                style={styles.infoButton}
+                onPress={() => onOpenProfile(profiles[activeIndex])}
+                accessibilityLabel={t('profileDetail.openDetails')}
+                hitSlop={10}
+                scaleTo={0.9}
+              >
+                <Ionicons name="information-circle" size={28} color={colors.text} />
+              </AnimatedPressable>
+            </View>
+          ) : null}
         </View>
 
         <DropTargets
@@ -542,20 +565,6 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           rewindEnabled={rewindEnabled}
           isSparkPlus={isSparkPlus}
         />
-
-        {onOpenProfile && activeIndex < profiles.length ? (
-          <View style={styles.infoButtonWrap} pointerEvents="box-none">
-            <AnimatedPressable
-              style={styles.infoButton}
-              onPress={() => onOpenProfile(profiles[activeIndex])}
-              accessibilityLabel={t('profileDetail.openDetails')}
-              hitSlop={6}
-              scaleTo={0.9}
-            >
-              <Ionicons name="information-circle" size={28} color={colors.text} />
-            </AnimatedPressable>
-          </View>
-        ) : null}
 
         <SwipeBurstEffect
           kind={activeEffect?.kind ?? null}
@@ -579,9 +588,11 @@ const styles = StyleSheet.create({
     flex: 1,
     height: '100%',
   },
-  deck: {
-    flex: 1,
-    height: '100%',
+  cardStage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
   },
   cardSlot: {
     ...StyleSheet.absoluteFill,
@@ -589,11 +600,10 @@ const styles = StyleSheet.create({
   infoButtonWrap: {
     position: 'absolute',
     top: DISCOVER_INFO_TOP,
-    right: spacing.md,
     width: DISCOVER_INFO_BUTTON_SIZE,
     height: DISCOVER_INFO_BUTTON_SIZE,
-    zIndex: 50,
-    elevation: 50,
+    zIndex: 60,
+    elevation: 60,
   },
   infoButton: {
     width: DISCOVER_INFO_BUTTON_SIZE,

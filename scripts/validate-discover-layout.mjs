@@ -8,6 +8,16 @@ const SPACING_XS = 4;
 const INFO_SIZE = 40;
 const INFO_TOP = SPACING_MD;
 const BADGE_ROW = 26;
+const COMPACT_TARGET = 52;
+
+function discoverInfoButtonRightInset(compact) {
+  const boostColumn = compact ? COMPACT_TARGET : 68;
+  return SPACING_MD + boostColumn + SPACING_SM;
+}
+
+function discoverDotsRightInset(compact) {
+  return INFO_SIZE + discoverInfoButtonRightInset(compact) + SPACING_SM;
+}
 
 function discoverTopChromeBottom() {
   return INFO_TOP + INFO_SIZE + SPACING_SM;
@@ -66,6 +76,14 @@ assert(
 assert(
   discoverPhotoTapBottomInset(true, { emberChipRow: true }) > discoverPhotoTapBottomInset(true),
   'ember row increases tap inset',
+);
+assert(
+  discoverInfoButtonRightInset(true) > SPACING_MD + COMPACT_TARGET,
+  'info clears boost column on compact deck',
+);
+assert(
+  discoverDotsRightInset(true) > discoverInfoButtonRightInset(true) + INFO_SIZE,
+  'dots leave room for info control',
 );
 
 console.log('validate-discover-layout: ok');

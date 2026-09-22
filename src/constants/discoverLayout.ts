@@ -19,10 +19,25 @@ export function discoverActionRailHeight(compact: boolean): number {
 }
 
 /** Photo indicator row — leave room for top-right info control. */
-export const DISCOVER_DOTS_RIGHT_INSET =
-  DISCOVER_INFO_BUTTON_SIZE + spacing.md + spacing.sm;
+/** Keep photo dots out of the top-right info control. */
+export function discoverDotsRightInset(compact: boolean): number {
+  return (
+    DISCOVER_INFO_BUTTON_SIZE +
+    discoverInfoButtonRightInset(compact) +
+    spacing.sm
+  );
+}
 
 export const DISCOVER_INFO_TOP = spacing.md;
+
+/**
+ * Distance from the card's right edge to the info button's right edge.
+ * Inset left of the boost column so the purple flash control cannot cover the ⓘ hit target.
+ */
+export function discoverInfoButtonRightInset(compact: boolean): number {
+  const boostColumn = compact ? DISCOVER_COMPACT_TARGET_SIZE : DISCOVER_TARGET_SIZE;
+  return spacing.md + boostColumn + spacing.sm;
+}
 
 /** Bottom edge of the top chrome row (photo dots + info control). */
 export function discoverTopChromeBottom(): number {

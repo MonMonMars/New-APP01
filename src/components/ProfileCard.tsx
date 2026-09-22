@@ -17,7 +17,8 @@ import { AiPersonaBadge } from './AiPersonaBadge';
 import { VideoProfileOverlay } from './VideoProfileOverlay';
 import { VerificationBadges } from './VerificationBadges';
 import {
-  DISCOVER_DOTS_RIGHT_INSET,
+  discoverDotsRightInset,
+  discoverInfoButtonRightInset,
   DISCOVER_INFO_BUTTON_SIZE,
   DISCOVER_INFO_TOP,
   discoverLeftBadgeTop,
@@ -196,7 +197,12 @@ export function ProfileCard({
 
       {isTop && photoCount > 1 && (
         <>
-          <View style={styles.dots}>
+          <View
+            style={[
+              styles.dots,
+              { right: spacing.md + discoverDotsRightInset(compact) },
+            ]}
+          >
             {profile.photos.map((_, dotIndex) => {
               const locked = dotIndex >= visiblePhotoCount;
               return (
@@ -243,9 +249,12 @@ export function ProfileCard({
 
       {isTop && onOpenDetail ? (
         <AnimatedPressable
-          style={styles.infoButton}
+          style={[
+            styles.infoButton,
+            { right: discoverInfoButtonRightInset(compact) },
+          ]}
           onPress={onOpenDetail}
-          hitSlop={6}
+          hitSlop={10}
           accessibilityLabel={t('profileDetail.openDetails')}
         >
           <Ionicons name="information-circle" size={28} color={colors.text} />
@@ -368,7 +377,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: DISCOVER_INFO_TOP,
     left: spacing.md,
-    right: spacing.md + DISCOVER_DOTS_RIGHT_INSET,
     flexDirection: 'row',
     gap: 4,
     zIndex: 8,
@@ -420,14 +428,14 @@ const styles = StyleSheet.create({
   infoButton: {
     position: 'absolute',
     top: DISCOVER_INFO_TOP,
-    right: spacing.md,
     width: DISCOVER_INFO_BUTTON_SIZE,
     height: DISCOVER_INFO_BUTTON_SIZE,
     borderRadius: DISCOVER_INFO_BUTTON_SIZE / 2,
     backgroundColor: 'rgba(0,0,0,0.45)',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 12,
+    zIndex: 24,
+    elevation: 24,
   },
   info: {
     position: 'absolute',

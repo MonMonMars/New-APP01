@@ -127,6 +127,7 @@ export function DisguiseAlertsScreen() {
           <PulseFeedRefreshFooter
             refreshing={refreshing}
             justUpdated={justUpdated}
+            variant="refresh"
             onPressRefresh={() => {
               void refresh();
             }}

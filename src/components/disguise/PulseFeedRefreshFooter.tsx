@@ -10,33 +10,41 @@ import { AnimatedPressable } from '../AnimatedPressable';
 type PulseFeedRefreshFooterProps = {
   refreshing: boolean;
   justUpdated?: boolean;
+  loadingMore?: boolean;
+  /** `loadMore` = infinite scroll footer; `refresh` = tap to reload (profile/settings scroll). */
+  variant?: 'loadMore' | 'refresh';
   onPressRefresh?: () => void;
 };
 
 export function PulseFeedRefreshFooter({
   refreshing,
   justUpdated = false,
+  loadingMore = false,
+  variant = 'loadMore',
   onPressRefresh,
 }: PulseFeedRefreshFooterProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const accent = useDisguiseWorld().accent;
 
-  let message = t('disguiseFeed.scrollRefreshHint');
+  let message =
+    variant === 'refresh' ? t('disguiseFeed.scrollRefreshHint') : t('disguiseFeed.scrollLoadMoreHint');
   if (refreshing) {
     message = t('disguiseFeed.refreshingFeed');
+  } else if (loadingMore) {
+    message = t('disguiseFeed.loadingMore');
   } else if (justUpdated) {
     message = t('disguiseFeed.feedUpdated');
   }
 
   const body = (
     <>
-      {refreshing ? <ActivityIndicator color={accent} /> : null}
+      {refreshing || loadingMore ? <ActivityIndicator color={accent} /> : null}
       <Text style={[styles.text, { color: colors.textMuted }]}>{message}</Text>
     </>
   );
 
-  if (!onPressRefresh || refreshing) {
+  if (!onPressRefresh || refreshing || loadingMore) {
     return <View style={styles.footer}>{body}</View>;
   }
 

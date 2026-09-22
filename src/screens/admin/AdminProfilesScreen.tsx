@@ -8,7 +8,8 @@ import { ScreenHeader } from '../../components/ScreenHeader';
 import { listAdminCatalogProfiles } from '../../admin/adminProfileStore';
 import { mockProfiles } from '../../data/profiles';
 import { useTheme } from '../../context/ThemeContext';
-import { ACCOUNT_KIND_LABELS, resolveAccountKind } from '../../types/accountKind';
+import { useTranslation } from '../../i18n';
+import { resolveAccountKind, type AccountKind } from '../../types/accountKind';
 import type { AdminStackParamList } from '../../navigation/AdminNavigator';
 import { radii, spacing } from '../../theme';
 
@@ -21,6 +22,7 @@ type Props = {
 export function AdminProfilesScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
 
@@ -40,12 +42,18 @@ export function AdminProfilesScreen({ navigation }: Props) {
 
   const filters: Filter[] = ['all', 'demo', 'ai_persona', 'real'];
 
+  const kindLabel = (kind: AccountKind) => t(`admin.accountKind.${kind}`);
+
   return (
     <View style={[styles.root, { paddingTop: insets.top, backgroundColor: colors.background }]}>
-      <ScreenHeader title="Profiles" leftIcon="chevron-back" onLeftPress={() => navigation.goBack()} />
+      <ScreenHeader
+        title={t('admin.profiles')}
+        leftIcon="chevron-back"
+        onLeftPress={() => navigation.goBack()}
+      />
       <View style={styles.toolbar}>
         <TextInput
-          placeholder="Search name or id"
+          placeholder={t('admin.searchPlaceholder')}
           placeholderTextColor={colors.textMuted}
           value={query}
           onChangeText={setQuery}
@@ -68,7 +76,7 @@ export function AdminProfilesScreen({ navigation }: Props) {
               onPress={() => setFilter(f)}
             >
               <Text style={[styles.chipText, { color: filter === f ? '#111' : colors.textMuted }]}>
-                {f === 'all' ? 'All' : ACCOUNT_KIND_LABELS[f]}
+                {f === 'all' ? t('admin.filterAll') : kindLabel(f)}
               </Text>
             </AnimatedPressable>
           ))}
@@ -90,11 +98,11 @@ export function AdminProfilesScreen({ navigation }: Props) {
                   {item.name}, {item.age}
                 </Text>
                 <Text style={[styles.meta, { color: colors.textMuted }]}>
-                  id {item.id} · {ACCOUNT_KIND_LABELS[kind]}
+                  {t('admin.metaId', { id: item.id, kind: kindLabel(kind) })}
                   {item.city ? ` · ${item.city}` : ''}
                 </Text>
               </View>
-              <Text style={{ color: colors.textMuted }}>Edit</Text>
+              <Text style={{ color: colors.textMuted }}>{t('admin.edit')}</Text>
             </AnimatedPressable>
           );
         }}

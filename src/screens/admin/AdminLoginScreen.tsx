@@ -7,6 +7,7 @@ import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { useAdmin } from '../../context/AdminContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import type { AdminStackParamList } from '../../navigation/AdminNavigator';
 import { radii, spacing } from '../../theme';
 
@@ -18,6 +19,7 @@ type Props = {
 export function AdminLoginScreen({ onClose }: Props) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const { signInAdmin, adminSession } = useAdmin();
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -33,23 +35,21 @@ export function AdminLoginScreen({ onClose }: Props) {
     const result = await signInAdmin(email);
     setBusy(false);
     if (!result.ok) {
-      setError(result.error ?? 'Sign-in failed');
+      setError(result.error ? t(result.error) : t('admin.signInFailed'));
     }
   };
 
   return (
     <View style={[styles.root, { paddingTop: insets.top, backgroundColor: colors.background }]}>
-      <ScreenHeader title="Admin" leftIcon="close" onLeftPress={onClose} />
+      <ScreenHeader title={t('admin.title')} leftIcon="close" onLeftPress={onClose} />
       <View style={styles.body}>
-        <Text style={[styles.title, { color: colors.text }]}>Staff sign-in</Text>
-        <Text style={[styles.sub, { color: colors.textMuted }]}>
-          Use an email on EXPO_PUBLIC_ADMIN_ALLOWLIST. Roles come from env maps or superadmin assignment.
-        </Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('admin.staffSignIn')}</Text>
+        <Text style={[styles.sub, { color: colors.textMuted }]}>{t('admin.signInHint')}</Text>
         <TextInput
           autoCapitalize="none"
           autoCorrect={false}
           keyboardType="email-address"
-          placeholder="you@company.com"
+          placeholder={t('admin.emailPlaceholder')}
           placeholderTextColor={colors.textMuted}
           value={email}
           onChangeText={setEmail}
@@ -67,7 +67,7 @@ export function AdminLoginScreen({ onClose }: Props) {
           {busy ? (
             <ActivityIndicator color="#111" />
           ) : (
-            <Text style={styles.buttonText}>Continue</Text>
+            <Text style={styles.buttonText}>{t('admin.continue')}</Text>
           )}
         </AnimatedPressable>
       </View>

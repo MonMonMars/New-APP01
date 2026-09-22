@@ -31,4 +31,5 @@ jobs:
           sleep 3
           node scripts/verify-demo-link.mjs http://127.0.0.1:8090
           node scripts/check-pulse-link-routing.mjs http://127.0.0.1:8090
+          node scripts/check-privacy-version-footer.mjs http://127.0.0.1:8090
           kill "$SERVE_PID" 2>/dev/null || true

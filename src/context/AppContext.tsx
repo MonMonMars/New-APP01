@@ -12,7 +12,8 @@ import { AppState, Linking, type AppStateStatus } from 'react-native';
 
 import { hydrateAdminProfileOverrides } from '../admin/adminProfileStore';
 import { assessProfile, shouldHideProfileFromDiscover } from '../trust/scamDetector';
-import { hydrateScamEnforcement } from '../trust/scamEnforcementStore';
+import { hydrateScamEnforcement, quarantineProfile } from '../trust/scamEnforcementStore';
+import { shouldBlockOutgoingLinkToPeer } from '../trust/scamMessageGuard';
 import { seedConversations } from '../data/conversations';
 import {
   AI_PERSONA_IDS,
@@ -485,6 +486,7 @@ type AppContextValue = {
   unblockProfile: (profileId: string) => void;
   unlikeProfile: (profileId: string) => void;
   reportProfile: (profileId: string, reason?: string) => void;
+  refreshScamEnforcement: () => void;
   unmatchProfile: (profileId: string) => void;
   savePulsePost: (postId: string) => void;
   unsavePulsePost: (postId: string) => void;
@@ -2204,12 +2206,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPassedIds((prev) => new Set(prev).add(profileId));
   }, []);
 
+  const refreshScamEnforcement = useCallback(() => {
+    setScamEnforcementVersion((version) => version + 1);
+  }, []);
+
   const reportProfile = useCallback(
     (profileId: string, reason?: string) => {
       if (!checkClientRateLimit('report', 10, 60_000)) {
         return;
       }
       const sanitizedReason = reason ? sanitizeReportReason(reason) : 'Reported from app';
+      const reportedProfile = getProfileById(profileId);
+      const scamAssessment = reportedProfile ? assessProfile(reportedProfile) : null;
+      const scamReport =
+        sanitizedReason.toLowerCase().includes('scam') ||
+        sanitizedReason.toLowerCase().includes('spam') ||
+        sanitizedReason.toLowerCase().includes('fake profile');
+      if (scamReport || (scamAssessment && scamAssessment.level !== 'low')) {
+        void quarantineProfile(profileId).then(() => {
+          setScamEnforcementVersion((version) => version + 1);
+        });
+      }
       if (userId) {
         void submitSecurityReport({
           reporterUserId: userId,
@@ -2217,7 +2234,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
           reason: sanitizedReason,
           context: 'profile',
         });
-        void logSecurityEvent(userId, 'profile_reported', { profileId });
+        void logSecurityEvent(userId, 'profile_reported', {
+          profileId,
+          scamScore: scamAssessment ? String(scamAssessment.score) : '',
+          scamLevel: scamAssessment?.level ?? '',
+          autoQuarantine: String(
+            scamReport || scamAssessment?.level === 'critical' || scamAssessment?.level === 'high',
+          ),
+        });
       }
       blockProfile(profileId);
     },
@@ -2490,6 +2514,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return 'invalid';
       }
 
+      const targetConversation = conversations.find((item) => item.id === conversationId);
+      const peerProfile = targetConversation?.match.profile;
+      if (peerProfile && trimmed) {
+        const peerAssessment = assessProfile(peerProfile);
+        if (shouldBlockOutgoingLinkToPeer(peerAssessment.level, trimmed)) {
+          return 'scam_link_blocked';
+        }
+      }
+
       let resolvedImageUrl = imageUrl;
       if (resolvedImageUrl && !isGif && needsCloudMediaUpload(resolvedImageUrl, userId)) {
         const localUri = resolvedImageUrl;
@@ -2516,7 +2549,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       };
 
       const preview = messagePreviewText(message, locale);
-      const targetConversation = conversations.find((item) => item.id === conversationId);
 
       setConversations((prev) =>
         prev.map((conversation) => {
@@ -3543,6 +3575,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       unblockProfile,
       unlikeProfile,
       reportProfile,
+      refreshScamEnforcement,
       unmatchProfile,
       savePulsePost,
       unsavePulsePost,
@@ -3706,6 +3739,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       unblockProfile,
       unlikeProfile,
       reportProfile,
+      refreshScamEnforcement,
       unmatchProfile,
       savePulsePost,
       unsavePulsePost,

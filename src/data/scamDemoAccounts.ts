@@ -4,8 +4,8 @@ export const SCAM_DEMO_PROFILE_MARKERS: Record<
   { bioSnippet?: string; openerSnippet?: string; bonusScore?: number }
 > = {
   '42': {
-    openerSnippet: 'Can we move to WhatsApp? I have a crypto opportunity for you.',
-    bonusScore: 35,
+    openerSnippet: 'Can we move to WhatsApp? I have a crypto opportunity for you — send money via Cash App.',
+    bonusScore: 38,
   },
   '67': {
     bioSnippet: 'Deployed overseas — need help with a wire transfer until I get home.',

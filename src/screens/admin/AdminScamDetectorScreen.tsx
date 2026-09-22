@@ -6,6 +6,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { mockProfiles } from '../../data/profiles';
+import { useApp } from '../../context/AppContext';
 import { useAdmin } from '../../context/AdminContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../i18n';
@@ -32,6 +33,7 @@ type Row = {
   level: ScamRiskLevel;
   quarantined: boolean;
   signalCount: number;
+  topSignal?: string;
 };
 
 function levelColor(level: ScamRiskLevel): string {
@@ -52,6 +54,7 @@ export function AdminScamDetectorScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const { hasPermission } = useAdmin();
+  const { refreshScamEnforcement } = useApp();
   const [refreshKey, setRefreshKey] = useState(0);
 
   const rows = useMemo((): Row[] => {
@@ -67,6 +70,7 @@ export function AdminScamDetectorScreen({ navigation }: Props) {
           level: assessment.level,
           quarantined: isProfileQuarantined(profile.id),
           signalCount: assessment.signals.length,
+          topSignal: assessment.signals[0]?.excerpt ?? assessment.signals[0]?.id,
         };
       })
       .sort((a, b) => b.score - a.score);
@@ -86,7 +90,8 @@ export function AdminScamDetectorScreen({ navigation }: Props) {
       await quarantineProfile(profileId);
     }
     setRefreshKey((k) => k + 1);
-  }, []);
+    refreshScamEnforcement();
+  }, [refreshScamEnforcement]);
 
   if (!hasPermission('canRunBackendActions')) {
     return (
@@ -126,6 +131,7 @@ export function AdminScamDetectorScreen({ navigation }: Props) {
               </Text>
               <Text style={[styles.meta, { color: colors.textMuted }]}>
                 ID {item.id} · {item.signalCount} {t('admin.scamSignals')}
+                {item.topSignal ? ` · ${item.topSignal}` : ''}
               </Text>
               <View style={styles.badges}>
                 <Text style={[styles.badge, { color: levelColor(item.level) }]}>

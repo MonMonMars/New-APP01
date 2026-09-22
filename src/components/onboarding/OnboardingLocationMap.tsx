@@ -78,6 +78,7 @@ export function OnboardingLocationMap({
           showYouMarker={false}
           showAvatarPins={false}
           interactive
+          showZoomControls
           showLocateButton
           onLocatePress={handleUseGps}
           locateLoading={gpsLoading}

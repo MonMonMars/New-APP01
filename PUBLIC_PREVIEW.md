@@ -5,8 +5,8 @@
 **https://limousines-phase-carmen-safe.trycloudflare.com**
 
 - **Integration branch:** `cursor/fix-info-boost-buttons-7b60` (layout + scam detector)
-- **Build ID:** `1fa89ce-20260922T165033Z` (HTML comment `spark-demo-build:` or loading screen footer)
-- **Verified:** 2026-09-22 16:51 UTC — `verify-demo-link` 9/9 (onboarding → Discover → Pulse)
+- **Build ID:** `aca70f2-20260922T173121Z` (HTML comment `spark-demo-build:` or loading screen footer)
+- **Verified:** 2026-09-22 17:32 UTC — `verify-demo-link` 9/9 (onboarding → Discover → Pulse)
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

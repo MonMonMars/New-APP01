@@ -2,11 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://gods-rated-categories-elementary.trycloudflare.com**
+**https://traditions-academics-inch-harris.trycloudflare.com**
 
-- **Integration branch:** `cursor/tinder-style-dating-app-7b60` (complete demo app)
-- **Build ID:** `0f102f9-20260922T031946Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-22 03:20 UTC — HTML + JS bundle + `verify-demo-link` PASS (9/9)
+- **Integration branch:** `main` (post PR #155)
+- **Build ID:** `24f429d-20260922T180034Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
+- **Verified:** 2026-09-22 18:01 UTC — tunnel HTTP 200 + HTML build stamp (local `verify:ci` PASS)
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

@@ -309,11 +309,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.xs,
     padding: spacing.sm,
+    flexShrink: 1,
+    maxWidth: '58%',
   },
   holdText: {
     color: palette.gradientEnd,
     fontSize: 14,
     fontWeight: '700',
+    flexShrink: 1,
   },
   content: {
     paddingBottom: spacing.xl,

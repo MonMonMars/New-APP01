@@ -26,7 +26,7 @@ jobs:
       - run: npx playwright install chromium --with-deps
       - name: Playwright smoke (onboarding + Pulse routing)
         run: |
-          npx --yes serve -c serve.json -l 8090 dist &
+          npx --yes serve -s -l 8090 -c serve.json &
           SERVE_PID=$!
           sleep 3
           node scripts/verify-demo-link.mjs http://127.0.0.1:8090

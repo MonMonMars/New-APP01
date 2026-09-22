@@ -67,7 +67,13 @@ export function ChatReplySuggestions({
           accessibilityLabel={onOpenHelper ? t('chat.openDialogueHelper') : title}
         >
           <Ionicons name="sparkles" size={14} color={colors.gradientEnd} />
-          <Text style={[styles.title, { color: colors.textMuted }]}>{title}</Text>
+          <Text
+            style={[styles.title, { color: colors.textMuted }]}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {title}
+          </Text>
           {source === 'llm' ? (
             <Text style={[styles.badge, { color: colors.gradientEnd }]}>{t('chat.aiPowered')}</Text>
           ) : null}

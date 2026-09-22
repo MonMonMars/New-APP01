@@ -444,7 +444,13 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
                 { backgroundColor: effectiveYourTurn ? colors.gradientEnd : colors.surface },
               ]}
             >
-              <Text style={[styles.turnText, { color: colors.text }]}>{turnLabel}</Text>
+              <Text
+                style={[styles.turnText, { color: colors.text }]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {turnLabel}
+              </Text>
             </View>
           ) : null}
           <AnimatedPressable
@@ -806,6 +812,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.button,
     paddingHorizontal: spacing.sm,
     paddingVertical: 3,
+    maxWidth: 88,
   },
   turnText: {
     fontSize: 10,

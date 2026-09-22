@@ -51,6 +51,10 @@ import { getReportReasonLabel } from '../components/ReportReasonSheet';
 import { pickProfilePhoto } from '../utils/photoPicker';
 import { alertChatSendOutcome } from '../utils/chatSendAlerts';
 import { resolveYourTurnFromMessages } from '../utils/conversationMerge';
+import { ScamAlertBanner } from '../components/ScamAlertBanner';
+import { ScamProtectionSheet } from '../components/ScamProtectionSheet';
+import { assessProfile } from '../trust/scamDetector';
+import { buildCustomerProtectionPlan } from '../trust/scamProtectionProtocol';
 import { radii, spacing } from '../theme';
 
 type ChatScreenProps = {
@@ -100,6 +104,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
   const [aiSuggestionsFailed, setAiSuggestionsFailed] = useState(false);
   const [dialogueMode, setDialogueMode] = useState<ChatDialogueMode>('opener');
   const [showDialogueHelper, setShowDialogueHelper] = useState(false);
+  const [showScamProtection, setShowScamProtection] = useState(false);
   const suggestRequestRef = useRef(0);
   const messageListRef = useRef<FlatList<Message>>(null);
 
@@ -171,6 +176,28 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
     }
     return null;
   }, [threadMessages]);
+
+  const peerMessageTexts = useMemo(
+    () =>
+      threadMessages
+        .filter((message) => !message.isMine && message.text.trim().length > 0)
+        .map((message) => message.text),
+    [threadMessages],
+  );
+
+  const scamAssessment = useMemo(() => {
+    if (!threadProfile) {
+      return null;
+    }
+    return assessProfile(threadProfile, peerMessageTexts);
+  }, [peerMessageTexts, threadProfile]);
+
+  const scamProtectionPlan = useMemo(() => {
+    if (!scamAssessment) {
+      return null;
+    }
+    return buildCustomerProtectionPlan(scamAssessment, locale);
+  }, [locale, scamAssessment]);
 
   useEffect(() => {
     markConversationRead(conversationId);
@@ -451,6 +478,13 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         </View>
       </View>
 
+      {scamProtectionPlan?.showChatBanner && scamAssessment ? (
+        <ScamAlertBanner
+          riskLevel={scamAssessment.level}
+          onLearnMore={() => setShowScamProtection(true)}
+        />
+      ) : null}
+
       {activeDateCheckIn && (
         <View style={[styles.checkInCard, { backgroundColor: colors.surface, borderColor: colors.gradientEnd }]}>
           <Ionicons name="shield-checkmark" size={18} color={colors.gradientEnd} />
@@ -662,6 +696,14 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
           setShowDateCheckIn(true);
         }}
       />
+
+      {scamAssessment ? (
+        <ScamProtectionSheet
+          visible={showScamProtection}
+          onClose={() => setShowScamProtection(false)}
+          riskLevel={scamAssessment.level}
+        />
+      ) : null}
 
       <DateCheckInSheet
         visible={showDateCheckIn}

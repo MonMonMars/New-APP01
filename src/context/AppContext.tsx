@@ -11,6 +11,8 @@ import {
 import { AppState, Linking, type AppStateStatus } from 'react-native';
 
 import { hydrateAdminProfileOverrides } from '../admin/adminProfileStore';
+import { assessProfile, shouldHideProfileFromDiscover } from '../trust/scamDetector';
+import { hydrateScamEnforcement } from '../trust/scamEnforcementStore';
 import { seedConversations } from '../data/conversations';
 import {
   AI_PERSONA_IDS,
@@ -619,6 +621,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [rewindKey, setRewindKey] = useState(0);
   const [discoverUnlockedCount, setDiscoverUnlockedCount] = useState(DISCOVER_BATCH_SIZE);
   const [priorityProfileId, setPriorityProfileId] = useState<string | null>(null);
+  const [scamEnforcementVersion, setScamEnforcementVersion] = useState(0);
 
   const hydratedRef = useRef(false);
   const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -675,11 +678,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const hydrationTimeout = setTimeout(finishHydration, 8000);
 
-    void Promise.all([loadPersistedState(), hydrateAdminProfileOverrides()])
+    void Promise.all([loadPersistedState(), hydrateAdminProfileOverrides(), hydrateScamEnforcement()])
       .then(async ([saved]) => {
       if (cancelled) {
         return;
       }
+
+      setScamEnforcementVersion((version) => version + 1);
 
       if (saved) {
         setUser(saved.user);
@@ -1328,6 +1333,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       );
       filtered = filterProfilesInRadius(filtered, searchCenter, preferences.maxDistanceMiles);
     }
+    filtered = filtered.filter((profile) => {
+      const assessment = assessProfile(profile);
+      return !shouldHideProfileFromDiscover(assessment);
+    });
     return filtered;
   }, [
     excludedIds,
@@ -1339,6 +1348,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     preferences,
     privacyPreferences.incognitoMode,
     privacyPreferences.locationSharing,
+    scamEnforcementVersion,
     user,
   ]);
 

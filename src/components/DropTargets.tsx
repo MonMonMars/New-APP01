@@ -10,6 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { PRESS_SPRING } from './AnimatedPressable';
+import { discoverActionRailHeight } from '../constants/discoverLayout';
 import { spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
@@ -105,7 +106,7 @@ function TargetButton({
   return (
     <Pressable
       onPress={disabled ? undefined : onPress}
-      hitSlop={16}
+      hitSlop={10}
       disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
@@ -212,8 +213,18 @@ export function DropTargets({
   const rewindBorder = rewindEnabled ? TINDER_REWIND_BORDER : 'rgba(160, 160, 165, 0.35)';
   const rewindBg = rewindEnabled ? TINDER_REWIND_BG : 'rgba(255, 255, 255, 0.06)';
 
+  const railHeight = discoverActionRailHeight(compact);
+
   return (
-    <View style={[styles.row, compact && styles.rowCompact]} pointerEvents="box-none" onLayout={reportZones}>
+    <View
+      style={[
+        styles.row,
+        compact && styles.rowCompact,
+        { height: railHeight, maxHeight: railHeight },
+      ]}
+      pointerEvents="box-none"
+      onLayout={reportZones}
+    >
       <View style={styles.rewindWrap}>
         <TargetButton
           icon="arrow-undo"
@@ -312,7 +323,7 @@ export function DropTargets({
 const styles = StyleSheet.create({
   row: {
     position: 'absolute',
-    bottom: spacing.md,
+    bottom: 0,
     left: spacing.sm,
     right: spacing.sm,
     flexDirection: 'row',
@@ -321,7 +332,6 @@ const styles = StyleSheet.create({
     zIndex: 20,
   },
   rowCompact: {
-    bottom: spacing.sm,
     left: spacing.xs,
     right: spacing.xs,
   },

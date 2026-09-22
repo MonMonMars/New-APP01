@@ -46,11 +46,10 @@ export function VideoProfileOverlay({ visible, profile }: VideoProfileOverlayPro
 
 const styles = StyleSheet.create({
   overlay: {
-    position: 'absolute',
-    top: spacing.md + 28,
-    right: spacing.md,
+    ...StyleSheet.absoluteFill,
     zIndex: 7,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   playButton: {
     width: 52,

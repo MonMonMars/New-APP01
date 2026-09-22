@@ -92,7 +92,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
     padding: spacing.sm,
   },
-  textCol: { flex: 1 },
+  textCol: {
+    flex: 1,
+    minWidth: 0,
+  },
   title: {
     fontSize: 15,
     fontWeight: '700',

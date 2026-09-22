@@ -34,6 +34,49 @@ export function discoverPhotoTapTopInset(): number {
   return discoverTopChromeBottom();
 }
 
+export const DISCOVER_LEFT_BADGE_ROW_HEIGHT = 26;
+
+type DiscoverBadgeProfile = {
+  spotlight?: boolean;
+  mostCompatible?: boolean;
+};
+
+export function discoverLeftBadgeStackIndex(
+  profile: DiscoverBadgeProfile,
+  kind: 'crush' | 'compatible' | 'private',
+): number {
+  switch (kind) {
+    case 'crush':
+      return 0;
+    case 'compatible':
+      return profile.spotlight ? 1 : 0;
+    case 'private': {
+      let index = 0;
+      if (profile.spotlight) {
+        index += 1;
+      }
+      if (profile.mostCompatible) {
+        index += 1;
+      }
+      return index;
+    }
+    default: {
+      const neverKind: never = kind;
+      return neverKind;
+    }
+  }
+}
+
+export function discoverLeftBadgeTop(
+  profile: DiscoverBadgeProfile,
+  kind: 'crush' | 'compatible' | 'private',
+): number {
+  return (
+    discoverTopChromeBottom() +
+    discoverLeftBadgeStackIndex(profile, kind) * DISCOVER_LEFT_BADGE_ROW_HEIGHT
+  );
+}
+
 /**
  * Bottom inset for profile name / meta on the card.
  * Compact decks already reserve the action rail via deck `paddingBottom` — only add a small gap here.

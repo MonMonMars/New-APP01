@@ -96,12 +96,20 @@ export function DisguiseProfileScreen() {
   }, [handleTabRepress, navigation]);
   const profileFeedItem = buildDisguisedProfileFeedItem(user, profileCreative);
   const recentPosts = useMemo(
-    () => buildDisguisedProfileFeedItems(pulseSection, refreshGeneration),
-    [pulseSection, refreshGeneration],
+    () => buildDisguisedProfileFeedItems(pulseSection, refreshGeneration, preferences.showMe),
+    [pulseSection, refreshGeneration, preferences.showMe],
   );
   const feedItems = useMemo(
-    () => buildDisguiseFeed(user, disguiseAdCreative, pulseSection, refreshGeneration),
-    [user, disguiseAdCreative, pulseSection, refreshGeneration],
+    () =>
+      buildDisguiseFeed(
+        user,
+        disguiseAdCreative,
+        pulseSection,
+        refreshGeneration,
+        undefined,
+        preferences.showMe,
+      ),
+    [user, disguiseAdCreative, pulseSection, refreshGeneration, preferences.showMe],
   );
   const savedPosts = useMemo(
     () => resolveSavedPulsePosts(pulseSocial.savedPostIds, feedItems, user.gender, locale),

@@ -11,6 +11,7 @@ import {
   getOpeningMoveSuggestionLabel,
   getOrientationLabel,
   getProfileIntentLabel,
+  getShowMeLabel,
 } from '../i18n/labels';
 import { useTranslation } from '../i18n';
 import {

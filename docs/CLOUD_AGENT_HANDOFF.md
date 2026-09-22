@@ -2,7 +2,7 @@
 
 **Read this file first** on every new Cloud Agent run for `MonMonMars/New-APP01`.
 
-Last updated: 2026-09-22 (after PR #155 merged to `main`).
+Last updated: 2026-09-22 (integration branch for PRs #147–#154: `cursor/integrate-prs-147-154-2e8c`).
 
 ## Where all “data and files” live
 
@@ -34,18 +34,20 @@ These mobile/cloud threads are stuck (queue full, errors, or pre-`main` empty ch
 | Cantonese voice / Sakura Face / Amoji-engine voice | Unable to complete |
 | Any agent still on empty `main` before 2026-09-22 | No `package.json` in workspace |
 
-## Open draft PRs (feature work not yet on `main`)
+## Draft PRs #147–#154 (integrated 2026-09-22)
 
-Review and merge or rebase onto `main` as needed:
+These eight drafts were stacked on a pre-`main` history (merge-base = initial commit only). They are **combined in one PR** from branch **`cursor/integrate-prs-147-154-2e8c`** (tip content from `cursor/fix-info-boost-buttons-7b60`, which already includes #153 scam detector + #154 layout). After merge to `main`, close #147–#154 as superseded.
 
-| PR | Branch | Topic |
-|----|--------|--------|
-| #154 | `cursor/fix-info-boost-buttons-7b60` | Discover layout + scam protection UI |
-| #153 | `cursor/scam-detector-system-7b60` | Scam detector protocol |
-| #152 | `cursor/admin-panel-menu-7b60` | Admin panel / staff accounts |
-| #151 | `cursor/demo-ai-portrait-photos-7b60` | AI portrait pool for demo |
-| #150 | `cursor/pulse-unique-news-ads-7b60` | Unique Pulse news/ads |
-| #149–#147 | various `cursor/*-7b60` | Pulse reload, Show me filter, etc. |
+| PR | Topic |
+|----|--------|
+| #147 | Pulse reload, taps, ads, badges |
+| #148 | Grey reload overlay |
+| #149 | Show me filter + demo profile copy |
+| #150 | Unique news/sponsor cards |
+| #151 | Bundled AI demo portraits |
+| #152 | Admin panel / staff accounts |
+| #153 | Scam detector + customer protection |
+| #154 | Discover layout + scam UI polish |
 
 `main` is the integration branch for **new** agents unless the user names a specific PR branch.
 

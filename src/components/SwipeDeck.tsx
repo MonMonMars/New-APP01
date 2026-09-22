@@ -18,6 +18,11 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Profile } from '../types/profile';
+import {
+  DISCOVER_INFO_BUTTON_SIZE,
+  DISCOVER_INFO_TOP,
+  discoverActionRailHeight,
+} from '../constants/discoverLayout';
 import { spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
@@ -28,6 +33,7 @@ import { SuperLikeCelebration } from './SuperLikeCelebration';
 import { SwipeBurstEffect, SwipeEffectKind, SwipeEffectOrigin } from './SwipeBurstEffect';
 
 const ZONE_HIT_PADDING = 36;
+const ZONE_HIT_PADDING_COMPACT = 26;
 
 export type SwipeDeckHandle = {
   reject: () => void;
@@ -367,6 +373,8 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
       [starZone],
     );
 
+    const zoneHitPadding = compact ? ZONE_HIT_PADDING_COMPACT : ZONE_HIT_PADDING;
+
     const panGesture = Gesture.Pan()
       .activeOffsetX([-16, 16])
       .activeOffsetY([-16, 16])
@@ -380,30 +388,30 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
         const pointerY = event.y;
 
         const trashProximity = Math.max(
-          zoneProximity(pointerX, pointerY, trashZone.value, ZONE_HIT_PADDING),
+          zoneProximity(pointerX, pointerY, trashZone.value, zoneHitPadding),
           zoneProximity(
             cardCenterX,
             cardCenterY,
             trashZone.value,
-            ZONE_HIT_PADDING,
+            zoneHitPadding,
           ),
         );
         const heartProximity = Math.max(
-          zoneProximity(pointerX, pointerY, heartZone.value, ZONE_HIT_PADDING),
+          zoneProximity(pointerX, pointerY, heartZone.value, zoneHitPadding),
           zoneProximity(
             cardCenterX,
             cardCenterY,
             heartZone.value,
-            ZONE_HIT_PADDING,
+            zoneHitPadding,
           ),
         );
         const starProximity = Math.max(
-          zoneProximity(pointerX, pointerY, starZone.value, ZONE_HIT_PADDING),
+          zoneProximity(pointerX, pointerY, starZone.value, zoneHitPadding),
           zoneProximity(
             cardCenterX,
             cardCenterY,
             starZone.value,
-            ZONE_HIT_PADDING,
+            zoneHitPadding,
           ),
         );
 
@@ -429,7 +437,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           cardCenterX,
           cardCenterY,
           trashZone.value,
-          ZONE_HIT_PADDING,
+          zoneHitPadding,
         );
         const overHeart = isOverZone(
           pointerX,
@@ -437,7 +445,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           cardCenterX,
           cardCenterY,
           heartZone.value,
-          ZONE_HIT_PADDING,
+          zoneHitPadding,
         );
         const overStar = isOverZone(
           pointerX,
@@ -445,7 +453,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           cardCenterX,
           cardCenterY,
           starZone.value,
-          ZONE_HIT_PADDING,
+          zoneHitPadding,
         );
 
         if (overTrash) {
@@ -470,9 +478,11 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
       return null;
     }
 
+    const actionRailHeight = discoverActionRailHeight(compact);
+
     return (
       <View ref={containerRef} style={styles.container} onLayout={handleDeckLayout}>
-        <View style={styles.deck}>
+        <View style={[styles.deck, { paddingBottom: actionRailHeight }]}>
           {visibleProfiles
             .slice()
             .reverse()
@@ -498,17 +508,6 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
                         />
                       </Animated.View>
                     </GestureDetector>
-                    {onOpenProfile ? (
-                      <AnimatedPressable
-                        style={styles.infoButton}
-                        onPress={() => onOpenProfile(profile)}
-                        accessibilityLabel={t('profileDetail.openDetails')}
-                        hitSlop={12}
-                        scaleTo={0.9}
-                      >
-                        <Ionicons name="information-circle" size={28} color={colors.text} />
-                      </AnimatedPressable>
-                    ) : null}
                   </View>
                 );
               }
@@ -544,6 +543,20 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           isSparkPlus={isSparkPlus}
         />
 
+        {onOpenProfile && activeIndex < profiles.length ? (
+          <View style={styles.infoButtonWrap} pointerEvents="box-none">
+            <AnimatedPressable
+              style={styles.infoButton}
+              onPress={() => onOpenProfile(profiles[activeIndex])}
+              accessibilityLabel={t('profileDetail.openDetails')}
+              hitSlop={6}
+              scaleTo={0.9}
+            >
+              <Ionicons name="information-circle" size={28} color={colors.text} />
+            </AnimatedPressable>
+          </View>
+        ) : null}
+
         <SwipeBurstEffect
           kind={activeEffect?.kind ?? null}
           origin={activeEffect?.origin ?? null}
@@ -573,17 +586,21 @@ const styles = StyleSheet.create({
   cardSlot: {
     ...StyleSheet.absoluteFill,
   },
-  infoButton: {
+  infoButtonWrap: {
     position: 'absolute',
-    bottom: spacing.lg + 8,
+    top: DISCOVER_INFO_TOP,
     right: spacing.md,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: DISCOVER_INFO_BUTTON_SIZE,
+    height: DISCOVER_INFO_BUTTON_SIZE,
+    zIndex: 50,
+    elevation: 50,
+  },
+  infoButton: {
+    width: DISCOVER_INFO_BUTTON_SIZE,
+    height: DISCOVER_INFO_BUTTON_SIZE,
+    borderRadius: DISCOVER_INFO_BUTTON_SIZE / 2,
     backgroundColor: 'rgba(0,0,0,0.45)',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 20,
-    elevation: 20,
   },
 });

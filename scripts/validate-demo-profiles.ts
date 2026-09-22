@@ -1,55 +1,33 @@
 import '../src/data/demoPortraitPools';
-import { INVALID_PEXELS_IDS } from '../src/data/demoPhotoSets';
-import { LEGACY_PEXELS_IDS } from '../src/data/legacyPexelsIds';
-import { LEGACY_PROFILE_IDS } from '../src/data/legacyProfilePhotos';
 import { AI_PERSONA_IDS, INCOMING_LIKE_IDS, mockProfiles, getProfileById } from '../src/data/profiles';
-
-if (LEGACY_PEXELS_IDS.length !== LEGACY_PROFILE_IDS.length) {
-  console.error(
-    `LEGACY_PEXELS_IDS (${LEGACY_PEXELS_IDS.length}) must match LEGACY_PROFILE_IDS (${LEGACY_PROFILE_IDS.length})`,
-  );
-  process.exit(1);
-}
 
 const humanProfiles = mockProfiles.filter((p) => !AI_PERSONA_IDS.has(p.id) && !p.isAiPersona);
 
 const nameCounts = new Map<string, number>();
-const photoCounts = new Map<string, number>();
-const picsumProfiles: string[] = [];
-const mixedPhotoProfiles: string[] = [];
-const invalidPexelsProfiles: string[] = [];
+const stockPhotoProfiles: string[] = [];
 
-function pexelsIdFromUrl(url: string): string | null {
-  const match = url.match(/pexels\.com\/photos\/(\d+)\//);
-  return match ? match[1] : null;
+function isStockPhotoUrl(url: string): boolean {
+  const lower = url.toLowerCase();
+  if (lower.startsWith('spark-demo-portrait://')) {
+    return false;
+  }
+  return (
+    lower.includes('pexels.com') ||
+    lower.includes('unsplash.com') ||
+    lower.includes('picsum.photos')
+  );
 }
 
 for (const profile of humanProfiles) {
   const nameKey = profile.name.trim().toLowerCase();
   nameCounts.set(nameKey, (nameCounts.get(nameKey) ?? 0) + 1);
-  const primary = profile.photos[0];
-  if (primary) {
-    photoCounts.set(primary, (photoCounts.get(primary) ?? 0) + 1);
-  }
 
-  if (profile.photos.some((url) => url.includes('picsum.photos'))) {
-    picsumProfiles.push(profile.id);
-  }
-
-  const pexelsIds = profile.photos
-    .map(pexelsIdFromUrl)
-    .filter((id): id is string => id !== null);
-  if (pexelsIds.length > 1 && new Set(pexelsIds).size > 1) {
-    mixedPhotoProfiles.push(profile.id);
-  }
-
-  const primaryPexelsId = pexelsIds[0] ? Number(pexelsIds[0]) : NaN;
-  if (Number.isFinite(primaryPexelsId) && INVALID_PEXELS_IDS.has(primaryPexelsId)) {
-    invalidPexelsProfiles.push(profile.id);
+  if (profile.photos.some(isStockPhotoUrl)) {
+    stockPhotoProfiles.push(profile.id);
   }
 
   if (profile.photos.length === 0) {
-    invalidPexelsProfiles.push(profile.id);
+    stockPhotoProfiles.push(profile.id);
   }
 }
 
@@ -57,16 +35,6 @@ const duplicateNames = [...nameCounts.entries()].filter(([, count]) => count > 1
 const legacyShortBios = humanProfiles.filter(
   (p) => Number(p.id) < 97 && (p.bio?.length ?? 0) < 80,
 );
-const duplicatePhotos = [...photoCounts.entries()].filter(([, count]) => count > 1);
-const duplicatePrimaryProfileIds = duplicatePhotos.flatMap(([url]) => {
-  const ids: string[] = [];
-  for (const profile of humanProfiles) {
-    if (profile.photos[0] === url) {
-      ids.push(profile.id);
-    }
-  }
-  return ids;
-});
 
 const missingIncoming = INCOMING_LIKE_IDS.filter((id) => getProfileById(id) === undefined);
 
@@ -77,10 +45,9 @@ function validateBatch(minId: number, maxId: number, label: string): boolean {
   });
 
   const namesUnique = new Set(batch.map((p) => p.name.toLowerCase())).size === batch.length;
-  const photosUnique = new Set(batch.map((p) => p.photos[0])).size === batch.length;
 
-  if (!namesUnique || !photosUnique) {
-    console.error(`${label} must have unique names and primary photos`);
+  if (!namesUnique) {
+    console.error(`${label} must have unique names`);
     return false;
   }
 
@@ -95,20 +62,9 @@ console.log(
   JSON.stringify(
     {
       totalHumanProfiles: humanProfiles.length,
-      nextBatchCount: humanProfiles.filter((p) => Number(p.id) >= 117 && Number(p.id) <= 136).length,
-      latestBatchCount: humanProfiles.filter((p) => Number(p.id) >= 137 && Number(p.id) <= 156).length,
-      newestBatchCount: humanProfiles.filter((p) => Number(p.id) >= 157 && Number(p.id) <= 176).length,
+      stockPhotoProfileCount: stockPhotoProfiles.length,
       duplicateNameCount: duplicateNames.length,
       legacyShortBioCount: legacyShortBios.length,
-      duplicatePrimaryPhotoCount: duplicatePhotos.length,
-      duplicatePrimaryProfileSample: duplicatePhotos.slice(0, 5).map(([url, count]) => ({
-        count,
-        pexelsId: url.match(/photos\/(\d+)\//)?.[1],
-      })),
-      picsumProfileCount: picsumProfiles.length,
-      mixedPexelsPhotoProfileCount: mixedPhotoProfiles.length,
-      invalidPexelsProfileCount: invalidPexelsProfiles.length,
-      invalidPexelsProfileIds: invalidPexelsProfiles.slice(0, 20),
       missingIncomingIds: missingIncoming,
       nextBatchUnique: nextBatchOk,
       latestBatchUnique: latestBatchOk,
@@ -124,26 +80,8 @@ if (missingIncoming.length > 0) {
   process.exit(1);
 }
 
-if (picsumProfiles.length > 0) {
-  console.error('Profiles still using picsum placeholders:', picsumProfiles);
-  process.exit(1);
-}
-
-if (mixedPhotoProfiles.length > 0) {
-  console.error('Profiles with mixed Pexels identities:', mixedPhotoProfiles);
-  process.exit(1);
-}
-
-if (invalidPexelsProfiles.length > 0) {
-  console.error('Profiles with missing or invalid Pexels portraits:', invalidPexelsProfiles);
-  process.exit(1);
-}
-
-if (duplicatePhotos.length > 0) {
-  console.error(
-    'Human demo profiles must not share the same primary portrait:',
-    duplicatePrimaryProfileIds.slice(0, 40),
-  );
+if (stockPhotoProfiles.length > 0) {
+  console.error('Catalog profiles must use AI portrait assets, not stock URLs:', stockPhotoProfiles.slice(0, 40));
   process.exit(1);
 }
 

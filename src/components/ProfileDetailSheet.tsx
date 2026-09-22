@@ -17,6 +17,7 @@ import {
   getProfileIntentLabel,
   getPromptQuestionLabel,
 } from '../i18n/labels';
+import { resolveDemoPortraitUri } from '../utils/resolveDemoPortraitUri';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import {
@@ -27,6 +28,11 @@ import {
 import { ProfileSocialLinks } from './ProfileSocialLinks';
 import { EmberStatusChips } from './EmberStatusChips';
 import { AnimatedPressable } from './AnimatedPressable';
+import { ScamAlertBanner } from './ScamAlertBanner';
+import { ScamProtectionSheet } from './ScamProtectionSheet';
+import { assessProfile } from '../trust/scamDetector';
+import { buildCustomerProtectionPlan } from '../trust/scamProtectionProtocol';
+import { useMemo, useState } from 'react';
 
 type ProfileDetailSheetProps = {
   profile: Profile | null;
@@ -69,6 +75,17 @@ export function ProfileDetailSheet({
   const { t, locale } = useTranslation();
   const showInternalProfileLabels = useOptionalAdmin()?.showInternalProfileLabels ?? false;
   const insets = useSafeAreaInsets();
+  const [showScamProtection, setShowScamProtection] = useState(false);
+  const scamAssessment = useMemo(
+    () => (profile ? assessProfile(profile) : null),
+    [profile],
+  );
+  const scamPlan = useMemo(() => {
+    if (!scamAssessment) {
+      return null;
+    }
+    return buildCustomerProtectionPlan(scamAssessment, locale);
+  }, [locale, scamAssessment]);
 
   if (!profile) {
     return null;
@@ -95,12 +112,23 @@ export function ProfileDetailSheet({
         </View>
 
         <ScrollView contentContainerStyle={styles.content}>
+          {scamPlan?.showProfileWarning && scamAssessment ? (
+            <ScamAlertBanner
+              riskLevel={scamAssessment.level}
+              onLearnMore={() => setShowScamProtection(true)}
+              onReport={
+                scamPlan.recommendBlockAndReport && onReport
+                  ? () => onReport(profile.id)
+                  : undefined
+              }
+            />
+          ) : null}
           {profile.photos.map((photo, photoIndex) => {
             const locked = photoIndex >= visiblePhotoCount;
             return (
               <View key={`${profile.id}-photo-${photoIndex}`} style={[styles.heroWrap, { backgroundColor: colors.surface }]}>
                 <Image
-                  source={{ uri: photo }}
+                  source={{ uri: resolveDemoPortraitUri(photo) }}
                   style={styles.hero}
                   blurRadius={locked ? 28 : 0}
                 />
@@ -285,6 +313,13 @@ export function ProfileDetailSheet({
           </View>
         )}
       </View>
+      {scamAssessment ? (
+        <ScamProtectionSheet
+          visible={showScamProtection}
+          onClose={() => setShowScamProtection(false)}
+          riskLevel={scamAssessment.level}
+        />
+      ) : null}
     </Modal>
   );
 }
@@ -309,11 +344,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.xs,
     padding: spacing.sm,
+    flexShrink: 1,
+    maxWidth: '58%',
   },
   holdText: {
     color: palette.gradientEnd,
     fontSize: 14,
     fontWeight: '700',
+    flexShrink: 1,
   },
   content: {
     paddingBottom: spacing.xl,
@@ -498,19 +536,20 @@ const styles = StyleSheet.create({
   },
   actionBar: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: spacing.xl,
+    gap: spacing.lg,
     paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.md,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#2A2A2E',
     backgroundColor: palette.background,
   },
   actionButton: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
   },

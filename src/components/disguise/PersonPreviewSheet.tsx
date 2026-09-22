@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -259,7 +259,14 @@ export function PersonPreviewSheet({
           {...webClass('spark-sheet-in')}
         >
           {dismissKind ? <DisguiseMiniDismissStat kind={dismissKind} /> : null}
-          <Animated.View style={[styles.cardInner, cardFadeStyle]}>
+          <ScrollView
+            style={styles.cardScroll}
+            contentContainerStyle={styles.cardInner}
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Animated.View style={cardFadeStyle}>
             <FadeSlideIn replayKey={visible} index={0}>
               <View style={styles.header}>
                 <View style={[styles.headerIcon, { backgroundColor: worldMeta.accentSoft }]}>
@@ -328,7 +335,10 @@ export function PersonPreviewSheet({
 
             {photoCount > 1 ? (
               <FadeSlideIn replayKey={visible} index={4}>
-                <Text style={[styles.photoMeta, { color: colors.textMuted }]}>
+                <Text
+                  style={[styles.photoMeta, { color: colors.textMuted }]}
+                  numberOfLines={1}
+                >
                   {t('disguiseMiniWindow.photoMeta', { current: photoIndex + 1, total: photoCount })}
                 </Text>
               </FadeSlideIn>
@@ -368,7 +378,8 @@ export function PersonPreviewSheet({
                 </Text>
               </FadeSlideIn>
             )}
-          </Animated.View>
+            </Animated.View>
+          </ScrollView>
         </Animated.View>
       </AnimatedOverlay>
 
@@ -390,10 +401,16 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     overflow: 'hidden',
     zIndex: 2,
+    flexDirection: 'column',
+  },
+  cardScroll: {
+    flexShrink: 1,
+    flexGrow: 0,
   },
   cardInner: {
     padding: 6,
     gap: 5,
+    flexGrow: 0,
   },
   header: {
     flexDirection: 'row',
@@ -438,13 +455,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   actionsWrap: {
-    marginTop: 2,
+    marginTop: spacing.xs,
     zIndex: 6,
+    gap: spacing.xs,
   },
   hint: {
     fontSize: 10,
     textAlign: 'center',
-    marginTop: 2,
+    marginTop: 0,
+    paddingHorizontal: spacing.xs,
+    lineHeight: 14,
   },
   limitHint: {
     fontSize: 10,

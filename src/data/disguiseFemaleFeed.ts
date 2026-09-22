@@ -2,6 +2,7 @@ import { disguiseClientAds } from './disguiseClientAds';
 import { disguiseSocialPosts } from './disguiseSocialPosts';
 import { FeedItem, NewsPost } from './disguiseFeed';
 import { freeNewsLinks, pulseNewsImages } from './pulseNewsMedia';
+import { interleaveUniquePulseFeed } from '../utils/pulseFeedUnique';
 
 const femaleNewsItems: NewsPost[] = [
   {
@@ -103,7 +104,7 @@ const femaleNewsItems: NewsPost[] = [
       'Past — Four of Pentacles. Present — Knight of Wands. Possible — Ace of Cups.',
     articleBody:
       'You may be holding onto a situation out of comfort, not joy.\n\nThe present card pushes for honest momentum — say what you want plainly.\n\nThe possible card is soft new energy: a match, an invite, or a creative yes.',
-    imageUrl: pulseNewsImages.tarot,
+    imageUrl: pulseNewsImages.gallery,
     timeAgo: '5h ago',
     category: 'Tarot',
     articleUrl: freeNewsLinks.guardianFilm,
@@ -118,7 +119,7 @@ const femaleNewsItems: NewsPost[] = [
       'Minimal jewelry, strong color blocks, and hair that survives humidity — stylists break down what worked.',
     articleBody:
       'BBC Culture\'s fashion team notes a shift toward wearable silhouettes after a season of extreme couture.\n\nBeauty editors highlight skin-first makeup that reads well on video dates and office calls alike.',
-    imageUrl: pulseNewsImages.fashion,
+    imageUrl: pulseNewsImages.theater,
     timeAgo: '6h ago',
     category: 'Entertainment',
     articleUrl: freeNewsLinks.bbcCulture,
@@ -139,30 +140,11 @@ const femaleAdItems = disguiseClientAds.map((campaign) => ({
 }));
 
 /** Woman accounts see cosmos, tarot, and entertainment in Pulse disguise. */
-export const disguiseFemaleFeedItems: FeedItem[] = [
-  femaleNewsItems[0],
-  disguiseSocialPosts[1],
-  femaleAdItems[0],
-  femaleNewsItems[1],
-  disguiseSocialPosts[3],
-  femaleAdItems[1],
-  femaleNewsItems[2],
-  disguiseSocialPosts[5],
-  femaleNewsItems[3],
-  femaleAdItems[2],
-  femaleNewsItems[4],
-  disguiseSocialPosts[7],
-  femaleNewsItems[5],
-  femaleAdItems[0],
-  femaleNewsItems[6],
-  disguiseSocialPosts[0],
-  femaleNewsItems[7],
-  femaleAdItems[1],
-  femaleNewsItems[0],
-  disguiseSocialPosts[2],
-  femaleNewsItems[3],
-  femaleAdItems[2],
-];
+export const disguiseFemaleFeedItems: FeedItem[] = interleaveUniquePulseFeed(
+  femaleNewsItems,
+  disguiseSocialPosts,
+  femaleAdItems,
+);
 
 export const disguiseFemaleNewsItems = femaleNewsItems;
 

@@ -14,6 +14,7 @@ import { mergeLiveNewsIntoFeed, densifyPulseNewsBlocks } from './mergeLivePulseN
 import { socialAuthorDemoProfileId } from '../data/disguiseReporterProfileLinks';
 import { explicitReporterProfileId } from './resolveDisguiseProfile';
 import { getPulseLiveNewsSnapshot } from '../services/pulseLiveNews';
+import { spaceSponsoredFeedItems } from './pulseFeedSpacing';
 
 function weaveProfileCards(base: FeedItem[], profileCards: FeedItem[]): FeedItem[] {
   if (profileCards.length === 0) {
@@ -25,7 +26,7 @@ function weaveProfileCards(base: FeedItem[], profileCards: FeedItem[]): FeedItem
 
   base.forEach((item, index) => {
     result.push(item);
-    if ((index + 1) % 2 === 0 && profileIndex < profileCards.length) {
+    if ((index + 1) % 4 === 0 && profileIndex < profileCards.length) {
       result.push(profileCards[profileIndex]);
       profileIndex += 1;
     }
@@ -168,9 +169,11 @@ export function buildDisguiseFeed(
     );
   }
 
+  const spaced = spaceSponsoredFeedItems(linked, 4);
+
   if (refreshGeneration > 0) {
-    return renewPulseFeedPage(linked, section, refreshGeneration);
+    return renewPulseFeedPage(spaced, section, refreshGeneration);
   }
 
-  return linked;
+  return spaced;
 }

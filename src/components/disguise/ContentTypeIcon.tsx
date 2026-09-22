@@ -117,10 +117,16 @@ export function MediaWithContentBadge({
     );
   }
 
+  const cornerOnTopLeft = kind === 'ad' || kind === 'sponsored';
+
   return (
     <View style={[styles.cornerWrap, style]} pointerEvents="box-none">
       {children}
-      <View style={styles.cornerBadge} accessibilityLabel={kindMeta[kind].label} pointerEvents="none">
+      <View
+        style={[styles.cornerBadge, cornerOnTopLeft ? styles.cornerBadgeTopLeft : null]}
+        accessibilityLabel={kindMeta[kind].label}
+        pointerEvents="none"
+      >
         <ContentTypeIcon kind={kind} size={14} />
       </View>
     </View>
@@ -145,6 +151,12 @@ const styles = StyleSheet.create({
   },
   cornerWrap: {
     position: 'relative',
+  },
+  cornerBadgeTopLeft: {
+    top: 8,
+    left: 8,
+    right: undefined,
+    bottom: undefined,
   },
   cornerBadge: {
     position: 'absolute',

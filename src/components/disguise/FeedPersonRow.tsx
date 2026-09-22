@@ -63,7 +63,7 @@ export function FeedPersonRow({
       <View style={styles.avatarCol}>
         {avatar}
         {contentKind ? (
-          <View style={styles.avatarBadge}>
+          <View style={styles.avatarBadge} pointerEvents="none">
             <ContentTypeIcon
               kind={contentKind}
               size={contentKind === 'profile' ? PROFILE_THUMB_ICON_SIZE : undefined}
@@ -107,16 +107,19 @@ const styles = StyleSheet.create({
   },
   avatarBadge: {
     position: 'absolute',
-    right: 0,
-    bottom: 0,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: 'rgba(255,255,255,0.95)',
+    top: -2,
+    left: -2,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: 'rgba(255,255,255,0.96)',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(0,0,0,0.08)',
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
   textCol: {
     flex: 1,

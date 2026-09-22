@@ -49,6 +49,8 @@ const TOP_OFFSET_THRESHOLD = 8;
 const TOP_OVERSCROLL_THRESHOLD =
   Platform.OS === 'ios' ? -48 : Platform.OS === 'web' ? -20 : -32;
 const TOP_ARRIVAL_DEBOUNCE_MS = Platform.OS === 'web' ? 280 : 120;
+/** Prevent overscroll / tab re-press from stacking refreshes and stealing taps on web. */
+const REFRESH_COOLDOWN_MS = Platform.OS === 'web' ? 900 : 600;
 
 export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}) {
   const { onRefreshed } = options;
@@ -62,6 +64,7 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
   const scrollOffsetRef = useRef(0);
   const wasScrolledDownRef = useRef(false);
   const topArrivalTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastRefreshFinishedAtRef = useRef(0);
   const refreshGeneration = usePulseFeedRefreshGeneration();
 
   const clearTopArrivalTimer = useCallback(() => {
@@ -96,19 +99,25 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
       if (gateRef.current || refreshing) {
         return false;
       }
+      const sinceLast = Date.now() - lastRefreshFinishedAtRef.current;
+      if (sinceLast < REFRESH_COOLDOWN_MS) {
+        return false;
+      }
 
       gateRef.current = true;
       setRefreshing(true);
       try {
-        await refreshPulseLiveNews({ force: true });
+        // Reshuffle woven profiles immediately — do not block on RSS/network fetches.
         bumpPulseFeedRefreshGeneration();
         setJustUpdated(true);
         scrollToTop(true);
         onRefreshed?.();
+        void refreshPulseLiveNews({ force: true }).catch(() => undefined);
         return true;
       } finally {
         setRefreshing(false);
         gateRef.current = false;
+        lastRefreshFinishedAtRef.current = Date.now();
       }
     },
     [onRefreshed, refreshing, scrollToTop],
@@ -205,17 +214,18 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
   }, [runRefresh, scrollToTop]);
 
   const refreshControl = useMemo(
-    () => (
-      <RefreshControl
-        refreshing={refreshing}
-        onRefresh={() => {
-          void refresh();
-        }}
-        tintColor={meta.accent}
-        colors={[meta.accent]}
-        progressBackgroundColor="transparent"
-      />
-    ),
+    () =>
+      Platform.OS === 'web' ? undefined : (
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={() => {
+            void refresh();
+          }}
+          tintColor={meta.accent}
+          colors={[meta.accent]}
+          progressBackgroundColor="transparent"
+        />
+      ),
     [meta.accent, refresh, refreshing],
   );
 
@@ -224,7 +234,7 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
     onScrollEndDrag: maybeRefreshAfterScrollToTop,
     onMomentumScrollEnd: maybeRefreshAfterScrollToTop,
     scrollEventThrottle: 16 as const,
-    refreshControl,
+    ...(refreshControl ? { refreshControl } : {}),
   };
 
   const scrollViewProps = {
@@ -232,7 +242,7 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
     onScrollEndDrag: maybeRefreshAfterScrollToTop,
     onMomentumScrollEnd: maybeRefreshAfterScrollToTop,
     scrollEventThrottle: 16 as const,
-    refreshControl,
+    ...(refreshControl ? { refreshControl } : {}),
   };
 
   return {

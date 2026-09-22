@@ -19,7 +19,17 @@ jobs:
         with:
           node-version: '20'
           cache: npm
-      - run: npm ci
+      - name: Install dependencies
+        run: |
+          npm config set fetch-retries 5
+          npm config set fetch-retry-mintimeout 20000
+          npm config set fetch-retry-maxtimeout 120000
+          for attempt in 1 2 3; do
+            npm ci && exit 0
+            echo "npm ci failed (attempt $attempt), retrying..."
+            sleep $((attempt * 8))
+          done
+          exit 1
       - run: npx tsc --noEmit
       - run: npm run validate:profiles
       - run: npm run build:web:demo

@@ -1418,6 +1418,7 @@ export const zhTw = {
     openPostPhoto: '開啟貼文照片',
     sharePost: '分享貼文',
     comments: '留言',
+    openCommentsA11y: '檢視留言，{count} 則回覆',
     postTitle: '貼文',
     addComment: '新增留言…',
     sendComment: '送出留言',

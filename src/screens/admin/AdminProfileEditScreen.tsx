@@ -9,8 +9,9 @@ import { saveAdminProfileOverride } from '../../admin/adminProfileStore';
 import { getProfileById } from '../../data/profiles';
 import { useAdmin } from '../../context/AdminContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../i18n';
 import type { AccountKind } from '../../types/accountKind';
-import { ACCOUNT_KIND_LABELS, resolveAccountKind } from '../../types/accountKind';
+import { resolveAccountKind } from '../../types/accountKind';
 import type { AdminStackParamList } from '../../navigation/AdminNavigator';
 import { radii, spacing } from '../../theme';
 
@@ -22,6 +23,7 @@ type Props = {
 export function AdminProfileEditScreen({ profileId, navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const { hasPermission } = useAdmin();
   const base = useMemo(() => getProfileById(profileId), [profileId]);
 
@@ -37,8 +39,12 @@ export function AdminProfileEditScreen({ profileId, navigation }: Props) {
   if (!base) {
     return (
       <View style={[styles.root, { backgroundColor: colors.background }]}>
-        <ScreenHeader title="Profile" leftIcon="chevron-back" onLeftPress={() => navigation.goBack()} />
-        <Text style={{ padding: spacing.lg, color: colors.textMuted }}>Profile not found.</Text>
+        <ScreenHeader
+          title={t('admin.profileTitle')}
+          leftIcon="chevron-back"
+          onLeftPress={() => navigation.goBack()}
+        />
+        <Text style={{ padding: spacing.lg, color: colors.textMuted }}>{t('admin.profileNotFound')}</Text>
       </View>
     );
   }
@@ -46,9 +52,11 @@ export function AdminProfileEditScreen({ profileId, navigation }: Props) {
   const canEdit = hasPermission('canEditProfiles');
   const canToggleDemo = hasPermission('canToggleDemoFlag');
 
+  const kindLabel = (kind: AccountKind) => t(`admin.accountKind.${kind}`);
+
   const save = async () => {
     if (!canEdit) {
-      Alert.alert('Permission denied', 'Your role cannot edit profiles.');
+      Alert.alert(t('admin.permissionDeniedTitle'), t('admin.permissionDeniedBody'));
       return;
     }
     setBusy(true);
@@ -64,19 +72,21 @@ export function AdminProfileEditScreen({ profileId, navigation }: Props) {
       ...(canToggleDemo ? { accountKind } : {}),
     });
     setBusy(false);
-    Alert.alert('Saved', 'Profile overrides stored locally.', [
-      { text: 'OK', onPress: () => navigation.goBack() },
+    Alert.alert(t('admin.savedTitle'), t('admin.savedBody'), [
+      { text: t('common.ok'), onPress: () => navigation.goBack() },
     ]);
   };
 
   return (
     <View style={[styles.root, { paddingTop: insets.top, backgroundColor: colors.background }]}>
-      <ScreenHeader title={`Edit ${base.name}`} leftIcon="chevron-back" onLeftPress={() => navigation.goBack()} />
+      <ScreenHeader
+        title={t('admin.editProfileTitle', { name: base.name })}
+        leftIcon="chevron-back"
+        onLeftPress={() => navigation.goBack()}
+      />
       <ScrollView contentContainerStyle={styles.body}>
-        <Text style={[styles.label, { color: colors.textMuted }]}>Internal kind</Text>
-        <Text style={[styles.kind, { color: colors.text }]}>
-          {ACCOUNT_KIND_LABELS[accountKind]}
-        </Text>
+        <Text style={[styles.label, { color: colors.textMuted }]}>{t('admin.internalKind')}</Text>
+        <Text style={[styles.kind, { color: colors.text }]}>{kindLabel(accountKind)}</Text>
         {canToggleDemo ? (
           <View style={styles.kindRow}>
             {(['demo', 'ai_persona', 'real'] as AccountKind[]).map((kind) => (
@@ -92,24 +102,36 @@ export function AdminProfileEditScreen({ profileId, navigation }: Props) {
                 onPress={() => setAccountKind(kind)}
               >
                 <Text style={{ color: accountKind === kind ? '#111' : colors.text, fontSize: 12 }}>
-                  {ACCOUNT_KIND_LABELS[kind]}
+                  {kindLabel(kind)}
                 </Text>
               </AnimatedPressable>
             ))}
           </View>
         ) : null}
 
-        <Field label="Name" value={name} onChange={setName} colors={colors} editable={canEdit} />
-        <Field label="City" value={city} onChange={setCity} colors={colors} editable={canEdit} />
         <Field
-          label="Bio"
+          label={t('admin.fieldName')}
+          value={name}
+          onChange={setName}
+          colors={colors}
+          editable={canEdit}
+        />
+        <Field
+          label={t('admin.fieldCity')}
+          value={city}
+          onChange={setCity}
+          colors={colors}
+          editable={canEdit}
+        />
+        <Field
+          label={t('admin.fieldBio')}
           value={bio}
           onChange={setBio}
           colors={colors}
           editable={canEdit}
           multiline
         />
-        <Text style={[styles.label, { color: colors.textMuted }]}>Photo URLs (one per line)</Text>
+        <Text style={[styles.label, { color: colors.textMuted }]}>{t('admin.photoUrlsLabel')}</Text>
         <TextInput
           multiline
           editable={canEdit}
@@ -123,7 +145,7 @@ export function AdminProfileEditScreen({ profileId, navigation }: Props) {
         />
 
         <View style={[styles.switchRow, { borderColor: colors.border }]}>
-          <Text style={{ color: colors.text, flex: 1 }}>Demo flag (internal)</Text>
+          <Text style={{ color: colors.text, flex: 1 }}>{t('admin.demoFlag')}</Text>
           <Switch
             value={accountKind === 'demo' || accountKind === 'ai_persona'}
             onValueChange={(on) => setAccountKind(on ? 'demo' : 'real')}
@@ -137,7 +159,7 @@ export function AdminProfileEditScreen({ profileId, navigation }: Props) {
             onPress={() => void save()}
             disabled={busy}
           >
-            <Text style={styles.saveText}>{busy ? 'Saving…' : 'Save overrides'}</Text>
+            <Text style={styles.saveText}>{busy ? t('admin.saving') : t('admin.saveOverrides')}</Text>
           </AnimatedPressable>
         ) : null}
       </ScrollView>

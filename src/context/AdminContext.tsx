@@ -93,11 +93,11 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const signInAdmin = useCallback(async (email: string) => {
     const normalized = email.trim().toLowerCase();
     if (!normalized.includes('@')) {
-      return { ok: false, error: 'Enter a valid email' };
+      return { ok: false, error: 'admin.errors.invalidEmail' };
     }
     const role = await resolveRoleForEmail(normalized);
     if (!role) {
-      return { ok: false, error: 'Not authorized for admin access' };
+      return { ok: false, error: 'admin.errors.notAuthorized' };
     }
     const session = { email: normalized, role };
     setAdminSession(session);

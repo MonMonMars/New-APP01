@@ -69,6 +69,10 @@ npm run demo:tunnel   # public Cloudflare URL (requires cloudflared)
 ### Premium (Spark+)
 - Unlimited likes & notes, rewind, boost, advanced filters
 
+### Admin (demo RBAC)
+- Profile → tap version footer **7 times** → staff admin (allowlist email)
+- Local profile overrides; EN + 繁體中文 UI
+
 ### Persistence
 - **AsyncStorage** — matches, chats, disguise settings survive restart
 

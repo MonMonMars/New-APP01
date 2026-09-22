@@ -7,7 +7,8 @@ import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { useAdmin } from '../../context/AdminContext';
 import { useTheme } from '../../context/ThemeContext';
-import { ADMIN_ROLE_LABELS } from '../../admin/rbac';
+import { useTranslation } from '../../i18n';
+import type { AdminRole } from '../../admin/rbac';
 import type { AdminStackParamList } from '../../navigation/AdminNavigator';
 import { isSupabaseConfigured } from '../../services/supabase';
 import { radii, spacing } from '../../theme';
@@ -20,26 +21,29 @@ type Props = {
 export function AdminDashboardScreen({ onClose, navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const { adminSession, signOutAdmin, hasPermission } = useAdmin();
 
   if (!adminSession) {
     return null;
   }
 
+  const roleLabel = t(`admin.roles.${adminSession.role as AdminRole}`);
+
   const rows: {
-    label: string;
+    labelKey: string;
     icon: keyof typeof Ionicons.glyphMap;
     onPress: () => void;
     show: boolean;
   }[] = [
     {
-      label: 'Profiles',
+      labelKey: 'admin.profiles',
       icon: 'people-outline',
       onPress: () => navigation.navigate('AdminProfiles'),
       show: hasPermission('canViewInternalProfileMetadata'),
     },
     {
-      label: 'Role management',
+      labelKey: 'admin.roleManagement',
       icon: 'key-outline',
       onPress: () => navigation.navigate('AdminRoles'),
       show: hasPermission('canManageAdmins'),
@@ -48,42 +52,38 @@ export function AdminDashboardScreen({ onClose, navigation }: Props) {
 
   return (
     <View style={[styles.root, { paddingTop: insets.top, backgroundColor: colors.background }]}>
-      <ScreenHeader title="Admin dashboard" leftIcon="close" onLeftPress={onClose} />
+      <ScreenHeader title={t('admin.dashboardTitle')} leftIcon="close" onLeftPress={onClose} />
       <View style={styles.body}>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <Text style={[styles.cardTitle, { color: colors.text }]}>{adminSession.email}</Text>
-          <Text style={[styles.cardSub, { color: colors.textMuted }]}>
-            {ADMIN_ROLE_LABELS[adminSession.role]}
-          </Text>
+          <Text style={[styles.cardSub, { color: colors.textMuted }]}>{roleLabel}</Text>
         </View>
 
-        <Text style={[styles.section, { color: colors.textMuted }]}>Tools</Text>
+        <Text style={[styles.section, { color: colors.textMuted }]}>{t('admin.tools')}</Text>
         {rows
           .filter((r) => r.show)
           .map((row) => (
             <AnimatedPressable
-              key={row.label}
+              key={row.labelKey}
               style={[styles.row, { borderColor: colors.border }]}
               onPress={row.onPress}
             >
               <Ionicons name={row.icon} size={22} color={colors.gradientEnd} />
-              <Text style={[styles.rowLabel, { color: colors.text }]}>{row.label}</Text>
+              <Text style={[styles.rowLabel, { color: colors.text }]}>{t(row.labelKey)}</Text>
               <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
             </AnimatedPressable>
           ))}
 
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Text style={[styles.cardTitle, { color: colors.text }]}>Backend</Text>
+          <Text style={[styles.cardTitle, { color: colors.text }]}>{t('admin.backend')}</Text>
           <Text style={[styles.cardSub, { color: colors.textMuted }]}>
-            Supabase: {isSupabaseConfigured() ? 'configured' : 'local stubs only'}
+            {isSupabaseConfigured() ? t('admin.supabaseConfigured') : t('admin.supabaseLocal')}
           </Text>
-          <Text style={[styles.cardSub, { color: colors.textMuted }]}>
-            Profile CRUD persists to device storage — wire Supabase admin tables for production.
-          </Text>
+          <Text style={[styles.cardSub, { color: colors.textMuted }]}>{t('admin.backendHint')}</Text>
         </View>
 
         <AnimatedPressable style={styles.signOut} onPress={() => void signOutAdmin()}>
-          <Text style={styles.signOutText}>Sign out admin</Text>
+          <Text style={styles.signOutText}>{t('admin.signOutAdmin')}</Text>
         </AnimatedPressable>
       </View>
     </View>

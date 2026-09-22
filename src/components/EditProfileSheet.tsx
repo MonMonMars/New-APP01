@@ -29,7 +29,7 @@ import {
 } from '../types/profile';
 import { OPENING_MOVE_SUGGESTIONS } from '../utils/openingMove';
 import { pickProfilePhoto } from '../utils/photoPicker';
-import { resolveSparkSection } from '../types/preferences';
+import { resolveSparkSection, ShowMePreference } from '../types/preferences';
 import { ProfileCoachSheet } from './ProfileCoachSheet';
 import { VerificationSheet } from './VerificationSheet';
 import { VoicePromptSheet } from './VoicePromptSheet';
@@ -51,6 +51,8 @@ const discretionOptions: EmberDiscretion[] = ['open', 'careful', 'hidden'];
 const seekingOptions: EmberSeeking[] = ['online', 'travel', 'ongoing', 'light'];
 const availabilityOptions: EmberAvailability[] = ['evenings', 'weekends', 'flexible'];
 const genderOptions: ProfileGender[] = ['woman', 'man', 'nonbinary'];
+const showMeOptions: ShowMePreference[] = ['women', 'men', 'everyone'];
+
 const orientationOptions: Orientation[] = [
   'straight',
   'gay',
@@ -65,7 +67,7 @@ const orientationOptions: Orientation[] = [
 export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfileSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { preferences } = useApp();
+  const { preferences, updatePreferences } = useApp();
   const { locale } = useAppLocale();
   const { t } = useTranslation();
   const isEmber = resolveSparkSection(preferences.sparkSection) === 'ember';
@@ -463,6 +465,30 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
 
           {!isEmber ? (
             <>
+          <Text style={[styles.label, { color: colors.textMuted }]}>{t('preferences.discoveryShowMe')}</Text>
+          <View style={styles.intentRow}>
+            {showMeOptions.map((option) => {
+              const selected = preferences.showMe === option;
+              return (
+                <AnimatedPressable
+                  key={option}
+                  style={[
+                    styles.intentChip,
+                    {
+                      backgroundColor: selected ? colors.gradientEnd : colors.surface,
+                      borderColor: selected ? colors.gradientEnd : colors.border,
+                    },
+                  ]}
+                  onPress={() => updatePreferences({ ...preferences, showMe: option })}
+                >
+                  <Text style={[styles.intentChipText, { color: selected ? '#fff' : colors.text }]}>
+                    {getShowMeLabel(locale, option)}
+                  </Text>
+                </AnimatedPressable>
+              );
+            })}
+          </View>
+
           <Text style={[styles.label, { color: colors.textMuted }]}>{t('editProfile.lookingFor')}</Text>
           <View style={styles.intentRow}>
             {intentOptions.map((option) => {

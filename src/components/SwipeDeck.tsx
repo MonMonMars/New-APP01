@@ -545,7 +545,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
             style={styles.infoButton}
             onPress={() => onOpenProfile(profiles[activeIndex])}
             accessibilityLabel={t('profileDetail.openDetails')}
-            hitSlop={8}
+            hitSlop={6}
             scaleTo={0.9}
           >
             <Ionicons name="information-circle" size={28} color={colors.text} />

@@ -22,7 +22,7 @@ type PulseFeedItemViewerProps = {
 
 /** Opens the correct disguise sheet for a saved or history item. */
 export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItemViewerProps) {
-  const { user, disguiseAdCreative } = useApp();
+  const { user, disguiseAdCreative, preferences } = useApp();
   const pulseSection = usePulseContextSection();
   const { locale, t } = useTranslation();
 
@@ -38,7 +38,14 @@ export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItem
     };
 
     if (itemId && !itemId.startsWith('empty-') && !itemId.startsWith('hist-')) {
-      const fromFeed = buildDisguiseFeed(user, disguiseAdCreative, pulseSection).find((item) => item.id === itemId);
+      const fromFeed = buildDisguiseFeed(
+        user,
+        disguiseAdCreative,
+        pulseSection,
+        0,
+        undefined,
+        preferences.showMe,
+      ).find((item) => item.id === itemId);
       const resolved = allowItem(fromFeed) ?? allowItem(findFeedItemById(itemId, user.gender));
       if (resolved) {
         return resolved;
@@ -48,7 +55,7 @@ export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItem
       return allowItem(findNewsPostByHeadline(headline, user.gender));
     }
     return null;
-  }, [itemId, headline, user, disguiseAdCreative, pulseSection]);
+  }, [itemId, headline, user, disguiseAdCreative, pulseSection, preferences.showMe]);
 
   const visible = Boolean(itemId || headline);
   const newsPost = feedItem?.type === 'news' ? feedItem : null;

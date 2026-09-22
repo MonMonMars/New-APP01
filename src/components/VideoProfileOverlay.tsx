@@ -25,15 +25,21 @@ export function VideoProfileOverlay({ visible, profile }: VideoProfileOverlayPro
 
   return (
     <>
-      <AnimatedPressable style={styles.overlay} onPress={() => setSheetOpen(true)}>
-        <View style={[styles.playButton, { backgroundColor: colors.overlay }]}>
-          <Ionicons name="play" size={28} color={colors.text} />
-        </View>
-        <View style={[styles.badge, { backgroundColor: colors.surface }]}>
-          <Ionicons name="videocam" size={12} color={colors.gradientEnd} />
-          <Text style={[styles.badgeText, { color: colors.text }]}>{t('videoProfile.badge')}</Text>
-        </View>
-      </AnimatedPressable>
+      <View style={styles.overlay} pointerEvents="box-none">
+        <AnimatedPressable
+          style={styles.playHitArea}
+          onPress={() => setSheetOpen(true)}
+          accessibilityLabel={t('videoProfile.badge')}
+        >
+          <View style={[styles.playButton, { backgroundColor: colors.overlay }]}>
+            <Ionicons name="play" size={28} color={colors.text} />
+          </View>
+          <View style={[styles.badge, { backgroundColor: colors.surface }]}>
+            <Ionicons name="videocam" size={12} color={colors.gradientEnd} />
+            <Text style={[styles.badgeText, { color: colors.text }]}>{t('videoProfile.badge')}</Text>
+          </View>
+        </AnimatedPressable>
+      </View>
 
       <VideoPreviewSheet
         visible={sheetOpen}
@@ -46,11 +52,14 @@ export function VideoProfileOverlay({ visible, profile }: VideoProfileOverlayPro
 
 const styles = StyleSheet.create({
   overlay: {
-    position: 'absolute',
-    top: spacing.md + 28,
-    right: spacing.md,
+    ...StyleSheet.absoluteFill,
     zIndex: 7,
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  playHitArea: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   playButton: {
     width: 52,

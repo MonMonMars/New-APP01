@@ -18,6 +18,9 @@ export function alertChatSendOutcome(outcome: ChatSendOutcome, t: Translate): bo
     case 'invalid':
       Alert.alert(t('chat.sendFailedTitle'), t('chat.sendFailedBody'));
       return false;
+    case 'scam_link_blocked':
+      Alert.alert(t('chat.scamLinkBlockedTitle'), t('chat.scamLinkBlockedBody'));
+      return false;
     default: {
       const _exhaustive: never = outcome;
       return _exhaustive;

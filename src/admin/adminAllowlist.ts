@@ -1,4 +1,5 @@
-import { AdminRole, parseAdminRole } from './rbac';
+import { DEFAULT_DEMO_ADMIN_EMAIL, getLocalAdminAllowlist } from './adminLocalAllowlist';
+import { AdminRole } from './rbac';
 
 function parseEmailList(raw: string | undefined): string[] {
   if (!raw?.trim()) {
@@ -10,8 +11,20 @@ function parseEmailList(raw: string | undefined): string[] {
     .filter(Boolean);
 }
 
-export function getAdminAllowlist(): string[] {
+/** Emails from build-time env only. */
+export function getEnvAdminAllowlist(): string[] {
   return parseEmailList(process.env.EXPO_PUBLIC_ADMIN_ALLOWLIST);
+}
+
+/** Env + device-local invites + built-in demo default (unless disabled). */
+export function getAdminAllowlist(): string[] {
+  const env = getEnvAdminAllowlist();
+  const local = getLocalAdminAllowlist();
+  const merged = new Set<string>([...env, ...local]);
+  if (env.length === 0 && process.env.EXPO_PUBLIC_ADMIN_DISABLE_DEFAULT !== 'true') {
+    merged.add(DEFAULT_DEMO_ADMIN_EMAIL);
+  }
+  return [...merged];
 }
 
 const ENV_ROLE_MAP: { env: string; role: AdminRole }[] = [
@@ -21,14 +34,29 @@ const ENV_ROLE_MAP: { env: string; role: AdminRole }[] = [
   { env: 'EXPO_PUBLIC_ADMIN_VIEWERS', role: 'viewer' },
 ];
 
+export function isAdminDevOpen(): boolean {
+  return process.env.EXPO_PUBLIC_ADMIN_DEV_OPEN === 'true';
+}
+
+export function getAdminDemoPin(): string | null {
+  const pin = process.env.EXPO_PUBLIC_ADMIN_DEMO_PIN?.trim();
+  return pin && pin.length >= 4 ? pin : null;
+}
+
+export function verifyAdminDemoPin(pin: string): boolean {
+  const expected = getAdminDemoPin();
+  if (!expected) {
+    return true;
+  }
+  return pin.trim() === expected;
+}
+
 export function isEmailAdminAllowlisted(email: string): boolean {
   const normalized = email.trim().toLowerCase();
-  const allowlist = getAdminAllowlist();
-  if (allowlist.length === 0) {
-    // Dev fallback: only when explicitly enabled — never hardcode passwords.
-    return process.env.EXPO_PUBLIC_ADMIN_DEV_OPEN === 'true';
+  if (isAdminDevOpen()) {
+    return true;
   }
-  return allowlist.includes(normalized);
+  return getAdminAllowlist().includes(normalized);
 }
 
 export function resolveDefaultRoleFromEnv(email: string): AdminRole {
@@ -39,5 +67,19 @@ export function resolveDefaultRoleFromEnv(email: string): AdminRole {
       return role;
     }
   }
+  if (
+    normalized === DEFAULT_DEMO_ADMIN_EMAIL &&
+    getEnvAdminAllowlist().length === 0 &&
+    process.env.EXPO_PUBLIC_ADMIN_DISABLE_DEFAULT !== 'true'
+  ) {
+    return 'superadmin';
+  }
   return 'viewer';
+}
+
+export function shouldShowAdminMenuEntry(): boolean {
+  if (isAdminDevOpen()) {
+    return true;
+  }
+  return getAdminAllowlist().length > 0;
 }

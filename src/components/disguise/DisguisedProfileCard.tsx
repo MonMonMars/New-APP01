@@ -132,7 +132,12 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
                 {upvoted ? 25 : 24}
               </Text>
             </AnimatedPressable>
-            <AnimatedPressable style={styles.socialAction} onPress={() => setCommentsOpen(true)}>
+            <AnimatedPressable
+              style={styles.socialAction}
+              onPress={() => setCommentsOpen(true)}
+              accessibilityRole="button"
+              accessibilityLabel={t('pulseSocial.openCommentsA11y', { count: 3 })}
+            >
               <Ionicons name="chatbubble-outline" size={18} color={meta.accent} />
               <Text style={[styles.socialActionText, { color: colors.textMuted }]}>3</Text>
             </AnimatedPressable>
@@ -173,9 +178,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
               <Text style={styles.sponsored}>{t('disguiseAd.sponsored')}</Text>
               <ContentTypeIcon kind="sponsored" />
             </View>
-            <MediaWithContentBadge kind="ad">
-              <NewsHeroImage uri={post.coverImageUrl} style={styles.adImage} accessibilityLabel={post.headline} />
-            </MediaWithContentBadge>
+            <NewsHeroImage uri={post.coverImageUrl} style={styles.adImage} accessibilityLabel={post.headline} />
             <View style={styles.body}>
               <Text style={styles.brand}>{post.headline}</Text>
               <Text style={styles.tagline}>{post.summary}</Text>

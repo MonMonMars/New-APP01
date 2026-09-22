@@ -15,13 +15,15 @@ import { useTranslation } from '../../i18n';
 import { useTheme } from '../../context/ThemeContext';
 import { FeedItem } from '../../data/disguiseFeed';
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
-import { useDisguiseFeedItems } from '../../hooks/useDisguiseFeedItems';
+import { usePulsePaginatedFeedItems } from '../../hooks/usePulsePaginatedFeedItems';
 import { topicFilterLabel } from '../../utils/disguiseFeedFilter';
 import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
 import { spacing } from '../../theme';
+import { pulseFeedScrollPaddingBottom } from '../../theme/pulseFeedLayout';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefreshFooter';
 import { PulseFeedRefreshHeader } from '../../components/disguise/PulseFeedRefreshHeader';
+import { PulseFeedRefreshDimLayer } from '../../components/disguise/PulseFeedRefreshDimLayer';
 import { FadeSlideIn } from '../../components/motion/FadeSlideIn';
 import { usePulseFeedRefreshGeneration, usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
 
@@ -60,7 +62,7 @@ export function DisguiseFeedScreen() {
   const route = useRoute<RouteProp<DisguiseTabParamList, 'Home'>>();
   const topic = route.params?.topic;
 
-  const feedItems = useDisguiseFeedItems(topic);
+  const { feedItems, loadMore, loadingMore, canLoadMore } = usePulsePaginatedFeedItems(topic);
   const refreshGeneration = usePulseFeedRefreshGeneration();
   const {
     refreshing,
@@ -84,20 +86,33 @@ export function DisguiseFeedScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader />
+      <PulseFeedRefreshDimLayer refreshing={refreshing}>
       <FlatList
         ref={listRef}
         data={feedItems}
         extraData={refreshGeneration}
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => renderFeedItem({ item, index })}
-        contentContainerStyle={[styles.list, { paddingBottom: spacing.xl * 2 }]}
+        contentContainerStyle={[styles.list, { paddingBottom: pulseFeedScrollPaddingBottom(insets.bottom) }]}
         {...flatListProps}
+        maintainVisibleContentPosition={
+          feedItems.length > 40
+            ? { minIndexForVisible: 0, autoscrollToTopThreshold: 24 }
+            : undefined
+        }
+        onEndReached={() => {
+          if (canLoadMore && !refreshing) {
+            void loadMore();
+          }
+        }}
+        onEndReachedThreshold={0.35}
         ListFooterComponent={
           <PulseFeedRefreshFooter
             refreshing={refreshing}
             justUpdated={justUpdated}
+            loadingMore={loadingMore}
             onPressRefresh={() => {
-              void refresh();
+              void loadMore();
             }}
           />
         }
@@ -158,6 +173,7 @@ export function DisguiseFeedScreen() {
           </View>
         }
       />
+      </PulseFeedRefreshDimLayer>
     </View>
   );
 }

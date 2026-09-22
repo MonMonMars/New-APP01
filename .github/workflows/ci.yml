@@ -4,14 +4,11 @@ on:
   push:
     branches:
       - main
+      - cursor/**
   pull_request:
     branches:
       - main
       - cursor/**
-
-concurrency:
-  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
 
 jobs:
   verify:
@@ -22,7 +19,17 @@ jobs:
         with:
           node-version: '20'
           cache: npm
-      - run: npm ci
+      - name: Install dependencies
+        run: |
+          npm config set fetch-retries 5
+          npm config set fetch-retry-mintimeout 20000
+          npm config set fetch-retry-maxtimeout 120000
+          for attempt in 1 2 3; do
+            npm ci && exit 0
+            echo "npm ci failed (attempt $attempt), retrying..."
+            sleep $((attempt * 8))
+          done
+          exit 1
       - run: npx tsc --noEmit
       - run: npm run validate:profiles
       - run: npm run build:web:demo
@@ -31,7 +38,18 @@ jobs:
         run: |
           npx --yes serve -s -l 8090 -c serve.json &
           SERVE_PID=$!
-          sleep 3
+          for attempt in $(seq 1 45); do
+            if curl -sf --max-time 2 http://127.0.0.1:8090/ >/dev/null; then
+              echo "Demo server ready (attempt $attempt)"
+              break
+            fi
+            if [ "$attempt" -eq 45 ]; then
+              echo "Demo server did not become ready in time"
+              kill "$SERVE_PID" 2>/dev/null || true
+              exit 1
+            fi
+            sleep 1
+          done
           node scripts/verify-demo-link.mjs http://127.0.0.1:8090
           node scripts/check-pulse-link-routing.mjs http://127.0.0.1:8090
           node scripts/check-privacy-version-footer.mjs http://127.0.0.1:8090

@@ -69,6 +69,13 @@ async function reachedAppShell(page) {
   if (await likesTab.isVisible().catch(() => false)) {
     return true;
   }
+  const chatTab = page.getByRole('tab', { name: /^chat$/i }).first();
+  if (await chatTab.isVisible().catch(() => false)) {
+    return true;
+  }
+  if (/^pass$/im.test(text) && /super like|boost|rewind/i.test(text)) {
+    return true;
+  }
   return false;
 }
 
@@ -120,11 +127,14 @@ export async function completeDemoOnboarding(page, { maxSteps = 26, gender } = {
     }
 
     if (/choose your region/i.test(text)) {
-      const confirmArea = page.getByText(/continue with this area/i).first();
+      const confirmArea = page
+        .getByRole('button', { name: /continue with this area/i })
+        .or(page.getByText(/continue with this area/i))
+        .first();
       await confirmArea.scrollIntoViewIfNeeded().catch(() => {});
-      if (await confirmArea.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await confirmArea.click();
-        await page.waitForTimeout(900);
+      if (await confirmArea.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await confirmArea.click({ force: true });
+        await page.waitForTimeout(1200);
         continue;
       }
       const useLoc = page.getByText(/use my location/i).first();
@@ -154,15 +164,28 @@ export async function completeDemoOnboarding(page, { maxSteps = 26, gender } = {
       }
     }
 
-    if (/create your profile/i.test(text)) {
+    if (/create your profile|your public profile/i.test(text)) {
       const openPulse = page
-        .getByRole('button', { name: /^open pulse$/i })
-        .or(page.getByText(/^open pulse$/i))
+        .getByRole('button', { name: /open pulse/i })
+        .or(page.getByText(/open pulse/i))
         .first();
-      if (await openPulse.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await openPulse.click();
-        await page.waitForTimeout(1500);
-        return;
+      if (await openPulse.isVisible({ timeout: 4000 }).catch(() => false)) {
+        await openPulse.click({ force: true });
+        await page.waitForTimeout(2500);
+        if (await reachedAppShell(page)) {
+          return;
+        }
+      }
+    }
+
+    if (/what are you looking for|personalize your feed/i.test(text)) {
+      const firstIntent = page.getByText(/long.term|short.term|new friends|not sure/i).first();
+      if (await firstIntent.isVisible({ timeout: 1500 }).catch(() => false)) {
+        await firstIntent.click();
+        await page.waitForTimeout(300);
+      }
+      if (await clickContinue(page)) {
+        continue;
       }
     }
 

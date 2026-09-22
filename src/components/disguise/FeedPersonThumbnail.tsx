@@ -8,7 +8,6 @@ import {
   ContentTypeIcon,
   ContentTypeKind,
   ContentTypeLabel,
-  PROFILE_THUMB_ICON_SIZE,
 } from './ContentTypeIcon';
 import { DisguiseOverlayAvatar, DisguiseOverlayVariant, PROFILE_AVATAR_SIZE } from './DisguiseOverlayAvatar';
 import { FaceCenteredImage } from './FaceCenteredImage';
@@ -53,7 +52,15 @@ export function FeedPersonThumbnail({
   const { colors } = useTheme();
   const { t } = useTranslation();
 
-  const avatar = plainAvatar ? (
+  const trimmedCaption = caption?.trim();
+  const isProfile = contentKind === 'profile';
+  const badgeKind = isProfile ? 'profile' : contentKind;
+  const showProfileBadge = isProfile || showIconBadge;
+  const showCaption = Boolean(trimmedCaption);
+  const showCaptionIcon = showCaption && !isProfile;
+  const showTypeLabel = !hideLabel && !showCaption && !showProfileBadge;
+
+  const avatarCore = plainAvatar ? (
     <View style={[styles.plainWrap, { width: size, height: size, borderRadius: size / 2 }]}>
       <FaceCenteredImage imageUrl={imageUrl} size={size} />
     </View>
@@ -67,13 +74,16 @@ export function FeedPersonThumbnail({
     />
   );
 
-  const trimmedCaption = caption?.trim();
-  const isProfile = contentKind === 'profile';
-  const badgeKind = isProfile ? 'profile' : contentKind;
-  const showProfileBadge = isProfile || showIconBadge;
-  const showCaption = Boolean(trimmedCaption);
-  const showCaptionIcon = showCaption && !isProfile;
-  const showTypeLabel = !hideLabel && !showCaption && !showProfileBadge;
+  const avatar = (
+    <View style={[styles.avatarShell, { width: size, height: size }]}>
+      {avatarCore}
+      {showProfileBadge ? (
+        <View style={styles.avatarTypeBadge} pointerEvents="none">
+          <ContentTypeIcon kind={badgeKind} size={10} />
+        </View>
+      ) : null}
+    </View>
+  );
 
   const captionBlock = showCaption ? (
     <View style={styles.captionCol}>
@@ -90,12 +100,6 @@ export function FeedPersonThumbnail({
     <ContentTypeLabel kind={contentKind} />
   ) : null;
 
-  const profileBadge = showProfileBadge ? (
-    <View style={styles.iconBesideAvatar}>
-      <ContentTypeIcon kind={badgeKind} size={PROFILE_THUMB_ICON_SIZE} />
-    </View>
-  ) : null;
-
   const runPress = (event?: { stopPropagation?: () => void }) => {
     event?.stopPropagation?.();
     onPress?.();
@@ -105,7 +109,6 @@ export function FeedPersonThumbnail({
     return (
       <View style={[styles.row, style]}>
         {avatar}
-        {profileBadge}
         {captionBlock}
       </View>
     );
@@ -124,7 +127,6 @@ export function FeedPersonThumbnail({
       >
         <View style={styles.row}>
           {avatar}
-          {profileBadge}
           {captionBlock}
         </View>
       </AnimatedPressable>
@@ -140,7 +142,6 @@ export function FeedPersonThumbnail({
         style={styles.avatarPressTarget}
       >
         {avatar}
-        {profileBadge}
       </AnimatedPressable>
       {captionBlock}
     </View>
@@ -168,9 +169,25 @@ const styles = StyleSheet.create({
     maxWidth: '100%',
     minWidth: 0,
   },
-  iconBesideAvatar: {
+  avatarShell: {
+    position: 'relative',
     flexShrink: 0,
-    alignSelf: 'center',
+  },
+  avatarTypeBadge: {
+    position: 'absolute',
+    top: -2,
+    left: -2,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: 'rgba(255,255,255,0.96)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
   plainWrap: {
     overflow: 'hidden',

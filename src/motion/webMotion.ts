@@ -63,6 +63,11 @@ const CSS = `
   filter: brightness(1.18);
   animation: spark-press-glow 320ms ease-out;
 }
+.spark-pulse-refresh-dim {
+  filter: grayscale(1) brightness(0.74);
+  opacity: 0.88;
+  transition: filter 220ms ease, opacity 220ms ease;
+}
 `;
 
 /** Inject CSS keyframes used for web button + sheet motion. Safe to call more than once. */

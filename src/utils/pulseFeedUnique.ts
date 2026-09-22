@@ -87,6 +87,7 @@ export function interleaveUniquePulseFeed(
     usedSocialIds.size < social.length ||
     usedAdIds.size < ads.length
   ) {
+    const sizeBefore = result.length;
     const nextNews = takeNextNews(news, newsCursor, usedNewsIds, usedHeroImages);
     if (nextNews) {
       result.push(nextNews);
@@ -111,6 +112,9 @@ export function interleaveUniquePulseFeed(
       break;
     }
     if (!nextNews && !nextSocial && slotsSinceAd < 3) {
+      break;
+    }
+    if (result.length === sizeBefore) {
       break;
     }
   }

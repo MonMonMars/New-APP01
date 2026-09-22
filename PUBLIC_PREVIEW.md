@@ -2,11 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://pad-longer-lectures-tickets.trycloudflare.com**
+**https://seventh-rear-loading-sewing.trycloudflare.com**
 
-- **Integration branch:** `cursor/tinder-style-dating-app-7b60` (complete demo app)
-- **Build ID:** `ad619c5-20260922T050224Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-22 05:03 UTC — HTML + JS bundle + `verify-demo-link` PASS (9/9)
+- **Integration branch:** `cursor/fix-info-boost-buttons-7b60` (layout + scam detector)
+- **Build ID:** `df5a0ea-20260922T080955Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
+- **Verified:** 2026-09-22 08:12 UTC — HTTP 200, JS bundle 200, onboarding landing loads (fixed Pulse feed init hang)
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

@@ -541,15 +541,17 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
         />
 
         {onOpenProfile && activeIndex < profiles.length ? (
-          <AnimatedPressable
-            style={styles.infoButton}
-            onPress={() => onOpenProfile(profiles[activeIndex])}
-            accessibilityLabel={t('profileDetail.openDetails')}
-            hitSlop={6}
-            scaleTo={0.9}
-          >
-            <Ionicons name="information-circle" size={28} color={colors.text} />
-          </AnimatedPressable>
+          <View style={styles.infoButtonWrap} pointerEvents="box-none">
+            <AnimatedPressable
+              style={styles.infoButton}
+              onPress={() => onOpenProfile(profiles[activeIndex])}
+              accessibilityLabel={t('profileDetail.openDetails')}
+              hitSlop={6}
+              scaleTo={0.9}
+            >
+              <Ionicons name="information-circle" size={28} color={colors.text} />
+            </AnimatedPressable>
+          </View>
         ) : null}
 
         <SwipeBurstEffect
@@ -581,17 +583,21 @@ const styles = StyleSheet.create({
   cardSlot: {
     ...StyleSheet.absoluteFill,
   },
-  infoButton: {
+  infoButtonWrap: {
     position: 'absolute',
     top: DISCOVER_INFO_TOP,
     right: spacing.md,
+    width: DISCOVER_INFO_BUTTON_SIZE,
+    height: DISCOVER_INFO_BUTTON_SIZE,
+    zIndex: 50,
+    elevation: 50,
+  },
+  infoButton: {
     width: DISCOVER_INFO_BUTTON_SIZE,
     height: DISCOVER_INFO_BUTTON_SIZE,
     borderRadius: DISCOVER_INFO_BUTTON_SIZE / 2,
     backgroundColor: 'rgba(0,0,0,0.45)',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 40,
-    elevation: 40,
   },
 });

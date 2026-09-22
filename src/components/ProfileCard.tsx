@@ -20,6 +20,7 @@ import {
   DISCOVER_DOTS_RIGHT_INSET,
   DISCOVER_INFO_BUTTON_SIZE,
   DISCOVER_INFO_TOP,
+  discoverPhotoTapBottomInset,
   discoverPhotoTapTopInset,
   discoverProfileMetaBottom,
   discoverTopChromeBottom,
@@ -155,6 +156,7 @@ export function ProfileCard({
         colors={['rgba(0,0,0,0.35)', 'transparent', 'rgba(0,0,0,0.85)']}
         locations={[0, 0.35, 1]}
         style={styles.gradient}
+        pointerEvents="none"
       />
       {isTop && passDim && (
         <Animated.View style={[styles.passDimOverlay, passDimStyle]} pointerEvents="none" />
@@ -208,7 +210,13 @@ export function ProfileCard({
               <Text style={styles.privateBadgeText}>{t('discover.privatePhotos')}</Text>
             </View>
           ) : null}
-          <View style={styles.tapZones} pointerEvents="box-none">
+          <View
+            style={[
+              styles.tapZones,
+              { bottom: discoverPhotoTapBottomInset(compact) },
+            ]}
+            pointerEvents="box-none"
+          >
             <AnimatedPressable style={styles.tapZone} onPress={() => goToPhoto('left')} />
             <AnimatedPressable style={styles.tapZone} onPress={() => goToPhoto('right')} />
           </View>
@@ -406,7 +414,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     top: discoverPhotoTapTopInset(),
-    bottom: 0,
     flexDirection: 'row',
     zIndex: 4,
   },

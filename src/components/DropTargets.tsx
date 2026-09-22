@@ -106,7 +106,7 @@ function TargetButton({
   return (
     <Pressable
       onPress={disabled ? undefined : onPress}
-      hitSlop={10}
+      hitSlop={6}
       disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}

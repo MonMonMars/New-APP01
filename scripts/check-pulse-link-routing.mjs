@@ -106,18 +106,14 @@ for (let scroll = 0; scroll < 12; scroll += 1) {
     await page.waitForTimeout(300);
   }
 
-  const socialComments = page.locator('[aria-label*="chatbubble"], [aria-label*="Comment"]').first();
-  const socialFallback = page.getByText(/^\d+$/).nth(2);
+  const socialComments = page.getByLabel(/View comments|檢視留言/i).first();
   if (socialOk) {
-    const commentBtn = (await socialComments.isVisible().catch(() => false))
-      ? socialComments
-      : socialFallback;
-    if (await commentBtn.isVisible().catch(() => false)) {
-      await commentBtn.click({ force: true });
+    if (await socialComments.isVisible().catch(() => false)) {
+      await socialComments.click({ force: true });
       await page.waitForTimeout(700);
       const body = await page.locator('body').innerText();
-      socialOk = /comment|reply|post/i.test(body) && !(await hasMiniWindow(page));
-      await page.keyboard.press('Escape').catch(() => {});
+      socialOk = /comments|comment|reply|留言/i.test(body) && !(await hasMiniWindow(page));
+      await page.getByLabel(/^Close$|^關閉$/i).last().click({ force: true }).catch(() => {});
       await page.waitForTimeout(300);
     }
   }

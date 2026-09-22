@@ -1430,6 +1430,7 @@ export const en = {
     openPostPhoto: 'Open post photo',
     sharePost: 'Share post',
     comments: 'Comments',
+    openCommentsA11y: 'View comments, {count} replies',
     postTitle: 'Post',
     addComment: 'Add a comment...',
     sendComment: 'Send comment',

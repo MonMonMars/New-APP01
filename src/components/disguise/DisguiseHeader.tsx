@@ -1,0 +1,139 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+
+import { useApp } from '../../context/AppContext';
+import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
+import { useTranslation } from '../../i18n';
+import { FeedItem } from '../../data/disguiseFeed';
+import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
+import { spacing } from '../../theme';
+import { pulseBrand } from '../../theme/pulseBrand';
+import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
+import { DisguiseSearchSheet } from './DisguiseSearchSheet';
+import { DisguiseHeaderLogo } from './DisguiseBrand';
+import { PulseFeedItemViewer } from './PulseFeedItemViewer';
+import { AnimatedPressable } from '../AnimatedPressable';
+import { NavigationPressable } from '../NavigationPressable';
+
+type DisguiseHeaderProps = {
+  title?: string;
+  showSearch?: boolean;
+};
+
+export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps) {
+  const { setDisguiseMode } = useApp();
+  const { t } = useTranslation();
+  const meta = useDisguiseWorld();
+  const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchItemId, setSearchItemId] = useState<string | null>(null);
+
+  const handleSearchArticle = (item: FeedItem) => {
+    setSearchItemId(item.id);
+  };
+
+  return (
+    <>
+      <View style={[styles.header, { backgroundColor: pulseBrand.navy, borderBottomColor: pulseBrand.navyMuted }]}>
+        <View style={styles.leading}>
+          <NavigationPressable
+            onPress={() => {
+              void setDisguiseMode(false);
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={t('disguiseHeader.leaveLogoA11y', { name: meta.name, unlockLabel: meta.unlockLabel })}
+            accessibilityHint={t('disguiseHeader.leaveLogoHint', { name: meta.name, unlockLabel: meta.unlockLabel })}
+            hitSlop={8}
+            style={styles.brandTap}
+          >
+            <DisguiseHeaderLogo />
+          </NavigationPressable>
+          {title ? (
+            <View style={styles.titleBlock}>
+              <Text style={styles.sectionTitle} numberOfLines={1}>
+                {title}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+        <View style={styles.actions}>
+          {showSearch && (
+            <>
+              <AnimatedPressable
+                style={styles.iconBtn}
+                accessibilityLabel={meta.searchTitle}
+                onPress={() => setSearchOpen(true)}
+              >
+                <Ionicons name="search-outline" size={22} color={pulseBrand.mastheadText} />
+              </AnimatedPressable>
+              <AnimatedPressable
+                style={styles.iconBtn}
+                accessibilityLabel={t('disguiseHeader.openActivity')}
+                onPress={() => navigation.navigate('Activity')}
+              >
+                <Ionicons name="notifications-outline" size={22} color={pulseBrand.mastheadText} />
+              </AnimatedPressable>
+            </>
+          )}
+        </View>
+      </View>
+
+      <DisguiseSearchSheet
+        visible={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onSelectTopic={(topic) => navigateDisguiseFeedTopic(navigation, topic)}
+        onSelectArticle={handleSearchArticle}
+      />
+      <PulseFeedItemViewer
+        itemId={searchItemId}
+        onClose={() => setSearchItemId(null)}
+      />
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  leading: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    minWidth: 0,
+    marginRight: spacing.sm,
+  },
+  brandTap: {
+    flexShrink: 0,
+    zIndex: 2,
+  },
+  titleBlock: {
+    flex: 1,
+    minWidth: 0,
+    justifyContent: 'center',
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+    color: 'rgba(255, 255, 255, 0.72)',
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+    flexShrink: 0,
+  },
+  iconBtn: {
+    padding: spacing.xs,
+  },
+});

@@ -1,0 +1,87 @@
+{
+  "expo": {
+    "name": "Spark",
+    "slug": "spark-dating",
+    "version": "1.0.0",
+    "description": "Spark dating app with Pulse disguise mode — news feed cover and private safe-mode discovery.",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F0F10"
+    },
+    "scheme": "spark",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.spark.dating",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Spark uses your camera for profile photos and verification selfies.",
+        "NSPhotoLibraryUsageDescription": "Spark uses your photo library to add profile pictures.",
+        "NSFaceIDUsageDescription": "Spark uses Face ID to unlock private dating mode.",
+        "NSLocationWhenInUseUsageDescription": "Spark uses your location to show people nearby.",
+        "NSMicrophoneUsageDescription": "Spark uses your microphone for voice notes in chat."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0F0F10",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "package": "com.spark.dating",
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "READ_MEDIA_IMAGES",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT",
+        "RECORD_AUDIO"
+      ],
+      "predictiveBackGestureEnabled": false,
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": false,
+          "data": [
+            {
+              "scheme": "spark",
+              "host": "auth",
+              "pathPrefix": "/callback"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "disguiseAppName": "Pulse",
+      "eas": {
+        "projectId": "spark-dating-demo"
+      }
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Spark to access your photos for your profile."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Spark uses your location to show people nearby on the map."
+        }
+      ],
+      "expo-notifications",
+      "expo-audio"
+    ]
+  }
+}

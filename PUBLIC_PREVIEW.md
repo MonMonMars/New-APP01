@@ -2,11 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://effectiveness-allergy-polo-comp.trycloudflare.com**
+**https://flight-durham-bidder-websites.trycloudflare.com**
 
 - **Integration branch:** `cursor/tinder-style-dating-app-7b60` (complete demo app)
-- **Build ID:** `f5a7196-20260921T234400Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-21 23:48 UTC — `verify:ci` + **`verify:extended`** PASS (Pulse refresh, map Tokyo search, routing, disguise UX)
+- **Build ID:** `935bed0-20260922T012057Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
+- **Verified:** 2026-09-22 01:21 UTC — `verify-demo-link` PASS on tunnel URL
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

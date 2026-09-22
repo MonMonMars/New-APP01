@@ -55,6 +55,11 @@ import { ScamAlertBanner } from '../components/ScamAlertBanner';
 import { ScamProtectionSheet } from '../components/ScamProtectionSheet';
 import { assessProfile } from '../trust/scamDetector';
 import { buildCustomerProtectionPlan } from '../trust/scamProtectionProtocol';
+import {
+  messageContainsSuspiciousLink,
+  shouldSanitizeIncomingLinks,
+  shouldWarnBeforeSendingToScammer,
+} from '../trust/scamMessageGuard';
 import { radii, spacing } from '../theme';
 
 type ChatScreenProps = {
@@ -296,10 +301,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
       ? t('matches.waitingReply')
       : null;
 
-  const handleSend = (text: string, imageUrl?: string, isGif = false) => {
-    if (messageSending) {
-      return;
-    }
+  const deliverSend = (text: string, imageUrl?: string, isGif = false) => {
     const needsUpload =
       Boolean(imageUrl) &&
       !isGif &&
@@ -317,6 +319,25 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
       }
       setDraft('');
     });
+  };
+
+  const handleSend = (text: string, imageUrl?: string, isGif = false) => {
+    if (messageSending) {
+      return;
+    }
+    const trimmed = text.trim();
+    if (
+      scamAssessment &&
+      trimmed &&
+      shouldWarnBeforeSendingToScammer(scamAssessment.level, trimmed)
+    ) {
+      Alert.alert(t('chat.scamSendWarnTitle'), t('chat.scamSendWarnBody'), [
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('chat.scamSendAnyway'), style: 'destructive', onPress: () => deliverSend(text, imageUrl, isGif) },
+      ]);
+      return;
+    }
+    deliverSend(text, imageUrl, isGif);
   };
 
   const handlePickImage = async () => {
@@ -406,6 +427,12 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
           ) : null}
           {messageHasCaption(item) ? (
             <Text style={[styles.bubbleText, { color: colors.text }]}>{item.text}</Text>
+          ) : null}
+          {!item.isMine &&
+          scamAssessment &&
+          shouldSanitizeIncomingLinks(scamAssessment.level) &&
+          messageContainsSuspiciousLink(item.text) ? (
+            <Text style={[styles.scamLinkHint, { color: colors.textMuted }]}>{t('chat.scamIncomingLinkHint')}</Text>
           ) : null}
           {item.isMine && (
             <View style={styles.statusRow}>
@@ -1029,6 +1056,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 21,
     flexShrink: 1,
+  },
+  scamLinkHint: {
+    fontSize: 11,
+    lineHeight: 15,
+    marginTop: 6,
+    fontWeight: '600',
   },
   statusRow: {
     flexDirection: 'row',

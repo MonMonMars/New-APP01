@@ -28,6 +28,11 @@ import {
 import { ProfileSocialLinks } from './ProfileSocialLinks';
 import { EmberStatusChips } from './EmberStatusChips';
 import { AnimatedPressable } from './AnimatedPressable';
+import { ScamAlertBanner } from './ScamAlertBanner';
+import { ScamProtectionSheet } from './ScamProtectionSheet';
+import { assessProfile } from '../trust/scamDetector';
+import { buildCustomerProtectionPlan } from '../trust/scamProtectionProtocol';
+import { useMemo, useState } from 'react';
 
 type ProfileDetailSheetProps = {
   profile: Profile | null;
@@ -70,6 +75,17 @@ export function ProfileDetailSheet({
   const { t, locale } = useTranslation();
   const showInternalProfileLabels = useOptionalAdmin()?.showInternalProfileLabels ?? false;
   const insets = useSafeAreaInsets();
+  const [showScamProtection, setShowScamProtection] = useState(false);
+  const scamAssessment = useMemo(
+    () => (profile ? assessProfile(profile) : null),
+    [profile],
+  );
+  const scamPlan = useMemo(() => {
+    if (!scamAssessment) {
+      return null;
+    }
+    return buildCustomerProtectionPlan(scamAssessment, locale);
+  }, [locale, scamAssessment]);
 
   if (!profile) {
     return null;
@@ -96,6 +112,12 @@ export function ProfileDetailSheet({
         </View>
 
         <ScrollView contentContainerStyle={styles.content}>
+          {scamPlan?.showProfileWarning && scamAssessment ? (
+            <ScamAlertBanner
+              riskLevel={scamAssessment.level}
+              onLearnMore={() => setShowScamProtection(true)}
+            />
+          ) : null}
           {profile.photos.map((photo, photoIndex) => {
             const locked = photoIndex >= visiblePhotoCount;
             return (
@@ -286,6 +308,13 @@ export function ProfileDetailSheet({
           </View>
         )}
       </View>
+      {scamAssessment ? (
+        <ScamProtectionSheet
+          visible={showScamProtection}
+          onClose={() => setShowScamProtection(false)}
+          riskLevel={scamAssessment.level}
+        />
+      ) : null}
     </Modal>
   );
 }

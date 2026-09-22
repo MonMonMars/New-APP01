@@ -124,5 +124,11 @@ export function shouldHideProfileFromDiscover(assessment: ScamAssessment): boole
   if (isProfileQuarantined(assessment.profileId)) {
     return true;
   }
-  return assessment.level === 'critical' && assessment.score >= 85;
+  if (assessment.level === 'critical') {
+    return true;
+  }
+  if (assessment.level === 'high' && assessment.score >= 70) {
+    return true;
+  }
+  return false;
 }

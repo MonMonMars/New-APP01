@@ -402,6 +402,14 @@ export const en = {
       'Your photo or voice note could not reach cloud storage. Check your connection and Supabase bucket setup, then try again.',
     sendFailedTitle: 'Message not sent',
     sendFailedBody: 'This message could not be sent. Check the content and try again.',
+    scamLinkBlockedTitle: 'Link blocked for your safety',
+    scamLinkBlockedBody:
+      'This match is flagged as a likely scam. Spark blocks links in chat until our team reviews the account.',
+    scamSendWarnTitle: 'Pause before you send',
+    scamSendWarnBody:
+      'This message looks like money, crypto, or personal payment info. Scammers often ask for this — consider staying on Spark and reporting instead.',
+    scamSendAnyway: 'Send anyway',
+    scamIncomingLinkHint: 'Suspicious link — do not open. Report this profile if you feel pressured.',
     checkedInSafely: '✅ Checked in safely at {location}',
     homeSafeEnding: '🏠 Home safe — ending date check-in',
     dateCheckInStarted: '📍 Date check-in: meeting at {location}{contactSuffix}',
@@ -525,6 +533,9 @@ export const en = {
     blockSomeoneBody: 'Blocking removes them from your deck and chats immediately. Blocked profiles stay hidden until you unblock them in Settings.',
     safetyFaqBody: 'Meet in public, tell a friend your plans, and trust your instincts. Full FAQ at spark.app/safety.',
     contactSupportBody: 'Email support@spark.app — we typically reply within one business day.',
+    scamProtection: 'Avoid romance scams',
+    scamProtectionBody:
+      'Never send money or gift cards. Keep chat in Spark, video-verify before meeting, and report “Spam or scam” — high-risk accounts are hidden from Discover automatically.',
   },
   report: {
     title: 'Report {name}',
@@ -1818,6 +1829,10 @@ export const en = {
     overviewStaffDefault: 'Using built-in demo account {email} until env allowlist is set.',
     overviewBuild: 'App {version}',
     overviewPinEnabled: 'Staff PIN is required at sign-in (EXPO_PUBLIC_ADMIN_DEMO_PIN).',
+    overviewScamDetector: 'Trust & safety',
+    overviewScamStats: '{risky} high/critical · {quarantined} quarantined locally',
+    overviewOpenScamDetector: 'Open scam detector',
+    overviewScamHiddenDiscover: '{n} profiles hidden from Discover by risk rules',
     tools: 'Tools',
     profiles: 'Profiles',
     roleManagement: 'Role management',

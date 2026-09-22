@@ -46,7 +46,11 @@ export function EmberStatusChips({ profile, compact = false }: EmberStatusChipsP
             { backgroundColor: `${colors.ember}22`, borderColor: `${colors.ember}66` },
           ]}
         >
-          <Text style={[styles.text, compact && styles.textCompact, { color: colors.ember }]}>
+          <Text
+            style={[styles.text, compact && styles.textCompact, { color: colors.ember }]}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
             {label}
           </Text>
         </View>

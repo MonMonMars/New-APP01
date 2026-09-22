@@ -1,18 +1,14 @@
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import {
-  FlatList,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  Platform,
-  RefreshControl,
-  ScrollView,
-} from 'react-native';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { FlatList, NativeScrollEvent, NativeSyntheticEvent, Platform, ScrollView } from 'react-native';
 
-import { useDisguiseWorld } from './useDisguiseWorld';
+import { useApp } from '../context/AppContext';
 import { refreshPulseLiveNews } from '../services/pulseLiveNews';
 
 let refreshGeneration = 0;
 const subscribers = new Set<() => void>();
+
+let feedRefreshing = false;
+const refreshingSubscribers = new Set<() => void>();
 
 function subscribe(listener: () => void): () => void {
   subscribers.add(listener);
@@ -21,12 +17,40 @@ function subscribe(listener: () => void): () => void {
   };
 }
 
+function subscribeRefreshing(listener: () => void): () => void {
+  refreshingSubscribers.add(listener);
+  return () => {
+    refreshingSubscribers.delete(listener);
+  };
+}
+
 function getRefreshGenerationSnapshot(): number {
   return refreshGeneration;
 }
 
+function getFeedRefreshingSnapshot(): boolean {
+  return feedRefreshing;
+}
+
 function notifyRefreshSubscribers(): void {
   subscribers.forEach((listener) => listener());
+}
+
+function setFeedRefreshing(next: boolean): void {
+  if (feedRefreshing === next) {
+    return;
+  }
+  feedRefreshing = next;
+  refreshingSubscribers.forEach((listener) => listener());
+}
+
+/** True while any Pulse tab is running a feed reload (dims tab bar + feed). */
+export function usePulseFeedRefreshing(): boolean {
+  return useSyncExternalStore(
+    subscribeRefreshing,
+    getFeedRefreshingSnapshot,
+    getFeedRefreshingSnapshot,
+  );
 }
 
 export function bumpPulseFeedRefreshGeneration(): number {
@@ -49,10 +73,28 @@ const TOP_OFFSET_THRESHOLD = 8;
 const TOP_OVERSCROLL_THRESHOLD =
   Platform.OS === 'ios' ? -48 : Platform.OS === 'web' ? -20 : -32;
 const TOP_ARRIVAL_DEBOUNCE_MS = Platform.OS === 'web' ? 280 : 120;
+/** Prevent overscroll / tab re-press from stacking refreshes and stealing taps on web. */
+const REFRESH_COOLDOWN_MS = Platform.OS === 'web' ? 900 : 600;
+/** Visible grey reload — matches Instagram / YouTube pull-to-refresh timing. */
+const PULSE_REFRESH_MIN_MS = Platform.OS === 'web' ? 520 : 480;
+
+function waitNextPaint(): Promise<void> {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => resolve());
+    });
+  });
+}
+
+function waitMs(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
 export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}) {
   const { onRefreshed } = options;
-  const meta = useDisguiseWorld();
+  const { dismissDisguiseLeaveConfirm } = useApp();
   const [refreshing, setRefreshing] = useState(false);
   const [justUpdated, setJustUpdated] = useState(false);
   const [isAtTop, setIsAtTop] = useState(true);
@@ -62,6 +104,7 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
   const scrollOffsetRef = useRef(0);
   const wasScrolledDownRef = useRef(false);
   const topArrivalTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastRefreshFinishedAtRef = useRef(0);
   const refreshGeneration = usePulseFeedRefreshGeneration();
 
   const clearTopArrivalTimer = useCallback(() => {
@@ -96,22 +139,37 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
       if (gateRef.current || refreshing) {
         return false;
       }
+      const sinceLast = Date.now() - lastRefreshFinishedAtRef.current;
+      if (sinceLast < REFRESH_COOLDOWN_MS) {
+        return false;
+      }
 
       gateRef.current = true;
       setRefreshing(true);
+      setFeedRefreshing(true);
+      const startedAt = Date.now();
       try {
-        await refreshPulseLiveNews({ force: true });
-        bumpPulseFeedRefreshGeneration();
-        setJustUpdated(true);
+        dismissDisguiseLeaveConfirm();
         scrollToTop(true);
+        await waitNextPaint();
+        bumpPulseFeedRefreshGeneration();
         onRefreshed?.();
+        void refreshPulseLiveNews({ force: true }).catch(() => undefined);
+        const elapsed = Date.now() - startedAt;
+        const remain = PULSE_REFRESH_MIN_MS - elapsed;
+        if (remain > 0) {
+          await waitMs(remain);
+        }
+        setJustUpdated(true);
         return true;
       } finally {
         setRefreshing(false);
+        setFeedRefreshing(false);
         gateRef.current = false;
+        lastRefreshFinishedAtRef.current = Date.now();
       }
     },
-    [onRefreshed, refreshing, scrollToTop],
+    [dismissDisguiseLeaveConfirm, onRefreshed, refreshing, scrollToTop],
   );
 
   const refresh = useCallback(() => runRefresh('pull'), [runRefresh]);
@@ -161,7 +219,12 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
         clearTopArrivalTimer();
       }
 
-      if (!refreshing && y <= TOP_OVERSCROLL_THRESHOLD) {
+      // Web overscroll pull is handled by PulseFeedRefreshHeader; auto-overscroll here steals taps.
+      if (
+        Platform.OS !== 'web' &&
+        !refreshing &&
+        y <= TOP_OVERSCROLL_THRESHOLD
+      ) {
         void runRefresh('pull');
       }
     },
@@ -204,27 +267,11 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
     void runRefresh('top');
   }, [runRefresh, scrollToTop]);
 
-  const refreshControl = useMemo(
-    () => (
-      <RefreshControl
-        refreshing={refreshing}
-        onRefresh={() => {
-          void refresh();
-        }}
-        tintColor={meta.accent}
-        colors={[meta.accent]}
-        progressBackgroundColor="transparent"
-      />
-    ),
-    [meta.accent, refresh, refreshing],
-  );
-
   const flatListProps = {
     onScroll: handleFlatListScroll,
     onScrollEndDrag: maybeRefreshAfterScrollToTop,
     onMomentumScrollEnd: maybeRefreshAfterScrollToTop,
     scrollEventThrottle: 16 as const,
-    refreshControl,
   };
 
   const scrollViewProps = {
@@ -232,7 +279,6 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
     onScrollEndDrag: maybeRefreshAfterScrollToTop,
     onMomentumScrollEnd: maybeRefreshAfterScrollToTop,
     scrollEventThrottle: 16 as const,
-    refreshControl,
   };
 
   return {
@@ -247,7 +293,7 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
     scrollToTop,
     listRef,
     scrollViewRef,
-    refreshControl,
+    refreshControl: undefined,
     flatListProps,
     scrollViewProps,
   };

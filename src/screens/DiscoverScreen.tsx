@@ -3,7 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useCallback, useRef, useState } from 'react';
 
 import { usePulseTabReturnToDisguise } from '../hooks/usePulseTabReturnToDisguise';
-import { Alert, Dimensions, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BoostBanner } from '../components/BoostBanner';
@@ -31,13 +31,9 @@ import { spacing } from '../theme';
 import { dailyLikeLimitForGender } from '../utils/genderAccountPerks';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 
-const TAB_BAR_HEIGHT = 72;
-const { height: WINDOW_HEIGHT } = Dimensions.get('window');
-
 export function DiscoverScreen() {
   usePulseTabReturnToDisguise();
   const insets = useSafeAreaInsets();
-  const deckHeight = Math.round((WINDOW_HEIGHT - insets.top - TAB_BAR_HEIGHT) * 0.92);
   const navigation = useNavigation();
   const { colors } = useTheme();
   const { t, locale } = useTranslation();
@@ -403,14 +399,7 @@ export function DiscoverScreen() {
       </View>
       {isIncognitoActive && <IncognitoBanner />}
       <BoostBanner visible={isBoosted} />
-      <View
-        style={[
-          styles.deckContainer,
-          {
-            height: deckHeight,
-          },
-        ]}
-      >
+      <View style={styles.deckContainer}>
         {isPaused ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyEmoji}>⏸️</Text>

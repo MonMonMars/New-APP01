@@ -118,6 +118,12 @@ export function SafetyScreen({ onClose }: SafetyScreenProps) {
         icon: 'shield-half-outline' as const,
         action: 'security-protocols' as const,
       },
+      {
+        id: 'scam-protection',
+        label: t('safety.scamProtection'),
+        icon: 'alert-circle-outline' as const,
+        message: t('safety.scamProtectionBody'),
+      },
     ],
     [t],
   );

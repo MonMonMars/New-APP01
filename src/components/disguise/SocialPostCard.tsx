@@ -194,6 +194,8 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
         <AnimatedPressable
           style={styles.action}
           onPress={() => setCommentsOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t('pulseSocial.openCommentsA11y', { count: post.comments })}
         >
           <Ionicons name="chatbubble-outline" size={18} color={accent} />
           <Text style={[styles.actionText, { color: colors.textMuted }]}>{post.comments}</Text>

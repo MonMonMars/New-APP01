@@ -1,8 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
+import { AdminControlMenu, type AdminMenuItem } from '../../components/admin/AdminControlMenu';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { useAdmin } from '../../context/AdminContext';
@@ -30,23 +30,46 @@ export function AdminDashboardScreen({ onClose, navigation }: Props) {
 
   const roleLabel = t(`admin.roles.${adminSession.role as AdminRole}`);
 
-  const rows: {
-    labelKey: string;
-    icon: keyof typeof Ionicons.glyphMap;
-    onPress: () => void;
-    show: boolean;
-  }[] = [
+  const menuItems: AdminMenuItem[] = [
     {
-      labelKey: 'admin.profiles',
-      icon: 'people-outline',
-      onPress: () => navigation.navigate('AdminProfiles'),
-      show: hasPermission('canViewInternalProfileMetadata'),
+      id: 'overview',
+      labelKey: 'admin.overviewTitle',
+      subtitleKey: 'admin.overviewMenuSub',
+      icon: 'speedometer-outline',
+      onPress: () => navigation.navigate('AdminOverview'),
+      visible: hasPermission('canViewAnalytics'),
     },
     {
+      id: 'profiles',
+      labelKey: 'admin.profiles',
+      subtitleKey: 'admin.profilesMenuSub',
+      icon: 'people-outline',
+      onPress: () => navigation.navigate('AdminProfiles'),
+      visible: hasPermission('canViewInternalProfileMetadata'),
+    },
+    {
+      id: 'scam',
+      labelKey: 'admin.scamDetectorTitle',
+      subtitleKey: 'admin.scamDetectorMenuSub',
+      icon: 'shield-checkmark-outline',
+      onPress: () => navigation.navigate('AdminScamDetector'),
+      visible: hasPermission('canRunBackendActions'),
+    },
+    {
+      id: 'accounts',
+      labelKey: 'admin.accountsTitle',
+      subtitleKey: 'admin.accountsMenuSub',
+      icon: 'person-add-outline',
+      onPress: () => navigation.navigate('AdminAccounts'),
+      visible: hasPermission('canManageAdmins'),
+    },
+    {
+      id: 'roles',
       labelKey: 'admin.roleManagement',
+      subtitleKey: 'admin.rolesMenuSub',
       icon: 'key-outline',
       onPress: () => navigation.navigate('AdminRoles'),
-      show: hasPermission('canManageAdmins'),
+      visible: hasPermission('canManageAdmins'),
     },
   ];
 
@@ -59,20 +82,7 @@ export function AdminDashboardScreen({ onClose, navigation }: Props) {
           <Text style={[styles.cardSub, { color: colors.textMuted }]}>{roleLabel}</Text>
         </View>
 
-        <Text style={[styles.section, { color: colors.textMuted }]}>{t('admin.tools')}</Text>
-        {rows
-          .filter((r) => r.show)
-          .map((row) => (
-            <AnimatedPressable
-              key={row.labelKey}
-              style={[styles.row, { borderColor: colors.border }]}
-              onPress={row.onPress}
-            >
-              <Ionicons name={row.icon} size={22} color={colors.gradientEnd} />
-              <Text style={[styles.rowLabel, { color: colors.text }]}>{t(row.labelKey)}</Text>
-              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-            </AnimatedPressable>
-          ))}
+        <AdminControlMenu items={menuItems} sectionTitleKey="admin.controlPanel" />
 
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <Text style={[styles.cardTitle, { color: colors.text }]}>{t('admin.backend')}</Text>
@@ -101,21 +111,6 @@ const styles = StyleSheet.create({
   },
   cardTitle: { fontSize: 16, fontWeight: '700' },
   cardSub: { fontSize: 13, lineHeight: 18 },
-  section: {
-    marginTop: spacing.md,
-    fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingVertical: spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  rowLabel: { flex: 1, fontSize: 16, fontWeight: '600' },
   signOut: { marginTop: spacing.xl, alignItems: 'center' },
   signOutText: { color: '#e74c3c', fontWeight: '700' },
 });

@@ -4,6 +4,7 @@ import { disguiseNewsExtra } from './disguiseNewsExtra';
 import { hydrateDisguiseAlert, hydrateNewsPost } from './disguisePulsePersonaPhotos';
 import { disguiseSocialPosts } from './disguiseSocialPosts';
 import { freeNewsLinks, pulseNewsImages } from './pulseNewsMedia';
+import { interleaveUniquePulseFeed } from '../utils/pulseFeedUnique';
 
 export type NewsReporter = {
   id: string;
@@ -242,57 +243,11 @@ export function findAdPostByLandingUrl(landingUrl: string): AdPost | undefined {
 const allNewsItems = [...newsItems, ...disguiseNewsExtra, ...disguiseNewsBatch2].map(hydrateNewsPost);
 
 /** Static feed slots — disguised dating profiles are injected in buildDisguiseFeed(). */
-export const disguiseFeedItems: FeedItem[] = [
-  allNewsItems[0],
-  disguiseSocialPosts[0],
-  adItems[0],
-  allNewsItems[1],
-  disguiseSocialPosts[1],
-  adItems[1],
-  allNewsItems[2],
-  disguiseSocialPosts[2],
-  adItems[2],
-  allNewsItems[3],
-  disguiseSocialPosts[3],
-  allNewsItems[4],
-  disguiseSocialPosts[4],
-  adItems[0],
-  allNewsItems[5],
-  disguiseSocialPosts[5],
-  adItems[1],
-  allNewsItems[6],
-  disguiseSocialPosts[6],
-  allNewsItems[7],
-  disguiseSocialPosts[7],
-  adItems[2],
-  allNewsItems[0],
-  disguiseSocialPosts[0],
-  allNewsItems[3],
-  disguiseSocialPosts[4],
-  adItems[0],
-  allNewsItems[5],
-  disguiseSocialPosts[6],
-  allNewsItems[2],
-  disguiseSocialPosts[2],
-  adItems[1],
-  allNewsItems[8],
-  disguiseSocialPosts[8],
-  allNewsItems[9],
-  disguiseSocialPosts[9],
-  allNewsItems[10],
-  disguiseSocialPosts[10],
-  adItems[2],
-  allNewsItems[11],
-  disguiseSocialPosts[11],
-  allNewsItems[12],
-  disguiseSocialPosts[12],
-  allNewsItems[13],
-  adItems[0],
-  allNewsItems[4],
-  disguiseSocialPosts[4],
-  allNewsItems[7],
-  disguiseSocialPosts[7],
-];
+export const disguiseFeedItems: FeedItem[] = interleaveUniquePulseFeed(
+  allNewsItems,
+  disguiseSocialPosts,
+  adItems,
+);
 
 export function findNewsPostByArticleUrl(articleUrl: string): NewsPost | undefined {
   return allNewsItems.find((item) => item.articleUrl === articleUrl);

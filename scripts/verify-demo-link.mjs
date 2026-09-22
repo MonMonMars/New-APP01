@@ -98,7 +98,20 @@ async function main() {
     await completeDemoOnboarding(page);
     await dismissCookies(page);
 
-    const sparkVisible = /miles away|\d+\s*mi\b/i.test(await page.locator('body').innerText());
+    await page
+      .getByRole('tab', { name: /^discover$/i })
+      .first()
+      .waitFor({ state: 'visible', timeout: 15000 })
+      .catch(() => {});
+
+    const bodyAfter = await page.locator('body').innerText();
+    const sparkVisible =
+      /miles away|\d+\s*mi\b/i.test(bodyAfter) ||
+      (await page
+        .getByRole('tab', { name: /^discover$/i })
+        .first()
+        .isVisible()
+        .catch(() => false));
     const pulseDisguiseVisible = await page
       .getByLabel(/tap .+ logo to leave/i)
       .first()
@@ -125,7 +138,7 @@ async function main() {
       } else {
         fail('Pulse tab', 'not found on Spark tab bar');
       }
-    } else {
+    } else if (pulseDisguiseVisible) {
       await dismissCookies(page);
       await unlockSparkFromPulse(page);
       await dismissCookies(page);

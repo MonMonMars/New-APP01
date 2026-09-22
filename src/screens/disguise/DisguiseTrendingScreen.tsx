@@ -51,6 +51,7 @@ import { usesFemalePulseExperience } from '../../utils/genderAccountPerks';
 import { briefToNewsPost, breakingToNewsPost, editorsPickToNewsPost } from '../../utils/disguiseTrendingArticles';
 import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefreshFooter';
 import { PulseFeedRefreshHeader } from '../../components/disguise/PulseFeedRefreshHeader';
+import { PulseFeedRefreshDimLayer } from '../../components/disguise/PulseFeedRefreshDimLayer';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { useRotatedPulseContent } from '../../hooks/useRotatedPulseContent';
 import { usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
@@ -191,6 +192,7 @@ export function DisguiseTrendingScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader title={meta.trendingTab} showSearch={false} />
+      <PulseFeedRefreshDimLayer refreshing={refreshing}>
       <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={styles.list}
@@ -401,11 +403,13 @@ export function DisguiseTrendingScreen() {
         <PulseFeedRefreshFooter
           refreshing={refreshing}
           justUpdated={justUpdated}
+          variant="refresh"
           onPressRefresh={() => {
             void refresh();
           }}
         />
       </ScrollView>
+      </PulseFeedRefreshDimLayer>
 
       <NewsArticleSheet
         visible={articlePost !== null}

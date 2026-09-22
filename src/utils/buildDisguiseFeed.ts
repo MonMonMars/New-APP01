@@ -11,11 +11,12 @@ import { profileIntroCaption } from './profileIntroCaption';
 import {
   renewPulseFeedPage,
 } from './refreshPulseFeed';
-import { mergeLiveNewsIntoFeed, densifyPulseNewsBlocks } from './mergeLivePulseNews';
+import { mergeLiveNewsIntoFeed } from './mergeLivePulseNews';
 import { socialAuthorDemoProfileId } from '../data/disguiseReporterProfileLinks';
 import { explicitReporterProfileId } from './resolveDisguiseProfile';
 import { getPulseLiveNewsSnapshot } from '../services/pulseLiveNews';
 import { spaceSponsoredFeedItems } from './pulseFeedSpacing';
+import { dedupePulseFeedItems } from './pulseFeedUnique';
 import { matchesShowMePreference } from './showMeFilter';
 
 function weaveProfileCards(base: FeedItem[], profileCards: FeedItem[]): FeedItem[] {
@@ -182,8 +183,8 @@ export function buildDisguiseFeed(
   const livePosts = liveSnapshot?.posts ?? [];
   if (livePosts.length > 0) {
     baseFeed = mergeLiveNewsIntoFeed(baseFeed, livePosts, refreshGeneration);
-    baseFeed = densifyPulseNewsBlocks(baseFeed, livePosts, refreshGeneration);
   }
+  baseFeed = dedupePulseFeedItems(baseFeed);
 
   const withProfiles = weaveProfileCards(baseFeed, profileCards);
 
@@ -217,10 +218,10 @@ export function buildDisguiseFeed(
     );
   }
 
-  const spaced = spaceSponsoredFeedItems(linked, 6);
+  const spaced = dedupePulseFeedItems(spaceSponsoredFeedItems(linked, 6));
 
   if (refreshGeneration > 0) {
-    return renewPulseFeedPage(spaced, section, refreshGeneration, showMe);
+    return dedupePulseFeedItems(renewPulseFeedPage(spaced, section, refreshGeneration, showMe));
   }
 
   return spaced;

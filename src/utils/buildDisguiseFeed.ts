@@ -26,7 +26,7 @@ function weaveProfileCards(base: FeedItem[], profileCards: FeedItem[]): FeedItem
 
   base.forEach((item, index) => {
     result.push(item);
-    if ((index + 1) % 4 === 0 && profileIndex < profileCards.length) {
+    if ((index + 1) % 5 === 0 && profileIndex < profileCards.length) {
       result.push(profileCards[profileIndex]);
       profileIndex += 1;
     }
@@ -169,7 +169,7 @@ export function buildDisguiseFeed(
     );
   }
 
-  const spaced = spaceSponsoredFeedItems(linked, 4);
+  const spaced = spaceSponsoredFeedItems(linked, 6);
 
   if (refreshGeneration > 0) {
     return renewPulseFeedPage(spaced, section, refreshGeneration);

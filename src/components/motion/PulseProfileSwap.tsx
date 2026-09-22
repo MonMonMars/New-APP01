@@ -41,21 +41,11 @@ export function PulseProfileSwap({ profileKey, children, style }: PulseProfileSw
     swapToken.current = token;
 
     if (Platform.OS === 'web') {
-      setWebPhase('out');
-      const outTimer = window.setTimeout(() => {
-        if (swapToken.current !== token) {
-          return;
-        }
-        setRenderKey(profileKey);
-        setRendered(pendingChildren.current);
-        setWebPhase('in');
-        window.setTimeout(() => {
-          if (swapToken.current === token) {
-            setWebPhase('visible');
-          }
-        }, MOTION.duration.normal);
-      }, MOTION.duration.exit);
-      return () => window.clearTimeout(outTimer);
+      // Instant swap on web — fade animation left taps dead after Pulse reload.
+      setRenderKey(profileKey);
+      setRendered(pendingChildren.current);
+      setWebPhase('visible');
+      return;
     }
 
     opacity.value = withTiming(0, { duration: MOTION.duration.exit }, (finished) => {

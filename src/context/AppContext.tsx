@@ -533,6 +533,7 @@ type AppContextValue = {
   updateNotificationPreferences: (prefs: NotificationPreferences) => void;
   setThemeMode: (mode: ThemeMode) => void;
   setDisguiseMode: (enabled: boolean) => Promise<boolean>;
+  dismissDisguiseLeaveConfirm: () => void;
   updateSecuritySettings: (settings: SecuritySettings) => void;
   updatePrivacyPreferences: (prefs: PrivacyPreferences) => void;
   setIncognitoMode: (enabled: boolean) => boolean;
@@ -3566,6 +3567,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateNotificationPreferences,
       setThemeMode,
       setDisguiseMode,
+      dismissDisguiseLeaveConfirm: cancelLeaveDisguise,
       updateSecuritySettings,
       updatePrivacyPreferences,
       setIncognitoMode,
@@ -3728,6 +3730,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateNotificationPreferences,
       setThemeMode,
       setDisguiseMode,
+      cancelLeaveDisguise,
       updateSecuritySettings,
       updatePrivacyPreferences,
       setIncognitoMode,

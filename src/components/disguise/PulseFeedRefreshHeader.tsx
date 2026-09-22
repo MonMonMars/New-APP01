@@ -60,7 +60,12 @@ export function PulseFeedRefreshHeader({
 
   return (
     <View pointerEvents="box-none">
-      <View {...panHandlers} style={styles.pullRow} accessibilityLiveRegion="polite">
+      <View
+        {...panHandlers}
+        style={styles.pullRow}
+        accessibilityLiveRegion="polite"
+        collapsable={false}
+      >
         {refreshing ? <ActivityIndicator color={accent} size="small" /> : null}
         <Text
           style={[styles.pullText, { color: colors.textMuted }]}

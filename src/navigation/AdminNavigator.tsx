@@ -10,6 +10,7 @@ import { AdminProfilesScreen } from '../screens/admin/AdminProfilesScreen';
 import { AdminAccountsScreen } from '../screens/admin/AdminAccountsScreen';
 import { AdminOverviewScreen } from '../screens/admin/AdminOverviewScreen';
 import { AdminRolesScreen } from '../screens/admin/AdminRolesScreen';
+import { AdminScamDetectorScreen } from '../screens/admin/AdminScamDetectorScreen';
 
 export type AdminStackParamList = {
   AdminLogin: undefined;
@@ -19,6 +20,7 @@ export type AdminStackParamList = {
   AdminProfileEdit: { profileId: string };
   AdminAccounts: undefined;
   AdminRoles: undefined;
+  AdminScamDetector: undefined;
 };
 
 const Stack = createNativeStackNavigator<AdminStackParamList>();
@@ -75,6 +77,9 @@ export function AdminNavigator({ onClose }: AdminNavigatorProps) {
       </Stack.Screen>
       <Stack.Screen name="AdminRoles">
         {({ navigation }) => <AdminRolesScreen navigation={navigation} />}
+      </Stack.Screen>
+      <Stack.Screen name="AdminScamDetector">
+        {({ navigation }) => <AdminScamDetectorScreen navigation={navigation} />}
       </Stack.Screen>
     </Stack.Navigator>
   );

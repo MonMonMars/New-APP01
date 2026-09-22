@@ -48,6 +48,14 @@ export function AdminDashboardScreen({ onClose, navigation }: Props) {
       visible: hasPermission('canViewInternalProfileMetadata'),
     },
     {
+      id: 'scam',
+      labelKey: 'admin.scamDetectorTitle',
+      subtitleKey: 'admin.scamDetectorMenuSub',
+      icon: 'shield-checkmark-outline',
+      onPress: () => navigation.navigate('AdminScamDetector'),
+      visible: hasPermission('canRunBackendActions'),
+    },
+    {
       id: 'accounts',
       labelKey: 'admin.accountsTitle',
       subtitleKey: 'admin.accountsMenuSub',

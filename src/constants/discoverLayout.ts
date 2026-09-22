@@ -34,10 +34,21 @@ export function discoverPhotoTapTopInset(): number {
   return discoverTopChromeBottom();
 }
 
-/** Compact profile meta sits above the action rail with extra breathing room. */
+/**
+ * Bottom inset for profile name / meta on the card.
+ * Compact decks already reserve the action rail via deck `paddingBottom` — only add a small gap here.
+ */
 export function discoverProfileMetaBottom(compact: boolean): number {
   if (!compact) {
     return spacing.lg;
   }
-  return discoverActionRailHeight(true) + spacing.sm;
+  return spacing.lg;
+}
+
+/** Keep photo tap zones from covering compact name / job / distance text. */
+export function discoverPhotoTapBottomInset(compact: boolean): number {
+  if (!compact) {
+    return spacing.xl * 2;
+  }
+  return discoverProfileMetaBottom(true) + spacing.xl + spacing.lg + spacing.md;
 }

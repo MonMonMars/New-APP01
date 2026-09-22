@@ -1,0 +1,17 @@
+{
+  "name": "Spark (Expo web)",
+  "install": "npm ci",
+  "ports": [
+    {
+      "name": "web demo",
+      "port": 8090
+    }
+  ],
+  "terminals": [
+    {
+      "name": "demo",
+      "command": "npm run demo",
+      "description": "Build web demo and serve on http://localhost:8090 (see PUBLIC_PREVIEW.md for tunnel)."
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+name: Deploy Web to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - cursor/tinder-style-dating-app-7b60
+      - cursor/phase-d-features-7b60
+      - cursor/complete-all-details-7b60
+      - cursor/debug-tab-bleed-7b60
+      - cursor/legal-privacy-security-7b60
+      - cursor/disguise-trending-7b60
+      - cursor/quiet-no-sfx-7b60
+      - cursor/button-press-effects-7b60
+      - cursor/complete-app-details-7b60
+      - cursor/disguise-mode-7b60
+      - cursor/competitor-features-7b60
+      - cursor/cloud-complete-7b60
+      - cursor/red-star-superlike-7b60
+      - cursor/pulse-explicit-profile-links-7b60
+      - cursor/update-fake-accounts-7b60
+      - cursor/pulse-top-refresh-7b60
+      - cursor/world-map-touch-search-7b60
+      - cursor/compact-mini-window-7b60
+      - cursor/mini-xsl-buttons-7b60
+      - cursor/pulse-icons-blue-7b60
+      - cursor/app-i18n-7b60
+      - cursor/legal-docs-complete-7b60
+      - cursor/finish-app-perks-7b60
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build:web:pages
+      - name: Add SPA fallback for GitHub Pages
+        run: |
+          cp dist-pages/index.html dist-pages/404.html
+          touch dist-pages/.nojekyll
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: dist-pages
+
+  deploy-gh-pages-branch:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: dist
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages

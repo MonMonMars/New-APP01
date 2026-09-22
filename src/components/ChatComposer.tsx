@@ -1,0 +1,245 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
+
+import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
+import { radii, spacing } from '../theme';
+import { AnimatedPressable } from './AnimatedPressable';
+
+type ChatComposerProps = {
+  draft: string;
+  onChangeDraft: (text: string) => void;
+  onSend: (text: string) => void;
+  onPickImage: () => void;
+  onSuggestDate: () => void;
+  onVibeGame: () => void;
+  onVoiceNote?: () => void;
+  onPickGif?: () => void;
+  onAiSuggest?: () => void;
+  sendDisabled?: boolean;
+  paddingBottom: number;
+};
+
+type ExtraAction = {
+  id: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  onPress: () => void;
+};
+
+export function ChatComposer({
+  draft,
+  onChangeDraft,
+  onSend,
+  onPickImage,
+  onSuggestDate,
+  onVibeGame,
+  onVoiceNote,
+  onPickGif,
+  onAiSuggest,
+  sendDisabled = false,
+  paddingBottom,
+}: ChatComposerProps) {
+  const { colors } = useTheme();
+  const { t } = useTranslation();
+  const [extrasOpen, setExtrasOpen] = useState(false);
+  const extrasProgress = useSharedValue(0);
+
+  const hasText = draft.trim().length > 0;
+
+  const extrasStyle = useAnimatedStyle(() => ({
+    opacity: extrasProgress.value,
+    maxHeight: extrasProgress.value * 72,
+    marginBottom: extrasProgress.value * spacing.sm,
+  }));
+
+  const toggleExtras = () => {
+    const next = !extrasOpen;
+    setExtrasOpen(next);
+    extrasProgress.value = withSpring(next ? 1 : 0, { damping: 16, stiffness: 280 });
+  };
+
+  const runExtra = (action: () => void) => {
+    if (sendDisabled) {
+      return;
+    }
+    action();
+    setExtrasOpen(false);
+    extrasProgress.value = withTiming(0, { duration: 180 });
+  };
+
+  const handleSend = () => {
+    if (!hasText || sendDisabled) {
+      return;
+    }
+    onSend(draft);
+  };
+
+  const extras: ExtraAction[] = [
+    { id: 'photo', icon: 'images-outline', label: t('chat.photo'), onPress: onPickImage },
+    ...(onPickGif
+      ? [{ id: 'gif', icon: 'happy-outline' as keyof typeof Ionicons.glyphMap, label: t('chat.gif'), onPress: onPickGif }]
+      : []),
+    { id: 'date', icon: 'calendar-outline', label: t('chat.date'), onPress: onSuggestDate },
+    { id: 'vibe', icon: 'color-wand-outline', label: t('chat.vibe'), onPress: onVibeGame },
+    {
+      id: 'voice',
+      icon: 'mic-outline',
+      label: t('chat.voice'),
+      onPress: () => {
+        if (onVoiceNote) {
+          onVoiceNote();
+        }
+      },
+    },
+  ];
+
+  return (
+    <View style={[styles.wrap, { borderTopColor: colors.border, paddingBottom }]}>
+      <Animated.View style={[styles.extrasTray, extrasStyle]} pointerEvents={extrasOpen ? 'auto' : 'none'}>
+        <View style={styles.extrasRow}>
+          {extras.map((item) => (
+            <AnimatedPressable
+              key={item.id}
+              scaleTo={0.92}
+              style={[styles.extraButton, { backgroundColor: colors.surface }]}
+              onPress={() => runExtra(item.onPress)}
+              accessibilityLabel={item.label}
+            >
+              <Ionicons name={item.icon} size={22} color={colors.gradientEnd} />
+              <Text style={[styles.extraLabel, { color: colors.textMuted }]}>{item.label}</Text>
+            </AnimatedPressable>
+          ))}
+        </View>
+      </Animated.View>
+
+      <View style={styles.composer}>
+        {onAiSuggest ? (
+          <AnimatedPressable
+            scaleTo={0.9}
+            onPress={onAiSuggest}
+            style={[styles.plusButton, { backgroundColor: colors.surface }]}
+            accessibilityLabel={t('chat.openDialogueHelper')}
+          >
+            <Ionicons name="sparkles" size={20} color={colors.gradientEnd} />
+          </AnimatedPressable>
+        ) : null}
+        <AnimatedPressable
+          scaleTo={0.9}
+          onPress={toggleExtras}
+          style={[
+            styles.plusButton,
+            {
+              backgroundColor: extrasOpen ? colors.gradientEnd : colors.surface,
+            },
+          ]}
+          accessibilityLabel={extrasOpen ? t('chat.hideExtras') : t('chat.moreActions')}
+        >
+          <Ionicons
+            name={extrasOpen ? 'close' : 'add'}
+            size={22}
+            color={extrasOpen ? colors.text : colors.textMuted}
+          />
+        </AnimatedPressable>
+
+        <TextInput
+          value={draft}
+          onChangeText={onChangeDraft}
+          placeholder={t('chat.messagePlaceholder')}
+          placeholderTextColor={colors.textMuted}
+          style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]}
+          multiline
+          blurOnSubmit={false}
+          textAlignVertical="center"
+          onSubmitEditing={handleSend}
+          returnKeyType="default"
+        />
+
+        <AnimatedPressable
+          scaleTo={0.9}
+          onPress={handleSend}
+          disabled={!hasText || sendDisabled}
+          style={[
+            styles.sendButton,
+            { backgroundColor: hasText ? colors.gradientEnd : colors.surface },
+          ]}
+          accessibilityLabel={t('chat.sendMessage')}
+        >
+          <Ionicons
+            name="send"
+            size={18}
+            color={hasText ? colors.text : colors.textMuted}
+          />
+        </AnimatedPressable>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  wrap: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  extrasTray: {
+    overflow: 'hidden',
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+  },
+  extrasRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    gap: spacing.sm,
+  },
+  extraButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.sm,
+    borderRadius: radii.button,
+    gap: 4,
+  },
+  extraLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  composer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.xs,
+    gap: spacing.sm,
+  },
+  plusButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  input: {
+    flex: 1,
+    flexGrow: 1,
+    minWidth: 0,
+    borderRadius: radii.button,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
+    fontSize: 15,
+    lineHeight: 20,
+    minHeight: 40,
+    maxHeight: 120,
+  },
+  sendButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

@@ -1,0 +1,127 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
+import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../i18n';
+import { getPromptQuestionLabel } from '../i18n/labels';
+import { Profile, ProfilePrompt } from '../types/profile';
+import { radii, spacing } from '../theme';
+import { modalFill } from '../theme/modalFill';
+import { AnimatedPressable } from './AnimatedPressable';
+
+type PromptLikeSheetProps = {
+  visible: boolean;
+  profile: Profile | null;
+  prompt: ProfilePrompt | null;
+  onClose: () => void;
+  onSend: (comment: string) => void;
+};
+
+/** Hinge-style like on a specific prompt with optional comment. */
+export function PromptLikeSheet({ visible, profile, prompt, onClose, onSend }: PromptLikeSheetProps) {
+  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const { t, locale } = useTranslation();
+  const [comment, setComment] = useState('');
+
+  if (!profile || !prompt) {
+    return null;
+  }
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent>
+      <View style={[styles.backdrop, modalFill]}>
+        <View style={[styles.sheet, { backgroundColor: colors.background, paddingBottom: insets.bottom + spacing.md }]}>
+          <View style={styles.handleRow}>
+            <Text style={[styles.title, { color: colors.text }]}>{t('promptLike.title', { name: profile.name })}</Text>
+            <AnimatedPressable onPress={onClose}>
+              <Ionicons name="close" size={24} color={colors.textMuted} />
+            </AnimatedPressable>
+          </View>
+          <View style={[styles.promptCard, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.question, { color: colors.gradientEnd }]}>
+              {getPromptQuestionLabel(locale, prompt.question)}
+            </Text>
+            <Text style={[styles.answer, { color: colors.text }]}>{prompt.answer}</Text>
+          </View>
+          <TextInput
+            value={comment}
+            onChangeText={setComment}
+            placeholder={t('promptLike.placeholder')}
+            placeholderTextColor={colors.textMuted}
+            style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]}
+            multiline
+          />
+          <AnimatedPressable
+            style={[styles.sendButton, { backgroundColor: colors.heartPink }]}
+            onPress={() => {
+              onSend(comment.trim());
+              setComment('');
+            }}
+          >
+            <Ionicons name="heart" size={18} color="#fff" />
+            <Text style={styles.sendText}>{t('promptLike.sendLike')}</Text>
+          </AnimatedPressable>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  sheet: {
+    borderTopLeftRadius: radii.card * 2,
+    borderTopRightRadius: radii.card * 2,
+    padding: spacing.lg,
+    gap: spacing.md,
+  },
+  handleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  promptCard: {
+    borderRadius: radii.card,
+    padding: spacing.md,
+  },
+  question: {
+    fontSize: 12,
+    fontWeight: '700',
+    marginBottom: spacing.xs,
+  },
+  answer: {
+    fontSize: 16,
+    lineHeight: 22,
+  },
+  input: {
+    borderRadius: radii.card,
+    padding: spacing.md,
+    minHeight: 72,
+    textAlignVertical: 'top',
+    fontSize: 15,
+  },
+  sendButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    borderRadius: radii.button,
+    paddingVertical: spacing.md,
+  },
+  sendText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+});

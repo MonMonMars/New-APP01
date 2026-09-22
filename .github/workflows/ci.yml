@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      - cursor/**
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run validate:profiles
+      - run: npm run build:web:demo
+      - run: npx playwright install chromium --with-deps
+      - name: Playwright smoke (onboarding + Pulse routing)
+        run: |
+          npx --yes serve -s -l 8090 -c serve.json &
+          SERVE_PID=$!
+          sleep 3
+          node scripts/verify-demo-link.mjs http://127.0.0.1:8090
+          node scripts/check-pulse-link-routing.mjs http://127.0.0.1:8090
+          node scripts/check-privacy-version-footer.mjs http://127.0.0.1:8090
+          kill "$SERVE_PID" 2>/dev/null || true

@@ -1,0 +1,291 @@
+import type { AccountKind } from './accountKind';
+
+export type ProfilePrompt = {
+  question: string;
+  answer: string;
+};
+
+export const VOICE_PROMPT_QUESTIONS = [
+  'My perfect Sunday sounds like…',
+  'The way to win me over is…',
+  'I geek out on…',
+  'My most irrational fear is…',
+  'Two truths and a lie…',
+] as const;
+
+export type VoicePrompt = {
+  question: string;
+  durationSeconds: number;
+  recordedAt: string;
+};
+
+export type ProfileGender = 'woman' | 'man' | 'nonbinary';
+
+export type Orientation =
+  | 'straight'
+  | 'gay'
+  | 'lesbian'
+  | 'bisexual'
+  | 'pansexual'
+  | 'queer'
+  | 'asexual'
+  | 'other';
+
+export const ORIENTATION_LABELS: Record<Orientation, string> = {
+  straight: 'Straight',
+  gay: 'Gay',
+  lesbian: 'Lesbian',
+  bisexual: 'Bisexual',
+  pansexual: 'Pansexual',
+  queer: 'Queer',
+  asexual: 'Asexual',
+  other: 'Other',
+};
+
+export const GENDER_LABELS: Record<ProfileGender, string> = {
+  woman: 'Woman',
+  man: 'Man',
+  nonbinary: 'Non-binary',
+};
+
+export const HINGE_PROMPT_OPTIONS = [
+  'My simple pleasures',
+  'I go crazy for',
+  'Together we could',
+  'The way to win me over is',
+  'A life goal of mine',
+  'My most controversial opinion',
+  'I\'m looking for',
+  'Typical Sunday',
+  'Best travel story',
+  'Green flags I look for',
+] as const;
+
+export type Profile = {
+  id: string;
+  name: string;
+  age: number;
+  bio: string;
+  distanceMiles: number;
+  gender: ProfileGender;
+  photos: string[];
+  interests: string[];
+  job?: string;
+  school?: string;
+  verified?: boolean;
+  /** Selfie matches profile photos */
+  photoVerified?: boolean;
+  /** Liveness / real-person check passed */
+  personVerified?: boolean;
+  prompts?: ProfilePrompt[];
+  /** Hinge-style "Most Compatible" daily pick */
+  mostCompatible?: boolean;
+  /** Badoo-style Crush / spotlight profile */
+  spotlight?: boolean;
+  /** Has a video profile (placeholder) */
+  hasVideo?: boolean;
+  /** Active within last 24h */
+  activeToday?: boolean;
+  /** Joined within last 7 days */
+  isNew?: boolean;
+  /** Bumble-style conversation starter shown on match */
+  openingMove?: string;
+  /** Hinge-style voice prompt on profile */
+  voicePrompt?: VoicePrompt;
+  /** Internal: demo / seed catalog profile (not the signed-in member). */
+  isDemoProfile?: boolean;
+  /** Internal: real member vs demo seed vs AI persona — admin-only in UI. */
+  accountKind?: AccountKind;
+  /** Spark AI practice persona — not a real person */
+  isAiPersona?: boolean;
+  /** Links to AI_PERSONA_CONFIGS for chat personality */
+  aiPersonaId?: string;
+  /** Relationship intent — used for Spark+ advanced filters */
+  intent?: RelationshipIntent;
+  /** Optional bio status — does not lock Spark or Ember */
+  relationshipStatus?: RelationshipStatus;
+  /** Ember-only: how private this profile is */
+  emberDiscretion?: EmberDiscretion;
+  /** Ember-only: what they want */
+  emberSeeking?: EmberSeeking;
+  /** Ember-only: when they can talk */
+  emberAvailability?: EmberAvailability;
+  /** City label for map / discovery */
+  city?: string;
+  /** Real map coordinates for nearby search */
+  latitude?: number;
+  longitude?: number;
+  /** @deprecated Legacy fake pin — prefer latitude/longitude */
+  mapX?: number;
+  mapY?: number;
+  instagramHandle?: string;
+  spotifyHandle?: string;
+};
+
+export type RelationshipIntent =
+  | 'long_term'
+  | 'short_term'
+  | 'new_friends'
+  | 'not_sure';
+
+export type RelationshipStatus = 'single' | 'married' | 'divorced';
+
+export const RELATIONSHIP_STATUS_LABELS: Record<RelationshipStatus, string> = {
+  single: 'Single',
+  married: 'Married',
+  divorced: 'Divorced',
+};
+
+export function isEmberRelationshipStatus(status?: RelationshipStatus | null): boolean {
+  switch (status) {
+    case 'married':
+    case 'divorced':
+      return true;
+    case 'single':
+    case undefined:
+    case null:
+      return false;
+    default: {
+      const _exhaustive: never = status;
+      return _exhaustive;
+    }
+  }
+}
+
+/** Married / Divorced labels for Ember cards. Spark hides relationship status. */
+export function emberRelationshipLabel(status?: RelationshipStatus | null): string | null {
+  switch (status) {
+    case 'married':
+    case 'divorced':
+      return RELATIONSHIP_STATUS_LABELS[status];
+    case 'single':
+    case undefined:
+    case null:
+      return null;
+    default: {
+      const _exhaustive: never = status;
+      return _exhaustive;
+    }
+  }
+}
+
+/** Ashley Madison–style discretion preference. Shown only in Ember. */
+export type EmberDiscretion = 'open' | 'careful' | 'hidden';
+
+/** What someone wants in Ember — more specific than Spark intent. */
+export type EmberSeeking = 'online' | 'travel' | 'ongoing' | 'light';
+
+export type EmberAvailability = 'evenings' | 'weekends' | 'flexible';
+
+export const EMBER_DISCRETION_LABELS: Record<EmberDiscretion, string> = {
+  open: 'Open',
+  careful: 'Careful',
+  hidden: 'Hidden',
+};
+
+export const EMBER_DISCRETION_HINTS: Record<EmberDiscretion, string> = {
+  open: 'Photos and city stay visible',
+  careful: 'Extra photos stay private until a match',
+  hidden: 'City hidden · extra photos private',
+};
+
+export const EMBER_SEEKING_LABELS: Record<EmberSeeking, string> = {
+  online: 'Online only',
+  travel: 'When traveling',
+  ongoing: 'Ongoing',
+  light: 'Keep it light',
+};
+
+export const EMBER_AVAILABILITY_LABELS: Record<EmberAvailability, string> = {
+  evenings: 'Evenings',
+  weekends: 'Weekends',
+  flexible: 'Flexible',
+};
+
+export const EMBER_PROMPT_OPTIONS = [
+  'I value discretion because',
+  'The best time to talk is',
+  'What this is (and isn’t)',
+  'I’m looking for',
+] as const;
+
+export function emberLocksExtraPhotos(discretion?: EmberDiscretion | null): boolean {
+  switch (discretion) {
+    case 'careful':
+    case 'hidden':
+      return true;
+    case 'open':
+    case undefined:
+    case null:
+      return false;
+    default: {
+      const _exhaustive: never = discretion;
+      return _exhaustive;
+    }
+  }
+}
+
+export function emberHidesCity(discretion?: EmberDiscretion | null): boolean {
+  switch (discretion) {
+    case 'hidden':
+      return true;
+    case 'open':
+    case 'careful':
+    case undefined:
+    case null:
+      return false;
+    default: {
+      const _exhaustive: never = discretion;
+      return _exhaustive;
+    }
+  }
+}
+
+export function emberLocationLine(profile: {
+  city?: string;
+  distanceMiles: number;
+  emberDiscretion?: EmberDiscretion;
+}): string {
+  if (emberHidesCity(profile.emberDiscretion)) {
+    return 'Nearby';
+  }
+  const miles = `${profile.distanceMiles} mi`;
+  if (profile.emberDiscretion === 'careful') {
+    return miles;
+  }
+  return profile.city ? `${profile.city} · ${miles}` : miles;
+}
+
+export function emberVisiblePhotoCount(photoCount: number, discretion?: EmberDiscretion | null, unlocked = false): number {
+  if (unlocked || !emberLocksExtraPhotos(discretion) || photoCount === 0) {
+    return photoCount;
+  }
+  return 1;
+}
+
+export type UserProfile = {
+  name: string;
+  age: number;
+  bio: string;
+  photos: string[];
+  interests: string[];
+  intent?: RelationshipIntent;
+  relationshipStatus?: RelationshipStatus;
+  emberDiscretion?: EmberDiscretion;
+  emberSeeking?: EmberSeeking;
+  emberAvailability?: EmberAvailability;
+  gender?: ProfileGender;
+  orientation?: Orientation;
+  prompts?: ProfilePrompt[];
+  /** Bumble-style Opening Move — shown to matches when you connect */
+  openingMove?: string;
+  /** Hinge-style voice prompt — optional audio intro */
+  voicePrompt?: VoicePrompt;
+  instagramConnected?: boolean;
+  instagramHandle?: string;
+  spotifyConnected?: boolean;
+  spotifyHandle?: string;
+  ageVerified?: boolean;
+  photoVerified?: boolean;
+  personVerified?: boolean;
+};

@@ -5,6 +5,7 @@ import { aiPersonaProfiles, getAiPersonaConfig } from '../data/aiPersonas';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
 import { Profile } from '../types/profile';
+import { resolveDemoPortraitUri } from '../utils/resolveDemoPortraitUri';
 import { radii, spacing } from '../theme';
 import { AiPersonaBadge } from './AiPersonaBadge';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -38,7 +39,7 @@ export function AiPersonasRow({ onSelect }: AiPersonasRowProps) {
               accessibilityRole="button"
               accessibilityLabel={t('discoverHub.viewProfileA11y', { name: profile.name })}
             >
-              <Image source={{ uri: profile.photos[0] }} style={styles.photo} />
+              <Image source={{ uri: resolveDemoPortraitUri(profile.photos[0]) }} style={styles.photo} />
               <AiPersonaBadge profile={profile} compact />
               <Text style={[styles.name, { color: colors.text }]}>{profile.name}</Text>
               <Text style={[styles.tagline, { color: colors.textMuted }]} numberOfLines={2}>

@@ -24,6 +24,7 @@ import {
   emberVisiblePhotoCount,
   Profile,
 } from '../types/profile';
+import { resolveDemoPortraitUri } from '../utils/resolveDemoPortraitUri';
 import { AnimatedPressable } from './AnimatedPressable';
 import { EmberStatusChips } from './EmberStatusChips';
 
@@ -139,7 +140,7 @@ export function ProfileCard({
         <Animated.View style={[styles.spotlightRing, spotlightStyle, { borderColor: colors.heartPink }]} pointerEvents="none" />
       )}
       <Image
-        source={{ uri: profile.photos[photoIndex] }}
+        source={{ uri: resolveDemoPortraitUri(profile.photos[photoIndex]) }}
         style={styles.photo}
         resizeMode="cover"
       />

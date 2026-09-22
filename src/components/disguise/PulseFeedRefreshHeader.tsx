@@ -1,72 +1,65 @@
-import { ActivityIndicator, PanResponder, StyleSheet, Text, View } from 'react-native';
-import { useMemo, useRef, type ReactNode } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import type { ReactNode } from 'react';
 
 import { useTranslation } from '../../i18n';
 import { useTheme } from '../../context/ThemeContext';
 import { spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
-
-const PULL_TRIGGER_PX = 72;
+import { PULSE_PULL_TRIGGER_PX } from '../../hooks/usePulseFeedRefresh';
 
 type PulseFeedRefreshHeaderProps = {
   children?: ReactNode;
   refreshing: boolean;
   justUpdated: boolean;
   isAtTop: boolean;
+  pullOffset?: number;
   onPullRefresh: () => void;
 };
 
-/** Top-of-feed pull affordance (Instagram / YouTube style) — works on web where RefreshControl is weak. */
+/** Top-of-feed status row — pairs with native RefreshControl or web pull wrapper (Instagram / YouTube). */
 export function PulseFeedRefreshHeader({
   children,
   refreshing,
   justUpdated,
   isAtTop,
-  onPullRefresh,
+  pullOffset = 0,
+  onPullRefresh: _onPullRefresh,
 }: PulseFeedRefreshHeaderProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const accent = useDisguiseWorld().accent;
-  const pullReadyRef = useRef(false);
 
-  const panHandlers = useMemo(
-    () =>
-      PanResponder.create({
-        onStartShouldSetPanResponder: () => false,
-        onMoveShouldSetPanResponder: (_, gesture) =>
-          isAtTop && !refreshing && gesture.dy > 6 && Math.abs(gesture.dy) > Math.abs(gesture.dx),
-        onPanResponderMove: (_, gesture) => {
-          pullReadyRef.current = gesture.dy >= PULL_TRIGGER_PX;
-        },
-        onPanResponderRelease: () => {
-          if (pullReadyRef.current && isAtTop && !refreshing) {
-            onPullRefresh();
-          }
-          pullReadyRef.current = false;
-        },
-        onPanResponderTerminate: () => {
-          pullReadyRef.current = false;
-        },
-      }).panHandlers,
-    [isAtTop, onPullRefresh, refreshing],
-  );
+  const pullReady = pullOffset >= PULSE_PULL_TRIGGER_PX;
 
   let status = t('disguiseFeed.pullRefreshHint');
   if (refreshing) {
     status = t('disguiseFeed.refreshingFeed');
   } else if (justUpdated) {
     status = t('disguiseFeed.feedUpdated');
+  } else if (pullReady && isAtTop) {
+    status = t('disguiseFeed.releaseToRefresh');
+  } else if (pullOffset > 12 && isAtTop) {
+    status = t('disguiseFeed.pullRefreshHint');
   }
+
+  const pullProgress = Math.min(1, pullOffset / PULSE_PULL_TRIGGER_PX);
+  const indicatorPadding = refreshing ? spacing.sm : Math.max(spacing.xs, pullOffset * 0.35);
 
   return (
     <View pointerEvents="box-none" style={refreshing ? styles.refreshingHost : undefined}>
       <View
-        {...panHandlers}
-        style={styles.pullRow}
+        style={[styles.pullRow, { paddingTop: indicatorPadding, minHeight: 28 + indicatorPadding }]}
         accessibilityLiveRegion="polite"
         collapsable={false}
       >
-        {refreshing ? <ActivityIndicator color={accent} size="small" /> : null}
+        {refreshing || pullOffset > 8 ? (
+          <ActivityIndicator
+            color={accent}
+            size="small"
+            animating={refreshing || pullOffset > 8}
+            style={{ opacity: refreshing ? 1 : 0.35 + pullProgress * 0.65 }}
+          />
+        ) : null}
         <Text
           style={[styles.pullText, { color: colors.textMuted }]}
           testID="pulse-feed-refresh-header"
@@ -89,7 +82,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.sm,
     paddingBottom: spacing.sm,
-    minHeight: 28,
   },
   pullText: {
     fontSize: 12,

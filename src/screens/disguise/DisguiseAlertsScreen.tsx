@@ -49,11 +49,15 @@ export function DisguiseAlertsScreen() {
     refreshing,
     justUpdated,
     isAtTop,
+    pullOffset,
     flatListProps,
     listRef,
     refresh,
     handleTabRepress,
-  } = usePulseScrollRefresh();
+    refreshControl,
+    webPullWrapperProps,
+    feedPullTranslateStyle,
+  } = usePulseScrollRefresh({ refreshTintColor: meta.accent });
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('tabPress', () => {
@@ -106,18 +110,22 @@ export function DisguiseAlertsScreen() {
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader title={t('tabs.activity')} showSearch={false} />
       <PulseFeedRefreshDimLayer refreshing={refreshing}>
+      <View style={styles.feedPullHost} {...webPullWrapperProps}>
+      <View style={[styles.feedPullHost, feedPullTranslateStyle]}>
       <FlatList
         ref={listRef}
         data={alerts}
         extraData={refreshGeneration}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
+        refreshControl={refreshControl}
         {...flatListProps}
         ListHeaderComponent={
           <PulseFeedRefreshHeader
             refreshing={refreshing}
             justUpdated={justUpdated}
             isAtTop={isAtTop}
+            pullOffset={pullOffset}
             onPullRefresh={() => {
               void refresh();
             }}
@@ -201,6 +209,8 @@ export function DisguiseAlertsScreen() {
           );
         }}
       />
+      </View>
+      </View>
       </PulseFeedRefreshDimLayer>
 
       <NewsArticleSheet
@@ -225,6 +235,9 @@ export function DisguiseAlertsScreen() {
 
 const styles = StyleSheet.create({
   screen: {
+    flex: 1,
+  },
+  feedPullHost: {
     flex: 1,
   },
   list: {

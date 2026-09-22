@@ -64,8 +64,8 @@ const CSS = `
   animation: spark-press-glow 320ms ease-out;
 }
 .spark-pulse-refresh-dim {
-  filter: grayscale(1) brightness(0.74);
-  opacity: 0.88;
+  filter: grayscale(0.35) brightness(0.96);
+  opacity: 0.92;
   transition: filter 220ms ease, opacity 220ms ease;
 }
 `;

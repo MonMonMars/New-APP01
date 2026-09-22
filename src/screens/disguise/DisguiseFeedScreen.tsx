@@ -68,11 +68,15 @@ export function DisguiseFeedScreen() {
     refreshing,
     justUpdated,
     isAtTop,
+    pullOffset,
     flatListProps,
     listRef,
     refresh,
     handleTabRepress,
-  } = usePulseScrollRefresh();
+    refreshControl,
+    webPullWrapperProps,
+    feedPullTranslateStyle,
+  } = usePulseScrollRefresh({ refreshTintColor: meta.accent });
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('tabPress', () => {
@@ -87,6 +91,8 @@ export function DisguiseFeedScreen() {
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader />
       <PulseFeedRefreshDimLayer refreshing={refreshing}>
+      <View style={styles.feedPullHost} {...webPullWrapperProps}>
+      <View style={[styles.feedPullHost, feedPullTranslateStyle]}>
       <FlatList
         ref={listRef}
         data={feedItems}
@@ -94,6 +100,7 @@ export function DisguiseFeedScreen() {
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => renderFeedItem({ item, index })}
         contentContainerStyle={[styles.list, { paddingBottom: pulseFeedScrollPaddingBottom(insets.bottom) }]}
+        refreshControl={refreshControl}
         {...flatListProps}
         maintainVisibleContentPosition={
           feedItems.length > 40
@@ -121,6 +128,7 @@ export function DisguiseFeedScreen() {
             refreshing={refreshing}
             justUpdated={justUpdated}
             isAtTop={isAtTop}
+            pullOffset={pullOffset}
             onPullRefresh={() => {
               void refresh();
             }}
@@ -173,6 +181,8 @@ export function DisguiseFeedScreen() {
           </View>
         }
       />
+      </View>
+      </View>
       </PulseFeedRefreshDimLayer>
     </View>
   );
@@ -180,6 +190,9 @@ export function DisguiseFeedScreen() {
 
 const styles = StyleSheet.create({
   screen: {
+    flex: 1,
+  },
+  feedPullHost: {
     flex: 1,
   },
   list: {

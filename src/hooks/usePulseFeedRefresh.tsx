@@ -1,5 +1,14 @@
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { FlatList, NativeScrollEvent, NativeSyntheticEvent, Platform, ScrollView } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import {
+  FlatList,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  PanResponder,
+  Platform,
+  RefreshControl,
+  ScrollView,
+  type ViewStyle,
+} from 'react-native';
 
 import { useApp } from '../context/AppContext';
 import { refreshPulseLiveNews } from '../services/pulseLiveNews';
@@ -63,20 +72,23 @@ export function usePulseFeedRefreshGeneration(): number {
   return useSyncExternalStore(subscribe, getRefreshGenerationSnapshot, getRefreshGenerationSnapshot);
 }
 
+export const PULSE_PULL_TRIGGER_PX = 72;
+export const PULSE_PULL_MAX_PX = 108;
+
 type UsePulseScrollRefreshOptions = {
   onRefreshed?: () => void;
+  /** Spinner tint for native RefreshControl (Pulse accent). */
+  refreshTintColor?: string;
 };
 
 type RefreshMode = 'pull' | 'top';
 
 const TOP_OFFSET_THRESHOLD = 8;
-const TOP_OVERSCROLL_THRESHOLD =
-  Platform.OS === 'ios' ? -48 : Platform.OS === 'web' ? -20 : -32;
-const TOP_ARRIVAL_DEBOUNCE_MS = Platform.OS === 'web' ? 280 : 120;
 /** Prevent overscroll / tab re-press from stacking refreshes and stealing taps on web. */
 const REFRESH_COOLDOWN_MS = Platform.OS === 'web' ? 900 : 600;
-/** Visible grey reload — matches Instagram / YouTube pull-to-refresh timing. */
+/** Visible reload timing — Instagram / YouTube style minimum spinner duration. */
 const PULSE_REFRESH_MIN_MS = Platform.OS === 'web' ? 520 : 480;
+const SCROLL_TO_TOP_BEFORE_REFRESH_MS = Platform.OS === 'web' ? 320 : 220;
 
 function waitNextPaint(): Promise<void> {
   return new Promise((resolve) => {
@@ -93,30 +105,23 @@ function waitMs(ms: number): Promise<void> {
 }
 
 export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}) {
-  const { onRefreshed } = options;
+  const { onRefreshed, refreshTintColor = '#1a73e8' } = options;
   const { dismissDisguiseLeaveConfirm } = useApp();
   const [refreshing, setRefreshing] = useState(false);
   const [justUpdated, setJustUpdated] = useState(false);
   const [isAtTop, setIsAtTop] = useState(true);
+  const [pullOffset, setPullOffset] = useState(0);
   const gateRef = useRef(false);
   const listRef = useRef<FlatList | null>(null);
   const scrollViewRef = useRef<ScrollView | null>(null);
   const scrollOffsetRef = useRef(0);
-  const wasScrolledDownRef = useRef(false);
-  const topArrivalTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pullOffsetRef = useRef(0);
   const lastRefreshFinishedAtRef = useRef(0);
   const refreshGeneration = usePulseFeedRefreshGeneration();
 
-  const clearTopArrivalTimer = useCallback(() => {
-    if (topArrivalTimerRef.current) {
-      clearTimeout(topArrivalTimerRef.current);
-      topArrivalTimerRef.current = null;
-    }
-  }, []);
-
   useEffect(() => {
-    return () => clearTopArrivalTimer();
-  }, [clearTopArrivalTimer]);
+    pullOffsetRef.current = pullOffset;
+  }, [pullOffset]);
 
   useEffect(() => {
     if (!justUpdated) {
@@ -145,12 +150,16 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
       }
 
       gateRef.current = true;
+      setPullOffset(0);
       setRefreshing(true);
       setFeedRefreshing(true);
       const startedAt = Date.now();
       try {
         dismissDisguiseLeaveConfirm();
-        scrollToTop(true);
+        if (mode === 'top' && scrollOffsetRef.current > TOP_OFFSET_THRESHOLD) {
+          scrollToTop(true);
+          await waitMs(SCROLL_TO_TOP_BEFORE_REFRESH_MS);
+        }
         await waitNextPaint();
         bumpPulseFeedRefreshGeneration();
         onRefreshed?.();
@@ -178,71 +187,12 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
     void runRefresh('top');
   }, [runRefresh]);
 
-  const scheduleTopArrivalRefresh = useCallback(() => {
-    if (
-      !wasScrolledDownRef.current ||
-      scrollOffsetRef.current > TOP_OFFSET_THRESHOLD ||
-      refreshing ||
-      gateRef.current
-    ) {
-      return;
-    }
-    clearTopArrivalTimer();
-    topArrivalTimerRef.current = setTimeout(() => {
-      topArrivalTimerRef.current = null;
-      if (
-        wasScrolledDownRef.current &&
-        scrollOffsetRef.current <= TOP_OFFSET_THRESHOLD &&
-        !refreshing &&
-        !gateRef.current
-      ) {
-        wasScrolledDownRef.current = false;
-        void runRefresh('top');
-      }
-    }, TOP_ARRIVAL_DEBOUNCE_MS);
-  }, [clearTopArrivalTimer, refreshing, runRefresh]);
-
-  const handleScrollMetrics = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const { contentOffset } = event.nativeEvent;
-      const y = contentOffset.y;
-      scrollOffsetRef.current = y;
-      setIsAtTop(y <= TOP_OFFSET_THRESHOLD);
-
-      if (y > 48) {
-        wasScrolledDownRef.current = true;
-      }
-
-      if (y <= TOP_OFFSET_THRESHOLD) {
-        scheduleTopArrivalRefresh();
-      } else {
-        clearTopArrivalTimer();
-      }
-
-      // Web overscroll pull is handled by PulseFeedRefreshHeader; auto-overscroll here steals taps.
-      if (
-        Platform.OS !== 'web' &&
-        !refreshing &&
-        y <= TOP_OVERSCROLL_THRESHOLD
-      ) {
-        void runRefresh('pull');
-      }
-    },
-    [clearTopArrivalTimer, refreshing, runRefresh, scheduleTopArrivalRefresh],
-  );
-
-  const maybeRefreshAfterScrollToTop = useCallback(() => {
-    clearTopArrivalTimer();
-    if (
-      wasScrolledDownRef.current &&
-      scrollOffsetRef.current <= TOP_OFFSET_THRESHOLD &&
-      !refreshing &&
-      !gateRef.current
-    ) {
-      wasScrolledDownRef.current = false;
-      void runRefresh('top');
-    }
-  }, [clearTopArrivalTimer, refreshing, runRefresh]);
+  const handleScrollMetrics = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const { contentOffset } = event.nativeEvent;
+    const y = contentOffset.y;
+    scrollOffsetRef.current = y;
+    setIsAtTop(y <= TOP_OFFSET_THRESHOLD);
+  }, []);
 
   const handleFlatListScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -258,7 +208,7 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
     [handleScrollMetrics],
   );
 
-  /** Re-tap the active tab at top → refresh; while scrolled → scroll to top (arrival refresh follows). */
+  /** Re-tap the active tab: scroll to top when scrolled; refresh when already at top (Instagram / YouTube). */
   const handleTabRepress = useCallback(() => {
     if (scrollOffsetRef.current > TOP_OFFSET_THRESHOLD) {
       scrollToTop(true);
@@ -267,17 +217,69 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
     void runRefresh('top');
   }, [runRefresh, scrollToTop]);
 
+  const webPullWrapperProps = useMemo(() => {
+    if (Platform.OS !== 'web') {
+      return {};
+    }
+    return PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_, gesture) =>
+        isAtTop &&
+        !refreshing &&
+        !gateRef.current &&
+        gesture.dy > 6 &&
+        Math.abs(gesture.dy) > Math.abs(gesture.dx) * 1.2,
+      onPanResponderMove: (_, gesture) => {
+        if (gesture.dy > 0) {
+          setPullOffset(Math.min(PULSE_PULL_MAX_PX, gesture.dy * 0.92));
+        }
+      },
+      onPanResponderRelease: () => {
+        const offset = pullOffsetRef.current;
+        setPullOffset(0);
+        if (offset >= PULSE_PULL_TRIGGER_PX && isAtTop && !refreshing) {
+          void runRefresh('pull');
+        }
+      },
+      onPanResponderTerminate: () => {
+        setPullOffset(0);
+      },
+    }).panHandlers;
+  }, [isAtTop, refreshing, runRefresh]);
+
+  const feedPullTranslateStyle = useMemo((): ViewStyle | undefined => {
+    if (Platform.OS !== 'web' || pullOffset <= 0) {
+      return undefined;
+    }
+    return {
+      transform: [{ translateY: pullOffset }],
+    };
+  }, [pullOffset]);
+
+  const refreshControl = useMemo(() => {
+    if (Platform.OS === 'web') {
+      return undefined;
+    }
+    return (
+      <RefreshControl
+        refreshing={refreshing}
+        onRefresh={() => {
+          void runRefresh('pull');
+        }}
+        tintColor={refreshTintColor}
+        colors={[refreshTintColor]}
+        progressBackgroundColor="#ffffff"
+      />
+    );
+  }, [refreshTintColor, refreshing, runRefresh]);
+
   const flatListProps = {
     onScroll: handleFlatListScroll,
-    onScrollEndDrag: maybeRefreshAfterScrollToTop,
-    onMomentumScrollEnd: maybeRefreshAfterScrollToTop,
     scrollEventThrottle: 16 as const,
   };
 
   const scrollViewProps = {
     onScroll: handleScrollViewScroll,
-    onScrollEndDrag: maybeRefreshAfterScrollToTop,
-    onMomentumScrollEnd: maybeRefreshAfterScrollToTop,
     scrollEventThrottle: 16 as const,
   };
 
@@ -285,6 +287,7 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
     refreshing,
     justUpdated,
     isAtTop,
+    pullOffset,
     refreshGeneration,
     refresh,
     triggerTopRefresh,
@@ -293,7 +296,9 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
     scrollToTop,
     listRef,
     scrollViewRef,
-    refreshControl: undefined,
+    refreshControl,
+    webPullWrapperProps,
+    feedPullTranslateStyle,
     flatListProps,
     scrollViewProps,
   };

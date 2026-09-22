@@ -2,11 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://dangerous-assumed-medicare-orbit.trycloudflare.com**
+**https://monday-three-organizing-transportation.trycloudflare.com**
 
-- **Integration branch:** `cursor/fix-info-boost-buttons-7b60` (layout + scam detector)
-- **Build ID:** `aca70f2-20260922T173121Z` (HTML comment `spark-demo-build:` or loading screen footer)
-- **Verified:** 2026-09-22 17:32 UTC — `verify-demo-link` 9/9 (onboarding → Discover → Pulse)
+- **Integration branch:** `main` (PR **#157** — features from former drafts #147–#154)
+- **Build ID:** `c22203d-20260922T181747Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
+- **Verified:** 2026-09-22 18:18 UTC — tunnel HTTP 200 + local `verify:ci-smoke` 9/9
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)
@@ -51,7 +51,7 @@ Private repo → use **Vercel** or **Netlify** (free, stable URL, auto-deploy on
 ### Vercel
 
 1. [vercel.com/new](https://vercel.com/new) → Import `MonMonMars/New-APP01`
-2. Branch: **`cursor/tinder-style-dating-app-7b60`**
+2. Branch: **`main`**
 3. Build: `npm run build:web:demo` · Output: `dist` (build ID stamp + SPA 404 fallback)
 4. Deploy → stable URL like `https://new-app01.vercel.app`
 
@@ -59,7 +59,7 @@ Private repo → use **Vercel** or **Netlify** (free, stable URL, auto-deploy on
 
 ### GitHub Pages (public repo or GitHub Pro only)
 
-Push to `cursor/tinder-style-dating-app-7b60` — workflow deploys `gh-pages` branch (see `.github/workflows/deploy-web.yml`).
+Push to **`main`** — workflow deploys `gh-pages` branch (see `.github/workflows/deploy-web.yml`).
 
 ---
 

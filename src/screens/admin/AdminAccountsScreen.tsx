@@ -91,7 +91,11 @@ export function AdminAccountsScreen({ navigation }: Props) {
 
   return (
     <View style={[styles.root, { paddingTop: insets.top, backgroundColor: colors.background }]}>
-      <ScreenHeader title={t('admin.accountsTitle')} onLeftPress={() => navigation.goBack()} />
+      <ScreenHeader
+        title={t('admin.accountsTitle')}
+        leftIcon="chevron-back"
+        onLeftPress={() => navigation.goBack()}
+      />
       <View style={styles.body}>
         <Text style={[styles.hint, { color: colors.textMuted }]}>{t('admin.accountsHint')}</Text>
         <TextInput

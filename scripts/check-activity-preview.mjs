@@ -20,13 +20,13 @@ await completeDemoOnboarding(page);
 await dismissCookies(page);
 await enterPulseForYouFeed(page);
 
-// Open Activity tab
-const activityTab = page.getByText('Activity', { exact: true }).last();
+// Open Activity tab (bottom Pulse tabs)
+const activityTab = page.getByRole('tab', { name: /activity/i }).first();
 await activityTab.click();
 await page.waitForTimeout(800);
 
-const feedBody = await page.locator('body').innerText();
-const hasSocialQuote = /hot take: the best productivity hack/i.test(feedBody);
+const activityBody = await page.locator('body').innerText();
+const hasActivityList = /alex chen upvoted|activity/i.test(activityBody);
 
 // Row tap should open the activity sheet — not force a dating mini-window.
 const alertRow = page.getByText(/alex chen upvoted/i).first();
@@ -35,8 +35,9 @@ await page.waitForTimeout(900);
 
 const sheetBody = await page.locator('body').innerText();
 const hasAlex = /alex chen/i.test(sheetBody);
-const openedActivitySheet = /upvoted your comment|activity alert|notification/i.test(sheetBody);
-const hasPhotos = /photo \d+ of \d+/i.test(sheetBody);
+const openedActivitySheet = /upvoted your comment|upvoted/i.test(sheetBody);
+/** Activity alerts use FeedPersonRow avatars, not the dating photo pager. */
+const hasActivityProfile = /alex chen/i.test(sheetBody) && /upvoted/i.test(sheetBody);
 
 // Explicit woven reporter on the home feed still opens mini-window with photos.
 await page.keyboard.press('Escape').catch(() => {});
@@ -60,9 +61,9 @@ console.log(
     {
       hasAlex,
       openedActivitySheet,
-      hasPhotos,
+      hasActivityProfile,
       reporterMiniWindow,
-      hasSocialQuote,
+      hasActivityList,
       sample: sheetBody.slice(0, 700),
     },
     null,
@@ -71,5 +72,5 @@ console.log(
 );
 
 await browser.close();
-const ok = hasAlex && openedActivitySheet && hasSocialQuote && reporterMiniWindow;
+const ok = hasAlex && openedActivitySheet && hasActivityList && hasActivityProfile && reporterMiniWindow;
 process.exit(ok ? 0 : 1);

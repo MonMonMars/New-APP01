@@ -687,7 +687,13 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
             );
           })}
         </View>
-        <Text style={[styles.attrib, { color: chromeMuted }]}>{t('mapDiscover.attribution')}</Text>
+        <Text
+          style={[styles.attrib, { color: chromeMuted }]}
+          numberOfLines={2}
+          ellipsizeMode="tail"
+        >
+          {t('mapDiscover.attribution')}
+        </Text>
       </View>
 
       <ActionToast

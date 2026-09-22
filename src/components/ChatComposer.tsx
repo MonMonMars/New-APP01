@@ -114,7 +114,13 @@ export function ChatComposer({
               accessibilityLabel={item.label}
             >
               <Ionicons name={item.icon} size={22} color={colors.gradientEnd} />
-              <Text style={[styles.extraLabel, { color: colors.textMuted }]}>{item.label}</Text>
+              <Text
+                style={[styles.extraLabel, { color: colors.textMuted }]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {item.label}
+              </Text>
             </AnimatedPressable>
           ))}
         </View>
@@ -208,6 +214,7 @@ const styles = StyleSheet.create({
   extraLabel: {
     fontSize: 11,
     fontWeight: '600',
+    textAlign: 'center',
   },
   composer: {
     flexDirection: 'row',

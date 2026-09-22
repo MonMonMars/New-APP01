@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -259,7 +259,14 @@ export function PersonPreviewSheet({
           {...webClass('spark-sheet-in')}
         >
           {dismissKind ? <DisguiseMiniDismissStat kind={dismissKind} /> : null}
-          <Animated.View style={[styles.cardInner, cardFadeStyle]}>
+          <ScrollView
+            style={styles.cardScroll}
+            contentContainerStyle={styles.cardInner}
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Animated.View style={cardFadeStyle}>
             <FadeSlideIn replayKey={visible} index={0}>
               <View style={styles.header}>
                 <View style={[styles.headerIcon, { backgroundColor: worldMeta.accentSoft }]}>
@@ -368,7 +375,8 @@ export function PersonPreviewSheet({
                 </Text>
               </FadeSlideIn>
             )}
-          </Animated.View>
+            </Animated.View>
+          </ScrollView>
         </Animated.View>
       </AnimatedOverlay>
 
@@ -391,9 +399,14 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     zIndex: 2,
   },
+  cardScroll: {
+    flexGrow: 0,
+    flexShrink: 1,
+  },
   cardInner: {
     padding: 6,
     gap: 5,
+    flexGrow: 0,
   },
   header: {
     flexDirection: 'row',

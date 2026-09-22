@@ -1,6 +1,10 @@
 import { mockProfiles } from '../src/data/profiles';
 import { SCAM_DEMO_PROFILE_MARKERS } from '../src/data/scamDemoAccounts';
-import { assessProfile, shouldHideProfileFromDiscover } from '../src/trust/scamDetector';
+import {
+  assessProfile,
+  shouldAutoQuarantineOnReport,
+  shouldHideProfileFromDiscover,
+} from '../src/trust/scamDetector';
 
 function main(): void {
   const demoIds = Object.keys(SCAM_DEMO_PROFILE_MARKERS);
@@ -32,6 +36,15 @@ function main(): void {
   const hidden = mockProfiles.filter((profile) => shouldHideProfileFromDiscover(assessProfile(profile)));
   if (hidden.length === 0) {
     console.error('validate-scam-detector: expected at least one profile hidden from Discover');
+    failed = true;
+  }
+
+  if (!shouldAutoQuarantineOnReport('Spam or scam', { profileId: 'x', score: 10, level: 'low', signals: [], assessedAt: '' })) {
+    console.error('validate-scam-detector: spam report must auto-quarantine');
+    failed = true;
+  }
+  if (shouldAutoQuarantineOnReport('Inappropriate photos', { profileId: 'x', score: 40, level: 'medium', signals: [], assessedAt: '' })) {
+    console.error('validate-scam-detector: non-scam report must not quarantine medium-only profiles');
     failed = true;
   }
 

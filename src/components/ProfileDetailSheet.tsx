@@ -116,6 +116,11 @@ export function ProfileDetailSheet({
             <ScamAlertBanner
               riskLevel={scamAssessment.level}
               onLearnMore={() => setShowScamProtection(true)}
+              onReport={
+                scamPlan.recommendBlockAndReport && onReport
+                  ? () => onReport(profile.id)
+                  : undefined
+              }
             />
           ) : null}
           {profile.photos.map((photo, photoIndex) => {

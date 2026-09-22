@@ -11,7 +11,11 @@ import {
 import { AppState, Linking, type AppStateStatus } from 'react-native';
 
 import { hydrateAdminProfileOverrides } from '../admin/adminProfileStore';
-import { assessProfile, shouldHideProfileFromDiscover } from '../trust/scamDetector';
+import {
+  assessProfile,
+  filterProfilesForScamDiscover,
+  shouldAutoQuarantineOnReport,
+} from '../trust/scamDetector';
 import { hydrateScamEnforcement, quarantineProfile } from '../trust/scamEnforcementStore';
 import { shouldBlockOutgoingLinkToPeer } from '../trust/scamMessageGuard';
 import { seedConversations } from '../data/conversations';
@@ -1287,6 +1291,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           stableIncognitoVisible(profile.id),
       );
     }
+    filtered = filterProfilesForScamDiscover(filtered);
     return filtered;
   }, [
     excludedIds,
@@ -1297,6 +1302,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     preferences,
     privacyPreferences.incognitoMode,
     privacyPreferences.locationSharing,
+    scamEnforcementVersion,
     user,
   ]);
 
@@ -1335,10 +1341,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       );
       filtered = filterProfilesInRadius(filtered, searchCenter, preferences.maxDistanceMiles);
     }
-    filtered = filtered.filter((profile) => {
-      const assessment = assessProfile(profile);
-      return !shouldHideProfileFromDiscover(assessment);
-    });
+    filtered = filterProfilesForScamDiscover(filtered);
     return filtered;
   }, [
     excludedIds,
@@ -2218,11 +2221,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const sanitizedReason = reason ? sanitizeReportReason(reason) : 'Reported from app';
       const reportedProfile = getProfileById(profileId);
       const scamAssessment = reportedProfile ? assessProfile(reportedProfile) : null;
-      const scamReport =
-        sanitizedReason.toLowerCase().includes('scam') ||
-        sanitizedReason.toLowerCase().includes('spam') ||
-        sanitizedReason.toLowerCase().includes('fake profile');
-      if (scamReport || (scamAssessment && scamAssessment.level !== 'low')) {
+      const autoQuarantine = shouldAutoQuarantineOnReport(sanitizedReason, scamAssessment);
+      if (autoQuarantine) {
         void quarantineProfile(profileId).then(() => {
           setScamEnforcementVersion((version) => version + 1);
         });
@@ -2238,9 +2238,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           profileId,
           scamScore: scamAssessment ? String(scamAssessment.score) : '',
           scamLevel: scamAssessment?.level ?? '',
-          autoQuarantine: String(
-            scamReport || scamAssessment?.level === 'critical' || scamAssessment?.level === 'high',
-          ),
+          autoQuarantine: String(autoQuarantine),
         });
       }
       blockProfile(profileId);

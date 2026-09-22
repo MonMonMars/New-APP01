@@ -10,10 +10,11 @@ import type { ScamRiskLevel } from '../trust/scamTypes';
 type Props = {
   riskLevel: ScamRiskLevel;
   onLearnMore?: () => void;
+  onReport?: () => void;
   compact?: boolean;
 };
 
-export function ScamAlertBanner({ riskLevel, onLearnMore, compact }: Props) {
+export function ScamAlertBanner({ riskLevel, onLearnMore, onReport, compact }: Props) {
   const { colors } = useTheme();
   const { t } = useTranslation();
   if (riskLevel === 'low') {
@@ -51,6 +52,18 @@ export function ScamAlertBanner({ riskLevel, onLearnMore, compact }: Props) {
         {onLearnMore ? (
           <Text style={[styles.link, { color: colors.gradientEnd }]}>{t('scamProtection.learnProtection')}</Text>
         ) : null}
+        {onReport ? (
+          <Pressable
+            onPress={(event) => {
+              event.stopPropagation();
+              onReport();
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={t('scamProtection.reportNow')}
+          >
+            <Text style={[styles.link, styles.reportLink, { color: accent }]}>{t('scamProtection.reportNow')}</Text>
+          </Pressable>
+        ) : null}
       </View>
     </Pressable>
   );
@@ -85,5 +98,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     marginTop: 6,
+  },
+  reportLink: {
+    marginTop: 4,
+    textDecorationLine: 'underline',
   },
 });

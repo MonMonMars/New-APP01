@@ -49,3 +49,10 @@ export function shouldBlockOutgoingLinkToPeer(
   }
   return messageContainsSuspiciousLink(outgoingText);
 }
+
+/** Replace clickable-looking URLs in high-risk threads (display-only). */
+export function redactSuspiciousLinksForDisplay(text: string): string {
+  return text
+    .replace(URL_PATTERN, '[link hidden]')
+    .replace(SHORT_LINK_PATTERN, '[link hidden]');
+}

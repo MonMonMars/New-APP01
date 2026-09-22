@@ -975,6 +975,7 @@ export const zhTw = {
     bannerCriticalTitle: '疑似詐騙 — 請停止並檢舉',
     bannerBody: '切勿匯款、購買禮品卡或轉加密貨幣。見面前請留在 Spark 聊天。',
     learnProtection: '查看保護步驟',
+    reportNow: '檢舉此檔案',
     sheetTitle: '用戶保護協議',
     sheetIntro: '以下步驟參考主流約會 App 的信任與安全指引：留在平台內、視訊驗證、檢舉可疑對象。',
     sheetFooter: '若感到被施壓或被要求匯款，請立即封鎖並檢舉。',
@@ -1879,6 +1880,8 @@ export const zhTw = {
       high: '高',
       critical: '極高',
     },
+    scamProfileRisk: '詐騙風險分數',
+    scamNoSignals: '無模式訊號',
   },
   sparkPlusComparison: {
     feature: '功能',

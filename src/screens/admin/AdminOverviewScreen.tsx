@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -29,8 +30,16 @@ export function AdminOverviewScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const { adminSession, hasPermission } = useAdmin();
+  const [overviewTick, setOverviewTick] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      setOverviewTick((tick) => tick + 1);
+    }, []),
+  );
 
   const scamOverview = useMemo(() => {
+    void overviewTick;
     const risky = mockProfiles.filter((profile) => {
       const assessment = assessProfile(profile);
       return assessment.level === 'high' || assessment.level === 'critical';
@@ -39,7 +48,7 @@ export function AdminOverviewScreen({ navigation }: Props) {
       shouldHideProfileFromDiscover(assessProfile(profile)),
     ).length;
     return { risky, quarantined: getQuarantinedProfileIds().length, hidden };
-  }, []);
+  }, [overviewTick]);
 
   const humanProfiles = mockProfiles.filter(
     (p) => !AI_PERSONA_IDS.has(p.id) && !p.isAiPersona,

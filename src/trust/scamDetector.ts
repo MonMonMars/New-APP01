@@ -132,3 +132,30 @@ export function shouldHideProfileFromDiscover(assessment: ScamAssessment): boole
   }
   return false;
 }
+
+export function isProfileVisibleInDiscover(profile: Profile): boolean {
+  return !shouldHideProfileFromDiscover(assessProfile(profile));
+}
+
+export function filterProfilesForScamDiscover(profiles: Profile[]): Profile[] {
+  return profiles.filter(isProfileVisibleInDiscover);
+}
+
+export function shouldAutoQuarantineOnReport(
+  sanitizedReason: string,
+  assessment: ScamAssessment | null,
+): boolean {
+  const reason = sanitizedReason.toLowerCase();
+  const scamReport =
+    reason.includes('scam') || reason.includes('spam') || reason.includes('fake profile');
+  if (scamReport) {
+    return true;
+  }
+  if (!assessment) {
+    return false;
+  }
+  if (assessment.level === 'critical') {
+    return true;
+  }
+  return assessment.level === 'high' && assessment.score >= 70;
+}

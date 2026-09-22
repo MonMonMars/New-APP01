@@ -983,6 +983,7 @@ export const en = {
     bannerCriticalTitle: 'Likely scam — stop and report',
     bannerBody: 'Never send money, gift cards, or crypto. Keep chat in Spark until you meet safely.',
     learnProtection: 'View protection steps',
+    reportNow: 'Report this profile',
     sheetTitle: 'Customer protection',
     sheetIntro:
       'These steps follow trust & safety guidance from major dating apps: stay on-platform, verify in video, and report suspicious profiles.',
@@ -1896,6 +1897,8 @@ export const en = {
       high: 'High',
       critical: 'Critical',
     },
+    scamProfileRisk: 'Scam risk score',
+    scamNoSignals: 'No pattern signals',
   },
   sparkPlusComparison: {
     feature: 'Feature',

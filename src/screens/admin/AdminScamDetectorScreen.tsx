@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -56,6 +57,12 @@ export function AdminScamDetectorScreen({ navigation }: Props) {
   const { hasPermission } = useAdmin();
   const { refreshScamEnforcement } = useApp();
   const [refreshKey, setRefreshKey] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      setRefreshKey((key) => key + 1);
+    }, []),
+  );
 
   const rows = useMemo((): Row[] => {
     void refreshKey;

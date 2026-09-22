@@ -57,6 +57,7 @@ import { assessProfile } from '../trust/scamDetector';
 import { buildCustomerProtectionPlan } from '../trust/scamProtectionProtocol';
 import {
   messageContainsSuspiciousLink,
+  redactSuspiciousLinksForDisplay,
   shouldSanitizeIncomingLinks,
   shouldWarnBeforeSendingToScammer,
 } from '../trust/scamMessageGuard';
@@ -426,7 +427,14 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
             />
           ) : null}
           {messageHasCaption(item) ? (
-            <Text style={[styles.bubbleText, { color: colors.text }]}>{item.text}</Text>
+            <Text style={[styles.bubbleText, { color: colors.text }]}>
+              {!item.isMine &&
+              scamAssessment &&
+              shouldSanitizeIncomingLinks(scamAssessment.level) &&
+              messageContainsSuspiciousLink(item.text)
+                ? redactSuspiciousLinksForDisplay(item.text)
+                : item.text}
+            </Text>
           ) : null}
           {!item.isMine &&
           scamAssessment &&
@@ -509,6 +517,14 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
         <ScamAlertBanner
           riskLevel={scamAssessment.level}
           onLearnMore={() => setShowScamProtection(true)}
+          onReport={
+            scamProtectionPlan.recommendBlockAndReport
+              ? () => {
+                  setShowScamProtection(false);
+                  setShowReport(true);
+                }
+              : undefined
+          }
         />
       ) : null}
 

@@ -415,7 +415,13 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
           <Image source={{ uri: profile.photos[0] }} style={styles.headerAvatar} />
           <View style={styles.headerText}>
             <View style={styles.headerNameRow}>
-              <Text style={[styles.headerName, { color: colors.text }]}>{profile.name}</Text>
+              <Text
+                style={[styles.headerName, { color: colors.text }]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {profile.name}
+              </Text>
               <AiPersonaBadge profile={profile} compact />
               <VerificationBadges
                 photoVerified={profile.photoVerified ?? profile.verified}
@@ -568,6 +574,7 @@ export function ChatScreen({ conversationId, onBack }: ChatScreenProps) {
       ) : (
         <FlatList
           ref={messageListRef}
+          style={styles.messageList}
           data={conversation.messages}
           keyExtractor={(item) => item.id}
           renderItem={renderMessage}
@@ -789,6 +796,8 @@ const styles = StyleSheet.create({
   headerName: {
     fontSize: 17,
     fontWeight: '700',
+    flexShrink: 1,
+    maxWidth: '100%',
   },
   headerMeta: {
     fontSize: 12,
@@ -817,6 +826,7 @@ const styles = StyleSheet.create({
   },
   checkInText: {
     flex: 1,
+    minWidth: 0,
   },
   checkInTitle: {
     fontSize: 14,
@@ -830,6 +840,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.button,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs + 2,
+    flexShrink: 0,
   },
   checkInButtonText: {
     fontSize: 12,
@@ -926,6 +937,10 @@ const styles = StyleSheet.create({
   gameChipText: {
     fontSize: 13,
     fontWeight: '700',
+  },
+  messageList: {
+    flex: 1,
+    minHeight: 0,
   },
   messages: {
     padding: spacing.lg,

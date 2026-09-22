@@ -170,6 +170,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.xs,
     flex: 1,
+    minWidth: 0,
   },
   segment: {
     flexDirection: 'row',

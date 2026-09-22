@@ -19,6 +19,8 @@ type DisguiseMiniPhotoPagerProps = {
 };
 
 const SWIPE_THRESHOLD = 36;
+/** Keep segment bar tappable — photo tap lanes start below it. */
+const SEGMENT_BAR_INSET = 14;
 
 /** Full-photo mini-window pager — segment bar, tap zones, and horizontal swipe. */
 export function DisguiseMiniPhotoPager({
@@ -172,7 +174,7 @@ const styles = StyleSheet.create({
   tapLeft: {
     position: 'absolute',
     left: 0,
-    top: 0,
+    top: SEGMENT_BAR_INSET,
     bottom: 0,
     width: '38%',
     zIndex: 1,
@@ -180,7 +182,7 @@ const styles = StyleSheet.create({
   tapRight: {
     position: 'absolute',
     right: 0,
-    top: 0,
+    top: SEGMENT_BAR_INSET,
     bottom: 0,
     width: '38%',
     zIndex: 1,

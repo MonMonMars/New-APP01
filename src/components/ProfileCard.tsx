@@ -20,10 +20,10 @@ import {
   DISCOVER_DOTS_RIGHT_INSET,
   DISCOVER_INFO_BUTTON_SIZE,
   DISCOVER_INFO_TOP,
+  discoverLeftBadgeTop,
   discoverPhotoTapBottomInset,
   discoverPhotoTapTopInset,
   discoverProfileMetaBottom,
-  discoverTopChromeBottom,
 } from '../constants/discoverLayout';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
@@ -163,20 +163,27 @@ export function ProfileCard({
       )}
 
       {profile.spotlight && isTop && (
-        <View style={[styles.crushBadge, { backgroundColor: colors.heartRed }]}>
-          <Text style={styles.crushBadgeText}>{t('discover.crushBadge')}</Text>
+        <View
+          style={[
+            styles.leftBadge,
+            { backgroundColor: colors.heartRed, top: discoverLeftBadgeTop(profile, 'crush') },
+          ]}
+        >
+          <Text style={styles.leftBadgeText}>{t('discover.crushBadge')}</Text>
         </View>
       )}
 
       {profile.mostCompatible && isTop && (
         <View
           style={[
-            styles.compatibleBadge,
-            { backgroundColor: colors.boost },
-            profile.spotlight && isTop ? styles.compatibleBadgeBelowCrush : null,
+            styles.leftBadge,
+            {
+              backgroundColor: colors.boost,
+              top: discoverLeftBadgeTop(profile, 'compatible'),
+            },
           ]}
         >
-          <Text style={styles.compatibleBadgeText}>{t('discover.mostCompatibleBadge')}</Text>
+          <Text style={styles.leftBadgeText}>{t('discover.mostCompatibleBadge')}</Text>
         </View>
       )}
 
@@ -203,7 +210,7 @@ export function ProfileCard({
             <View
               style={[
                 styles.privateBadge,
-                profile.spotlight ? styles.privateBadgeBelowCrush : null,
+                { top: discoverLeftBadgeTop(profile, 'private') },
               ]}
             >
               <Ionicons name="lock-closed" size={11} color={colors.ember} />
@@ -318,39 +325,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.65)',
     zIndex: 4,
   },
-  compatibleBadge: {
+  leftBadge: {
     position: 'absolute',
-    top: discoverTopChromeBottom(),
     left: spacing.md,
     maxWidth: '72%',
-    backgroundColor: palette.boost,
     borderRadius: radii.button,
     paddingHorizontal: spacing.sm + 4,
     paddingVertical: spacing.xs + 2,
     zIndex: 6,
   },
-  compatibleBadgeBelowCrush: {
-    top: discoverTopChromeBottom() + 26,
-  },
-  compatibleBadgeText: {
-    color: palette.text,
-    fontSize: 11,
-    fontWeight: '800',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  crushBadge: {
-    position: 'absolute',
-    top: discoverTopChromeBottom(),
-    left: spacing.md,
-    maxWidth: '72%',
-    backgroundColor: palette.heartRed,
-    borderRadius: radii.button,
-    paddingHorizontal: spacing.sm + 4,
-    paddingVertical: spacing.xs + 2,
-    zIndex: 6,
-  },
-  crushBadgeText: {
+  leftBadgeText: {
     color: palette.text,
     fontSize: 11,
     fontWeight: '800',
@@ -388,7 +372,6 @@ const styles = StyleSheet.create({
   },
   privateBadge: {
     position: 'absolute',
-    top: discoverTopChromeBottom(),
     left: spacing.md,
     maxWidth: '55%',
     flexDirection: 'row',
@@ -406,9 +389,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 0.3,
     textTransform: 'uppercase',
-  },
-  privateBadgeBelowCrush: {
-    top: discoverTopChromeBottom() + 26,
   },
   tapZones: {
     position: 'absolute',

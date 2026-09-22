@@ -36,7 +36,7 @@ jobs:
       - run: npx playwright install chromium --with-deps
       - name: Playwright smoke (onboarding + Pulse routing)
         run: |
-          npx --yes serve -l 8090 &
+          npx --yes serve -s -l 8090 -c serve.json &
           SERVE_PID=$!
           for attempt in $(seq 1 45); do
             if curl -sf --max-time 2 http://127.0.0.1:8090/ >/dev/null; then

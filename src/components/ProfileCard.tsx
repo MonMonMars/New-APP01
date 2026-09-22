@@ -214,7 +214,9 @@ export function ProfileCard({
               ]}
             >
               <Ionicons name="lock-closed" size={11} color={colors.ember} />
-              <Text style={styles.privateBadgeText}>{t('discover.privatePhotos')}</Text>
+              <Text style={styles.privateBadgeText} numberOfLines={1} ellipsizeMode="tail">
+                {t('discover.privatePhotos')}
+              </Text>
             </View>
           ) : null}
           <View
@@ -263,12 +265,17 @@ export function ProfileCard({
             personVerified={profile.personVerified ?? profile.verified}
             size="sm"
           />
-          {emberStatus ? (
+          {emberStatus && !compact ? (
             <View style={styles.discreetChipWrap}>
               <EmberStatusChips profile={profile} compact />
             </View>
           ) : null}
         </View>
+        {emberStatus && compact ? (
+          <View style={styles.emberChipRow}>
+            <EmberStatusChips profile={profile} compact />
+          </View>
+        ) : null}
         {profile.job && (
           <Text
             style={[styles.job, compact && styles.jobCompact]}
@@ -443,6 +450,10 @@ const styles = StyleSheet.create({
     maxWidth: '100%',
   },
   discreetChipWrap: {
+    maxWidth: '100%',
+  },
+  emberChipRow: {
+    marginTop: spacing.xs,
     maxWidth: '100%',
   },
   job: {

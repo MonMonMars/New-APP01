@@ -263,6 +263,7 @@ export function DropTargets({
       {onStarPress ? (
         <View style={styles.starWrap}>
           <View
+            pointerEvents="none"
             style={[
               styles.starGlow,
               {
@@ -349,8 +350,8 @@ const styles = StyleSheet.create({
   },
   plusDot: {
     position: 'absolute',
-    top: -2,
-    right: -2,
+    top: 0,
+    right: 0,
     width: 16,
     height: 16,
     borderRadius: 8,

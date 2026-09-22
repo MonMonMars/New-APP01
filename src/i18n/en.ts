@@ -1194,6 +1194,8 @@ export const en = {
     exploreTrending: 'Explore {tab}',
     pullRefreshHint: 'Pull down for new stories and updated profiles',
     scrollRefreshHint: 'Pull down at the top, or tap Home again while at the top',
+    scrollLoadMoreHint: 'Keep scrolling for more stories',
+    loadingMore: 'Loading more stories…',
     homeTabRefreshHint: 'Tap Home again to refresh',
     refreshFeedA11y: 'Refresh Pulse feed',
     refreshingFeed: 'Loading latest stories…',

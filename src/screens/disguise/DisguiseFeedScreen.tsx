@@ -15,7 +15,7 @@ import { useTranslation } from '../../i18n';
 import { useTheme } from '../../context/ThemeContext';
 import { FeedItem } from '../../data/disguiseFeed';
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
-import { useDisguiseFeedItems } from '../../hooks/useDisguiseFeedItems';
+import { usePulsePaginatedFeedItems } from '../../hooks/usePulsePaginatedFeedItems';
 import { topicFilterLabel } from '../../utils/disguiseFeedFilter';
 import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
 import { spacing } from '../../theme';
@@ -62,7 +62,7 @@ export function DisguiseFeedScreen() {
   const route = useRoute<RouteProp<DisguiseTabParamList, 'Home'>>();
   const topic = route.params?.topic;
 
-  const feedItems = useDisguiseFeedItems(topic);
+  const { feedItems, loadMore, loadingMore, canLoadMore } = usePulsePaginatedFeedItems(topic);
   const refreshGeneration = usePulseFeedRefreshGeneration();
   const {
     refreshing,
@@ -95,12 +95,24 @@ export function DisguiseFeedScreen() {
         renderItem={({ item, index }) => renderFeedItem({ item, index })}
         contentContainerStyle={[styles.list, { paddingBottom: pulseFeedScrollPaddingBottom(insets.bottom) }]}
         {...flatListProps}
+        maintainVisibleContentPosition={
+          feedItems.length > 40
+            ? { minIndexForVisible: 0, autoscrollToTopThreshold: 24 }
+            : undefined
+        }
+        onEndReached={() => {
+          if (canLoadMore && !refreshing) {
+            void loadMore();
+          }
+        }}
+        onEndReachedThreshold={0.35}
         ListFooterComponent={
           <PulseFeedRefreshFooter
             refreshing={refreshing}
             justUpdated={justUpdated}
+            loadingMore={loadingMore}
             onPressRefresh={() => {
-              void refresh();
+              void loadMore();
             }}
           />
         }

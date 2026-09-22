@@ -1187,6 +1187,8 @@ export const zhTw = {
     exploreTrending: '探索{tab}',
     pullRefreshHint: '下拉以載入新動態與更新個人檔案',
     scrollRefreshHint: '在頂部下拉，或在頂部時再點一次 Home',
+    scrollLoadMoreHint: '繼續向下捲動以載入更多',
+    loadingMore: '正在載入更多新聞…',
     homeTabRefreshHint: '再點一次 Home 以重新整理',
     refreshFeedA11y: '重新整理 Pulse 動態',
     refreshingFeed: '正在載入最新內容…',

@@ -7,6 +7,9 @@ import { refreshPulseLiveNews } from '../services/pulseLiveNews';
 let refreshGeneration = 0;
 const subscribers = new Set<() => void>();
 
+let feedRefreshing = false;
+const refreshingSubscribers = new Set<() => void>();
+
 function subscribe(listener: () => void): () => void {
   subscribers.add(listener);
   return () => {
@@ -14,12 +17,40 @@ function subscribe(listener: () => void): () => void {
   };
 }
 
+function subscribeRefreshing(listener: () => void): () => void {
+  refreshingSubscribers.add(listener);
+  return () => {
+    refreshingSubscribers.delete(listener);
+  };
+}
+
 function getRefreshGenerationSnapshot(): number {
   return refreshGeneration;
 }
 
+function getFeedRefreshingSnapshot(): boolean {
+  return feedRefreshing;
+}
+
 function notifyRefreshSubscribers(): void {
   subscribers.forEach((listener) => listener());
+}
+
+function setFeedRefreshing(next: boolean): void {
+  if (feedRefreshing === next) {
+    return;
+  }
+  feedRefreshing = next;
+  refreshingSubscribers.forEach((listener) => listener());
+}
+
+/** True while any Pulse tab is running a feed reload (dims tab bar + feed). */
+export function usePulseFeedRefreshing(): boolean {
+  return useSyncExternalStore(
+    subscribeRefreshing,
+    getFeedRefreshingSnapshot,
+    getFeedRefreshingSnapshot,
+  );
 }
 
 export function bumpPulseFeedRefreshGeneration(): number {
@@ -44,6 +75,22 @@ const TOP_OVERSCROLL_THRESHOLD =
 const TOP_ARRIVAL_DEBOUNCE_MS = Platform.OS === 'web' ? 280 : 120;
 /** Prevent overscroll / tab re-press from stacking refreshes and stealing taps on web. */
 const REFRESH_COOLDOWN_MS = Platform.OS === 'web' ? 900 : 600;
+/** Visible grey reload — matches Instagram / YouTube pull-to-refresh timing. */
+const PULSE_REFRESH_MIN_MS = Platform.OS === 'web' ? 520 : 480;
+
+function waitNextPaint(): Promise<void> {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => resolve());
+    });
+  });
+}
+
+function waitMs(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
 export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}) {
   const { onRefreshed } = options;
@@ -99,17 +146,25 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
 
       gateRef.current = true;
       setRefreshing(true);
+      setFeedRefreshing(true);
+      const startedAt = Date.now();
       try {
-        // Reshuffle woven profiles immediately — do not block on RSS/network fetches.
         dismissDisguiseLeaveConfirm();
-        bumpPulseFeedRefreshGeneration();
-        setJustUpdated(true);
         scrollToTop(true);
+        await waitNextPaint();
+        bumpPulseFeedRefreshGeneration();
         onRefreshed?.();
         void refreshPulseLiveNews({ force: true }).catch(() => undefined);
+        const elapsed = Date.now() - startedAt;
+        const remain = PULSE_REFRESH_MIN_MS - elapsed;
+        if (remain > 0) {
+          await waitMs(remain);
+        }
+        setJustUpdated(true);
         return true;
       } finally {
         setRefreshing(false);
+        setFeedRefreshing(false);
         gateRef.current = false;
         lastRefreshFinishedAtRef.current = Date.now();
       }

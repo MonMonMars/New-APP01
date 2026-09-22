@@ -173,6 +173,7 @@ export function DisguiseSearchSheet({
           <PulseFeedRefreshFooter
             refreshing={refreshing}
             justUpdated={justUpdated}
+            variant="refresh"
             onPressRefresh={() => {
               void refresh();
             }}

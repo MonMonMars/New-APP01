@@ -2,6 +2,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import type { AdminRole } from './rbac';
 import { parseAdminRole } from './rbac';
+import {
+  DEFAULT_DEMO_ADMIN_EMAIL,
+  ensureDefaultAdminAccountSeeded,
+  hydrateLocalAdminAllowlist,
+} from './adminLocalAllowlist';
 import { getAdminAllowlist, resolveDefaultRoleFromEnv } from './adminAllowlist';
 
 const ROLES_KEY = '@spark/admin_role_assignments_v1';
@@ -16,6 +21,8 @@ type RoleMap = Record<string, AdminRole>;
 let roleCache: RoleMap | null = null;
 
 export async function hydrateAdminRoles(): Promise<void> {
+  await hydrateLocalAdminAllowlist();
+  await ensureDefaultAdminAccountSeeded();
   if (roleCache) {
     return;
   }
@@ -24,6 +31,10 @@ export async function hydrateAdminRoles(): Promise<void> {
     roleCache = raw ? (JSON.parse(raw) as RoleMap) : {};
   } catch {
     roleCache = {};
+  }
+  if (!roleCache[DEFAULT_DEMO_ADMIN_EMAIL]) {
+    roleCache[DEFAULT_DEMO_ADMIN_EMAIL] = 'superadmin';
+    await AsyncStorage.setItem(ROLES_KEY, JSON.stringify(roleCache));
   }
 }
 

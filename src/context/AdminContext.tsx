@@ -9,7 +9,12 @@ import {
   type ReactNode,
 } from 'react';
 
-import { isEmailAdminAllowlisted } from '../admin/adminAllowlist';
+import {
+  isEmailAdminAllowlisted,
+  shouldShowAdminMenuEntry,
+  verifyAdminDemoPin,
+} from '../admin/adminAllowlist';
+import { hydrateLocalAdminAllowlist } from '../admin/adminLocalAllowlist';
 import { hydrateAdminProfileOverrides } from '../admin/adminProfileStore';
 import { hydrateAdminRoles, resolveAdminRoleForEmail } from '../admin/adminRolesStore';
 import {
@@ -30,7 +35,8 @@ type AdminSession = {
 type AdminContextValue = {
   adminSession: AdminSession | null;
   isAdminHydrated: boolean;
-  signInAdmin: (email: string) => Promise<{ ok: boolean; error?: string }>;
+  signInAdmin: (email: string, pin?: string) => Promise<{ ok: boolean; error?: string }>;
+  canOpenAdminMenu: boolean;
   signOutAdmin: () => Promise<void>;
   hasPermission: (permission: AdminPermission) => boolean;
   showInternalProfileLabels: boolean;
@@ -66,7 +72,11 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      await Promise.all([hydrateAdminProfileOverrides(), hydrateAdminRoles()]);
+      await Promise.all([
+        hydrateLocalAdminAllowlist(),
+        hydrateAdminProfileOverrides(),
+        hydrateAdminRoles(),
+      ]);
       try {
         const raw = await AsyncStorage.getItem(SESSION_KEY);
         if (raw && !cancelled) {
@@ -90,10 +100,13 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const signInAdmin = useCallback(async (email: string) => {
+  const signInAdmin = useCallback(async (email: string, pin?: string) => {
     const normalized = email.trim().toLowerCase();
     if (!normalized.includes('@')) {
       return { ok: false, error: 'admin.errors.invalidEmail' };
+    }
+    if (!verifyAdminDemoPin(pin ?? '')) {
+      return { ok: false, error: 'admin.errors.invalidPin' };
     }
     const role = await resolveRoleForEmail(normalized);
     if (!role) {
@@ -161,6 +174,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       showInternalProfileLabels: hasPermission('canViewInternalProfileMetadata'),
       showDemoBillingHints: hasPermission('canViewDemoBillingHints'),
       refreshAdminRole,
+      canOpenAdminMenu: shouldShowAdminMenuEntry(),
     }),
     [adminSession, hasPermission, isAdminHydrated, refreshAdminRole, signInAdmin, signOutAdmin],
   );

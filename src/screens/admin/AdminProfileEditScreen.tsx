@@ -13,6 +13,8 @@ import { useTranslation } from '../../i18n';
 import type { AccountKind } from '../../types/accountKind';
 import { resolveAccountKind } from '../../types/accountKind';
 import type { AdminStackParamList } from '../../navigation/AdminNavigator';
+import { assessProfile } from '../../trust/scamDetector';
+import { isProfileQuarantined } from '../../trust/scamEnforcementStore';
 import { radii, spacing } from '../../theme';
 
 type Props = {
@@ -35,6 +37,11 @@ export function AdminProfileEditScreen({ profileId, navigation }: Props) {
     base ? resolveAccountKind(base) : 'demo',
   );
   const [busy, setBusy] = useState(false);
+  const scamAssessment = useMemo(
+    () => (base ? assessProfile(base) : null),
+    [base],
+  );
+  const quarantined = base ? isProfileQuarantined(base.id) : false;
 
   if (!base) {
     return (
@@ -51,6 +58,7 @@ export function AdminProfileEditScreen({ profileId, navigation }: Props) {
 
   const canEdit = hasPermission('canEditProfiles');
   const canToggleDemo = hasPermission('canToggleDemoFlag');
+  const canViewScam = hasPermission('canRunBackendActions');
 
   const kindLabel = (kind: AccountKind) => t(`admin.accountKind.${kind}`);
 
@@ -106,6 +114,26 @@ export function AdminProfileEditScreen({ profileId, navigation }: Props) {
                 </Text>
               </AnimatedPressable>
             ))}
+          </View>
+        ) : null}
+
+        {canViewScam && scamAssessment ? (
+          <View style={[styles.scamCard, { borderColor: colors.border, backgroundColor: colors.surface }]}>
+            <Text style={[styles.label, { color: colors.textMuted }]}>{t('admin.scamProfileRisk')}</Text>
+            <Text style={{ color: colors.text, fontWeight: '700' }}>
+              {t(`admin.scamLevel.${scamAssessment.level}`)} · {scamAssessment.score}
+            </Text>
+            {quarantined ? (
+              <Text style={{ color: '#E74C3C', fontSize: 13, fontWeight: '600' }}>
+                {t('admin.scamQuarantined')}
+              </Text>
+            ) : null}
+            <Text style={{ color: colors.textMuted, fontSize: 12 }}>
+              {scamAssessment.signals
+                .slice(0, 4)
+                .map((signal) => signal.excerpt ?? signal.id)
+                .join(' · ') || t('admin.scamNoSignals')}
+            </Text>
           </View>
         ) : null}
 
@@ -211,6 +239,12 @@ const styles = StyleSheet.create({
     borderRadius: radii.button,
     paddingHorizontal: spacing.sm,
     paddingVertical: 6,
+  },
+  scamCard: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radii.card,
+    padding: spacing.md,
+    gap: spacing.xs,
   },
   input: {
     borderWidth: 1,

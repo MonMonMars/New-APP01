@@ -15,8 +15,9 @@ function disguiseFeedSignature(
   gender: string | undefined,
   section: string,
   creativeKey: string,
+  showMe: string,
 ): string {
-  return `${section}|${userId}|${gender ?? ''}|${creativeKey}`;
+  return `${section}|${userId}|${gender ?? ''}|${showMe}|${creativeKey}`;
 }
 
 /** Pulse feed layout stays cached; liked/passed profiles fade into fresh replacements in-place. */
@@ -36,6 +37,7 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
     user.gender,
     pulseSection,
     creativeKey,
+    preferences.showMe,
   )}|refresh:${refreshGeneration}|news:${liveNewsRevision}`;
 
   const baseFeed = useMemo(() => {
@@ -48,10 +50,19 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
       pulseSection,
       refreshGeneration,
       resolveAppLocale(preferences.appLocale),
+      preferences.showMe,
     );
     cacheRef.current = { signature, base: built };
     return built;
-  }, [disguiseAdCreative, preferences.appLocale, pulseSection, refreshGeneration, signature, user]);
+  }, [
+    disguiseAdCreative,
+    preferences.appLocale,
+    preferences.showMe,
+    pulseSection,
+    refreshGeneration,
+    signature,
+    user,
+  ]);
 
   return useMemo(() => {
     const filtered = filterDisguiseFeed(baseFeed, topic, user.gender);
@@ -61,6 +72,7 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
       passedIds,
       superLikedIds,
       pulseSection,
+      preferences.showMe,
     );
     return withoutActioned.filter((item) => {
       if (item.type !== 'social') {
@@ -80,6 +92,7 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
     pulseSection,
     pulseSocial.mutedAuthors,
     pulseSocial.reportedPostIds,
+    preferences.showMe,
     topic,
     user.gender,
   ]);

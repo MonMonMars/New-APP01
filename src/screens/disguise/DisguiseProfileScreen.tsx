@@ -35,6 +35,7 @@ import { PulseFeedItemViewer } from '../../components/disguise/PulseFeedItemView
 import { PulseListPickerSheet } from '../../components/disguise/PulseListPickerSheet';
 import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefreshFooter';
 import { PulseFeedRefreshHeader } from '../../components/disguise/PulseFeedRefreshHeader';
+import { PulseFeedRefreshDimLayer } from '../../components/disguise/PulseFeedRefreshDimLayer';
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { usePulseFeedRefreshGeneration, usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
@@ -95,12 +96,20 @@ export function DisguiseProfileScreen() {
   }, [handleTabRepress, navigation]);
   const profileFeedItem = buildDisguisedProfileFeedItem(user, profileCreative);
   const recentPosts = useMemo(
-    () => buildDisguisedProfileFeedItems(pulseSection, refreshGeneration),
-    [pulseSection, refreshGeneration],
+    () => buildDisguisedProfileFeedItems(pulseSection, refreshGeneration, preferences.showMe),
+    [pulseSection, refreshGeneration, preferences.showMe],
   );
   const feedItems = useMemo(
-    () => buildDisguiseFeed(user, disguiseAdCreative, pulseSection, refreshGeneration),
-    [user, disguiseAdCreative, pulseSection, refreshGeneration],
+    () =>
+      buildDisguiseFeed(
+        user,
+        disguiseAdCreative,
+        pulseSection,
+        refreshGeneration,
+        undefined,
+        preferences.showMe,
+      ),
+    [user, disguiseAdCreative, pulseSection, refreshGeneration, preferences.showMe],
   );
   const savedPosts = useMemo(
     () => resolveSavedPulsePosts(pulseSocial.savedPostIds, feedItems, user.gender, locale),
@@ -198,6 +207,7 @@ export function DisguiseProfileScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader title={t('tabs.settings')} showSearch={false} />
+      <PulseFeedRefreshDimLayer refreshing={refreshing}>
       <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={styles.content}
@@ -328,11 +338,13 @@ export function DisguiseProfileScreen() {
         <PulseFeedRefreshFooter
           refreshing={refreshing}
           justUpdated={justUpdated}
+          variant="refresh"
           onPressRefresh={() => {
             void refresh();
           }}
         />
       </ScrollView>
+      </PulseFeedRefreshDimLayer>
 
       <DisguiseAdGeneratorSheet visible={showGenerator} onClose={() => setShowGenerator(false)} />
       {detailSheet ? (

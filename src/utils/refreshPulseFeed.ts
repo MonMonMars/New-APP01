@@ -1,8 +1,8 @@
 import { DisguisedProfilePost, FeedItem } from '../data/disguiseFeed';
 import { translate } from '../i18n';
 import { AppLocale, resolveAppLocale } from '../types/locale';
-import { getAllProfiles, getIncomingLikeProfilesForSection } from '../data/profiles';
-import { matchesSparkSection, resolveSparkSection, SparkSection } from '../types/preferences';
+import { buildSectionProfilePool } from './discoveryProfilePool';
+import { resolveSparkSection, ShowMePreference, SparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
 import {
   pinFeedProfileLinks,
@@ -69,15 +69,9 @@ export function freshenPulseFeedTimestamps(
 function buildProfilePool(
   section: SparkSection | string | null | undefined,
   excluded: Set<string>,
+  showMe: ShowMePreference,
 ): Profile[] {
-  const resolved = resolveSparkSection(section);
-  const incoming = getIncomingLikeProfilesForSection(resolved);
-  const rest = getAllProfiles().filter((profile) => matchesSparkSection(profile, resolved));
-  const merged = [...incoming, ...rest];
-  const unique = merged.filter(
-    (profile, index, list) => list.findIndex((item) => item.id === profile.id) === index,
-  );
-  return unique.filter((profile) => !excluded.has(profile.id) && profile.photos.length > 0);
+  return buildSectionProfilePool(section, showMe, excluded);
 }
 
 function pickProfile(slotKey: string, pool: Profile[], reserved: Set<string>): Profile | undefined {
@@ -92,8 +86,9 @@ function renewDisguisedProfiles(
   items: FeedItem[],
   section: SparkSection | string | null | undefined,
   generation: number,
+  showMe: ShowMePreference,
 ): FeedItem[] {
-  const pool = buildProfilePool(section, new Set());
+  const pool = buildProfilePool(section, new Set(), showMe);
   const reserved = new Set<string>();
 
   return items.map((item) => {
@@ -126,14 +121,17 @@ export function renewPulseFeedProfiles(
   items: FeedItem[],
   section?: SparkSection | string | null,
   generation = 1,
+  showMe: ShowMePreference = 'everyone',
 ): FeedItem[] {
   clearReporterProfileCache();
   setPulseProfileMappingGeneration(generation);
 
   const stripped = stripPulseProfileLinks(items);
-  const withRotatedCards = renewDisguisedProfiles(stripped, section, generation);
+  const withRotatedCards = renewDisguisedProfiles(stripped, section, generation, showMe);
   return syncSocialPostProfiles(
-    syncReporterPhotos(pinFeedProfileLinks(withRotatedCards, section), section),
+    syncReporterPhotos(pinFeedProfileLinks(withRotatedCards, section, showMe), section, showMe),
+    section,
+    showMe,
   );
 }
 
@@ -142,8 +140,9 @@ export function renewPulseFeedPage(
   items: FeedItem[],
   section?: SparkSection | string | null,
   generation = 1,
+  showMe: ShowMePreference = 'everyone',
 ): FeedItem[] {
   const rotated = rotatePulseList(items, generation);
   const freshened = freshenPulseFeedTimestamps(rotated, generation);
-  return renewPulseFeedProfiles(freshened, section, generation);
+  return renewPulseFeedProfiles(freshened, section, generation, showMe);
 }

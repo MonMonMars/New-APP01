@@ -4,29 +4,6 @@ on:
   push:
     branches:
       - main
-      - cursor/tinder-style-dating-app-7b60
-      - cursor/phase-d-features-7b60
-      - cursor/complete-all-details-7b60
-      - cursor/debug-tab-bleed-7b60
-      - cursor/legal-privacy-security-7b60
-      - cursor/disguise-trending-7b60
-      - cursor/quiet-no-sfx-7b60
-      - cursor/button-press-effects-7b60
-      - cursor/complete-app-details-7b60
-      - cursor/disguise-mode-7b60
-      - cursor/competitor-features-7b60
-      - cursor/cloud-complete-7b60
-      - cursor/red-star-superlike-7b60
-      - cursor/pulse-explicit-profile-links-7b60
-      - cursor/update-fake-accounts-7b60
-      - cursor/pulse-top-refresh-7b60
-      - cursor/world-map-touch-search-7b60
-      - cursor/compact-mini-window-7b60
-      - cursor/mini-xsl-buttons-7b60
-      - cursor/pulse-icons-blue-7b60
-      - cursor/app-i18n-7b60
-      - cursor/legal-docs-complete-7b60
-      - cursor/finish-app-perks-7b60
   workflow_dispatch:
 
 permissions:

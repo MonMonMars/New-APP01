@@ -36,6 +36,12 @@ These mobile/cloud threads are stuck (queue full, errors, or pre-`main` empty ch
 | Any agent still on empty `main` before 2026-09-22 | No `package.json` in workspace |
 | Draft PRs **#147–#154** | **Closed** — superseded by #157 on `main` |
 
+## Legacy open drafts (#112–#139 and older)
+
+Many pre-`main` branches (`cursor/*-7b60`) only share the initial commit with `main` — same situation as #147–#154. **Do not merge them blindly.** Treat `main` as canonical; pick a draft only when Mon names a specific PR to port or re-implement.
+
+GitHub Pages deploy workflow now runs on **`main`** pushes only (see `.github/workflows/deploy-web.yml`).
+
 ## Default commands
 
 ```bash

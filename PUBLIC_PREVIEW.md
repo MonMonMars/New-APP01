@@ -2,11 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://monday-three-organizing-transportation.trycloudflare.com**
+**https://tommy-workstation-carolina-portland.trycloudflare.com**
 
-- **Integration branch:** `main` (PR **#157** — features from former drafts #147–#154)
-- **Build ID:** `c22203d-20260922T181747Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-22 18:18 UTC — tunnel HTTP 200 + local `verify:ci-smoke` 9/9
+- **Integration branch:** `main` (PR **#157** + docs **#159**)
+- **Build ID:** `55178b8-20260922T182447Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
+- **Verified:** 2026-09-22 18:27 UTC — tunnel HTTP 200 + local `verify:extended` PASS
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

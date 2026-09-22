@@ -623,7 +623,7 @@ Prototype user: **Mon**, 28, designer bio, default Unsplash photo.
 
 | Gate | Command | Scope |
 |------|---------|--------|
-| CI | `npm run verify:ci` | Typecheck, 177 demo profiles + Pexels probe, demo web build, Playwright smoke (onboarding + Pulse link routing) |
+| CI | `npm run verify:ci` | Typecheck, 177 demo profiles + Pexels probe, **972×2 i18n keys**, demo web build, Playwright smoke (onboarding + Pulse link routing) |
 | Release QA | `npm run verify:extended` | Playwright: onboarding, Pulse mini-window, explicit profile links, feed refresh, world map search, disguise UX, world picker |
 
 **Shipped in this integration line:** Pulse scroll-to-top / pull refresh; worldwide map discover + touch pan/zoom; explicit Pulse → dating entry points; passport demo profiles 201–218; Supabase prefs + chat cloud merge; admin RBAC stubs; legal/privacy screens; permanent demo hosting docs (`PUBLIC_PREVIEW.md`, Vercel/`serve.json` cache split).

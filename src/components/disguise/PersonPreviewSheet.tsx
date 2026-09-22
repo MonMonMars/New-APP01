@@ -438,13 +438,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   actionsWrap: {
-    marginTop: 2,
+    marginTop: spacing.xs,
     zIndex: 6,
+    gap: spacing.xs,
   },
   hint: {
     fontSize: 10,
     textAlign: 'center',
-    marginTop: 2,
+    marginTop: 0,
+    paddingHorizontal: spacing.xs,
+    lineHeight: 14,
   },
   limitHint: {
     fontSize: 10,

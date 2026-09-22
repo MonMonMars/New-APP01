@@ -18,16 +18,26 @@ export function discoverActionRailHeight(compact: boolean): number {
   return DISCOVER_TARGET_SIZE + spacing.md + spacing.lg;
 }
 
-/** Bottom inset for profile name / meta on compact cards. */
-export function discoverProfileMetaBottom(compact: boolean): number {
-  if (!compact) {
-    return spacing.lg;
-  }
-  return discoverActionRailHeight(true) + spacing.xs;
-}
-
 /** Photo indicator row — leave room for top-right info control. */
 export const DISCOVER_DOTS_RIGHT_INSET =
   DISCOVER_INFO_BUTTON_SIZE + spacing.md + spacing.sm;
 
 export const DISCOVER_INFO_TOP = spacing.md;
+
+/** Bottom edge of the top chrome row (photo dots + info control). */
+export function discoverTopChromeBottom(): number {
+  return DISCOVER_INFO_TOP + DISCOVER_INFO_BUTTON_SIZE + spacing.sm;
+}
+
+/** Photo tap zones start below top chrome so info and dots stay tappable. */
+export function discoverPhotoTapTopInset(): number {
+  return discoverTopChromeBottom();
+}
+
+/** Compact profile meta sits above the action rail with extra breathing room. */
+export function discoverProfileMetaBottom(compact: boolean): number {
+  if (!compact) {
+    return spacing.lg;
+  }
+  return discoverActionRailHeight(true) + spacing.sm;
+}

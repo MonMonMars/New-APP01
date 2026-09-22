@@ -20,7 +20,9 @@ import {
   DISCOVER_DOTS_RIGHT_INSET,
   DISCOVER_INFO_BUTTON_SIZE,
   DISCOVER_INFO_TOP,
+  discoverPhotoTapTopInset,
   discoverProfileMetaBottom,
+  discoverTopChromeBottom,
 } from '../constants/discoverLayout';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
@@ -196,25 +198,36 @@ export function ProfileCard({
             })}
           </View>
           {visiblePhotoCount < photoCount ? (
-            <View style={styles.privateBadge}>
+            <View
+              style={[
+                styles.privateBadge,
+                profile.spotlight ? styles.privateBadgeBelowCrush : null,
+              ]}
+            >
               <Ionicons name="lock-closed" size={11} color={colors.ember} />
               <Text style={styles.privateBadgeText}>{t('discover.privatePhotos')}</Text>
             </View>
           ) : null}
-          <View style={styles.tapZones}>
+          <View style={styles.tapZones} pointerEvents="box-none">
             <AnimatedPressable style={styles.tapZone} onPress={() => goToPhoto('left')} />
             <AnimatedPressable style={styles.tapZone} onPress={() => goToPhoto('right')} />
           </View>
         </>
       )}
 
-      {isTop && onOpenDetail && (
-        <AnimatedPressable style={styles.infoButton} onPress={onOpenDetail}>
+      {isTop && onOpenDetail ? (
+        <AnimatedPressable
+          style={styles.infoButton}
+          onPress={onOpenDetail}
+          hitSlop={6}
+          accessibilityLabel={t('profileDetail.openDetails')}
+        >
           <Ionicons name="information-circle" size={28} color={colors.text} />
         </AnimatedPressable>
-      )}
+      ) : null}
 
       <View
+        pointerEvents="box-none"
         style={[
           styles.info,
           compact && styles.infoCompact,
@@ -298,7 +311,7 @@ const styles = StyleSheet.create({
   },
   compatibleBadge: {
     position: 'absolute',
-    top: spacing.md + 30,
+    top: discoverTopChromeBottom(),
     left: spacing.md,
     maxWidth: '72%',
     backgroundColor: palette.boost,
@@ -308,7 +321,7 @@ const styles = StyleSheet.create({
     zIndex: 6,
   },
   compatibleBadgeBelowCrush: {
-    top: spacing.md + 54,
+    top: discoverTopChromeBottom() + 26,
   },
   compatibleBadgeText: {
     color: palette.text,
@@ -319,7 +332,7 @@ const styles = StyleSheet.create({
   },
   crushBadge: {
     position: 'absolute',
-    top: spacing.md + 30,
+    top: discoverTopChromeBottom(),
     left: spacing.md,
     maxWidth: '72%',
     backgroundColor: palette.heartRed,
@@ -349,7 +362,8 @@ const styles = StyleSheet.create({
     right: spacing.md + DISCOVER_DOTS_RIGHT_INSET,
     flexDirection: 'row',
     gap: 4,
-    zIndex: 5,
+    zIndex: 8,
+    pointerEvents: 'none',
   },
   dot: {
     flex: 1,
@@ -365,7 +379,7 @@ const styles = StyleSheet.create({
   },
   privateBadge: {
     position: 'absolute',
-    top: DISCOVER_INFO_TOP + 8,
+    top: discoverTopChromeBottom(),
     left: spacing.md,
     maxWidth: '55%',
     flexDirection: 'row',
@@ -384,9 +398,17 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
     textTransform: 'uppercase',
   },
+  privateBadgeBelowCrush: {
+    top: discoverTopChromeBottom() + 26,
+  },
   tapZones: {
-    ...StyleSheet.absoluteFill,
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: discoverPhotoTapTopInset(),
+    bottom: 0,
     flexDirection: 'row',
+    zIndex: 4,
   },
   tapZone: {
     flex: 1,
@@ -418,6 +440,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexWrap: 'wrap',
     gap: spacing.xs,
+    maxWidth: '100%',
   },
   name: {
     color: palette.text,

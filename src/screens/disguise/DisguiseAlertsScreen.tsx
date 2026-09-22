@@ -25,6 +25,7 @@ import { radii, spacing } from '../../theme';
 import { useApp } from '../../context/AppContext';
 import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefreshFooter';
 import { PulseFeedRefreshHeader } from '../../components/disguise/PulseFeedRefreshHeader';
+import { PulseFeedRefreshDimLayer } from '../../components/disguise/PulseFeedRefreshDimLayer';
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
 import { PulseProfileSwap } from '../../components/motion/PulseProfileSwap';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
@@ -104,6 +105,7 @@ export function DisguiseAlertsScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader title={t('tabs.activity')} showSearch={false} />
+      <PulseFeedRefreshDimLayer refreshing={refreshing}>
       <FlatList
         ref={listRef}
         data={alerts}
@@ -198,6 +200,7 @@ export function DisguiseAlertsScreen() {
           );
         }}
       />
+      </PulseFeedRefreshDimLayer>
 
       <NewsArticleSheet
         visible={articlePost !== null}

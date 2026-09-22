@@ -59,7 +59,7 @@ export function PulseFeedRefreshHeader({
   }
 
   return (
-    <View pointerEvents="box-none">
+    <View pointerEvents="box-none" style={refreshing ? styles.refreshingHost : undefined}>
       <View
         {...panHandlers}
         style={styles.pullRow}
@@ -80,6 +80,9 @@ export function PulseFeedRefreshHeader({
 }
 
 const styles = StyleSheet.create({
+  refreshingHost: {
+    zIndex: 2,
+  },
   pullRow: {
     flexDirection: 'row',
     alignItems: 'center',

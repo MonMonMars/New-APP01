@@ -23,6 +23,7 @@ import { pulseFeedScrollPaddingBottom } from '../../theme/pulseFeedLayout';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefreshFooter';
 import { PulseFeedRefreshHeader } from '../../components/disguise/PulseFeedRefreshHeader';
+import { PulseFeedRefreshDimLayer } from '../../components/disguise/PulseFeedRefreshDimLayer';
 import { FadeSlideIn } from '../../components/motion/FadeSlideIn';
 import { usePulseFeedRefreshGeneration, usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
 
@@ -85,6 +86,7 @@ export function DisguiseFeedScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader />
+      <PulseFeedRefreshDimLayer refreshing={refreshing}>
       <FlatList
         ref={listRef}
         data={feedItems}
@@ -159,6 +161,7 @@ export function DisguiseFeedScreen() {
           </View>
         }
       />
+      </PulseFeedRefreshDimLayer>
     </View>
   );
 }

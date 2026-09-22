@@ -173,9 +173,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
               <Text style={styles.sponsored}>{t('disguiseAd.sponsored')}</Text>
               <ContentTypeIcon kind="sponsored" />
             </View>
-            <MediaWithContentBadge kind="ad">
-              <NewsHeroImage uri={post.coverImageUrl} style={styles.adImage} accessibilityLabel={post.headline} />
-            </MediaWithContentBadge>
+            <NewsHeroImage uri={post.coverImageUrl} style={styles.adImage} accessibilityLabel={post.headline} />
             <View style={styles.body}>
               <Text style={styles.brand}>{post.headline}</Text>
               <Text style={styles.tagline}>{post.summary}</Text>

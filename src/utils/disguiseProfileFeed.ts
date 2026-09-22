@@ -37,7 +37,7 @@ const NEWS_TEMPLATES = [
   },
 ];
 
-const VARIANTS: DisguisedProfileVariant[] = ['news', 'ad', 'social'];
+const VARIANTS: DisguisedProfileVariant[] = ['news', 'news', 'social', 'ad'];
 
 function profileHandle(name: string): string {
   return `@${name.toLowerCase().replace(/[^a-z0-9]/g, '')}`;

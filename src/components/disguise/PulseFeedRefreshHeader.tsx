@@ -32,6 +32,7 @@ export function PulseFeedRefreshHeader({
   const panHandlers = useMemo(
     () =>
       PanResponder.create({
+        onStartShouldSetPanResponder: () => false,
         onMoveShouldSetPanResponder: (_, gesture) =>
           isAtTop && !refreshing && gesture.dy > 6 && Math.abs(gesture.dy) > Math.abs(gesture.dx),
         onPanResponderMove: (_, gesture) => {
@@ -58,8 +59,8 @@ export function PulseFeedRefreshHeader({
   }
 
   return (
-    <View {...panHandlers}>
-      <View style={styles.pullRow} accessibilityLiveRegion="polite">
+    <View pointerEvents="box-none">
+      <View {...panHandlers} style={styles.pullRow} accessibilityLiveRegion="polite">
         {refreshing ? <ActivityIndicator color={accent} size="small" /> : null}
         <Text
           style={[styles.pullText, { color: colors.textMuted }]}

@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Platform, StyleSheet, View } from 'react-native';
 
 import { TabBarButton } from '../components/TabBarButton';
 import { useApp } from '../context/AppContext';
@@ -11,6 +12,7 @@ import { DisguiseProfileScreen } from '../screens/disguise/DisguiseProfileScreen
 import { DisguiseTrendingScreen } from '../screens/disguise/DisguiseTrendingScreen';
 import { useTranslation } from '../i18n';
 import { usePulseContextSection } from '../hooks/usePulseContextSection';
+import { usePulseFeedRefreshing } from '../hooks/usePulseFeedRefresh';
 import { disguiseWorldMeta } from '../utils/disguiseWorld';
 
 export type DisguiseTabParamList = {
@@ -32,8 +34,10 @@ export function DisguiseNavigator() {
     !pulseSocial.activityAlertsRead && disguiseAlerts.length > 0
       ? disguiseAlerts.length
       : undefined;
+  const feedRefreshing = usePulseFeedRefreshing();
 
   return (
+    <View style={styles.navRoot}>
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
@@ -45,6 +49,9 @@ export function DisguiseNavigator() {
           borderTopColor: colors.border,
           paddingTop: 6,
           height: 72,
+          opacity: feedRefreshing ? 0.48 : 1,
+          // Web: default absolute tab bar sits on top of FlatList footers and eats taps.
+          ...(Platform.OS === 'web' ? { position: 'relative' as const } : null),
         },
         tabBarActiveTintColor: meta.accent,
         tabBarInactiveTintColor: colors.textMuted,
@@ -81,5 +88,26 @@ export function DisguiseNavigator() {
         options={{ title: t('tabs.settings') }}
       />
     </Tab.Navigator>
+    {feedRefreshing ? (
+      <View
+        style={styles.tabBarBlocker}
+        pointerEvents="auto"
+        accessibilityElementsHidden
+      />
+    ) : null}
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  navRoot: {
+    flex: 1,
+  },
+  tabBarBlocker: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 72,
+  },
+});

@@ -1,6 +1,6 @@
 import { DisguisedProfilePost, FeedItem, NewsReporter } from '../data/disguiseFeed';
-import { getAllProfiles, getIncomingLikeProfilesForSection } from '../data/profiles';
-import { matchesSparkSection, resolveSparkSection, SparkSection } from '../types/preferences';
+import { buildSectionProfilePool } from './discoveryProfilePool';
+import { ShowMePreference, SparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
 import { disguiseDisplayName } from './disguiseProfileFeed';
 import { profileIntroCaption } from './profileIntroCaption';
@@ -30,8 +30,12 @@ function hashSlotId(id: string): number {
   return Math.abs(hash);
 }
 
-function reporterProfileId(reporter: NewsReporter): string | undefined {
-  return explicitReporterProfileId(reporter.id, reporter.profileId);
+function reporterProfileId(
+  reporter: NewsReporter,
+  showMe: ShowMePreference,
+  section?: SparkSection | string | null,
+): string | undefined {
+  return explicitReporterProfileId(reporter.id, reporter.profileId, showMe, section);
 }
 
 function disguisedProfileId(item: DisguisedProfilePost): string | undefined {
@@ -41,15 +45,9 @@ function disguisedProfileId(item: DisguisedProfilePost): string | undefined {
 function buildReplacementPool(
   section: SparkSection | string | null | undefined,
   excluded: Set<string>,
+  showMe: ShowMePreference,
 ): Profile[] {
-  const resolved = resolveSparkSection(section);
-  const incoming = getIncomingLikeProfilesForSection(resolved);
-  const rest = getAllProfiles().filter((profile) => matchesSparkSection(profile, resolved));
-  const merged = [...incoming, ...rest];
-  const unique = merged.filter(
-    (profile, index, list) => list.findIndex((item) => item.id === profile.id) === index,
-  );
-  return unique.filter((profile) => !excluded.has(profile.id) && profile.photos.length > 0);
+  return buildSectionProfilePool(section, showMe, excluded);
 }
 
 function pickReplacementProfile(
@@ -98,7 +96,11 @@ function profileToDisguisedPost(post: DisguisedProfilePost, profile: Profile): D
   };
 }
 
-function collectReservedProfileIds(items: FeedItem[], section?: SparkSection | string | null): Set<string> {
+function collectReservedProfileIds(
+  items: FeedItem[],
+  showMe: ShowMePreference,
+  section?: SparkSection | string | null,
+): Set<string> {
   const reserved = new Set<string>();
 
   items.forEach((item) => {
@@ -112,7 +114,7 @@ function collectReservedProfileIds(items: FeedItem[], section?: SparkSection | s
 
     if (item.type === 'news') {
       item.reporters.forEach((reporter) => {
-        const profileId = reporterProfileId(reporter);
+        const profileId = reporterProfileId(reporter, showMe, section);
         if (profileId) {
           reserved.add(profileId);
         }
@@ -130,6 +132,7 @@ export function filterActionedDisguiseFeed(
   passedIds: Set<string>,
   superLikedIds: Set<string>,
   section?: SparkSection | string | null,
+  showMe: ShowMePreference = 'everyone',
 ): FeedItem[] {
   const actioned = actionedProfileIds(likedIds, passedIds, superLikedIds);
   syncActionedProfileIds(actioned);
@@ -138,11 +141,11 @@ export function filterActionedDisguiseFeed(
     return items;
   }
 
-  const reserved = collectReservedProfileIds(items, section);
+  const reserved = collectReservedProfileIds(items, showMe, section);
   actioned.forEach((id) => reserved.delete(id));
 
-  const pool = buildReplacementPool(section, actioned);
-  const displayFallbackPool = buildReplacementPool(section, new Set());
+  const pool = buildReplacementPool(section, actioned, showMe);
+  const displayFallbackPool = buildReplacementPool(section, new Set(), showMe);
 
   return items.flatMap((item): FeedItem[] => {
     if (item.type === 'disguised_profile') {
@@ -173,7 +176,7 @@ export function filterActionedDisguiseFeed(
     if (item.type === 'news') {
       let changed = false;
       const reporters = item.reporters.flatMap((reporter) => {
-        const profileId = reporterProfileId(reporter);
+        const profileId = reporterProfileId(reporter, showMe, section);
         if (!profileId || !actioned.has(profileId)) {
           return [reporter];
         }

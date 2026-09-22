@@ -18,6 +18,11 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Profile } from '../types/profile';
+import {
+  DISCOVER_INFO_BUTTON_SIZE,
+  DISCOVER_INFO_TOP,
+  discoverActionRailHeight,
+} from '../constants/discoverLayout';
 import { spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
@@ -470,9 +475,11 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
       return null;
     }
 
+    const actionRailHeight = discoverActionRailHeight(compact);
+
     return (
       <View ref={containerRef} style={styles.container} onLayout={handleDeckLayout}>
-        <View style={styles.deck}>
+        <View style={[styles.deck, { paddingBottom: actionRailHeight }]}>
           {visibleProfiles
             .slice()
             .reverse()
@@ -498,17 +505,6 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
                         />
                       </Animated.View>
                     </GestureDetector>
-                    {onOpenProfile ? (
-                      <AnimatedPressable
-                        style={styles.infoButton}
-                        onPress={() => onOpenProfile(profile)}
-                        accessibilityLabel={t('profileDetail.openDetails')}
-                        hitSlop={12}
-                        scaleTo={0.9}
-                      >
-                        <Ionicons name="information-circle" size={28} color={colors.text} />
-                      </AnimatedPressable>
-                    ) : null}
                   </View>
                 );
               }
@@ -544,6 +540,18 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           isSparkPlus={isSparkPlus}
         />
 
+        {onOpenProfile && activeIndex < profiles.length ? (
+          <AnimatedPressable
+            style={styles.infoButton}
+            onPress={() => onOpenProfile(profiles[activeIndex])}
+            accessibilityLabel={t('profileDetail.openDetails')}
+            hitSlop={8}
+            scaleTo={0.9}
+          >
+            <Ionicons name="information-circle" size={28} color={colors.text} />
+          </AnimatedPressable>
+        ) : null}
+
         <SwipeBurstEffect
           kind={activeEffect?.kind ?? null}
           origin={activeEffect?.origin ?? null}
@@ -575,15 +583,15 @@ const styles = StyleSheet.create({
   },
   infoButton: {
     position: 'absolute',
-    top: spacing.md,
+    top: DISCOVER_INFO_TOP,
     right: spacing.md,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: DISCOVER_INFO_BUTTON_SIZE,
+    height: DISCOVER_INFO_BUTTON_SIZE,
+    borderRadius: DISCOVER_INFO_BUTTON_SIZE / 2,
     backgroundColor: 'rgba(0,0,0,0.45)',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 30,
-    elevation: 30,
+    zIndex: 40,
+    elevation: 40,
   },
 });

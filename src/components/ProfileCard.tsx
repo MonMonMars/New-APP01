@@ -16,6 +16,12 @@ import Animated, {
 import { AiPersonaBadge } from './AiPersonaBadge';
 import { VideoProfileOverlay } from './VideoProfileOverlay';
 import { VerificationBadges } from './VerificationBadges';
+import {
+  DISCOVER_DOTS_RIGHT_INSET,
+  DISCOVER_INFO_BUTTON_SIZE,
+  DISCOVER_INFO_TOP,
+  discoverProfileMetaBottom,
+} from '../constants/discoverLayout';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
@@ -152,15 +158,21 @@ export function ProfileCard({
         <Animated.View style={[styles.passDimOverlay, passDimStyle]} pointerEvents="none" />
       )}
 
-      {profile.mostCompatible && isTop && (
-        <View style={[styles.compatibleBadge, { backgroundColor: colors.boost }]}>
-          <Text style={styles.compatibleBadgeText}>{t('discover.mostCompatibleBadge')}</Text>
-        </View>
-      )}
-
       {profile.spotlight && isTop && (
         <View style={[styles.crushBadge, { backgroundColor: colors.heartRed }]}>
           <Text style={styles.crushBadgeText}>{t('discover.crushBadge')}</Text>
+        </View>
+      )}
+
+      {profile.mostCompatible && isTop && (
+        <View
+          style={[
+            styles.compatibleBadge,
+            { backgroundColor: colors.boost },
+            profile.spotlight && isTop ? styles.compatibleBadgeBelowCrush : null,
+          ]}
+        >
+          <Text style={styles.compatibleBadgeText}>{t('discover.mostCompatibleBadge')}</Text>
         </View>
       )}
 
@@ -202,9 +214,18 @@ export function ProfileCard({
         </AnimatedPressable>
       )}
 
-      <View style={[styles.info, compact && styles.infoCompact]}>
+      <View
+        style={[
+          styles.info,
+          compact && styles.infoCompact,
+          compact ? { bottom: discoverProfileMetaBottom(true) } : null,
+        ]}
+      >
         <View style={styles.nameRow}>
-          <Text style={[styles.name, compact && styles.nameCompact]}>
+          <Text
+            style={[styles.name, compact && styles.nameCompact]}
+            numberOfLines={compact ? 1 : undefined}
+          >
             {profile.name}, {profile.age}
           </Text>
           <AiPersonaBadge profile={profile} compact />
@@ -219,8 +240,18 @@ export function ProfileCard({
             </View>
           ) : null}
         </View>
-        {profile.job && <Text style={[styles.job, compact && styles.jobCompact]}>{profile.job}</Text>}
-        <Text style={[styles.distance, compact && styles.distanceCompact]}>
+        {profile.job && (
+          <Text
+            style={[styles.job, compact && styles.jobCompact]}
+            numberOfLines={compact ? 1 : undefined}
+          >
+            {profile.job}
+          </Text>
+        )}
+        <Text
+          style={[styles.distance, compact && styles.distanceCompact]}
+          numberOfLines={compact ? 1 : undefined}
+        >
           {emberStatus
             ? getEmberLocationLabel(locale, profile)
             : `${profile.city ? `${profile.city} · ` : ''}${t('likes.milesAway', { n: profile.distanceMiles })}`}
@@ -267,13 +298,17 @@ const styles = StyleSheet.create({
   },
   compatibleBadge: {
     position: 'absolute',
-    top: spacing.md + 28,
+    top: spacing.md + 30,
     left: spacing.md,
+    maxWidth: '72%',
     backgroundColor: palette.boost,
     borderRadius: radii.button,
     paddingHorizontal: spacing.sm + 4,
     paddingVertical: spacing.xs + 2,
     zIndex: 6,
+  },
+  compatibleBadgeBelowCrush: {
+    top: spacing.md + 54,
   },
   compatibleBadgeText: {
     color: palette.text,
@@ -284,8 +319,9 @@ const styles = StyleSheet.create({
   },
   crushBadge: {
     position: 'absolute',
-    top: spacing.md + 12,
-    right: spacing.md,
+    top: spacing.md + 30,
+    left: spacing.md,
+    maxWidth: '72%',
     backgroundColor: palette.heartRed,
     borderRadius: radii.button,
     paddingHorizontal: spacing.sm + 4,
@@ -308,11 +344,12 @@ const styles = StyleSheet.create({
   },
   dots: {
     position: 'absolute',
-    top: spacing.md,
+    top: DISCOVER_INFO_TOP,
     left: spacing.md,
-    right: spacing.md,
+    right: spacing.md + DISCOVER_DOTS_RIGHT_INSET,
     flexDirection: 'row',
     gap: 4,
+    zIndex: 5,
   },
   dot: {
     flex: 1,
@@ -328,8 +365,9 @@ const styles = StyleSheet.create({
   },
   privateBadge: {
     position: 'absolute',
-    top: spacing.md + 14,
+    top: DISCOVER_INFO_TOP + 8,
     left: spacing.md,
+    maxWidth: '55%',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -355,11 +393,11 @@ const styles = StyleSheet.create({
   },
   infoButton: {
     position: 'absolute',
-    top: spacing.md,
+    top: DISCOVER_INFO_TOP,
     right: spacing.md,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: DISCOVER_INFO_BUTTON_SIZE,
+    height: DISCOVER_INFO_BUTTON_SIZE,
+    borderRadius: DISCOVER_INFO_BUTTON_SIZE / 2,
     backgroundColor: 'rgba(0,0,0,0.45)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -372,7 +410,6 @@ const styles = StyleSheet.create({
     bottom: spacing.lg,
   },
   infoCompact: {
-    bottom: spacing.lg + 52,
     left: spacing.sm + 4,
     right: spacing.sm + 4,
   },

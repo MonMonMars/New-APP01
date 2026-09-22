@@ -2,11 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://tommy-workstation-carolina-portland.trycloudflare.com**
+**https://excess-suggestion-ruth-quad.trycloudflare.com**
 
-- **Integration branch:** `main` (PR **#157** + docs **#159**)
-- **Build ID:** `55178b8-20260922T182447Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-22 18:27 UTC — tunnel HTTP 200 + local `verify:extended` PASS
+- **Demo build:** `main` + **#162** + preview **#163** (map pan/zoom) + **#164** (Pulse IG/YT refresh)
+- **Build ID:** `47d72ed-20260922T234831Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
+- **Verified:** 2026-09-22 23:49 UTC — tunnel HTTP 200 + `verify-demo-link` PASS
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)
@@ -28,7 +28,7 @@ Server-side (already applied on each `npm run build:web:demo`):
 3. Complete onboarding (defaults are fine)
 4. Tap the **Pulse logo** → **Leave Spark** to enter dating mode
 5. **Discover tools → Map** — drag/pinch the map; **Places → Tokyo** → **Search this area**
-6. **Pulse Home** — scroll down, back to top → “Updated just now”
+6. **Pulse Home** — pull down at top or tap **Home** twice at top → “Updated just now”
 7. **Profile → Privacy controls → Language** for 繁體中文
 
 ---

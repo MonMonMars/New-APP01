@@ -34,6 +34,7 @@ import { radii, spacing } from '../theme';
 import { LocaleToggle } from '../components/legal/LocaleToggle';
 import { APP_LOCALE_LABELS } from '../types/locale';
 import { AnimatedPressable } from '../components/AnimatedPressable';
+import { getAppVersionLabel } from '../constants/buildInfo';
 
 type SettingsRoute =
   | 'Safety'
@@ -436,7 +437,9 @@ export function ProfileScreen() {
         </View>
 
         <AnimatedPressable style={styles.versionRow} onPress={handleVersionTap}>
-          <Text style={[styles.versionText, { color: colors.textMuted }]}>Spark {appVersion}</Text>
+          <Text style={[styles.versionText, { color: colors.textMuted }]}>
+            {t('profile.versionFooter', { version: getAppVersionLabel(appVersion) })}
+          </Text>
         </AnimatedPressable>
 
         <AnimatedPressable style={styles.deleteRow} onPress={handleDeleteAccount}>

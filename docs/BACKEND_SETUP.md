@@ -70,5 +70,5 @@ No env vars? Everything works exactly as before — AsyncStorage persistence onl
 - [ ] Set up Apple Sign-In service ID + redirect URLs
 - [ ] Configure email templates for magic links
 - [ ] Add server-side matchmaking (currently client-side demo)
-- [ ] Wire real-time subscriptions for chat (`supabase.channel`)
-- [ ] Store photos in Supabase Storage (currently URLs / local URIs)
+- [x] Wire real-time subscriptions for chat (`src/services/realtimeChat.ts`, `useCloudConversation`)
+- [x] Store photos in Supabase Storage (`src/services/cloudStorage.ts` — graceful fallback to local URIs when unconfigured)

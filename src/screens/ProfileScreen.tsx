@@ -19,6 +19,7 @@ import { VoicePromptCard } from '../components/VoicePromptCard';
 import { PhotoCarousel } from '../components/PhotoCarousel';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { EmberStatusChips } from '../components/EmberStatusChips';
+import { useOptionalAdmin } from '../context/AdminContext';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
@@ -65,6 +66,10 @@ export function ProfileScreen() {
   const navigation = useNavigation();
   const { colors } = useTheme();
   const { t, locale } = useTranslation();
+  const admin = useOptionalAdmin();
+  const showAdminMenu = admin?.canOpenAdminMenu ?? false;
+  const adminSignedIn = Boolean(admin?.adminSession);
+
   const {
     user,
     likedIds,
@@ -116,6 +121,10 @@ export function ProfileScreen() {
     versionTapTimer.current = setTimeout(() => {
       versionTapCount.current = 0;
     }, 2500);
+  };
+
+  const openAdminPanel = () => {
+    navigation.getParent()?.navigate('Admin');
   };
 
   const handleRowPress = (route: SettingsRoute) => {
@@ -436,6 +445,25 @@ export function ProfileScreen() {
           ))}
         </View>
 
+        {showAdminMenu ? (
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('admin.profileSection')}</Text>
+            <AnimatedPressable
+              style={[styles.settingsRow, { borderBottomColor: colors.border }]}
+              onPress={openAdminPanel}
+            >
+              <Ionicons name="shield-outline" size={20} color={colors.gradientEnd} />
+              <View style={styles.adminLabelWrap}>
+                <Text style={[styles.settingsLabel, { color: colors.text }]}>{t('admin.profileMenuTitle')}</Text>
+                <Text style={[styles.adminMenuSub, { color: colors.textMuted }]}>
+                  {adminSignedIn ? t('admin.profileMenuSignedIn') : t('admin.profileMenuSignedOut')}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+            </AnimatedPressable>
+          </View>
+        ) : null}
+
         <AnimatedPressable style={styles.versionRow} onPress={handleVersionTap}>
           <Text style={[styles.versionText, { color: colors.textMuted }]}>
             {t('profile.versionFooter', { version: getAppVersionLabel(appVersion) })}
@@ -706,6 +734,14 @@ const styles = StyleSheet.create({
   settingsLabel: {
     flex: 1,
     fontSize: 16,
+  },
+  adminLabelWrap: {
+    flex: 1,
+    gap: 2,
+  },
+  adminMenuSub: {
+    fontSize: 12,
+    lineHeight: 16,
   },
   versionRow: {
     alignItems: 'center',

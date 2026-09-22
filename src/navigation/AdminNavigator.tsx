@@ -7,13 +7,17 @@ import { AdminDashboardScreen } from '../screens/admin/AdminDashboardScreen';
 import { AdminLoginScreen } from '../screens/admin/AdminLoginScreen';
 import { AdminProfileEditScreen } from '../screens/admin/AdminProfileEditScreen';
 import { AdminProfilesScreen } from '../screens/admin/AdminProfilesScreen';
+import { AdminAccountsScreen } from '../screens/admin/AdminAccountsScreen';
+import { AdminOverviewScreen } from '../screens/admin/AdminOverviewScreen';
 import { AdminRolesScreen } from '../screens/admin/AdminRolesScreen';
 
 export type AdminStackParamList = {
   AdminLogin: undefined;
   AdminDashboard: undefined;
+  AdminOverview: undefined;
   AdminProfiles: undefined;
   AdminProfileEdit: { profileId: string };
+  AdminAccounts: undefined;
   AdminRoles: undefined;
 };
 
@@ -55,8 +59,14 @@ export function AdminNavigator({ onClose }: AdminNavigatorProps) {
           <AdminDashboardScreen onClose={onClose} navigation={navigation} />
         )}
       </Stack.Screen>
+      <Stack.Screen name="AdminOverview">
+        {({ navigation }) => <AdminOverviewScreen navigation={navigation} />}
+      </Stack.Screen>
       <Stack.Screen name="AdminProfiles">
         {({ navigation }) => <AdminProfilesScreen navigation={navigation} />}
+      </Stack.Screen>
+      <Stack.Screen name="AdminAccounts">
+        {({ navigation }) => <AdminAccountsScreen navigation={navigation} />}
       </Stack.Screen>
       <Stack.Screen name="AdminProfileEdit">
         {({ navigation, route }) => (

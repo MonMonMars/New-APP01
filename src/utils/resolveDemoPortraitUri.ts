@@ -9,6 +9,27 @@ export function isDemoPortraitUri(uri: string): boolean {
   return uri.startsWith(DEMO_PORTRAIT_URI_PREFIX);
 }
 
+function uriFromAssetModule(assetModule: number): string | null {
+  if (typeof assetModule === 'string') {
+    return assetModule;
+  }
+  if (
+    typeof assetModule === 'object' &&
+    assetModule !== null &&
+    'uri' in assetModule &&
+    typeof (assetModule as { uri: unknown }).uri === 'string'
+  ) {
+    return (assetModule as { uri: string }).uri;
+  }
+  if (typeof Image.resolveAssetSource === 'function') {
+    const resolved = Image.resolveAssetSource(assetModule);
+    if (resolved?.uri) {
+      return resolved.uri;
+    }
+  }
+  return null;
+}
+
 export function resolveDemoPortraitUri(uri: string): string {
   if (!isDemoPortraitUri(uri)) {
     return uri;
@@ -22,7 +43,10 @@ export function resolveDemoPortraitUri(uri: string): string {
   if (!assetModule) {
     return uri;
   }
-  const resolved = Image.resolveAssetSource(assetModule).uri;
+  const resolved = uriFromAssetModule(assetModule);
+  if (!resolved) {
+    return uri;
+  }
   resolvedCache.set(uri, resolved);
   return resolved;
 }

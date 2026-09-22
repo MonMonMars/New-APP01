@@ -82,11 +82,15 @@ export function DisguiseProfileScreen() {
     refreshing,
     justUpdated,
     isAtTop,
+    pullOffset,
     scrollViewProps,
     scrollViewRef,
     refresh,
     handleTabRepress,
-  } = usePulseScrollRefresh();
+    refreshControl,
+    webPullWrapperProps,
+    feedPullTranslateStyle,
+  } = usePulseScrollRefresh({ refreshTintColor: meta.accent });
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('tabPress', () => {
@@ -208,15 +212,19 @@ export function DisguiseProfileScreen() {
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader title={t('tabs.settings')} showSearch={false} />
       <PulseFeedRefreshDimLayer refreshing={refreshing}>
+      <View style={styles.feedPullHost} {...webPullWrapperProps}>
+      <View style={[styles.feedPullHost, feedPullTranslateStyle]}>
       <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={styles.content}
+        refreshControl={refreshControl}
         {...scrollViewProps}
       >
         <PulseFeedRefreshHeader
           refreshing={refreshing}
           justUpdated={justUpdated}
           isAtTop={isAtTop}
+          pullOffset={pullOffset}
           onPullRefresh={() => {
             void refresh();
           }}
@@ -344,6 +352,8 @@ export function DisguiseProfileScreen() {
           }}
         />
       </ScrollView>
+      </View>
+      </View>
       </PulseFeedRefreshDimLayer>
 
       <DisguiseAdGeneratorSheet visible={showGenerator} onClose={() => setShowGenerator(false)} />
@@ -518,6 +528,9 @@ function MenuRow({
 
 const styles = StyleSheet.create({
   screen: {
+    flex: 1,
+  },
+  feedPullHost: {
     flex: 1,
   },
   content: {

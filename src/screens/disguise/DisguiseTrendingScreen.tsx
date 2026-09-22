@@ -164,11 +164,15 @@ export function DisguiseTrendingScreen() {
     refreshing,
     justUpdated,
     isAtTop,
+    pullOffset,
     scrollViewProps,
     scrollViewRef,
     refresh,
     handleTabRepress,
-  } = usePulseScrollRefresh();
+    refreshControl,
+    webPullWrapperProps,
+    feedPullTranslateStyle,
+  } = usePulseScrollRefresh({ refreshTintColor: meta.accent });
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('tabPress', () => {
@@ -193,16 +197,20 @@ export function DisguiseTrendingScreen() {
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader title={meta.trendingTab} showSearch={false} />
       <PulseFeedRefreshDimLayer refreshing={refreshing}>
+      <View style={styles.feedPullHost} {...webPullWrapperProps}>
+      <View style={[styles.feedPullHost, feedPullTranslateStyle]}>
       <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
+        refreshControl={refreshControl}
         {...scrollViewProps}
       >
         <PulseFeedRefreshHeader
           refreshing={refreshing}
           justUpdated={justUpdated}
           isAtTop={isAtTop}
+          pullOffset={pullOffset}
           onPullRefresh={() => {
             void refresh();
           }}
@@ -409,6 +417,8 @@ export function DisguiseTrendingScreen() {
           }}
         />
       </ScrollView>
+      </View>
+      </View>
       </PulseFeedRefreshDimLayer>
 
       <NewsArticleSheet
@@ -422,6 +432,9 @@ export function DisguiseTrendingScreen() {
 
 const styles = StyleSheet.create({
   screen: {
+    flex: 1,
+  },
+  feedPullHost: {
     flex: 1,
   },
   list: {

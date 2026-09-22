@@ -104,6 +104,12 @@ docs/
 PUBLIC_PREVIEW.md        # Live demo URL (canonical)
 ```
 
+## Cloud Agents (Cursor)
+
+New Cloud Agent runs check out **`main`**. If `main` is still the empty initial commit, agents will only see a README and cannot build or run the app. Keep **`main` in sync** with the integration branch (`cursor/tinder-style-dating-app-7b60`) or merge the open “Spark complete app” PR.
+
+This repo includes [`.cursor/environment.json`](.cursor/environment.json) so agents run `npm ci` on boot and can start the web demo on port **8090**.
+
 ## Legal note
 
 Prototype for demonstration. Not affiliated with Tinder, Bumble, or Hinge.

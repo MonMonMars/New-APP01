@@ -2,18 +2,22 @@ import { FeedItem } from '../data/disguiseFeed';
 import { getProfileById } from '../data/profiles';
 import { DisguiseAdCreative } from '../types/disguise';
 import { AppLocale } from '../types/locale';
-import { SparkSection } from '../types/preferences';
+import { ShowMePreference, SparkSection } from '../types/preferences';
 import { UserProfile } from '../types/profile';
 import { disguiseFeedItemsForGender } from './disguiseFeedCatalog';
 import { buildDisguisedProfileFeedItem, buildDisguisedProfileFeedItems } from './disguiseProfileFeed';
+import { pulseReporterQuoteForProfile } from './disguisePulseCopy';
 import { profileIntroCaption } from './profileIntroCaption';
 import {
   renewPulseFeedPage,
 } from './refreshPulseFeed';
-import { mergeLiveNewsIntoFeed, densifyPulseNewsBlocks } from './mergeLivePulseNews';
+import { mergeLiveNewsIntoFeed } from './mergeLivePulseNews';
 import { socialAuthorDemoProfileId } from '../data/disguiseReporterProfileLinks';
 import { explicitReporterProfileId } from './resolveDisguiseProfile';
 import { getPulseLiveNewsSnapshot } from '../services/pulseLiveNews';
+import { spaceSponsoredFeedItems } from './pulseFeedSpacing';
+import { dedupePulseFeedItems } from './pulseFeedUnique';
+import { matchesShowMePreference } from './showMeFilter';
 
 function weaveProfileCards(base: FeedItem[], profileCards: FeedItem[]): FeedItem[] {
   if (profileCards.length === 0) {
@@ -25,7 +29,7 @@ function weaveProfileCards(base: FeedItem[], profileCards: FeedItem[]): FeedItem
 
   base.forEach((item, index) => {
     result.push(item);
-    if ((index + 1) % 2 === 0 && profileIndex < profileCards.length) {
+    if ((index + 1) % 5 === 0 && profileIndex < profileCards.length) {
       result.push(profileCards[profileIndex]);
       profileIndex += 1;
     }
@@ -37,6 +41,23 @@ function weaveProfileCards(base: FeedItem[], profileCards: FeedItem[]): FeedItem
   }
 
   return result;
+}
+
+function filterPulseFeedForShowMe(items: FeedItem[], showMe: ShowMePreference): FeedItem[] {
+  if (showMe === 'everyone') {
+    return items;
+  }
+  return items.filter((item) => {
+    if (item.type !== 'social') {
+      return true;
+    }
+    const profileId = item.datingProfileId ?? socialAuthorDemoProfileId(item.author);
+    if (!profileId) {
+      return true;
+    }
+    const profile = getProfileById(profileId);
+    return profile ? matchesShowMePreference(profile, showMe) : true;
+  });
 }
 
 /** Drop woven profile ids so a Pulse refresh can reassign every slot. */
@@ -64,7 +85,11 @@ export function stripPulseProfileLinks(items: FeedItem[]): FeedItem[] {
 }
 
 /** Pin reporter profile ids so news links do not swap after mini-window likes. */
-export function pinFeedProfileLinks(items: FeedItem[], section?: SparkSection | string | null): FeedItem[] {
+export function pinFeedProfileLinks(
+  items: FeedItem[],
+  section?: SparkSection | string | null,
+  showMe: ShowMePreference = 'everyone',
+): FeedItem[] {
   return items.map((item) => {
     if (item.type !== 'news') {
       return item;
@@ -73,14 +98,18 @@ export function pinFeedProfileLinks(items: FeedItem[], section?: SparkSection | 
       ...item,
       reporters: item.reporters.map((reporter) => ({
         ...reporter,
-        profileId: explicitReporterProfileId(reporter.id, reporter.profileId),
+        profileId: explicitReporterProfileId(reporter.id, reporter.profileId, showMe, section),
       })),
     };
   });
 }
 
-/** Social avatars use the same Pexels identity as the linked discover profile. */
-export function syncSocialPostProfiles(items: FeedItem[]): FeedItem[] {
+/** Social avatars mirror the linked discover profile photo set. */
+export function syncSocialPostProfiles(
+  items: FeedItem[],
+  _section?: SparkSection | string | null,
+  showMe: ShowMePreference = 'everyone',
+): FeedItem[] {
   return items.map((item) => {
     if (item.type !== 'social') {
       return item;
@@ -93,6 +122,9 @@ export function syncSocialPostProfiles(items: FeedItem[]): FeedItem[] {
     if (!profile || profile.photos.length === 0) {
       return { ...item, datingProfileId: profileId };
     }
+    if (showMe !== 'everyone' && !matchesShowMePreference(profile, showMe)) {
+      return item;
+    }
     return {
       ...item,
       datingProfileId: profileId,
@@ -102,7 +134,11 @@ export function syncSocialPostProfiles(items: FeedItem[]): FeedItem[] {
 }
 
 /** Use linked dating profile photos so Pulse reporters match their mini-window identity. */
-export function syncReporterPhotos(items: FeedItem[], section?: SparkSection | string | null): FeedItem[] {
+export function syncReporterPhotos(
+  items: FeedItem[],
+  section?: SparkSection | string | null,
+  showMe: ShowMePreference = 'everyone',
+): FeedItem[] {
   return items.map((item) => {
     if (item.type !== 'news') {
       return item;
@@ -110,7 +146,7 @@ export function syncReporterPhotos(items: FeedItem[], section?: SparkSection | s
     return {
       ...item,
       reporters: item.reporters.map((reporter) => {
-        const profileId = explicitReporterProfileId(reporter.id, reporter.profileId);
+        const profileId = explicitReporterProfileId(reporter.id, reporter.profileId, showMe, section);
         if (!profileId) {
           return reporter;
         }
@@ -119,12 +155,13 @@ export function syncReporterPhotos(items: FeedItem[], section?: SparkSection | s
           return { ...reporter, profileId };
         }
         const intro = profileIntroCaption(profile);
+        const quote = pulseReporterQuoteForProfile(profile);
         return {
           ...reporter,
           profileId,
           avatarUrl: profile.photos[0],
           photos: profile.photos,
-          quote: intro || reporter.quote,
+          quote: intro || quote || reporter.quote,
         };
       }),
     };
@@ -137,40 +174,55 @@ export function buildDisguiseFeed(
   section?: SparkSection | string | null,
   refreshGeneration = 0,
   locale?: AppLocale | null,
+  showMe: ShowMePreference = 'everyone',
 ): FeedItem[] {
-  const profileCards = buildDisguisedProfileFeedItems(section, refreshGeneration);
+  const profileCards = buildDisguisedProfileFeedItems(section, refreshGeneration, showMe);
   let baseFeed = disguiseFeedItemsForGender(user.gender);
 
   const liveSnapshot = getPulseLiveNewsSnapshot();
   const livePosts = liveSnapshot?.posts ?? [];
   if (livePosts.length > 0) {
     baseFeed = mergeLiveNewsIntoFeed(baseFeed, livePosts, refreshGeneration);
-    baseFeed = densifyPulseNewsBlocks(baseFeed, livePosts, refreshGeneration);
   }
+  baseFeed = dedupePulseFeedItems(baseFeed);
 
   const withProfiles = weaveProfileCards(baseFeed, profileCards);
 
-  let linked = syncSocialPostProfiles(
-    syncReporterPhotos(pinFeedProfileLinks(withProfiles, section), section),
+  let linked = filterPulseFeedForShowMe(
+    syncSocialPostProfiles(
+      syncReporterPhotos(pinFeedProfileLinks(withProfiles, section, showMe), section, showMe),
+      section,
+      showMe,
+    ),
+    showMe,
   );
 
   if (creative) {
     const userItem = buildDisguisedProfileFeedItem(user, creative);
     const withoutUserSlot = linked.filter((item) => item.id !== 'disguised-user');
-    linked = syncSocialPostProfiles(
-      syncReporterPhotos(
-        pinFeedProfileLinks(
-          [withoutUserSlot[0], withoutUserSlot[1], userItem, ...withoutUserSlot.slice(2)],
+    linked = filterPulseFeedForShowMe(
+      syncSocialPostProfiles(
+        syncReporterPhotos(
+          pinFeedProfileLinks(
+            [withoutUserSlot[0], withoutUserSlot[1], userItem, ...withoutUserSlot.slice(2)],
+            section,
+            showMe,
+          ),
           section,
+          showMe,
         ),
         section,
+        showMe,
       ),
+      showMe,
     );
   }
 
+  const spaced = dedupePulseFeedItems(spaceSponsoredFeedItems(linked, 6));
+
   if (refreshGeneration > 0) {
-    return renewPulseFeedPage(linked, section, refreshGeneration);
+    return dedupePulseFeedItems(renewPulseFeedPage(spaced, section, refreshGeneration, showMe));
   }
 
-  return linked;
+  return spaced;
 }

@@ -15,6 +15,7 @@ import { navigateDisguiseFeedTopic } from '../../utils/disguiseNavigation';
 import { DisguiseSearchSheet } from './DisguiseSearchSheet';
 import { DisguiseHeaderLogo } from './DisguiseBrand';
 import { PulseFeedItemViewer } from './PulseFeedItemViewer';
+import { usePulseFeedRefreshing } from '../../hooks/usePulseFeedRefresh';
 import { AnimatedPressable } from '../AnimatedPressable';
 import { NavigationPressable } from '../NavigationPressable';
 
@@ -30,6 +31,7 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchItemId, setSearchItemId] = useState<string | null>(null);
+  const feedRefreshing = usePulseFeedRefreshing();
 
   const handleSearchArticle = (item: FeedItem) => {
     setSearchItemId(item.id);
@@ -37,7 +39,14 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
 
   return (
     <>
-      <View style={[styles.header, { backgroundColor: pulseBrand.navy, borderBottomColor: pulseBrand.navyMuted }]}>
+      <View
+        style={[
+          styles.header,
+          { backgroundColor: pulseBrand.navy, borderBottomColor: pulseBrand.navyMuted },
+          feedRefreshing ? styles.headerDim : null,
+        ]}
+        pointerEvents={feedRefreshing ? 'none' : 'auto'}
+      >
         <View style={styles.leading}>
           <NavigationPressable
             onPress={() => {
@@ -96,6 +105,9 @@ export function DisguiseHeader({ title, showSearch = true }: DisguiseHeaderProps
 }
 
 const styles = StyleSheet.create({
+  headerDim: {
+    opacity: 0.5,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

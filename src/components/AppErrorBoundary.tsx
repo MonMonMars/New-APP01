@@ -1,22 +1,20 @@
 import { Component, type ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { useTranslation } from '../i18n';
 import { darkColors, spacing } from '../theme';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type Props = { children: ReactNode };
 type State = { error: Error | null };
 
+/** Must not use AppContext/i18n — this renders outside AppProvider when the boundary catches. */
 function ErrorFallback({ error, onRetry }: { error: Error; onRetry: () => void }) {
-  const { t } = useTranslation();
-
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{t('errors.title')}</Text>
+      <Text style={styles.title}>Something went wrong</Text>
       <Text style={styles.message}>{error.message}</Text>
       <AnimatedPressable onPress={onRetry} style={styles.button}>
-        <Text style={styles.buttonText}>{t('common.tryAgain')}</Text>
+        <Text style={styles.buttonText}>Try again</Text>
       </AnimatedPressable>
     </View>
   );

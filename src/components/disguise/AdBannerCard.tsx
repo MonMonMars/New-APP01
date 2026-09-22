@@ -7,7 +7,7 @@ import { useTranslation } from '../../i18n';
 import { AdPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
-import { ContentTypeIcon, MediaWithContentBadge } from './ContentTypeIcon';
+import { ContentTypeIcon } from './ContentTypeIcon';
 import { AdLandingSheet } from './AdLandingSheet';
 import { AnimatedPressable } from '../AnimatedPressable';
 
@@ -33,9 +33,7 @@ export function AdBannerCard({ ad }: AdBannerCardProps) {
           <Text style={styles.sponsored}>{t('disguiseAd.sponsored')}</Text>
           <ContentTypeIcon kind="sponsored" />
         </View>
-        <MediaWithContentBadge kind="ad">
-          <Image source={{ uri: ad.imageUrl }} style={styles.image} resizeMode="cover" />
-        </MediaWithContentBadge>
+        <Image source={{ uri: ad.imageUrl }} style={styles.image} resizeMode="cover" />
         <View style={styles.body}>
           <Text style={styles.brand}>{ad.brand}</Text>
           <Text style={styles.tagline}>{ad.tagline}</Text>

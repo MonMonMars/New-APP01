@@ -15,46 +15,43 @@ function cloneNewsShell(template: NewsPost, live: NewsPost): NewsPost {
   };
 }
 
-/** Replace static headline slots with cached live headlines while keeping feed rhythm. */
+/** Replace static headline slots with cached live headlines — each live hero image used at most once. */
 export function mergeLiveNewsIntoFeed(items: FeedItem[], livePosts: NewsPost[], generation: number): FeedItem[] {
   if (livePosts.length === 0) {
     return items;
   }
 
-  let cursor = generation % livePosts.length;
+  const usedLiveImages = new Set<string>();
+  const usedLiveHeadlines = new Set<string>();
+  let liveIndex = generation % livePosts.length;
+
+  const nextLive = (): NewsPost | null => {
+    for (let step = 0; step < livePosts.length; step += 1) {
+      const live = livePosts[(liveIndex + step) % livePosts.length];
+      if (usedLiveImages.has(live.imageUrl) || usedLiveHeadlines.has(live.headline)) {
+        continue;
+      }
+      liveIndex = (liveIndex + step + 1) % livePosts.length;
+      usedLiveImages.add(live.imageUrl);
+      usedLiveHeadlines.add(live.headline);
+      return live;
+    }
+    return null;
+  };
+
   return items.map((item) => {
     if (item.type !== 'news') {
       return item;
     }
-    const live = livePosts[cursor % livePosts.length];
-    cursor += 1;
+    const live = nextLive();
+    if (!live) {
+      return item;
+    }
     return cloneNewsShell(item, live);
   });
 }
 
-/** Insert extra news cards between non-news items for a denser Pulse rotation. */
-export function densifyPulseNewsBlocks(items: FeedItem[], extraNews: NewsPost[], generation: number): FeedItem[] {
-  if (extraNews.length === 0) {
-    return items;
-  }
-
-  const result: FeedItem[] = [];
-  let extraIndex = generation % extraNews.length;
-  let nonNewsSinceNews = 0;
-
-  for (const item of items) {
-    result.push(item);
-    if (item.type === 'news') {
-      nonNewsSinceNews = 0;
-      continue;
-    }
-    nonNewsSinceNews += 1;
-    if (nonNewsSinceNews >= 2) {
-      result.push(extraNews[extraIndex % extraNews.length]);
-      extraIndex += 1;
-      nonNewsSinceNews = 0;
-    }
-  }
-
-  return result;
+/** @deprecated Live merge + unique catalog replace extra insertions — avoids duplicate headlines in-feed. */
+export function densifyPulseNewsBlocks(items: FeedItem[], _extraNews: NewsPost[], _generation: number): FeedItem[] {
+  return items;
 }

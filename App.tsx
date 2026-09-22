@@ -18,18 +18,18 @@ function StatusBarWrapper() {
 
 export default function App() {
   return (
-    <AppErrorBoundary>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <SafeAreaProvider>
-          <AppProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <AppProvider>
+          <AppErrorBoundary>
             <AdminProvider>
               <StatusBarWrapper />
               <AppNavigator />
               <PrivacyShield />
             </AdminProvider>
-          </AppProvider>
-        </SafeAreaProvider>
-      </GestureHandlerRootView>
-    </AppErrorBoundary>
+          </AppErrorBoundary>
+        </AppProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

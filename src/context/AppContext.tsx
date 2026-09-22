@@ -11,6 +11,13 @@ import {
 import { AppState, Linking, type AppStateStatus } from 'react-native';
 
 import { hydrateAdminProfileOverrides } from '../admin/adminProfileStore';
+import {
+  assessProfile,
+  filterProfilesForScamDiscover,
+  shouldAutoQuarantineOnReport,
+} from '../trust/scamDetector';
+import { hydrateScamEnforcement, quarantineProfile } from '../trust/scamEnforcementStore';
+import { shouldBlockOutgoingLinkToPeer } from '../trust/scamMessageGuard';
 import { seedConversations } from '../data/conversations';
 import {
   AI_PERSONA_IDS,
@@ -158,6 +165,7 @@ import {
   recordFailedUnlockAttempt,
 } from '../utils/unlockLockout';
 import { computeCompatibilityScore, pickDailyMostCompatible } from '../utils/compatibility';
+import { isDiscoverableDemoProfile, matchesShowMePreference } from '../utils/showMeFilter';
 import { matchesPassportCity } from '../utils/passportFilter';
 import {
   requestNotificationPermission,
@@ -202,20 +210,6 @@ import {
   savePersistedState,
 } from '../utils/persistence';
 
-function matchesGenderFilter(profile: Profile, showMe: ShowMePreference): boolean {
-  switch (showMe) {
-    case 'everyone':
-      return true;
-    case 'women':
-      return profile.gender === 'woman';
-    case 'men':
-      return profile.gender === 'man';
-    default: {
-      const _exhaustive: never = showMe;
-      return _exhaustive;
-    }
-  }
-}
 
 function matchesDiscoverFilters(profile: Profile, filters: DiscoverFilter[]): boolean {
   if (filters.length === 0) {
@@ -334,7 +328,8 @@ function filterDiscoverProfiles(
       (skipHomeDistance || profile.distanceMiles <= maxDistance) &&
       profile.age >= preferences.minAge &&
       profile.age <= preferences.maxAge &&
-      matchesGenderFilter(profile, preferences.showMe) &&
+      isDiscoverableDemoProfile(profile) &&
+      matchesShowMePreference(profile, preferences.showMe) &&
       matchesDiscoverFilters(profile, filters) &&
       matchesAdvancedFilters(profile, user, preferences.advancedFilters, isSparkPlus) &&
       matchesSparkSection(profile, section) &&
@@ -495,6 +490,7 @@ type AppContextValue = {
   unblockProfile: (profileId: string) => void;
   unlikeProfile: (profileId: string) => void;
   reportProfile: (profileId: string, reason?: string) => void;
+  refreshScamEnforcement: () => void;
   unmatchProfile: (profileId: string) => void;
   savePulsePost: (postId: string) => void;
   unsavePulsePost: (postId: string) => void;
@@ -533,6 +529,7 @@ type AppContextValue = {
   updateNotificationPreferences: (prefs: NotificationPreferences) => void;
   setThemeMode: (mode: ThemeMode) => void;
   setDisguiseMode: (enabled: boolean) => Promise<boolean>;
+  dismissDisguiseLeaveConfirm: () => void;
   updateSecuritySettings: (settings: SecuritySettings) => void;
   updatePrivacyPreferences: (prefs: PrivacyPreferences) => void;
   setIncognitoMode: (enabled: boolean) => boolean;
@@ -630,6 +627,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [rewindKey, setRewindKey] = useState(0);
   const [discoverUnlockedCount, setDiscoverUnlockedCount] = useState(DISCOVER_BATCH_SIZE);
   const [priorityProfileId, setPriorityProfileId] = useState<string | null>(null);
+  const [scamEnforcementVersion, setScamEnforcementVersion] = useState(0);
 
   const hydratedRef = useRef(false);
   const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -686,11 +684,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const hydrationTimeout = setTimeout(finishHydration, 8000);
 
-    void Promise.all([loadPersistedState(), hydrateAdminProfileOverrides()])
+    void Promise.all([loadPersistedState(), hydrateAdminProfileOverrides(), hydrateScamEnforcement()])
       .then(async ([saved]) => {
       if (cancelled) {
         return;
       }
+
+      setScamEnforcementVersion((version) => version + 1);
 
       if (saved) {
         setUser(saved.user);
@@ -1222,9 +1222,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       (profile): profile is Profile =>
         profile !== undefined &&
         !excludedIds.has(profile.id) &&
-        matchesSparkSection(profile, section),
+        matchesSparkSection(profile, section) &&
+        isDiscoverableDemoProfile(profile) &&
+        matchesShowMePreference(profile, preferences.showMe),
     );
-  }, [excludedIds, preferences.sparkSection, privacyPreferences.personalisationEnabled]);
+  }, [excludedIds, preferences.showMe, preferences.sparkSection, privacyPreferences.personalisationEnabled]);
 
   const recentlyActiveProfiles = useMemo(() => {
     if (!privacyPreferences.showActiveStatus) {
@@ -1236,9 +1238,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       (profile): profile is Profile =>
         profile !== undefined &&
         !excludedIds.has(profile.id) &&
-        matchesSparkSection(profile, section),
+        matchesSparkSection(profile, section) &&
+        isDiscoverableDemoProfile(profile) &&
+        matchesShowMePreference(profile, preferences.showMe),
     );
-  }, [excludedIds, preferences.sparkSection, privacyPreferences.showActiveStatus]);
+  }, [excludedIds, preferences.showMe, preferences.sparkSection, privacyPreferences.showActiveStatus]);
 
   const blockedProfiles = useMemo(
     () =>
@@ -1287,6 +1291,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           stableIncognitoVisible(profile.id),
       );
     }
+    filtered = filterProfilesForScamDiscover(filtered);
     return filtered;
   }, [
     excludedIds,
@@ -1297,6 +1302,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     preferences,
     privacyPreferences.incognitoMode,
     privacyPreferences.locationSharing,
+    scamEnforcementVersion,
     user,
   ]);
 
@@ -1335,6 +1341,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       );
       filtered = filterProfilesInRadius(filtered, searchCenter, preferences.maxDistanceMiles);
     }
+    filtered = filterProfilesForScamDiscover(filtered);
     return filtered;
   }, [
     excludedIds,
@@ -1346,6 +1353,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     preferences,
     privacyPreferences.incognitoMode,
     privacyPreferences.locationSharing,
+    scamEnforcementVersion,
     user,
   ]);
 
@@ -1444,9 +1452,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       (profile) =>
         !actioned.has(profile.id) &&
         !matches.some((match) => match.profile.id === profile.id) &&
-        matchesSparkSection(profile, activeSection),
+        matchesSparkSection(profile, activeSection) &&
+        isDiscoverableDemoProfile(profile) &&
+        matchesShowMePreference(profile, preferences.showMe),
     );
-  }, [activeSection, likedIds, passedIds, blockedIds, matches]);
+  }, [activeSection, likedIds, passedIds, blockedIds, matches, preferences.showMe]);
 
   const worldMatches = useMemo(
     () => matches.filter((match) => matchesSparkSection(match.profile, activeSection)),
@@ -2199,12 +2209,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPassedIds((prev) => new Set(prev).add(profileId));
   }, []);
 
+  const refreshScamEnforcement = useCallback(() => {
+    setScamEnforcementVersion((version) => version + 1);
+  }, []);
+
   const reportProfile = useCallback(
     (profileId: string, reason?: string) => {
       if (!checkClientRateLimit('report', 10, 60_000)) {
         return;
       }
       const sanitizedReason = reason ? sanitizeReportReason(reason) : 'Reported from app';
+      const reportedProfile = getProfileById(profileId);
+      const scamAssessment = reportedProfile ? assessProfile(reportedProfile) : null;
+      const autoQuarantine = shouldAutoQuarantineOnReport(sanitizedReason, scamAssessment);
+      if (autoQuarantine) {
+        void quarantineProfile(profileId).then(() => {
+          setScamEnforcementVersion((version) => version + 1);
+        });
+      }
       if (userId) {
         void submitSecurityReport({
           reporterUserId: userId,
@@ -2212,7 +2234,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
           reason: sanitizedReason,
           context: 'profile',
         });
-        void logSecurityEvent(userId, 'profile_reported', { profileId });
+        void logSecurityEvent(userId, 'profile_reported', {
+          profileId,
+          scamScore: scamAssessment ? String(scamAssessment.score) : '',
+          scamLevel: scamAssessment?.level ?? '',
+          autoQuarantine: String(autoQuarantine),
+        });
       }
       blockProfile(profileId);
     },
@@ -2485,6 +2512,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return 'invalid';
       }
 
+      const targetConversation = conversations.find((item) => item.id === conversationId);
+      const peerProfile = targetConversation?.match.profile;
+      if (peerProfile && trimmed) {
+        const peerAssessment = assessProfile(peerProfile);
+        if (shouldBlockOutgoingLinkToPeer(peerAssessment.level, trimmed)) {
+          return 'scam_link_blocked';
+        }
+      }
+
       let resolvedImageUrl = imageUrl;
       if (resolvedImageUrl && !isGif && needsCloudMediaUpload(resolvedImageUrl, userId)) {
         const localUri = resolvedImageUrl;
@@ -2511,7 +2547,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       };
 
       const preview = messagePreviewText(message, locale);
-      const targetConversation = conversations.find((item) => item.id === conversationId);
 
       setConversations((prev) =>
         prev.map((conversation) => {
@@ -3538,6 +3573,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       unblockProfile,
       unlikeProfile,
       reportProfile,
+      refreshScamEnforcement,
       unmatchProfile,
       savePulsePost,
       unsavePulsePost,
@@ -3566,6 +3602,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateNotificationPreferences,
       setThemeMode,
       setDisguiseMode,
+      dismissDisguiseLeaveConfirm: cancelLeaveDisguise,
       updateSecuritySettings,
       updatePrivacyPreferences,
       setIncognitoMode,
@@ -3700,6 +3737,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       unblockProfile,
       unlikeProfile,
       reportProfile,
+      refreshScamEnforcement,
       unmatchProfile,
       savePulsePost,
       unsavePulsePost,
@@ -3728,6 +3766,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateNotificationPreferences,
       setThemeMode,
       setDisguiseMode,
+      cancelLeaveDisguise,
       updateSecuritySettings,
       updatePrivacyPreferences,
       setIncognitoMode,

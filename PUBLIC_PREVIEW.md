@@ -2,11 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://gods-rated-categories-elementary.trycloudflare.com**
+**https://dangerous-assumed-medicare-orbit.trycloudflare.com**
 
-- **Integration branch:** `cursor/tinder-style-dating-app-7b60` (complete demo app)
-- **Build ID:** `0f102f9-20260922T031946Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-22 03:20 UTC — HTML + JS bundle + `verify-demo-link` PASS (9/9)
+- **Integration branch:** `cursor/fix-info-boost-buttons-7b60` (layout + scam detector)
+- **Build ID:** `aca70f2-20260922T173121Z` (HTML comment `spark-demo-build:` or loading screen footer)
+- **Verified:** 2026-09-22 17:32 UTC — `verify-demo-link` 9/9 (onboarding → Discover → Pulse)
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

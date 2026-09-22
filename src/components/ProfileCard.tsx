@@ -16,6 +16,15 @@ import Animated, {
 import { AiPersonaBadge } from './AiPersonaBadge';
 import { VideoProfileOverlay } from './VideoProfileOverlay';
 import { VerificationBadges } from './VerificationBadges';
+import {
+  DISCOVER_DOTS_RIGHT_INSET,
+  DISCOVER_INFO_BUTTON_SIZE,
+  DISCOVER_INFO_TOP,
+  discoverLeftBadgeTop,
+  discoverPhotoTapBottomInset,
+  discoverPhotoTapTopInset,
+  discoverProfileMetaBottom,
+} from '../constants/discoverLayout';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
@@ -24,6 +33,7 @@ import {
   emberVisiblePhotoCount,
   Profile,
 } from '../types/profile';
+import { resolveDemoPortraitUri } from '../utils/resolveDemoPortraitUri';
 import { AnimatedPressable } from './AnimatedPressable';
 import { EmberStatusChips } from './EmberStatusChips';
 
@@ -139,7 +149,7 @@ export function ProfileCard({
         <Animated.View style={[styles.spotlightRing, spotlightStyle, { borderColor: colors.heartPink }]} pointerEvents="none" />
       )}
       <Image
-        source={{ uri: profile.photos[photoIndex] }}
+        source={{ uri: resolveDemoPortraitUri(profile.photos[photoIndex]) }}
         style={styles.photo}
         resizeMode="cover"
       />
@@ -147,30 +157,42 @@ export function ProfileCard({
         colors={['rgba(0,0,0,0.35)', 'transparent', 'rgba(0,0,0,0.85)']}
         locations={[0, 0.35, 1]}
         style={styles.gradient}
+        pointerEvents="none"
       />
       {isTop && passDim && (
         <Animated.View style={[styles.passDimOverlay, passDimStyle]} pointerEvents="none" />
       )}
 
-      {profile.mostCompatible && isTop && (
-        <View style={[styles.compatibleBadge, { backgroundColor: colors.boost }]}>
-          <Text style={styles.compatibleBadgeText}>{t('discover.mostCompatibleBadge')}</Text>
+      {profile.spotlight && isTop && (
+        <View
+          style={[
+            styles.leftBadge,
+            { backgroundColor: colors.heartRed, top: discoverLeftBadgeTop(profile, 'crush') },
+          ]}
+        >
+          <Text style={styles.leftBadgeText} numberOfLines={1} ellipsizeMode="tail">
+            {t('discover.crushBadge')}
+          </Text>
         </View>
       )}
 
-      {profile.spotlight && isTop && (
-        <View style={[styles.crushBadge, { backgroundColor: colors.heartRed }]}>
-          <Text style={styles.crushBadgeText}>{t('discover.crushBadge')}</Text>
+      {profile.mostCompatible && isTop && (
+        <View
+          style={[
+            styles.leftBadge,
+            {
+              backgroundColor: colors.boost,
+              top: discoverLeftBadgeTop(profile, 'compatible'),
+            },
+          ]}
+        >
+          <Text style={styles.leftBadgeText} numberOfLines={1} ellipsizeMode="tail">
+            {t('discover.mostCompatibleBadge')}
+          </Text>
         </View>
       )}
 
       {profile.hasVideo && isTop && <VideoProfileOverlay visible profile={profile} />}
-
-      {isTop && onOpenDetail && (
-        <AnimatedPressable style={styles.infoButton} onPress={onOpenDetail}>
-          <Ionicons name="information-circle" size={28} color={colors.text} />
-        </AnimatedPressable>
-      )}
 
       {isTop && photoCount > 1 && (
         <>
@@ -190,21 +212,60 @@ export function ProfileCard({
             })}
           </View>
           {visiblePhotoCount < photoCount ? (
-            <View style={styles.privateBadge}>
+            <View
+              style={[
+                styles.privateBadge,
+                { top: discoverLeftBadgeTop(profile, 'private') },
+              ]}
+            >
               <Ionicons name="lock-closed" size={11} color={colors.ember} />
-              <Text style={styles.privateBadgeText}>{t('discover.privatePhotos')}</Text>
+              <Text style={styles.privateBadgeText} numberOfLines={1} ellipsizeMode="tail">
+                {t('discover.privatePhotos')}
+              </Text>
             </View>
           ) : null}
-          <View style={styles.tapZones}>
+          <View
+            style={[
+              styles.tapZones,
+              {
+                bottom: discoverPhotoTapBottomInset(compact, {
+                  emberChipRow: Boolean(emberStatus && compact),
+                }),
+              },
+            ]}
+            pointerEvents="box-none"
+          >
             <AnimatedPressable style={styles.tapZone} onPress={() => goToPhoto('left')} />
             <AnimatedPressable style={styles.tapZone} onPress={() => goToPhoto('right')} />
           </View>
         </>
       )}
 
-      <View style={[styles.info, compact && styles.infoCompact]}>
+      {isTop && onOpenDetail ? (
+        <AnimatedPressable
+          style={styles.infoButton}
+          onPress={onOpenDetail}
+          hitSlop={6}
+          accessibilityLabel={t('profileDetail.openDetails')}
+        >
+          <Ionicons name="information-circle" size={28} color={colors.text} />
+        </AnimatedPressable>
+      ) : null}
+
+      <View
+        pointerEvents="box-none"
+        style={[
+          styles.info,
+          compact && styles.infoCompact,
+          compact ? { bottom: discoverProfileMetaBottom(true) } : null,
+        ]}
+      >
         <View style={styles.nameRow}>
-          <Text style={[styles.name, compact && styles.nameCompact]}>
+          <Text
+            style={[styles.name, compact && styles.nameCompact, styles.nameFlex]}
+            numberOfLines={compact ? 1 : 2}
+            ellipsizeMode="tail"
+          >
             {profile.name}, {profile.age}
           </Text>
           <AiPersonaBadge profile={profile} compact />
@@ -213,14 +274,29 @@ export function ProfileCard({
             personVerified={profile.personVerified ?? profile.verified}
             size="sm"
           />
-          {emberStatus ? (
+          {emberStatus && !compact ? (
             <View style={styles.discreetChipWrap}>
               <EmberStatusChips profile={profile} compact />
             </View>
           ) : null}
         </View>
-        {profile.job && <Text style={[styles.job, compact && styles.jobCompact]}>{profile.job}</Text>}
-        <Text style={[styles.distance, compact && styles.distanceCompact]}>
+        {emberStatus && compact ? (
+          <View style={styles.emberChipRow}>
+            <EmberStatusChips profile={profile} compact />
+          </View>
+        ) : null}
+        {profile.job && (
+          <Text
+            style={[styles.job, compact && styles.jobCompact]}
+            numberOfLines={compact ? 1 : undefined}
+          >
+            {profile.job}
+          </Text>
+        )}
+        <Text
+          style={[styles.distance, compact && styles.distanceCompact]}
+          numberOfLines={compact ? 1 : undefined}
+        >
           {emberStatus
             ? getEmberLocationLabel(locale, profile)
             : `${profile.city ? `${profile.city} · ` : ''}${t('likes.milesAway', { n: profile.distanceMiles })}`}
@@ -265,34 +341,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.65)',
     zIndex: 4,
   },
-  compatibleBadge: {
+  leftBadge: {
     position: 'absolute',
-    top: spacing.md + 28,
     left: spacing.md,
-    backgroundColor: palette.boost,
+    maxWidth: '72%',
     borderRadius: radii.button,
     paddingHorizontal: spacing.sm + 4,
     paddingVertical: spacing.xs + 2,
     zIndex: 6,
   },
-  compatibleBadgeText: {
-    color: palette.text,
-    fontSize: 11,
-    fontWeight: '800',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  crushBadge: {
-    position: 'absolute',
-    top: spacing.md + 12,
-    right: spacing.md,
-    backgroundColor: palette.heartRed,
-    borderRadius: radii.button,
-    paddingHorizontal: spacing.sm + 4,
-    paddingVertical: spacing.xs + 2,
-    zIndex: 6,
-  },
-  crushBadgeText: {
+  leftBadgeText: {
     color: palette.text,
     fontSize: 11,
     fontWeight: '800',
@@ -308,11 +366,13 @@ const styles = StyleSheet.create({
   },
   dots: {
     position: 'absolute',
-    top: spacing.md,
+    top: DISCOVER_INFO_TOP,
     left: spacing.md,
-    right: spacing.md,
+    right: spacing.md + DISCOVER_DOTS_RIGHT_INSET,
     flexDirection: 'row',
     gap: 4,
+    zIndex: 8,
+    pointerEvents: 'none',
   },
   dot: {
     flex: 1,
@@ -328,8 +388,8 @@ const styles = StyleSheet.create({
   },
   privateBadge: {
     position: 'absolute',
-    top: spacing.md + 14,
     left: spacing.md,
+    maxWidth: '55%',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -347,23 +407,27 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   tapZones: {
-    ...StyleSheet.absoluteFill,
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: discoverPhotoTapTopInset(),
     flexDirection: 'row',
+    zIndex: 4,
   },
   tapZone: {
     flex: 1,
   },
   infoButton: {
     position: 'absolute',
-    bottom: spacing.lg + 8,
+    top: DISCOVER_INFO_TOP,
     right: spacing.md,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: DISCOVER_INFO_BUTTON_SIZE,
+    height: DISCOVER_INFO_BUTTON_SIZE,
+    borderRadius: DISCOVER_INFO_BUTTON_SIZE / 2,
     backgroundColor: 'rgba(0,0,0,0.45)',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 7,
+    zIndex: 12,
   },
   info: {
     position: 'absolute',
@@ -372,7 +436,6 @@ const styles = StyleSheet.create({
     bottom: spacing.lg,
   },
   infoCompact: {
-    bottom: spacing.lg + 52,
     left: spacing.sm + 4,
     right: spacing.sm + 4,
   },
@@ -381,6 +444,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexWrap: 'wrap',
     gap: spacing.xs,
+    maxWidth: '100%',
   },
   name: {
     color: palette.text,
@@ -390,7 +454,15 @@ const styles = StyleSheet.create({
   nameCompact: {
     fontSize: 24,
   },
+  nameFlex: {
+    flexShrink: 1,
+    maxWidth: '100%',
+  },
   discreetChipWrap: {
+    maxWidth: '100%',
+  },
+  emberChipRow: {
+    marginTop: spacing.xs,
     maxWidth: '100%',
   },
   job: {

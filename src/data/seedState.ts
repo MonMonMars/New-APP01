@@ -1,6 +1,7 @@
 import { Conversation, Match, Message } from '../types/match';
 import { Profile } from '../types/profile';
 import { buildLocalMatchOpener } from '../services/demoChatLlm';
+import { SCAM_DEMO_PROFILE_MARKERS } from './scamDemoAccounts';
 import {
   getProfileById,
   MUTUAL_MATCH_IDS,
@@ -456,6 +457,29 @@ export function buildEmberSeedConversations(matches: Match[]): Conversation[] {
   const sam = findMatch(matches, '40');
   if (sam) {
     conversations.push(newMatchConversation('conv-40', sam, true, 10));
+  }
+
+  const hannah = findMatch(matches, '103');
+  if (hannah) {
+    const scamOpener =
+      SCAM_DEMO_PROFILE_MARKERS['103']?.openerSnippet ??
+      'Buy gift cards for me ASAP, I will pay you back double.';
+    conversations.push({
+      id: 'conv-103',
+      match: hannah,
+      messages: [
+        {
+          id: 'm103-1',
+          text: scamOpener,
+          sentAt: new Date(Date.now() - 1200000).toISOString(),
+          isMine: false,
+        },
+      ],
+      lastMessage: scamOpener,
+      lastMessageAt: new Date(Date.now() - 1200000).toISOString(),
+      yourTurn: true,
+      unread: true,
+    });
   }
 
   return conversations;

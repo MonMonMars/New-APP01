@@ -1,4 +1,4 @@
-import { Modal, Platform, StyleSheet, Text, View } from 'react-native';
+import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useTranslation } from '../../i18n';
 import { radii, spacing } from '../../theme';
@@ -24,16 +24,26 @@ export function DisguiseUnlockConfirm({
   onCancel,
 }: DisguiseUnlockConfirmProps) {
   const { t } = useTranslation();
+
+  if (!visible) {
+    return null;
+  }
+
   return (
     <Modal
-      visible={visible}
+      visible
       transparent
       animationType="fade"
       presentationStyle={Platform.OS === 'ios' ? 'overFullScreen' : undefined}
       onRequestClose={onCancel}
     >
-      <View style={[styles.overlay, modalFill]}>
-        <View style={styles.card}>
+      <Pressable
+        style={[styles.overlay, modalFill]}
+        onPress={onCancel}
+        accessibilityRole="button"
+        accessibilityLabel={t('common.close')}
+      >
+        <Pressable style={styles.card} onPress={(event) => event.stopPropagation()}>
           <Text style={styles.title}>{t('disguiseConfirm.leaveTitle', { name: disguiseName })}</Text>
           <Text style={styles.body}>{t('disguiseConfirm.body', { unlockLabel })}</Text>
           <View style={styles.actions}>
@@ -53,8 +63,8 @@ export function DisguiseUnlockConfirm({
               <Text style={styles.unlockText}>{t('disguiseConfirm.leaveUnlock', { unlockLabel })}</Text>
             </NavigationPressable>
           </View>
-        </View>
-      </View>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 }

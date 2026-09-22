@@ -1,8 +1,10 @@
 import { NewsReporter } from '../data/disguiseFeed';
 import { reporterDemoProfileId } from '../data/disguiseReporterProfileLinks';
-import { getAllProfiles, getIncomingLikeProfilesForSection, getProfileById } from '../data/profiles';
-import { matchesSparkSection, resolveSparkSection, SparkSection } from '../types/preferences';
+import { getProfileById } from '../data/profiles';
+import { matchesSparkSection, resolveSparkSection, ShowMePreference, SparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
+import { buildSectionProfilePool } from './discoveryProfilePool';
+import { isDiscoverableDemoProfile, matchesShowMePreference } from './showMeFilter';
 
 const reporterProfileCache = new Map<string, string>();
 const actionedProfileIds = new Set<string>();
@@ -47,14 +49,31 @@ export function profileIdFromPostId(postId: string): string | undefined {
 
 /** Map disguise reporter / card ids back to a dating profile when woven from seed data. */
 /** Reporter id → demo profile only when explicitly mapped (not hash-assigned). */
+function profileEligibleForShowMe(profileId: string, showMe: ShowMePreference): boolean {
+  const profile = getProfileById(profileId);
+  if (!profile) {
+    return false;
+  }
+  if (!isDiscoverableDemoProfile(profile)) {
+    return false;
+  }
+  return matchesShowMePreference(profile, showMe);
+}
+
 export function explicitReporterProfileId(
   reporterId: string,
   profileId?: string,
+  showMe: ShowMePreference = 'everyone',
+  section?: SparkSection | string | null,
 ): string | undefined {
-  if (profileId) {
+  if (profileId && profileEligibleForShowMe(profileId, showMe)) {
     return profileId;
   }
-  return resolveDisguiseProfileId(reporterId);
+  const explicit = resolveDisguiseProfileId(reporterId);
+  if (explicit && profileEligibleForShowMe(explicit, showMe)) {
+    return explicit;
+  }
+  return mappedProfileIdForReporter(reporterId, section, showMe);
 }
 
 export function resolveDisguiseProfileId(reporterId: string): string | undefined {
@@ -93,8 +112,8 @@ function hashReporterId(id: string): number {
   return Math.abs(hash);
 }
 
-function cacheKey(reporterId: string, section: SparkSection): string {
-  return `${section}:${reporterId}`;
+function cacheKey(reporterId: string, section: SparkSection, showMe: ShowMePreference): string {
+  return `${section}:${showMe}:${reporterId}`;
 }
 
 /** Stable map from disguise commenter / social avatar ids → dating profile ids in the active world. */
@@ -102,37 +121,27 @@ function cacheKey(reporterId: string, section: SparkSection): string {
 export function pinnedReporterProfileId(
   reporterId: string,
   section?: SparkSection | string | null,
+  showMe: ShowMePreference = 'everyone',
 ): string | undefined {
-  return mappedProfileIdForReporter(reporterId, section);
+  return mappedProfileIdForReporter(reporterId, section, showMe);
 }
 
 function mappedProfileIdForReporter(
   reporterId: string,
   section?: SparkSection | string | null,
+  showMe: ShowMePreference = 'everyone',
 ): string | undefined {
   const resolvedSection = resolveSparkSection(section);
-  const key = cacheKey(reporterId, resolvedSection);
+  const key = cacheKey(reporterId, resolvedSection, showMe);
   const cached = reporterProfileCache.get(key);
-  if (cached && !actionedProfileIds.has(cached)) {
+  if (cached && !actionedProfileIds.has(cached) && profileEligibleForShowMe(cached, showMe)) {
     return cached;
   }
   if (cached) {
     reporterProfileCache.delete(key);
   }
 
-  const explicit = resolveDisguiseProfileId(reporterId);
-  if (explicit) {
-    reporterProfileCache.set(key, explicit);
-    return explicit;
-  }
-
-  const incoming = getIncomingLikeProfilesForSection(resolvedSection);
-  const rest = getAllProfiles().filter((profile) => matchesSparkSection(profile, resolvedSection));
-  const pool = [...incoming, ...rest];
-  const uniquePool = pool.filter(
-    (profile, index, list) => list.findIndex((item) => item.id === profile.id) === index,
-  );
-  const availablePool = uniquePool.filter((profile) => !actionedProfileIds.has(profile.id));
+  const availablePool = buildSectionProfilePool(resolvedSection, showMe, actionedProfileIds);
   if (availablePool.length === 0) {
     return undefined;
   }
@@ -159,6 +168,7 @@ export function resolveDisguiseProfile(
 export function resolveExplicitDatingProfile(
   profileId: string | undefined,
   section?: SparkSection | string | null,
+  showMe: ShowMePreference = 'everyone',
 ): Profile | null {
   if (!profileId) {
     return null;
@@ -168,6 +178,12 @@ export function resolveExplicitDatingProfile(
     return null;
   }
   if (!matchesSparkSection(profile, resolveSparkSection(section))) {
+    return null;
+  }
+  if (!isDiscoverableDemoProfile(profile)) {
+    return null;
+  }
+  if (!matchesShowMePreference(profile, showMe)) {
     return null;
   }
   return profile;

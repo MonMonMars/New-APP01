@@ -335,7 +335,10 @@ export function PersonPreviewSheet({
 
             {photoCount > 1 ? (
               <FadeSlideIn replayKey={visible} index={4}>
-                <Text style={[styles.photoMeta, { color: colors.textMuted }]}>
+                <Text
+                  style={[styles.photoMeta, { color: colors.textMuted }]}
+                  numberOfLines={1}
+                >
                   {t('disguiseMiniWindow.photoMeta', { current: photoIndex + 1, total: photoCount })}
                 </Text>
               </FadeSlideIn>
@@ -398,10 +401,11 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     overflow: 'hidden',
     zIndex: 2,
+    flexDirection: 'column',
   },
   cardScroll: {
-    flexGrow: 0,
     flexShrink: 1,
+    flexGrow: 0,
   },
   cardInner: {
     padding: 6,

@@ -89,9 +89,13 @@ export function discoverProfileMetaBottom(compact: boolean): number {
 }
 
 /** Keep photo tap zones from covering compact name / job / distance text. */
-export function discoverPhotoTapBottomInset(compact: boolean): number {
+export function discoverPhotoTapBottomInset(
+  compact: boolean,
+  options?: { emberChipRow?: boolean },
+): number {
   if (!compact) {
     return spacing.xl * 2;
   }
-  return discoverProfileMetaBottom(true) + spacing.xl + spacing.lg + spacing.md;
+  const emberExtra = options?.emberChipRow ? spacing.lg + spacing.xs : 0;
+  return discoverProfileMetaBottom(true) + spacing.xl + spacing.lg + spacing.md + emberExtra;
 }

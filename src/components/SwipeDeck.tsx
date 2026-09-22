@@ -33,6 +33,7 @@ import { SuperLikeCelebration } from './SuperLikeCelebration';
 import { SwipeBurstEffect, SwipeEffectKind, SwipeEffectOrigin } from './SwipeBurstEffect';
 
 const ZONE_HIT_PADDING = 36;
+const ZONE_HIT_PADDING_COMPACT = 26;
 
 export type SwipeDeckHandle = {
   reject: () => void;
@@ -372,6 +373,8 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
       [starZone],
     );
 
+    const zoneHitPadding = compact ? ZONE_HIT_PADDING_COMPACT : ZONE_HIT_PADDING;
+
     const panGesture = Gesture.Pan()
       .activeOffsetX([-16, 16])
       .activeOffsetY([-16, 16])
@@ -385,30 +388,30 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
         const pointerY = event.y;
 
         const trashProximity = Math.max(
-          zoneProximity(pointerX, pointerY, trashZone.value, ZONE_HIT_PADDING),
+          zoneProximity(pointerX, pointerY, trashZone.value, zoneHitPadding),
           zoneProximity(
             cardCenterX,
             cardCenterY,
             trashZone.value,
-            ZONE_HIT_PADDING,
+            zoneHitPadding,
           ),
         );
         const heartProximity = Math.max(
-          zoneProximity(pointerX, pointerY, heartZone.value, ZONE_HIT_PADDING),
+          zoneProximity(pointerX, pointerY, heartZone.value, zoneHitPadding),
           zoneProximity(
             cardCenterX,
             cardCenterY,
             heartZone.value,
-            ZONE_HIT_PADDING,
+            zoneHitPadding,
           ),
         );
         const starProximity = Math.max(
-          zoneProximity(pointerX, pointerY, starZone.value, ZONE_HIT_PADDING),
+          zoneProximity(pointerX, pointerY, starZone.value, zoneHitPadding),
           zoneProximity(
             cardCenterX,
             cardCenterY,
             starZone.value,
-            ZONE_HIT_PADDING,
+            zoneHitPadding,
           ),
         );
 
@@ -434,7 +437,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           cardCenterX,
           cardCenterY,
           trashZone.value,
-          ZONE_HIT_PADDING,
+          zoneHitPadding,
         );
         const overHeart = isOverZone(
           pointerX,
@@ -442,7 +445,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           cardCenterX,
           cardCenterY,
           heartZone.value,
-          ZONE_HIT_PADDING,
+          zoneHitPadding,
         );
         const overStar = isOverZone(
           pointerX,
@@ -450,7 +453,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
           cardCenterX,
           cardCenterY,
           starZone.value,
-          ZONE_HIT_PADDING,
+          zoneHitPadding,
         );
 
         if (overTrash) {

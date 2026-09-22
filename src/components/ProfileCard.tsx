@@ -169,7 +169,9 @@ export function ProfileCard({
             { backgroundColor: colors.heartRed, top: discoverLeftBadgeTop(profile, 'crush') },
           ]}
         >
-          <Text style={styles.leftBadgeText}>{t('discover.crushBadge')}</Text>
+          <Text style={styles.leftBadgeText} numberOfLines={1} ellipsizeMode="tail">
+            {t('discover.crushBadge')}
+          </Text>
         </View>
       )}
 
@@ -183,7 +185,9 @@ export function ProfileCard({
             },
           ]}
         >
-          <Text style={styles.leftBadgeText}>{t('discover.mostCompatibleBadge')}</Text>
+          <Text style={styles.leftBadgeText} numberOfLines={1} ellipsizeMode="tail">
+            {t('discover.mostCompatibleBadge')}
+          </Text>
         </View>
       )}
 
@@ -222,7 +226,11 @@ export function ProfileCard({
           <View
             style={[
               styles.tapZones,
-              { bottom: discoverPhotoTapBottomInset(compact) },
+              {
+                bottom: discoverPhotoTapBottomInset(compact, {
+                  emberChipRow: Boolean(emberStatus && compact),
+                }),
+              },
             ]}
             pointerEvents="box-none"
           >

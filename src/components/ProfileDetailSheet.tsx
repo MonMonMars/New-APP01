@@ -17,6 +17,7 @@ import {
   getProfileIntentLabel,
   getPromptQuestionLabel,
 } from '../i18n/labels';
+import { resolveDemoPortraitUri } from '../utils/resolveDemoPortraitUri';
 import { colors as palette, radii, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import {
@@ -100,7 +101,7 @@ export function ProfileDetailSheet({
             return (
               <View key={`${profile.id}-photo-${photoIndex}`} style={[styles.heroWrap, { backgroundColor: colors.surface }]}>
                 <Image
-                  source={{ uri: photo }}
+                  source={{ uri: resolveDemoPortraitUri(photo) }}
                   style={styles.hero}
                   blurRadius={locked ? 28 : 0}
                 />

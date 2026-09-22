@@ -1190,11 +1190,13 @@ function withVerification(profile: Profile): Profile {
 export const mockProfiles: Profile[] = rawProfiles.map((profile, index) => {
   const seed = Number(profile.id) || index + 1;
   const enriched = applyLegacyProfileEnrichment(profile);
-  return withEmberFields(
-    withRelationshipStatus(
-      withVerification(withIntent(withMap(withDemoProfilePhotos(enriched), seed), seed)),
+  return hydrateCatalogProfilePhotos(
+    withEmberFields(
+      withRelationshipStatus(
+        withVerification(withIntent(withMap(withDemoProfilePhotos(enriched), seed), seed)),
+      ),
+      seed,
     ),
-    seed,
   );
 });
 
@@ -1205,12 +1207,24 @@ export function getAllProfiles(): Profile[] {
   return [...mockProfiles, ...incomingLikeProfiles];
 }
 
+function hydrateCatalogProfilePhotos(profile: Profile): Profile {
+  if (!profile.photos.some((uri) => uri.startsWith('spark-demo-portrait://'))) {
+    return profile;
+  }
+  try {
+    const { resolveDemoPortraitPhotos } = require('../utils/resolveDemoPortraitUri') as typeof import('../utils/resolveDemoPortraitUri');
+    return { ...profile, photos: resolveDemoPortraitPhotos(profile.photos) };
+  } catch {
+    return profile;
+  }
+}
+
 export function getProfileById(id: string): Profile | undefined {
   const base = getAllProfiles().find((p) => p.id === id);
   if (!base) {
     return undefined;
   }
-  return applyAdminProfileOverride(base);
+  return hydrateCatalogProfilePhotos(applyAdminProfileOverride(base));
 }
 
 setCatalogProfileIds(new Set(mockProfiles.map((p) => p.id)));

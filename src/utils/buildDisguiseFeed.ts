@@ -104,7 +104,7 @@ export function pinFeedProfileLinks(
   });
 }
 
-/** Social avatars use the same Pexels identity as the linked discover profile. */
+/** Social avatars mirror the linked discover profile photo set. */
 export function syncSocialPostProfiles(
   items: FeedItem[],
   _section?: SparkSection | string | null,

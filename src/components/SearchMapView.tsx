@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import {
   ActivityIndicator,
   Dimensions,
-  GestureResponderEvent,
   LayoutChangeEvent,
   Platform,
   ImageStyle,
@@ -108,6 +107,29 @@ function clampVisualScale(baseZoom: number, scale: number): number {
   return Math.min(maxScale, Math.max(minScale, scale));
 }
 
+function resolveMapDomNode(node: unknown): HTMLElement | null {
+  if (!node) {
+    return null;
+  }
+  if (typeof HTMLElement !== 'undefined' && node instanceof HTMLElement) {
+    return node;
+  }
+  const record = node as {
+    _node?: unknown;
+    getScrollableNode?: () => unknown;
+  };
+  if (typeof HTMLElement !== 'undefined' && record._node instanceof HTMLElement) {
+    return record._node;
+  }
+  if (typeof record.getScrollableNode === 'function') {
+    const scrollNode = record.getScrollableNode();
+    if (typeof HTMLElement !== 'undefined' && scrollNode instanceof HTMLElement) {
+      return scrollNode;
+    }
+  }
+  return null;
+}
+
 /** Standard street basemap (Carto Voyager by default) with pan, pinch/wheel zoom, and GPS control. */
 export function SearchMapView({
   center,
@@ -142,8 +164,6 @@ export function SearchMapView({
     width: windowSize.width,
     height: windowSize.height,
   });
-  const [webDragging, setWebDragging] = useState(false);
-
   const panX = useSharedValue(0);
   const panY = useSharedValue(0);
   const visualZoomScale = useSharedValue(1);
@@ -156,14 +176,13 @@ export function SearchMapView({
   const centerRef = useRef(center);
   centerRef.current = center;
 
-  const webDragRef = useRef<{ active: boolean; lastX: number; lastY: number }>({
-    active: false,
-    lastX: 0,
-    lastY: 0,
-  });
   const wheelCommitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wheelPinchBaseZoom = useRef(zoom);
   const wheelAccumScale = useRef(1);
+  const mapContainerRef = useRef<View>(null);
+  const handleWebWheelRef = useRef<(event: { deltaY?: number; preventDefault?: () => void }) => void>(
+    () => {},
+  );
 
   const mapInteractive =
     interactive && (Boolean(onCenterChange) || Boolean(onZoomChange));
@@ -269,6 +288,7 @@ export function SearchMapView({
   const panGesture = Gesture.Pan()
     .enabled(mapInteractive && Boolean(onCenterChange))
     .minDistance(2)
+    .maxPointers(1)
     .onUpdate((event) => {
       panX.value = event.translationX;
       panY.value = event.translationY;
@@ -366,79 +386,26 @@ export function SearchMapView({
     scheduleWheelZoomCommit();
   };
 
-  const handleWebPointerDown = (clientX: number, clientY: number) => {
-    if (!mapInteractive || !onCenterChange) {
+  handleWebWheelRef.current = handleWebWheel;
+
+  useEffect(() => {
+    if (Platform.OS !== 'web' || !mapInteractive || !onZoomChange) {
       return;
     }
-    webDragRef.current = { active: true, lastX: clientX, lastY: clientY };
-    setWebDragging(true);
-  };
-
-  const handleWebPointerMove = (clientX: number, clientY: number) => {
-    const drag = webDragRef.current;
-    if (!drag.active) {
+    const dom = resolveMapDomNode(mapContainerRef.current);
+    if (!dom) {
       return;
     }
-    const dx = clientX - drag.lastX;
-    const dy = clientY - drag.lastY;
-    drag.lastX = clientX;
-    drag.lastY = clientY;
-    if (Math.abs(dx) > 0 || Math.abs(dy) > 0) {
-      panX.value += dx;
-      panY.value += dy;
-    }
-  };
-
-  const handleWebPointerUp = () => {
-    const drag = webDragRef.current;
-    if (drag.active && onCenterChange) {
-      commitPan(panX.value, panY.value);
-    }
-    drag.active = false;
-    setWebDragging(false);
-  };
-
-  const webMapHandlers =
-    Platform.OS === 'web' && mapInteractive
-      ? ({
-          onWheel: (e: { nativeEvent: { deltaY: number }; preventDefault?: () => void }) => {
-            handleWebWheel({
-              deltaY: e.nativeEvent.deltaY,
-              preventDefault: () => e.preventDefault?.(),
-            });
-          },
-          onMouseDown: (e: { nativeEvent: { clientX: number; clientY: number } }) => {
-            handleWebPointerDown(e.nativeEvent.clientX, e.nativeEvent.clientY);
-          },
-          onMouseMove: (e: { nativeEvent: { clientX: number; clientY: number } }) => {
-            handleWebPointerMove(e.nativeEvent.clientX, e.nativeEvent.clientY);
-          },
-          onMouseUp: () => {
-            handleWebPointerUp();
-          },
-          onMouseLeave: () => {
-            handleWebPointerUp();
-          },
-          onTouchStart: (e: GestureResponderEvent) => {
-            const touch = e.nativeEvent.touches[0];
-            if (touch) {
-              handleWebPointerDown(touch.pageX, touch.pageY);
-            }
-          },
-          onTouchMove: (e: GestureResponderEvent) => {
-            const touch = e.nativeEvent.touches[0];
-            if (touch) {
-              handleWebPointerMove(touch.pageX, touch.pageY);
-            }
-          },
-          onTouchEnd: () => {
-            handleWebPointerUp();
-          },
-          onTouchCancel: () => {
-            handleWebPointerUp();
-          },
-        } as const)
-      : {};
+    dom.style.touchAction = 'none';
+    const onWheel = (nativeEvent: WheelEvent) => {
+      nativeEvent.preventDefault();
+      handleWebWheelRef.current({ deltaY: nativeEvent.deltaY });
+    };
+    dom.addEventListener('wheel', onWheel, { passive: false });
+    return () => {
+      dom.removeEventListener('wheel', onWheel);
+    };
+  }, [mapInteractive, mapSize.height, mapSize.width, onZoomChange]);
 
   const onMapLayout = (event: LayoutChangeEvent) => {
     const { width, height } = event.nativeEvent.layout;
@@ -518,6 +485,7 @@ export function SearchMapView({
           cachePolicy="memory-disk"
           recyclingKey={tile.key}
           transition={80}
+          pointerEvents="none"
         />
       ))}
 
@@ -562,7 +530,7 @@ export function SearchMapView({
   const mapWebCursor =
     mapInteractive && Platform.OS === 'web'
       ? ({
-          cursor: webDragging ? 'grabbing' : 'grab',
+          cursor: 'grab',
           touchAction: 'none',
           userSelect: 'none',
         } as unknown as ViewStyle)
@@ -570,18 +538,17 @@ export function SearchMapView({
 
   const mapBody = (
     <View
+      ref={mapContainerRef}
       style={[styles.map, mapWebCursor, style]}
       onLayout={onMapLayout}
-      {...webMapHandlers}
+      collapsable={false}
     >
       {mapInteractive ? (
-        Platform.OS === 'web' ? (
-          <Animated.View style={[styles.mapLayer, layerStyle]}>{mapLayer}</Animated.View>
-        ) : (
-          <GestureDetector gesture={mapGesture}>
-            <Animated.View style={[styles.mapLayer, layerStyle]}>{mapLayer}</Animated.View>
-          </GestureDetector>
-        )
+        <GestureDetector gesture={mapGesture}>
+          <Animated.View style={[styles.mapLayer, layerStyle]} collapsable={false}>
+            {mapLayer}
+          </Animated.View>
+        </GestureDetector>
       ) : (
         <View style={styles.mapLayer}>{mapLayer}</View>
       )}

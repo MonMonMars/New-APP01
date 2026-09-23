@@ -20,6 +20,7 @@ import {
   discoverDotsRightInset,
   discoverInfoButtonRightInset,
   DISCOVER_INFO_BUTTON_SIZE,
+  DISCOVER_INFO_ICON_SIZE,
   DISCOVER_INFO_TOP,
   discoverLeftBadgeTop,
   discoverPhotoTapBottomInset,
@@ -257,7 +258,7 @@ export function ProfileCard({
           hitSlop={10}
           accessibilityLabel={t('profileDetail.openDetails')}
         >
-          <Ionicons name="information-circle" size={28} color={colors.text} />
+          <Ionicons name="information-circle" size={DISCOVER_INFO_ICON_SIZE} color={colors.text} />
         </AnimatedPressable>
       ) : null}
 

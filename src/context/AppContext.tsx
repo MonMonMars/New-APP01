@@ -180,7 +180,6 @@ import {
   PulseSocialState,
 } from '../types/pulseSocial';
 import { resolvePulseContextSection } from '../utils/pulseWorldPool';
-import { bumpPulseFeedRefreshGeneration } from '../hooks/usePulseFeedRefresh';
 import {
   checkClientRateLimit,
   isProductionBuild,

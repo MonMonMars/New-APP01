@@ -3,10 +3,24 @@ import { StyleSheet } from 'react-native';
 import { radii, spacing } from '../../theme';
 
 /** Almost full-screen read panels for news, tarot, and sponsored landing content. */
-export const DISGUISE_READ_SHEET_RATIO = 0.94;
+export const DISGUISE_READ_SHEET_RATIO = 0.88;
 
-export function disguiseReadSheetHeight(windowHeight: number): number {
-  return Math.round(windowHeight * DISGUISE_READ_SHEET_RATIO);
+export type DisguiseReadSheetInsets = {
+  top: number;
+  bottom: number;
+};
+
+/** Cap height by safe areas so bottom CTAs (Learn more, Read on) stay on-screen. */
+export function disguiseReadSheetHeight(
+  windowHeight: number,
+  insets: DisguiseReadSheetInsets = { top: 0, bottom: 0 },
+): number {
+  const topGap = insets.top + spacing.sm;
+  const bottomGap = insets.bottom + spacing.sm;
+  const available = windowHeight - topGap - bottomGap;
+  const ratioHeight = Math.round(windowHeight * DISGUISE_READ_SHEET_RATIO);
+  const capped = Math.min(ratioHeight, available);
+  return Math.max(280, capped);
 }
 
 export const disguiseReadSheetStyles = StyleSheet.create({
@@ -15,9 +29,12 @@ export const disguiseReadSheetStyles = StyleSheet.create({
     borderTopRightRadius: radii.card + 4,
     borderWidth: StyleSheet.hairlineWidth,
     overflow: 'hidden',
+    width: '100%',
+    flexDirection: 'column',
   },
   scroll: {
     flex: 1,
+    minHeight: 0,
   },
   toolbar: {
     flexDirection: 'row',

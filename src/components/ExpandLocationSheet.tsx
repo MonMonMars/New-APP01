@@ -26,13 +26,16 @@ import { type DiscoveryPreferences, resolveSparkSection } from '../types/prefere
 import type { Profile } from '../types/profile';
 import {
   distanceFromCenter,
-  filterProfilesInRadius,
-  relocateProfilesForMapSearch,
-  sortProfilesByDistance,
+  profileHasGeo,
   type GeoPoint,
 } from '../utils/geoMap';
+import { profilesForMapViewport } from '../utils/mapDiscoverPins';
 import { resolveUserLocation } from '../services/userLocation';
-import { searchMapPlaces, type MapPlaceSuggestion } from '../utils/mapPlaceSearch';
+import {
+  listPinnedMapPlaces,
+  searchMapPlaces,
+  type MapPlaceSuggestion,
+} from '../utils/mapPlaceSearch';
 import { mapCenterForCity, zoomForRadius } from '../utils/searchMapTiles';
 import {
   MAP_PROFILE_PREVIEW_BOTTOM_OFFSET,
@@ -174,20 +177,24 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   }, [hasActiveMapSearch, preferences.passportCity, preferences.travelMode]);
 
   const showSearchArea = centersDiffer(mapCenter, searchCenter);
-  const pinCenter = showSearchArea ? mapCenter : searchCenter;
+  /** Pins and counts follow the map viewport — not locked to GPS until you search. */
+  const viewportCenter = mapCenter;
 
-  const areaPins = useMemo(() => {
-    const pool = relocateProfilesForMapSearch(mapDiscoverPool, pinCenter, currentRadius);
-    return sortProfilesByDistance(
-      filterProfilesInRadius(pool, pinCenter, currentRadius),
-      pinCenter,
-    );
-  }, [currentRadius, mapDiscoverPool, pinCenter]);
-
-  const placeSuggestions = useMemo(
-    () => (queryMode === 'places' ? searchMapPlaces(searchQuery, locale) : []),
-    [locale, queryMode, searchQuery],
+  const areaPins = useMemo(
+    () => profilesForMapViewport(mapDiscoverPool, viewportCenter, currentRadius),
+    [currentRadius, mapDiscoverPool, viewportCenter],
   );
+
+  const placeSuggestions = useMemo(() => {
+    if (queryMode !== 'places') {
+      return [];
+    }
+    const query = searchQuery.trim();
+    if (query.length >= 2) {
+      return searchMapPlaces(query, locale);
+    }
+    return listPinnedMapPlaces(locale, 12);
+  }, [locale, queryMode, searchQuery]);
 
   const mapPins = useMemo(() => areaPins.slice(0, MAP_PIN_LIMIT), [areaPins]);
 
@@ -251,21 +258,47 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
 
   const handleSelectPlace = useCallback(
     (place: MapPlaceSuggestion) => {
+      const jumpRadius =
+        currentRadius >= 100 ? currentRadius : Math.max(currentRadius, 100);
+      if (jumpRadius !== currentRadius) {
+        expandSearchRadius(jumpRadius);
+      }
       setMapCenter(place.coords);
       setSearchCenter(place.coords);
-      setMapZoom(zoomForRadius(currentRadius));
+      setMapZoom(zoomForRadius(jumpRadius));
       searchMapAt(place.coords);
       setSearchQuery('');
       setQueryMode('people');
       setSelectedPinId(null);
       setDeckToast(t('mapDiscover.areaLoaded'));
     },
-    [currentRadius, searchMapAt, t],
+    [currentRadius, expandSearchRadius, searchMapAt, t],
   );
 
   const handlePinPress = (profileId: string) => {
+    const profile = mapPins.find((item) => item.id === profileId);
+    if (profile && profileHasGeo(profile)) {
+      setMapCenter({ lat: profile.latitude, lng: profile.longitude });
+    }
     setSelectedPinId(profileId);
   };
+
+  const handleSearchNearPin = useCallback(
+    (profile: Profile) => {
+      const center: GeoPoint =
+        profileHasGeo(profile)
+          ? { lat: profile.latitude, lng: profile.longitude }
+          : mapCenter;
+      setMapCenter(center);
+      setSearchCenter(center);
+      searchMapAt(center);
+      setSelectedPinId(null);
+      setSearchQuery('');
+      setQueryMode('people');
+      setDeckToast(t('mapDiscover.areaLoaded'));
+    },
+    [mapCenter, searchMapAt, t],
+  );
 
   const handleZoomIn = () => {
     setMapZoom((prev) => Math.min(MAP_MAX_ZOOM, prev + 1));
@@ -368,8 +401,8 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     if (!detailProfile) {
       return undefined;
     }
-    return Math.max(1, Math.round(distanceFromCenter(detailProfile, pinCenter)));
-  }, [detailProfile, pinCenter]);
+    return Math.max(1, Math.round(distanceFromCenter(detailProfile, viewportCenter)));
+  }, [detailProfile, viewportCenter]);
 
   const handleDetailPass = () => {
     if (!detailProfile) {
@@ -411,7 +444,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         center={mapCenter}
         zoom={mapZoom}
         radiusMiles={currentRadius}
-        radiusCenter={searchCenter}
+        radiusCenter={viewportCenter}
         accentColor={accent}
         pinColor={colors.heartRed}
         pins={visiblePins}
@@ -541,6 +574,11 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
             keyboardShouldPersistTaps="handled"
             accessibilityLabel={t('mapDiscover.placeSuggestionsA11y')}
           >
+            {queryMode === 'places' && searchQuery.trim().length < 2 ? (
+              <Text style={[styles.pinnedPlacesHint, { color: chromeMuted }]}>
+                {t('mapDiscover.pinnedPlacesHint')}
+              </Text>
+            ) : null}
             {placeSuggestions.map((place) => (
               <AnimatedPressable
                 key={place.id}
@@ -614,11 +652,18 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
                 {t('mapDiscover.milesAway', {
                   miles: Math.max(
                     1,
-                    Math.round(distanceFromCenter(selectedProfile, pinCenter)),
+                    Math.round(distanceFromCenter(selectedProfile, viewportCenter)),
                   ),
                 })}
               </Text>
             </View>
+          </AnimatedPressable>
+          <AnimatedPressable
+            style={[styles.previewAction, styles.previewSecondaryAction, { borderColor: colors.border }]}
+            accessibilityLabel={t('mapDiscover.searchNearPinA11y')}
+            onPress={() => handleSearchNearPin(selectedProfile)}
+          >
+            <Ionicons name="search" size={20} color={accent} />
           </AnimatedPressable>
           <AnimatedPressable
             style={[styles.previewAction, { backgroundColor: accent }]}
@@ -940,6 +985,16 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  previewSecondaryAction: {
+    backgroundColor: 'transparent',
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  pinnedPlacesHint: {
+    fontSize: 12,
+    fontWeight: '600',
+    paddingHorizontal: spacing.sm,
+    paddingBottom: spacing.xs,
   },
   bottomBar: {
     position: 'absolute',

@@ -2,11 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://tommy-workstation-carolina-portland.trycloudflare.com**
+**https://submit-stars-boxes-tuition.trycloudflare.com**
 
-- **Integration branch:** `main` (PR **#157** + docs **#159**)
-- **Build ID:** `55178b8-20260922T182447Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-22 18:27 UTC — tunnel HTTP 200 + local `verify:extended` PASS
+- **Integration branch:** `main` (includes realistic portraits **#169**, Pulse like fix **#168**, map privacy **#167** when merged)
+- **Build ID:** `c292bbc-20260923T013747Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
+- **Verified:** 2026-09-23 01:39 UTC — `verify-demo-link.mjs` PASS (9/9)
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

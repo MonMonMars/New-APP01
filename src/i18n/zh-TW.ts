@@ -750,7 +750,7 @@ export const zhTw = {
     pinsTruncated: '顯示 {shown} / {total} 位附近的人',
     viewProfileA11y: '查看 {name} 的個人檔案',
     areaLoaded: '此區域的人已加入你的推薦',
-    attribution: '© OpenStreetMap contributors',
+    attribution: '© OpenStreetMap contributors · © CARTO',
     zoomInA11y: '放大',
     zoomOutA11y: '縮小',
   },

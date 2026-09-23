@@ -42,7 +42,10 @@ const count = peopleMatch ? Number(peopleMatch[1]) : 0;
 
 let browseMatchesOk = false;
 if (count >= 5) {
-  const browse = page.getByRole('button', { name: /Browse \d+ matches/i }).first();
+  const browse = page
+    .getByRole('button', { name: /Browse \d+ (matches|people)/i })
+    .or(page.getByText(/Browse \d+ matches/i))
+    .first();
   if (await browse.isVisible().catch(() => false)) {
     await browse.click({ force: true });
     await page.waitForTimeout(800);

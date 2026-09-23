@@ -30,7 +30,10 @@ export function AdLandingSheet({ visible, ad, onClose }: AdLandingSheetProps) {
   const { colors } = useTheme();
   const meta = useDisguiseWorld();
   const heroHeight = disguiseReadHeroHeight(windowHeight);
-  const sheetHeight = disguiseReadSheetHeight(windowHeight);
+  const sheetHeight = disguiseReadSheetHeight(windowHeight, {
+    top: insets.top,
+    bottom: insets.bottom,
+  });
 
   if (!ad) {
     return null;
@@ -52,7 +55,6 @@ export function AdLandingSheet({ visible, ad, onClose }: AdLandingSheetProps) {
             borderColor: colors.border,
             height: sheetHeight,
             maxHeight: sheetHeight,
-            paddingBottom: insets.bottom + spacing.md,
           },
         ]}
       >
@@ -87,7 +89,12 @@ export function AdLandingSheet({ visible, ad, onClose }: AdLandingSheetProps) {
             </FadeSlideIn>
           ))}
         </ScrollView>
-        <View style={[disguiseReadSheetStyles.footer, { borderTopColor: colors.border }]}>
+        <View
+          style={[
+            disguiseReadSheetStyles.footer,
+            { borderTopColor: colors.border, paddingBottom: insets.bottom + spacing.sm },
+          ]}
+        >
           <AnimatedPressable
             style={[styles.cta, { backgroundColor: meta.accent }]}
             onPress={handleVisit}

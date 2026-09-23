@@ -8,7 +8,8 @@ export const DISCOVER_STAR_SIZE = 58;
 export const DISCOVER_COMPACT_TARGET_SIZE = 52;
 export const DISCOVER_COMPACT_STAR_SIZE = 44;
 
-export const DISCOVER_INFO_BUTTON_SIZE = 40;
+export const DISCOVER_INFO_BUTTON_SIZE = 48;
+export const DISCOVER_INFO_ICON_SIZE = 34;
 
 /** Space reserved under the card for the swipe action row — keeps text off the buttons. */
 export function discoverActionRailHeight(compact: boolean): number {

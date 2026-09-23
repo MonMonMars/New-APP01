@@ -4,6 +4,7 @@ import { Platform, StyleSheet, View } from 'react-native';
 
 import { TabBarButton } from '../components/TabBarButton';
 import { useApp } from '../context/AppContext';
+import { resolvePulseInitialTab } from '../types/pulseSocial';
 import { useTheme } from '../context/ThemeContext';
 import { disguiseAlerts } from '../data/disguiseFeed';
 import { DisguiseAlertsScreen } from '../screens/disguise/DisguiseAlertsScreen';
@@ -28,6 +29,7 @@ export function DisguiseNavigator() {
   const { colors } = useTheme();
   const { t, locale } = useTranslation();
   const { pulseSocial, user } = useApp();
+  const initialTab = resolvePulseInitialTab(pulseSocial.pulseLastTab);
   const pulseSection = usePulseContextSection();
   const meta = disguiseWorldMeta(pulseSection, user.gender, locale);
   const activityBadge =
@@ -39,6 +41,7 @@ export function DisguiseNavigator() {
   return (
     <View style={styles.navRoot}>
     <Tab.Navigator
+      initialRouteName={initialTab}
       screenOptions={({ route }) => ({
         headerShown: false,
         animation: 'fade',

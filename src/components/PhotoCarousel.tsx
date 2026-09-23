@@ -42,10 +42,12 @@ export function PhotoCarousel({
 
   if (photos.length === 0) {
     return (
-      <AnimatedPressable style={[styles.empty, { height }]} onPress={onAddPhoto}>
-        <Ionicons name="camera" size={32} color={colors.textMuted} />
-        <Text style={styles.emptyText}>{t('photoCarousel.addPhoto')}</Text>
-      </AnimatedPressable>
+      <View style={[styles.emptyWrap, { height }]}>
+        <AnimatedPressable style={styles.empty} onPress={onAddPhoto}>
+          <Ionicons name="camera" size={32} color={colors.textMuted} />
+          <Text style={styles.emptyText}>{t('photoCarousel.addPhoto')}</Text>
+        </AnimatedPressable>
+      </View>
     );
   }
 
@@ -131,8 +133,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  empty: {
+  emptyWrap: {
+    width: '100%',
+    alignSelf: 'stretch',
     borderRadius: radii.card,
+    overflow: 'hidden',
+  },
+  empty: {
+    flex: 1,
+    width: '100%',
     backgroundColor: palette.surface,
     alignItems: 'center',
     justifyContent: 'center',
@@ -140,6 +149,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#2A2A2E',
     borderStyle: 'dashed',
+    borderRadius: radii.card,
   },
   emptyText: {
     color: palette.textMuted,

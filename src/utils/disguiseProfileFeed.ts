@@ -1,6 +1,6 @@
 import { DisguisedProfilePost, DisguisedProfileVariant } from '../data/disguiseFeed';
-import { disguiseClientAds } from '../data/disguiseClientAds';
 import { getIncomingLikeProfilesForSection } from '../data/profiles';
+import { disguiseClientAds } from '../data/disguiseClientAds';
 import { pulseNewsImages } from '../data/pulseNewsMedia';
 import { DisguiseAdCreative } from '../types/disguise';
 import { SparkSection } from '../types/preferences';
@@ -10,9 +10,11 @@ import {
   pulseNewsSummaryForProfile,
   pulseReporterQuoteForProfile,
 } from './disguisePulseCopy';
-import { filterProfilesForShowMe } from './showMeFilter';
 import { profileIntroCaption } from './profileIntroCaption';
 import { ShowMePreference } from '../types/preferences';
+import { buildPulseProfilePool, PulseWorldPoolScope } from './pulseWorldPool';
+import { buildSectionProfilePool } from './discoveryProfilePool';
+import { filterProfilesForShowMe } from './showMeFilter';
 
 const NEWS_SOURCES = [
   { source: 'BBC News', category: 'Local', coverImageUrl: pulseNewsImages.restaurant },
@@ -79,10 +81,19 @@ export function buildDisguisedProfileFeedItems(
   section?: SparkSection | string | null,
   rotationOffset = 0,
   showMe: ShowMePreference = 'everyone',
+  poolScope?: PulseWorldPoolScope,
 ): DisguisedProfilePost[] {
-  const profiles = filterProfilesForShowMe(getIncomingLikeProfilesForSection(section), showMe);
+  const profiles = poolScope
+    ? buildPulseProfilePool(poolScope, showMe, new Set())
+    : buildSectionProfilePool(section, showMe, new Set());
   if (profiles.length === 0) {
-    return [];
+    const fallback = filterProfilesForShowMe(getIncomingLikeProfilesForSection(section), showMe);
+    if (fallback.length === 0) {
+      return [];
+    }
+    const offset = ((rotationOffset % fallback.length) + fallback.length) % fallback.length;
+    const rotated = [...fallback.slice(offset), ...fallback.slice(0, offset)];
+    return rotated.map((profile, index) => toDisguisedProfilePost(profile, index));
   }
 
   const offset = ((rotationOffset % profiles.length) + profiles.length) % profiles.length;

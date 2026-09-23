@@ -18,6 +18,12 @@ export type RootStackParamList = {
   NotificationPreferences: undefined;
   ConsumablesShop: undefined;
   MapDiscover: undefined;
+  MapAreaMatches: {
+    centerLat: number;
+    centerLng: number;
+    radiusMiles: number;
+    nameQuery?: string;
+  };
   Explore: undefined;
   DiscoverHub: undefined;
   PurchaseHistory: undefined;

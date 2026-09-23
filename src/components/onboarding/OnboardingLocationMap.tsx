@@ -77,6 +77,7 @@ export function OnboardingLocationMap({
           showRadiusRing
           showYouMarker={false}
           showAvatarPins={false}
+          pinMarkerStyle="icon"
           interactive
           showLocateButton
           onLocatePress={handleUseGps}

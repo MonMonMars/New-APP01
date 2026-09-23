@@ -1,4 +1,5 @@
 import { DisguisedProfilePost, FeedItem, NewsReporter } from '../data/disguiseFeed';
+import { getProfileById } from '../data/profiles';
 import { buildSectionProfilePool } from './discoveryProfilePool';
 import { buildPulseProfilePool, PulseWorldPoolScope } from './pulseWorldPool';
 import { ShowMePreference, SparkSection } from '../types/preferences';
@@ -8,6 +9,9 @@ import { profileIntroCaption } from './profileIntroCaption';
 import {
   profileIdFromPostId,
   explicitReporterProfileId,
+  clearPulseSlotDisplayProfiles,
+  getPulseSlotDisplayProfile,
+  setPulseSlotDisplayProfile,
   syncActionedProfileIds,
 } from './resolveDisguiseProfile';
 
@@ -31,7 +35,7 @@ function hashSlotId(id: string): number {
   return Math.abs(hash);
 }
 
-function reporterProfileId(
+function pinnedReporterProfileId(
   reporter: NewsReporter,
   showMe: ShowMePreference,
   section?: SparkSection | string | null,
@@ -40,8 +44,28 @@ function reporterProfileId(
   return explicitReporterProfileId(reporter.id, reporter.profileId, showMe, section, poolScope);
 }
 
-function disguisedProfileId(item: DisguisedProfilePost): string | undefined {
+function pinnedDisguisedProfileId(item: DisguisedProfilePost): string | undefined {
   return item.profileId ?? profileIdFromPostId(item.id);
+}
+
+function slotDisplayProfileId(slotKey: string, pinnedProfileId: string | undefined): string | undefined {
+  return getPulseSlotDisplayProfile(slotKey) ?? pinnedProfileId;
+}
+
+function syncReporterToProfile(reporter: NewsReporter, profileId: string): NewsReporter {
+  const profile = getProfileById(profileId);
+  if (!profile) {
+    return reporter;
+  }
+  return profileToReporter(reporter, profile);
+}
+
+function syncDisguisedPostToProfile(post: DisguisedProfilePost, profileId: string): DisguisedProfilePost {
+  const profile = getProfileById(profileId);
+  if (!profile) {
+    return post;
+  }
+  return profileToDisguisedPost(post, profile);
 }
 
 function buildReplacementPool(
@@ -112,7 +136,8 @@ function collectReservedProfileIds(
 
   items.forEach((item) => {
     if (item.type === 'disguised_profile') {
-      const profileId = disguisedProfileId(item);
+      const pinned = pinnedDisguisedProfileId(item);
+      const profileId = slotDisplayProfileId(item.id, pinned);
       if (profileId) {
         reserved.add(profileId);
       }
@@ -121,7 +146,8 @@ function collectReservedProfileIds(
 
     if (item.type === 'news') {
       item.reporters.forEach((reporter) => {
-        const profileId = reporterProfileId(reporter, showMe, section, poolScope);
+        const pinned = pinnedReporterProfileId(reporter, showMe, section, poolScope);
+        const profileId = slotDisplayProfileId(reporter.id, pinned);
         if (profileId) {
           reserved.add(profileId);
         }
@@ -146,6 +172,7 @@ export function filterActionedDisguiseFeed(
   syncActionedProfileIds(actioned);
 
   if (actioned.size === 0) {
+    clearPulseSlotDisplayProfiles();
     return items;
   }
 
@@ -161,8 +188,17 @@ export function filterActionedDisguiseFeed(
         return [item];
       }
 
-      const profileId = disguisedProfileId(item);
-      if (!profileId || !actioned.has(profileId)) {
+      const pinned = pinnedDisguisedProfileId(item);
+      const displayId = slotDisplayProfileId(item.id, pinned);
+      if (!displayId) {
+        return [item];
+      }
+
+      if (!actioned.has(displayId)) {
+        setPulseSlotDisplayProfile(item.id, undefined);
+        if (pinned && pinned !== displayId) {
+          return [syncDisguisedPostToProfile(item, pinned)];
+        }
         return [item];
       }
 
@@ -171,21 +207,32 @@ export function filterActionedDisguiseFeed(
         pool,
         reserved,
         displayFallbackPool,
-        profileId,
+        displayId,
       );
       if (!replacement) {
         return [item];
       }
 
       reserved.add(replacement.id);
+      setPulseSlotDisplayProfile(item.id, replacement.id);
       return [profileToDisguisedPost(item, replacement)];
     }
 
     if (item.type === 'news') {
       let changed = false;
       const reporters = item.reporters.flatMap((reporter) => {
-        const profileId = reporterProfileId(reporter, showMe, section, poolScope);
-        if (!profileId || !actioned.has(profileId)) {
+        const pinned = pinnedReporterProfileId(reporter, showMe, section, poolScope);
+        const displayId = slotDisplayProfileId(reporter.id, pinned);
+        if (!displayId) {
+          return [reporter];
+        }
+
+        if (!actioned.has(displayId)) {
+          setPulseSlotDisplayProfile(reporter.id, undefined);
+          if (pinned && pinned !== displayId) {
+            changed = true;
+            return [syncReporterToProfile(reporter, pinned)];
+          }
           return [reporter];
         }
 
@@ -194,7 +241,7 @@ export function filterActionedDisguiseFeed(
           pool,
           reserved,
           displayFallbackPool,
-          profileId,
+          displayId,
         );
         if (!replacement) {
           return [reporter];
@@ -202,6 +249,7 @@ export function filterActionedDisguiseFeed(
 
         changed = true;
         reserved.add(replacement.id);
+        setPulseSlotDisplayProfile(reporter.id, replacement.id);
         return [profileToReporter(reporter, replacement)];
       });
 

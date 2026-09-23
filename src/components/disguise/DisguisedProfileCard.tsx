@@ -89,7 +89,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   );
 
   const avatarRow = (
-    <PulseProfileSwap profileKey={linkedProfileId ?? post.id}>
+    <PulseProfileSwap profileKey={`${linkedProfileId ?? post.id}:${post.avatarUrl}`}>
       <FeedPersonThumbnail
         imageUrl={post.avatarUrl}
         overlayText={maskSnippet}
@@ -108,7 +108,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
     return (
       <>
         <View style={[styles.socialCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <PulseProfileSwap profileKey={linkedProfileId ?? post.id}>
+          <PulseProfileSwap profileKey={`${linkedProfileId ?? post.id}:${post.avatarUrl}`}>
             <FeedPersonThumbnail
               imageUrl={post.avatarUrl}
               overlayText={maskSnippet}

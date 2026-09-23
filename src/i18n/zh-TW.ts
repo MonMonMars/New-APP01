@@ -722,6 +722,11 @@ export const zhTw = {
   },
   mapDiscover: {
     meta: '{radius} · {count} 人',
+    peopleInArea: '此區域有 {count} 人',
+    peopleInAreaHint: '為安全起見不顯示精確位置，請在下方瀏覽個人檔案。',
+    withinMiles: '約 {miles} 英里內',
+    viewProfileRowA11y: '查看 {name}，{age} 歲',
+    listTruncated: '顯示 {shown} / {total} 人 — 可調整搜尋或範圍',
     emptyArea: '此區域目前沒有人',
     any: '不限',
     searchAnywhereA11y: '搜尋不限距離',
@@ -869,6 +874,7 @@ export const zhTw = {
   discoverHub: {
     title: '探索工具',
     map: '地圖',
+    mapTileHint: '{radius} · {count} 人',
     explore: '探索',
     preferences: '偏好',
     likesLeft: '今日剩餘 {n} 次喜歡',

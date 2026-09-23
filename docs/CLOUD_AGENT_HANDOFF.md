@@ -2,7 +2,7 @@
 
 **Read this file first** on every new Cloud Agent run for `MonMonMars/New-APP01`.
 
-Last updated: 2026-09-23 (after **#191** on `main`; map viewport count fix pending merge).
+Last updated: 2026-09-23 (after **#192** on `main`; demo smoke green).
 
 ## Where all “data and files” live
 
@@ -29,6 +29,7 @@ There is nothing to copy out of old agent VMs except what is already committed o
 | PR | Summary |
 |----|---------|
 | **#191** | **#189** Pulse like reload + **#190** map pin privacy + `MapAreaMatches` browse grid |
+| **#192** | Map area people count aligned with search pool; Tokyo map smoke + Browse grid |
 
 Superseded drafts — see **`docs/PR_TRIAGE.md`**.
 

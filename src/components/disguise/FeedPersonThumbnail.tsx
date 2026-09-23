@@ -53,10 +53,13 @@ export function FeedPersonThumbnail({
   const { t } = useTranslation();
 
   const trimmedCaption = caption?.trim();
+  const overlayBeside =
+    !plainAvatar && overlayText?.trim() && !trimmedCaption ? overlayText.trim() : undefined;
+  const displayCaption = trimmedCaption ?? overlayBeside;
   const isProfile = contentKind === 'profile';
   const badgeKind = isProfile ? 'profile' : contentKind;
   const showProfileBadge = isProfile || showIconBadge;
-  const showCaption = Boolean(trimmedCaption);
+  const showCaption = Boolean(displayCaption);
   const showCaptionIcon = showCaption && !isProfile;
   const showTypeLabel = !hideLabel && !showCaption && !showProfileBadge;
 
@@ -93,7 +96,7 @@ export function FeedPersonThumbnail({
         </View>
       ) : null}
       <Text style={[styles.caption, { color: colors.text }]} numberOfLines={2} testID="feed-person-caption">
-        {trimmedCaption}
+        {displayCaption}
       </Text>
     </View>
   ) : showTypeLabel ? (

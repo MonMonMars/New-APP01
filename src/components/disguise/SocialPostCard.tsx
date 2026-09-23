@@ -98,10 +98,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={styles.header}>
         <View style={styles.headerMain}>
-          <PulseProfileSwap
-            profileKey={linkedAuthorProfile?.id ?? post.id}
-            style={styles.avatarSlot}
-          >
+          <PulseProfileSwap profileKey={linkedAuthorProfile?.id ?? post.id} style={styles.avatarSwapWrap}>
             <FeedPersonThumbnail
               imageUrl={authorAvatarUrl}
               plainAvatar={
@@ -241,8 +238,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     minWidth: 0,
   },
-  avatarSlot: {
-    width: 48,
+  avatarSwapWrap: {
     flexShrink: 0,
   },
   authorMeta: {

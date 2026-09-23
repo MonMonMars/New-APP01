@@ -142,7 +142,9 @@ export function DisguiseAlertsScreen() {
           const linkedProfile = item.person ? resolveAlertPersonProfile(item.person, pulseSection) : null;
           const profileKey = linkedProfile?.id ?? `alert-${item.id}-${refreshGeneration}`;
           const avatarUrl = linkedProfile?.photos[0] ?? item.person?.avatarUrl ?? '';
-          const avatarCaption = linkedProfile ? profileIntroCaption(linkedProfile) : undefined;
+          const avatarCaption = linkedProfile
+            ? profileIntroCaption(linkedProfile) || linkedProfile.name
+            : item.person?.name;
           const alertText = getActivityAlertText(locale, item.id, item.text);
 
           const textBlock = (
@@ -261,8 +263,9 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   avatarSlot: {
-    width: 48,
-    flexShrink: 0,
+    flex: 1,
+    minWidth: 0,
+    maxWidth: '48%',
   },
   iconWrap: {
     width: 44,

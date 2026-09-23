@@ -49,6 +49,7 @@ await enterPulseForYouFeed(page);
 
 let avatarOk = false;
 let captionOk = true;
+let captionTextOk = false;
 for (let scroll = 0; scroll < 16 && !avatarOk; scroll += 1) {
   const triggers = [
     page.getByLabel(/^View photos from /i).first(),
@@ -79,6 +80,23 @@ for (let scroll = 0; scroll < 16 && !avatarOk; scroll += 1) {
   }
   await page.evaluate(() => window.scrollBy(0, 480));
   await page.waitForTimeout(350);
+}
+
+for (let scroll = 0; scroll < 14 && !captionTextOk; scroll += 1) {
+  const captions = page.getByTestId('feed-person-caption');
+  const count = await captions.count().catch(() => 0);
+  for (let i = 0; i < count; i += 1) {
+    const text = (await captions.nth(i).innerText().catch(() => '')).trim();
+    if (text.length >= 8) {
+      captionTextOk = true;
+      break;
+    }
+  }
+  if (captionTextOk) {
+    break;
+  }
+  await page.evaluate(() => window.scrollBy(0, 420));
+  await page.waitForTimeout(300);
 }
 
 const article = page.getByLabel(/Read article:/).first();
@@ -162,7 +180,18 @@ if (await newsAlert.isVisible().catch(() => false)) {
 
 console.log(
   JSON.stringify(
-    { articleOk, disguisedOk, disguisedReadOnOk, adOk, socialOk, avatarOk, captionOk, activityOk, newsAlertOk },
+    {
+      articleOk,
+      disguisedOk,
+      disguisedReadOnOk,
+      adOk,
+      socialOk,
+      avatarOk,
+      captionOk,
+      captionTextOk,
+      activityOk,
+      newsAlertOk,
+    },
     null,
     2,
   ),
@@ -178,5 +207,6 @@ const ok =
   activityOk &&
   avatarOk &&
   captionOk &&
+  captionTextOk &&
   newsAlertOk;
 process.exit(ok ? 0 : 1);

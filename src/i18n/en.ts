@@ -727,6 +727,11 @@ export const en = {
   },
   mapDiscover: {
     meta: '{radius} · {count} people',
+    peopleInArea: '{count} people in this area',
+    peopleInAreaHint: 'Exact locations are hidden for safety. Browse profiles below.',
+    withinMiles: 'Within {miles} mi',
+    viewProfileRowA11y: 'View {name}, {age}',
+    listTruncated: 'Showing {shown} of {total} — refine search or radius',
     emptyArea: 'No one in this area',
     any: 'Any',
     searchAnywhereA11y: 'Search anywhere',
@@ -875,6 +880,7 @@ export const en = {
   discoverHub: {
     title: 'Discover tools',
     map: 'Map',
+    mapTileHint: '{radius} · {count} people',
     explore: 'Explore',
     preferences: 'Preferences',
     likesLeft: '{n} likes left today',

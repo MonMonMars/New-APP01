@@ -728,7 +728,11 @@ export const en = {
   mapDiscover: {
     meta: '{radius} · {count} people',
     peopleInArea: '{count} people in this area',
-    peopleInAreaHint: 'Exact locations are hidden for safety. Browse profiles below.',
+    peopleInAreaHint: 'Photos stay off the map for safety. Only pin markers show density.',
+    browseMatches: 'Browse {count} matches',
+    browseMatchesA11y: 'Browse {count} people in this search area',
+    areaMatchesTitle: 'Matches in this area',
+    areaMatchesHint: 'Choose someone to view their profile, like, or add to your deck.',
     withinMiles: 'Within {miles} mi',
     viewProfileRowA11y: 'View {name}, {age}',
     listTruncated: 'Showing {shown} of {total} — refine search or radius',

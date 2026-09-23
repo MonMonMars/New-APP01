@@ -1,11 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  FlatList,
   Modal,
   ScrollView,
   StyleSheet,
@@ -44,6 +43,7 @@ import { ActionToast } from './ActionToast';
 import { AnimatedPressable } from './AnimatedPressable';
 import { ProfileDetailSheet } from './ProfileDetailSheet';
 import { ReportReasonSheet, type ReportReason, getReportReasonLabel } from './ReportReasonSheet';
+import { RootStackParamList } from '../types/navigation';
 import { MAP_MAX_ZOOM, MAP_MIN_ZOOM, SearchMapView } from './SearchMapView';
 
 const MAP_PEOPLE_LIST_LIMIT = 48;
@@ -89,7 +89,7 @@ function resolveInitialMapCenter(preferences: DiscoveryPreferences): GeoPoint {
 
 export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { colors } = useTheme();
   const { t, locale } = useTranslation();
   const {
@@ -189,6 +189,17 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     [currentRadius, mapDiscoverPool, viewportCenter],
   );
 
+  const mapPrivacyPins = useMemo(
+    () =>
+      areaPins.map((profile) => ({
+        id: profile.id,
+        latitude: profile.latitude,
+        longitude: profile.longitude,
+        name: profile.name,
+      })),
+    [areaPins],
+  );
+
   const placeSuggestions = useMemo(() => {
     if (queryMode !== 'places') {
       return [];
@@ -199,17 +210,6 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     }
     return listPinnedMapPlaces(locale, 12);
   }, [locale, queryMode, searchQuery]);
-
-  const visiblePeople = useMemo(() => {
-    if (queryMode !== 'people') {
-      return [];
-    }
-    const query = searchQuery.trim().toLowerCase();
-    const filtered = query
-      ? areaPins.filter((profile) => profile.name.toLowerCase().includes(query))
-      : areaPins;
-    return filtered.slice(0, MAP_PEOPLE_LIST_LIMIT);
-  }, [areaPins, queryMode, searchQuery]);
 
   const peopleListTruncated = areaPins.length > MAP_PEOPLE_LIST_LIMIT;
 
@@ -276,26 +276,27 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     setMapZoom((prev) => Math.max(MAP_MIN_ZOOM, prev - 1));
   };
 
-  const handleAddToDeck = (profile: Profile) => {
-    const commitSearch = () => {
-      if (showSearchArea) {
-        setSearchCenter(mapCenter);
-        searchMapAt(mapCenter);
-      }
-    };
-    commitSearch();
-    const deferMs = showSearchArea ? 48 : 0;
-    setTimeout(() => {
-      const added = prioritizeProfileInDeck(profile.id);
-      setDeckToast(
-        added ? t('discoverHub.addedToDeck', { name: profile.name }) : t('discoverHub.notInPool'),
-      );
-    }, deferMs);
-  };
-
-  const handleOpenProfile = (profile: Profile) => {
-    setDetailProfile(profile);
-  };
+  const handleBrowseAreaMatches = useCallback(() => {
+    if (showSearchArea) {
+      setSearchCenter(mapCenter);
+      searchMapAt(mapCenter);
+    }
+    navigation.navigate('MapAreaMatches', {
+      centerLat: viewportCenter.lat,
+      centerLng: viewportCenter.lng,
+      radiusMiles: currentRadius,
+      nameQuery: searchQuery.trim() || undefined,
+    });
+  }, [
+    currentRadius,
+    mapCenter,
+    navigation,
+    searchMapAt,
+    searchQuery,
+    showSearchArea,
+    viewportCenter.lat,
+    viewportCenter.lng,
+  ]);
 
   const handleDetailLike = () => {
     if (!detailProfile) {
@@ -412,8 +413,9 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         radiusCenter={viewportCenter}
         accentColor={accent}
         pinColor={colors.heartRed}
-        pins={[]}
+        pins={mapPrivacyPins}
         showAvatarPins={false}
+        pinMarkerStyle="icon"
         userLocation={null}
         showYouMarker={false}
         onCenterChange={setMapCenter}
@@ -422,7 +424,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         onLocatePress={handleLocateGps}
         locateLoading={locatingGps}
         locateAccessibilityLabel={t('mapDiscover.locateGpsA11y')}
-        locateInsetBottom={Math.max(insets.bottom, spacing.md) + 248}
+        locateInsetBottom={Math.max(insets.bottom, spacing.md) + 168}
         style={styles.fullMap}
       />
 
@@ -610,42 +612,18 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
               {t('mapDiscover.peopleInAreaHint')}
             </Text>
           </View>
-          {visiblePeople.length > 0 ? (
-            <FlatList
-              data={visiblePeople}
-              keyExtractor={(item) => item.id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.peopleListContent}
-              keyboardShouldPersistTaps="handled"
-              renderItem={({ item }) => (
-                <AnimatedPressable
-                  style={[styles.peopleCard, { borderColor: colors.border, backgroundColor: colors.surface }]}
-                  accessibilityLabel={t('mapDiscover.viewProfileRowA11y', {
-                    name: item.name,
-                    age: item.age,
-                  })}
-                  onPress={() => handleOpenProfile(item)}
-                >
-                  <Image source={{ uri: item.photos[0] }} style={styles.peoplePhoto} contentFit="cover" />
-                  <Text style={[styles.peopleName, { color: chromeText }]} numberOfLines={1}>
-                    {item.name}, {item.age}
-                  </Text>
-                  <Text style={[styles.peopleDistance, { color: chromeMuted }]}>
-                    {t('mapDiscover.withinMiles', {
-                      miles: approxDistanceMiles(item, viewportCenter, currentRadius),
-                    })}
-                  </Text>
-                  <AnimatedPressable
-                    style={[styles.peopleAddButton, { backgroundColor: accent }]}
-                    accessibilityLabel={t('mapDiscover.addToDeckA11y', { name: item.name })}
-                    onPress={() => handleAddToDeck(item)}
-                  >
-                    <Ionicons name="add" size={18} color={onAccentText} />
-                  </AnimatedPressable>
-                </AnimatedPressable>
-              )}
-            />
+          {areaPins.length > 0 ? (
+            <AnimatedPressable
+              style={[styles.browseMatchesButton, { backgroundColor: accent }]}
+              accessibilityLabel={t('mapDiscover.browseMatchesA11y', { count: areaPins.length })}
+              onPress={handleBrowseAreaMatches}
+            >
+              <Ionicons name="people" size={18} color={onAccentText} />
+              <Text style={[styles.browseMatchesText, { color: onAccentText }]}>
+                {t('mapDiscover.browseMatches', { count: areaPins.length })}
+              </Text>
+              <Ionicons name="chevron-forward" size={18} color={onAccentText} />
+            </AnimatedPressable>
           ) : (
             <Text style={[styles.peopleEmpty, { color: chromeMuted }]}>
               {searchQuery.trim()
@@ -926,8 +904,7 @@ const styles = StyleSheet.create({
     right: spacing.md,
     borderRadius: radii.card,
     paddingTop: spacing.sm,
-    paddingBottom: spacing.xs,
-    maxHeight: 168,
+    paddingBottom: spacing.sm,
   },
   peoplePanelHeader: {
     paddingHorizontal: spacing.sm,
@@ -943,37 +920,22 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 16,
   },
-  peopleListContent: {
-    paddingHorizontal: spacing.sm,
-    gap: spacing.sm,
-  },
-  peopleCard: {
-    width: 112,
-    borderRadius: radii.card,
-    borderWidth: StyleSheet.hairlineWidth,
-    padding: spacing.xs,
-    gap: spacing.xs,
-  },
-  peoplePhoto: {
-    width: '100%',
-    aspectRatio: 3 / 4,
-    borderRadius: radii.button,
-  },
-  peopleName: {
-    fontSize: 13,
-    fontWeight: '800',
-  },
-  peopleDistance: {
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  peopleAddButton: {
-    alignSelf: 'center',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+  browseMatchesButton: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: spacing.xs,
+    marginHorizontal: spacing.sm,
+    marginTop: spacing.xs,
+    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: spacing.md,
+    borderRadius: radii.button,
+  },
+  browseMatchesText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '800',
+    textAlign: 'center',
   },
   peopleEmpty: {
     fontSize: 13,

@@ -1,4 +1,4 @@
-import { PixelRatio } from 'react-native';
+import { PixelRatio, Platform } from 'react-native';
 
 import type { GeoPoint } from './geoMap';
 import {
@@ -15,9 +15,24 @@ export const TILE_PX = 256;
 
 const CARTO_SUBDOMAINS = ['a', 'b', 'c', 'd'] as const;
 
-/** Prefer @2x raster tiles on retina — keeps sharpness without changing layout math. */
+/** Device pixel ratio for map tiles (web must read `devicePixelRatio`, not RN’s 1). */
+export function mapDisplayPixelRatio(): number {
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    const dpr = window.devicePixelRatio;
+    if (typeof dpr === 'number' && Number.isFinite(dpr) && dpr > 0) {
+      return dpr;
+    }
+  }
+  return PixelRatio.get();
+}
+
+/** Use Carto @2x (512px) tiles whenever the screen is sharper than 1x. */
 export function mapTilePixelRatio(): number {
-  return PixelRatio.get() >= 2 ? 2 : 1;
+  return mapDisplayPixelRatio() >= 1.5 ? 2 : 1;
+}
+
+export function mapTileSourcePixelSize(): number {
+  return TILE_PX * mapTilePixelRatio();
 }
 
 /** Carto Voyager — clean Google/Apple-like street basemap (OSM-based). */

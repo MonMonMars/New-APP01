@@ -13,7 +13,7 @@ import {
 } from './refreshPulseFeed';
 import { mergeLiveNewsIntoFeed } from './mergeLivePulseNews';
 import { socialAuthorDemoProfileId } from '../data/disguiseReporterProfileLinks';
-import { explicitReporterProfileId } from './resolveDisguiseProfile';
+import { explicitReporterProfileId, profileIdFromPostId } from './resolveDisguiseProfile';
 import { getPulseLiveNewsSnapshot } from '../services/pulseLiveNews';
 import { spaceSponsoredFeedItems } from './pulseFeedSpacing';
 import { dedupePulseFeedItems } from './pulseFeedUnique';
@@ -59,10 +59,16 @@ function feedItemMatchesShowMe(item: FeedItem, showMe: ShowMePreference): boolea
     if (item.id === 'disguised-user') {
       return true;
     }
-    if (!item.profileId) {
+    const profileId = explicitReporterProfileId(
+      item.id,
+      item.profileId ?? profileIdFromPostId(item.id),
+      showMe,
+      undefined,
+    );
+    if (!profileId) {
       return false;
     }
-    const profile = getProfileById(item.profileId);
+    const profile = getProfileById(profileId);
     return profile ? matchesShowMePreference(profile, showMe) : false;
   }
   return true;
@@ -106,16 +112,27 @@ export function pinFeedProfileLinks(
   showMe: ShowMePreference = 'everyone',
 ): FeedItem[] {
   return items.map((item) => {
-    if (item.type !== 'news') {
-      return item;
+    if (item.type === 'news') {
+      return {
+        ...item,
+        reporters: item.reporters.map((reporter) => ({
+          ...reporter,
+          profileId: explicitReporterProfileId(reporter.id, reporter.profileId, showMe, section),
+        })),
+      };
     }
-    return {
-      ...item,
-      reporters: item.reporters.map((reporter) => ({
-        ...reporter,
-        profileId: explicitReporterProfileId(reporter.id, reporter.profileId, showMe, section),
-      })),
-    };
+    if (item.type === 'disguised_profile' && item.id !== 'disguised-user') {
+      return {
+        ...item,
+        profileId: explicitReporterProfileId(
+          item.id,
+          item.profileId ?? profileIdFromPostId(item.id),
+          showMe,
+          section,
+        ),
+      };
+    }
+    return item;
   });
 }
 

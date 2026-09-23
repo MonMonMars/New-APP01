@@ -38,8 +38,17 @@ function reporterProfileId(
   return explicitReporterProfileId(reporter.id, reporter.profileId, showMe, section);
 }
 
-function disguisedProfileId(item: DisguisedProfilePost): string | undefined {
-  return item.profileId ?? profileIdFromPostId(item.id);
+function disguisedProfileId(
+  item: DisguisedProfilePost,
+  showMe: ShowMePreference,
+  section?: SparkSection | string | null,
+): string | undefined {
+  return explicitReporterProfileId(
+    item.id,
+    item.profileId ?? profileIdFromPostId(item.id),
+    showMe,
+    section,
+  );
 }
 
 function buildReplacementPool(
@@ -105,7 +114,7 @@ function collectReservedProfileIds(
 
   items.forEach((item) => {
     if (item.type === 'disguised_profile') {
-      const profileId = disguisedProfileId(item);
+      const profileId = disguisedProfileId(item, showMe, section);
       if (profileId) {
         reserved.add(profileId);
       }
@@ -153,7 +162,7 @@ export function filterActionedDisguiseFeed(
         return [item];
       }
 
-      const profileId = disguisedProfileId(item);
+      const profileId = disguisedProfileId(item, showMe, section);
       if (!profileId || !actioned.has(profileId)) {
         return [item];
       }

@@ -872,6 +872,14 @@ export const en = {
     defaultOverlayText: 'Weekend reads you should not miss',
     emailSupport: 'Email support',
     supportEmailSubject: '{appName} support',
+    pulseWorldFeedTitle: 'Pulse feed worlds',
+    pulseWorldFeedHint:
+      'Choose which dating worlds appear in your Pulse disguise feed. At least one must stay on.',
+    pulseIncludeSpark: 'Include Spark',
+    pulseIncludeEmber: 'Include Ember',
+    pulseWorldRequiredTitle: 'Keep one world on',
+    pulseWorldRequiredBody: 'Your Pulse feed needs at least Spark or Ember content enabled.',
+    pulseWorldActiveHint: 'Active in feed: {worlds}',
   },
   disguiseSearch: {
     placeholder: 'Topics, headlines, sources…',
@@ -1293,6 +1301,17 @@ export const en = {
     aiCoach: 'AI coach ✨',
     iAmA: 'I am a',
     myOrientation: 'My orientation',
+    showRelationshipStatus: 'Show relationship status on Ember',
+    showRelationshipStatusHint:
+      'When on, Married or Divorced from Status above appears on your Ember profile. Spark never shows this.',
+    discoveryVisibility: 'Discovery visibility',
+    discoveryVisibilityHint:
+      'Control whether you appear in Spark and Ember discovery. Turn off one world or both to pause.',
+    visibleInSpark: 'Visible in Spark',
+    visibleInEmber: 'Visible in Ember',
+    discoveryVisibilityRequiredTitle: 'Stay visible somewhere',
+    discoveryVisibilityRequiredBody:
+      'Turn on Spark or Ember discovery — or use Pause in Discover tools to hide everywhere.',
   },
   security: {
     title: 'Security',
@@ -1476,6 +1495,8 @@ export const en = {
     sharePost: 'Share post',
     comments: 'Comments',
     openCommentsA11y: 'View comments, {count} replies',
+    upvotePostA11y: 'Upvote post',
+    removeUpvoteA11y: 'Remove upvote',
     postTitle: 'Post',
     addComment: 'Add a comment...',
     sendComment: 'Send comment',

@@ -58,7 +58,7 @@ await page.waitForTimeout(1200);
 
 let updated = await waitForUpdated(page);
 let sawGreyChrome = await page
-  .getByTestId('pulse-feed-refresh-grey-blocks')
+  .getByTestId('pulse-feed-refresh-top-chrome')
   .isVisible()
   .catch(() => false);
 
@@ -72,7 +72,7 @@ if (!updated) {
   sawGreyChrome =
     sawGreyChrome ||
     (await page
-      .getByTestId('pulse-feed-refresh-grey-blocks')
+      .getByTestId('pulse-feed-refresh-top-chrome')
       .isVisible()
       .catch(() => false));
 }

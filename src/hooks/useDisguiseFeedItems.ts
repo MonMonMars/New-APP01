@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext';
 import { FeedItem } from '../data/disguiseFeed';
 import { resolveAppLocale } from '../types/locale';
 import { buildDisguiseFeed } from '../utils/buildDisguiseFeed';
+import { pulseFeedPrime } from '../utils/warmPulseFeedCatalog';
 import { filterActionedDisguiseFeed } from '../utils/filterActionedDisguiseFeed';
 import { filterDisguiseFeed } from '../utils/disguiseFeedFilter';
 import { usePulseContextSection } from './usePulseContextSection';
@@ -43,6 +44,10 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
   const baseFeed = useMemo(() => {
     if (cacheRef.current?.signature === signature) {
       return cacheRef.current.base;
+    }
+    if (pulseFeedPrime?.signature === signature) {
+      cacheRef.current = { signature, base: pulseFeedPrime.base };
+      return pulseFeedPrime.base;
     }
     const built = buildDisguiseFeed(
       user,

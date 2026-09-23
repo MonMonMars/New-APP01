@@ -109,7 +109,7 @@ export function DisguiseAlertsScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       <DisguiseHeader title={t('tabs.activity')} showSearch={false} />
-      <PulseFeedRefreshDimLayer refreshing={refreshing}>
+      <PulseFeedRefreshDimLayer refreshing={refreshing} pullOffset={pullOffset}>
       <View style={styles.feedPullHost} {...webPullWrapperProps}>
       <View style={[styles.feedPullHost, feedPullTranslateStyle]}>
       <FlatList

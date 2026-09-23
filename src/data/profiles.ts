@@ -5,6 +5,7 @@ import { latestRawProfiles } from './latestProfiles';
 import { moreRawProfiles } from './moreProfiles';
 import { newestRawProfiles } from './newestProfiles';
 import { nextRawProfiles } from './nextProfiles';
+import { applyDemoCatalogPolish } from './demoCatalogPolish';
 import { applyLegacyProfileEnrichment } from './legacyProfileEnrichment';
 import { profileGeoLocation } from '../utils/geoMap';
 import { applyAdminProfileOverride } from '../admin/adminProfileStore';
@@ -1147,7 +1148,7 @@ const rawProfiles: Profile[] = [
     job: 'Dentist',
     photos: [
       'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=80',
-      'https://picsum.photos/seed/ember-diego/800/1000',
+      'https://images.pexels.com/photos/2373775/pexels-photo-2373775.jpeg?auto=compress&cs=tinysrgb&w=800&h=1000&fit=crop',
     ],
     interests: ['Dance', 'Food', 'Travel'],
   },
@@ -1189,7 +1190,7 @@ function withVerification(profile: Profile): Profile {
 
 export const mockProfiles: Profile[] = rawProfiles.map((profile, index) => {
   const seed = Number(profile.id) || index + 1;
-  const enriched = applyLegacyProfileEnrichment(profile);
+  const enriched = applyDemoCatalogPolish(applyLegacyProfileEnrichment(profile));
   return hydrateCatalogProfilePhotos(
     withEmberFields(
       withRelationshipStatus(

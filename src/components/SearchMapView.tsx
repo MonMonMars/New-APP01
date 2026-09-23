@@ -56,6 +56,8 @@ type SearchMapViewProps = {
   showRadiusRing?: boolean;
   showYouMarker?: boolean;
   showAvatarPins?: boolean;
+  /** Privacy-safe markers: icon pins or dots — never profile photos unless `avatar`. */
+  pinMarkerStyle?: 'icon' | 'dot' | 'avatar';
   selectedPinId?: string | null;
   interactive?: boolean;
   onCenterChange?: (center: GeoPoint) => void;
@@ -143,6 +145,7 @@ export function SearchMapView({
   showRadiusRing = true,
   showYouMarker = true,
   showAvatarPins = true,
+  pinMarkerStyle,
   selectedPinId = null,
   interactive = true,
   onCenterChange,
@@ -233,6 +236,13 @@ export function SearchMapView({
     ringPixel.top > -ringDiameter / 2 &&
     ringPixel.left < mapSize.width + ringDiameter / 2 &&
     ringPixel.top < mapSize.height + ringDiameter / 2;
+
+  const resolvedPinStyle: 'icon' | 'dot' | 'avatar' = useMemo(() => {
+    if (pinMarkerStyle) {
+      return pinMarkerStyle;
+    }
+    return showAvatarPins ? 'avatar' : 'icon';
+  }, [pinMarkerStyle, showAvatarPins]);
 
   const mapPins: MapPin[] = useMemo(
     () => layoutMapPins(pins, center, zoom, mapSize.width, mapSize.height),
@@ -419,26 +429,38 @@ export function SearchMapView({
 
   const renderPin = (pin: MapPin) => {
     const selected = selectedPinId === pin.id;
-    const useAvatar = showAvatarPins && Boolean(pin.photoUrl);
-    const size = useAvatar ? (selected ? AVATAR_PIN_SELECTED : AVATAR_PIN_SIZE) : selected ? 14 : 10;
+    const useAvatar = resolvedPinStyle === 'avatar' && Boolean(pin.photoUrl);
+    const useIcon = resolvedPinStyle === 'icon';
+    const iconSize = selected ? 26 : 22;
+    const dotSize = selected ? 14 : 10;
+    const size = useAvatar ? (selected ? AVATAR_PIN_SELECTED : AVATAR_PIN_SIZE) : useIcon ? iconSize : dotSize;
     const half = size / 2;
-    const positionStyle = {
-      left: pin.left - half,
-      top: pin.top - half,
-      width: size,
-      height: size,
-      borderRadius: half,
-    };
+    const positionStyle = useIcon
+      ? {
+          left: pin.left - half,
+          top: pin.top - iconSize + 2,
+          width: iconSize,
+          height: iconSize,
+        }
+      : {
+          left: pin.left - half,
+          top: pin.top - half,
+          width: size,
+          height: size,
+          borderRadius: half,
+        };
 
     const pinShellStyle: ViewStyle[] = [
-      useAvatar ? styles.avatarPin : styles.pin,
+      useAvatar ? styles.avatarPin : useIcon ? styles.iconPin : styles.pin,
       positionStyle,
-      {
-        backgroundColor: useAvatar ? '#fff' : selected ? accentColor : pinColor,
-        borderColor: selected ? accentColor : '#fff',
-      },
+      useAvatar || useIcon
+        ? {}
+        : {
+            backgroundColor: selected ? accentColor : pinColor,
+            borderColor: selected ? accentColor : '#fff',
+          },
     ];
-    if (selected) {
+    if (selected && !useIcon) {
       pinShellStyle.push(useAvatar ? styles.avatarPinSelected : styles.pinSelected);
     }
     const avatarImageStyle: ImageStyle = styles.avatarImage;
@@ -447,12 +469,16 @@ export function SearchMapView({
       ? pinAccessibilityLabel?.(pin.name) ?? pin.name
       : undefined;
 
+    const pinBody = useAvatar ? (
+      <Image source={{ uri: pin.photoUrl }} style={avatarImageStyle} contentFit="cover" />
+    ) : useIcon ? (
+      <Ionicons name="location" size={iconSize} color={selected ? accentColor : pinColor} />
+    ) : null;
+
     if (!onPinPress) {
       return (
         <View key={pin.id} pointerEvents="none" style={pinShellStyle}>
-          {useAvatar ? (
-            <Image source={{ uri: pin.photoUrl }} style={avatarImageStyle} contentFit="cover" />
-          ) : null}
+          {pinBody}
         </View>
       );
     }
@@ -466,9 +492,7 @@ export function SearchMapView({
         onPress={() => onPinPress(pin.id)}
         style={pinShellStyle}
       >
-        {useAvatar ? (
-          <Image source={{ uri: pin.photoUrl }} style={avatarImageStyle} contentFit="cover" />
-        ) : null}
+        {pinBody}
       </AnimatedPressable>
     );
   };
@@ -679,6 +703,12 @@ const styles = StyleSheet.create({
   pinSelected: {
     borderWidth: 2,
     zIndex: 5,
+  },
+  iconPin: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    zIndex: 3,
   },
   avatarPin: {
     position: 'absolute',

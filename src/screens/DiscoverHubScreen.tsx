@@ -412,6 +412,7 @@ function HubTile({
             showYouMarker={false}
             showRadiusRing
             showAvatarPins={false}
+            pinMarkerStyle="icon"
             interactive={false}
             style={styles.hubMapPreview}
           />

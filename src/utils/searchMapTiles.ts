@@ -13,28 +13,41 @@ export { CITY_COORDS, DEFAULT_MAP_CENTER, mapCenterForCity, zoomForRadius };
 /** Logical tile size on screen (Slippy Map 256 world units). */
 export const TILE_PX = 256;
 
-const CARTO_SUBDOMAINS = ['a', 'b', 'c', 'd'] as const;
+/** Max zoom for OSM raster tiles (overzoom uses +1 fetch below this cap). */
+export const MAP_TILE_MAX_ZOOM = 19;
 
 /**
- * Device pixel ratio for choosing @2x raster tiles.
- * RN Web often reports PixelRatio 1 while the screen is 2x — that made @2x tiles skipped and maps look soft.
+ * Device pixel ratio for retina tile fetch.
+ * RN Web often reports PixelRatio 1 while the screen is 2x or 3x.
  */
 export function mapTilePixelRatio(): number {
   if (Platform.OS === 'web') {
-    if (typeof window !== 'undefined' && window.devicePixelRatio >= 1.5) {
-      return 2;
+    if (typeof window !== 'undefined') {
+      return Math.min(3, Math.max(1, window.devicePixelRatio || 1));
     }
     return 1;
   }
-  return PixelRatio.get() >= 2 ? 2 : 1;
+  return PixelRatio.get();
 }
 
-/** Carto Positron (light) without labels — clean streets, no baked-in caption tiles. */
+type TileFetchPlan = {
+  fetchZoom: number;
+  /** Each tile drawn at TILE_PX * pixelScale (0.5 when fetching zoom+1 on retina). */
+  pixelScale: number;
+};
+
+/** Retina: fetch one zoom level deeper, draw tiles at half size — sharp on phone/desktop. */
+export function tileFetchPlan(displayZoom: number): TileFetchPlan {
+  const dpr = mapTilePixelRatio();
+  if (dpr >= 1.5 && displayZoom < MAP_TILE_MAX_ZOOM - 1) {
+    return { fetchZoom: displayZoom + 1, pixelScale: 0.5 };
+  }
+  return { fetchZoom: displayZoom, pixelScale: 1 };
+}
+
+/** OpenStreetMap standard raster tiles — no provider watermark baked into imagery. */
 export function buildMapTileUri(zoom: number, x: number, y: number): string {
-  const useRetina = mapTilePixelRatio() >= 2;
-  const retinaSuffix = useRetina ? '@2x' : '';
-  const subdomain = CARTO_SUBDOMAINS[Math.abs(x + y) % CARTO_SUBDOMAINS.length];
-  return `https://${subdomain}.basemaps.cartocdn.com/rastertiles/light_nolabels/${zoom}/${x}/${y}${retinaSuffix}.png`;
+  return `https://tile.openstreetmap.org/${zoom}/${x}/${y}.png`;
 }
 
 export type MapTile = {
@@ -42,6 +55,7 @@ export type MapTile = {
   uri: string;
   left: number;
   top: number;
+  size: number;
 };
 
 export function lonToTile(lon: number, zoom: number): number {
@@ -99,7 +113,7 @@ export function milesToPixels(miles: number, lat: number, zoom: number): number 
 }
 
 export function buildMapTiles(
-  zoom: number,
+  displayZoom: number,
   width: number,
   height: number,
   lat: number,
@@ -108,13 +122,16 @@ export function buildMapTiles(
   if (width <= 0 || height <= 0) {
     return [];
   }
-  const n = 2 ** zoom;
-  const cx = lonToTile(lng, zoom);
-  const cy = latToTile(lat, zoom);
-  const minX = Math.floor(cx - width / 2 / TILE_PX) - 1;
-  const maxX = Math.ceil(cx + width / 2 / TILE_PX) + 1;
-  const minY = Math.floor(cy - height / 2 / TILE_PX) - 1;
-  const maxY = Math.ceil(cy + height / 2 / TILE_PX) + 1;
+
+  const { fetchZoom, pixelScale } = tileFetchPlan(displayZoom);
+  const tileSpan = TILE_PX * pixelScale;
+  const n = 2 ** fetchZoom;
+  const cx = lonToTile(lng, fetchZoom);
+  const cy = latToTile(lat, fetchZoom);
+  const minX = Math.floor(cx - width / 2 / tileSpan) - 1;
+  const maxX = Math.ceil(cx + width / 2 / tileSpan) + 1;
+  const minY = Math.floor(cy - height / 2 / tileSpan) - 1;
+  const maxY = Math.ceil(cy + height / 2 / tileSpan) + 1;
   const tiles: MapTile[] = [];
   for (let x = minX; x <= maxX; x += 1) {
     for (let y = minY; y <= maxY; y += 1) {
@@ -123,10 +140,11 @@ export function buildMapTiles(
       }
       const wrappedX = ((x % n) + n) % n;
       tiles.push({
-        key: `${zoom}-${wrappedX}-${y}-${x}`,
-        uri: buildMapTileUri(zoom, wrappedX, y),
-        left: (x - cx) * TILE_PX + width / 2,
-        top: (y - cy) * TILE_PX + height / 2,
+        key: `${fetchZoom}-${wrappedX}-${y}-${x}-${pixelScale}`,
+        uri: buildMapTileUri(fetchZoom, wrappedX, y),
+        left: (x - cx) * tileSpan + width / 2,
+        top: (y - cy) * tileSpan + height / 2,
+        size: tileSpan,
       });
     }
   }

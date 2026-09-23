@@ -4,30 +4,30 @@ import { AI_PERSONA_IDS, INCOMING_LIKE_IDS, mockProfiles, getProfileById } from 
 const humanProfiles = mockProfiles.filter((p) => !AI_PERSONA_IDS.has(p.id) && !p.isAiPersona);
 
 const nameCounts = new Map<string, number>();
-const stockPhotoProfiles: string[] = [];
+const invalidPhotoProfiles: string[] = [];
 
-function isStockPhotoUrl(url: string): boolean {
-  const lower = url.toLowerCase();
-  if (lower.startsWith('spark-demo-portrait://')) {
-    return false;
-  }
-  return (
-    lower.includes('pexels.com') ||
-    lower.includes('unsplash.com') ||
-    lower.includes('picsum.photos')
-  );
+function isPexelsPortraitUrl(url: string): boolean {
+  return url.includes('images.pexels.com/photos/');
+}
+
+function isLegacyDemoPortraitUri(url: string): boolean {
+  return url.toLowerCase().startsWith('spark-demo-portrait://');
 }
 
 for (const profile of humanProfiles) {
   const nameKey = profile.name.trim().toLowerCase();
   nameCounts.set(nameKey, (nameCounts.get(nameKey) ?? 0) + 1);
 
-  if (profile.photos.some(isStockPhotoUrl)) {
-    stockPhotoProfiles.push(profile.id);
+  if (profile.photos.length === 0) {
+    invalidPhotoProfiles.push(profile.id);
+    continue;
   }
 
-  if (profile.photos.length === 0) {
-    stockPhotoProfiles.push(profile.id);
+  const bad = profile.photos.some(
+    (url) => !isPexelsPortraitUrl(url) || isLegacyDemoPortraitUri(url),
+  );
+  if (bad) {
+    invalidPhotoProfiles.push(profile.id);
   }
 }
 
@@ -62,7 +62,7 @@ console.log(
   JSON.stringify(
     {
       totalHumanProfiles: humanProfiles.length,
-      stockPhotoProfileCount: stockPhotoProfiles.length,
+      invalidPhotoProfileCount: invalidPhotoProfiles.length,
       duplicateNameCount: duplicateNames.length,
       legacyShortBioCount: legacyShortBios.length,
       missingIncomingIds: missingIncoming,
@@ -80,8 +80,11 @@ if (missingIncoming.length > 0) {
   process.exit(1);
 }
 
-if (stockPhotoProfiles.length > 0) {
-  console.error('Catalog profiles must use AI portrait assets, not stock URLs:', stockPhotoProfiles.slice(0, 40));
+if (invalidPhotoProfiles.length > 0) {
+  console.error(
+    'Catalog profiles must use Pexels portrait URLs (no AI bundle / unsplash):',
+    invalidPhotoProfiles.slice(0, 40),
+  );
   process.exit(1);
 }
 

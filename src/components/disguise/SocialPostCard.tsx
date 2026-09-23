@@ -9,7 +9,6 @@ import { getDisguiseOverlaySnippet, localizeTimeAgoLabel } from '../../i18n/labe
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { buildSocialReporter, socialReporterPhotoIndex } from '../../utils/disguiseReporterPhotos';
-import { profileIntroCaption } from '../../utils/profileIntroCaption';
 import { resolveSocialPostProfileId } from '../../utils/disguiseReporterPhotos';
 import { resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
@@ -56,8 +55,6 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
   );
   const authorAvatarUrl = linkedAuthorProfile?.photos[0] ?? post.avatarUrl;
   const authorContentKind = linkedAuthorProfile ? 'profile' : 'social';
-  const authorCaption = linkedAuthorProfile ? profileIntroCaption(linkedAuthorProfile) : undefined;
-
   const maskSnippet = post.avatarMask?.text.split(' ').slice(0, 2).join(' ')
     ? getDisguiseOverlaySnippet(locale, post.avatarMask.text.split(' ').slice(0, 2).join(' '))
     : t('profile.live');
@@ -105,38 +102,27 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
             profileKey={linkedAuthorProfile?.id ?? post.id}
             style={styles.avatarSlot}
           >
-            {post.maskAvatar !== false && post.avatarMask ? (
-              <FeedPersonThumbnail
-                imageUrl={authorAvatarUrl}
-                overlayText={maskSnippet}
-                overlayVariant={post.avatarMask.variant}
-                contentKind={authorContentKind}
-                caption={authorCaption}
-                hideLabel
-                showIconBadge={authorContentKind !== 'profile'}
-                onPress={linkedAuthorProfile ? () => setAuthorOpen(true) : undefined}
-                accessibilityLabel={
-                  linkedAuthorProfile
-                    ? t('disguiseMiniWindow.viewProfile', { name: post.author })
-                    : post.author
-                }
-              />
-            ) : (
-              <FeedPersonThumbnail
-                plainAvatar
-                contentKind={authorContentKind}
-                caption={authorCaption}
-                hideLabel
-                showIconBadge={authorContentKind !== 'profile'}
-                imageUrl={authorAvatarUrl}
-                onPress={linkedAuthorProfile ? () => setAuthorOpen(true) : undefined}
-                accessibilityLabel={
-                  linkedAuthorProfile
-                    ? t('disguiseMiniWindow.viewProfile', { name: post.author })
-                    : post.author
-                }
-              />
-            )}
+            <FeedPersonThumbnail
+              imageUrl={authorAvatarUrl}
+              plainAvatar={
+                Boolean(linkedAuthorProfile) || post.maskAvatar === false || !post.avatarMask
+              }
+              overlayText={
+                linkedAuthorProfile || post.maskAvatar === false || !post.avatarMask
+                  ? undefined
+                  : maskSnippet
+              }
+              overlayVariant={post.avatarMask?.variant ?? 'news'}
+              contentKind={authorContentKind}
+              hideLabel
+              showIconBadge={!linkedAuthorProfile && authorContentKind !== 'profile'}
+              onPress={linkedAuthorProfile ? () => setAuthorOpen(true) : undefined}
+              accessibilityLabel={
+                linkedAuthorProfile
+                  ? t('disguiseMiniWindow.viewProfile', { name: post.author })
+                  : post.author
+              }
+            />
           </PulseProfileSwap>
           <View style={styles.authorMeta}>
             <Text style={[styles.authorName, { color: colors.text }]} numberOfLines={1}>

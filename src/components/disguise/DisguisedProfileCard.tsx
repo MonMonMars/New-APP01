@@ -24,7 +24,7 @@ import { PersonPreviewSheet } from './PersonPreviewSheet';
 import { SocialCommentSheet } from './SocialCommentSheet';
 import { disguisedProfileToAdPost, disguisedProfileToNewsPost } from '../../utils/disguisePulseDestinations';
 import { profileIntroCaption } from '../../utils/profileIntroCaption';
-import { profileIdFromPostId, resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
+import { resolveDisguisedProfilePost } from '../../utils/resolveDisguiseProfile';
 import { usePulseContextSection } from '../../hooks/usePulseContextSection';
 import { PulseProfileSwap } from '../motion/PulseProfileSwap';
 import { AnimatedPressable } from '../AnimatedPressable';
@@ -54,8 +54,8 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   const [commentsOpen, setCommentsOpen] = useState(false);
   const upvoted = pulseSocial.likedPostIds.includes(post.id);
 
-  const linkedProfileId = post.profileId ?? profileIdFromPostId(post.id);
-  const linkedProfile = resolveExplicitDatingProfile(linkedProfileId, pulseSection);
+  const linkedProfile = resolveDisguisedProfilePost(post, pulseSection, preferences.showMe);
+  const linkedProfileId = linkedProfile?.id;
   const profileCaption = linkedProfile ? profileIntroCaption(linkedProfile) : post.overlayText;
 
   const reporter: NewsReporter = {

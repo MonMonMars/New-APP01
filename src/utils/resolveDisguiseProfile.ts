@@ -164,6 +164,21 @@ export function resolveDisguiseProfile(
   return resolveExplicitDatingProfile(id, section);
 }
 
+/** Resolve a disguised-profile feed card to a dating profile (honors show-me + slot remapping). */
+export function resolveDisguisedProfilePost(
+  post: { id: string; profileId?: string },
+  section?: SparkSection | string | null,
+  showMe: ShowMePreference = 'everyone',
+): Profile | null {
+  const profileId = explicitReporterProfileId(
+    post.id,
+    post.profileId ?? profileIdFromPostId(post.id),
+    showMe,
+    section,
+  );
+  return resolveExplicitDatingProfile(profileId, section, showMe);
+}
+
 /** Resolve a woven dating profile id for the active Spark/Ember section. */
 export function resolveExplicitDatingProfile(
   profileId: string | undefined,

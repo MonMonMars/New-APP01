@@ -77,9 +77,3 @@ export function resolveDefaultRoleFromEnv(email: string): AdminRole {
   return 'viewer';
 }
 
-export function shouldShowAdminMenuEntry(): boolean {
-  if (isAdminDevOpen()) {
-    return true;
-  }
-  return getAdminAllowlist().length > 0;
-}

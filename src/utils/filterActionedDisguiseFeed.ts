@@ -1,4 +1,5 @@
-import { DisguisedProfilePost, FeedItem, NewsReporter } from '../data/disguiseFeed';
+import { DisguisedProfilePost, FeedItem, NewsReporter, SocialPost } from '../data/disguiseFeed';
+import { socialAuthorDemoProfileId } from '../data/disguiseReporterProfileLinks';
 import { getProfileById } from '../data/profiles';
 import { buildSectionProfilePool } from './discoveryProfilePool';
 import { buildPulseProfilePool, PulseWorldPoolScope } from './pulseWorldPool';
@@ -113,6 +114,26 @@ function profileToReporter(reporter: NewsReporter, profile: Profile): NewsReport
   };
 }
 
+function pinnedSocialProfileId(post: SocialPost): string | undefined {
+  return post.datingProfileId ?? socialAuthorDemoProfileId(post.author);
+}
+
+function profileToSocialPost(post: SocialPost, profile: Profile): SocialPost {
+  return {
+    ...post,
+    datingProfileId: profile.id,
+    avatarUrl: profile.photos[0] ?? post.avatarUrl,
+  };
+}
+
+function syncSocialPostToProfile(post: SocialPost, profileId: string): SocialPost {
+  const profile = getProfileById(profileId);
+  if (!profile) {
+    return post;
+  }
+  return profileToSocialPost(post, profile);
+}
+
 function profileToDisguisedPost(post: DisguisedProfilePost, profile: Profile): DisguisedProfilePost {
   const intro = profileIntroCaption(profile);
   return {
@@ -152,6 +173,15 @@ function collectReservedProfileIds(
           reserved.add(profileId);
         }
       });
+      return;
+    }
+
+    if (item.type === 'social') {
+      const pinned = pinnedSocialProfileId(item);
+      const profileId = slotDisplayProfileId(item.id, pinned);
+      if (profileId) {
+        reserved.add(profileId);
+      }
     }
   });
 
@@ -258,6 +288,37 @@ export function filterActionedDisguiseFeed(
       }
 
       return [{ ...item, reporters }];
+    }
+
+    if (item.type === 'social') {
+      const pinned = pinnedSocialProfileId(item);
+      const displayId = slotDisplayProfileId(item.id, pinned);
+      if (!displayId) {
+        return [item];
+      }
+
+      if (!actioned.has(displayId)) {
+        setPulseSlotDisplayProfile(item.id, undefined);
+        if (pinned && pinned !== displayId) {
+          return [syncSocialPostToProfile(item, pinned)];
+        }
+        return [item];
+      }
+
+      const replacement = pickReplacementProfile(
+        item.id,
+        pool,
+        reserved,
+        displayFallbackPool,
+        displayId,
+      );
+      if (!replacement) {
+        return [item];
+      }
+
+      reserved.add(replacement.id);
+      setPulseSlotDisplayProfile(item.id, replacement.id);
+      return [profileToSocialPost(item, replacement)];
     }
 
     return [item];

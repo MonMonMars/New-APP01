@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 
 import type { NewsPost } from '../src/data/disguiseFeed';
+import { getProfileById } from '../src/data/profiles';
 import { filterActionedDisguiseFeed } from '../src/utils/filterActionedDisguiseFeed';
+import { profileIntroCaption } from '../src/utils/profileIntroCaption';
 import { clearPulseSlotDisplayProfiles } from '../src/utils/resolveDisguiseProfile';
 
 function mockNews(reporterId: string, profileId: string): NewsPost {
@@ -54,8 +56,16 @@ function run(): void {
   );
   const swapped = afterLikeA[0];
   assert.equal(swapped.type, 'news');
-  const shownAfterA = swapped.reporters[0]?.profileId;
+  const reporterAfterA = swapped.reporters[0];
+  const shownAfterA = reporterAfterA?.profileId;
   assert.ok(shownAfterA && shownAfterA !== profileA, 'first like should swap thumbnail profile');
+  const introAfterA = getProfileById(shownAfterA);
+  assert.ok(introAfterA, 'swapped profile should exist');
+  assert.equal(
+    reporterAfterA?.quote,
+    profileIntroCaption(introAfterA),
+    'caption beside thumbnail should match swapped person',
+  );
 
   const afterLikeShown = filterActionedDisguiseFeed(
     base,

@@ -2,11 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://submit-stars-boxes-tuition.trycloudflare.com**
+**https://passion-onion-manhattan-ownership.trycloudflare.com**
 
 - **Integration branch:** `main` (includes realistic portraits **#169**, Pulse like fix **#168**, map privacy **#167** when merged)
-- **Build ID:** `c292bbc-20260923T013747Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-23 01:39 UTC — `verify-demo-link.mjs` PASS (9/9)
+- **Build ID:** `c315faa-20260923T053701Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
+- **Verified:** 2026-09-23 05:37 UTC — `verify-demo-link.mjs` PASS (9/9)
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

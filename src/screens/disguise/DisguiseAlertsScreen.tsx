@@ -51,6 +51,7 @@ export function DisguiseAlertsScreen() {
     refreshing,
     justUpdated,
     isAtTop,
+    pullDistance,
     flatListProps,
     listRef,
     refresh,
@@ -120,6 +121,8 @@ export function DisguiseAlertsScreen() {
             refreshing={refreshing}
             justUpdated={justUpdated}
             isAtTop={isAtTop}
+            pullDistance={pullDistance}
+            refreshGeneration={refreshGeneration}
             onPullRefresh={() => {
               void refresh();
             }}

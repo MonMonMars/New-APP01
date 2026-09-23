@@ -85,6 +85,7 @@ export function DisguiseProfileScreen() {
     refreshing,
     justUpdated,
     isAtTop,
+    pullDistance,
     scrollViewProps,
     scrollViewRef,
     refresh,
@@ -251,6 +252,8 @@ export function DisguiseProfileScreen() {
           refreshing={refreshing}
           justUpdated={justUpdated}
           isAtTop={isAtTop}
+          pullDistance={pullDistance}
+          refreshGeneration={refreshGeneration}
           onPullRefresh={() => {
             void refresh();
           }}

@@ -166,6 +166,8 @@ export function DisguiseTrendingScreen() {
     refreshing,
     justUpdated,
     isAtTop,
+    pullDistance,
+    refreshGeneration,
     scrollViewProps,
     scrollViewRef,
     refresh,
@@ -205,6 +207,8 @@ export function DisguiseTrendingScreen() {
           refreshing={refreshing}
           justUpdated={justUpdated}
           isAtTop={isAtTop}
+          pullDistance={pullDistance}
+          refreshGeneration={refreshGeneration}
           onPullRefresh={() => {
             void refresh();
           }}

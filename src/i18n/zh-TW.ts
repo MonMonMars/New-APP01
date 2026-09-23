@@ -1223,6 +1223,7 @@ export const zhTw = {
     emptyTopicBody: '試試其他主題，或清除篩選以查看全部內容。',
     exploreTrending: '探索{tab}',
     pullRefreshHint: '下拉以載入新動態與更新個人檔案',
+    releaseToRefresh: '放開即可重新整理',
     scrollRefreshHint: '在頂部下拉，或在頂部時再點一次 Home',
     scrollLoadMoreHint: '繼續向下捲動以載入更多',
     loadingMore: '正在載入更多新聞…',

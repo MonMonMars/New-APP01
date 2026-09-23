@@ -1233,6 +1233,7 @@ export const en = {
     emptyTopicBody: 'Try another topic or clear the filter to see everything.',
     exploreTrending: 'Explore {tab}',
     pullRefreshHint: 'Pull down for new stories and updated profiles',
+    releaseToRefresh: 'Release to refresh',
     scrollRefreshHint: 'Pull down at the top, or tap Home again while at the top',
     scrollLoadMoreHint: 'Keep scrolling for more stories',
     loadingMore: 'Loading more stories…',

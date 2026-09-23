@@ -106,7 +106,7 @@ function clampVisualScale(baseZoom: number, scale: number): number {
   return Math.min(maxScale, Math.max(minScale, scale));
 }
 
-/** OpenStreetMap raster basemap with pan, pinch/wheel zoom, and GPS control. */
+/** Carto Voyager raster basemap with pan, pinch/wheel zoom, and GPS control. */
 export function SearchMapView({
   center,
   zoom,

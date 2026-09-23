@@ -2,11 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://tommy-workstation-carolina-portland.trycloudflare.com**
+**https://trips-trans-apart-tourism.trycloudflare.com**
 
-- **Integration branch:** `main` (PR **#157** + docs **#159**)
-- **Build ID:** `55178b8-20260922T182447Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-22 18:27 UTC — tunnel HTTP 200 + local `verify:extended` PASS
+- **Integration branch:** `cursor/clear-map-basemap-2e8c` (PR **#170** — sharp OSM basemap)
+- **Build ID:** `852480b-20260923T054827Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
+- **Verified:** 2026-09-23 05:51 UTC — tunnel HTTP 200 + `verify-demo-link.mjs` PASS (9/9)
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

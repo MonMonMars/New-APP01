@@ -13,8 +13,10 @@ export { CITY_COORDS, DEFAULT_MAP_CENTER, mapCenterForCity, zoomForRadius };
 /** Logical tile size on screen (Slippy Map 256 world units). */
 export const TILE_PX = 256;
 
-/** Max zoom for OSM raster tiles (overzoom uses +1 fetch below this cap). */
-export const MAP_TILE_MAX_ZOOM = 19;
+/** Max zoom for Carto Voyager raster tiles (overzoom uses +1 fetch below this cap). */
+export const MAP_TILE_MAX_ZOOM = 20;
+
+const CARTO_SUBDOMAINS = ['a', 'b', 'c', 'd'] as const;
 
 /**
  * Device pixel ratio for retina tile fetch.
@@ -45,9 +47,21 @@ export function tileFetchPlan(displayZoom: number): TileFetchPlan {
   return { fetchZoom: displayZoom, pixelScale: 1 };
 }
 
-/** OpenStreetMap standard raster tiles — no provider watermark baked into imagery. */
-export function buildMapTileUri(zoom: number, x: number, y: number): string {
-  return `https://tile.openstreetmap.org/${zoom}/${x}/${y}.png`;
+/**
+ * Carto Voyager without labels — clean streets/water (OSM data), no caption tiles.
+ * @2x on retina; combined with tileFetchPlan() for extra sharpness on high-DPR web.
+ */
+export function buildMapTileUri(
+  zoom: number,
+  x: number,
+  y: number,
+  pixelScale = 1,
+): string {
+  // Overzoom already fetches a deeper zoom — skip @2x to avoid oversampling.
+  const useRetina = mapTilePixelRatio() >= 2 && pixelScale >= 1;
+  const retinaSuffix = useRetina ? '@2x' : '';
+  const subdomain = CARTO_SUBDOMAINS[Math.abs(x + y) % CARTO_SUBDOMAINS.length];
+  return `https://${subdomain}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/${zoom}/${x}/${y}${retinaSuffix}.png`;
 }
 
 export type MapTile = {
@@ -141,7 +155,7 @@ export function buildMapTiles(
       const wrappedX = ((x % n) + n) % n;
       tiles.push({
         key: `${fetchZoom}-${wrappedX}-${y}-${x}-${pixelScale}`,
-        uri: buildMapTileUri(fetchZoom, wrappedX, y),
+        uri: buildMapTileUri(fetchZoom, wrappedX, y, pixelScale),
         left: (x - cx) * tileSpan + width / 2,
         top: (y - cy) * tileSpan + height / 2,
         size: tileSpan,

@@ -755,7 +755,7 @@ export const en = {
     pinsTruncated: 'Showing {shown} of {total} nearby',
     viewProfileA11y: 'View {name}\'s profile',
     areaLoaded: 'People in this area added to your deck',
-    attribution: '© OpenStreetMap contributors',
+    attribution: '© OpenStreetMap contributors · © CARTO',
     zoomInA11y: 'Zoom in',
     zoomOutA11y: 'Zoom out',
   },

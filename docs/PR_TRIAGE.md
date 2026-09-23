@@ -1,6 +1,6 @@
 # Open draft PR triage vs `main`
 
-**Status (2026-09-23, latest):** **#181** i18n CI fix · **#182** map basemap (OSM.org, no watermark tiles) · **#183** demo docs. Re-port **#166–#169** → **#180**. Closed stale **#163–#171** where superseded. **No open feature PRs.**
+**Status (2026-09-23, latest):** **#191** integrate Pulse like reload + map pin privacy · **#192** map viewport people count. **#189–#190** superseded by **#191**. **No open feature PRs.**
 
 **Status (2026-09-22):** Drafts **#1–#139** (plus **#147–#154** earlier) reviewed against current **`main`**. All were **closed as superseded** — features already live via **#155**, **#157**, and follow-ups. **No blind merges** were performed (branches share only the initial commit with `main`).
 

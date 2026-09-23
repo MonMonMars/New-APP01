@@ -5,8 +5,8 @@
 **https://yarn-ends-pop-managers.trycloudflare.com**
 
 - **Branch:** `main` (map basemap: standard **OpenStreetMap** tiles — no “API key required” watermarks)
-- **Build ID:** `c306c2b-20260923T215915Z` (merged **#191** — Pulse like reload + map pin privacy + area matches grid)
-- **Verified:** 2026-09-23 — `npm run verify:ci`
+- **Build ID:** `154e76e-20260923T220322Z` (through **#192** — map area count + Browse matches smoke)
+- **Verified:** 2026-09-23 — `npm run verify:ci` + `verify:ci-smoke` + Tokyo map smoke
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

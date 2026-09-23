@@ -32,6 +32,12 @@ for (const profile of humanProfiles) {
 }
 
 const duplicateNames = [...nameCounts.entries()].filter(([, count]) => count > 1);
+const clicheBios = humanProfiles.filter((p) =>
+  /love language|picsum\.photos|images\.unsplash\.com/i.test(p.bio ?? ''),
+);
+const clichePhotos = humanProfiles.filter((p) =>
+  p.photos.some((url) => /unsplash|picsum|spark-demo-portrait/i.test(url)),
+);
 const legacyShortBios = humanProfiles.filter(
   (p) => Number(p.id) < 97 && (p.bio?.length ?? 0) < 80,
 );
@@ -69,11 +75,29 @@ console.log(
       nextBatchUnique: nextBatchOk,
       latestBatchUnique: latestBatchOk,
       newestBatchUnique: newestBatchOk,
+      clicheBioCount: clicheBios.length,
+      clichePhotoCount: clichePhotos.length,
     },
     null,
     2,
   ),
 );
+
+if (clicheBios.length > 0) {
+  console.error(
+    'Demo bios still contain blocked cliché phrases:',
+    clicheBios.slice(0, 12).map((p) => p.id),
+  );
+  process.exit(1);
+}
+
+if (clichePhotos.length > 0) {
+  console.error(
+    'Demo photos must be Pexels only after catalog hydration:',
+    clichePhotos.slice(0, 12).map((p) => p.id),
+  );
+  process.exit(1);
+}
 
 if (missingIncoming.length > 0) {
   console.error('INCOMING_LIKE_IDS reference missing profiles:', missingIncoming);

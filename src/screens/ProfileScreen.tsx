@@ -67,8 +67,8 @@ export function ProfileScreen() {
   const { colors } = useTheme();
   const { t, locale } = useTranslation();
   const admin = useOptionalAdmin();
-  const showAdminMenu = admin?.canOpenAdminMenu ?? false;
-  const adminSignedIn = Boolean(admin?.adminSession);
+  const adminSession = admin?.adminSession ?? null;
+  const showAdminMenu = Boolean(adminSession);
 
   const {
     user,
@@ -456,7 +456,7 @@ export function ProfileScreen() {
               <View style={styles.adminLabelWrap}>
                 <Text style={[styles.settingsLabel, { color: colors.text }]}>{t('admin.profileMenuTitle')}</Text>
                 <Text style={[styles.adminMenuSub, { color: colors.textMuted }]}>
-                  {adminSignedIn ? t('admin.profileMenuSignedIn') : t('admin.profileMenuSignedOut')}
+                  {t('admin.profileMenuSignedIn')}
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />

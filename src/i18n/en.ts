@@ -755,7 +755,7 @@ export const en = {
     pinsTruncated: 'Showing {shown} of {total} nearby',
     viewProfileA11y: 'View {name}\'s profile',
     areaLoaded: 'People in this area added to your deck',
-    attribution: '© CARTO · © OpenStreetMap contributors',
+    attribution: '© OpenStreetMap contributors · OSM France tiles',
     zoomInA11y: 'Zoom in',
     zoomOutA11y: 'Zoom out',
   },
@@ -1810,7 +1810,7 @@ export const en = {
     title: 'Admin',
     staffSignIn: 'Staff sign-in',
     signInHint:
-      'Sign in with a staff email on the allowlist. Super admins can add accounts from the control panel.',
+      'Sign in with a staff email on the allowlist. After sign-in, Admin appears on your Profile. To open this screen: tap the app version at the bottom of Profile seven times, or open /admin on web.',
     defaultAccountHint: 'Demo default: admin@spark.demo (super admin). Tap Continue if the field is prefilled.',
     emailPlaceholder: 'you@company.com',
     pinPlaceholder: 'Staff PIN (if enabled)',

@@ -34,6 +34,11 @@ export function syncActionedProfileIds(ids: Set<string>): void {
   }
 }
 
+/** Stable reporter slot id for social posts (matches buildSocialReporter). */
+export function pulseSocialPostReporterId(postId: string): string {
+  return `social-${postId}`;
+}
+
 export function profileIdFromPostId(postId: string): string | undefined {
   if (postId === 'disguised-user') {
     return undefined;

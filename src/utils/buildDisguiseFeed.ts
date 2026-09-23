@@ -13,7 +13,12 @@ import {
 } from './refreshPulseFeed';
 import { mergeLiveNewsIntoFeed } from './mergeLivePulseNews';
 import { socialAuthorDemoProfileId } from '../data/disguiseReporterProfileLinks';
-import { explicitReporterProfileId, profileIdFromPostId } from './resolveDisguiseProfile';
+import {
+  explicitReporterProfileId,
+  profileIdFromPostId,
+  pulseSocialPostReporterId,
+} from './resolveDisguiseProfile';
+import { disguiseDisplayName } from './disguiseProfileFeed';
 import { getPulseLiveNewsSnapshot } from '../services/pulseLiveNews';
 import { spaceSponsoredFeedItems } from './pulseFeedSpacing';
 import { dedupePulseFeedItems } from './pulseFeedUnique';
@@ -43,12 +48,29 @@ function weaveProfileCards(base: FeedItem[], profileCards: FeedItem[]): FeedItem
   return result;
 }
 
-function feedItemMatchesShowMe(item: FeedItem, showMe: ShowMePreference): boolean {
+function socialPostProfileId(
+  item: Extract<FeedItem, { type: 'social' }>,
+  showMe: ShowMePreference,
+  section?: SparkSection | string | null,
+): string | undefined {
+  return explicitReporterProfileId(
+    pulseSocialPostReporterId(item.id),
+    item.datingProfileId ?? socialAuthorDemoProfileId(item.author),
+    showMe,
+    section,
+  );
+}
+
+function feedItemMatchesShowMe(
+  item: FeedItem,
+  showMe: ShowMePreference,
+  section?: SparkSection | string | null,
+): boolean {
   if (showMe === 'everyone') {
     return true;
   }
   if (item.type === 'social') {
-    const profileId = item.datingProfileId ?? socialAuthorDemoProfileId(item.author);
+    const profileId = socialPostProfileId(item, showMe, section);
     if (!profileId) {
       return false;
     }
@@ -63,7 +85,7 @@ function feedItemMatchesShowMe(item: FeedItem, showMe: ShowMePreference): boolea
       item.id,
       item.profileId ?? profileIdFromPostId(item.id),
       showMe,
-      undefined,
+      section,
     );
     if (!profileId) {
       return false;
@@ -74,11 +96,15 @@ function feedItemMatchesShowMe(item: FeedItem, showMe: ShowMePreference): boolea
   return true;
 }
 
-function filterPulseFeedForShowMe(items: FeedItem[], showMe: ShowMePreference): FeedItem[] {
+function filterPulseFeedForShowMe(
+  items: FeedItem[],
+  showMe: ShowMePreference,
+  section?: SparkSection | string | null,
+): FeedItem[] {
   if (showMe === 'everyone') {
     return items;
   }
-  return items.filter((item) => feedItemMatchesShowMe(item, showMe));
+  return items.filter((item) => feedItemMatchesShowMe(item, showMe, section));
 }
 
 /** Drop woven profile ids so a Pulse refresh can reassign every slot. */
@@ -139,23 +165,20 @@ export function pinFeedProfileLinks(
 /** Social avatars mirror the linked discover profile photo set. */
 export function syncSocialPostProfiles(
   items: FeedItem[],
-  _section?: SparkSection | string | null,
+  section?: SparkSection | string | null,
   showMe: ShowMePreference = 'everyone',
 ): FeedItem[] {
   return items.map((item) => {
     if (item.type !== 'social') {
       return item;
     }
-    const profileId = item.datingProfileId ?? socialAuthorDemoProfileId(item.author);
+    const profileId = socialPostProfileId(item, showMe, section);
     if (!profileId) {
-      return item;
+      return { ...item, datingProfileId: undefined };
     }
     const profile = getProfileById(profileId);
     if (!profile || profile.photos.length === 0) {
       return { ...item, datingProfileId: profileId };
-    }
-    if (showMe !== 'everyone' && !matchesShowMePreference(profile, showMe)) {
-      return { ...item, datingProfileId: undefined, avatarUrl: item.avatarUrl };
     }
     return {
       ...item,
@@ -175,12 +198,11 @@ export function syncReporterPhotos(
     if (item.type !== 'news') {
       return item;
     }
-    return {
-      ...item,
-      reporters: item.reporters.map((reporter) => {
+    const reporters = item.reporters
+      .map((reporter) => {
         const profileId = explicitReporterProfileId(reporter.id, reporter.profileId, showMe, section);
         if (!profileId) {
-          return reporter;
+          return showMe === 'everyone' ? reporter : null;
         }
         const profile = getProfileById(profileId);
         if (!profile || profile.photos.length === 0) {
@@ -191,11 +213,17 @@ export function syncReporterPhotos(
         return {
           ...reporter,
           profileId,
+          name: disguiseDisplayName(profile.name),
           avatarUrl: profile.photos[0],
           photos: profile.photos,
           quote: intro || quote || reporter.quote,
         };
-      }),
+      })
+      .filter((reporter): reporter is NonNullable<typeof reporter> => reporter !== null);
+
+    return {
+      ...item,
+      reporters,
     };
   });
 }
@@ -227,6 +255,7 @@ export function buildDisguiseFeed(
       showMe,
     ),
     showMe,
+    section,
   );
 
   if (creative) {
@@ -247,6 +276,7 @@ export function buildDisguiseFeed(
         showMe,
       ),
       showMe,
+      section,
     );
   }
 

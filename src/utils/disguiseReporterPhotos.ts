@@ -2,10 +2,14 @@ import { alertDemoProfileId } from '../data/disguiseAlertProfileLinks';
 import { socialAuthorDemoProfileId } from '../data/disguiseReporterProfileLinks';
 import { DisguiseAlertPerson, NewsReporter, SocialPost } from '../data/disguiseFeed';
 import { disguiseSocialPosts } from '../data/disguiseSocialPosts';
-import { SparkSection } from '../types/preferences';
+import { ShowMePreference, SparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
 import { profileIntroCaption } from './profileIntroCaption';
-import { resolveExplicitDatingProfile } from './resolveDisguiseProfile';
+import {
+  explicitReporterProfileId,
+  pulseSocialPostReporterId,
+  resolveExplicitDatingProfile,
+} from './resolveDisguiseProfile';
 
 /** Build a de-duplicated photo list for disguise mini-window previews. */
 export function buildReporterPhotoUrls(
@@ -40,9 +44,15 @@ export function resolveSocialPostProfileId(post: SocialPost): string | undefined
 export function buildSocialReporter(
   post: SocialPost,
   section?: SparkSection | string | null,
+  showMe: ShowMePreference = 'everyone',
 ): NewsReporter {
-  const profileId = resolveSocialPostProfileId(post);
-  const linkedProfile = resolveExplicitDatingProfile(profileId, section);
+  const profileId = explicitReporterProfileId(
+    pulseSocialPostReporterId(post.id),
+    resolveSocialPostProfileId(post),
+    showMe,
+    section,
+  );
+  const linkedProfile = resolveExplicitDatingProfile(profileId, section, showMe);
   const feedPhotos = post.imageUrl ? [post.imageUrl] : [];
   const avatarUrl = linkedProfile?.photos[0] ?? post.avatarUrl;
 

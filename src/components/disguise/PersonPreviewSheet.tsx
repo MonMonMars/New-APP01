@@ -136,13 +136,25 @@ export function PersonPreviewSheet({
     opacity: cardOpacity.value,
   }));
 
-  const linkedProfile = reporter
-    ? resolveExplicitDatingProfile(
-        explicitReporterProfileId(reporter.id, reporter.profileId, preferences.showMe, pulseSection),
-        pulseSection,
-        preferences.showMe,
-      )
-    : null;
+  const linkedProfile = useMemo(() => {
+    if (!reporter) {
+      return null;
+    }
+    const profileId = explicitReporterProfileId(
+      reporter.id,
+      reporter.profileId,
+      preferences.showMe,
+      pulseSection,
+    );
+    const base = resolveExplicitDatingProfile(profileId, pulseSection, preferences.showMe);
+    if (!base) {
+      return null;
+    }
+    return {
+      ...base,
+      photos: reporter.photos.length > 0 ? reporter.photos : base.photos,
+    };
+  }, [preferences.showMe, pulseSection, reporter]);
 
   const displayPhotos = useMemo(() => {
     if (!reporter) {
@@ -190,7 +202,8 @@ export function PersonPreviewSheet({
       return;
     }
     if (liked) {
-      dismissWithStat('like');
+      unlikeProfile(linkedProfile.id);
+      dismissWithStat('unlike');
       return;
     }
     if (!guardLikeLimit()) {
@@ -201,7 +214,16 @@ export function PersonPreviewSheet({
       notifyMatch(linkedProfile.name);
     }
     dismissWithStat('like');
-  }, [dismissWithStat, guardLikeLimit, isDismissing, likeProfile, liked, linkedProfile, notifyMatch]);
+  }, [
+    dismissWithStat,
+    guardLikeLimit,
+    isDismissing,
+    likeProfile,
+    liked,
+    linkedProfile,
+    notifyMatch,
+    unlikeProfile,
+  ]);
 
   const handleSuperLike = useCallback(() => {
     if (!linkedProfile || isDismissing) {

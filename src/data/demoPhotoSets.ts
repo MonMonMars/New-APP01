@@ -22,10 +22,11 @@ function hashNumber(value: number): number {
   return Math.abs(hash ^ (hash >>> 16));
 }
 
+/** Varied crops so carousels do not look like three identical headshots. */
 const CROP_SLOTS: Array<[number, number]> = [
-  [800, 1000],
-  [720, 960],
-  [640, 800],
+  [840, 1050],
+  [760, 950],
+  [900, 1120],
 ];
 
 function portraitCrop(id: number, slot: 0 | 1 | 2): string {

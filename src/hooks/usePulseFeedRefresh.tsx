@@ -78,7 +78,7 @@ const TOP_ARRIVAL_DEBOUNCE_MS = Platform.OS === 'web' ? 280 : 120;
 /** Prevent overscroll / tab re-press from stacking refreshes and stealing taps on web. */
 const REFRESH_COOLDOWN_MS = Platform.OS === 'web' ? 900 : 600;
 /** Visible grey reload — matches Instagram / YouTube pull-to-refresh timing. */
-const PULSE_REFRESH_MIN_MS = Platform.OS === 'web' ? 520 : 480;
+const PULSE_REFRESH_MIN_MS = Platform.OS === 'web' ? 620 : 560;
 
 function waitNextPaint(): Promise<void> {
   return new Promise((resolve) => {
@@ -100,6 +100,7 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
   const [refreshing, setRefreshing] = useState(false);
   const [justUpdated, setJustUpdated] = useState(false);
   const [isAtTop, setIsAtTop] = useState(true);
+  const [pullDistance, setPullDistance] = useState(0);
   const gateRef = useRef(false);
   const listRef = useRef<FlatList | null>(null);
   const scrollViewRef = useRef<ScrollView | null>(null);
@@ -166,6 +167,7 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
       }
 
       gateRef.current = true;
+      setPullDistance(0);
       setRefreshing(true);
       setFeedRefreshing(true);
       const startedAt = Date.now();
@@ -229,6 +231,11 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
       const y = contentOffset.y;
       scrollOffsetRef.current = y;
       setIsAtTop(y <= TOP_OFFSET_THRESHOLD);
+      if (y < 0 && y <= TOP_OFFSET_THRESHOLD) {
+        setPullDistance(Math.min(120, -y));
+      } else if (y >= 0) {
+        setPullDistance(0);
+      }
 
       if (y > 48) {
         wasScrolledDownRef.current = true;
@@ -316,6 +323,7 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
     refreshing,
     justUpdated,
     isAtTop,
+    pullDistance,
     refreshGeneration,
     refresh,
     triggerTopRefresh,

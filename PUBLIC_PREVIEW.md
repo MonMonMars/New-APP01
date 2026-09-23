@@ -2,11 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://comfort-assumed-prep-ham.trycloudflare.com**
+**https://stevens-const-mental-ease.trycloudflare.com**
 
-- **Branch:** `main` ( **#175** demo bundle + **#176** OSM map + **#177** admin hidden until staff login + **#178** YouTube-style Pulse reload )
-- **Build ID:** `be5cfae-20260923T153237Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-23 15:32 UTC — `npm run verify:ci` on `main`
+- **Branch:** `main` (through **#180**: map global search + privacy people list + realistic demo portraits; plus **#175–#179**)
+- **Build ID:** `b771a2a-20260923T204649Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
+- **Verified:** 2026-09-23 — `npm run verify:ci` before **#180** merge
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

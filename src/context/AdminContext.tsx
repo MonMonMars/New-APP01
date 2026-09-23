@@ -9,11 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 
-import {
-  isEmailAdminAllowlisted,
-  shouldShowAdminMenuEntry,
-  verifyAdminDemoPin,
-} from '../admin/adminAllowlist';
+import { isEmailAdminAllowlisted, verifyAdminDemoPin } from '../admin/adminAllowlist';
 import { hydrateLocalAdminAllowlist } from '../admin/adminLocalAllowlist';
 import { hydrateAdminProfileOverrides } from '../admin/adminProfileStore';
 import { hydrateAdminRoles, resolveAdminRoleForEmail } from '../admin/adminRolesStore';
@@ -174,7 +170,8 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       showInternalProfileLabels: hasPermission('canViewInternalProfileMetadata'),
       showDemoBillingHints: hasPermission('canViewDemoBillingHints'),
       refreshAdminRole,
-      canOpenAdminMenu: shouldShowAdminMenuEntry(),
+      /** Profile “Admin control panel” — only after staff sign-in (not for all users). */
+      canOpenAdminMenu: Boolean(adminSession),
     }),
     [adminSession, hasPermission, isAdminHydrated, refreshAdminRole, signInAdmin, signOutAdmin],
   );

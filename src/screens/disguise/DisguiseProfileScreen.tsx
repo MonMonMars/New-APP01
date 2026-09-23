@@ -99,8 +99,25 @@ export function DisguiseProfileScreen() {
   }, [handleTabRepress, navigation]);
   const profileFeedItem = buildDisguisedProfileFeedItem(user, profileCreative);
   const recentPosts = useMemo(
-    () => buildDisguisedProfileFeedItems(pulseSection, refreshGeneration, preferences.showMe),
-    [pulseSection, refreshGeneration, preferences.showMe],
+    () =>
+      buildDisguisedProfileFeedItems(
+        pulseSection,
+        refreshGeneration,
+        preferences.showMe,
+        {
+          sparkSection: preferences.sparkSection,
+          pulseDisplaySpark: preferences.pulseDisplaySpark,
+          pulseDisplayEmber: preferences.pulseDisplayEmber,
+        },
+      ),
+    [
+      pulseSection,
+      refreshGeneration,
+      preferences.pulseDisplayEmber,
+      preferences.pulseDisplaySpark,
+      preferences.showMe,
+      preferences.sparkSection,
+    ],
   );
   const feedItems = useMemo(
     () =>
@@ -111,8 +128,22 @@ export function DisguiseProfileScreen() {
         refreshGeneration,
         undefined,
         preferences.showMe,
+        {
+          sparkSection: preferences.sparkSection,
+          pulseDisplaySpark: preferences.pulseDisplaySpark,
+          pulseDisplayEmber: preferences.pulseDisplayEmber,
+        },
       ),
-    [user, disguiseAdCreative, pulseSection, refreshGeneration, preferences.showMe],
+    [
+      user,
+      disguiseAdCreative,
+      pulseSection,
+      refreshGeneration,
+      preferences.pulseDisplayEmber,
+      preferences.pulseDisplaySpark,
+      preferences.showMe,
+      preferences.sparkSection,
+    ],
   );
   const savedPosts = useMemo(
     () => resolveSavedPulsePosts(pulseSocial.savedPostIds, feedItems, user.gender, locale),

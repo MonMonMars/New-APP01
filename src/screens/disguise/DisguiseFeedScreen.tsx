@@ -25,11 +25,19 @@ import { PulseFeedRefreshFooter } from '../../components/disguise/PulseFeedRefre
 import { PulseFeedRefreshHeader } from '../../components/disguise/PulseFeedRefreshHeader';
 import { PulseFeedRefreshDimLayer } from '../../components/disguise/PulseFeedRefreshDimLayer';
 import { FadeSlideIn } from '../../components/motion/FadeSlideIn';
-import { usePulseFeedRefreshGeneration, usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
+import { usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
 import { useRecordPulseTab } from '../../hooks/useRecordPulseTab';
 import { useApp } from '../../context/AppContext';
 
-function renderFeedItem({ item, index }: { item: FeedItem; index: number }) {
+function renderFeedItem({
+  item,
+  index,
+  refreshGeneration,
+}: {
+  item: FeedItem;
+  index: number;
+  refreshGeneration: number;
+}) {
   const card = (() => {
     switch (item.type) {
       case 'news':
@@ -48,7 +56,11 @@ function renderFeedItem({ item, index }: { item: FeedItem; index: number }) {
   })();
 
   return (
-    <FadeSlideIn index={index % 10} distance={18}>
+    <FadeSlideIn
+      index={index % 10}
+      distance={18}
+      replayKey={index < 4 ? refreshGeneration : undefined}
+    >
       {card}
     </FadeSlideIn>
   );
@@ -67,11 +79,12 @@ export function DisguiseFeedScreen() {
   const topic = route.params?.topic;
 
   const { feedItems, loadMore, loadingMore, canLoadMore } = usePulsePaginatedFeedItems(topic);
-  const refreshGeneration = usePulseFeedRefreshGeneration();
   const {
     refreshing,
     justUpdated,
     isAtTop,
+    pullDistance,
+    refreshGeneration,
     flatListProps,
     listRef,
     refresh,
@@ -99,7 +112,9 @@ export function DisguiseFeedScreen() {
         data={feedItems}
         extraData={refreshGeneration}
         keyExtractor={(item) => item.id}
-        renderItem={({ item, index }) => renderFeedItem({ item, index })}
+        renderItem={({ item, index }) =>
+          renderFeedItem({ item, index, refreshGeneration })
+        }
         contentContainerStyle={[styles.list, { paddingBottom: pulseFeedScrollPaddingBottom(insets.bottom) }]}
         {...flatListProps}
         maintainVisibleContentPosition={
@@ -128,6 +143,8 @@ export function DisguiseFeedScreen() {
             refreshing={refreshing}
             justUpdated={justUpdated}
             isAtTop={isAtTop}
+            pullDistance={pullDistance}
+            refreshGeneration={refreshGeneration}
             onPullRefresh={() => {
               void refresh();
             }}

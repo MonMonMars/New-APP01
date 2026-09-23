@@ -43,21 +43,36 @@ function weaveProfileCards(base: FeedItem[], profileCards: FeedItem[]): FeedItem
   return result;
 }
 
+function feedItemMatchesShowMe(item: FeedItem, showMe: ShowMePreference): boolean {
+  if (showMe === 'everyone') {
+    return true;
+  }
+  if (item.type === 'social') {
+    const profileId = item.datingProfileId ?? socialAuthorDemoProfileId(item.author);
+    if (!profileId) {
+      return false;
+    }
+    const profile = getProfileById(profileId);
+    return profile ? matchesShowMePreference(profile, showMe) : false;
+  }
+  if (item.type === 'disguised_profile') {
+    if (item.id === 'disguised-user') {
+      return true;
+    }
+    if (!item.profileId) {
+      return false;
+    }
+    const profile = getProfileById(item.profileId);
+    return profile ? matchesShowMePreference(profile, showMe) : false;
+  }
+  return true;
+}
+
 function filterPulseFeedForShowMe(items: FeedItem[], showMe: ShowMePreference): FeedItem[] {
   if (showMe === 'everyone') {
     return items;
   }
-  return items.filter((item) => {
-    if (item.type !== 'social') {
-      return true;
-    }
-    const profileId = item.datingProfileId ?? socialAuthorDemoProfileId(item.author);
-    if (!profileId) {
-      return true;
-    }
-    const profile = getProfileById(profileId);
-    return profile ? matchesShowMePreference(profile, showMe) : true;
-  });
+  return items.filter((item) => feedItemMatchesShowMe(item, showMe));
 }
 
 /** Drop woven profile ids so a Pulse refresh can reassign every slot. */
@@ -123,7 +138,7 @@ export function syncSocialPostProfiles(
       return { ...item, datingProfileId: profileId };
     }
     if (showMe !== 'everyone' && !matchesShowMePreference(profile, showMe)) {
-      return item;
+      return { ...item, datingProfileId: undefined, avatarUrl: item.avatarUrl };
     }
     return {
       ...item,

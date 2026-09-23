@@ -166,6 +166,7 @@ import {
 } from '../utils/unlockLockout';
 import { computeCompatibilityScore, pickDailyMostCompatible } from '../utils/compatibility';
 import { isDiscoverableDemoProfile, matchesShowMePreference } from '../utils/showMeFilter';
+import { bumpPulseFeedRefreshGeneration } from '../hooks/usePulseFeedRefresh';
 import { matchesPassportCity } from '../utils/passportFilter';
 import {
   requestNotificationPermission,
@@ -1957,7 +1958,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const updatePreferences = useCallback((next: DiscoveryPreferences) => {
     const synced = withSyncedAccountCountry(next);
+    let shouldRefreshPulseFeed = false;
     setPreferences((prev) => {
+      shouldRefreshPulseFeed =
+        prev.showMe !== synced.showMe ||
+        prev.minAge !== synced.minAge ||
+        prev.maxAge !== synced.maxAge ||
+        prev.maxDistanceMiles !== synced.maxDistanceMiles ||
+        JSON.stringify(prev.discoverFilters ?? []) !== JSON.stringify(synced.discoverFilters ?? []) ||
+        JSON.stringify(prev.advancedFilters ?? {}) !==
+          JSON.stringify(synced.advancedFilters ?? {});
       const travelChanged = prev.travelMode !== synced.travelMode;
       const passportChanged = prev.passportCity !== synced.passportCity;
       if (travelChanged || passportChanged) {
@@ -1969,6 +1979,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       return synced;
     });
+    if (shouldRefreshPulseFeed) {
+      bumpPulseFeedRefreshGeneration();
+    }
     setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
     setPriorityProfileId(null);
   }, []);
@@ -2109,9 +2122,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .map((id) => getProfileById(id))
       .filter(
         (profile): profile is Profile =>
-          profile !== undefined && matchesSparkSection(profile, section),
+          profile !== undefined &&
+          isDiscoverableDemoProfile(profile) &&
+          matchesSparkSection(profile, section) &&
+          matchesShowMePreference(profile, preferences.showMe),
       );
-  }, [preferences.sparkSection, profileViewerIds]);
+  }, [preferences.showMe, preferences.sparkSection, profileViewerIds]);
 
   const profileViewCount = profileViewers.length;
 

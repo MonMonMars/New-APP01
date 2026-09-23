@@ -10,7 +10,7 @@ import { LocaleToggle } from '../../components/legal/LocaleToggle';
 import { useApp } from '../../context/AppContext';
 import { DISGUISE_APP_NAME } from '../../data/disguiseFeed';
 import { useTranslation } from '../../i18n';
-import { getGenderLabel, getOrientationLabel } from '../../i18n/labels';
+import { getGenderLabel, getOrientationLabel, getShowMeLabel } from '../../i18n/labels';
 import {
   Orientation,
   ProfileGender,
@@ -25,6 +25,9 @@ import { deriveShowMe } from '../../utils/deriveShowMe';
 import { mapCenterForCity } from '../../utils/searchMapTiles';
 import { countryCodeFromPassportCity, withSyncedAccountCountry } from '../../utils/accountRegion';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
+import { ShowMePreference } from '../../types/preferences';
+
+const SHOW_ME_OPTIONS: ShowMePreference[] = ['women', 'men', 'everyone'];
 
 type Step = 'welcome' | 'rules' | 'location' | 'intent' | 'identity' | 'profile';
 
@@ -58,6 +61,10 @@ export function OnboardingFlow() {
   const [intent, setIntent] = useState<RelationshipIntent>('not_sure');
   const [gender, setGender] = useState<ProfileGender>('man');
   const [orientation, setOrientation] = useState<Orientation>('straight');
+  const [showMe, setShowMe] = useState<ShowMePreference>(
+    preferences.showMe ?? deriveShowMe('man', 'straight'),
+  );
+  const [showMeTouched, setShowMeTouched] = useState(Boolean(preferences.showMe));
   const [photos, setPhotos] = useState<string[]>(user.photos);
   const [authLoading, setAuthLoading] = useState(false);
   const [showLocationInfo, setShowLocationInfo] = useState(false);
@@ -103,6 +110,12 @@ export function OnboardingFlow() {
     setStep('intent');
   }, [isAuthenticated, isHydrated, step, userId]);
 
+  useEffect(() => {
+    if (!showMeTouched) {
+      setShowMe(deriveShowMe(gender, orientation));
+    }
+  }, [gender, orientation, showMeTouched]);
+
   const genderOptions: ProfileGender[] = ['woman', 'man', 'nonbinary'];
   const orientationOptions: Orientation[] = ['straight', 'gay', 'lesbian', 'bisexual', 'pansexual', 'queer', 'asexual', 'other'];
 
@@ -136,7 +149,7 @@ export function OnboardingFlow() {
     updatePreferences(
       withSyncedAccountCountry({
         ...preferences,
-        showMe: deriveShowMe(gender, orientation),
+        showMe,
         passportCity: preferences.passportCity ?? preferences.homePassportCity ?? 'New York, NY',
         homePassportCity: preferences.homePassportCity ?? preferences.passportCity ?? 'New York, NY',
       }),
@@ -363,6 +376,27 @@ export function OnboardingFlow() {
                 >
                   <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
                     {getOrientationLabel(locale, option)}
+                  </Text>
+                </AnimatedPressable>
+              );
+            })}
+          </View>
+
+          <Text style={styles.label}>{t('preferences.discoveryShowMe')}</Text>
+          <View style={styles.chipRow}>
+            {SHOW_ME_OPTIONS.map((option) => {
+              const selected = showMe === option;
+              return (
+                <AnimatedPressable
+                  key={option}
+                  style={[styles.chip, selected && styles.chipSelected]}
+                  onPress={() => {
+                    setShowMeTouched(true);
+                    setShowMe(option);
+                  }}
+                >
+                  <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
+                    {getShowMeLabel(locale, option)}
                   </Text>
                 </AnimatedPressable>
               );

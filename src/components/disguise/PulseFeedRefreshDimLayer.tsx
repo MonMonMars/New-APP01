@@ -2,9 +2,11 @@ import { useEffect, type ReactNode } from 'react';
 import { Platform, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { ensureWebMotionCss, webClass } from '../../motion/webMotion';
+import { PulseFeedRefreshTopChrome } from './PulseFeedRefreshTopChrome';
 
 type PulseFeedRefreshDimLayerProps = {
   refreshing: boolean;
+  pullOffset?: number;
   children: ReactNode;
   style?: StyleProp<ViewStyle>;
 };
@@ -12,6 +14,7 @@ type PulseFeedRefreshDimLayerProps = {
 /** Instagram / YouTube — grey wash + blocked taps while Pulse reloads. */
 export function PulseFeedRefreshDimLayer({
   refreshing,
+  pullOffset = 0,
   children,
   style,
 }: PulseFeedRefreshDimLayerProps) {
@@ -38,6 +41,7 @@ export function PulseFeedRefreshDimLayer({
           testID="pulse-feed-refresh-dim-overlay"
         />
       ) : null}
+      <PulseFeedRefreshTopChrome visible={refreshing} pullOffset={pullOffset} />
     </View>
   );
 }
@@ -55,6 +59,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFill,
+    zIndex: 8,
     backgroundColor: Platform.OS === 'web' ? 'rgba(228, 228, 234, 0.62)' : 'rgba(210, 210, 218, 0.52)',
   },
 });

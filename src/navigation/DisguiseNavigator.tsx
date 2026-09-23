@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useEffect } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 
 import { TabBarButton } from '../components/TabBarButton';
@@ -14,6 +15,8 @@ import { useTranslation } from '../i18n';
 import { usePulseContextSection } from '../hooks/usePulseContextSection';
 import { usePulseFeedRefreshing } from '../hooks/usePulseFeedRefresh';
 import { disguiseWorldMeta } from '../utils/disguiseWorld';
+import { warmPulseFeedCatalog } from '../utils/warmPulseFeedCatalog';
+import { usePulseLiveNewsRevision } from '../hooks/usePulseLiveNews';
 
 export type DisguiseTabParamList = {
   Home: { topic?: string } | undefined;
@@ -27,9 +30,35 @@ const Tab = createBottomTabNavigator<DisguiseTabParamList>();
 export function DisguiseNavigator() {
   const { colors } = useTheme();
   const { t, locale } = useTranslation();
-  const { pulseSocial, user } = useApp();
+  const { pulseSocial, user, userId, disguiseAdCreative, preferences } = useApp();
   const pulseSection = usePulseContextSection();
+  const liveNewsRevision = usePulseLiveNewsRevision();
   const meta = disguiseWorldMeta(pulseSection, user.gender, locale);
+  const creativeKey = disguiseAdCreative
+    ? `${disguiseAdCreative.variant}|${disguiseAdCreative.sourcePhotoUrl}|${disguiseAdCreative.overlayText}`
+    : '';
+
+  useEffect(() => {
+    warmPulseFeedCatalog({
+      user,
+      userId: userId ?? 'local-user',
+      disguiseAdCreative,
+      pulseSection,
+      appLocale: preferences.appLocale,
+      showMe: preferences.showMe,
+      liveNewsRevision,
+      creativeKey,
+    });
+  }, [
+    creativeKey,
+    disguiseAdCreative,
+    liveNewsRevision,
+    preferences.appLocale,
+    preferences.showMe,
+    pulseSection,
+    user,
+    userId,
+  ]);
   const activityBadge =
     !pulseSocial.activityAlertsRead && disguiseAlerts.length > 0
       ? disguiseAlerts.length

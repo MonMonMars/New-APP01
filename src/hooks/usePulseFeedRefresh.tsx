@@ -88,7 +88,7 @@ const SCROLLED_DOWN_THRESHOLD = 48;
 /** Prevent overscroll / tab re-press from stacking refreshes and stealing taps on web. */
 const REFRESH_COOLDOWN_MS = Platform.OS === 'web' ? 700 : 500;
 /** Minimum time the grey reload chrome stays visible (Instagram / YouTube). */
-const PULSE_REFRESH_MIN_MS = Platform.OS === 'web' ? 360 : 320;
+const PULSE_REFRESH_MIN_MS = Platform.OS === 'web' ? 300 : 280;
 
 function waitNextPaint(): Promise<void> {
   return new Promise((resolve) => {
@@ -244,7 +244,7 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
       return;
     }
     clearTopArrivalTimer();
-    const debounceMs = Platform.OS === 'web' ? 90 : 0;
+    const debounceMs = Platform.OS === 'web' ? 48 : 0;
     topArrivalTimerRef.current = setTimeout(() => {
       topArrivalTimerRef.current = null;
       maybeRefreshAfterArrivingAtTop();

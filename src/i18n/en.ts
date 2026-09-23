@@ -763,7 +763,7 @@ export const en = {
     pinnedPlacesHint: 'Pinned cities — tap to jump on the map',
     viewProfileA11y: 'View {name}\'s profile',
     areaLoaded: 'People in this area added to your deck',
-    attribution: '© CARTO · © OpenStreetMap contributors',
+    attribution: '© OpenStreetMap contributors',
     zoomInA11y: 'Zoom in',
     zoomOutA11y: 'Zoom out',
   },

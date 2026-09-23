@@ -16,8 +16,11 @@ export const TILE_PX = 256;
 /** Max zoom for the active raster basemap (overzoom uses +1 fetch below this cap). */
 export const MAP_TILE_MAX_ZOOM = 19;
 
-/** OpenStreetMap France raster tiles — no API key, CORS-friendly for web demo. */
-const OSM_FR_SUBDOMAINS = ['a', 'b', 'c'] as const;
+/** Basemap id — bump when tile URL changes so clients drop stale cached tiles. */
+export const MAP_RASTER_BASEMAP_ID = 'osm-org-v1';
+
+/** Standard OSM raster tiles (no API key). Avoid osmfr/carto — they serve watermark PNGs. */
+const OSM_SUBDOMAINS = ['a', 'b', 'c'] as const;
 
 /**
  * Device pixel ratio for retina tile fetch.
@@ -58,8 +61,8 @@ export function buildMapTileUri(
   y: number,
   _pixelScale = 1,
 ): string {
-  const subdomain = OSM_FR_SUBDOMAINS[Math.abs(x + y) % OSM_FR_SUBDOMAINS.length];
-  return `https://${subdomain}.tile.openstreetmap.fr/osmfr/${zoom}/${x}/${y}.png`;
+  const subdomain = OSM_SUBDOMAINS[Math.abs(x + y) % OSM_SUBDOMAINS.length];
+  return `https://${subdomain}.tile.openstreetmap.org/${zoom}/${x}/${y}.png`;
 }
 
 export type MapTile = {
@@ -152,7 +155,7 @@ export function buildMapTiles(
       }
       const wrappedX = ((x % n) + n) % n;
       tiles.push({
-        key: `${fetchZoom}-${wrappedX}-${y}-${x}-${pixelScale}`,
+        key: `${MAP_RASTER_BASEMAP_ID}-${fetchZoom}-${wrappedX}-${y}-${x}-${pixelScale}`,
         uri: buildMapTileUri(fetchZoom, wrappedX, y, pixelScale),
         left: (x - cx) * tileSpan + width / 2,
         top: (y - cy) * tileSpan + height / 2,

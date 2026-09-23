@@ -72,6 +72,8 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
     ? profileIntroCaption(linkedProfile) || linkedProfile.name
     : getDisguiseOverlaySnippet(locale, maskSnippet);
 
+  const avatarSwapKey = `${post.id}:${linkedProfileId ?? post.id}:${post.avatarUrl}:${besideAvatarCaption}`;
+
   const openPreview = () => {
     if (!linkedProfile) {
       return;
@@ -91,7 +93,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   );
 
   const avatarRow = (
-    <PulseProfileSwap profileKey={linkedProfileId ?? post.id} style={styles.avatarRowWrap}>
+    <PulseProfileSwap profileKey={avatarSwapKey} style={styles.avatarRowWrap}>
       <FeedPersonThumbnail
         imageUrl={post.avatarUrl}
         plainAvatar={Boolean(linkedProfile)}
@@ -111,7 +113,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
     return (
       <>
         <View style={[styles.socialCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <PulseProfileSwap profileKey={linkedProfileId ?? post.id} style={styles.avatarRowWrap}>
+          <PulseProfileSwap profileKey={avatarSwapKey} style={styles.avatarRowWrap}>
             <FeedPersonThumbnail
               imageUrl={post.avatarUrl}
               plainAvatar={Boolean(linkedProfile)}

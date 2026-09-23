@@ -86,8 +86,6 @@ const AVATAR_PIN_SELECTED = 34;
 
 const PAN_RESET_MS = 120;
 const ZOOM_SETTLE_MS = 220;
-const WHEEL_ZOOM_COMMIT_MS = 140;
-
 function clampZoom(value: number): number {
   return Math.round(Math.min(MAP_MAX_ZOOM, Math.max(MAP_MIN_ZOOM, value)));
 }
@@ -108,7 +106,7 @@ function clampVisualScale(baseZoom: number, scale: number): number {
   return Math.min(maxScale, Math.max(minScale, scale));
 }
 
-/** Standard street basemap (Carto Voyager by default) with pan, pinch/wheel zoom, and GPS control. */
+/** Carto Voyager raster basemap with pan, pinch/wheel zoom, and GPS control. */
 export function SearchMapView({
   center,
   zoom,
@@ -161,10 +159,6 @@ export function SearchMapView({
     lastX: 0,
     lastY: 0,
   });
-  const wheelCommitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const wheelPinchBaseZoom = useRef(zoom);
-  const wheelAccumScale = useRef(1);
-
   const mapInteractive =
     interactive && (Boolean(onCenterChange) || Boolean(onZoomChange));
 
@@ -182,8 +176,6 @@ export function SearchMapView({
     zoomRef.current = zoom;
     pinchBaseZoom.value = zoom;
     visualZoomScale.value = 1;
-    wheelPinchBaseZoom.current = zoom;
-    wheelAccumScale.current = 1;
   }, [pinchBaseZoom, visualZoomScale, zoom]);
 
   useEffect(() => {
@@ -310,39 +302,12 @@ export function SearchMapView({
     };
   });
 
-  const scheduleWheelZoomCommit = useCallback(() => {
-    if (wheelCommitTimer.current) {
-      clearTimeout(wheelCommitTimer.current);
-    }
-    wheelCommitTimer.current = setTimeout(() => {
-      wheelCommitTimer.current = null;
-      const base = wheelPinchBaseZoom.current;
-      const scale = wheelAccumScale.current;
-      const nextZoom = clampZoom(fractionalZoomFromPinch(base, scale));
-      wheelPinchBaseZoom.current = nextZoom;
-      wheelAccumScale.current = 1;
-      commitZoom(nextZoom);
-      settleVisualZoom();
-    }, WHEEL_ZOOM_COMMIT_MS);
-  }, [commitZoom, settleVisualZoom]);
-
-  useEffect(
-    () => () => {
-      if (wheelCommitTimer.current) {
-        clearTimeout(wheelCommitTimer.current);
-      }
-    },
-    [],
-  );
-
   const handleZoomStep = (delta: number) => {
     if (!onZoomChange) {
       return;
     }
-    const next = clampZoom(zoomRef.current + delta);
-    visualZoomScale.value = delta > 0 ? 0.88 : 1.14;
-    commitZoom(next);
-    settleVisualZoom();
+    visualZoomScale.value = 1;
+    commitZoom(clampZoom(zoomRef.current + delta));
   };
 
   const handleWebWheel = (event: { deltaY?: number; preventDefault?: () => void }) => {
@@ -354,16 +319,9 @@ export function SearchMapView({
     if (Math.abs(deltaY) < 1) {
       return;
     }
-    const factor = deltaY > 0 ? 0.94 : 1.06;
-    wheelAccumScale.current = Math.min(
-      4,
-      Math.max(0.25, wheelAccumScale.current * factor),
-    );
-    visualZoomScale.value = clampVisualScale(
-      wheelPinchBaseZoom.current,
-      visualScaleForZoom(wheelPinchBaseZoom.current, wheelAccumScale.current),
-    );
-    scheduleWheelZoomCommit();
+    visualZoomScale.value = 1;
+    const nextZoom = clampZoom(zoomRef.current + (deltaY > 0 ? -1 : 1));
+    commitZoom(nextZoom);
   };
 
   const handleWebPointerDown = (clientX: number, clientY: number) => {
@@ -513,11 +471,20 @@ export function SearchMapView({
         <Image
           key={tile.key}
           source={{ uri: tile.uri }}
-          style={[styles.tile, { left: tile.left, top: tile.top }]}
+          style={[
+            styles.tile,
+            {
+              left: tile.left,
+              top: tile.top,
+              width: tile.size,
+              height: tile.size,
+            },
+          ]}
           contentFit="fill"
           cachePolicy="memory-disk"
           recyclingKey={tile.key}
-          transition={80}
+          transition={0}
+          pointerEvents="none"
         />
       ))}
 
@@ -661,7 +628,7 @@ const styles = StyleSheet.create({
   },
   mapFill: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: '#e8e4df',
+    backgroundColor: '#f5f5f0',
   },
   locateButton: {
     position: 'absolute',
@@ -680,8 +647,6 @@ const styles = StyleSheet.create({
   },
   tile: {
     position: 'absolute',
-    width: TILE_PX,
-    height: TILE_PX,
   },
   radiusRing: {
     position: 'absolute',

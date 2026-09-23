@@ -1,5 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
-import { ActivityIndicator, Modal, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Dimensions,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { getLegalUiStrings } from '../content/legal';
@@ -54,10 +62,32 @@ export function PurchaseConfirmSheet({
       ? legalUi.purchaseAutoRenew
       : `${demoNote} ${legalUi.purchaseAutoRenew}`;
 
+  const maxSheetHeight = Dimensions.get('window').height * 0.9 - insets.top;
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={[styles.backdrop, modalFill]}>
-        <View style={[styles.sheet, { backgroundColor: colors.surface, paddingBottom: insets.bottom + spacing.lg }]}>
+      <View
+        style={[
+          styles.backdrop,
+          modalFill,
+          { paddingTop: insets.top + spacing.sm, paddingBottom: spacing.sm },
+        ]}
+      >
+        <ScrollView
+          style={{ maxHeight: maxSheetHeight, width: '100%' }}
+          contentContainerStyle={styles.sheetScroll}
+          keyboardShouldPersistTaps="handled"
+          bounces={false}
+        >
+          <View
+            style={[
+              styles.sheet,
+              {
+                backgroundColor: colors.surface,
+                paddingBottom: insets.bottom + spacing.md,
+              },
+            ]}
+          >
           <View style={[styles.iconWrap, { backgroundColor: `${accent}22` }]}>
             <Ionicons name={icon} size={28} color={accent} />
           </View>
@@ -98,7 +128,8 @@ export function PurchaseConfirmSheet({
           <AnimatedPressable style={styles.cancelButton} onPress={onClose} disabled={confirmLoading}>
             <Text style={[styles.cancelText, { color: colors.textMuted }]}>{t('common.cancel')}</Text>
           </AnimatedPressable>
-        </View>
+          </View>
+        </ScrollView>
       </View>
     </Modal>
   );
@@ -108,6 +139,10 @@ const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  sheetScroll: {
+    flexGrow: 1,
     justifyContent: 'flex-end',
   },
   sheet: {

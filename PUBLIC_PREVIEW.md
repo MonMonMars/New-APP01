@@ -2,11 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://tommy-workstation-carolina-portland.trycloudflare.com**
+**https://absence-instructor-tall-columns.trycloudflare.com**
 
-- **Integration branch:** `main` (PR **#157** + docs **#159**)
-- **Build ID:** `55178b8-20260922T182447Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-22 18:27 UTC — tunnel HTTP 200 + local `verify:extended` PASS
+- **Branch:** `main` (merged **PR #175** — demo UX bundle: payment sheet, discover info, map tiles + pan/zoom, Pulse sheets, thumb/caption swaps, Show me / Spark–Ember prefs)
+- **Build ID:** `8f5cc56-20260923T134026Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
+- **Verified:** 2026-09-23 13:41 UTC — tunnel HTTP 200 + `verify:ci-smoke` PASS
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

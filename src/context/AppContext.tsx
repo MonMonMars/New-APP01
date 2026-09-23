@@ -173,7 +173,14 @@ import {
   scheduleMatchNotification,
   scheduleMessageNotification,
 } from '../utils/notifications';
-import { defaultPulseSocialState, PulseComment, PulseSocialState } from '../types/pulseSocial';
+import {
+  defaultPulseSocialState,
+  PulseComment,
+  PulseDisguiseTab,
+  PulseSocialState,
+} from '../types/pulseSocial';
+import { resolvePulseContextSection } from '../utils/pulseWorldPool';
+import { bumpPulseFeedRefreshGeneration } from '../hooks/usePulseFeedRefresh';
 import {
   checkClientRateLimit,
   isProductionBuild,
@@ -520,6 +527,8 @@ type AppContextValue = {
     options?: { postId?: string; articleUrl?: string },
   ) => void;
   markActivityAlertsRead: () => void;
+  recordPulseTab: (tab: PulseDisguiseTab) => void;
+  recordPulseHomeScroll: (offsetY: number) => void;
   purchaseSparkNotes: (count: number) => void;
   rewindLastPass: () => void;
   profileViewers: Profile[];
@@ -771,7 +780,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setIsPaused(saved.isPaused);
         setThemeModeState(saved.themeMode);
         setDisguiseModeState(saved.disguiseMode ?? true);
-        setPulseContextSection(resolveSparkSection(saved.preferences?.sparkSection));
+        const hydratedPreferences = normalizePreferencesAccountMarket(saved.preferences);
+        setPulseContextSection(
+          resolvePulseContextSection(
+            saved.pulseSocial?.pulseLastWorldSection ??
+              resolveSparkSection(hydratedPreferences.sparkSection),
+            {
+              sparkSection: hydratedPreferences.sparkSection,
+              pulseDisplaySpark: hydratedPreferences.pulseDisplaySpark,
+              pulseDisplayEmber: hydratedPreferences.pulseDisplayEmber,
+            },
+          ),
+        );
         setDisguiseAdCreative(saved.disguiseAdCreative ?? null);
         setSecuritySettings({
           ...defaultSecuritySettings,
@@ -1970,6 +1990,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
           JSON.stringify(synced.advancedFilters ?? {});
       const travelChanged = prev.travelMode !== synced.travelMode;
       const passportChanged = prev.passportCity !== synced.passportCity;
+      const pulseWorldChanged =
+        prev.pulseDisplaySpark !== synced.pulseDisplaySpark ||
+        prev.pulseDisplayEmber !== synced.pulseDisplayEmber;
+      if (pulseWorldChanged) {
+        bumpPulseFeedRefreshGeneration();
+        setPulseContextSection((current) =>
+          resolvePulseContextSection(current, {
+            sparkSection: synced.sparkSection,
+            pulseDisplaySpark: synced.pulseDisplaySpark,
+            pulseDisplayEmber: synced.pulseDisplayEmber,
+          }),
+        );
+      }
       if (travelChanged || passportChanged) {
         return {
           ...synced,
@@ -1994,6 +2027,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return { ...prev, sparkSection: section };
     });
     setPulseContextSection(section);
+    setPulseSocial((prev) => ({ ...prev, pulseLastWorldSection: section }));
     setDiscoverUnlockedCount(DISCOVER_BATCH_SIZE);
     setPriorityProfileId(null);
   }, []);
@@ -2926,6 +2960,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
+  const recordPulseTab = useCallback(
+    (tab: PulseDisguiseTab) => {
+      setPulseSocial((prev) => {
+        if (prev.pulseLastTab === tab && prev.pulseLastWorldSection === pulseContextSection) {
+          return prev;
+        }
+        return {
+          ...prev,
+          pulseLastTab: tab,
+          pulseLastWorldSection: pulseContextSection,
+        };
+      });
+    },
+    [pulseContextSection],
+  );
+
+  const recordPulseHomeScroll = useCallback((offsetY: number) => {
+    const y = Math.max(0, Math.round(offsetY));
+    setPulseSocial((prev) =>
+      prev.pulseHomeScrollY === y ? prev : { ...prev, pulseHomeScrollY: y },
+    );
+  }, []);
+
   const savePulsePost = useCallback((postId: string) => {
     setPulseSocial((prev) => ({
       ...prev,
@@ -3225,13 +3282,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const setDisguiseMode = useCallback(async (enabled: boolean): Promise<boolean> => {
     if (enabled) {
-      setPulseContextSection(resolveSparkSection(preferences.sparkSection));
+      const scope = {
+        sparkSection: preferences.sparkSection,
+        pulseDisplaySpark: preferences.pulseDisplaySpark,
+        pulseDisplayEmber: preferences.pulseDisplayEmber,
+      };
+      setPulseContextSection((current) =>
+        resolvePulseContextSection(
+          pulseSocial.pulseLastWorldSection ?? current ?? resolveSparkSection(preferences.sparkSection),
+          scope,
+        ),
+      );
       setDisguiseModeState(true);
       return true;
     }
     setUnlockConfirmVisible(true);
     return false;
-  }, [preferences.sparkSection]);
+  }, [
+    preferences.pulseDisplayEmber,
+    preferences.pulseDisplaySpark,
+    preferences.sparkSection,
+    pulseSocial.pulseLastWorldSection,
+  ]);
 
   const confirmLeaveDisguise = useCallback(async () => {
     setUnlockConfirmVisible(false);
@@ -3609,6 +3681,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addBonusBoosts,
       recordPulseReading,
       markActivityAlertsRead,
+      recordPulseTab,
+      recordPulseHomeScroll,
       purchaseSparkNotes,
       rewindLastPass,
       matchNotificationPromptVisible,
@@ -3773,6 +3847,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addBonusBoosts,
       recordPulseReading,
       markActivityAlertsRead,
+      recordPulseTab,
+      recordPulseHomeScroll,
       purchaseSparkNotes,
       rewindLastPass,
       matchNotificationPromptVisible,

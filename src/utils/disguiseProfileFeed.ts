@@ -12,6 +12,8 @@ import {
 } from './disguisePulseCopy';
 import { profileIntroCaption } from './profileIntroCaption';
 import { ShowMePreference } from '../types/preferences';
+import { buildPulseProfilePool, PulseWorldPoolScope } from './pulseWorldPool';
+import { buildSectionProfilePool } from './discoveryProfilePool';
 
 const NEWS_SOURCES = [
   { source: 'BBC News', category: 'Local', coverImageUrl: pulseNewsImages.restaurant },
@@ -78,10 +80,19 @@ export function buildDisguisedProfileFeedItems(
   section?: SparkSection | string | null,
   rotationOffset = 0,
   showMe: ShowMePreference = 'everyone',
+  poolScope?: PulseWorldPoolScope,
 ): DisguisedProfilePost[] {
-  const profiles = buildSectionProfilePool(section, showMe, new Set());
+  const profiles = poolScope
+    ? buildPulseProfilePool(poolScope, showMe, new Set())
+    : buildSectionProfilePool(section, showMe, new Set());
   if (profiles.length === 0) {
-    return [];
+    const fallback = filterProfilesForShowMe(getIncomingLikeProfilesForSection(section), showMe);
+    if (fallback.length === 0) {
+      return [];
+    }
+    const offset = ((rotationOffset % fallback.length) + fallback.length) % fallback.length;
+    const rotated = [...fallback.slice(offset), ...fallback.slice(0, offset)];
+    return rotated.map((profile, index) => toDisguisedProfilePost(profile, index));
   }
 
   const offset = ((rotationOffset % profiles.length) + profiles.length) % profiles.length;

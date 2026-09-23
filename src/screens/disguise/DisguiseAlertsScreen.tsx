@@ -33,9 +33,11 @@ import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { usePulseContextSection } from '../../hooks/usePulseContextSection';
 import { useRotatedPulseContent } from '../../hooks/useRotatedPulseContent';
 import { usePulseFeedRefreshGeneration, usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
+import { useRecordPulseTab } from '../../hooks/useRecordPulseTab';
 import { profileIntroCaption } from '../../utils/profileIntroCaption';
 
 export function DisguiseAlertsScreen() {
+  useRecordPulseTab('Activity');
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
   const { colors } = useTheme();

@@ -1,5 +1,6 @@
 import { DisguisedProfilePost, FeedItem, NewsReporter } from '../data/disguiseFeed';
 import { buildSectionProfilePool } from './discoveryProfilePool';
+import { buildPulseProfilePool, PulseWorldPoolScope } from './pulseWorldPool';
 import { ShowMePreference, SparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
 import { disguiseDisplayName } from './disguiseProfileFeed';
@@ -34,8 +35,9 @@ function reporterProfileId(
   reporter: NewsReporter,
   showMe: ShowMePreference,
   section?: SparkSection | string | null,
+  poolScope?: PulseWorldPoolScope,
 ): string | undefined {
-  return explicitReporterProfileId(reporter.id, reporter.profileId, showMe, section);
+  return explicitReporterProfileId(reporter.id, reporter.profileId, showMe, section, poolScope);
 }
 
 function disguisedProfileId(
@@ -55,7 +57,11 @@ function buildReplacementPool(
   section: SparkSection | string | null | undefined,
   excluded: Set<string>,
   showMe: ShowMePreference,
+  poolScope?: PulseWorldPoolScope,
 ): Profile[] {
+  if (poolScope) {
+    return buildPulseProfilePool(poolScope, showMe, excluded);
+  }
   return buildSectionProfilePool(section, showMe, excluded);
 }
 
@@ -109,6 +115,7 @@ function collectReservedProfileIds(
   items: FeedItem[],
   showMe: ShowMePreference,
   section?: SparkSection | string | null,
+  poolScope?: PulseWorldPoolScope,
 ): Set<string> {
   const reserved = new Set<string>();
 
@@ -123,7 +130,7 @@ function collectReservedProfileIds(
 
     if (item.type === 'news') {
       item.reporters.forEach((reporter) => {
-        const profileId = reporterProfileId(reporter, showMe, section);
+        const profileId = reporterProfileId(reporter, showMe, section, poolScope);
         if (profileId) {
           reserved.add(profileId);
         }
@@ -142,6 +149,7 @@ export function filterActionedDisguiseFeed(
   superLikedIds: Set<string>,
   section?: SparkSection | string | null,
   showMe: ShowMePreference = 'everyone',
+  poolScope?: PulseWorldPoolScope,
 ): FeedItem[] {
   const actioned = actionedProfileIds(likedIds, passedIds, superLikedIds);
   syncActionedProfileIds(actioned);
@@ -150,11 +158,11 @@ export function filterActionedDisguiseFeed(
     return items;
   }
 
-  const reserved = collectReservedProfileIds(items, showMe, section);
+  const reserved = collectReservedProfileIds(items, showMe, section, poolScope);
   actioned.forEach((id) => reserved.delete(id));
 
-  const pool = buildReplacementPool(section, actioned, showMe);
-  const displayFallbackPool = buildReplacementPool(section, new Set(), showMe);
+  const pool = buildReplacementPool(section, actioned, showMe, poolScope);
+  const displayFallbackPool = buildReplacementPool(section, new Set(), showMe, poolScope);
 
   return items.flatMap((item): FeedItem[] => {
     if (item.type === 'disguised_profile') {
@@ -185,7 +193,7 @@ export function filterActionedDisguiseFeed(
     if (item.type === 'news') {
       let changed = false;
       const reporters = item.reporters.flatMap((reporter) => {
-        const profileId = reporterProfileId(reporter, showMe, section);
+        const profileId = reporterProfileId(reporter, showMe, section, poolScope);
         if (!profileId || !actioned.has(profileId)) {
           return [reporter];
         }

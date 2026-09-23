@@ -2,11 +2,11 @@
 
 ## Demo link (verified working)
 
-**https://excess-suggestion-ruth-quad.trycloudflare.com**
+**https://hair-fallen-oklahoma-hamburg.trycloudflare.com**
 
 - **Demo build:** `main` + **#162** + preview **#163** (map pan/zoom) + **#164** (Pulse IG/YT refresh)
-- **Build ID:** `47d72ed-20260922T234831Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-22 23:49 UTC — tunnel HTTP 200 + `verify-demo-link` PASS
+- **Build ID:** `f1d1d8d-20260923T001919Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
+- **Verified:** 2026-09-23 00:19 UTC — tunnel HTTP 200 + `verify-demo-link` PASS
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

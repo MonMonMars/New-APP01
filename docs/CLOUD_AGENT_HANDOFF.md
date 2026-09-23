@@ -2,7 +2,7 @@
 
 **Read this file first** on every new Cloud Agent run for `MonMonMars/New-APP01`.
 
-Last updated: 2026-09-23 (after **#183** on `main`; integration **#175–#183**; **no open feature PRs**).
+Last updated: 2026-09-23 (integration **#189–#190** ready to merge; **#188** on `main`).
 
 ## Where all “data and files” live
 
@@ -21,14 +21,18 @@ There is nothing to copy out of old agent VMs except what is already committed o
 
 | PR | Summary |
 |----|---------|
-| **#175** | Integration: Show me, Spark/Ember prefs, payment sheet, discover info, map UX, Pulse sheets, thumb/caption swaps |
-| **#176+** | Map basemap → standard OSM (`tile.openstreetmap.org`); rejects osmfr/carto watermark tiles in CI |
-| **#177** | Admin menu gated on staff session (`admin@spark.demo`); `validate-admin-menu-gating.mjs` |
-| **#178** | YouTube-style Pulse pull-to-refresh (`PulseRefreshIndicator`, top bar, dim layer) |
-| **#179** | Pulse mini-window unlike + reporter photos in preview sheet |
-| **#180** | Map global search, privacy people list (no avatar pins), realistic demo portraits |
+| **#175–#180** | Integration: Show me, map OSM basemap, admin gate, Pulse refresh, map privacy list (no avatar pins on map) |
+| **#181–#188** | i18n CI, demo accounts refresh, Pulse captions beside thumbnails |
 
-Superseded drafts **#163–#171**, **#166–#169** — closed; see **`docs/PR_TRIAGE.md`**.
+## Open / integrating (green CI)
+
+| PR | Summary |
+|----|---------|
+| **#189** | Pulse post like/unlike → swap profile + caption (`mergeSparkLikesWithPulsePostLikes`) |
+| **#190** | Map: location **pin icons** only; **Browse matches** → `MapAreaMatches` grid + profile sheet |
+| **integrate branch** | `cursor/integrate-prs-189-190-2e8c` — both merged locally; docs + build ID in same branch |
+
+Superseded drafts — see **`docs/PR_TRIAGE.md`**.
 
 ## Infrastructure
 
@@ -38,11 +42,7 @@ Superseded drafts **#163–#171**, **#166–#169** — closed; see **`docs/PR_TR
 
 ## Known CI gotcha
 
-`validate-i18n-keys.ts` fails if UI uses `t('…')` keys missing from **`src/i18n/en.ts`** and **`src/i18n/zh-TW.ts`**. After adding Show me / Pulse world / edit-profile toggles, ensure both locales stay in sync.
-
-## Old agent sessions — do **not** continue
-
-Stuck pre-`main` or superseded integration threads — **start fresh** with this doc + `PUBLIC_PREVIEW.md`.
+`validate-i18n-keys.ts` fails if UI uses `t('…')` keys missing from **`src/i18n/en.ts`** and **`src/i18n/zh-TW.ts`**.
 
 ## Default commands
 

@@ -108,7 +108,7 @@ function clampVisualScale(baseZoom: number, scale: number): number {
   return Math.min(maxScale, Math.max(minScale, scale));
 }
 
-/** Standard street basemap (Carto Voyager by default) with pan, pinch/wheel zoom, and GPS control. */
+/** Carto Positron (no labels) basemap with pan, pinch/wheel zoom, and GPS control. */
 export function SearchMapView({
   center,
   zoom,
@@ -514,10 +514,11 @@ export function SearchMapView({
           key={tile.key}
           source={{ uri: tile.uri }}
           style={[styles.tile, { left: tile.left, top: tile.top }]}
-          contentFit="fill"
+          contentFit="cover"
           cachePolicy="memory-disk"
           recyclingKey={tile.key}
-          transition={80}
+          transition={0}
+          pointerEvents="none"
         />
       ))}
 
@@ -661,7 +662,7 @@ const styles = StyleSheet.create({
   },
   mapFill: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: '#e8e4df',
+    backgroundColor: '#f5f5f0',
   },
   locateButton: {
     position: 'absolute',

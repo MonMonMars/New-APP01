@@ -9,7 +9,7 @@ import { getDisguiseOverlaySnippet, localizeTimeAgoLabel } from '../../i18n/labe
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { buildSocialReporter, socialReporterPhotoIndex } from '../../utils/disguiseReporterPhotos';
-import { profileIntroCaption } from '../../utils/profileIntroCaption';
+import { pulseFeedCaptionForProfileId } from '../../utils/profileIntroCaption';
 import { resolveSocialPostProfileId } from '../../utils/disguiseReporterPhotos';
 import { resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
@@ -50,13 +50,11 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
 
   const photoReporter = buildSocialReporter(post, pulseSection);
   const feedPhotoIndex = socialReporterPhotoIndex(photoReporter, post.imageUrl, pulseSection);
-  const linkedAuthorProfile = resolveExplicitDatingProfile(
-    resolveSocialPostProfileId(post),
-    pulseSection,
-  );
-  const authorAvatarUrl = linkedAuthorProfile?.photos[0] ?? post.avatarUrl;
+  const authorProfileId = post.datingProfileId ?? resolveSocialPostProfileId(post);
+  const linkedAuthorProfile = resolveExplicitDatingProfile(authorProfileId, pulseSection);
+  const authorAvatarUrl = post.avatarUrl || linkedAuthorProfile?.photos[0] || '';
   const authorContentKind = linkedAuthorProfile ? 'profile' : 'social';
-  const authorCaption = linkedAuthorProfile ? profileIntroCaption(linkedAuthorProfile) : undefined;
+  const authorCaption = pulseFeedCaptionForProfileId(authorProfileId) || undefined;
 
   const maskSnippet = post.avatarMask?.text.split(' ').slice(0, 2).join(' ')
     ? getDisguiseOverlaySnippet(locale, post.avatarMask.text.split(' ').slice(0, 2).join(' '))
@@ -102,7 +100,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
       <View style={styles.header}>
         <View style={styles.headerMain}>
           <PulseProfileSwap
-            profileKey={linkedAuthorProfile?.id ?? post.id}
+            profileKey={`${authorProfileId ?? post.id}:${authorAvatarUrl}:${authorCaption ?? ''}`}
             style={styles.avatarSlot}
           >
             {post.maskAvatar !== false && post.avatarMask ? (

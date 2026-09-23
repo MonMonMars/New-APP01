@@ -7,7 +7,7 @@ import { useTranslation } from '../../i18n';
 import { getPulseCategoryLabel, localizeTimeAgoLabel } from '../../i18n/labels';
 import { NewsPost, NewsReporter } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
-import { profileIntroCaption } from '../../utils/profileIntroCaption';
+import { profileIntroCaption, pulseFeedCaptionForProfileId } from '../../utils/profileIntroCaption';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { usePulseContextSection } from '../../hooks/usePulseContextSection';
 import {
@@ -67,11 +67,16 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
   };
 
   const reporterCaption = (reporter: NewsReporter): string => {
-    const linked = linkedReporterProfile(reporter);
-    if (linked) {
-      return profileIntroCaption(linked);
+    const fromFeed = pulseFeedCaptionForProfileId(reporter.profileId);
+    if (fromFeed) {
+      return fromFeed;
     }
-    return reporter.quote;
+    const trimmedQuote = reporter.quote?.trim();
+    if (trimmedQuote) {
+      return trimmedQuote;
+    }
+    const linked = linkedReporterProfile(reporter);
+    return linked ? profileIntroCaption(linked) : reporter.name;
   };
 
   return (
@@ -113,10 +118,11 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
               {post.reporters.map((reporter) => {
                 const linkedProfile = linkedReporterProfile(reporter);
                 const reporterKind = linkedProfile ? 'profile' : 'news';
+                const caption = reporterCaption(reporter);
                 return (
                   <PulseProfileSwap
                     key={reporter.id}
-                    profileKey={`${linkedProfile?.id ?? reporter.id}:${reporter.avatarUrl}`}
+                    profileKey={`${reporter.profileId ?? linkedProfile?.id ?? reporter.id}:${reporter.avatarUrl}:${caption}`}
                     style={styles.reporterRow}
                   >
                     <FeedPersonThumbnail
@@ -124,7 +130,7 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
                       contentKind={reporterKind}
                       hideLabel
                       imageUrl={reporter.avatarUrl}
-                      caption={reporterCaption(reporter)}
+                      caption={caption}
                       onPress={linkedProfile ? () => openReporter(reporter) : undefined}
                       accessibilityLabel={
                         linkedProfile

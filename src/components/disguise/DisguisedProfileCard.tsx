@@ -8,6 +8,7 @@ import { useTranslation } from '../../i18n';
 import {
   getDisguisedProfileHintLabel,
   getDisguisedSourceLabel,
+  getDisguiseOverlaySnippet,
   getPulseCategoryLabel,
   localizeTimeAgoLabel,
 } from '../../i18n/labels';
@@ -67,6 +68,9 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
 
   const maskVariant = post.variant === 'ad' ? 'ad' : 'news';
   const maskSnippet = post.overlayText.split(' ').slice(0, 2).join(' ');
+  const besideAvatarCaption = linkedProfile
+    ? profileIntroCaption(linkedProfile) || linkedProfile.name
+    : getDisguiseOverlaySnippet(locale, maskSnippet);
 
   const openPreview = () => {
     if (!linkedProfile) {
@@ -87,13 +91,14 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   );
 
   const avatarRow = (
-    <PulseProfileSwap profileKey={linkedProfileId ?? post.id}>
+    <PulseProfileSwap profileKey={linkedProfileId ?? post.id} style={styles.avatarRowWrap}>
       <FeedPersonThumbnail
         imageUrl={post.avatarUrl}
         plainAvatar={Boolean(linkedProfile)}
         overlayText={linkedProfile ? undefined : maskSnippet}
         overlayVariant={maskVariant}
         contentKind="profile"
+        caption={besideAvatarCaption}
         hideLabel
         size={PROFILE_AVATAR_SIZE}
         onPress={openPreview}
@@ -106,13 +111,14 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
     return (
       <>
         <View style={[styles.socialCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <PulseProfileSwap profileKey={linkedProfileId ?? post.id}>
+          <PulseProfileSwap profileKey={linkedProfileId ?? post.id} style={styles.avatarRowWrap}>
             <FeedPersonThumbnail
               imageUrl={post.avatarUrl}
               plainAvatar={Boolean(linkedProfile)}
               overlayText={linkedProfile ? undefined : maskSnippet}
               overlayVariant={maskVariant}
               contentKind="profile"
+              caption={besideAvatarCaption}
               hideLabel
               size={PROFILE_AVATAR_SIZE}
               onPress={openPreview}
@@ -352,6 +358,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: '700',
+  },
+  avatarRowWrap: {
+    width: '100%',
+    minWidth: 0,
   },
   reportersRow: {
     marginTop: spacing.xs,

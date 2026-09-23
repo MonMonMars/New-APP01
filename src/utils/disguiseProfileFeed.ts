@@ -1,6 +1,6 @@
 import { DisguisedProfilePost, DisguisedProfileVariant } from '../data/disguiseFeed';
 import { disguiseClientAds } from '../data/disguiseClientAds';
-import { getIncomingLikeProfilesForSection } from '../data/profiles';
+import { buildSectionProfilePool } from './discoveryProfilePool';
 import { pulseNewsImages } from '../data/pulseNewsMedia';
 import { DisguiseAdCreative } from '../types/disguise';
 import { SparkSection } from '../types/preferences';
@@ -10,7 +10,6 @@ import {
   pulseNewsSummaryForProfile,
   pulseReporterQuoteForProfile,
 } from './disguisePulseCopy';
-import { filterProfilesForShowMe } from './showMeFilter';
 import { profileIntroCaption } from './profileIntroCaption';
 import { ShowMePreference } from '../types/preferences';
 
@@ -80,7 +79,7 @@ export function buildDisguisedProfileFeedItems(
   rotationOffset = 0,
   showMe: ShowMePreference = 'everyone',
 ): DisguisedProfilePost[] {
-  const profiles = filterProfilesForShowMe(getIncomingLikeProfilesForSection(section), showMe);
+  const profiles = buildSectionProfilePool(section, showMe, new Set());
   if (profiles.length === 0) {
     return [];
   }

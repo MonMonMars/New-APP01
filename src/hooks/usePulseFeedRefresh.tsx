@@ -65,6 +65,8 @@ export function usePulseFeedRefreshGeneration(): number {
 
 type UsePulseScrollRefreshOptions = {
   onRefreshed?: () => void;
+  initialScrollOffset?: number;
+  onPersistScrollOffset?: (offsetY: number) => void;
 };
 
 type RefreshMode = 'pull' | 'top';
@@ -93,7 +95,7 @@ function waitMs(ms: number): Promise<void> {
 }
 
 export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}) {
-  const { onRefreshed } = options;
+  const { onRefreshed, initialScrollOffset = 0, onPersistScrollOffset } = options;
   const { dismissDisguiseLeaveConfirm } = useApp();
   const [refreshing, setRefreshing] = useState(false);
   const [justUpdated, setJustUpdated] = useState(false);
@@ -105,7 +107,21 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
   const wasScrolledDownRef = useRef(false);
   const topArrivalTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastRefreshFinishedAtRef = useRef(0);
+  const persistScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const restoredScrollRef = useRef(false);
   const refreshGeneration = usePulseFeedRefreshGeneration();
+
+  useEffect(() => {
+    if (restoredScrollRef.current || initialScrollOffset <= 0) {
+      return;
+    }
+    restoredScrollRef.current = true;
+    scrollOffsetRef.current = initialScrollOffset;
+    requestAnimationFrame(() => {
+      listRef.current?.scrollToOffset({ offset: initialScrollOffset, animated: false });
+      scrollViewRef.current?.scrollTo({ y: initialScrollOffset, animated: false });
+    });
+  }, [initialScrollOffset]);
 
   const clearTopArrivalTimer = useCallback(() => {
     if (topArrivalTimerRef.current) {
@@ -115,7 +131,12 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
   }, []);
 
   useEffect(() => {
-    return () => clearTopArrivalTimer();
+    return () => {
+      clearTopArrivalTimer();
+      if (persistScrollTimerRef.current) {
+        clearTimeout(persistScrollTimerRef.current);
+      }
+    };
   }, [clearTopArrivalTimer]);
 
   useEffect(() => {
@@ -213,6 +234,16 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
         wasScrolledDownRef.current = true;
       }
 
+      if (onPersistScrollOffset) {
+        if (persistScrollTimerRef.current) {
+          clearTimeout(persistScrollTimerRef.current);
+        }
+        persistScrollTimerRef.current = setTimeout(() => {
+          persistScrollTimerRef.current = null;
+          onPersistScrollOffset(y);
+        }, 350);
+      }
+
       if (y <= TOP_OFFSET_THRESHOLD) {
         scheduleTopArrivalRefresh();
       } else {
@@ -228,7 +259,7 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
         void runRefresh('pull');
       }
     },
-    [clearTopArrivalTimer, refreshing, runRefresh, scheduleTopArrivalRefresh],
+    [clearTopArrivalTimer, onPersistScrollOffset, refreshing, runRefresh, scheduleTopArrivalRefresh],
   );
 
   const maybeRefreshAfterScrollToTop = useCallback(() => {

@@ -288,4 +288,10 @@ export type UserProfile = {
   ageVerified?: boolean;
   photoVerified?: boolean;
   personVerified?: boolean;
+  /** Discoverable in Spark (open dating) surfaces */
+  visibleInSpark?: boolean;
+  /** Discoverable in Ember surfaces */
+  visibleInEmber?: boolean;
+  /** Show relationship / marriage status on your profile card */
+  showRelationshipStatus?: boolean;
 };

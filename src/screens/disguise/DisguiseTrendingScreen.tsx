@@ -54,6 +54,7 @@ import { PulseFeedRefreshHeader } from '../../components/disguise/PulseFeedRefre
 import { PulseFeedRefreshDimLayer } from '../../components/disguise/PulseFeedRefreshDimLayer';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { useRotatedPulseContent } from '../../hooks/useRotatedPulseContent';
+import { useRecordPulseTab } from '../../hooks/useRecordPulseTab';
 import { usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
 
 function trendIcon(direction: TrendDirection): keyof typeof Ionicons.glyphMap {
@@ -134,6 +135,7 @@ function radarIcon(icon: 'train' | 'cloud' | 'ticket' | 'wifi'): keyof typeof Io
 }
 
 export function DisguiseTrendingScreen() {
+  useRecordPulseTab('Trending');
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();

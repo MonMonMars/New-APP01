@@ -1,4 +1,4 @@
-import { PixelRatio } from 'react-native';
+import { PixelRatio, Platform } from 'react-native';
 
 import type { GeoPoint } from './geoMap';
 import {
@@ -13,18 +13,55 @@ export { CITY_COORDS, DEFAULT_MAP_CENTER, mapCenterForCity, zoomForRadius };
 /** Logical tile size on screen (Slippy Map 256 world units). */
 export const TILE_PX = 256;
 
+/** Max zoom for Carto Voyager raster tiles (overzoom uses +1 fetch below this cap). */
+export const MAP_TILE_MAX_ZOOM = 20;
+
 const CARTO_SUBDOMAINS = ['a', 'b', 'c', 'd'] as const;
 
-/** Prefer @2x raster tiles on retina — keeps sharpness without changing layout math. */
+/**
+ * Device pixel ratio for retina tile fetch.
+ * RN Web often reports PixelRatio 1 while the screen is 2x or 3x.
+ */
 export function mapTilePixelRatio(): number {
-  return PixelRatio.get() >= 2 ? 2 : 1;
+  if (Platform.OS === 'web') {
+    if (typeof window !== 'undefined') {
+      return Math.min(3, Math.max(1, window.devicePixelRatio || 1));
+    }
+    return 1;
+  }
+  return PixelRatio.get();
 }
 
-/** Carto Voyager — clean Google/Apple-like street basemap (OSM-based). */
-export function buildMapTileUri(zoom: number, x: number, y: number): string {
-  const retinaSuffix = mapTilePixelRatio() >= 2 ? '@2x' : '';
+type TileFetchPlan = {
+  fetchZoom: number;
+  /** Each tile drawn at TILE_PX * pixelScale (0.5 when fetching zoom+1 on retina). */
+  pixelScale: number;
+};
+
+/** Retina: fetch one zoom level deeper, draw tiles at half size — sharp on phone/desktop. */
+export function tileFetchPlan(displayZoom: number): TileFetchPlan {
+  const dpr = mapTilePixelRatio();
+  if (dpr >= 1.5 && displayZoom < MAP_TILE_MAX_ZOOM - 1) {
+    return { fetchZoom: displayZoom + 1, pixelScale: 0.5 };
+  }
+  return { fetchZoom: displayZoom, pixelScale: 1 };
+}
+
+/**
+ * Carto Voyager without labels — clean streets/water (OSM data), no caption tiles.
+ * @2x on retina; combined with tileFetchPlan() for extra sharpness on high-DPR web.
+ */
+export function buildMapTileUri(
+  zoom: number,
+  x: number,
+  y: number,
+  pixelScale = 1,
+): string {
+  // Overzoom already fetches a deeper zoom — skip @2x to avoid oversampling.
+  const useRetina = mapTilePixelRatio() >= 2 && pixelScale >= 1;
+  const retinaSuffix = useRetina ? '@2x' : '';
   const subdomain = CARTO_SUBDOMAINS[Math.abs(x + y) % CARTO_SUBDOMAINS.length];
-  return `https://${subdomain}.basemaps.cartocdn.com/rastertiles/voyager/${zoom}/${x}/${y}${retinaSuffix}.png`;
+  return `https://${subdomain}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/${zoom}/${x}/${y}${retinaSuffix}.png`;
 }
 
 export type MapTile = {
@@ -32,6 +69,7 @@ export type MapTile = {
   uri: string;
   left: number;
   top: number;
+  size: number;
 };
 
 export function lonToTile(lon: number, zoom: number): number {
@@ -89,7 +127,7 @@ export function milesToPixels(miles: number, lat: number, zoom: number): number 
 }
 
 export function buildMapTiles(
-  zoom: number,
+  displayZoom: number,
   width: number,
   height: number,
   lat: number,
@@ -98,13 +136,16 @@ export function buildMapTiles(
   if (width <= 0 || height <= 0) {
     return [];
   }
-  const n = 2 ** zoom;
-  const cx = lonToTile(lng, zoom);
-  const cy = latToTile(lat, zoom);
-  const minX = Math.floor(cx - width / 2 / TILE_PX) - 1;
-  const maxX = Math.ceil(cx + width / 2 / TILE_PX) + 1;
-  const minY = Math.floor(cy - height / 2 / TILE_PX) - 1;
-  const maxY = Math.ceil(cy + height / 2 / TILE_PX) + 1;
+
+  const { fetchZoom, pixelScale } = tileFetchPlan(displayZoom);
+  const tileSpan = TILE_PX * pixelScale;
+  const n = 2 ** fetchZoom;
+  const cx = lonToTile(lng, fetchZoom);
+  const cy = latToTile(lat, fetchZoom);
+  const minX = Math.floor(cx - width / 2 / tileSpan) - 1;
+  const maxX = Math.ceil(cx + width / 2 / tileSpan) + 1;
+  const minY = Math.floor(cy - height / 2 / tileSpan) - 1;
+  const maxY = Math.ceil(cy + height / 2 / tileSpan) + 1;
   const tiles: MapTile[] = [];
   for (let x = minX; x <= maxX; x += 1) {
     for (let y = minY; y <= maxY; y += 1) {
@@ -113,10 +154,11 @@ export function buildMapTiles(
       }
       const wrappedX = ((x % n) + n) % n;
       tiles.push({
-        key: `${zoom}-${wrappedX}-${y}-${x}`,
-        uri: buildMapTileUri(zoom, wrappedX, y),
-        left: (x - cx) * TILE_PX + width / 2,
-        top: (y - cy) * TILE_PX + height / 2,
+        key: `${fetchZoom}-${wrappedX}-${y}-${x}-${pixelScale}`,
+        uri: buildMapTileUri(fetchZoom, wrappedX, y, pixelScale),
+        left: (x - cx) * tileSpan + width / 2,
+        top: (y - cy) * tileSpan + height / 2,
+        size: tileSpan,
       });
     }
   }

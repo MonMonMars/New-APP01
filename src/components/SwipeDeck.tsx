@@ -20,6 +20,7 @@ import Animated, {
 import { Profile } from '../types/profile';
 import {
   DISCOVER_INFO_BUTTON_SIZE,
+  DISCOVER_INFO_ICON_SIZE,
   DISCOVER_INFO_TOP,
   discoverActionRailHeight,
   discoverInfoButtonRightInset,
@@ -542,7 +543,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
                 hitSlop={10}
                 scaleTo={0.9}
               >
-                <Ionicons name="information-circle" size={28} color={colors.text} />
+                <Ionicons name="information-circle" size={DISCOVER_INFO_ICON_SIZE} color={colors.text} />
               </AnimatedPressable>
             </View>
           ) : null}

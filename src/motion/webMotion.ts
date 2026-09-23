@@ -38,6 +38,18 @@ const CSS = `
   from { opacity: 0; }
   to { opacity: 1; }
 }
+@keyframes spark-pulse-top-bar {
+  0% { transform: translate3d(-120%, 0, 0); }
+  100% { transform: translate3d(320%, 0, 0); }
+}
+@keyframes spark-pulse-feed-spring {
+  from { opacity: 0.55; transform: translate3d(0, -10px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes spark-pulse-refresh-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 .spark-fade-up {
   animation: spark-fade-up 340ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -66,7 +78,27 @@ const CSS = `
 .spark-pulse-refresh-dim {
   filter: grayscale(1) brightness(0.74);
   opacity: 0.88;
-  transition: filter 220ms ease, opacity 220ms ease;
+  transition: filter 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.spark-pulse-top-bar-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  overflow: hidden;
+  z-index: 40;
+  pointer-events: none;
+}
+.spark-pulse-top-bar-fill {
+  height: 100%;
+  width: 38%;
+  border-radius: 2px;
+  animation: spark-pulse-top-bar 0.95s ease-in-out infinite;
+}
+.spark-pulse-feed-spring {
+  animation: spark-pulse-feed-spring 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 `;
 

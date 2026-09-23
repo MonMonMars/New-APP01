@@ -9,7 +9,7 @@ type PulseFeedRefreshDimLayerProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-/** Subtle reload chrome — keep feed readable like Instagram / YouTube home refresh. */
+/** Instagram / YouTube — grey wash + blocked taps while Pulse reloads. */
 export function PulseFeedRefreshDimLayer({
   refreshing,
   children,
@@ -29,6 +29,15 @@ export function PulseFeedRefreshDimLayer({
       >
         {children}
       </View>
+      {refreshing ? (
+        <View
+          style={styles.overlay}
+          pointerEvents="auto"
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          testID="pulse-feed-refresh-dim-overlay"
+        />
+      ) : null}
     </View>
   );
 }
@@ -42,6 +51,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentDimNative: {
-    opacity: 0.88,
+    opacity: 0.48,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: Platform.OS === 'web' ? 'rgba(228, 228, 234, 0.62)' : 'rgba(210, 210, 218, 0.52)',
   },
 });

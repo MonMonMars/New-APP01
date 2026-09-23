@@ -27,7 +27,15 @@ import { PulseFeedRefreshDimLayer } from '../../components/disguise/PulseFeedRef
 import { FadeSlideIn } from '../../components/motion/FadeSlideIn';
 import { usePulseFeedRefreshGeneration, usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
 
-function renderFeedItem({ item, index }: { item: FeedItem; index: number }) {
+function renderFeedItem({
+  item,
+  index,
+  refreshGeneration,
+}: {
+  item: FeedItem;
+  index: number;
+  refreshGeneration: number;
+}) {
   const card = (() => {
     switch (item.type) {
       case 'news':
@@ -46,7 +54,12 @@ function renderFeedItem({ item, index }: { item: FeedItem; index: number }) {
   })();
 
   return (
-    <FadeSlideIn index={index % 10} distance={18}>
+    <FadeSlideIn
+      index={index % 10}
+      distance={18}
+      instant={index < 8}
+      replayKey={refreshGeneration}
+    >
       {card}
     </FadeSlideIn>
   );
@@ -98,7 +111,7 @@ export function DisguiseFeedScreen() {
         data={feedItems}
         extraData={refreshGeneration}
         keyExtractor={(item) => item.id}
-        renderItem={({ item, index }) => renderFeedItem({ item, index })}
+        renderItem={({ item, index }) => renderFeedItem({ item, index, refreshGeneration })}
         contentContainerStyle={[styles.list, { paddingBottom: pulseFeedScrollPaddingBottom(insets.bottom) }]}
         refreshControl={refreshControl}
         {...flatListProps}

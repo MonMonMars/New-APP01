@@ -6,6 +6,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { spacing } from '../../theme';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { PULSE_PULL_TRIGGER_PX } from '../../hooks/usePulseFeedRefresh';
+import { PulseFeedRefreshGreyBlocks } from './PulseFeedRefreshGreyBlocks';
 
 type PulseFeedRefreshHeaderProps = {
   children?: ReactNode;
@@ -47,6 +48,7 @@ export function PulseFeedRefreshHeader({
 
   return (
     <View pointerEvents="box-none" style={refreshing ? styles.refreshingHost : undefined}>
+      <PulseFeedRefreshGreyBlocks visible={refreshing} />
       <View
         style={[styles.pullRow, { paddingTop: indicatorPadding, minHeight: 28 + indicatorPadding }]}
         accessibilityLiveRegion="polite"

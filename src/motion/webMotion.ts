@@ -64,9 +64,23 @@ const CSS = `
   animation: spark-press-glow 320ms ease-out;
 }
 .spark-pulse-refresh-dim {
-  filter: grayscale(0.35) brightness(0.96);
-  opacity: 0.92;
-  transition: filter 220ms ease, opacity 220ms ease;
+  filter: grayscale(1) brightness(0.78);
+  opacity: 0.55;
+  transition: filter 160ms ease, opacity 160ms ease;
+}
+.spark-pulse-grey-block {
+  background: linear-gradient(90deg, #d4d4dc 0%, #e8e8ee 45%, #d4d4dc 90%);
+  background-size: 200% 100%;
+  animation: spark-pulse-grey-shimmer 900ms ease-in-out infinite;
+}
+@keyframes spark-pulse-grey-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+.spark-pulse-feed-instant {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
 }
 `;
 

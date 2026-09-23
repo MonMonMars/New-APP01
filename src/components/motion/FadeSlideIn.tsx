@@ -21,6 +21,8 @@ type FadeSlideInProps = {
   style?: StyleProp<ViewStyle>;
   /** Re-run enter animation when this changes. */
   replayKey?: string | number | boolean;
+  /** Skip enter motion — use for Pulse feed first paint (Instagram-style instant cards). */
+  instant?: boolean;
 };
 
 export function FadeSlideIn({
@@ -30,6 +32,7 @@ export function FadeSlideIn({
   distance = 14,
   style,
   replayKey,
+  instant = false,
 }: FadeSlideInProps) {
   const progress = useSharedValue(0);
 
@@ -52,13 +55,17 @@ export function FadeSlideIn({
       <View
         style={[
           style,
-          { animationDelay: `${delay + staggerDelay(index)}ms` } as ViewStyle,
+          instant ? undefined : ({ animationDelay: `${delay + staggerDelay(index)}ms` } as ViewStyle),
         ]}
-        {...webClass('spark-fade-up')}
+        {...webClass(instant ? 'spark-pulse-feed-instant' : 'spark-fade-up')}
       >
         {children}
       </View>
     );
+  }
+
+  if (instant) {
+    return <View style={style}>{children}</View>;
   }
 
   return <Animated.View style={[animatedStyle, style]}>{children}</Animated.View>;

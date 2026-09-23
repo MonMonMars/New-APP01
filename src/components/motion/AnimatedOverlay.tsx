@@ -175,6 +175,9 @@ const styles = StyleSheet.create({
   },
   bottomPanel: {
     width: '100%',
+    maxHeight: '100%',
+    flexShrink: 1,
+    justifyContent: 'flex-end',
   },
   centerChildren: {
     alignItems: 'center',

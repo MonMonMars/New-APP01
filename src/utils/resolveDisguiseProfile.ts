@@ -8,11 +8,30 @@ import { buildPulseProfilePool, PulseWorldPoolScope } from './pulseWorldPool';
 import { isDiscoverableDemoProfile, matchesShowMePreference } from './showMeFilter';
 
 const reporterProfileCache = new Map<string, string>();
+/** Feed slot → profile currently shown after a like/pass swap (reporter id or disguised card id). */
+const pulseSlotDisplayProfile = new Map<string, string>();
 const actionedProfileIds = new Set<string>();
 let pulseProfileMappingGeneration = 0;
 
 export function clearReporterProfileCache(): void {
   reporterProfileCache.clear();
+  pulseSlotDisplayProfile.clear();
+}
+
+export function getPulseSlotDisplayProfile(slotKey: string): string | undefined {
+  return pulseSlotDisplayProfile.get(slotKey);
+}
+
+export function setPulseSlotDisplayProfile(slotKey: string, profileId: string | undefined): void {
+  if (!profileId) {
+    pulseSlotDisplayProfile.delete(slotKey);
+    return;
+  }
+  pulseSlotDisplayProfile.set(slotKey, profileId);
+}
+
+export function clearPulseSlotDisplayProfiles(): void {
+  pulseSlotDisplayProfile.clear();
 }
 
 export function setPulseProfileMappingGeneration(generation: number): void {

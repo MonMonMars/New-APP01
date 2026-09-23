@@ -37,7 +37,10 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
   const { recordPulseReading } = useApp();
   const meta = useDisguiseWorld();
   const heroHeight = disguiseReadHeroHeight(windowHeight);
-  const sheetHeight = disguiseReadSheetHeight(windowHeight);
+  const sheetHeight = disguiseReadSheetHeight(windowHeight, {
+    top: insets.top,
+    bottom: insets.bottom,
+  });
 
   useEffect(() => {
     if (visible && post) {
@@ -65,7 +68,6 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
             borderColor: colors.border,
             height: sheetHeight,
             maxHeight: sheetHeight,
-            paddingBottom: insets.bottom + spacing.md,
           },
         ]}
       >
@@ -111,7 +113,12 @@ export function NewsArticleSheet({ visible, post, onClose }: NewsArticleSheetPro
           ))}
         </ScrollView>
         {showReadOriginal ? (
-          <View style={[disguiseReadSheetStyles.footer, { borderTopColor: colors.border }]}>
+          <View
+            style={[
+              disguiseReadSheetStyles.footer,
+              { borderTopColor: colors.border, paddingBottom: insets.bottom + spacing.sm },
+            ]}
+          >
             <AnimatedPressable
               style={[styles.readOriginal, { backgroundColor: meta.accent }]}
               onPress={() => {

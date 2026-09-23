@@ -61,10 +61,9 @@ export function ProfileViewsCard({
                 {profile.name}
               </Text>
             ) : (
-              <>
-                <View style={styles.blurFallback} />
-                <Ionicons name="lock-closed" size={14} color={colors.text} style={styles.lockIcon} />
-              </>
+              <View style={styles.lockOverlay}>
+                <Ionicons name="lock-closed" size={16} color={colors.text} />
+              </View>
             )}
           </View>
         ))}
@@ -140,15 +139,16 @@ const styles = StyleSheet.create({
     maxWidth: 72,
     textAlign: 'center',
   },
-  blurFallback: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    borderRadius: 32,
-  },
-  lockIcon: {
+  lockOverlay: {
     position: 'absolute',
-    top: 24,
-    left: 24,
+    top: 0,
+    left: 0,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   upgradeButton: {
     flexDirection: 'row',

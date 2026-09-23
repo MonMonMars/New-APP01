@@ -1,6 +1,6 @@
 import { DisguisedProfilePost, DisguisedProfileVariant } from '../data/disguiseFeed';
+import { getIncomingLikeProfilesForSection } from '../data/profiles';
 import { disguiseClientAds } from '../data/disguiseClientAds';
-import { buildSectionProfilePool } from './discoveryProfilePool';
 import { pulseNewsImages } from '../data/pulseNewsMedia';
 import { DisguiseAdCreative } from '../types/disguise';
 import { SparkSection } from '../types/preferences';
@@ -14,6 +14,7 @@ import { profileIntroCaption } from './profileIntroCaption';
 import { ShowMePreference } from '../types/preferences';
 import { buildPulseProfilePool, PulseWorldPoolScope } from './pulseWorldPool';
 import { buildSectionProfilePool } from './discoveryProfilePool';
+import { filterProfilesForShowMe } from './showMeFilter';
 
 const NEWS_SOURCES = [
   { source: 'BBC News', category: 'Local', coverImageUrl: pulseNewsImages.restaurant },

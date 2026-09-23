@@ -9,7 +9,7 @@ import { getDisguiseOverlaySnippet, localizeTimeAgoLabel } from '../../i18n/labe
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { buildSocialReporter, socialReporterPhotoIndex } from '../../utils/disguiseReporterPhotos';
-import { profileIntroCaption } from '../../utils/profileIntroCaption';
+import { pulseFeedCaptionForProfileId } from '../../utils/profileIntroCaption';
 import { resolveSocialPostProfileId } from '../../utils/disguiseReporterPhotos';
 import {
   explicitReporterProfileId,
@@ -55,19 +55,23 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
 
   const photoReporter = buildSocialReporter(post, pulseSection, preferences.showMe);
   const feedPhotoIndex = socialReporterPhotoIndex(photoReporter, post.imageUrl, pulseSection);
-  const linkedAuthorProfile = resolveExplicitDatingProfile(
+  const authorProfileId =
+    post.datingProfileId ??
     explicitReporterProfileId(
       pulseSocialPostReporterId(post.id),
       resolveSocialPostProfileId(post),
       preferences.showMe,
       pulseSection,
-    ),
+    ) ??
+    resolveSocialPostProfileId(post);
+  const linkedAuthorProfile = resolveExplicitDatingProfile(
+    authorProfileId,
     pulseSection,
     preferences.showMe,
   );
-  const authorAvatarUrl = linkedAuthorProfile?.photos[0] ?? post.avatarUrl;
+  const authorAvatarUrl = post.avatarUrl || linkedAuthorProfile?.photos[0] || '';
   const authorContentKind = linkedAuthorProfile ? 'profile' : 'social';
-  const authorCaption = linkedAuthorProfile ? profileIntroCaption(linkedAuthorProfile) : undefined;
+  const authorCaption = pulseFeedCaptionForProfileId(authorProfileId) || undefined;
 
   const maskSnippet = post.avatarMask?.text.split(' ').slice(0, 2).join(' ')
     ? getDisguiseOverlaySnippet(locale, post.avatarMask.text.split(' ').slice(0, 2).join(' '))
@@ -113,7 +117,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
       <View style={styles.header}>
         <View style={styles.headerMain}>
           <PulseProfileSwap
-            profileKey={linkedAuthorProfile?.id ?? post.id}
+            profileKey={`${authorProfileId ?? post.id}:${authorAvatarUrl}:${authorCaption ?? ''}`}
             style={styles.avatarSlot}
           >
             {post.maskAvatar !== false && post.avatarMask ? (

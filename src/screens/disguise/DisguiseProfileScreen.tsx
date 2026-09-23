@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { resolvePulseDisplaySections } from '../../utils/pulseWorldPool';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { DisguisedProfileCard } from '../../components/disguise/DisguisedProfileCard';
@@ -14,7 +15,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { usePulseContextSection } from '../../hooks/usePulseContextSection';
 import { useTranslation } from '../../i18n';
-import { getPassportCityLabel } from '../../i18n/labels';
+import { getPassportCityLabel, getSparkSectionLabel } from '../../i18n/labels';
 import { SparkSectionToggle } from '../../components/SparkSectionToggle';
 import { PASSPORT_CITIES, resolveSparkSection } from '../../types/preferences';
 import { ThemeMode } from '../../types/settings';
@@ -39,10 +40,12 @@ import { PulseFeedRefreshDimLayer } from '../../components/disguise/PulseFeedRef
 import { DisguiseTabParamList } from '../../navigation/DisguiseNavigator';
 import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { usePulseFeedRefreshGeneration, usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
+import { useRecordPulseTab } from '../../hooks/useRecordPulseTab';
 
 type DetailSheetKey = 'saved' | 'history' | 'settings' | 'help' | null;
 
 export function DisguiseProfileScreen() {
+  useRecordPulseTab('Profile');
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<BottomTabNavigationProp<DisguiseTabParamList>>();
   const { colors } = useTheme();
@@ -360,6 +363,63 @@ export function DisguiseProfileScreen() {
                   <Text style={[styles.languageHint, { color: colors.textMuted }]}>{t('profile.worldModeHint')}</Text>
                   <SparkSectionToggle section={sparkSection} onChange={setSparkSection} variant="list" />
                 </View>
+                <View style={[styles.worldBlock, { borderBottomColor: colors.border }]}>
+                  <Text style={[styles.languageTitle, { color: colors.text }]}>
+                    {t('disguiseProfile.pulseWorldFeedTitle')}
+                  </Text>
+                  <Text style={[styles.languageHint, { color: colors.textMuted }]}>
+                    {t('disguiseProfile.pulseWorldFeedHint')}
+                  </Text>
+                  <PulseWorldToggleRow
+                    label={t('disguiseProfile.pulseIncludeSpark')}
+                    value={preferences.pulseDisplaySpark !== false}
+                    colors={colors}
+                    accent={meta.accent}
+                    onValueChange={(enabled) => {
+                      const nextSpark = enabled;
+                      const nextEmber = preferences.pulseDisplayEmber ?? false;
+                      if (!nextSpark && !nextEmber) {
+                        Alert.alert(
+                          t('disguiseProfile.pulseWorldRequiredTitle'),
+                          t('disguiseProfile.pulseWorldRequiredBody'),
+                        );
+                        return;
+                      }
+                      updatePreferences({
+                        ...preferences,
+                        pulseDisplaySpark: nextSpark,
+                      });
+                    }}
+                  />
+                  <PulseWorldToggleRow
+                    label={t('disguiseProfile.pulseIncludeEmber')}
+                    value={preferences.pulseDisplayEmber ?? false}
+                    colors={colors}
+                    accent={meta.accent}
+                    onValueChange={(enabled) => {
+                      const nextEmber = enabled;
+                      const nextSpark = preferences.pulseDisplaySpark !== false;
+                      if (!nextSpark && !nextEmber) {
+                        Alert.alert(
+                          t('disguiseProfile.pulseWorldRequiredTitle'),
+                          t('disguiseProfile.pulseWorldRequiredBody'),
+                        );
+                        return;
+                      }
+                      updatePreferences({
+                        ...preferences,
+                        pulseDisplayEmber: nextEmber,
+                      });
+                    }}
+                  />
+                  <Text style={[styles.languageHint, { color: colors.textMuted }]}>
+                    {t('disguiseProfile.pulseWorldActiveHint', {
+                      worlds: resolvePulseDisplaySections(preferences)
+                        .map((world) => getSparkSectionLabel(locale, world))
+                        .join(' · '),
+                    })}
+                  </Text>
+                </View>
                 <View style={[styles.languageBlock, { borderBottomColor: colors.border }]}>
                   <View style={styles.languageText}>
                     <Text style={[styles.languageTitle, { color: colors.text }]}>{t('profile.language')}</Text>
@@ -493,6 +553,47 @@ export function DisguiseProfileScreen() {
     </View>
   );
 }
+
+function PulseWorldToggleRow({
+  label,
+  value,
+  colors,
+  accent,
+  onValueChange,
+}: {
+  label: string;
+  value: boolean;
+  colors: { text: string; textMuted: string; border: string };
+  accent: string;
+  onValueChange: (enabled: boolean) => void;
+}) {
+  return (
+    <View style={pulseToggleStyles.row}>
+      <Text style={[pulseToggleStyles.label, { color: colors.text }]}>{label}</Text>
+      <Switch
+        value={value}
+        onValueChange={onValueChange}
+        trackColor={{ false: colors.border, true: accent }}
+        thumbColor={colors.text}
+      />
+    </View>
+  );
+}
+
+const pulseToggleStyles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  label: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '600',
+  },
+});
 
 function MenuRow({
   icon,

@@ -13,6 +13,8 @@ export type PulseReadingEntry = {
   articleUrl?: string;
 };
 
+export type PulseDisguiseTab = 'Home' | 'Trending' | 'Activity' | 'Profile';
+
 export type PulseSocialState = {
   savedPostIds: string[];
   likedPostIds: string[];
@@ -22,7 +24,25 @@ export type PulseSocialState = {
   referralShareCount: number;
   readingHistory: PulseReadingEntry[];
   activityAlertsRead: boolean;
+  /** Last Pulse bottom tab — reopen disguise mode here */
+  pulseLastTab?: PulseDisguiseTab;
+  /** Home feed scroll offset when leaving Pulse */
+  pulseHomeScrollY?: number;
+  /** Last Spark vs Ember context inside Pulse (accent + pool bias) */
+  pulseLastWorldSection?: 'spark' | 'ember';
 };
+
+export function resolvePulseInitialTab(tab?: PulseDisguiseTab): PulseDisguiseTab {
+  switch (tab) {
+    case 'Home':
+    case 'Trending':
+    case 'Activity':
+    case 'Profile':
+      return tab;
+    default:
+      return 'Home';
+  }
+}
 
 export const defaultPulseSocialState: PulseSocialState = {
   savedPostIds: [],

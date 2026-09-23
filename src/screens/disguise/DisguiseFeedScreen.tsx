@@ -26,6 +26,8 @@ import { PulseFeedRefreshHeader } from '../../components/disguise/PulseFeedRefre
 import { PulseFeedRefreshDimLayer } from '../../components/disguise/PulseFeedRefreshDimLayer';
 import { FadeSlideIn } from '../../components/motion/FadeSlideIn';
 import { usePulseFeedRefreshGeneration, usePulseScrollRefresh } from '../../hooks/usePulseFeedRefresh';
+import { useRecordPulseTab } from '../../hooks/useRecordPulseTab';
+import { useApp } from '../../context/AppContext';
 
 function renderFeedItem({ item, index }: { item: FeedItem; index: number }) {
   const card = (() => {
@@ -53,6 +55,8 @@ function renderFeedItem({ item, index }: { item: FeedItem; index: number }) {
 }
 
 export function DisguiseFeedScreen() {
+  useRecordPulseTab('Home');
+  const { pulseSocial, recordPulseHomeScroll } = useApp();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { locale } = useAppLocale();
@@ -72,7 +76,10 @@ export function DisguiseFeedScreen() {
     listRef,
     refresh,
     handleTabRepress,
-  } = usePulseScrollRefresh();
+  } = usePulseScrollRefresh({
+    initialScrollOffset: pulseSocial.pulseHomeScrollY ?? 0,
+    onPersistScrollOffset: recordPulseHomeScroll,
+  });
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('tabPress', () => {

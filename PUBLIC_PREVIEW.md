@@ -5,8 +5,8 @@
 **https://trips-trans-apart-tourism.trycloudflare.com**
 
 - **Integration branch:** `cursor/clear-map-basemap-2e8c` (PR **#170** — sharp OSM basemap)
-- **Build ID:** `852480b-20260923T054827Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-23 05:51 UTC — tunnel HTTP 200 + `verify-demo-link.mjs` PASS (9/9)
+- **Build ID:** `8d98983-20260923T055503Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
+- **Verified:** 2026-09-23 — tunnel HTTP 200 + `verify-demo-link.mjs` PASS (9/9)
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

@@ -490,7 +490,7 @@ export function SearchMapView({
             },
           ]}
           contentFit="fill"
-          cachePolicy="memory-disk"
+          cachePolicy={Platform.OS === 'web' ? 'memory' : 'memory-disk'}
           recyclingKey={tile.key}
           transition={0}
           pointerEvents="none"

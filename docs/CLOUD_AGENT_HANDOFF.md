@@ -22,7 +22,7 @@ There is nothing to copy out of old agent VMs except what is already committed o
 | PR | Summary |
 |----|---------|
 | **#175** | Integration: Show me, Spark/Ember prefs, payment sheet, discover info, map UX, Pulse sheets, thumb/caption swaps |
-| **#176** | Map basemap → OSM France (no Carto API-key watermark); `validate-map-basemap.mjs` |
+| **#176+** | Map basemap → standard OSM (`tile.openstreetmap.org`); rejects osmfr/carto watermark tiles in CI |
 | **#177** | Admin menu gated on staff session (`admin@spark.demo`); `validate-admin-menu-gating.mjs` |
 | **#178** | YouTube-style Pulse pull-to-refresh (`PulseRefreshIndicator`, top bar, dim layer) |
 | **#179** | Pulse mini-window unlike + reporter photos in preview sheet |

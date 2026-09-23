@@ -27,6 +27,8 @@ import {
   buildMapTiles,
   latLngToPixel,
   layoutMapPins,
+  mapDisplayPixelRatio,
+  mapTileSourcePixelSize,
   milesToPixels,
   moveMapCenter,
   TILE_PX,
@@ -164,6 +166,7 @@ export function SearchMapView({
     width: windowSize.width,
     height: windowSize.height,
   });
+  const [displayPixelRatio, setDisplayPixelRatio] = useState(mapDisplayPixelRatio);
   const panX = useSharedValue(0);
   const panY = useSharedValue(0);
   const visualZoomScale = useSharedValue(1);
@@ -198,6 +201,20 @@ export function SearchMapView({
   }, [mapHeightSv, mapSize.height, mapSize.width, mapWidthSv]);
 
   useEffect(() => {
+    if (Platform.OS !== 'web' || typeof window === 'undefined') {
+      return;
+    }
+    const syncPixelRatio = () => {
+      setDisplayPixelRatio(mapDisplayPixelRatio());
+    };
+    syncPixelRatio();
+    window.addEventListener('resize', syncPixelRatio);
+    return () => {
+      window.removeEventListener('resize', syncPixelRatio);
+    };
+  }, []);
+
+  useEffect(() => {
     zoomRef.current = zoom;
     pinchBaseZoom.value = zoom;
     visualZoomScale.value = 1;
@@ -209,9 +226,11 @@ export function SearchMapView({
     resetPanOffset();
   }, [center.lat, center.lng, resetPanOffset]);
 
+  const tileSourceSize = mapTileSourcePixelSize();
+
   const tiles = useMemo(
     () => buildMapTiles(zoom, mapSize.width, mapSize.height, center.lat, center.lng),
-    [center.lat, center.lng, mapSize.height, mapSize.width, zoom],
+    [center.lat, center.lng, displayPixelRatio, mapSize.height, mapSize.width, zoom],
   );
 
   const ringAnchor = radiusCenter ?? center;
@@ -478,13 +497,13 @@ export function SearchMapView({
       <View style={styles.mapFill} />
       {tiles.map((tile) => (
         <Image
-          key={tile.key}
-          source={{ uri: tile.uri }}
+          key={`${tile.key}-dpr${displayPixelRatio}`}
+          source={{ uri: tile.uri, width: tileSourceSize, height: tileSourceSize }}
           style={[styles.tile, { left: tile.left, top: tile.top }]}
-          contentFit="fill"
+          contentFit="cover"
           cachePolicy="memory-disk"
-          recyclingKey={tile.key}
-          transition={80}
+          recyclingKey={`${tile.key}-dpr${displayPixelRatio}`}
+          transition={0}
           pointerEvents="none"
         />
       ))}
@@ -649,6 +668,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: TILE_PX,
     height: TILE_PX,
+    overflow: 'hidden',
+    ...(Platform.OS === 'web'
+      ? { maxWidth: TILE_PX, maxHeight: TILE_PX }
+      : null),
   },
   radiusRing: {
     position: 'absolute',

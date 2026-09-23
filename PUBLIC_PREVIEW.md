@@ -5,8 +5,8 @@
 **https://stevens-const-mental-ease.trycloudflare.com**
 
 - **Branch:** `main` (map basemap: standard **OpenStreetMap** tiles — no “API key required” watermarks)
-- **Build ID:** `2ce87b7-20260923T211635Z` (through **#184** on `main`; OSM.org map — hard refresh if tiles still show “api key required”)
-- **Verified:** 2026-09-23 — `npm run verify:ci` + `verify:ci-smoke` on tunnel
+- **Build ID:** `16a83a4-20260923T214016Z` (through **#186** — refreshed demo names/bios/photos)
+- **Verified:** 2026-09-23 — `npm run verify:ci` + `verify:ci-smoke`
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

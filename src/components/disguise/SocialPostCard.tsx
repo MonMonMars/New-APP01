@@ -9,13 +9,8 @@ import { getDisguiseOverlaySnippet, localizeTimeAgoLabel } from '../../i18n/labe
 import { SocialPost } from '../../data/disguiseFeed';
 import { radii, spacing } from '../../theme';
 import { buildSocialReporter, socialReporterPhotoIndex } from '../../utils/disguiseReporterPhotos';
-import { pulseFeedCaptionForProfileId } from '../../utils/profileIntroCaption';
 import { resolveSocialPostProfileId } from '../../utils/disguiseReporterPhotos';
-import {
-  explicitReporterProfileId,
-  pulseSocialPostReporterId,
-  resolveExplicitDatingProfile,
-} from '../../utils/resolveDisguiseProfile';
+import { resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { usePulseContextSection } from '../../hooks/usePulseContextSection';
 import { DisguiseOverlayImage } from './DisguiseOverlayImage';
@@ -42,7 +37,6 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
     togglePulseLike,
     mutePulseAuthor,
     reportPulsePost,
-    preferences,
   } = useApp();
   const pulseSection = usePulseContextSection();
   const accent = useDisguiseWorld().accent;
@@ -53,26 +47,14 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
   const isSaved = pulseSocial.savedPostIds.includes(post.id);
   const likeCount = upvoted ? post.likes + 1 : post.likes;
 
-  const photoReporter = buildSocialReporter(post, pulseSection, preferences.showMe);
+  const photoReporter = buildSocialReporter(post, pulseSection);
   const feedPhotoIndex = socialReporterPhotoIndex(photoReporter, post.imageUrl, pulseSection);
-  const authorProfileId =
-    post.datingProfileId ??
-    explicitReporterProfileId(
-      pulseSocialPostReporterId(post.id),
-      resolveSocialPostProfileId(post),
-      preferences.showMe,
-      pulseSection,
-    ) ??
-    resolveSocialPostProfileId(post);
   const linkedAuthorProfile = resolveExplicitDatingProfile(
-    authorProfileId,
+    resolveSocialPostProfileId(post),
     pulseSection,
-    preferences.showMe,
   );
-  const authorAvatarUrl = post.avatarUrl || linkedAuthorProfile?.photos[0] || '';
+  const authorAvatarUrl = linkedAuthorProfile?.photos[0] ?? post.avatarUrl;
   const authorContentKind = linkedAuthorProfile ? 'profile' : 'social';
-  const authorCaption = pulseFeedCaptionForProfileId(authorProfileId) || undefined;
-
   const maskSnippet = post.avatarMask?.text.split(' ').slice(0, 2).join(' ')
     ? getDisguiseOverlaySnippet(locale, post.avatarMask.text.split(' ').slice(0, 2).join(' '))
     : t('profile.live');
@@ -117,41 +99,30 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
       <View style={styles.header}>
         <View style={styles.headerMain}>
           <PulseProfileSwap
-            profileKey={`${authorProfileId ?? post.id}:${authorAvatarUrl}:${authorCaption ?? ''}`}
+            profileKey={linkedAuthorProfile?.id ?? post.id}
             style={styles.avatarSlot}
           >
-            {post.maskAvatar !== false && post.avatarMask ? (
-              <FeedPersonThumbnail
-                imageUrl={authorAvatarUrl}
-                overlayText={maskSnippet}
-                overlayVariant={post.avatarMask.variant}
-                contentKind={authorContentKind}
-                caption={authorCaption}
-                hideLabel
-                showIconBadge={authorContentKind !== 'profile'}
-                onPress={linkedAuthorProfile ? () => setAuthorOpen(true) : undefined}
-                accessibilityLabel={
-                  linkedAuthorProfile
-                    ? t('disguiseMiniWindow.viewProfile', { name: post.author })
-                    : post.author
-                }
-              />
-            ) : (
-              <FeedPersonThumbnail
-                plainAvatar
-                contentKind={authorContentKind}
-                caption={authorCaption}
-                hideLabel
-                showIconBadge={authorContentKind !== 'profile'}
-                imageUrl={authorAvatarUrl}
-                onPress={linkedAuthorProfile ? () => setAuthorOpen(true) : undefined}
-                accessibilityLabel={
-                  linkedAuthorProfile
-                    ? t('disguiseMiniWindow.viewProfile', { name: post.author })
-                    : post.author
-                }
-              />
-            )}
+            <FeedPersonThumbnail
+              imageUrl={authorAvatarUrl}
+              plainAvatar={
+                Boolean(linkedAuthorProfile) || post.maskAvatar === false || !post.avatarMask
+              }
+              overlayText={
+                linkedAuthorProfile || post.maskAvatar === false || !post.avatarMask
+                  ? undefined
+                  : maskSnippet
+              }
+              overlayVariant={post.avatarMask?.variant ?? 'news'}
+              contentKind={authorContentKind}
+              hideLabel
+              showIconBadge={!linkedAuthorProfile && authorContentKind !== 'profile'}
+              onPress={linkedAuthorProfile ? () => setAuthorOpen(true) : undefined}
+              accessibilityLabel={
+                linkedAuthorProfile
+                  ? t('disguiseMiniWindow.viewProfile', { name: post.author })
+                  : post.author
+              }
+            />
           </PulseProfileSwap>
           <View style={styles.authorMeta}>
             <Text style={[styles.authorName, { color: colors.text }]} numberOfLines={1}>
@@ -195,6 +166,10 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
       <View style={styles.actions}>
         <AnimatedPressable
           style={styles.action}
+          accessibilityRole="button"
+          accessibilityLabel={
+            upvoted ? t('pulseSocial.removeUpvoteA11y') : t('pulseSocial.upvotePostA11y')
+          }
           onPress={() => togglePulseLike(post.id)}
         >
           <Ionicons

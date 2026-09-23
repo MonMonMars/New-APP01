@@ -1793,7 +1793,8 @@ export const zhTw = {
   admin: {
     title: '管理',
     staffSignIn: '員工登入',
-    signInHint: '使用允許清單上的工作人員電子郵件。超級管理員可在控制台新增帳號。',
+    signInHint:
+      '使用允許清單上的工作人員電子郵件。登入後，個人檔案會顯示 Admin 區塊。開啟此畫面：在個人檔案底部連點版本號七次，或在網頁開啟 /admin。',
     defaultAccountHint: 'Demo 預設：admin@spark.demo（超級管理員）。若已預填可直接繼續。',
     emailPlaceholder: 'you@company.com',
     pinPlaceholder: '工作人員 PIN（若已啟用）',

@@ -1,5 +1,7 @@
 # Open draft PR triage vs `main`
 
+**Status (2026-09-23):** Closed stale open PRs **#163–#165**, **#170–#171** as superseded by **`main`** (**#175–#178**). Still open for possible re-port from fresh branches: **#166** (map global search), **#167** (map privacy results), **#168** (pulse mini-window like), **#169** (portraits).
+
 **Status (2026-09-22):** Drafts **#1–#139** (plus **#147–#154** earlier) reviewed against current **`main`**. All were **closed as superseded** — features already live via **#155**, **#157**, and follow-ups. **No blind merges** were performed (branches share only the initial commit with `main`).
 
 ## Method (one-by-one)

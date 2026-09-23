@@ -4,14 +4,34 @@ import { getProfileById } from '../data/profiles';
 import { matchesSparkSection, resolveSparkSection, ShowMePreference, SparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
 import { buildSectionProfilePool } from './discoveryProfilePool';
+import { buildPulseProfilePool, PulseWorldPoolScope } from './pulseWorldPool';
 import { isDiscoverableDemoProfile, matchesShowMePreference } from './showMeFilter';
 
 const reporterProfileCache = new Map<string, string>();
+/** Feed slot → profile currently shown after a like/pass swap (reporter id or disguised card id). */
+const pulseSlotDisplayProfile = new Map<string, string>();
 const actionedProfileIds = new Set<string>();
 let pulseProfileMappingGeneration = 0;
 
 export function clearReporterProfileCache(): void {
   reporterProfileCache.clear();
+  pulseSlotDisplayProfile.clear();
+}
+
+export function getPulseSlotDisplayProfile(slotKey: string): string | undefined {
+  return pulseSlotDisplayProfile.get(slotKey);
+}
+
+export function setPulseSlotDisplayProfile(slotKey: string, profileId: string | undefined): void {
+  if (!profileId) {
+    pulseSlotDisplayProfile.delete(slotKey);
+    return;
+  }
+  pulseSlotDisplayProfile.set(slotKey, profileId);
+}
+
+export function clearPulseSlotDisplayProfiles(): void {
+  pulseSlotDisplayProfile.clear();
 }
 
 export function setPulseProfileMappingGeneration(generation: number): void {
@@ -32,6 +52,11 @@ export function syncActionedProfileIds(ids: Set<string>): void {
       reporterProfileCache.delete(key);
     }
   }
+}
+
+/** Stable reporter slot id for social posts (matches buildSocialReporter). */
+export function pulseSocialPostReporterId(postId: string): string {
+  return `social-${postId}`;
 }
 
 export function profileIdFromPostId(postId: string): string | undefined {
@@ -65,6 +90,7 @@ export function explicitReporterProfileId(
   profileId?: string,
   showMe: ShowMePreference = 'everyone',
   section?: SparkSection | string | null,
+  poolScope?: PulseWorldPoolScope | null,
 ): string | undefined {
   if (profileId && profileEligibleForShowMe(profileId, showMe)) {
     return profileId;
@@ -73,7 +99,7 @@ export function explicitReporterProfileId(
   if (explicit && profileEligibleForShowMe(explicit, showMe)) {
     return explicit;
   }
-  return mappedProfileIdForReporter(reporterId, section, showMe);
+  return mappedProfileIdForReporter(reporterId, section, showMe, poolScope);
 }
 
 export function resolveDisguiseProfileId(reporterId: string): string | undefined {
@@ -112,8 +138,22 @@ function hashReporterId(id: string): number {
   return Math.abs(hash);
 }
 
-function cacheKey(reporterId: string, section: SparkSection, showMe: ShowMePreference): string {
-  return `${section}:${showMe}:${reporterId}`;
+function poolScopeKey(scope?: PulseWorldPoolScope | null): string {
+  if (!scope) {
+    return '';
+  }
+  const spark = scope.pulseDisplaySpark !== false ? '1' : '0';
+  const ember = scope.pulseDisplayEmber ? '1' : '0';
+  return `:ps${spark}pe${ember}`;
+}
+
+function cacheKey(
+  reporterId: string,
+  section: SparkSection,
+  showMe: ShowMePreference,
+  poolScope?: PulseWorldPoolScope | null,
+): string {
+  return `${section}:${showMe}${poolScopeKey(poolScope)}:${reporterId}`;
 }
 
 /** Stable map from disguise commenter / social avatar ids → dating profile ids in the active world. */
@@ -130,9 +170,10 @@ function mappedProfileIdForReporter(
   reporterId: string,
   section?: SparkSection | string | null,
   showMe: ShowMePreference = 'everyone',
+  poolScope?: PulseWorldPoolScope | null,
 ): string | undefined {
   const resolvedSection = resolveSparkSection(section);
-  const key = cacheKey(reporterId, resolvedSection, showMe);
+  const key = cacheKey(reporterId, resolvedSection, showMe, poolScope);
   const cached = reporterProfileCache.get(key);
   if (cached && !actionedProfileIds.has(cached) && profileEligibleForShowMe(cached, showMe)) {
     return cached;
@@ -141,7 +182,9 @@ function mappedProfileIdForReporter(
     reporterProfileCache.delete(key);
   }
 
-  const availablePool = buildSectionProfilePool(resolvedSection, showMe, actionedProfileIds);
+  const availablePool = poolScope
+    ? buildPulseProfilePool(poolScope, showMe, actionedProfileIds)
+    : buildSectionProfilePool(resolvedSection, showMe, actionedProfileIds);
   if (availablePool.length === 0) {
     return undefined;
   }
@@ -162,6 +205,21 @@ export function resolveDisguiseProfile(
   }
 
   return resolveExplicitDatingProfile(id, section);
+}
+
+/** Resolve a disguised-profile feed card to a dating profile (honors show-me + slot remapping). */
+export function resolveDisguisedProfilePost(
+  post: { id: string; profileId?: string },
+  section?: SparkSection | string | null,
+  showMe: ShowMePreference = 'everyone',
+): Profile | null {
+  const profileId = explicitReporterProfileId(
+    post.id,
+    post.profileId ?? profileIdFromPostId(post.id),
+    showMe,
+    section,
+  );
+  return resolveExplicitDatingProfile(profileId, section, showMe);
 }
 
 /** Resolve a woven dating profile id for the active Spark/Ember section. */

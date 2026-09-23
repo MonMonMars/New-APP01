@@ -45,6 +45,11 @@ export function PulseFeedItemViewer({ itemId, headline, onClose }: PulseFeedItem
         0,
         undefined,
         preferences.showMe,
+        {
+          sparkSection: preferences.sparkSection,
+          pulseDisplaySpark: preferences.pulseDisplaySpark,
+          pulseDisplayEmber: preferences.pulseDisplayEmber,
+        },
       ).find((item) => item.id === itemId);
       const resolved = allowItem(fromFeed) ?? allowItem(findFeedItemById(itemId, user.gender));
       if (resolved) {

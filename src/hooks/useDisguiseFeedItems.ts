@@ -9,6 +9,7 @@ import { filterDisguiseFeed } from '../utils/disguiseFeedFilter';
 import { usePulseContextSection } from './usePulseContextSection';
 import { usePulseFeedRefreshGeneration } from './usePulseFeedRefresh';
 import { usePulseLiveNewsRevision } from './usePulseLiveNews';
+import { PulseWorldPoolScope } from '../utils/pulseWorldPool';
 
 function disguiseFeedSignature(
   userId: string,
@@ -16,8 +17,11 @@ function disguiseFeedSignature(
   section: string,
   creativeKey: string,
   showMe: string,
+  poolScope: PulseWorldPoolScope,
 ): string {
-  return `${section}|${userId}|${gender ?? ''}|${showMe}|${creativeKey}`;
+  const spark = poolScope.pulseDisplaySpark !== false ? '1' : '0';
+  const ember = poolScope.pulseDisplayEmber ? '1' : '0';
+  return `${section}|${userId}|${gender ?? ''}|${showMe}|ps${spark}pe${ember}|${creativeKey}`;
 }
 
 /** Pulse feed layout stays cached; liked/passed profiles fade into fresh replacements in-place. */
@@ -32,12 +36,19 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
     ? `${disguiseAdCreative.variant}|${disguiseAdCreative.sourcePhotoUrl}|${disguiseAdCreative.overlayText}`
     : '';
 
+  const poolScope: PulseWorldPoolScope = {
+    sparkSection: preferences.sparkSection,
+    pulseDisplaySpark: preferences.pulseDisplaySpark,
+    pulseDisplayEmber: preferences.pulseDisplayEmber,
+  };
+
   const signature = `${disguiseFeedSignature(
     userId ?? 'local-user',
     user.gender,
     pulseSection,
     creativeKey,
     preferences.showMe,
+    poolScope,
   )}|refresh:${refreshGeneration}|news:${liveNewsRevision}`;
 
   const baseFeed = useMemo(() => {
@@ -51,13 +62,17 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
       refreshGeneration,
       resolveAppLocale(preferences.appLocale),
       preferences.showMe,
+      poolScope,
     );
     cacheRef.current = { signature, base: built };
     return built;
   }, [
     disguiseAdCreative,
     preferences.appLocale,
+    preferences.pulseDisplayEmber,
+    preferences.pulseDisplaySpark,
     preferences.showMe,
+    preferences.sparkSection,
     pulseSection,
     refreshGeneration,
     signature,
@@ -73,6 +88,7 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
       superLikedIds,
       pulseSection,
       preferences.showMe,
+      poolScope,
     );
     return withoutActioned.filter((item) => {
       if (item.type !== 'social') {
@@ -92,7 +108,10 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
     pulseSection,
     pulseSocial.mutedAuthors,
     pulseSocial.reportedPostIds,
+    preferences.pulseDisplayEmber,
+    preferences.pulseDisplaySpark,
     preferences.showMe,
+    preferences.sparkSection,
     topic,
     user.gender,
   ]);

@@ -23,7 +23,7 @@ import { decryptLocalPayload, encryptLocalPayload } from './localEncryption';
 
 const STORAGE_KEY = '@spark/app_state';
 const SENSITIVE_VAULT_KEY = '@spark/sensitive_vault';
-const STORAGE_VERSION = 19;
+const STORAGE_VERSION = 20;
 
 type SensitiveVault = {
   conversations: Conversation[];
@@ -89,6 +89,9 @@ export function createDefaultPersistedState(): PersistedAppState {
       photos: ['https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&q=80'],
       interests: ['Design', 'Coffee', 'Travel'],
       relationshipStatus: 'single',
+      visibleInSpark: true,
+      visibleInEmber: false,
+      showRelationshipStatus: false,
       emberDiscretion: 'careful',
       emberSeeking: 'ongoing',
       emberAvailability: 'flexible',

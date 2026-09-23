@@ -213,7 +213,7 @@ export function ProfileScreen() {
                 size="sm"
               />
             </View>
-            {section === 'ember' ? (
+            {section === 'ember' || user.showRelationshipStatus ? (
               <View style={styles.emberChips}>
                 <EmberStatusChips profile={user} />
               </View>

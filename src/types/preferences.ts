@@ -113,6 +113,10 @@ export type DiscoveryPreferences = {
   advancedFilters?: AdvancedDiscoverFilters;
   /** Spark (open dating) vs Ember (married group). Anyone can switch — not locked to profile status. */
   sparkSection?: SparkSection;
+  /** Pulse: weave open-dating personas into the disguise feed */
+  pulseDisplaySpark?: boolean;
+  /** Pulse: weave Ember personas into the disguise feed */
+  pulseDisplayEmber?: boolean;
   /** In-app language for legal docs and policy UI */
   appLocale?: AppLocale;
   /** Home account country (ISO alpha-2) — drives auth + payment rails like major dating apps */
@@ -151,6 +155,8 @@ export const defaultPreferences: DiscoveryPreferences = {
   discoverFilters: [],
   advancedFilters: {},
   sparkSection: 'spark',
+  pulseDisplaySpark: true,
+  pulseDisplayEmber: false,
 };
 
 export const SHOW_ME_LABELS: Record<ShowMePreference, string> = {

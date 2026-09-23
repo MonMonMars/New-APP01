@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Modal, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../context/AppContext';
@@ -108,6 +108,11 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
   const [relationshipStatus, setRelationshipStatus] = useState<RelationshipStatus>(
     user.relationshipStatus ?? 'single',
   );
+  const [showRelationshipStatus, setShowRelationshipStatus] = useState(
+    user.showRelationshipStatus ?? false,
+  );
+  const [visibleInSpark, setVisibleInSpark] = useState(user.visibleInSpark !== false);
+  const [visibleInEmber, setVisibleInEmber] = useState(user.visibleInEmber ?? false);
   const [emberDiscretion, setEmberDiscretion] = useState<EmberDiscretion>(user.emberDiscretion ?? 'careful');
   const [emberSeeking, setEmberSeeking] = useState<EmberSeeking>(user.emberSeeking ?? 'ongoing');
   const [emberAvailability, setEmberAvailability] = useState<EmberAvailability>(
@@ -138,6 +143,9 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       setInterests(user.interests);
       setIntent(user.intent);
       setRelationshipStatus(user.relationshipStatus ?? 'single');
+      setShowRelationshipStatus(user.showRelationshipStatus ?? false);
+      setVisibleInSpark(user.visibleInSpark !== false);
+      setVisibleInEmber(user.visibleInEmber ?? false);
       setEmberDiscretion(user.emberDiscretion ?? 'careful');
       setEmberSeeking(user.emberSeeking ?? 'ongoing');
       setEmberAvailability(user.emberAvailability ?? 'flexible');
@@ -178,6 +186,9 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
       interests,
       intent,
       relationshipStatus,
+      showRelationshipStatus,
+      visibleInSpark,
+      visibleInEmber,
       emberDiscretion,
       emberSeeking,
       emberAvailability,
@@ -374,6 +385,61 @@ export function EditProfileSheet({ visible, user, onClose, onSave }: EditProfile
                 </AnimatedPressable>
               );
             })}
+          </View>
+
+          <View style={styles.toggleRow}>
+            <View style={styles.toggleText}>
+              <Text style={[styles.label, { color: colors.textMuted }]}>
+                {t('editProfile.showRelationshipStatus')}
+              </Text>
+              <Text style={[styles.openingMoveHint, { color: colors.textMuted }]}>
+                {t('editProfile.showRelationshipStatusHint')}
+              </Text>
+            </View>
+            <Switch
+              value={showRelationshipStatus}
+              onValueChange={setShowRelationshipStatus}
+              trackColor={{ false: colors.border, true: colors.gradientEnd }}
+            />
+          </View>
+
+          <Text style={[styles.label, { color: colors.textMuted }]}>{t('editProfile.discoveryVisibility')}</Text>
+          <Text style={[styles.openingMoveHint, { color: colors.textMuted }]}>
+            {t('editProfile.discoveryVisibilityHint')}
+          </Text>
+          <View style={styles.toggleRow}>
+            <Text style={[styles.toggleLabel, { color: colors.text }]}>{t('editProfile.visibleInSpark')}</Text>
+            <Switch
+              value={visibleInSpark}
+              onValueChange={(enabled) => {
+                if (!enabled && !visibleInEmber) {
+                  Alert.alert(
+                    t('editProfile.discoveryVisibilityRequiredTitle'),
+                    t('editProfile.discoveryVisibilityRequiredBody'),
+                  );
+                  return;
+                }
+                setVisibleInSpark(enabled);
+              }}
+              trackColor={{ false: colors.border, true: colors.gradientEnd }}
+            />
+          </View>
+          <View style={styles.toggleRow}>
+            <Text style={[styles.toggleLabel, { color: colors.text }]}>{t('editProfile.visibleInEmber')}</Text>
+            <Switch
+              value={visibleInEmber}
+              onValueChange={(enabled) => {
+                if (!enabled && !visibleInSpark) {
+                  Alert.alert(
+                    t('editProfile.discoveryVisibilityRequiredTitle'),
+                    t('editProfile.discoveryVisibilityRequiredBody'),
+                  );
+                  return;
+                }
+                setVisibleInEmber(enabled);
+              }}
+              trackColor={{ false: colors.border, true: colors.ember }}
+            />
           </View>
 
           <Text style={[styles.label, { color: colors.ember }]}>{t('editProfile.emberDiscretion')}</Text>
@@ -747,6 +813,21 @@ const styles = StyleSheet.create({
   },
   openingMoveChipText: {
     fontSize: 13,
+    fontWeight: '600',
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+    marginBottom: spacing.md,
+  },
+  toggleText: {
+    flex: 1,
+  },
+  toggleLabel: {
+    flex: 1,
+    fontSize: 15,
     fontWeight: '600',
   },
 });

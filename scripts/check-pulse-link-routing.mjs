@@ -49,23 +49,33 @@ await enterPulseForYouFeed(page);
 
 let avatarOk = false;
 let captionOk = true;
-for (let scroll = 0; scroll < 8 && !avatarOk; scroll += 1) {
-  const reporter = page.getByLabel(/^View photos from /i).first();
-  if (await reporter.isVisible().catch(() => false)) {
-    await reporter.click({ force: true });
+for (let scroll = 0; scroll < 16 && !avatarOk; scroll += 1) {
+  const triggers = [
+    page.getByLabel(/^View photos from /i).first(),
+    page.getByLabel(/^View profile/i).first(),
+  ];
+  for (const trigger of triggers) {
+    if (!(await trigger.isVisible().catch(() => false))) {
+      continue;
+    }
+    await trigger.click({ force: true });
     await page.waitForTimeout(700);
     avatarOk = await hasMiniWindow(page);
-    if (avatarOk) {
-      await page.getByLabel('Close').last().click({ force: true }).catch(() => {});
-      await page.waitForTimeout(400);
-      const caption = page.getByTestId('feed-person-caption').first();
-      if (await caption.isVisible().catch(() => false)) {
-        await caption.click({ force: true });
-        await page.waitForTimeout(500);
-        captionOk = !(await hasMiniWindow(page));
-      }
-      break;
+    if (!avatarOk) {
+      continue;
     }
+    await page.getByLabel('Close').last().click({ force: true }).catch(() => {});
+    await page.waitForTimeout(400);
+    const caption = page.getByTestId('feed-person-caption').first();
+    if (await caption.isVisible().catch(() => false)) {
+      await caption.click({ force: true });
+      await page.waitForTimeout(500);
+      captionOk = !(await hasMiniWindow(page));
+    }
+    break;
+  }
+  if (avatarOk) {
+    break;
   }
   await page.evaluate(() => window.scrollBy(0, 480));
   await page.waitForTimeout(350);

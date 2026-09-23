@@ -23,8 +23,8 @@ import { NewsArticleSheet } from './NewsArticleSheet';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
 import { SocialCommentSheet } from './SocialCommentSheet';
 import { disguisedProfileToAdPost, disguisedProfileToNewsPost } from '../../utils/disguisePulseDestinations';
-import { profileIntroCaption } from '../../utils/profileIntroCaption';
-import { profileIdFromPostId, resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
+import { profileIntroCaption, pulseFeedCaptionForProfileId } from '../../utils/profileIntroCaption';
+import { profileIdFromPostId, resolveDisguisedProfilePost } from '../../utils/resolveDisguiseProfile';
 import { usePulseContextSection } from '../../hooks/usePulseContextSection';
 import { PulseProfileSwap } from '../motion/PulseProfileSwap';
 import { AnimatedPressable } from '../AnimatedPressable';
@@ -54,9 +54,12 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   const [commentsOpen, setCommentsOpen] = useState(false);
   const upvoted = pulseSocial.likedPostIds.includes(post.id);
 
-  const linkedProfileId = post.profileId ?? profileIdFromPostId(post.id);
-  const linkedProfile = resolveExplicitDatingProfile(linkedProfileId, pulseSection);
-  const profileCaption = linkedProfile ? profileIntroCaption(linkedProfile) : post.overlayText;
+  const linkedProfile = resolveDisguisedProfilePost(post, pulseSection, preferences.showMe);
+  const linkedProfileId = linkedProfile?.id ?? post.profileId ?? profileIdFromPostId(post.id);
+  const profileCaption =
+    pulseFeedCaptionForProfileId(linkedProfileId) ||
+    post.overlayText?.trim() ||
+    (linkedProfile ? profileIntroCaption(linkedProfile) : '');
 
   const reporter: NewsReporter = {
     id: post.id,
@@ -89,7 +92,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
   );
 
   const avatarRow = (
-    <PulseProfileSwap profileKey={linkedProfileId ?? post.id}>
+    <PulseProfileSwap profileKey={`${linkedProfileId ?? post.id}:${post.avatarUrl}:${profileCaption}`}>
       <FeedPersonThumbnail
         imageUrl={post.avatarUrl}
         overlayText={maskSnippet}
@@ -108,7 +111,7 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
     return (
       <>
         <View style={[styles.socialCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <PulseProfileSwap profileKey={linkedProfileId ?? post.id}>
+          <PulseProfileSwap profileKey={`${linkedProfileId ?? post.id}:${post.avatarUrl}:${profileCaption}`}>
             <FeedPersonThumbnail
               imageUrl={post.avatarUrl}
               overlayText={maskSnippet}

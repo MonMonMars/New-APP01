@@ -14,7 +14,10 @@ import { buildReporterPhotoUrls } from '../../utils/disguiseReporterPhotos';
 import { useDisguiseWorld } from '../../hooks/useDisguiseWorld';
 import { usePulseContextSection } from '../../hooks/usePulseContextSection';
 import { webClass } from '../../motion/webMotion';
-import { resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
+import {
+  explicitReporterProfileId,
+  resolveExplicitDatingProfile,
+} from '../../utils/resolveDisguiseProfile';
 import { MatchToast } from '../MatchToast';
 import { EmberStatusChips } from '../EmberStatusChips';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
@@ -133,9 +136,25 @@ export function PersonPreviewSheet({
     opacity: cardOpacity.value,
   }));
 
-  const linkedProfile = reporter
-    ? resolveExplicitDatingProfile(reporter.profileId, pulseSection)
-    : null;
+  const linkedProfile = useMemo(() => {
+    if (!reporter) {
+      return null;
+    }
+    const profileId = explicitReporterProfileId(
+      reporter.id,
+      reporter.profileId,
+      preferences.showMe,
+      pulseSection,
+    );
+    const base = resolveExplicitDatingProfile(profileId, pulseSection, preferences.showMe);
+    if (!base) {
+      return null;
+    }
+    return {
+      ...base,
+      photos: reporter.photos.length > 0 ? reporter.photos : base.photos,
+    };
+  }, [preferences.showMe, pulseSection, reporter]);
 
   const displayPhotos = useMemo(() => {
     if (!reporter) {
@@ -183,7 +202,8 @@ export function PersonPreviewSheet({
       return;
     }
     if (liked) {
-      dismissWithStat('like');
+      unlikeProfile(linkedProfile.id);
+      dismissWithStat('unlike');
       return;
     }
     if (!guardLikeLimit()) {
@@ -194,7 +214,16 @@ export function PersonPreviewSheet({
       notifyMatch(linkedProfile.name);
     }
     dismissWithStat('like');
-  }, [dismissWithStat, guardLikeLimit, isDismissing, likeProfile, liked, linkedProfile, notifyMatch]);
+  }, [
+    dismissWithStat,
+    guardLikeLimit,
+    isDismissing,
+    likeProfile,
+    liked,
+    linkedProfile,
+    notifyMatch,
+    unlikeProfile,
+  ]);
 
   const handleSuperLike = useCallback(() => {
     if (!linkedProfile || isDismissing) {
@@ -240,6 +269,35 @@ export function PersonPreviewSheet({
   if (!reporter || !linkedProfile) {
     return null;
   }
+
+  const actionBar = (
+    <View style={styles.actionsWrap}>
+      <DisguiseMiniSparkBar
+        liked={liked}
+        superLiked={superLiked}
+        passed={passed}
+        onLike={handleLike}
+        onSuperLike={handleSuperLike}
+        onPass={handlePass}
+        disabled={isDismissing}
+      />
+      {showLikeLimitHint ? (
+        <Text style={[styles.limitHint, { color: colors.gradientEnd }]}>
+          {t('discoverHub.likeLimitTitle')} — {t('discoverHub.likeLimitBody')}
+        </Text>
+      ) : (
+        <Text style={[styles.hint, { color: colors.textMuted }]}>
+          {superLiked
+            ? t('disguiseMiniWindow.superLikedHint', { world: worldName })
+            : liked
+              ? t('disguiseMiniWindow.savedToLikes')
+              : passed
+                ? t('disguiseMiniWindow.passedHint')
+                : t('disguiseMiniWindow.actionsSync', { world: worldName })}
+        </Text>
+      )}
+    </View>
+  );
 
   return (
     <>
@@ -344,42 +402,16 @@ export function PersonPreviewSheet({
               </FadeSlideIn>
             ) : null}
 
-            {sparkActionsEnabled ? (
-              <View style={styles.actionsWrap}>
-                <DisguiseMiniSparkBar
-                  liked={liked}
-                  superLiked={superLiked}
-                  passed={passed}
-                  onLike={handleLike}
-                  onSuperLike={handleSuperLike}
-                  onPass={handlePass}
-                  disabled={isDismissing}
-                />
-                {showLikeLimitHint ? (
-                  <Text style={[styles.limitHint, { color: colors.gradientEnd }]}>
-                    {t('discoverHub.likeLimitTitle')} — {t('discoverHub.likeLimitBody')}
-                  </Text>
-                ) : (
-                  <Text style={[styles.hint, { color: colors.textMuted }]}>
-                    {superLiked
-                      ? t('disguiseMiniWindow.superLikedHint', { world: worldName })
-                      : liked
-                        ? t('disguiseMiniWindow.savedToLikes')
-                        : passed
-                          ? t('disguiseMiniWindow.passedHint')
-                          : t('disguiseMiniWindow.actionsSync', { world: worldName })}
-                  </Text>
-                )}
-              </View>
-            ) : (
+            {!sparkActionsEnabled ? (
               <FadeSlideIn replayKey={visible} index={5}>
                 <Text style={[styles.hint, { color: colors.textMuted }]}>
                   {t('disguiseMiniWindow.sponsoredPreview')}
                 </Text>
               </FadeSlideIn>
-            )}
+            ) : null}
             </Animated.View>
           </ScrollView>
+          {sparkActionsEnabled ? actionBar : null}
         </Animated.View>
       </AnimatedOverlay>
 

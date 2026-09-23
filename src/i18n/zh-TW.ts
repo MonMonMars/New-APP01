@@ -1447,6 +1447,8 @@ export const zhTw = {
     savePost: '收藏貼文',
     muteAuthor: '靜音作者',
     report: '檢舉',
+    upvotePostA11y: '推這則貼文',
+    removeUpvoteA11y: '取消推',
     openPostPhoto: '開啟貼文照片',
     sharePost: '分享貼文',
     comments: '留言',

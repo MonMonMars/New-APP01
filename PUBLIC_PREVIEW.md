@@ -2,10 +2,10 @@
 
 ## Demo link (verified working)
 
-**https://stevens-const-mental-ease.trycloudflare.com**
+**https://yarn-ends-pop-managers.trycloudflare.com**
 
 - **Branch:** `main` (map basemap: standard **OpenStreetMap** tiles — no “API key required” watermarks)
-- **Build ID:** `abb9461-20260923T215641Z` (integration **#189–#190** — Pulse like reload + map pin privacy + area matches grid)
+- **Build ID:** `c306c2b-20260923T215915Z` (merged **#191** — Pulse like reload + map pin privacy + area matches grid)
 - **Verified:** 2026-09-23 — `npm run verify:ci`
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 

@@ -1,4 +1,4 @@
-import { PixelRatio } from 'react-native';
+import { PixelRatio, Platform } from 'react-native';
 
 import type { GeoPoint } from './geoMap';
 import {
@@ -15,16 +15,26 @@ export const TILE_PX = 256;
 
 const CARTO_SUBDOMAINS = ['a', 'b', 'c', 'd'] as const;
 
-/** Prefer @2x raster tiles on retina — keeps sharpness without changing layout math. */
+/**
+ * Device pixel ratio for choosing @2x raster tiles.
+ * RN Web often reports PixelRatio 1 while the screen is 2x — that made @2x tiles skipped and maps look soft.
+ */
 export function mapTilePixelRatio(): number {
+  if (Platform.OS === 'web') {
+    if (typeof window !== 'undefined' && window.devicePixelRatio >= 1.5) {
+      return 2;
+    }
+    return 1;
+  }
   return PixelRatio.get() >= 2 ? 2 : 1;
 }
 
-/** Carto Voyager — clean Google/Apple-like street basemap (OSM-based). */
+/** Carto Positron (light) without labels — clean streets, no baked-in caption tiles. */
 export function buildMapTileUri(zoom: number, x: number, y: number): string {
-  const retinaSuffix = mapTilePixelRatio() >= 2 ? '@2x' : '';
+  const useRetina = mapTilePixelRatio() >= 2;
+  const retinaSuffix = useRetina ? '@2x' : '';
   const subdomain = CARTO_SUBDOMAINS[Math.abs(x + y) % CARTO_SUBDOMAINS.length];
-  return `https://${subdomain}.basemaps.cartocdn.com/rastertiles/voyager/${zoom}/${x}/${y}${retinaSuffix}.png`;
+  return `https://${subdomain}.basemaps.cartocdn.com/rastertiles/light_nolabels/${zoom}/${x}/${y}${retinaSuffix}.png`;
 }
 
 export type MapTile = {

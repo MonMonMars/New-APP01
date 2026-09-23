@@ -1,7 +1,10 @@
 import { Image } from 'react-native';
 
 import { PORTRAIT_ASSET_BY_FILENAME } from '../data/demoAiPortraitAssets';
-import { DEMO_PORTRAIT_URI_PREFIX } from '../data/demoAiPortraitPool';
+import {
+  DEMO_PORTRAIT_URI_PREFIX,
+  resolveLegacyDemoPortraitFilename,
+} from '../data/demoAiPortraitPool';
 
 const resolvedCache = new Map<string, string>();
 
@@ -39,6 +42,11 @@ export function resolveDemoPortraitUri(uri: string): string {
     return cached;
   }
   const filename = uri.slice(DEMO_PORTRAIT_URI_PREFIX.length);
+  const pexelsFallback = resolveLegacyDemoPortraitFilename(filename);
+  if (pexelsFallback) {
+    resolvedCache.set(uri, pexelsFallback);
+    return pexelsFallback;
+  }
   const assetModule = PORTRAIT_ASSET_BY_FILENAME[filename];
   if (!assetModule) {
     return uri;

@@ -115,7 +115,9 @@ export function DisguiseMiniSparkBar({
           active={liked}
           disabled={disabled}
           onPress={onLike}
-          accessibilityLabel={t('disguiseMiniWindow.likeA11y')}
+          accessibilityLabel={
+            liked ? t('disguiseMiniWindow.unlikeA11y') : t('disguiseMiniWindow.likeA11y')
+          }
         />
       </View>
     </View>

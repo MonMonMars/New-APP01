@@ -7,7 +7,11 @@ import { useTranslation } from '../../i18n';
 import { spacing } from '../../theme';
 import { buildReporterPhotoUrls } from '../../utils/disguiseReporterPhotos';
 import { usePulseContextSection } from '../../hooks/usePulseContextSection';
-import { resolveExplicitDatingProfile } from '../../utils/resolveDisguiseProfile';
+import { useApp } from '../../context/AppContext';
+import {
+  explicitReporterProfileId,
+  resolveExplicitDatingProfile,
+} from '../../utils/resolveDisguiseProfile';
 import { AnimatedOverlay } from '../motion/AnimatedOverlay';
 import { AnimatedPressable } from '../AnimatedPressable';
 import { PersonPreviewSheet } from './PersonPreviewSheet';
@@ -30,11 +34,21 @@ export function DisguisePhotoLightbox({
   onClose,
 }: DisguisePhotoLightboxProps) {
   const pulseSection = usePulseContextSection();
+  const { preferences } = useApp();
   const { colors } = useTheme();
   const { t } = useTranslation();
   const { width, height } = useWindowDimensions();
   const linkedProfile = reporter
-    ? resolveExplicitDatingProfile(reporter.profileId, pulseSection)
+    ? resolveExplicitDatingProfile(
+        explicitReporterProfileId(
+          reporter.id,
+          reporter.profileId,
+          preferences.showMe,
+          pulseSection,
+        ),
+        pulseSection,
+        preferences.showMe,
+      )
     : null;
 
   if (linkedProfile && reporter) {

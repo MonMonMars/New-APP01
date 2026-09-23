@@ -1462,6 +1462,8 @@ export const en = {
     savePost: 'Save post',
     muteAuthor: 'Mute author',
     report: 'Report',
+    upvotePostA11y: 'Upvote post',
+    removeUpvoteA11y: 'Remove upvote',
     openPostPhoto: 'Open post photo',
     sharePost: 'Share post',
     comments: 'Comments',

@@ -180,6 +180,10 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
       <View style={styles.actions}>
         <AnimatedPressable
           style={styles.action}
+          accessibilityRole="button"
+          accessibilityLabel={
+            upvoted ? t('pulseSocial.removeUpvoteA11y') : t('pulseSocial.upvotePostA11y')
+          }
           onPress={() => togglePulseLike(post.id)}
         >
           <Ionicons

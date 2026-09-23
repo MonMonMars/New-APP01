@@ -47,6 +47,33 @@ function normalizeQuery(query: string): string {
   return query.trim().toLowerCase();
 }
 
+function allMapPlaces(locale: AppLocale): MapPlaceSuggestion[] {
+  return [
+    ...buildPassportPlaces(locale),
+    ...buildWorldPlaces(),
+    ...buildNeighborhoodPlaces(locale),
+  ];
+}
+
+/** Pinned cities / neighborhoods to jump the map without typing (Places tab). */
+export function listPinnedMapPlaces(locale: AppLocale, limit = 10): MapPlaceSuggestion[] {
+  const passport = buildPassportPlaces(locale);
+  const world = buildWorldPlaces();
+  const seen = new Set<string>();
+  const results: MapPlaceSuggestion[] = [];
+  for (const place of [...passport, ...world]) {
+    if (seen.has(place.label)) {
+      continue;
+    }
+    seen.add(place.label);
+    results.push(place);
+    if (results.length >= limit) {
+      break;
+    }
+  }
+  return results;
+}
+
 /** City and neighborhood suggestions for the map search bar. */
 export function searchMapPlaces(query: string, locale: AppLocale, limit = 6): MapPlaceSuggestion[] {
   const normalized = normalizeQuery(query);
@@ -54,11 +81,7 @@ export function searchMapPlaces(query: string, locale: AppLocale, limit = 6): Ma
     return [];
   }
 
-  const allPlaces = [
-    ...buildPassportPlaces(locale),
-    ...buildWorldPlaces(),
-    ...buildNeighborhoodPlaces(locale),
-  ];
+  const allPlaces = allMapPlaces(locale);
 
   const scored = allPlaces.flatMap((place) => {
     const label = place.searchKey;

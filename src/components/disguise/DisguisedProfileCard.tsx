@@ -56,13 +56,11 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
 
   const linkedProfileId = post.profileId ?? profileIdFromPostId(post.id);
   const linkedProfile = resolveExplicitDatingProfile(linkedProfileId, pulseSection);
-  const profileCaption = linkedProfile ? profileIntroCaption(linkedProfile) : post.overlayText;
-
   const reporter: NewsReporter = {
     id: post.id,
     name: post.name,
     avatarUrl: post.avatarUrl,
-    quote: profileCaption,
+    quote: linkedProfile ? profileIntroCaption(linkedProfile) : post.overlayText,
     photos: post.photos,
     profileId: linkedProfile?.id,
   };
@@ -92,10 +90,10 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
     <PulseProfileSwap profileKey={linkedProfileId ?? post.id}>
       <FeedPersonThumbnail
         imageUrl={post.avatarUrl}
-        overlayText={maskSnippet}
+        plainAvatar={Boolean(linkedProfile)}
+        overlayText={linkedProfile ? undefined : maskSnippet}
         overlayVariant={maskVariant}
         contentKind="profile"
-        caption={profileCaption}
         hideLabel
         size={PROFILE_AVATAR_SIZE}
         onPress={openPreview}
@@ -111,10 +109,10 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
           <PulseProfileSwap profileKey={linkedProfileId ?? post.id}>
             <FeedPersonThumbnail
               imageUrl={post.avatarUrl}
-              overlayText={maskSnippet}
+              plainAvatar={Boolean(linkedProfile)}
+              overlayText={linkedProfile ? undefined : maskSnippet}
               overlayVariant={maskVariant}
               contentKind="profile"
-              caption={linkedProfile ? linkedProfile.bio.trim() : post.summary}
               hideLabel
               size={PROFILE_AVATAR_SIZE}
               onPress={openPreview}

@@ -1,4 +1,4 @@
-import { photosForDemoProfile } from './demoAiPortraitPool';
+import { AI_PERSONA_PEXELS_IDS, photosForPexelsId } from './demoPhotoSets';
 import { Profile } from '../types/profile';
 import { AiPersonaConfig } from '../types/aiPersona';
 
@@ -229,7 +229,8 @@ function buildAiProfile(
       ? [{ question: 'Typical Sunday', answer: config.tagline }]
       : undefined,
   };
-  return { ...base, photos: photosForDemoProfile(base) };
+  const pexelsId = AI_PERSONA_PEXELS_IDS[id] ?? AI_PERSONA_PEXELS_IDS['ai-nova'];
+  return { ...base, photos: photosForPexelsId(pexelsId) };
 }
 
 export const aiPersonaProfiles: Profile[] = [

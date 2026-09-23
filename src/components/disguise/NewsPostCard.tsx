@@ -116,7 +116,7 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
                 return (
                   <PulseProfileSwap
                     key={reporter.id}
-                    profileKey={linkedProfile?.id ?? reporter.id}
+                    profileKey={`${linkedProfile?.id ?? reporter.id}:${reporter.avatarUrl}`}
                     style={styles.reporterRow}
                   >
                     <FeedPersonThumbnail

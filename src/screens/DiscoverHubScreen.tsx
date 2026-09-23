@@ -89,7 +89,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
       : mapCenterForCity(null);
   }, [preferences.mapSearchLat, preferences.mapSearchLng, preferences.passportCity, preferences.travelMode]);
 
-  const mapPreviewPins = useMemo(() => {
+  const mapPreviewPeopleCount = useMemo(() => {
     const localized = relocateProfilesForMapSearch(
       mapDiscoverPool,
       mapPreviewCenter,
@@ -99,7 +99,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
       localized,
       mapPreviewCenter,
       preferences.maxDistanceMiles,
-    ).slice(0, 16);
+    ).length;
   }, [mapDiscoverPool, mapPreviewCenter, preferences.maxDistanceMiles]);
 
   const openMap = () => {
@@ -168,7 +168,10 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
           <HubTile
             icon="map-outline"
             label={t('discoverHub.map')}
-            hint={formatSearchRadiusLocalized(locale, preferences.maxDistanceMiles)}
+            hint={t('discoverHub.mapTileHint', {
+              radius: formatSearchRadiusLocalized(locale, preferences.maxDistanceMiles),
+              count: mapPreviewPeopleCount,
+            })}
             colors={colors}
             onPress={openMap}
             featured
@@ -177,7 +180,7 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
             mapZoom={zoomForRadius(preferences.maxDistanceMiles)}
             mapRadiusMiles={preferences.maxDistanceMiles}
             mapAccent={colors.gradientEnd}
-            mapPins={mapPreviewPins}
+            mapPins={[]}
             mapPinColor={colors.heartRed}
           />
           <HubTile icon="compass-outline" label={t('discoverHub.explore')} colors={colors} onPress={openExplore} />
@@ -408,7 +411,7 @@ function HubTile({
             pins={mapPins}
             showYouMarker={false}
             showRadiusRing
-            showAvatarPins
+            showAvatarPins={false}
             interactive={false}
             style={styles.hubMapPreview}
           />

@@ -4,9 +4,9 @@
 
 **https://stevens-const-mental-ease.trycloudflare.com**
 
-- **Branch:** `main` (through **#180**: map global search + privacy people list + realistic demo portraits; plus **#175–#179**)
-- **Build ID:** `a6b5654-20260923T205020Z` (HTML comment `spark-demo-build:` or Profile → **Privacy controls** → footer)
-- **Verified:** 2026-09-23 — `npm run verify:ci` (includes i18n fix for Show me / Pulse world keys)
+- **Branch:** `main` (map basemap: standard **OpenStreetMap** tiles — no “API key required” watermarks)
+- **Build ID:** see footer after latest deploy (must **not** still show `openstreetmap.fr` tiles — hard refresh if map looks wrong)
+- **Verified:** 2026-09-23 — `npm run verify:ci` + map basemap validator (Tokyo + NYC sample tiles)
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

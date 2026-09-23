@@ -758,7 +758,7 @@ export const zhTw = {
     pinnedPlacesHint: '釘選城市 — 點一下在地圖上跳轉',
     viewProfileA11y: '查看 {name} 的個人檔案',
     areaLoaded: '此區域的人已加入你的推薦',
-    attribution: '© CARTO · © OpenStreetMap contributors',
+    attribution: '© OpenStreetMap contributors',
     zoomInA11y: '放大',
     zoomOutA11y: '縮小',
   },

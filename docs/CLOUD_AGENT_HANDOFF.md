@@ -2,7 +2,7 @@
 
 **Read this file first** on every new Cloud Agent run for `MonMonMars/New-APP01`.
 
-Last updated: 2026-09-23 (integration **#189–#190** ready to merge; **#188** on `main`).
+Last updated: 2026-09-23 (after **#191** on `main`; map viewport count fix pending merge).
 
 ## Where all “data and files” live
 
@@ -24,13 +24,11 @@ There is nothing to copy out of old agent VMs except what is already committed o
 | **#175–#180** | Integration: Show me, map OSM basemap, admin gate, Pulse refresh, map privacy list (no avatar pins on map) |
 | **#181–#188** | i18n CI, demo accounts refresh, Pulse captions beside thumbnails |
 
-## Open / integrating (green CI)
+## Recent on `main`
 
 | PR | Summary |
 |----|---------|
-| **#189** | Pulse post like/unlike → swap profile + caption (`mergeSparkLikesWithPulsePostLikes`) |
-| **#190** | Map: location **pin icons** only; **Browse matches** → `MapAreaMatches` grid + profile sheet |
-| **integrate branch** | `cursor/integrate-prs-189-190-2e8c` — both merged locally; docs + build ID in same branch |
+| **#191** | **#189** Pulse like reload + **#190** map pin privacy + `MapAreaMatches` browse grid |
 
 Superseded drafts — see **`docs/PR_TRIAGE.md`**.
 

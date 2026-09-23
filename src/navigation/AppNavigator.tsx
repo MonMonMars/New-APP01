@@ -23,6 +23,7 @@ import { DiscoverHubScreen } from '../screens/DiscoverHubScreen';
 import { DiscoverScreen } from '../screens/DiscoverScreen';
 import { ExploreScreen } from '../screens/ExploreScreen';
 import { MapDiscoverScreen } from '../screens/MapDiscoverScreen';
+import { MapAreaMatchesScreen } from '../screens/MapAreaMatchesScreen';
 import { LikesScreen } from '../screens/LikesScreen';
 import { MatchesScreen } from '../screens/MatchesScreen';
 import { NotificationPreferencesScreen } from '../screens/NotificationPreferencesScreen';
@@ -247,6 +248,12 @@ function MapDiscoverWrapper({
   return <MapDiscoverScreen onClose={() => navigation.goBack()} />;
 }
 
+function MapAreaMatchesWrapper({
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, 'MapAreaMatches'>) {
+  return <MapAreaMatchesScreen onClose={() => navigation.goBack()} />;
+}
+
 function ExploreWrapper({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, 'Explore'>) {
@@ -357,6 +364,11 @@ function RootNavigator() {
           <Stack.Screen
             name="MapDiscover"
             component={MapDiscoverWrapper}
+            options={{ animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="MapAreaMatches"
+            component={MapAreaMatchesWrapper}
             options={{ animation: 'slide_from_right' }}
           />
           <Stack.Screen

@@ -4,7 +4,10 @@ import { useApp } from '../context/AppContext';
 import { FeedItem } from '../data/disguiseFeed';
 import { resolveAppLocale } from '../types/locale';
 import { buildDisguiseFeed } from '../utils/buildDisguiseFeed';
-import { filterActionedDisguiseFeed } from '../utils/filterActionedDisguiseFeed';
+import {
+  filterActionedDisguiseFeed,
+  mergeSparkLikesWithPulsePostLikes,
+} from '../utils/filterActionedDisguiseFeed';
 import { filterDisguiseFeed } from '../utils/disguiseFeedFilter';
 import { usePulseContextSection } from './usePulseContextSection';
 import { usePulseFeedRefreshGeneration } from './usePulseFeedRefresh';
@@ -81,9 +84,17 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
 
   return useMemo(() => {
     const filtered = filterDisguiseFeed(baseFeed, topic, user.gender);
+    const likesForSwap = mergeSparkLikesWithPulsePostLikes(
+      likedIds,
+      pulseSocial.likedPostIds,
+      filtered,
+      preferences.showMe,
+      pulseSection,
+      poolScope,
+    );
     const withoutActioned = filterActionedDisguiseFeed(
       filtered,
-      likedIds,
+      likesForSwap,
       passedIds,
       superLikedIds,
       pulseSection,
@@ -106,6 +117,7 @@ export function useDisguiseFeedItems(topic?: string): FeedItem[] {
     passedIds,
     superLikedIds,
     pulseSection,
+    pulseSocial.likedPostIds,
     pulseSocial.mutedAuthors,
     pulseSocial.reportedPostIds,
     preferences.pulseDisplayEmber,

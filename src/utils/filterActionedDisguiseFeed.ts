@@ -28,6 +28,64 @@ function actionedProfileIds(
   return ids;
 }
 
+/** Map Pulse post upvotes to the dating profile currently shown in each liked slot. */
+export function profileIdsForLikedPulsePosts(
+  likedPostIds: readonly string[],
+  items: FeedItem[],
+  showMe: ShowMePreference = 'everyone',
+  section?: SparkSection | string | null,
+  poolScope?: PulseWorldPoolScope,
+): Set<string> {
+  if (likedPostIds.length === 0) {
+    return new Set();
+  }
+
+  const likedPosts = new Set(likedPostIds);
+  const profileIds = new Set<string>();
+
+  items.forEach((item) => {
+    if (item.type === 'disguised_profile') {
+      if (!likedPosts.has(item.id)) {
+        return;
+      }
+      const pinned = pinnedDisguisedProfileId(item, showMe, section, poolScope);
+      const displayId = slotDisplayProfileId(item.id, pinned);
+      if (displayId) {
+        profileIds.add(displayId);
+      }
+      return;
+    }
+
+    if (item.type === 'social') {
+      if (!likedPosts.has(item.id)) {
+        return;
+      }
+      const pinned = pinnedSocialProfileId(item);
+      const displayId = slotDisplayProfileId(item.id, pinned);
+      if (displayId) {
+        profileIds.add(displayId);
+      }
+    }
+  });
+
+  return profileIds;
+}
+
+export function mergeSparkLikesWithPulsePostLikes(
+  likedIds: Set<string>,
+  likedPostIds: readonly string[],
+  items: FeedItem[],
+  showMe: ShowMePreference = 'everyone',
+  section?: SparkSection | string | null,
+  poolScope?: PulseWorldPoolScope,
+): Set<string> {
+  const fromPulse = profileIdsForLikedPulsePosts(likedPostIds, items, showMe, section, poolScope);
+  if (fromPulse.size === 0) {
+    return likedIds;
+  }
+  return new Set([...likedIds, ...fromPulse]);
+}
+
 function hashSlotId(id: string): number {
   let hash = 0;
   for (let i = 0; i < id.length; i += 1) {

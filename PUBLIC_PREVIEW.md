@@ -5,8 +5,8 @@
 **https://stevens-const-mental-ease.trycloudflare.com**
 
 - **Branch:** `main` (map basemap: standard **OpenStreetMap** tiles — no “API key required” watermarks)
-- **Build ID:** `16a83a4-20260923T214016Z` (through **#186** — refreshed demo names/bios/photos)
-- **Verified:** 2026-09-23 — `npm run verify:ci` + `verify:ci-smoke`
+- **Build ID:** `abb9461-20260923T215641Z` (integration **#189–#190** — Pulse like reload + map pin privacy + area matches grid)
+- **Verified:** 2026-09-23 — `npm run verify:ci`
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)
@@ -27,9 +27,10 @@ Server-side (already applied on each `npm run build:web:demo`):
 2. Tap **Continue without account**
 3. Complete onboarding (defaults are fine)
 4. Tap the **Pulse logo** → **Leave Spark** to enter dating mode
-5. **Discover tools → Map** — drag/pinch the map; **Places → Tokyo** → **Search this area**
-6. **Pulse Home** — scroll down, back to top → “Updated just now”
-7. **Profile → Privacy controls → Language** for 繁體中文
+5. **Discover tools → Map** — drag/pinch; **Places → Tokyo** → **Search this area** → map shows **pin icons only** (no photos) + people count → **Browse matches** for the profile grid
+6. **Pulse** — like/unlike a disguised or social card → profile photo + beside-text should swap in place
+7. **Pulse Home** — scroll down, back to top → “Updated just now”
+8. **Profile → Privacy controls → Language** for 繁體中文
 
 ---
 

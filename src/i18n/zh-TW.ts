@@ -723,7 +723,11 @@ export const zhTw = {
   mapDiscover: {
     meta: '{radius} · {count} 人',
     peopleInArea: '此區域有 {count} 人',
-    peopleInAreaHint: '為安全起見不顯示精確位置，請在下方瀏覽個人檔案。',
+    peopleInAreaHint: '為安全起見地圖不顯示照片，僅以圖釘標示人數密度。',
+    browseMatches: '瀏覽 {count} 位配對',
+    browseMatchesA11y: '瀏覽此搜尋區域的 {count} 人',
+    areaMatchesTitle: '此區域的配對',
+    areaMatchesHint: '選擇對象以查看檔案、按讚或加入推薦。',
     withinMiles: '約 {miles} 英里內',
     viewProfileRowA11y: '查看 {name}，{age} 歲',
     listTruncated: '顯示 {shown} / {total} 人 — 可調整搜尋或範圍',

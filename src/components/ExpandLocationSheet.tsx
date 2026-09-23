@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  FlatList,
   Modal,
   ScrollView,
   StyleSheet,
@@ -24,18 +25,16 @@ import { useTranslation } from '../i18n';
 import { formatSearchRadiusLocalized } from '../i18n/labels';
 import { type DiscoveryPreferences, resolveSparkSection } from '../types/preferences';
 import type { Profile } from '../types/profile';
-import {
-  distanceFromCenter,
-  filterProfilesInRadius,
-  relocateProfilesForMapSearch,
-  sortProfilesByDistance,
-  type GeoPoint,
-} from '../utils/geoMap';
+import { distanceFromCenter, type GeoPoint } from '../utils/geoMap';
+import { profilesForMapViewport } from '../utils/mapDiscoverPins';
 import { resolveUserLocation } from '../services/userLocation';
-import { searchMapPlaces, type MapPlaceSuggestion } from '../utils/mapPlaceSearch';
+import {
+  listPinnedMapPlaces,
+  searchMapPlaces,
+  type MapPlaceSuggestion,
+} from '../utils/mapPlaceSearch';
 import { mapCenterForCity, zoomForRadius } from '../utils/searchMapTiles';
 import {
-  MAP_PROFILE_PREVIEW_BOTTOM_OFFSET,
   MAP_SEARCH_STACK_TOP_OFFSET,
   MAP_ZOOM_CONTROLS_TOP_OFFSET,
   MAP_ZOOM_SUGGESTIONS_EXTRA_TOP,
@@ -47,7 +46,16 @@ import { ProfileDetailSheet } from './ProfileDetailSheet';
 import { ReportReasonSheet, type ReportReason, getReportReasonLabel } from './ReportReasonSheet';
 import { MAP_MAX_ZOOM, MAP_MIN_ZOOM, SearchMapView } from './SearchMapView';
 
-const MAP_PIN_LIMIT = 48;
+const MAP_PEOPLE_LIST_LIMIT = 48;
+
+function approxDistanceMiles(profile: Profile, center: GeoPoint, radiusCap: number): number {
+  const raw = distanceFromCenter(profile, center);
+  const rounded = Math.max(1, Math.round(raw));
+  if (radiusCap >= 9999) {
+    return rounded;
+  }
+  return Math.min(rounded, radiusCap);
+}
 
 const RADIUS_CHIPS = [
   { labelKey: '25', value: 25 },
@@ -68,7 +76,7 @@ function centersDiffer(a: GeoPoint, b: GeoPoint): boolean {
   );
 }
 
-/** Full-bleed real map — pan/zoom, geo pins, search this area. */
+/** Full-bleed map for area context — people shown in list, not as map pins. */
 function resolveInitialMapCenter(preferences: DiscoveryPreferences): GeoPoint {
   if (preferences.mapSearchLat != null && preferences.mapSearchLng != null) {
     return { lat: preferences.mapSearchLat, lng: preferences.mapSearchLng };
@@ -118,7 +126,6 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const [mapCenter, setMapCenter] = useState<GeoPoint>(() => resolveInitialMapCenter(preferences));
   const [searchCenter, setSearchCenter] = useState<GeoPoint>(() => resolveInitialMapCenter(preferences));
   const [mapZoom, setMapZoom] = useState(() => zoomForRadius(currentRadius));
-  const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
   const [queryMode, setQueryMode] = useState<'people' | 'places'>('people');
   const [searchQuery, setSearchQuery] = useState('');
   const [detailProfile, setDetailProfile] = useState<Profile | null>(null);
@@ -174,45 +181,41 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   }, [hasActiveMapSearch, preferences.passportCity, preferences.travelMode]);
 
   const showSearchArea = centersDiffer(mapCenter, searchCenter);
-  const pinCenter = showSearchArea ? mapCenter : searchCenter;
+  /** Pins and counts follow the map viewport — not locked to GPS until you search. */
+  const viewportCenter = mapCenter;
 
-  const areaPins = useMemo(() => {
-    const pool = relocateProfilesForMapSearch(mapDiscoverPool, pinCenter, currentRadius);
-    return sortProfilesByDistance(
-      filterProfilesInRadius(pool, pinCenter, currentRadius),
-      pinCenter,
-    );
-  }, [currentRadius, mapDiscoverPool, pinCenter]);
-
-  const placeSuggestions = useMemo(
-    () => (queryMode === 'places' ? searchMapPlaces(searchQuery, locale) : []),
-    [locale, queryMode, searchQuery],
+  const areaPins = useMemo(
+    () => profilesForMapViewport(mapDiscoverPool, viewportCenter, currentRadius),
+    [currentRadius, mapDiscoverPool, viewportCenter],
   );
 
-  const mapPins = useMemo(() => areaPins.slice(0, MAP_PIN_LIMIT), [areaPins]);
+  const placeSuggestions = useMemo(() => {
+    if (queryMode !== 'places') {
+      return [];
+    }
+    const query = searchQuery.trim();
+    if (query.length >= 2) {
+      return searchMapPlaces(query, locale);
+    }
+    return listPinnedMapPlaces(locale, 12);
+  }, [locale, queryMode, searchQuery]);
 
-  const visiblePins = useMemo(() => {
+  const visiblePeople = useMemo(() => {
     if (queryMode !== 'people') {
-      return mapPins;
+      return [];
     }
     const query = searchQuery.trim().toLowerCase();
-    if (!query) {
-      return mapPins;
-    }
-    return mapPins.filter((profile) => profile.name.toLowerCase().includes(query));
-  }, [mapPins, queryMode, searchQuery]);
+    const filtered = query
+      ? areaPins.filter((profile) => profile.name.toLowerCase().includes(query))
+      : areaPins;
+    return filtered.slice(0, MAP_PEOPLE_LIST_LIMIT);
+  }, [areaPins, queryMode, searchQuery]);
 
-  const pinsTruncated = areaPins.length > MAP_PIN_LIMIT;
-
-  const selectedProfile = useMemo(
-    () => visiblePins.find((profile) => profile.id === selectedPinId) ?? null,
-    [selectedPinId, visiblePins],
-  );
+  const peopleListTruncated = areaPins.length > MAP_PEOPLE_LIST_LIMIT;
 
   const handleSearchThisArea = useCallback(() => {
     setSearchCenter(mapCenter);
     searchMapAt(mapCenter);
-    setSelectedPinId(null);
     setSearchQuery('');
     setQueryMode('people');
     setDeckToast(t('mapDiscover.areaLoaded'));
@@ -228,7 +231,6 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
           setSearchCenter(result.coords);
         }
         setMapZoom((prev) => Math.min(MAP_MAX_ZOOM, Math.max(prev, 14)));
-        setSelectedPinId(null);
       })
       .finally(() => {
         setLocatingGps(false);
@@ -243,7 +245,6 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         : userLocation ?? mapCenterForCity(preferences.passportCity);
     setMapCenter(target);
     setSearchCenter(target);
-    setSelectedPinId(null);
     setSearchQuery('');
     setQueryMode('people');
     setDeckToast(t('mapDiscover.resetSearchArea'));
@@ -251,21 +252,21 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
 
   const handleSelectPlace = useCallback(
     (place: MapPlaceSuggestion) => {
+      const jumpRadius =
+        currentRadius >= 100 ? currentRadius : Math.max(currentRadius, 100);
+      if (jumpRadius !== currentRadius) {
+        expandSearchRadius(jumpRadius);
+      }
       setMapCenter(place.coords);
       setSearchCenter(place.coords);
-      setMapZoom(zoomForRadius(currentRadius));
+      setMapZoom(zoomForRadius(jumpRadius));
       searchMapAt(place.coords);
       setSearchQuery('');
       setQueryMode('people');
-      setSelectedPinId(null);
       setDeckToast(t('mapDiscover.areaLoaded'));
     },
-    [currentRadius, searchMapAt, t],
+    [currentRadius, expandSearchRadius, searchMapAt, t],
   );
-
-  const handlePinPress = (profileId: string) => {
-    setSelectedPinId(profileId);
-  };
 
   const handleZoomIn = () => {
     setMapZoom((prev) => Math.min(MAP_MAX_ZOOM, prev + 1));
@@ -336,7 +337,6 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const handleBlockDetail = (profileId: string) => {
     blockProfile(profileId);
     setDetailProfile(null);
-    setSelectedPinId(null);
     Alert.alert(t('discover.blocked'), t('discover.blockedHint'));
   };
 
@@ -348,7 +348,6 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     setReportProfileId(profileId);
     setReportProfileName(profile?.name ?? '');
     setDetailProfile(null);
-    setSelectedPinId(null);
   };
 
   const handleReportSubmit = (reason: ReportReason) => {
@@ -368,8 +367,8 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     if (!detailProfile) {
       return undefined;
     }
-    return Math.max(1, Math.round(distanceFromCenter(detailProfile, pinCenter)));
-  }, [detailProfile, pinCenter]);
+    return Math.max(1, Math.round(distanceFromCenter(detailProfile, viewportCenter)));
+  }, [detailProfile, viewportCenter]);
 
   const handleDetailPass = () => {
     if (!detailProfile) {
@@ -377,7 +376,6 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     }
     passProfile(detailProfile);
     setDetailProfile(null);
-    setSelectedPinId(null);
   };
 
   const handleDetailHold = () => {
@@ -411,22 +409,20 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         center={mapCenter}
         zoom={mapZoom}
         radiusMiles={currentRadius}
-        radiusCenter={searchCenter}
+        radiusCenter={viewportCenter}
         accentColor={accent}
         pinColor={colors.heartRed}
-        pins={visiblePins}
-        userLocation={userLocation}
-        selectedPinId={selectedPinId}
+        pins={[]}
+        showAvatarPins={false}
+        userLocation={null}
+        showYouMarker={false}
         onCenterChange={setMapCenter}
         onZoomChange={setMapZoom}
-        onPinPress={handlePinPress}
-        pinAccessibilityLabel={(name) => t('mapDiscover.selectPinA11y', { name })}
-        youMarkerA11y={t('mapDiscover.youMarkerA11y')}
         showLocateButton
         onLocatePress={handleLocateGps}
         locateLoading={locatingGps}
         locateAccessibilityLabel={t('mapDiscover.locateGpsA11y')}
-        locateInsetBottom={Math.max(insets.bottom, spacing.md) + 132}
+        locateInsetBottom={Math.max(insets.bottom, spacing.md) + 248}
         style={styles.fullMap}
       />
 
@@ -446,7 +442,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
           <Text style={[styles.metaText, { color: chromeText }]} numberOfLines={1} ellipsizeMode="tail">
             {t('mapDiscover.meta', {
               radius: formatSearchRadiusLocalized(locale, currentRadius),
-              count: visiblePins.length,
+              count: areaPins.length,
             })}
           </Text>
         </View>
@@ -541,6 +537,11 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
             keyboardShouldPersistTaps="handled"
             accessibilityLabel={t('mapDiscover.placeSuggestionsA11y')}
           >
+            {queryMode === 'places' && searchQuery.trim().length < 2 ? (
+              <Text style={[styles.pinnedPlacesHint, { color: chromeMuted }]}>
+                {t('mapDiscover.pinnedPlacesHint')}
+              </Text>
+            ) : null}
             {placeSuggestions.map((place) => (
               <AnimatedPressable
                 key={place.id}
@@ -590,43 +591,68 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
         </AnimatedPressable>
       </View>
 
-      {selectedProfile ? (
+      {queryMode === 'people' ? (
         <View
+          pointerEvents="box-none"
           style={[
-            styles.previewCard,
+            styles.peoplePanel,
             {
-              bottom: Math.max(insets.bottom, spacing.md) + MAP_PROFILE_PREVIEW_BOTTOM_OFFSET,
               backgroundColor: chromeBg,
+              bottom: Math.max(insets.bottom, spacing.md) + 148,
             },
           ]}
         >
-          <AnimatedPressable
-            style={styles.previewTapArea}
-            accessibilityLabel={t('mapDiscover.viewProfileA11y', { name: selectedProfile.name })}
-            onPress={() => handleOpenProfile(selectedProfile)}
-          >
-            <Image source={{ uri: selectedProfile.photos[0] }} style={styles.previewPhoto} contentFit="cover" />
-            <View style={styles.previewBody}>
-              <Text style={[styles.previewName, { color: chromeText }]} numberOfLines={1} ellipsizeMode="tail">
-                {selectedProfile.name}, {selectedProfile.age}
-              </Text>
-              <Text style={[styles.previewDistance, { color: chromeMuted }]}>
-                {t('mapDiscover.milesAway', {
-                  miles: Math.max(
-                    1,
-                    Math.round(distanceFromCenter(selectedProfile, pinCenter)),
-                  ),
-                })}
-              </Text>
-            </View>
-          </AnimatedPressable>
-          <AnimatedPressable
-            style={[styles.previewAction, { backgroundColor: accent }]}
-            accessibilityLabel={t('mapDiscover.addToDeckA11y', { name: selectedProfile.name })}
-            onPress={() => handleAddToDeck(selectedProfile)}
-          >
-            <Ionicons name="add" size={22} color={onAccentText} />
-          </AnimatedPressable>
+          <View style={styles.peoplePanelHeader}>
+            <Text style={[styles.peopleCount, { color: chromeText }]}>
+              {t('mapDiscover.peopleInArea', { count: areaPins.length })}
+            </Text>
+            <Text style={[styles.peopleHint, { color: chromeMuted }]} numberOfLines={2}>
+              {t('mapDiscover.peopleInAreaHint')}
+            </Text>
+          </View>
+          {visiblePeople.length > 0 ? (
+            <FlatList
+              data={visiblePeople}
+              keyExtractor={(item) => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.peopleListContent}
+              keyboardShouldPersistTaps="handled"
+              renderItem={({ item }) => (
+                <AnimatedPressable
+                  style={[styles.peopleCard, { borderColor: colors.border, backgroundColor: colors.surface }]}
+                  accessibilityLabel={t('mapDiscover.viewProfileRowA11y', {
+                    name: item.name,
+                    age: item.age,
+                  })}
+                  onPress={() => handleOpenProfile(item)}
+                >
+                  <Image source={{ uri: item.photos[0] }} style={styles.peoplePhoto} contentFit="cover" />
+                  <Text style={[styles.peopleName, { color: chromeText }]} numberOfLines={1}>
+                    {item.name}, {item.age}
+                  </Text>
+                  <Text style={[styles.peopleDistance, { color: chromeMuted }]}>
+                    {t('mapDiscover.withinMiles', {
+                      miles: approxDistanceMiles(item, viewportCenter, currentRadius),
+                    })}
+                  </Text>
+                  <AnimatedPressable
+                    style={[styles.peopleAddButton, { backgroundColor: accent }]}
+                    accessibilityLabel={t('mapDiscover.addToDeckA11y', { name: item.name })}
+                    onPress={() => handleAddToDeck(item)}
+                  >
+                    <Ionicons name="add" size={18} color={onAccentText} />
+                  </AnimatedPressable>
+                </AnimatedPressable>
+              )}
+            />
+          ) : (
+            <Text style={[styles.peopleEmpty, { color: chromeMuted }]}>
+              {searchQuery.trim()
+                ? t('mapDiscover.noSearchResults')
+                : t('mapDiscover.emptyArea')}
+            </Text>
+          )}
         </View>
       ) : null}
 
@@ -651,16 +677,10 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
             {t('mapDiscover.searchThisArea')}
           </Text>
         </AnimatedPressable>
-        {visiblePins.length === 0 ? (
-          <Text style={[styles.emptyHint, { color: chromeText, backgroundColor: chromeBg }]}>
-            {queryMode === 'people' && searchQuery.trim()
-              ? t('mapDiscover.noSearchResults')
-              : t('mapDiscover.emptyArea')}
-          </Text>
-        ) : pinsTruncated ? (
+        {queryMode === 'people' && peopleListTruncated ? (
           <Text style={[styles.emptyHint, { color: chromeMuted, backgroundColor: chromeBg }]}>
-            {t('mapDiscover.pinsTruncated', {
-              shown: MAP_PIN_LIMIT,
+            {t('mapDiscover.listTruncated', {
+              shown: MAP_PEOPLE_LIST_LIMIT,
               total: areaPins.length,
             })}
           </Text>
@@ -900,46 +920,73 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '800',
   },
-  previewCard: {
+  peoplePanel: {
     position: 'absolute',
     left: spacing.md,
     right: spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
     borderRadius: radii.card,
-    padding: spacing.sm,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.xs,
+    maxHeight: 168,
   },
-  previewTapArea: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  previewPhoto: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-  },
-  previewBody: {
-    flex: 1,
-    minWidth: 0,
+  peoplePanelHeader: {
+    paddingHorizontal: spacing.sm,
+    paddingBottom: spacing.xs,
     gap: 2,
   },
-  previewName: {
-    fontSize: 16,
+  peopleCount: {
+    fontSize: 15,
     fontWeight: '800',
   },
-  previewDistance: {
+  peopleHint: {
+    fontSize: 12,
+    fontWeight: '600',
+    lineHeight: 16,
+  },
+  peopleListContent: {
+    paddingHorizontal: spacing.sm,
+    gap: spacing.sm,
+  },
+  peopleCard: {
+    width: 112,
+    borderRadius: radii.card,
+    borderWidth: StyleSheet.hairlineWidth,
+    padding: spacing.xs,
+    gap: spacing.xs,
+  },
+  peoplePhoto: {
+    width: '100%',
+    aspectRatio: 3 / 4,
+    borderRadius: radii.button,
+  },
+  peopleName: {
     fontSize: 13,
+    fontWeight: '800',
+  },
+  peopleDistance: {
+    fontSize: 11,
     fontWeight: '600',
   },
-  previewAction: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  peopleAddButton: {
+    alignSelf: 'center',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  peopleEmpty: {
+    fontSize: 13,
+    fontWeight: '700',
+    textAlign: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  pinnedPlacesHint: {
+    fontSize: 12,
+    fontWeight: '600',
+    paddingHorizontal: spacing.sm,
+    paddingBottom: spacing.xs,
   },
   bottomBar: {
     position: 'absolute',

@@ -54,6 +54,8 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
     pulseSection,
   );
   const authorAvatarUrl = linkedAuthorProfile?.photos[0] ?? post.avatarUrl;
+  const authorProfileId = post.datingProfileId ?? resolveSocialPostProfileId(post);
+  const authorSwapKey = `${post.id}:${authorProfileId ?? post.id}:${authorAvatarUrl}`;
   const authorContentKind = linkedAuthorProfile ? 'profile' : 'social';
   const maskSnippet = post.avatarMask?.text.split(' ').slice(0, 2).join(' ')
     ? getDisguiseOverlaySnippet(locale, post.avatarMask.text.split(' ').slice(0, 2).join(' '))
@@ -98,7 +100,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={styles.header}>
         <View style={styles.headerMain}>
-          <PulseProfileSwap profileKey={linkedAuthorProfile?.id ?? post.id} style={styles.avatarSwapWrap}>
+          <PulseProfileSwap profileKey={authorSwapKey} style={styles.avatarSwapWrap}>
             <FeedPersonThumbnail
               imageUrl={authorAvatarUrl}
               plainAvatar={

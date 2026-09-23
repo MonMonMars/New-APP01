@@ -39,8 +39,25 @@ await page.waitForTimeout(1200);
 const meta = await page.locator('body').innerText();
 const peopleMatch = meta.match(/·\s*(\d+)\s+people/i);
 const count = peopleMatch ? Number(peopleMatch[1]) : 0;
-const ok = count >= 5;
 
-console.log(JSON.stringify({ worldMapSearch: true, tokyoPeopleCount: count, ok }, null, 2));
+let browseMatchesOk = false;
+if (count >= 5) {
+  const browse = page.getByRole('button', { name: /Browse \d+ matches/i }).first();
+  if (await browse.isVisible().catch(() => false)) {
+    await browse.click({ force: true });
+    await page.waitForTimeout(800);
+    browseMatchesOk = await page
+      .getByText(/Matches in this area|此區域的配對/i)
+      .first()
+      .isVisible()
+      .catch(() => false);
+  }
+}
+
+const ok = count >= 5 && browseMatchesOk;
+
+console.log(
+  JSON.stringify({ worldMapSearch: true, tokyoPeopleCount: count, browseMatchesOk, ok }, null, 2),
+);
 await browser.close();
 process.exit(ok ? 0 : 1);

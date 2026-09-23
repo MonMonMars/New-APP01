@@ -130,7 +130,7 @@ function resolveMapDomNode(node: unknown): HTMLElement | null {
   return null;
 }
 
-/** Carto Voyager raster basemap with pan, pinch/wheel zoom, and GPS control. */
+/** OpenStreetMap raster basemap with pan, pinch/wheel zoom, and GPS control. */
 export function SearchMapView({
   center,
   zoom,

@@ -13,10 +13,11 @@ export { CITY_COORDS, DEFAULT_MAP_CENTER, mapCenterForCity, zoomForRadius };
 /** Logical tile size on screen (Slippy Map 256 world units). */
 export const TILE_PX = 256;
 
-/** Max zoom for Carto Voyager raster tiles (overzoom uses +1 fetch below this cap). */
-export const MAP_TILE_MAX_ZOOM = 20;
+/** Max zoom for the active raster basemap (overzoom uses +1 fetch below this cap). */
+export const MAP_TILE_MAX_ZOOM = 19;
 
-const CARTO_SUBDOMAINS = ['a', 'b', 'c', 'd'] as const;
+/** OpenStreetMap France raster tiles — no API key, CORS-friendly for web demo. */
+const OSM_FR_SUBDOMAINS = ['a', 'b', 'c'] as const;
 
 /**
  * Device pixel ratio for retina tile fetch.
@@ -48,20 +49,17 @@ export function tileFetchPlan(displayZoom: number): TileFetchPlan {
 }
 
 /**
- * Carto Voyager without labels — clean streets/water (OSM data), no caption tiles.
- * @2x on retina; combined with tileFetchPlan() for extra sharpness on high-DPR web.
+ * OSM raster tile URL. Sharpness on retina comes from tileFetchPlan() (fetch zoom+1, draw half size).
+ * pixelScale is kept for cache keys when overzooming.
  */
 export function buildMapTileUri(
   zoom: number,
   x: number,
   y: number,
-  pixelScale = 1,
+  _pixelScale = 1,
 ): string {
-  // Overzoom already fetches a deeper zoom — skip @2x to avoid oversampling.
-  const useRetina = mapTilePixelRatio() >= 2 && pixelScale >= 1;
-  const retinaSuffix = useRetina ? '@2x' : '';
-  const subdomain = CARTO_SUBDOMAINS[Math.abs(x + y) % CARTO_SUBDOMAINS.length];
-  return `https://${subdomain}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/${zoom}/${x}/${y}${retinaSuffix}.png`;
+  const subdomain = OSM_FR_SUBDOMAINS[Math.abs(x + y) % OSM_FR_SUBDOMAINS.length];
+  return `https://${subdomain}.tile.openstreetmap.fr/osmfr/${zoom}/${x}/${y}.png`;
 }
 
 export type MapTile = {

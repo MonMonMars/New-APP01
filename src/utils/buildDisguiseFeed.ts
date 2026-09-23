@@ -2,7 +2,8 @@ import { FeedItem } from '../data/disguiseFeed';
 import { getProfileById } from '../data/profiles';
 import { DisguiseAdCreative } from '../types/disguise';
 import { AppLocale } from '../types/locale';
-import { ShowMePreference, SparkSection } from '../types/preferences';
+import { resolveSparkSection, ShowMePreference, SparkSection } from '../types/preferences';
+import { PulseWorldPoolScope } from './pulseWorldPool';
 import { UserProfile } from '../types/profile';
 import { disguiseFeedItemsForGender } from './disguiseFeedCatalog';
 import { buildDisguisedProfileFeedItem, buildDisguisedProfileFeedItems } from './disguiseProfileFeed';
@@ -132,18 +133,33 @@ export function stripPulseProfileLinks(items: FeedItem[]): FeedItem[] {
 }
 
 /** Pin reporter profile ids so news links do not swap after mini-window likes. */
+function scopeForSection(
+  section: SparkSection | string | null | undefined,
+  poolScope?: PulseWorldPoolScope,
+): PulseWorldPoolScope {
+  return (
+    poolScope ?? {
+      sparkSection: resolveSparkSection(section),
+      pulseDisplaySpark: true,
+      pulseDisplayEmber: false,
+    }
+  );
+}
+
 export function pinFeedProfileLinks(
   items: FeedItem[],
   section?: SparkSection | string | null,
   showMe: ShowMePreference = 'everyone',
+  poolScope?: PulseWorldPoolScope,
 ): FeedItem[] {
+  const scope = scopeForSection(section, poolScope);
   return items.map((item) => {
     if (item.type === 'news') {
       return {
         ...item,
         reporters: item.reporters.map((reporter) => ({
           ...reporter,
-          profileId: explicitReporterProfileId(reporter.id, reporter.profileId, showMe, section),
+          profileId: explicitReporterProfileId(reporter.id, reporter.profileId, showMe, section, scope),
         })),
       };
     }
@@ -155,6 +171,7 @@ export function pinFeedProfileLinks(
           item.profileId ?? profileIdFromPostId(item.id),
           showMe,
           section,
+          scope,
         ),
       };
     }
@@ -193,14 +210,16 @@ export function syncReporterPhotos(
   items: FeedItem[],
   section?: SparkSection | string | null,
   showMe: ShowMePreference = 'everyone',
+  poolScope?: PulseWorldPoolScope,
 ): FeedItem[] {
+  const scope = scopeForSection(section, poolScope);
   return items.map((item) => {
     if (item.type !== 'news') {
       return item;
     }
     const reporters = item.reporters
       .map((reporter) => {
-        const profileId = explicitReporterProfileId(reporter.id, reporter.profileId, showMe, section);
+        const profileId = explicitReporterProfileId(reporter.id, reporter.profileId, showMe, section, scope);
         if (!profileId) {
           return showMe === 'everyone' ? reporter : null;
         }
@@ -235,8 +254,10 @@ export function buildDisguiseFeed(
   refreshGeneration = 0,
   locale?: AppLocale | null,
   showMe: ShowMePreference = 'everyone',
+  poolScope?: PulseWorldPoolScope,
 ): FeedItem[] {
-  const profileCards = buildDisguisedProfileFeedItems(section, refreshGeneration, showMe);
+  const scope = scopeForSection(section, poolScope);
+  const profileCards = buildDisguisedProfileFeedItems(section, refreshGeneration, showMe, scope);
   let baseFeed = disguiseFeedItemsForGender(user.gender);
 
   const liveSnapshot = getPulseLiveNewsSnapshot();
@@ -250,7 +271,7 @@ export function buildDisguiseFeed(
 
   let linked = filterPulseFeedForShowMe(
     syncSocialPostProfiles(
-      syncReporterPhotos(pinFeedProfileLinks(withProfiles, section, showMe), section, showMe),
+      syncReporterPhotos(pinFeedProfileLinks(withProfiles, section, showMe, scope), section, showMe, scope),
       section,
       showMe,
     ),
@@ -268,9 +289,11 @@ export function buildDisguiseFeed(
             [withoutUserSlot[0], withoutUserSlot[1], userItem, ...withoutUserSlot.slice(2)],
             section,
             showMe,
+            scope,
           ),
           section,
           showMe,
+          scope,
         ),
         section,
         showMe,
@@ -283,7 +306,7 @@ export function buildDisguiseFeed(
   const spaced = dedupePulseFeedItems(spaceSponsoredFeedItems(linked, 6));
 
   if (refreshGeneration > 0) {
-    return dedupePulseFeedItems(renewPulseFeedPage(spaced, section, refreshGeneration, showMe));
+    return dedupePulseFeedItems(renewPulseFeedPage(spaced, section, refreshGeneration, showMe, scope));
   }
 
   return spaced;

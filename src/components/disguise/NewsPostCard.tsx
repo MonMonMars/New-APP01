@@ -35,9 +35,21 @@ export function NewsPostCard({ post }: NewsPostCardProps) {
   const [articleOpen, setArticleOpen] = useState(false);
   const [selectedReporter, setSelectedReporter] = useState<NewsReporter | null>(null);
 
+  const poolScope = {
+    sparkSection: preferences.sparkSection,
+    pulseDisplaySpark: preferences.pulseDisplaySpark,
+    pulseDisplayEmber: preferences.pulseDisplayEmber,
+  };
+
   const linkedReporterProfile = (reporter: NewsReporter) =>
     resolveExplicitDatingProfile(
-      explicitReporterProfileId(reporter.id, reporter.profileId, preferences.showMe, pulseSection),
+      explicitReporterProfileId(
+        reporter.id,
+        reporter.profileId,
+        preferences.showMe,
+        pulseSection,
+        poolScope,
+      ),
       pulseSection,
       preferences.showMe,
     );

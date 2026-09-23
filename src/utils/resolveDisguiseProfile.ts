@@ -4,6 +4,7 @@ import { getProfileById } from '../data/profiles';
 import { matchesSparkSection, resolveSparkSection, ShowMePreference, SparkSection } from '../types/preferences';
 import { Profile } from '../types/profile';
 import { buildSectionProfilePool } from './discoveryProfilePool';
+import { buildPulseProfilePool, PulseWorldPoolScope } from './pulseWorldPool';
 import { isDiscoverableDemoProfile, matchesShowMePreference } from './showMeFilter';
 
 const reporterProfileCache = new Map<string, string>();
@@ -70,6 +71,7 @@ export function explicitReporterProfileId(
   profileId?: string,
   showMe: ShowMePreference = 'everyone',
   section?: SparkSection | string | null,
+  poolScope?: PulseWorldPoolScope | null,
 ): string | undefined {
   if (profileId && profileEligibleForShowMe(profileId, showMe)) {
     return profileId;
@@ -78,7 +80,7 @@ export function explicitReporterProfileId(
   if (explicit && profileEligibleForShowMe(explicit, showMe)) {
     return explicit;
   }
-  return mappedProfileIdForReporter(reporterId, section, showMe);
+  return mappedProfileIdForReporter(reporterId, section, showMe, poolScope);
 }
 
 export function resolveDisguiseProfileId(reporterId: string): string | undefined {
@@ -117,8 +119,22 @@ function hashReporterId(id: string): number {
   return Math.abs(hash);
 }
 
-function cacheKey(reporterId: string, section: SparkSection, showMe: ShowMePreference): string {
-  return `${section}:${showMe}:${reporterId}`;
+function poolScopeKey(scope?: PulseWorldPoolScope | null): string {
+  if (!scope) {
+    return '';
+  }
+  const spark = scope.pulseDisplaySpark !== false ? '1' : '0';
+  const ember = scope.pulseDisplayEmber ? '1' : '0';
+  return `:ps${spark}pe${ember}`;
+}
+
+function cacheKey(
+  reporterId: string,
+  section: SparkSection,
+  showMe: ShowMePreference,
+  poolScope?: PulseWorldPoolScope | null,
+): string {
+  return `${section}:${showMe}${poolScopeKey(poolScope)}:${reporterId}`;
 }
 
 /** Stable map from disguise commenter / social avatar ids → dating profile ids in the active world. */
@@ -135,9 +151,10 @@ function mappedProfileIdForReporter(
   reporterId: string,
   section?: SparkSection | string | null,
   showMe: ShowMePreference = 'everyone',
+  poolScope?: PulseWorldPoolScope | null,
 ): string | undefined {
   const resolvedSection = resolveSparkSection(section);
-  const key = cacheKey(reporterId, resolvedSection, showMe);
+  const key = cacheKey(reporterId, resolvedSection, showMe, poolScope);
   const cached = reporterProfileCache.get(key);
   if (cached && !actionedProfileIds.has(cached) && profileEligibleForShowMe(cached, showMe)) {
     return cached;
@@ -146,7 +163,9 @@ function mappedProfileIdForReporter(
     reporterProfileCache.delete(key);
   }
 
-  const availablePool = buildSectionProfilePool(resolvedSection, showMe, actionedProfileIds);
+  const availablePool = poolScope
+    ? buildPulseProfilePool(poolScope, showMe, actionedProfileIds)
+    : buildSectionProfilePool(resolvedSection, showMe, actionedProfileIds);
   if (availablePool.length === 0) {
     return undefined;
   }

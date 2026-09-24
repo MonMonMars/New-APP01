@@ -181,6 +181,7 @@ export const en = {
     mfaEnrollFailed: 'Could not start 2FA setup.',
     paymentVerificationHint: 'Enter your authenticator code to approve this purchase.',
     paymentVerificationHintStep1: 'Step 1 of 2 — enter your authenticator code.',
+    paymentVerificationHintStep2: 'Step 2 of 2 — enter a new code from your authenticator.',
   },
   profile: {
     title: 'Profile',
@@ -666,6 +667,8 @@ export const en = {
     notesAddedBody: '{count} Spark Note added to your account.',
     notesAddedBodyMany: '{count} Spark Notes added to your account.',
     manageOnWeb: 'Manage subscriptions in the App Store or Google Play app on your phone.',
+    manageOnWebStripe: 'Opening Stripe billing portal…',
+    manageOnWebStripeUnavailable: 'No web subscription found. Subscribe with card checkout first, or use the mobile app.',
     historyTitle: 'Purchase history',
     historyEmpty: 'No purchases yet',
     historyEmptyHint: 'Boosts, Spark Notes, and Spark+ subscriptions appear here after you buy.',

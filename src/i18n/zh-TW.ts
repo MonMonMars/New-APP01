@@ -181,6 +181,7 @@ export const zhTw = {
     mfaEnrollFailed: '無法開始 2FA 設定。',
     paymentVerificationHint: '輸入驗證器代碼以核准此筆購買。',
     paymentVerificationHintStep1: '第 1 步（共 2 步）— 輸入驗證器代碼。',
+    paymentVerificationHintStep2: '第 2 步（共 2 步）— 輸入驗證器的新代碼。',
   },
   profile: {
     title: '個人檔案',
@@ -661,6 +662,8 @@ export const zhTw = {
     notesAddedBody: '已新增 {count} 則 Spark Note 至你的帳戶。',
     notesAddedBodyMany: '已新增 {count} 則 Spark Note 至你的帳戶。',
     manageOnWeb: '請在手機的 App Store 或 Google Play 中管理訂閱。',
+    manageOnWebStripe: '正在開啟 Stripe 帳單入口…',
+    manageOnWebStripeUnavailable: '找不到網頁訂閱。請先以卡片結帳訂閱，或使用手機 App。',
     historyTitle: '購買紀錄',
     historyEmpty: '尚無購買紀錄',
     historyEmptyHint: '購買 Boost、Spark Note 或 Spark+ 訂閱後會顯示在這裡。',

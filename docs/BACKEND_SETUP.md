@@ -13,6 +13,8 @@ Open the SQL Editor and paste the contents of [`supabase-schema.sql`](./supabase
 
 Then run [`supabase-security-migration.sql`](./supabase-security-migration.sql) in the same SQL Editor. It adds `security_reports`, `security_audit_events`, and the `user_state.is_spark_plus` client guard trigger.
 
+Also run [`supabase-trust-safety-migration.sql`](./supabase-trust-safety-migration.sql) for shared scam quarantine and moderator access to reports. Grant moderators `app_metadata.admin_role` = `moderator` or `superadmin` on their Supabase auth user.
+
 ## 3. Configure environment variables
 
 Create a `.env` file in the project root (or set in EAS secrets):
@@ -145,7 +147,27 @@ supabase secrets set OPENAI_API_KEY=sk-...
 
 See [`security/SECURITY.md`](./security/SECURITY.md) for the full control list.
 
-## 8. Production checklist
+## 8. Payments (Stripe web + store IAP)
+
+**Schema:** [`supabase-payments-migration.sql`](./supabase-payments-migration.sql) — `purchase_approvals`, `purchase_ledger`, `profiles.stripe_customer_id`, `grant_spark_plus_entitlement()`.
+
+**Edge Functions:**
+
+```bash
+supabase functions deploy purchase-approve
+supabase functions deploy create-stripe-checkout
+supabase functions deploy create-stripe-portal
+supabase functions deploy stripe-webhook --no-verify-jwt
+supabase secrets set STRIPE_SECRET_KEY=sk_...
+supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_...
+supabase secrets set STRIPE_PRICE_spark_plus_monthly=price_...
+```
+
+Point Stripe webhook to `https://YOUR_PROJECT.supabase.co/functions/v1/stripe-webhook` for `checkout.session.completed`.
+
+**App env (web card checkout):** `EXPO_PUBLIC_WEB_PAYMENTS_ENABLED=true` plus Supabase URL/anon key. Store mode: `EXPO_PUBLIC_PURCHASES_MODE=store` and `EXPO_PUBLIC_REVENUECAT_API_KEY` — see [`IAP.md`](./IAP.md).
+
+## 9. Production checklist
 
 - [ ] Enable RLS policies (included in schema)
 - [ ] Run `supabase-security-migration.sql`
@@ -156,3 +178,5 @@ See [`security/SECURITY.md`](./security/SECURITY.md) for the full control list.
 - [x] Wire real-time subscriptions for chat (`src/services/realtimeChat.ts`, `useCloudConversation`)
 - [x] Store photos in Supabase Storage (`src/services/cloudStorage.ts` — graceful fallback to local URIs when unconfigured)
 - [x] Disguise AI via server proxy when Supabase is configured (`src/services/disguiseImageGeneration.ts`)
+- [ ] Run `supabase-payments-migration.sql` + deploy payment Edge Functions when enabling Stripe web checkout
+- [ ] Run `supabase-trust-safety-migration.sql` + moderator JWT roles for Admin moderation queue

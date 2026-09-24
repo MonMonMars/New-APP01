@@ -74,7 +74,7 @@ Root Stack
 └── Main (Bottom Tabs)
     ├── Pulse (Discover hub — branded tab with Pulse logo + label)
     │   ├── Discover card deck (drag → trash / heart / rose)
-    │   ├── Hub sheet → map preview (Esri tiles + avatar pins), Explore, preferences
+    │   ├── Hub sheet → map preview (OSM tiles + privacy pin icons), Explore, preferences
     │   ├── Search radius pill + Expand location sheet (25 → Anywhere)
     │   ├── Batch loading — 6 profiles at a time, “Search more people” CTA
     │   ├── Like limit pill + modal
@@ -86,12 +86,11 @@ Root Stack
     │   ├── Profile detail sheet (prompts, report/block)
     │   └── Full-screen match celebration
     ├── MapDiscover (stack push from Discover header map icon or Discover Hub)
-    │   ├── Esri street map tiles with real lat/lng + avatar pins
-    │   ├── Live pan / pinch zoom + zoom +/- controls
-    │   ├── Search bar — filter people by name on the map
-    │   ├── Tap pin → preview card → add to deck
-    │   ├── Radius ring anchored to active search center (persists while panning)
-    │   └── “Search this area” → filter pool + reload batch
+    │   ├── OpenStreetMap tiles; **location pin icons only** (no profile photos on map)
+    │   ├── People count in area; **Browse matches** → MapAreaMatches grid + profile sheet
+    │   ├── Live pan / pinch zoom + zoom +/- controls; Places vs People search modes
+    │   ├── Radius ring anchored to viewport; radius chips 25 → Anywhere
+    │   └── “Search this area” → `mapSearchLat/Lng` + discover deck pool for that region
     ├── Explore (stack push from Discover)
     │   ├── Serious daters / New members / Nearby categories
     │   └── Tap profile → prioritize in deck
@@ -153,7 +152,7 @@ This avoids direct replication of Tinder's patented swipe gesture while keeping 
 
 - `AppContext` holds: discover queue (batched), pool total, likes, passes, pending likes, matches, conversations, daily like count, blocked IDs.
 - Discover loads **6 profiles per batch** from a pool filtered by radius (25 → 50 → 100 → 250 → Anywhere) and optional map search center (`mapSearchLat` / `mapSearchLng`).
-- Profiles carry **real latitude/longitude** for map placement; `SearchMapView` uses Esri tiles with avatar pins.
+- Map discover uses **OpenStreetMap** via `SearchMapView`; pins are **icons only** for privacy. Selection happens on **MapAreaMatches** / profile sheet, not from photo pins on the map.
 - **Demo / AI chat profiles** receive AI opening messages and gated auto-replies via `chatReplyCoach` + `demoChatLlm`.
 - Seed matches with empty threads get **demo openers** from `seedState.ts`.
 - See `profiles.ts` header comment for full QA bucket map (IDs, likes, matches, pending).

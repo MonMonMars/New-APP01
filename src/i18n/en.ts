@@ -88,6 +88,9 @@ export const en = {
     magicLinkWaiting: 'Open the link in your email on this device. This screen will continue automatically.',
     magicLinkRefresh: 'I opened the link — refresh',
     magicLinkNotYet: 'Sign-in not detected yet. Open the email link on this device, then tap refresh.',
+    magicLinkResend: 'Resend email',
+    magicLinkResendWait: 'Resend in {seconds}s',
+    magicLinkChangeEmail: 'Use a different email',
     emailRequiresSupabase: 'Email sign-in requires Supabase configuration.',
     signedInLocally: 'Signed in locally. Connect Supabase for cloud email sign-in.',
   },
@@ -136,6 +139,7 @@ export const en = {
     signInSuccess: 'Signed in.',
     forgotPassword: 'Forgot password?',
     forgotPasswordBody: 'Enter the email for your account. If it exists, we\'ll send a link to reset your password.',
+    magicLinkRateLimited: 'Too many sign-in emails sent. Wait a few minutes, then try again.',
     sendPasswordReset: 'Send reset link',
     backToSignIn: 'Back to sign in',
     passwordResetEmailSent:

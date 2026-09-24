@@ -1,5 +1,5 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useApp } from '../../context/AppContext';
@@ -83,6 +83,21 @@ export function AuthWelcomePanel({
   const [passwordMode, setPasswordMode] = useState<'signIn' | 'signUp'>('signIn');
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const [awaitingOAuthReturn, setAwaitingOAuthReturn] = useState(false);
+  const [magicLinkResendAvailableAt, setMagicLinkResendAvailableAt] = useState(0);
+  const [resendTick, setResendTick] = useState(0);
+
+  const magicLinkResendSecondsLeft = Math.max(
+    0,
+    Math.ceil((magicLinkResendAvailableAt - Date.now()) / 1000),
+  );
+
+  useEffect(() => {
+    if (!awaitingMagicLink || magicLinkResendAvailableAt <= Date.now()) {
+      return;
+    }
+    const timer = setInterval(() => setResendTick((n) => n + 1), 1000);
+    return () => clearInterval(timer);
+  }, [awaitingMagicLink, magicLinkResendAvailableAt, resendTick]);
 
   useEffect(() => {
     if (!awaitingOAuthReturn || !isSupabaseEnabled) {
@@ -95,14 +110,24 @@ export function AuthWelcomePanel({
   }, [awaitingOAuthReturn, isAuthenticated, isSupabaseEnabled, onAuthenticated, userId]);
 
   useEffect(() => {
-    if (!awaitingOAuthReturn || !isSupabaseEnabled) {
+    if (!awaitingMagicLink || !isSupabaseEnabled) {
+      return;
+    }
+    if (isAuthenticated && userId) {
+      setAwaitingMagicLink(false);
+      onAuthenticated();
+    }
+  }, [awaitingMagicLink, isAuthenticated, isSupabaseEnabled, onAuthenticated, setAwaitingMagicLink, userId]);
+
+  useEffect(() => {
+    if ((!awaitingOAuthReturn && !awaitingMagicLink) || !isSupabaseEnabled) {
       return;
     }
     const intervalId = setInterval(() => {
       void refreshAuthFromCloud();
     }, 2500);
     return () => clearInterval(intervalId);
-  }, [awaitingOAuthReturn, isSupabaseEnabled, refreshAuthFromCloud]);
+  }, [awaitingMagicLink, awaitingOAuthReturn, isSupabaseEnabled, refreshAuthFromCloud]);
 
   const handleApple = async () => {
     setAuthLoading(true);
@@ -182,7 +207,7 @@ export function AuthWelcomePanel({
     }
   };
 
-  const handleEmailMagic = async () => {
+  const handleEmailMagic = useCallback(async () => {
     setAuthLoading(true);
     setEmailMessage(null);
     try {
@@ -191,6 +216,7 @@ export function AuthWelcomePanel({
       if (result.ok) {
         if (isSupabaseEnabled) {
           setAwaitingMagicLink(true);
+          setMagicLinkResendAvailableAt(Date.now() + 60_000);
         } else {
           onAuthenticated();
         }
@@ -198,7 +224,7 @@ export function AuthWelcomePanel({
     } finally {
       setAuthLoading(false);
     }
-  };
+  }, [email, isSupabaseEnabled, onAuthenticated, setAwaitingMagicLink, signInWithEmailMagicLink, setEmailMessage, setAuthLoading]);
 
   const handlePhoneSend = async () => {
     setAuthLoading(true);
@@ -363,21 +389,53 @@ export function AuthWelcomePanel({
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
+            editable={!awaitingMagicLink}
           />
-          <AnimatedPressable
-            style={styles.emailButton}
-            onPress={() => void handleEmailMagic()}
-            disabled={authLoading || !email.trim()}
-          >
-            <Ionicons name="mail-outline" size={18} color={colors.text} />
-            <Text style={styles.emailButtonText}>{t('onboarding.continueEmail')}</Text>
-          </AnimatedPressable>
-          {awaitingMagicLink ? (
-            <AnimatedPressable style={styles.emailButton} disabled={authLoading} onPress={onRefreshMagicLink}>
-              <Ionicons name="refresh-outline" size={18} color={colors.text} />
-              <Text style={styles.emailButtonText}>{t('onboarding.magicLinkRefresh')}</Text>
+          {!awaitingMagicLink ? (
+            <AnimatedPressable
+              style={styles.emailButton}
+              onPress={() => void handleEmailMagic()}
+              disabled={authLoading || !email.trim()}
+            >
+              <Ionicons name="mail-outline" size={18} color={colors.text} />
+              <Text style={styles.emailButtonText}>{t('onboarding.continueEmail')}</Text>
             </AnimatedPressable>
-          ) : null}
+          ) : (
+            <>
+              <Text style={styles.magicLinkWaiting}>{t('onboarding.magicLinkWaiting')}</Text>
+              <AnimatedPressable
+                style={styles.emailButton}
+                disabled={authLoading}
+                onPress={onRefreshMagicLink}
+              >
+                <Ionicons name="refresh-outline" size={18} color={colors.text} />
+                <Text style={styles.emailButtonText}>{t('onboarding.magicLinkRefresh')}</Text>
+              </AnimatedPressable>
+              <AnimatedPressable
+                style={styles.emailButton}
+                disabled={
+                  authLoading || !email.trim() || magicLinkResendSecondsLeft > 0
+                }
+                onPress={() => void handleEmailMagic()}
+              >
+                <Ionicons name="paper-plane-outline" size={18} color={colors.text} />
+                <Text style={styles.emailButtonText}>
+                  {magicLinkResendSecondsLeft > 0
+                    ? t('onboarding.magicLinkResendWait', { seconds: magicLinkResendSecondsLeft })
+                    : t('onboarding.magicLinkResend')}
+                </Text>
+              </AnimatedPressable>
+              <AnimatedPressable
+                onPress={() => {
+                  setAwaitingMagicLink(false);
+                  setEmailMessage(null);
+                  setMagicLinkResendAvailableAt(0);
+                }}
+              >
+                <Text style={styles.link}>{t('onboarding.magicLinkChangeEmail')}</Text>
+              </AnimatedPressable>
+            </>
+          )}
         </View>
       ) : null}
 
@@ -649,6 +707,13 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontWeight: '700',
     fontSize: 15,
+  },
+  magicLinkWaiting: {
+    color: colors.textMuted,
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
+    marginBottom: spacing.sm,
   },
   emailHint: {
     color: colors.textMuted,

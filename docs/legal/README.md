@@ -5,6 +5,8 @@
 
 This folder contains legal policies for the **Spark** dating app and **Pulse** disguise mode. In-app summaries live in `src/content/legal/` (English + 繁體中文 via **Settings → Privacy controls → App language**, or the **EN | 繁中** toggle on legal screens). These markdown files are the full reference copies.
 
+**Master checklist (login, security, payments, legal flows):** [`../COMPLIANCE_AND_OPERATIONS_MASTER.md`](../COMPLIANCE_AND_OPERATIONS_MASTER.md)
+
 ---
 
 ## ⚠️ Important — not a substitute for a lawyer

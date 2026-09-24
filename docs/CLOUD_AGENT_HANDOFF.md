@@ -2,7 +2,7 @@
 
 **Read this file first** on every new Cloud Agent run for `MonMonMars/New-APP01`.
 
-Last updated: 2026-09-24 (after **#198**; full QA reference in `docs/QA_AND_VERIFICATION.md`).
+Last updated: 2026-09-24 (after **#200**; full QA reference in `docs/QA_AND_VERIFICATION.md`).
 
 ## Where all “data and files” live
 
@@ -37,6 +37,8 @@ There is nothing to copy out of old agent VMs except what is already committed o
 | **#196** | `docs/DEMO_DEPLOY.md` + `npm run verify:remote-smoke` |
 | **#197** | README + handoff refresh + build ID in `PUBLIC_PREVIEW.md` |
 | **#198** | `docs/APP_FLOW.md` + README map copy (OSM, pin icons, Browse matches) |
+| **#199** | `docs/QA_AND_VERIFICATION.md` + handoff/deploy doc completion |
+| **#200** | Pulse unlike restores pinned face; `check-pulse-like-swap.mjs` in CI + remote smoke |
 
 Superseded drafts — see **`docs/PR_TRIAGE.md`**.
 

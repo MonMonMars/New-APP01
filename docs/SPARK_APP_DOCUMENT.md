@@ -62,8 +62,11 @@ Disguise mode persists in AsyncStorage (`disguiseMode`, default `true`). See `Di
 
 | Feature | Implementation |
 |---------|----------------|
-| **Map UI** | Full-screen Carto Voyager tiles; finger pan/pinch (native + web touch) |
-| **World search** | `mapDiscoverPool` + `relocateProfilesForMapSearch`; Places search (passport + global cities) |
+| **Map UI** | Full-screen **OpenStreetMap** tiles (`tile.openstreetmap.org`); finger pan/pinch (native + web touch) |
+| **Privacy on map** | **Pin icons only** on the map (`SearchMapView` `pinMarkerStyle="icon"`) — no profile photos as map markers |
+| **People in area** | Meta pill `{radius} · {count} people`; pool from `profilesForMapViewport` + `relocateProfilesForMapSearch` |
+| **Browse matches** | **Browse {n} matches** → `MapAreaMatchesScreen` (photo grid) → `ProfileDetailSheet` |
+| **World search** | `mapDiscoverPool`; Places search (passport + global cities) |
 | **Commit area** | **Search this area** → `searchMapAt` reloads discover deck for that region |
 
 ---
@@ -619,14 +622,16 @@ Prototype user: **Mon**, 28, designer bio, default Unsplash photo.
 
 ## 13. Integration status (demo-complete)
 
-**Branch:** `cursor/tinder-style-dating-app-7b60` · **PR:** [#2](https://github.com/MonMonMars/New-APP01/pull/2) → `main`
+**Production branch:** `main` (2026-09-24). Feature history: **`docs/PR_TRIAGE.md`**.
 
 | Gate | Command | Scope |
 |------|---------|--------|
-| CI | `npm run verify:ci` | Typecheck, 177 demo profiles + Pexels probe, **972×2 i18n keys**, demo web build, Playwright smoke (onboarding + Pulse link routing) |
-| Release QA | `npm run verify:extended` | Playwright: onboarding, Pulse mini-window, explicit profile links, feed refresh, world map search, disguise UX, world picker |
+| CI build | `npm run verify:ci` | Typecheck, demo profile validators, i18n keys, `build:web:demo` + build id stamp |
+| CI smoke (GitHub Actions) | `npm run verify:ci-smoke` | 5 Playwright scripts: demo link, Pulse routing, mini-window, privacy footer, Tokyo map + Browse matches |
+| Release QA | `npm run verify:extended` | Full Playwright suite (feed refresh, disguise UX, world picker, etc.) — see `docs/QA_AND_VERIFICATION.md` |
+| Post-deploy | `DEMO_URL=… npm run verify:remote-smoke` | Same 5 scripts against Vercel/Netlify |
 
-**Shipped in this integration line:** Pulse scroll-to-top / pull refresh; worldwide map discover + touch pan/zoom; explicit Pulse → dating entry points; passport demo profiles 201–218; Supabase prefs + chat cloud merge; **admin RBAC UI (EN + zh-TW, 7-tap entry)**; legal/privacy screens + CI check for version footer; permanent demo hosting docs (`PUBLIC_PREVIEW.md`, Vercel/`serve.json` cache split).
+**Shipped in this integration line:** Pulse like/unlike **in-feed profile swap** (`mergeSparkLikesWithPulsePostLikes`); map **pin privacy** + **MapAreaMatches** grid; OSM basemap; viewport people count fix; CI smoke stack (#193–#195); deploy + QA docs (#196–#198); prior: Pulse refresh, captions beside thumbs, admin gate, demo accounts, i18n CI.
 
 **Not in v1 demo scope:** real IAP (RevenueCat), photo ID verification, Android store build — see §11 “Later (v1.0)”.
 
@@ -638,7 +643,10 @@ Prototype user: **Mon**, 28, designer bio, default Unsplash photo.
 |----------|-------|
 | [`APP_FLOW.md`](./APP_FLOW.md) | Screen map, competitor matrix, navigation |
 | [`PRODUCT_STRATEGY.md`](./PRODUCT_STRATEGY.md) | GTM, pricing, metrics, launch phases |
-| [`PUBLIC_PREVIEW.md`](./PUBLIC_PREVIEW.md) | Live browser demo URLs |
+| [`PUBLIC_PREVIEW.md`](../PUBLIC_PREVIEW.md) | Live browser demo URLs |
+| [`QA_AND_VERIFICATION.md`](./QA_AND_VERIFICATION.md) | CI scripts, manual map/Pulse checklists |
+| [`DEMO_DEPLOY.md`](./DEMO_DEPLOY.md) | Vercel/Netlify + remote smoke |
+| [`CLOUD_AGENT_HANDOFF.md`](./CLOUD_AGENT_HANDOFF.md) | Cloud Agent bootstrap |
 | [`README.md`](../README.md) | Quick start & project overview |
 
 ---

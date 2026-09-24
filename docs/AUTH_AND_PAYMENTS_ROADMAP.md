@@ -36,10 +36,11 @@ Working plan for moving Spark from **demo-ready** to **production-ready** auth a
 
 ## Step 6 — Payments
 
-- [ ] Add `react-native-purchases` + RevenueCat for iOS/Android store mode
-- [ ] Implement Supabase functions: `purchase-approve`, `create-stripe-checkout`, `purchase_ledger` schema
-- [ ] Purchase step-up UI (TOTP) on Spark+ / shop when MFA required
-- [ ] Stripe Customer Portal link for web manage subscription
+- [x] RevenueCat / `react-native-purchases` scaffold documented (`docs/IAP.md`, dynamic native bridge)
+- [x] Supabase functions: `purchase-approve`, `create-stripe-checkout`, `create-stripe-portal`, `stripe-webhook` + `docs/supabase-payments-migration.sql`
+- [x] Purchase step-up UI (TOTP) on Spark+ / shop when MFA required (`PurchaseConfirmSheet`, `usePurchaseStepUp`)
+- [x] Stripe Customer Portal on web manage subscription (`openStripeCustomerPortal`, Spark+ screen)
+- [ ] Operator: Stripe products, webhook URL, deploy functions, enable `EXPO_PUBLIC_WEB_PAYMENTS_ENABLED`
 
 ## Step 7 — Trust & safety (server)
 

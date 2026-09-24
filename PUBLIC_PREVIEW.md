@@ -2,11 +2,12 @@
 
 ## Demo link (verified working)
 
-**https://yarn-ends-pop-managers.trycloudflare.com**
+**Tunnel (may be offline)** — last known: `https://yarn-ends-pop-managers.trycloudflare.com`  
+If the link fails, run `npm run demo:tunnel` in the cloud workspace or use **Vercel** below.
 
 - **Branch:** `main` (map basemap: standard **OpenStreetMap** tiles — no “API key required” watermarks)
-- **Build ID:** `154e76e-20260923T220322Z` (through **#192** — map area count + Browse matches smoke)
-- **Verified:** 2026-09-24 — `verify:ci` + `verify:ci-smoke` + `verify:extended`
+- **Build ID:** `9bb04a9-20260924T005802Z` (through **#195** — CI smoke: Pulse mini-window + map Browse)
+- **Verified:** 2026-09-24 — `verify:ci` + `verify:ci-smoke` (5 Playwright scripts) + `verify:extended`
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

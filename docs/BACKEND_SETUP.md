@@ -11,6 +11,8 @@ Spark ships with a **Supabase integration** that syncs auth, profiles, matches, 
 
 Open the SQL Editor and paste the contents of [`supabase-schema.sql`](./supabase-schema.sql). Run it once.
 
+Then run [`supabase-security-migration.sql`](./supabase-security-migration.sql) in the same SQL Editor. It adds `security_reports`, `security_audit_events`, and the `user_state.is_spark_plus` client guard trigger.
+
 ## 3. Configure environment variables
 
 Create a `.env` file in the project root (or set in EAS secrets):
@@ -122,11 +124,35 @@ On boot, if a Supabase session exists, `loadFromSupabase()` hydrates local state
 
 No env vars? Everything works exactly as before — AsyncStorage persistence only. Perfect for demos and stakeholder previews.
 
-## 7. Production checklist
+## 7. Edge Functions (security)
+
+Templates live under `supabase/functions/`. Deploy with the [Supabase CLI](https://supabase.com/docs/guides/functions) linked to your project.
+
+```bash
+supabase login
+supabase link --project-ref YOUR_PROJECT_REF
+supabase functions deploy delete-account
+supabase functions deploy openai-disguise-proxy
+supabase secrets set OPENAI_API_KEY=sk-...
+```
+
+| Function | Secrets / env | App wiring |
+|----------|----------------|------------|
+| **`delete-account`** | `SUPABASE_SERVICE_ROLE_KEY` (auto in hosted functions) | `deleteAccountViaEdgeFunction()` in Privacy / Profile |
+| **`openai-disguise-proxy`** | `OPENAI_API_KEY` | `generateDisguiseAdImage()` — JWT required; **no** `EXPO_PUBLIC_OPENAI_API_KEY` in production builds |
+
+**Verify:** Sign in on a Vercel or local web build with Supabase env vars → Pulse → generate disguise ad. Without a session, the app falls back to the local compositor. Account delete should return `{ ok: true }` and sign the user out.
+
+See [`security/SECURITY.md`](./security/SECURITY.md) for the full control list.
+
+## 8. Production checklist
 
 - [ ] Enable RLS policies (included in schema)
+- [ ] Run `supabase-security-migration.sql`
+- [ ] Deploy Edge Functions (`delete-account`, `openai-disguise-proxy`)
 - [ ] Set up Apple Sign-In service ID + redirect URLs
 - [ ] Configure email templates for magic links
 - [ ] Add server-side matchmaking (currently client-side demo)
 - [x] Wire real-time subscriptions for chat (`src/services/realtimeChat.ts`, `useCloudConversation`)
 - [x] Store photos in Supabase Storage (`src/services/cloudStorage.ts` — graceful fallback to local URIs when unconfigured)
+- [x] Disguise AI via server proxy when Supabase is configured (`src/services/disguiseImageGeneration.ts`)

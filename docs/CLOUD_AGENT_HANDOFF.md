@@ -2,7 +2,7 @@
 
 **Read this file first** on every new Cloud Agent run for `MonMonMars/New-APP01`.
 
-Last updated: 2026-09-24 (after **#192**; CI smoke includes Tokyo map + Browse matches).
+Last updated: 2026-09-24 (after **#195**; CI smoke = demo + Pulse routing + mini-window + footer + map Browse).
 
 ## Where all “data and files” live
 
@@ -32,6 +32,7 @@ There is nothing to copy out of old agent VMs except what is already committed o
 | **#192** | Map area people count aligned with search pool; Tokyo map smoke + Browse grid |
 | **#193** | CI + `verify:ci-smoke` include Tokyo map Browse flow |
 | **#194** | Pulse mini-window Playwright scroll + View profile / View photos labels |
+| **#195** | `check-mini-window` in GitHub CI + `verify:ci-smoke` |
 
 Superseded drafts — see **`docs/PR_TRIAGE.md`**.
 

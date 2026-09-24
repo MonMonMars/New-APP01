@@ -30,6 +30,7 @@ There is nothing to copy out of old agent VMs except what is already committed o
 |----|---------|
 | **#191** | **#189** Pulse like reload + **#190** map pin privacy + `MapAreaMatches` browse grid |
 | **#192** | Map area people count aligned with search pool; Tokyo map smoke + Browse grid |
+| **#193** | CI + `verify:ci-smoke` include Tokyo map Browse flow |
 
 Superseded drafts — see **`docs/PR_TRIAGE.md`**.
 

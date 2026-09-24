@@ -11,6 +11,8 @@ Spark ships with a **Supabase integration** that syncs auth, profiles, matches, 
 
 Open the SQL Editor and paste the contents of [`supabase-schema.sql`](./supabase-schema.sql). Run it once.
 
+Also run [`supabase-security-migration.sql`](./supabase-security-migration.sql) and [`supabase-trust-safety-migration.sql`](./supabase-trust-safety-migration.sql) for reports, audit events, shared quarantine, and moderator RLS.
+
 ## 3. Configure environment variables
 
 Create a `.env` file in the project root (or set in EAS secrets):

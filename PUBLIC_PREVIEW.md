@@ -6,8 +6,8 @@
 If the link fails, run `npm run demo:tunnel` in the cloud workspace or use **Vercel** below.
 
 - **Branch:** `main` (map basemap: standard **OpenStreetMap** tiles — no “API key required” watermarks)
-- **Build ID:** `1a8eae3-20260924T010703Z` (through **#196** — deploy docs + remote smoke runner)
-- **Verified:** 2026-09-24 — `verify:ci` + `verify:ci-smoke` (5 Playwright scripts) + `verify:extended`
+- **Build ID:** `01846dc-20260924T055213Z` (through **#198** — APP_FLOW map/privacy docs + handoff/QA reference)
+- **Verified:** 2026-09-24 — `verify:ci` + `verify:ci-smoke` (Tokyo **77** people, Browse matches, Pulse mini-window)
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)
@@ -59,7 +59,7 @@ Private repo → use **Vercel** or **Netlify** (free, stable URL, auto-deploy on
 
 `vercel.json` includes the same cache header split as `serve.json`.
 
-Full checklist: [`docs/DEMO_DEPLOY.md`](docs/DEMO_DEPLOY.md) · post-deploy: `DEMO_URL=https://… npm run verify:remote-smoke`
+Full checklist: [`docs/DEMO_DEPLOY.md`](docs/DEMO_DEPLOY.md) · QA scripts: [`docs/QA_AND_VERIFICATION.md`](docs/QA_AND_VERIFICATION.md) · post-deploy: `DEMO_URL=https://… npm run verify:remote-smoke`
 
 ### GitHub Pages (public repo or GitHub Pro only)
 

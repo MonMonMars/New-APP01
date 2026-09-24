@@ -2,7 +2,7 @@
 
 **Read this file first** on every new Cloud Agent run for `MonMonMars/New-APP01`.
 
-Last updated: 2026-09-24 (after **#196**; tunnel prefer Vercel — `docs/DEMO_DEPLOY.md`).
+Last updated: 2026-09-24 (after **#198**; full QA reference in `docs/QA_AND_VERIFICATION.md`).
 
 ## Where all “data and files” live
 
@@ -11,6 +11,7 @@ Last updated: 2026-09-24 (after **#196**; tunnel prefer Vercel — `docs/DEMO_DE
 | **All app source code** | GitHub **`main`** — https://github.com/MonMonMars/New-APP01 |
 | **Cloud bootstrap** | `.cursor/environment.json` (`npm ci`, demo on port 8090) |
 | **Product spec** | `docs/SPARK_APP_DOCUMENT.md` |
+| **QA / smoke scripts** | `docs/QA_AND_VERIFICATION.md` |
 | **Live demo URL** | `PUBLIC_PREVIEW.md` (tunnel often offline — prefer Vercel; see `docs/DEMO_DEPLOY.md`) |
 | **PR triage history** | `docs/PR_TRIAGE.md` |
 | **Agent chat history** | **Not portable** — old Cursor agent threads cannot be merged. This doc replaces them. |
@@ -34,13 +35,15 @@ There is nothing to copy out of old agent VMs except what is already committed o
 | **#194** | Pulse mini-window Playwright scroll + View profile / View photos labels |
 | **#195** | `check-mini-window` in GitHub CI + `verify:ci-smoke` |
 | **#196** | `docs/DEMO_DEPLOY.md` + `npm run verify:remote-smoke` |
+| **#197** | README + handoff refresh + build ID in `PUBLIC_PREVIEW.md` |
+| **#198** | `docs/APP_FLOW.md` + README map copy (OSM, pin icons, Browse matches) |
 
 Superseded drafts — see **`docs/PR_TRIAGE.md`**.
 
 ## Infrastructure
 
 1. **`main` carries the full Spark/Expo app** (SDK 57).
-2. **CI** — `npm run verify:ci` (typecheck, `validate:profiles`, `build:web:demo`). Playwright smoke: `npm run verify:ci-smoke` when demo is on `:8090`.
+2. **CI** — `npm run verify:ci` (typecheck, `validate:profiles`, `build:web:demo`). GitHub Actions then runs **`npm run verify:ci-smoke`** (5 Playwright scripts) against `dist` on `:8090`.
 3. **Environment build** — https://cursor.com/dashboard/cloud-agents/environments/e/a3b86124-af8c-11f1-bf4b-42ffb4d10ea7
 
 ## Known CI gotcha
@@ -51,11 +54,15 @@ Superseded drafts — see **`docs/PR_TRIAGE.md`**.
 
 ```bash
 npm ci
-npm run verify:ci          # typecheck + validators + build demo
-npm run demo               # localhost:8090
-npm run demo:tunnel        # public Cloudflare URL (update PUBLIC_PREVIEW.md)
-npm run verify:ci-smoke    # Playwright (demo must be running)
+npm run verify:ci              # typecheck + validators + build demo
+npm run demo                   # localhost:8090
+npm run demo:tunnel            # public Cloudflare URL (update PUBLIC_PREVIEW.md)
+npm run verify:ci-smoke        # same 5 scripts as GitHub CI (demo on :8090)
+npm run verify:extended        # full Playwright QA (local only)
+DEMO_URL=https://… npm run verify:remote-smoke   # after Vercel deploy
 ```
+
+Manual checklists (map privacy, Pulse like swap, build ID): **`docs/QA_AND_VERIFICATION.md`**.
 
 ## First message for a **new** Cloud Agent (copy-paste)
 

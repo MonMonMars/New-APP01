@@ -6,7 +6,7 @@ A dating app prototype inspired by **Tinder**, **Bumble**, and **Hinge** — bui
 
 ## Live demo
 
-**Latest link:** see [`PUBLIC_PREVIEW.md`](PUBLIC_PREVIEW.md) — updated after each release. **Stable hosting:** [`docs/DEMO_DEPLOY.md`](docs/DEMO_DEPLOY.md) (Vercel + `verify:remote-smoke`).
+**Latest link:** see [`PUBLIC_PREVIEW.md`](PUBLIC_PREVIEW.md) — updated after each release. **Stable hosting:** [`docs/DEMO_DEPLOY.md`](docs/DEMO_DEPLOY.md) (Vercel + `verify:remote-smoke`). **QA:** [`docs/QA_AND_VERIFICATION.md`](docs/QA_AND_VERIFICATION.md).
 
 ```bash
 npm install
@@ -100,9 +100,12 @@ src/
   screens/               # Discover, disguise, onboarding, chat
   data/                  # Mock profiles, disguise feed
 docs/
-  SPARK_APP_DOCUMENT.md
-  PUBLIC_PREVIEW.md
-PUBLIC_PREVIEW.md        # Live demo URL (canonical)
+  SPARK_APP_DOCUMENT.md   # Product & technical reference
+  APP_FLOW.md             # Navigation + map/Pulse flows
+  QA_AND_VERIFICATION.md  # CI scripts + manual checklists
+  DEMO_DEPLOY.md          # Vercel/Netlify
+  CLOUD_AGENT_HANDOFF.md  # Agent bootstrap
+PUBLIC_PREVIEW.md         # Live demo URL (canonical)
 ```
 
 ## Legal note

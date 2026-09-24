@@ -4,30 +4,55 @@ Use this when the Cloudflare tunnel is offline or you want a **stable URL** for 
 
 ## Recommended: Vercel
 
-1. Open [vercel.com/new](https://vercel.com/new) → import **`MonMonMars/New-APP01`**.
-2. **Production branch:** `main`.
-3. **Build command:** `npm run build:web:demo`
-4. **Output directory:** `dist`
-5. **Install command:** `npm ci` (default is fine).
-6. Deploy. No env vars required for the guest demo.
+| Setting | Value |
+|---------|--------|
+| Repository | `MonMonMars/New-APP01` |
+| Production branch | `main` |
+| Framework preset | Other (or None) |
+| Install command | `npm ci` |
+| Build command | `npm run build:web:demo` |
+| Output directory | `dist` |
+| Root directory | `.` (repo root) |
 
-Repo root **`vercel.json`** already sets SPA rewrites, cache split (`/_expo/static/*` immutable, HTML no-store), and security headers.
+**Environment variables:** none required for guest demo (no API keys in client for map tiles or demo auth).
 
-### After deploy — smoke the live URL
+**Auto deploy:** enable “Production deployments” on push to `main` so every merge gets a fresh build id.
 
-Replace `https://YOUR-APP.vercel.app` with your deployment URL:
+Repo root **`vercel.json`** provides:
+
+- SPA rewrite → `index.html`
+- `/_expo/static/*` → long cache, immutable
+- All other paths → `no-cache` HTML (matches `serve.json`)
+- Security headers (CSP, frame deny, etc.)
+
+### After deploy — automated smoke
 
 ```bash
 DEMO_URL=https://YOUR-APP.vercel.app npm run verify:remote-smoke
 ```
 
-**Build ID:** Profile → Privacy controls → footer `App version … · <build-id>` should match the commit you deployed (`main` HEAD).
+This runs the **same five Playwright scripts as GitHub CI** (onboarding, Pulse routing, mini-window, privacy footer, Tokyo map + Browse matches).
 
-### Manual QA (2 minutes)
+**Build ID:** Profile → Privacy controls → footer must show the commit you deployed. Compare with `git rev-parse --short HEAD` on `main`.
+
+### Manual QA (detailed)
+
+Full step tables: **[QA_AND_VERIFICATION.md](./QA_AND_VERIFICATION.md)**.
+
+**Minimum (2 minutes):**
 
 1. Continue without account → onboarding → Pulse logo → **Leave Spark**.
-2. **Discover tools → Map** → Places → **Tokyo** → **Browse matches**.
-3. Pulse feed → like/unlike disguised card → photo + caption swap.
+2. **Discover tools → Map** → **Places** → type **Tokyo** → select → confirm **pin icons** (no faces on map) and people count → **Browse matches** → open someone → profile sheet.
+3. Back to **Pulse** → like then unlike a **disguised** or **social** card → avatar + text beside it should **change**, then revert on unlike.
+
+## Alternative: Netlify
+
+| Setting | Value |
+|---------|--------|
+| Build command | `npm run build:web:demo` |
+| Publish directory | `dist` |
+
+Add a `_redirects` or netlify.toml SPA rule if needed (`/* /index.html 200`). Prefer Vercel — **`vercel.json` is already committed**.
 
 ## Local (agent / dev)
 
@@ -36,10 +61,33 @@ npm ci
 npm run verify:ci
 npm run build:web:demo
 npx serve -s -l 8090 -c serve.json dist
-npm run verify:ci-smoke   # against http://127.0.0.1:8090
+npm run verify:ci-smoke
+# optional full pass:
+npm run verify:extended
 ```
+
+**Expo dev server (`npm run web`)** is not the shipping demo — always test **`build:web:demo`** output.
 
 ## Not for private-repo public demo
 
-- **GitHub Pages** (`deploy-web.yml`) uses `build:web:pages` and needs a **public** repo or GitHub Pro — see `PUBLIC_PREVIEW.md`.
-- **Quick Cloudflare tunnel** (`npm run demo:tunnel`) — convenient but dies when the cloud VM sleeps; refresh URL in `PUBLIC_PREVIEW.md` after each session.
+| Method | Issue |
+|--------|--------|
+| **GitHub Pages** | Workflow uses `build:web:pages` + `/New-APP01` base path; repo is **private** unless Pro/public — see `.github/workflows/deploy-web.yml` |
+| **Quick Cloudflare tunnel** | `npm run demo:tunnel` — URL dies when cloud VM sleeps; update `PUBLIC_PREVIEW.md` after each session |
+| **loca.lt** | Unreliable from cloud agents |
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---------|-----|
+| Old UI after deploy | Hard refresh / incognito; check build id in Privacy footer |
+| Map watermark “API key required” | Wrong tile host — must be OSM.org (see `validate-map-basemap.mjs`) |
+| Tokyo shows 0 people | Pan map; tap **Search this area**; widen radius chip |
+| Browse matches missing | Switch search mode to **People**; ensure count &gt; 0 |
+| Pulse like doesn’t swap face | Hard refresh; confirm build includes **#191+** |
+
+## Related docs
+
+- **[QA_AND_VERIFICATION.md](./QA_AND_VERIFICATION.md)** — all scripts + manual checklists
+- **[PUBLIC_PREVIEW.md](../PUBLIC_PREVIEW.md)** — canonical demo link notes
+- **[CLOUD_AGENT_HANDOFF.md](./CLOUD_AGENT_HANDOFF.md)** — agent bootstrap

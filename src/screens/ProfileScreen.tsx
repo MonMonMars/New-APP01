@@ -33,6 +33,7 @@ import { SparkSectionToggle } from '../components/SparkSectionToggle';
 import { resolveSparkSection } from '../types/preferences';
 import { radii, spacing } from '../theme';
 import { LocaleToggle } from '../components/legal/LocaleToggle';
+import { AccountSessionSection } from '../components/auth/AccountSessionSection';
 import { APP_LOCALE_LABELS } from '../types/locale';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { getAppVersionLabel } from '../constants/buildInfo';
@@ -463,6 +464,10 @@ export function ProfileScreen() {
             </AnimatedPressable>
           </View>
         ) : null}
+
+        <View style={styles.section}>
+          <AccountSessionSection />
+        </View>
 
         <AnimatedPressable style={styles.versionRow} onPress={handleVersionTap}>
           <Text style={[styles.versionText, { color: colors.textMuted }]}>

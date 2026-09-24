@@ -29,9 +29,10 @@ Working plan for moving Spark from **demo-ready** to **production-ready** auth a
 
 ## Step 5 — Security backend
 
-- [ ] Apply `docs/supabase-security-migration.sql`
-- [ ] Deploy Edge Functions: `delete-account`, `openai-disguise-proxy`
-- [ ] Wire disguise AI to proxy (no client OpenAI key)
+- [x] Document applying `docs/supabase-security-migration.sql` in `BACKEND_SETUP.md` (run in Supabase SQL Editor after main schema)
+- [x] Document deploying Edge Functions: `delete-account`, `openai-disguise-proxy` (`BACKEND_SETUP.md` §7)
+- [x] Wire disguise AI to proxy when Supabase + session (`disguiseImageGeneration.ts`; prod ignores client OpenAI key)
+- [ ] Operator: run migration + deploy functions on your Supabase project (manual)
 
 ## Step 6 — Payments
 

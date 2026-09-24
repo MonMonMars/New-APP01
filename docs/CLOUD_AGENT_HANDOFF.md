@@ -2,7 +2,7 @@
 
 **Read this file first** on every new Cloud Agent run for `MonMonMars/New-APP01`.
 
-Last updated: 2026-09-23 (after **#192** on `main`; demo smoke green).
+Last updated: 2026-09-24 (after **#192**; CI smoke includes Tokyo map + Browse matches).
 
 ## Where all “data and files” live
 

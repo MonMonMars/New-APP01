@@ -30,11 +30,13 @@ npm start
 
 | Method | Status | Notes |
 |--------|--------|-------|
-| **Apple Sign-In** | Stub + Supabase | Real on iOS via `expo-apple-authentication`; creates/updates `profiles` row when Supabase is configured |
+| **Apple Sign-In** | iOS native + Supabase | Real on **iOS** via `expo-apple-authentication` → `signInWithIdToken`; **web production** hides the Apple button (no fake stub). Preview/dev web may use a local stub when Supabase is off. |
+| **Google OAuth** | Supabase | `signInWithGoogleOAuth()` — enable Google in Dashboard; same redirect URLs as magic link |
+| **WeChat / QQ** | Supabase (CN) | Custom OAuth providers for mainland account region; enable in Dashboard and register redirect URLs |
 | **Magic link email** | Supabase | `signInWithMagicLink()` in `src/services/supabase.ts` |
 | **Phone SMS** | Supabase + SMS provider | `sendPhoneLoginOtp` / `verifyPhoneLoginOtp` in `supabaseAuthExtended.ts`; without Supabase, dev demo code `123456` only |
 
-Enable Apple provider in Supabase Dashboard → Authentication → Providers.
+Enable providers in Supabase Dashboard → **Authentication → Providers**.
 
 ### Redirect URLs (magic link, sign-up confirm, password reset, OAuth)
 
@@ -82,6 +84,27 @@ See also [`DEMO_DEPLOY.md`](./DEMO_DEPLOY.md) when hosting the web demo on Verce
 5. Test with a real device on the **same deploy origin** you use for web (phone OTP does not use redirect URLs; session is created on `verifyOtp`).
 
 **CN accounts:** UI defaults to +86 placeholders when account home market is CN (`regionalAuthProviders.ts`). Ensure your SMS provider supports mainland delivery if you ship there.
+
+### OAuth (Google, Apple, WeChat, QQ)
+
+**App code:** `signInWithOAuthProvider` in `src/services/supabaseAuthExtended.ts` (Google, WeChat, QQ). Apple uses native iOS token exchange in `signInWithAppleToken()` (`src/services/supabase.ts`).
+
+**Redirect URLs:** OAuth uses the same `redirectTo` as magic link (`getMagicLinkRedirectTo()`). Every production web host (Vercel, custom domain, tunnel used for QA) must appear in Supabase **Redirect URLs** or the browser returns with `auth` errors.
+
+| Provider | Supabase setup | Spark behavior |
+|----------|----------------|----------------|
+| **Google** | Enable Google; add OAuth client ID/secret from Google Cloud Console; authorized redirect = Supabase callback URL | Web redirects in-tab; native opens system browser via `Linking` |
+| **Apple** | Enable Apple; configure Services ID, key, and team ID for **Sign in with Apple** | **iOS app only** for native flow; web release builds do not show Apple until a real web Apple JS flow is implemented |
+| **WeChat** | Enable custom WeChat provider (Supabase docs / partner setup); register app ID and secret | Shown when account region is **CN** (`regionalSocialAuthProviders`) |
+| **QQ** | Enable custom QQ provider similarly | CN region only |
+
+**Without Supabase:** Google / WeChat / QQ fall back to local demo IDs in **preview** builds only (`isProductionBuild()` blocks OAuth in release).
+
+**Mainland checklist:**
+
+1. Enable WeChat and QQ in Supabase; confirm redirect URLs include your CN-facing web origin and `spark://auth/callback`.
+2. Use SMS provider that delivers +86 OTP (see Phone SMS above).
+3. QA: complete OAuth in WeChat/QQ app or embedded browser, return to Spark, tap **I finished sign-in — refresh** if the session poll has not fired yet.
 
 ## 5. What syncs
 

@@ -43,8 +43,9 @@ Working plan for moving Spark from **demo-ready** to **production-ready** auth a
 
 ## Step 7 — Trust & safety (server)
 
-- [ ] Moderation queue for `security_reports`
-- [ ] Shared scam quarantine (not only AsyncStorage)
+- [x] Moderation queue UI for `security_reports` (`AdminModerationQueue`, moderator JWT + RLS)
+- [x] Shared scam quarantine table + cloud sync (`scam_quarantine`, `trustSafety.ts`, `scamEnforcementStore`)
+- [ ] Operator: run `supabase-trust-safety-migration.sql`; set `app_metadata.admin_role` on moderator Supabase users
 
 ---
 

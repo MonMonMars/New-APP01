@@ -14,7 +14,14 @@ Use this when the Cloudflare tunnel is offline or you want a **stable URL** for 
 | Output directory | `dist` |
 | Root directory | `.` (repo root) |
 
-**Environment variables:** none required for guest demo (no API keys in client for map tiles or demo auth).
+**Environment variables:**
+
+| Variable | Required for |
+|----------|----------------|
+| *(none)* | Guest demo — map tiles, local AsyncStorage |
+| `EXPO_PUBLIC_SUPABASE_URL` + `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Cloud sign-in, sync, magic link, password reset on **this deploy URL** |
+
+When Supabase is enabled on Vercel, add your deployment URL to Supabase **Redirect URLs** (see [`BACKEND_SETUP.md`](./BACKEND_SETUP.md)). Magic links and password reset emails must point at the same origin users open in the browser.
 
 **Auto deploy:** enable “Production deployments” on push to `main` so every merge gets a fresh build id.
 

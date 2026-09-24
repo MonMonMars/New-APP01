@@ -1615,6 +1615,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
 
     if (isSupabaseConfigured()) {
+      const rateKey = `magic-link:${trimmed}`;
+      if (!checkClientRateLimit(rateKey, 5, 15 * 60 * 1000)) {
+        return { ok: false, message: translate(locale, 'auth.magicLinkRateLimited') };
+      }
       const result = await signInWithMagicLink(trimmed);
       if (!result.ok) {
         return {

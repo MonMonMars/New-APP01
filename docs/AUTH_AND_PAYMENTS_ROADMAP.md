@@ -52,4 +52,4 @@ Working plan for moving Spark from **demo-ready** to **production-ready** auth a
 
 **Reference audit:** Cloud Agent conversation (Sep 2026) — login, email/phone, anti-abuse, payments inventory.
 
-**Related docs:** [`BACKEND_SETUP.md`](./BACKEND_SETUP.md), [`security/SECURITY.md`](./security/SECURITY.md), [`IAP.md`](./IAP.md), [`QA_AND_VERIFICATION.md`](./QA_AND_VERIFICATION.md)
+**Related docs:** [`COMPLIANCE_AND_OPERATIONS_MASTER.md`](./COMPLIANCE_AND_OPERATIONS_MASTER.md) (unified checklists), [`BACKEND_SETUP.md`](./BACKEND_SETUP.md), [`security/SECURITY.md`](./security/SECURITY.md), [`IAP.md`](./IAP.md), [`QA_AND_VERIFICATION.md`](./QA_AND_VERIFICATION.md)

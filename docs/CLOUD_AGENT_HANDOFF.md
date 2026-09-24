@@ -11,7 +11,7 @@ Last updated: 2026-09-24 (after **#195**; CI smoke = demo + Pulse routing + mini
 | **All app source code** | GitHub **`main`** — https://github.com/MonMonMars/New-APP01 |
 | **Cloud bootstrap** | `.cursor/environment.json` (`npm ci`, demo on port 8090) |
 | **Product spec** | `docs/SPARK_APP_DOCUMENT.md` |
-| **Live demo URL** | `PUBLIC_PREVIEW.md` (tunnel URLs change; always read that file) |
+| **Live demo URL** | `PUBLIC_PREVIEW.md` (tunnel often offline — prefer Vercel; see `docs/DEMO_DEPLOY.md`) |
 | **PR triage history** | `docs/PR_TRIAGE.md` |
 | **Agent chat history** | **Not portable** — old Cursor agent threads cannot be merged. This doc replaces them. |
 

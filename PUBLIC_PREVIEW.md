@@ -59,6 +59,8 @@ Private repo → use **Vercel** or **Netlify** (free, stable URL, auto-deploy on
 
 `vercel.json` includes the same cache header split as `serve.json`.
 
+Full checklist: [`docs/DEMO_DEPLOY.md`](docs/DEMO_DEPLOY.md) · post-deploy: `DEMO_URL=https://… npm run verify:remote-smoke`
+
 ### GitHub Pages (public repo or GitHub Pro only)
 
 Push to **`main`** — workflow deploys `gh-pages` branch (see `.github/workflows/deploy-web.yml`).

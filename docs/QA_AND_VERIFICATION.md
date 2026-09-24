@@ -7,7 +7,7 @@ Complete guide for agents, CI, and Mon before sharing a demo URL.
 | Command | When to use |
 |---------|-------------|
 | `npm run verify:ci` | **CI gate** — TypeScript, profile/i18n/map validators, `build:web:demo` |
-| `npm run verify:ci-smoke` | Same **5 Playwright scripts as GitHub CI** (serve `dist` on `:8090` first) |
+| `npm run verify:ci-smoke` | Same **6 Playwright scripts as GitHub CI** (serve `dist` on `:8090` first) |
 | `DEMO_URL=https://… npm run verify:remote-smoke` | Post-deploy smoke against Vercel/Netlify |
 | `npm run verify:extended` | Full release QA (~10+ Playwright flows; local `:8090`) |
 | `npm run validate:profiles` | Validators only (no build) |
@@ -21,6 +21,7 @@ On every push/PR to `main` or `cursor/**`:
 3. Playwright (in order):
    - **`verify-demo-link.mjs`** — HTTP 200, onboarding → Spark discover → Pulse tab, no console errors
    - **`check-pulse-link-routing.mjs`** — News/ad/social taps open correct sheets; profile avatars open mini-window; caption beside thumb
+   - **`check-pulse-like-swap.mjs`** — Upvote/remove on a Pulse card swaps avatar + beside caption, then reverts on unlike
    - **`check-mini-window.mjs`** — Open mini-window from feed; photo swipe; like/pass/super-like toasts; sheet closes
    - **`check-privacy-version-footer.mjs`** — Privacy screen shows build id (no raw i18n keys)
    - **`check-map-world-search.mjs`** — Discover Hub → Map → Places → Tokyo → people count → **Browse matches** → “Matches in this area” grid

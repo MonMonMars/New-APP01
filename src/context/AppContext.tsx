@@ -59,6 +59,7 @@ import {
 import { generateDisguiseAdImage } from '../services/disguiseImageGeneration';
 import { registerCloudPushToken } from '../services/pushCloud';
 import { scheduleDateCheckInReminder } from '../utils/notifications';
+import { setPulseSlotDisplayProfile } from '../utils/resolveDisguiseProfile';
 import type { ConversationRealtimeUpdate } from '../services/realtimeChat';
 import {
   mergeConversationLists,
@@ -2999,12 +3000,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const togglePulseLike = useCallback((postId: string) => {
-    setPulseSocial((prev) => ({
-      ...prev,
-      likedPostIds: prev.likedPostIds.includes(postId)
-        ? prev.likedPostIds.filter((id) => id !== postId)
-        : [...prev.likedPostIds, postId],
-    }));
+    setPulseSocial((prev) => {
+      const removing = prev.likedPostIds.includes(postId);
+      if (removing) {
+        setPulseSlotDisplayProfile(postId, undefined);
+      }
+      return {
+        ...prev,
+        likedPostIds: removing
+          ? prev.likedPostIds.filter((id) => id !== postId)
+          : [...prev.likedPostIds, postId],
+      };
+    });
   }, []);
 
   const mutePulseAuthor = useCallback((handle: string) => {

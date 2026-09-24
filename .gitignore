@@ -49,3 +49,4 @@ yarn-error.*
 # local tunnel binary + logs
 /cloudflared
 tmp-cloudflared.log
+.artifacts/

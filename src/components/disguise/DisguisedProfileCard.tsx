@@ -128,7 +128,15 @@ export function DisguisedProfileCard({ post }: DisguisedProfileCardProps) {
             />
           </PulseProfileSwap>
           <View style={styles.socialActions}>
-            <AnimatedPressable style={styles.socialAction} onPress={() => togglePulseLike(post.id)}>
+            <AnimatedPressable
+              style={styles.socialAction}
+              testID={`pulse-post-upvote-${post.id}`}
+              accessibilityRole="button"
+              accessibilityLabel={
+                upvoted ? t('pulseSocial.removeUpvoteA11y') : t('pulseSocial.upvotePostA11y')
+              }
+              onPress={() => togglePulseLike(post.id)}
+            >
               <Ionicons
                 name={upvoted ? 'arrow-up' : 'arrow-up-outline'}
                 size={18}

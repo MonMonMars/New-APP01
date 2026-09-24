@@ -165,6 +165,7 @@ export function SocialPostCard({ post }: SocialPostCardProps) {
       <View style={styles.actions}>
         <AnimatedPressable
           style={styles.action}
+          testID={`pulse-post-upvote-${post.id}`}
           accessibilityRole="button"
           accessibilityLabel={
             upvoted ? t('pulseSocial.removeUpvoteA11y') : t('pulseSocial.upvotePostA11y')

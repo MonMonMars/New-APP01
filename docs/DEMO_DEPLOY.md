@@ -31,7 +31,7 @@ Repo root **`vercel.json`** provides:
 DEMO_URL=https://YOUR-APP.vercel.app npm run verify:remote-smoke
 ```
 
-This runs the **same five Playwright scripts as GitHub CI** (onboarding, Pulse routing, mini-window, privacy footer, Tokyo map + Browse matches).
+This runs the **same six Playwright scripts as GitHub CI** (onboarding, Pulse routing, Pulse like swap, mini-window, privacy footer, Tokyo map + Browse matches).
 
 **Build ID:** Profile → Privacy controls → footer must show the commit you deployed. Compare with `git rev-parse --short HEAD` on `main`.
 

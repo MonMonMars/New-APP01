@@ -1784,6 +1784,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
           message: translate(locale, 'auth.phoneOtpSentDemo', { code: DEMO_PHONE_OTP_CODE }),
         };
       }
+      const normalized = phone.trim();
+      const rateKey = `phone-otp:${normalized.replace(/\D/g, '')}`;
+      if (!checkClientRateLimit(rateKey, 5, 15 * 60 * 1000)) {
+        return { ok: false, message: translate(locale, 'auth.phoneOtpRateLimited') };
+      }
       const result = await sendPhoneLoginOtp(phone);
       if (!result.ok) {
         return { ok: false, message: result.error ?? translate(locale, 'auth.phoneOtpFailed') };

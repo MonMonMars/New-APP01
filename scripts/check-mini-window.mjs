@@ -13,12 +13,44 @@ if (!url) {
   process.exit(1);
 }
 
+async function findMiniWindowTrigger(page, index = 0) {
+  const selectors = [
+    page.getByLabel(/^View photos from /i),
+    page.getByLabel(/^View profile/i),
+  ];
+  for (const locator of selectors) {
+    const count = await locator.count().catch(() => 0);
+    if (count > index) {
+      return locator.nth(index);
+    }
+  }
+  return null;
+}
+
 async function openMiniWindow(page, index = 0) {
-  const thumb = page.getByLabel(/view photos from/i).nth(index);
-  const label = (await thumb.getAttribute('aria-label')) ?? '';
-  await thumb.click();
-  await page.waitForTimeout(600);
-  return label.replace(/^View photos from\s+/i, '').trim();
+  for (let scroll = 0; scroll < 14; scroll += 1) {
+    const thumb = await findMiniWindowTrigger(page, index);
+    if (thumb && (await thumb.isVisible().catch(() => false))) {
+      const label = (await thumb.getAttribute('aria-label')) ?? '';
+      await thumb.click({ force: true });
+      await page.waitForTimeout(600);
+      const name = label
+        .replace(/^View photos from\s+/i, '')
+        .replace(/^View profile:?\s+/i, '')
+        .trim();
+      const opened = await page
+        .getByLabel(/like profile|pass profile/i)
+        .first()
+        .isVisible()
+        .catch(() => false);
+      if (opened) {
+        return name;
+      }
+    }
+    await page.mouse.wheel(0, 520);
+    await page.waitForTimeout(350);
+  }
+  throw new Error('No Pulse mini-window trigger found in feed');
 }
 
 async function waitForDismiss(page) {

@@ -1,6 +1,6 @@
 # Open draft PR triage vs `main`
 
-**Status (2026-09-23, latest):** **#191** integrate Pulse like reload + map pin privacy · **#192** map viewport people count. **#189–#190** superseded by **#191**. **No open feature PRs.**
+**Status (2026-09-24, latest):** **#193** CI map Tokyo + Browse smoke. **#191–#192** map/Pulse integration. **No open feature PRs.**
 
 **Status (2026-09-22):** Drafts **#1–#139** (plus **#147–#154** earlier) reviewed against current **`main`**. All were **closed as superseded** — features already live via **#155**, **#157**, and follow-ups. **No blind merges** were performed (branches share only the initial commit with `main`).
 

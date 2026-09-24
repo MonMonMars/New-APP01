@@ -23,9 +23,9 @@ Working plan for moving Spark from **demo-ready** to **production-ready** auth a
 
 ## Step 4 — OAuth & Apple
 
-- [ ] Google / Apple redirect URLs for production web
-- [ ] Apple on web: real Sign in with Apple JS or hide stub on web release
-- [ ] WeChat / QQ provider notes for CN builds
+- [x] Google / Apple redirect URLs documented in `BACKEND_SETUP.md` (shared with magic link)
+- [x] Apple on web release: hide button + block non-iOS stub (`appleAuth.ts`, `regionalAuthProviders.ts`)
+- [x] WeChat / QQ provider notes for CN builds in `BACKEND_SETUP.md`
 
 ## Step 5 — Security backend
 

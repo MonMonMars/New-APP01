@@ -130,6 +130,8 @@ export const zhTw = {
     phoneVerified: '手機已驗證，登入成功。',
     googleFailed: 'Google 登入失敗。',
     googleContinue: '請在瀏覽器完成登入後返回。',
+    appleUnavailable:
+      'Apple 登入僅在 iOS App 提供。網頁版請使用 Google、電子郵件或手機 — 或在 Supabase 設定 Apple 以支援日後網頁流程。',
     oauthRefresh: '我已完成登入 — 重新整理',
     oauthNotYet: '尚未偵測到登入。請在微信、QQ 或瀏覽器完成後再點重新整理。',
     regionalMethodsCN: '登入：微信、QQ、手機、電子郵件或密碼。',

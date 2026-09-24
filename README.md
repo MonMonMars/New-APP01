@@ -45,7 +45,7 @@ DEMO_URL=https://your-app.vercel.app npm run verify:remote-smoke
 ### Spark discovery
 - One profile card at a time
 - **Drag to trash** (pass) · **Drag to heart** (like) · **Red star** (super-like)
-- **World map search** — pan/pinch street map, search cities, **Search this area** reloads demo profiles globally
+- **World map search** — OSM map, privacy **pin icons**, people count, **Browse matches** grid; Places → **Search this area** reloads the deck pool
 - Spark Note, Rewind (Spark+), Boost, profile sheet, report/block
 
 ### Main tabs (Spark)

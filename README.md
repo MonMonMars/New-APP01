@@ -6,12 +6,13 @@ A dating app prototype inspired by **Tinder**, **Bumble**, and **Hinge** — bui
 
 ## Live demo
 
-**Latest link:** see [`PUBLIC_PREVIEW.md`](PUBLIC_PREVIEW.md) — updated after each release.
+**Latest link:** see [`PUBLIC_PREVIEW.md`](PUBLIC_PREVIEW.md) — updated after each release. **Stable hosting:** [`docs/DEMO_DEPLOY.md`](docs/DEMO_DEPLOY.md) (Vercel + `verify:remote-smoke`).
 
 ```bash
 npm install
 npm run demo          # http://localhost:8090
-npm run demo:tunnel   # public Cloudflare URL (requires cloudflared)
+npm run demo:tunnel   # ephemeral Cloudflare URL (cloud VM only)
+DEMO_URL=https://your-app.vercel.app npm run verify:remote-smoke
 ```
 
 ## Two modes

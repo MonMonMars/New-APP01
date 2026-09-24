@@ -67,6 +67,22 @@ The app sets `emailRedirectTo` / OAuth `redirectTo` via `getMagicLinkRedirectTo(
 
 See also [`DEMO_DEPLOY.md`](./DEMO_DEPLOY.md) when hosting the web demo on Vercel.
 
+### Phone SMS (OTP)
+
+**App code:** `sendPhoneLoginOtp` / `verifyPhoneLoginOtp` in `src/services/supabaseAuthExtended.ts` (E.164 normalization for US, CN, TW).
+
+**Without Supabase:** preview builds only — fixed demo code `123456` (`src/services/demoPhoneAuth.ts`). **Production release builds block phone auth** until Supabase is configured.
+
+**Supabase setup checklist:**
+
+1. Dashboard → **Authentication → Providers → Phone** → enable.
+2. Connect an SMS provider (common: **Twilio**, **MessageBird**, Vonage — follow Supabase docs for your region).
+3. Configure **SMS template** and sender ID per provider rules (US 10DLC, CN carrier requirements, etc.).
+4. Add **rate limits** in Supabase Auth settings (recommended) — the app also limits sends client-side (5 OTPs per number per 15 minutes).
+5. Test with a real device on the **same deploy origin** you use for web (phone OTP does not use redirect URLs; session is created on `verifyOtp`).
+
+**CN accounts:** UI defaults to +86 placeholders when account home market is CN (`regionalAuthProviders.ts`). Ensure your SMS provider supports mainland delivery if you ship there.
+
 ## 5. What syncs
 
 When configured, `AppContext` calls `syncToSupabase()` after state changes:

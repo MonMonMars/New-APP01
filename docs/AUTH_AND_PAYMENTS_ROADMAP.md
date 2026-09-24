@@ -10,9 +10,9 @@ Working plan for moving Spark from **demo-ready** to **production-ready** auth a
 
 ## Step 2 — Email auth hardening
 
-- [ ] Document Vercel redirect URLs in `BACKEND_SETUP.md` (replace stale GitHub Pages URLs)
-- [ ] Magic-link “waiting” UX polish + resend cooldown
-- [ ] Password recovery tested on web deploy
+- [x] Document Vercel / local / tunnel redirect URLs in `BACKEND_SETUP.md` + `DEMO_DEPLOY.md`
+- [x] Magic-link waiting UI, auto session poll, 60s resend cooldown, client rate limit (5 / 15 min)
+- [ ] Password recovery E2E on a live Vercel + Supabase project (manual QA checklist)
 
 ## Step 3 — Phone SMS auth
 

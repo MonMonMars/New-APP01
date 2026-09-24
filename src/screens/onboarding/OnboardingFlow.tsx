@@ -94,16 +94,6 @@ export function OnboardingFlow() {
   ]);
 
   useEffect(() => {
-    if (!isSupabaseEnabled || !awaitingMagicLink) {
-      return;
-    }
-    if (isAuthenticated && userId && step === 'welcome') {
-      setAwaitingMagicLink(false);
-      setStep('intent');
-    }
-  }, [awaitingMagicLink, isAuthenticated, isSupabaseEnabled, step, userId]);
-
-  useEffect(() => {
     if (!isHydrated || step !== 'welcome' || !isAuthenticated || !userId) {
       return;
     }

@@ -36,17 +36,36 @@ npm start
 
 Enable Apple provider in Supabase Dashboard → Authentication → Providers.
 
-### Magic link redirect URLs
+### Redirect URLs (magic link, sign-up confirm, password reset, OAuth)
 
-Add these under **Authentication → URL configuration → Redirect URLs** (adjust host for your deploy):
+Supabase **Authentication → URL configuration**:
 
-| Platform | Redirect URL |
+1. **Site URL** — your primary web demo origin (e.g. `https://new-app01.vercel.app` or `http://localhost:8090` for local `npm run demo`).
+2. **Redirect URLs** — add **every** origin users open the app from (exact path the app uses; trailing slash optional but be consistent).
+
+The app sets `emailRedirectTo` / OAuth `redirectTo` via `getMagicLinkRedirectTo()` in `src/services/supabaseAuthCallback.ts`:
+
+| Platform | Redirect value |
 |----------|----------------|
-| Web demo | `https://monmonmars.github.io/New-APP01/` |
-| Local web | `http://localhost:8081/` |
-| Native | `spark://auth/callback` |
+| **Web** | `{origin}{pathname}` of the running page (Vercel, tunnel, or `http://localhost:8090`) |
+| **Native** | `spark://auth/callback` (`app.json` scheme `spark`) |
 
-The app sets `emailRedirectTo` to the web origin or `spark://auth/callback` and completes the session via `src/services/supabaseAuthCallback.ts` (hash tokens, PKCE `code`, and deep links).
+**Register in Supabase (examples — replace with your hosts):**
+
+| Use case | Add to Redirect URLs |
+|----------|----------------------|
+| Vercel production | `https://YOUR-PROJECT.vercel.app` |
+| Vercel preview | `https://YOUR-PROJECT-*.vercel.app` (if your Supabase plan allows wildcards) or each preview URL |
+| Local demo (`npm run demo`) | `http://localhost:8090` |
+| Expo web dev | `http://localhost:8081` |
+| Cloudflare quick tunnel | `https://*.trycloudflare.com` (or the exact tunnel URL each session) |
+| iOS / Android | `spark://auth/callback` |
+
+**Password reset** uses the same `redirectTo` as magic link. After the user opens the email link, the app shows **PasswordRecoveryGate** (`type=recovery` / `PASSWORD_RECOVERY`) to set a new password.
+
+**Completion:** `recoverSupabaseAuthFromLaunchUrl()` reads hash tokens or PKCE `code`, then `window.history.replaceState` clears auth params on web.
+
+See also [`DEMO_DEPLOY.md`](./DEMO_DEPLOY.md) when hosting the web demo on Vercel.
 
 ## 5. What syncs
 

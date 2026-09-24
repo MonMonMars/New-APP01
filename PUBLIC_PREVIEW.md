@@ -6,7 +6,7 @@
 If the link fails, run `npm run demo:tunnel` in the cloud workspace or use **Vercel** below.
 
 - **Branch:** `main` (map basemap: standard **OpenStreetMap** tiles — no “API key required” watermarks)
-- **Build ID:** `9bb04a9-20260924T005802Z` (through **#195** — CI smoke: Pulse mini-window + map Browse)
+- **Build ID:** `1a8eae3-20260924T010703Z` (through **#196** — deploy docs + remote smoke runner)
 - **Verified:** 2026-09-24 — `verify:ci` + `verify:ci-smoke` (5 Playwright scripts) + `verify:extended`
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 

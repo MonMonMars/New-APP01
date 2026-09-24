@@ -2,7 +2,7 @@
 
 **Read this file first** on every new Cloud Agent run for `MonMonMars/New-APP01`.
 
-Last updated: 2026-09-24 (after **#195**; CI smoke = demo + Pulse routing + mini-window + footer + map Browse).
+Last updated: 2026-09-24 (after **#196**; tunnel prefer Vercel — `docs/DEMO_DEPLOY.md`).
 
 ## Where all “data and files” live
 
@@ -33,6 +33,7 @@ There is nothing to copy out of old agent VMs except what is already committed o
 | **#193** | CI + `verify:ci-smoke` include Tokyo map Browse flow |
 | **#194** | Pulse mini-window Playwright scroll + View profile / View photos labels |
 | **#195** | `check-mini-window` in GitHub CI + `verify:ci-smoke` |
+| **#196** | `docs/DEMO_DEPLOY.md` + `npm run verify:remote-smoke` |
 
 Superseded drafts — see **`docs/PR_TRIAGE.md`**.
 

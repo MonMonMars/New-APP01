@@ -63,7 +63,8 @@ This document describes privacy and security controls in Spark / Pulse. It is fo
 ### 7. AI disguise generation
 
 - `EXPO_PUBLIC_OPENAI_API_KEY` is **ignored in production builds**
-- Use **`supabase/functions/openai-disguise-proxy`** with auth + rate limits
+- When Supabase is configured, **`generateDisguiseAdImage()`** calls **`openai-disguise-proxy`** with the user JWT (5 req/min per user on the function)
+- Preview/dev without Supabase may still use a local OpenAI key; guests fall back to the compositor
 
 ### 8. Unlock lockout (`src/utils/unlockLockout.ts`)
 
@@ -96,8 +97,9 @@ This document describes privacy and security controls in Spark / Pulse. It is fo
 
 ## Production checklist (not yet fully implemented)
 
-- [ ] Deploy `supabase-security-migration.sql` to production project
-- [ ] Deploy Edge Functions with service role secrets
+- [ ] Deploy `supabase-security-migration.sql` to production project (see `BACKEND_SETUP.md`)
+- [ ] Deploy Edge Functions with service role secrets + `OPENAI_API_KEY` on proxy
+- [x] Client calls disguise proxy + delete-account Edge Functions when Supabase is configured
 - [ ] Server-side matching, likes, blocks (Edge Functions + RLS)
 - [ ] Private photo bucket + signed URLs (not public `profile-photos`)
 - [ ] Apple/Google receipt validation before `is_spark_plus` (server webhook)

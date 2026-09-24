@@ -32,7 +32,7 @@ npm start
 |--------|--------|-------|
 | **Apple Sign-In** | Stub + Supabase | Real on iOS via `expo-apple-authentication`; creates/updates `profiles` row when Supabase is configured |
 | **Magic link email** | Supabase | `signInWithMagicLink()` in `src/services/supabase.ts` |
-| **Phone** | Prototype stub | Skips auth, local-only until backend wired |
+| **Phone SMS** | Supabase + SMS provider | `sendPhoneLoginOtp` / `verifyPhoneLoginOtp` in `supabaseAuthExtended.ts`; without Supabase, dev demo code `123456` only |
 
 Enable Apple provider in Supabase Dashboard → Authentication → Providers.
 

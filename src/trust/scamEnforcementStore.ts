@@ -16,6 +16,27 @@ export async function hydrateScamEnforcement(): Promise<void> {
   } catch {
     quarantinedIds = new Set();
   }
+
+  const { fetchActiveQuarantineFromCloud } = await import('../services/trustSafety');
+  const cloudIds = await fetchActiveQuarantineFromCloud();
+  for (const id of cloudIds) {
+    quarantinedIds!.add(id);
+    bonusScores.set(id, 50);
+  }
+}
+
+/** Re-merge cloud quarantine (e.g. after sign-in). */
+export async function syncSharedQuarantineFromCloud(): Promise<void> {
+  const { fetchActiveQuarantineFromCloud } = await import('../services/trustSafety');
+  const cloudIds = await fetchActiveQuarantineFromCloud();
+  if (cloudIds.length === 0) {
+    return;
+  }
+  await hydrateScamEnforcement();
+  for (const id of cloudIds) {
+    quarantinedIds!.add(id);
+    bonusScores.set(id, 50);
+  }
 }
 
 export function isProfileQuarantined(profileId: string): boolean {
@@ -35,6 +56,7 @@ export async function quarantineProfile(profileId: string): Promise<void> {
   quarantinedIds!.add(profileId);
   bonusScores.set(profileId, 50);
   await AsyncStorage.setItem(QUARANTINE_KEY, JSON.stringify([...quarantinedIds!]));
+  void import('../services/trustSafety').then((m) => m.setCloudQuarantine(profileId, true));
 }
 
 export async function clearProfileQuarantine(profileId: string): Promise<void> {
@@ -42,4 +64,5 @@ export async function clearProfileQuarantine(profileId: string): Promise<void> {
   quarantinedIds!.delete(profileId);
   bonusScores.delete(profileId);
   await AsyncStorage.setItem(QUARANTINE_KEY, JSON.stringify([...quarantinedIds!]));
+  void import('../services/trustSafety').then((m) => m.setCloudQuarantine(profileId, false));
 }

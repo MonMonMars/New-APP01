@@ -17,6 +17,7 @@ import {
   regionalSocialAuthProviders,
   type RegionalSocialProvider,
 } from '../../config/regionalAuthProviders';
+import { isProductionBuild } from '../../utils/securityGuards';
 import { AnimatedPressable } from '../AnimatedPressable';
 
 type AuthWelcomePanelProps = {
@@ -84,20 +85,35 @@ export function AuthWelcomePanel({
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const [awaitingOAuthReturn, setAwaitingOAuthReturn] = useState(false);
   const [magicLinkResendAvailableAt, setMagicLinkResendAvailableAt] = useState(0);
+  const [phoneOtpResendAvailableAt, setPhoneOtpResendAvailableAt] = useState(0);
   const [resendTick, setResendTick] = useState(0);
 
   const magicLinkResendSecondsLeft = Math.max(
     0,
     Math.ceil((magicLinkResendAvailableAt - Date.now()) / 1000),
   );
+  const phoneOtpResendSecondsLeft = Math.max(
+    0,
+    Math.ceil((phoneOtpResendAvailableAt - Date.now()) / 1000),
+  );
+  const showDemoPhoneHint = !isSupabaseEnabled && !isProductionBuild();
 
   useEffect(() => {
-    if (!awaitingMagicLink || magicLinkResendAvailableAt <= Date.now()) {
+    const waitingOnCooldown =
+      (awaitingMagicLink && magicLinkResendAvailableAt > Date.now()) ||
+      (phoneSent && phoneOtpResendAvailableAt > Date.now());
+    if (!waitingOnCooldown) {
       return;
     }
     const timer = setInterval(() => setResendTick((n) => n + 1), 1000);
     return () => clearInterval(timer);
-  }, [awaitingMagicLink, magicLinkResendAvailableAt, resendTick]);
+  }, [
+    awaitingMagicLink,
+    magicLinkResendAvailableAt,
+    phoneOtpResendAvailableAt,
+    phoneSent,
+    resendTick,
+  ]);
 
   useEffect(() => {
     if (!awaitingOAuthReturn || !isSupabaseEnabled) {
@@ -226,7 +242,7 @@ export function AuthWelcomePanel({
     }
   }, [email, isSupabaseEnabled, onAuthenticated, setAwaitingMagicLink, signInWithEmailMagicLink, setEmailMessage, setAuthLoading]);
 
-  const handlePhoneSend = async () => {
+  const handlePhoneSend = useCallback(async () => {
     setAuthLoading(true);
     setEmailMessage(null);
     try {
@@ -234,11 +250,12 @@ export function AuthWelcomePanel({
       setEmailMessage(result.message);
       if (result.ok) {
         setPhoneSent(true);
+        setPhoneOtpResendAvailableAt(Date.now() + 60_000);
       }
     } finally {
       setAuthLoading(false);
     }
-  };
+  }, [phone, setAuthLoading, setEmailMessage, signInWithPhoneOtp]);
 
   const handlePhoneVerify = async () => {
     setAuthLoading(true);
@@ -441,7 +458,7 @@ export function AuthWelcomePanel({
 
       {tab === 'phone' ? (
         <View style={styles.emailBlock}>
-          {!isSupabaseEnabled ? (
+          {showDemoPhoneHint ? (
             <Text style={styles.demoPhoneHint}>{t('auth.phoneDemoHint')}</Text>
           ) : null}
           <TextInput
@@ -451,6 +468,7 @@ export function AuthWelcomePanel({
             value={phone}
             onChangeText={setPhone}
             keyboardType="phone-pad"
+            editable={!phoneSent}
           />
           {!phoneSent ? (
             <AnimatedPressable
@@ -463,6 +481,9 @@ export function AuthWelcomePanel({
             </AnimatedPressable>
           ) : (
             <>
+              {isSupabaseEnabled ? (
+                <Text style={styles.magicLinkWaiting}>{t('auth.phoneOtpWaiting')}</Text>
+              ) : null}
               <TextInput
                 style={styles.emailInput}
                 placeholder={t('auth.phoneCodePlaceholder')}
@@ -479,6 +500,28 @@ export function AuthWelcomePanel({
               >
                 <Ionicons name="checkmark-circle-outline" size={18} color={colors.text} />
                 <Text style={styles.emailButtonText}>{t('auth.verifyPhoneCode')}</Text>
+              </AnimatedPressable>
+              <AnimatedPressable
+                style={styles.emailButton}
+                disabled={authLoading || phone.trim().length < 8 || phoneOtpResendSecondsLeft > 0}
+                onPress={() => void handlePhoneSend()}
+              >
+                <Ionicons name="paper-plane-outline" size={18} color={colors.text} />
+                <Text style={styles.emailButtonText}>
+                  {phoneOtpResendSecondsLeft > 0
+                    ? t('auth.phoneOtpResendWait', { seconds: phoneOtpResendSecondsLeft })
+                    : t('auth.phoneOtpResend')}
+                </Text>
+              </AnimatedPressable>
+              <AnimatedPressable
+                onPress={() => {
+                  setPhoneSent(false);
+                  setPhoneCode('');
+                  setEmailMessage(null);
+                  setPhoneOtpResendAvailableAt(0);
+                }}
+              >
+                <Text style={styles.link}>{t('auth.phoneChangeNumber')}</Text>
               </AnimatedPressable>
             </>
           )}

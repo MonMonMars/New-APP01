@@ -16,9 +16,10 @@ Working plan for moving Spark from **demo-ready** to **production-ready** auth a
 
 ## Step 3 — Phone SMS auth
 
-- [ ] Supabase phone provider checklist (Twilio / MessageBird)
-- [ ] Remove demo `123456` hint in production builds when Supabase on
-- [ ] Rate-limit copy for OTP resend
+- [x] Supabase phone provider checklist in `BACKEND_SETUP.md` (Twilio / MessageBird)
+- [x] Hide demo `123456` hint in **production** builds (`isProductionBuild`)
+- [x] OTP resend 60s cooldown + client rate limit (5 / 15 min per number)
+- [ ] Live SMS test on Supabase + real number (manual QA)
 
 ## Step 4 — OAuth & Apple
 

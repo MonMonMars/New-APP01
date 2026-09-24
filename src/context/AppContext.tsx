@@ -3519,7 +3519,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIsAuthenticated(false);
     setUserId(null);
     setMfaLoginRequired(false);
-  }, []);
+    if (hydratedRef.current) {
+      await savePersistedState({
+        ...buildPersistedState(),
+        isAuthenticated: false,
+        userId: null,
+      });
+    }
+  }, [buildPersistedState]);
 
   const restartCloudSignIn = useCallback(() => {
     setHasOnboarded(false);

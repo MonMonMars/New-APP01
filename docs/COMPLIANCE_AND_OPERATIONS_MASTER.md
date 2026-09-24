@@ -112,7 +112,7 @@ Full markdown copies: [`docs/legal/`](./legal/README.md). In-app summaries: `src
 - [ ] Phone provider enabled + live SMS test (manual)
 - [ ] Google / Apple / WeChat / QQ providers enabled per market
 - [ ] Password recovery E2E on live Vercel + Supabase (manual)
-- [ ] Optional: sign-out on main Profile tab (roadmap item)
+- [x] Sign-out on main Profile tab (`AccountSessionSection` on Spark Profile)
 
 ---
 
@@ -144,7 +144,7 @@ Full markdown copies: [`docs/legal/`](./legal/README.md). In-app summaries: `src
 | Session timeout | Security settings | Re-lock after background |
 | 2FA (TOTP) | Security → Two-factor | Required for **web purchases** when enrolled |
 | Report profile / post | Discover, Pulse, chat | `submitSecurityReport()` → Supabase when configured |
-| Scam heuristics | Client-side | Quarantine + reports; server queue roadmap Step 7 |
+| Scam heuristics | Client-side + cloud | Quarantine + reports; admin moderation queue when Supabase + moderator JWT |
 
 ### 3.3 Server security migrations & Edge Functions
 
@@ -153,6 +153,7 @@ Run in order in Supabase SQL Editor:
 1. [`supabase-schema.sql`](./supabase-schema.sql)
 2. [`supabase-security-migration.sql`](./supabase-security-migration.sql) — `security_reports`, `security_audit_events`, Spark+ grant trigger
 3. [`supabase-payments-migration.sql`](./supabase-payments-migration.sql) — when enabling billing
+4. [`supabase-trust-safety-migration.sql`](./supabase-trust-safety-migration.sql) — moderation RLS + `scam_quarantine`
 
 | Edge Function | Purpose | Deploy |
 |---------------|---------|--------|
@@ -172,7 +173,8 @@ Run in order in Supabase SQL Editor:
 - [ ] WAF / DDoS on public API
 - [ ] Penetration test before public launch
 - [ ] Publish `security@` contact; vulnerability disclosure process
-- [ ] Step 7: moderation queue for `security_reports`; shared scam quarantine (not only AsyncStorage)
+- [x] Client: moderation queue for `security_reports` + shared scam quarantine sync (`AdminModerationQueueScreen`, `trustSafety.ts`)
+- [ ] Operator: run `supabase-trust-safety-migration.sql`; grant moderators `app_metadata.admin_role`
 
 ---
 

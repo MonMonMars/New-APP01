@@ -130,6 +130,8 @@ export const en = {
     phoneVerified: 'Phone verified — you\'re signed in.',
     googleFailed: 'Google sign-in failed.',
     googleContinue: 'Complete sign-in in the browser, then return here.',
+    appleUnavailable:
+      'Sign in with Apple is available on the iOS app. On web, use Google, email, or phone — or connect Supabase Apple for a future web flow.',
     oauthRefresh: 'I finished sign-in — refresh',
     oauthNotYet: 'Sign-in not detected yet. Finish in WeChat, QQ, or the browser, then tap refresh.',
     regionalMethodsCN: 'Sign-in: WeChat, QQ, phone, email, or password.',

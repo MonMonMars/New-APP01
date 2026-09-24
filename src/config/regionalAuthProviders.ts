@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 
 import type { AccountRegionContext } from '../types/accountRegion';
+import { isProductionBuild } from '../utils/securityGuards';
 
 /** OAuth / native sign-in buttons shown on the welcome screen (order matters). */
 export type RegionalSocialProvider = 'wechat' | 'qq' | 'apple' | 'google';
@@ -15,7 +16,9 @@ export function regionalSocialAuthProviders(region: AccountRegionContext): Regio
   }
 
   const providers: RegionalSocialProvider[] = [];
-  if (Platform.OS === 'ios' || Platform.OS === 'web') {
+  if (Platform.OS === 'ios') {
+    providers.push('apple');
+  } else if (Platform.OS === 'web' && !isProductionBuild()) {
     providers.push('apple');
   }
   providers.push('google');

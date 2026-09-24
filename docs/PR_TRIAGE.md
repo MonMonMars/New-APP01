@@ -1,6 +1,6 @@
 # Open draft PR triage vs `main`
 
-**Status (2026-09-24, latest):** **#193** CI map Tokyo + Browse smoke. **#191–#192** map/Pulse integration. **No open feature PRs.**
+**Status (2026-09-24, latest):** **#194** mini-window extended smoke fix · **#193** map in CI smoke · **#191–#192** map/Pulse. **No open feature PRs.**
 
 **Status (2026-09-22):** Drafts **#1–#139** (plus **#147–#154** earlier) reviewed against current **`main`**. All were **closed as superseded** — features already live via **#155**, **#157**, and follow-ups. **No blind merges** were performed (branches share only the initial commit with `main`).
 

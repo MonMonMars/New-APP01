@@ -53,6 +53,7 @@
     "demo:tunnel": "bash scripts/start-demo-tunnel.sh",
     "deploy:pages": "bash scripts/deploy-gh-pages.sh",
     "verify:demo": "node scripts/verify-demo-link.mjs",
+    "verify:remote-smoke": "node scripts/run-remote-ci-smoke.mjs",
     "verify:mini-window": "node scripts/check-mini-window.mjs http://127.0.0.1:8090",
     "verify:activity-preview": "node scripts/check-activity-preview.mjs http://127.0.0.1:8090",
     "verify:compact-mini": "node scripts/verify-compact-mini.mjs",

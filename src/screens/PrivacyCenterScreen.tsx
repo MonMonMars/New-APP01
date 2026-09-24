@@ -14,6 +14,7 @@ import { useAppLocale } from '../hooks/useAppLocale';
 import { useTranslation } from '../i18n';
 import { PrivacyPreferences } from '../types/privacy';
 import { radii, spacing } from '../theme';
+import { AccountSessionSection } from '../components/auth/AccountSessionSection';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 
 type PrivacyCenterScreenProps = {
@@ -116,6 +117,8 @@ export function PrivacyCenterScreen({ onClose }: PrivacyCenterScreenProps) {
             {t('privacy.bannerBody')}
           </Text>
         </View>
+
+        <AccountSessionSection onSessionChanged={onClose} />
 
         <Text style={[styles.section, { color: colors.textMuted }]}>{t('privacy.dataUse')}</Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>

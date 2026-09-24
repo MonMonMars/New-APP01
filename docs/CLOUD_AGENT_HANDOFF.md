@@ -12,6 +12,7 @@ Last updated: 2026-09-24 (after **#200**; full QA reference in `docs/QA_AND_VERI
 | **Cloud bootstrap** | `.cursor/environment.json` (`npm ci`, demo on port 8090) |
 | **Product spec** | `docs/SPARK_APP_DOCUMENT.md` |
 | **QA / smoke scripts** | `docs/QA_AND_VERIFICATION.md` |
+| **Auth / payments roadmap** | `docs/AUTH_AND_PAYMENTS_ROADMAP.md` |
 | **Live demo URL** | `PUBLIC_PREVIEW.md` (tunnel often offline — prefer Vercel; see `docs/DEMO_DEPLOY.md`) |
 | **PR triage history** | `docs/PR_TRIAGE.md` |
 | **Agent chat history** | **Not portable** — old Cursor agent threads cannot be merged. This doc replaces them. |

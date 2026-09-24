@@ -12,6 +12,7 @@ import { useDisguiseWorld } from '../hooks/useDisguiseWorld';
 import { useTranslation } from '../i18n';
 import { hashPin, setStoredPinHash, clearStoredPinHash } from '../utils/secureStorage';
 import { radii, spacing } from '../theme';
+import { AccountSessionSection } from '../components/auth/AccountSessionSection';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 
 type SecuritySettingsScreenProps = {
@@ -187,6 +188,8 @@ export function SecuritySettingsScreen({ onClose }: SecuritySettingsScreenProps)
             onValueChange={(next) => patch({ privacyShieldEnabled: next })}
           />
         </View>
+
+        <AccountSessionSection onSessionChanged={onClose} />
 
         <AnimatedPressable
           style={[styles.protocolLink, { borderColor: colors.border, backgroundColor: colors.surface }]}

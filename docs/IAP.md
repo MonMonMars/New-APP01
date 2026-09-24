@@ -26,6 +26,23 @@ npx expo prebuild
 
 5. Purchase and restore flow lives in `src/services/revenueCatBridge.native.ts` (configured on sign-in via `configureStorePurchases`). Web and builds without the SDK show guidance in `PurchasesModeNotice`.
 
+Optional: add `react-native-purchases` to your native project (`npx expo install react-native-purchases`). The repo loads it dynamically — web and demo builds do not require the package.
+
+## Web Stripe checkout
+
+1. Run [`supabase-payments-migration.sql`](./supabase-payments-migration.sql) in Supabase SQL Editor.
+2. Deploy Edge Functions (see [`BACKEND_SETUP.md`](./BACKEND_SETUP.md) § Payments): `purchase-approve`, `create-stripe-checkout`, `create-stripe-portal`, `stripe-webhook`.
+3. Set secrets: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and one env per price: `STRIPE_PRICE_spark_plus_monthly`, etc.
+4. In `.env` / Vercel:
+
+```bash
+EXPO_PUBLIC_WEB_PAYMENTS_ENABLED=true
+EXPO_PUBLIC_SUPABASE_URL=...
+EXPO_PUBLIC_SUPABASE_ANON_KEY=...
+```
+
+5. Purchases with MFA enrolled require authenticator codes in the confirm sheet (double code on web).
+
 ## Product catalog
 
 | In-app id | Store SKU (example) |

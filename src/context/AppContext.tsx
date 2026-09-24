@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { AppState, Linking, type AppStateStatus } from 'react-native';
+import { AppState, Linking, Platform, type AppStateStatus } from 'react-native';
 
 import { hydrateAdminProfileOverrides } from '../admin/adminProfileStore';
 import {
@@ -51,6 +51,7 @@ import {
   restorePurchases as runRestorePurchases,
 } from '../services/purchases';
 import { configureStorePurchases } from '../services/storePurchases';
+import { openStripeCustomerPortal } from '../services/stripePayments';
 import {
   uploadChatImageToCloud,
   uploadPhotosToCloud,
@@ -518,7 +519,7 @@ type AppContextValue = {
   ) => Promise<PurchaseResult>;
   syncPurchaseEntitlementsFromCloud: () => Promise<void>;
   restorePurchases: () => Promise<PurchaseRestoreResult>;
-  openManageSubscriptions: () => void;
+  openManageSubscriptions: () => Promise<void>;
   activateBoost: (options?: { purchased?: boolean }) => BoostActivationResult;
   addBonusBoosts: (count: number) => void;
   recordPulseReading: (
@@ -3248,10 +3249,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return result;
   }, [applyEntitlementGrant]);
 
-  const openManageSubscriptions = useCallback(() => {
+  const openManageSubscriptions = useCallback(async () => {
+    if (Platform.OS === 'web' && process.env.EXPO_PUBLIC_WEB_PAYMENTS_ENABLED === 'true') {
+      const portal = await openStripeCustomerPortal();
+      if (portal.ok && typeof window !== 'undefined') {
+        window.location.assign(portal.url);
+        return;
+      }
+    }
     const url = getManageSubscriptionsUrl();
     if (url) {
-      void Linking.openURL(url);
+      await Linking.openURL(url);
     }
   }, []);
 

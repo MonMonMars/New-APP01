@@ -6,6 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -33,6 +34,13 @@ type PurchaseConfirmSheetProps = {
   onConfirm: () => void | Promise<void>;
   onClose: () => void;
   onOpenSubscriptionTerms?: () => void;
+  showPurchaseStepUp?: boolean;
+  needsSecondVerificationCode?: boolean;
+  verificationCode?: string;
+  onVerificationCodeChange?: (value: string) => void;
+  verificationCodeConfirm?: string;
+  onVerificationCodeConfirmChange?: (value: string) => void;
+  confirmDisabled?: boolean;
 };
 
 export function PurchaseConfirmSheet({
@@ -48,6 +56,13 @@ export function PurchaseConfirmSheet({
   onConfirm,
   onClose,
   onOpenSubscriptionTerms,
+  showPurchaseStepUp = false,
+  needsSecondVerificationCode = false,
+  verificationCode = '',
+  onVerificationCodeChange,
+  verificationCodeConfirm = '',
+  onVerificationCodeConfirmChange,
+  confirmDisabled = false,
 }: PurchaseConfirmSheetProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
@@ -97,6 +112,48 @@ export function PurchaseConfirmSheet({
             <Text style={[styles.quantity, { color: accent }]}>{quantity}</Text>
           ) : null}
           <Text style={[styles.price, { color: colors.text }]}>{price}</Text>
+          {showPurchaseStepUp ? (
+            <View style={styles.stepUpBlock}>
+              <Text style={[styles.stepUpHint, { color: colors.textMuted }]}>
+                {needsSecondVerificationCode
+                  ? t('auth.paymentVerificationHintStep1')
+                  : t('auth.paymentVerificationHint')}
+              </Text>
+              <TextInput
+                value={verificationCode}
+                onChangeText={onVerificationCodeChange}
+                placeholder="000000"
+                placeholderTextColor={colors.textMuted}
+                keyboardType="number-pad"
+                maxLength={6}
+                autoComplete="one-time-code"
+                style={[
+                  styles.stepUpInput,
+                  { color: colors.text, borderColor: colors.border, backgroundColor: colors.background },
+                ]}
+              />
+              {needsSecondVerificationCode ? (
+                <>
+                  <Text style={[styles.stepUpHint, { color: colors.textMuted }]}>
+                    {t('auth.paymentVerificationHintStep2')}
+                  </Text>
+                  <TextInput
+                    value={verificationCodeConfirm}
+                    onChangeText={onVerificationCodeConfirmChange}
+                    placeholder="000000"
+                    placeholderTextColor={colors.textMuted}
+                    keyboardType="number-pad"
+                    maxLength={6}
+                    autoComplete="one-time-code"
+                    style={[
+                      styles.stepUpInput,
+                      { color: colors.text, borderColor: colors.border, backgroundColor: colors.background },
+                    ]}
+                  />
+                </>
+              ) : null}
+            </View>
+          ) : null}
           {errorMessage ? (
             <Text style={[styles.error, { color: '#ef4444' }]}>{errorMessage}</Text>
           ) : null}
@@ -116,7 +173,7 @@ export function PurchaseConfirmSheet({
               styles.confirmButton,
               { backgroundColor: colors.gradientEnd, opacity: confirmLoading ? 0.7 : 1 },
             ]}
-            disabled={confirmLoading}
+            disabled={confirmLoading || confirmDisabled}
             onPress={() => void onConfirm()}
           >
             {confirmLoading ? (
@@ -180,6 +237,27 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '800',
     marginBottom: spacing.md,
+  },
+  stepUpBlock: {
+    width: '100%',
+    marginBottom: spacing.md,
+    gap: spacing.xs,
+  },
+  stepUpHint: {
+    fontSize: 12,
+    lineHeight: 16,
+    textAlign: 'center',
+  },
+  stepUpInput: {
+    width: '100%',
+    borderWidth: 1,
+    borderRadius: radii.button,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    fontSize: 18,
+    fontWeight: '700',
+    letterSpacing: 4,
+    textAlign: 'center',
   },
   error: {
     fontSize: 13,

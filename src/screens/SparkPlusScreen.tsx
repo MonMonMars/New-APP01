@@ -21,6 +21,9 @@ import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { PurchaseConfirmSheet } from '../components/PurchaseConfirmSheet';
 import { PurchasesModeNotice } from '../components/PurchasesModeNotice';
+import { usePurchaseStepUp } from '../hooks/usePurchaseStepUp';
+import { isWebStripeCheckoutEnabled } from '../services/paymentRails';
+import { openStripeCustomerPortal } from '../services/stripePayments';
 
 type SparkPlusScreenProps = {
   onClose: () => void;
@@ -50,6 +53,7 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
     isSubscriptionActive,
     subscriptionPlan,
     subscriptionExpiresAt,
+    accountRegion,
   } = useApp();
   const { t, locale } = useTranslation();
   const legalUi = getLegalUiStrings(locale);
@@ -59,16 +63,32 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
   const [purchasing, setPurchasing] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
+  const {
+    needsStepUp,
+    needsSecondCode,
+    verificationCode,
+    setVerificationCode,
+    verificationCodeConfirm,
+    setVerificationCodeConfirm,
+    stepUpReady,
+    resetStepUp,
+  } = usePurchaseStepUp();
 
   const handleSubscribe = async () => {
     setPurchasing(true);
     setPurchaseError(null);
     const productId = sparkPlusProductForPlan(selectedPlan);
-    const result = await purchaseProduct(productId);
+    const result = await purchaseProduct(
+      productId,
+      verificationCode || undefined,
+      undefined,
+      verificationCodeConfirm || undefined,
+    );
     setPurchasing(false);
 
     if (result.ok) {
       setShowConfirm(false);
+      resetStepUp();
       Alert.alert(t('payments.purchaseSuccess'), t('payments.subscriptionActivated'));
       onClose();
       return;
@@ -93,12 +113,21 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
     }
   };
 
-  const handleManageSubscription = () => {
+  const handleManageSubscription = async () => {
+    if (Platform.OS === 'web' && isWebStripeCheckoutEnabled(accountRegion)) {
+      const portal = await openStripeCustomerPortal();
+      if (portal.ok && typeof window !== 'undefined') {
+        window.location.assign(portal.url);
+        return;
+      }
+      Alert.alert(t('sparkPlus.manageSubscription'), t('payments.manageOnWebStripeUnavailable'));
+      return;
+    }
     if (Platform.OS === 'web') {
       Alert.alert(t('sparkPlus.manageSubscription'), t('payments.manageOnWeb'));
       return;
     }
-    openManageSubscriptions();
+    await openManageSubscriptions();
   };
 
   return (
@@ -248,9 +277,17 @@ export function SparkPlusScreen({ onClose }: SparkPlusScreenProps) {
           if (!purchasing) {
             setShowConfirm(false);
             setPurchaseError(null);
+            resetStepUp();
           }
         }}
         onConfirm={handleSubscribe}
+        showPurchaseStepUp={needsStepUp}
+        needsSecondVerificationCode={needsSecondCode}
+        verificationCode={verificationCode}
+        onVerificationCodeChange={setVerificationCode}
+        verificationCodeConfirm={verificationCodeConfirm}
+        onVerificationCodeConfirmChange={setVerificationCodeConfirm}
+        confirmDisabled={!stepUpReady}
         onOpenSubscriptionTerms={() => navigation.navigate('LegalDocument', { documentId: 'subscription' })}
       />
     </View>

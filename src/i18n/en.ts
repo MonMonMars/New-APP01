@@ -1176,6 +1176,18 @@ export const en = {
     accountRegionValue: '{city} · account {code}',
     accountRegionHint:
       'Sign-in methods and billing currency follow this market. Change it in Profile → Account home market.',
+    accountSignIn: 'Account & sign-in',
+    accountStatusAnonymous: 'Not signed in — local demo data only on this device',
+    accountStatusGuest: 'Guest session — no cloud sync',
+    accountStatusLocal: 'Signed in locally — cloud backend not configured',
+    accountStatusCloud: 'Signed in — matches, chat, and purchases can sync when online',
+    signOutHint: 'End this session on this device',
+    switchAccount: 'Use another account',
+    switchAccountHint: 'Return to onboarding to sign in with email, phone, or social',
+    switchAccountTitle: 'Use another account?',
+    switchAccountBody:
+      'You will go back to onboarding to sign in again. Your profile and matches stay on this device until you delete the account.',
+    switchAccountConfirm: 'Continue',
     dataUse: 'Data use',
     analytics: 'Analytics & crash reports',
     analyticsHint: 'Help improve Spark with anonymised usage and stability data',

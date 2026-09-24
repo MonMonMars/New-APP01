@@ -40,6 +40,25 @@ function checkoutRedirectUrls(): { successUrl: string; cancelUrl: string } {
   };
 }
 
+export async function openStripeCustomerPortal(): Promise<
+  { ok: true; url: string } | { ok: false; error: string; code?: string }
+> {
+  let returnUrl: string | undefined;
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    returnUrl = `${window.location.origin}${window.location.pathname}`;
+  } else {
+    returnUrl = getMagicLinkRedirectTo();
+  }
+
+  const result = await invokePaymentFunction<{ url: string }>('create-stripe-portal', {
+    returnUrl,
+  });
+  if (!result.ok) {
+    return { ok: false, error: result.error, code: result.code };
+  }
+  return { ok: true, url: result.data.url };
+}
+
 export async function beginStripeCheckout(options: {
   productId: PurchaseProductId;
   approvalId: string;

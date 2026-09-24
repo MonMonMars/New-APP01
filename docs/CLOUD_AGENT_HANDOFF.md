@@ -43,7 +43,7 @@ Superseded drafts — see **`docs/PR_TRIAGE.md`**.
 ## Infrastructure
 
 1. **`main` carries the full Spark/Expo app** (SDK 57).
-2. **CI** — `npm run verify:ci` (typecheck, `validate:profiles`, `build:web:demo`). GitHub Actions then runs **`npm run verify:ci-smoke`** (5 Playwright scripts) against `dist` on `:8090`.
+2. **CI** — `npm run verify:ci` (typecheck, `validate:profiles`, `build:web:demo`). GitHub Actions then runs **`npm run verify:ci-smoke`** (6 Playwright scripts, incl. Pulse like swap) against `dist` on `:8090`.
 3. **Environment build** — https://cursor.com/dashboard/cloud-agents/environments/e/a3b86124-af8c-11f1-bf4b-42ffb4d10ea7
 
 ## Known CI gotcha

@@ -15,6 +15,7 @@ if (!url) {
 const steps = [
   'scripts/verify-demo-link.mjs',
   'scripts/check-pulse-link-routing.mjs',
+  'scripts/check-pulse-like-swap.mjs',
   'scripts/check-mini-window.mjs',
   'scripts/check-privacy-version-footer.mjs',
   'scripts/check-map-world-search.mjs',

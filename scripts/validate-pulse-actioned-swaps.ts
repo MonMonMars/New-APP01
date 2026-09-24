@@ -8,7 +8,10 @@ import {
   mergeSparkLikesWithPulsePostLikes,
 } from '../src/utils/filterActionedDisguiseFeed';
 import { profileIntroCaption } from '../src/utils/profileIntroCaption';
-import { clearPulseSlotDisplayProfiles } from '../src/utils/resolveDisguiseProfile';
+import {
+  clearPulseSlotDisplayProfiles,
+  setPulseSlotDisplayProfile,
+} from '../src/utils/resolveDisguiseProfile';
 
 function mockNews(reporterId: string, profileId: string): NewsPost {
   return {
@@ -188,6 +191,40 @@ function run(): void {
   assert.ok(
     swappedSocial.datingProfileId && swappedSocial.datingProfileId !== profileA,
     'pulse upvote on social post should swap author profile',
+  );
+
+  clearPulseSlotDisplayProfiles();
+  const pinned57 = '57';
+  const disguised57: DisguisedProfilePost = {
+    id: 'disguised-profile-57',
+    type: 'disguised_profile',
+    profileId: pinned57,
+    name: 'Test',
+    avatarUrl: `https://example.com/${pinned57}.png`,
+    variant: 'news',
+    overlayText: 'Pinned caption',
+    sourceLabel: 'Source',
+    summary: 'Summary',
+    timeAgo: '1m',
+    photos: [`https://example.com/${pinned57}.png`],
+  };
+  const seedLikedIncludingSwapTarget = new Set(['27']);
+  setPulseSlotDisplayProfile(disguised57.id, '27');
+  setPulseSlotDisplayProfile(disguised57.id, undefined);
+  const afterPulseUnlike = filterActionedDisguiseFeed(
+    [disguised57],
+    seedLikedIncludingSwapTarget,
+    new Set(),
+    new Set(),
+    'spark',
+    'everyone',
+    poolScope,
+  );
+  assert.equal(afterPulseUnlike[0].type, 'disguised_profile');
+  assert.equal(
+    afterPulseUnlike[0].profileId,
+    pinned57,
+    'pulse unlike should restore pinned profile even when swap target is in seed likedIds',
   );
 
   console.log('validate-pulse-actioned-swaps: ok');

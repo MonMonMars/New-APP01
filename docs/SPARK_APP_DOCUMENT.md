@@ -627,7 +627,7 @@ Prototype user: **Mon**, 28, designer bio, default Unsplash photo.
 | Gate | Command | Scope |
 |------|---------|--------|
 | CI build | `npm run verify:ci` | Typecheck, demo profile validators, i18n keys, `build:web:demo` + build id stamp |
-| CI smoke (GitHub Actions) | `npm run verify:ci-smoke` | 5 Playwright scripts: demo link, Pulse routing, mini-window, privacy footer, Tokyo map + Browse matches |
+| CI smoke (GitHub Actions) | `npm run verify:ci-smoke` | 6 Playwright scripts: demo link, Pulse routing, Pulse like swap, mini-window, privacy footer, Tokyo map + Browse matches |
 | Release QA | `npm run verify:extended` | Full Playwright suite (feed refresh, disguise UX, world picker, etc.) — see `docs/QA_AND_VERIFICATION.md` |
 | Post-deploy | `DEMO_URL=… npm run verify:remote-smoke` | Same 5 scripts against Vercel/Netlify |
 

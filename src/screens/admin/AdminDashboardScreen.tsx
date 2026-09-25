@@ -56,6 +56,14 @@ export function AdminDashboardScreen({ onClose, navigation }: Props) {
       visible: hasPermission('canRunBackendActions'),
     },
     {
+      id: 'moderation',
+      labelKey: 'admin.moderationTitle',
+      subtitleKey: 'admin.moderationMenuSub',
+      icon: 'flag-outline',
+      onPress: () => navigation.navigate('AdminModerationQueue'),
+      visible: hasPermission('canRunBackendActions'),
+    },
+    {
       id: 'accounts',
       labelKey: 'admin.accountsTitle',
       subtitleKey: 'admin.accountsMenuSub',

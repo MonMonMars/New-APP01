@@ -223,6 +223,8 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: '700',
+    textAlign: 'center',
+    flexShrink: 1,
   },
   iconButton: {
     alignItems: 'center',

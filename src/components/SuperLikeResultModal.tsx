@@ -10,6 +10,7 @@ import { Profile } from '../types/profile';
 import { AnimatedOverlay } from './motion/AnimatedOverlay';
 import { FadeSlideIn } from './motion/FadeSlideIn';
 import { AnimatedPressable } from './AnimatedPressable';
+import { matchFollowUpButtonStyles as btn } from './matchFollowUpButtonStyles';
 
 type SuperLikeResultModalProps = {
   visible: boolean;
@@ -81,14 +82,16 @@ export function SuperLikeResultModal({
         </FadeSlideIn>
 
         <FadeSlideIn replayKey={visible} index={3}>
-          <View style={styles.actions}>
+          <View style={btn.actions}>
             <AnimatedPressable style={styles.primaryButton} onPress={onChatNow} scaleTo={0.97}>
-              <Text style={[styles.primaryButtonText, { color: colors.heartRed }]}>
-                {isMatch ? t('discover.message') : t('discover.sendNote')}
+              <Text style={[btn.primaryButtonText, { color: colors.heartRed }]}>
+                {isMatch ? t('discover.chatNow') : t('discover.sendNote')}
               </Text>
             </AnimatedPressable>
-            <AnimatedPressable style={styles.secondaryButton} onPress={onTalkLater} scaleTo={0.97}>
-              <Text style={styles.secondaryButtonText}>{t('discover.keepSwiping')}</Text>
+            <AnimatedPressable style={btn.secondaryButton} onPress={onTalkLater} scaleTo={0.97}>
+              <Text style={btn.secondaryButtonText}>
+                {isMatch ? t('discover.continueScroll') : t('discover.keepSwiping')}
+              </Text>
             </AnimatedPressable>
           </View>
         </FadeSlideIn>
@@ -100,7 +103,8 @@ export function SuperLikeResultModal({
 const styles = StyleSheet.create({
   card: {
     width: '100%',
-    maxWidth: 360,
+    maxWidth: 400,
+    alignSelf: 'stretch',
     borderRadius: radii.card + 8,
     paddingTop: spacing.xl,
     paddingHorizontal: spacing.lg,
@@ -181,35 +185,8 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: 'rgba(255,255,255,0.75)',
   },
-  actions: {
-    width: '100%',
-    marginTop: spacing.md,
-  },
   primaryButton: {
-    width: '100%',
+    ...btn.primaryButton,
     backgroundColor: palette.text,
-    borderRadius: radii.button,
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  primaryButtonText: {
-    color: palette.heartRed,
-    fontSize: 17,
-    fontWeight: '800',
-  },
-  secondaryButton: {
-    marginTop: spacing.md,
-    width: '100%',
-    borderRadius: radii.button,
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.5)',
-  },
-  secondaryButtonText: {
-    color: palette.text,
-    fontSize: 16,
-    fontWeight: '700',
   },
 });

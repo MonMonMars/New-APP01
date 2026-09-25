@@ -199,7 +199,7 @@ export function DiscoveryPreferencesSheet({
           <StepperRow
             label={t('preferences.discoveryMaxAge')}
             value={preferences.maxAge}
-            min={preferences.minAge + 1}
+            min={preferences.minAge}
             max={60}
             step={1}
             onChange={(maxAge) => onChange({ ...preferences, maxAge })}

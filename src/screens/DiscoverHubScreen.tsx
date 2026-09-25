@@ -30,7 +30,7 @@ import { radii, spacing } from '../theme';
 import { ActionToast } from '../components/ActionToast';
 import { SearchMapView } from '../components/SearchMapView';
 import { AnimatedPressable } from '../components/AnimatedPressable';
-import { filterProfilesInRadius, relocateProfilesForMapSearch } from '../utils/geoMap';
+import { resolveMapAreaPeople } from '../utils/mapDiscoverPins';
 import { mapCenterForCity, zoomForRadius } from '../utils/searchMapTiles';
 
 type DiscoverHubScreenProps = {
@@ -89,18 +89,15 @@ export function DiscoverHubScreen({ onClose }: DiscoverHubScreenProps) {
       : mapCenterForCity(null);
   }, [preferences.mapSearchLat, preferences.mapSearchLng, preferences.passportCity, preferences.travelMode]);
 
-  const mapPreviewPeopleCount = useMemo(() => {
-    const localized = relocateProfilesForMapSearch(
-      mapDiscoverPool,
-      mapPreviewCenter,
-      preferences.maxDistanceMiles,
-    );
-    return filterProfilesInRadius(
-      localized,
-      mapPreviewCenter,
-      preferences.maxDistanceMiles,
-    ).length;
-  }, [mapDiscoverPool, mapPreviewCenter, preferences.maxDistanceMiles]);
+  const mapPreviewPeopleCount = useMemo(
+    () =>
+      resolveMapAreaPeople(
+        mapDiscoverPool,
+        mapPreviewCenter,
+        preferences.maxDistanceMiles,
+      ).length,
+    [mapDiscoverPool, mapPreviewCenter, preferences.maxDistanceMiles],
+  );
 
   const openMap = () => {
     navigation.navigate('MapDiscover');

@@ -25,7 +25,7 @@ import { formatSearchRadiusLocalized } from '../i18n/labels';
 import { type DiscoveryPreferences, resolveSparkSection } from '../types/preferences';
 import type { Profile } from '../types/profile';
 import { distanceFromCenter, type GeoPoint } from '../utils/geoMap';
-import { profilesForMapViewport } from '../utils/mapDiscoverPins';
+import { resolveMapAreaPeople } from '../utils/mapDiscoverPins';
 import { resolveUserLocation } from '../services/userLocation';
 import {
   listPinnedMapPlaces,
@@ -45,8 +45,6 @@ import { ProfileDetailSheet } from './ProfileDetailSheet';
 import { ReportReasonSheet, type ReportReason, getReportReasonLabel } from './ReportReasonSheet';
 import { RootStackParamList } from '../types/navigation';
 import { MAP_MAX_ZOOM, MAP_MIN_ZOOM, SearchMapView } from './SearchMapView';
-
-const MAP_PEOPLE_LIST_LIMIT = 48;
 
 function approxDistanceMiles(profile: Profile, center: GeoPoint, radiusCap: number): number {
   const raw = distanceFromCenter(profile, center);
@@ -181,12 +179,17 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   }, [hasActiveMapSearch, preferences.passportCity, preferences.travelMode]);
 
   const showSearchArea = centersDiffer(mapCenter, searchCenter);
-  /** Pins and counts follow the map viewport — not locked to GPS until you search. */
+  /** Counts follow the radius chip + discovery prefs (show me, age), not the map viewport. */
   const viewportCenter = mapCenter;
 
+  const peopleNameQuery = queryMode === 'people' ? searchQuery : '';
+
   const areaPins = useMemo(
-    () => profilesForMapViewport(mapDiscoverPool, viewportCenter, currentRadius),
-    [currentRadius, mapDiscoverPool, viewportCenter],
+    () =>
+      resolveMapAreaPeople(mapDiscoverPool, viewportCenter, currentRadius, {
+        nameQuery: peopleNameQuery,
+      }),
+    [currentRadius, mapDiscoverPool, peopleNameQuery, viewportCenter],
   );
 
   const mapPrivacyPins = useMemo(
@@ -210,8 +213,6 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     }
     return listPinnedMapPlaces(locale, 12);
   }, [locale, queryMode, searchQuery]);
-
-  const peopleListTruncated = areaPins.length > MAP_PEOPLE_LIST_LIMIT;
 
   const handleSearchThisArea = useCallback(() => {
     setSearchCenter(mapCenter);
@@ -285,14 +286,14 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
       centerLat: viewportCenter.lat,
       centerLng: viewportCenter.lng,
       radiusMiles: currentRadius,
-      nameQuery: searchQuery.trim() || undefined,
+      nameQuery: peopleNameQuery.trim() || undefined,
     });
   }, [
     currentRadius,
     mapCenter,
     navigation,
+    peopleNameQuery,
     searchMapAt,
-    searchQuery,
     showSearchArea,
     viewportCenter.lat,
     viewportCenter.lng,
@@ -655,14 +656,6 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
             {t('mapDiscover.searchThisArea')}
           </Text>
         </AnimatedPressable>
-        {queryMode === 'people' && peopleListTruncated ? (
-          <Text style={[styles.emptyHint, { color: chromeMuted, backgroundColor: chromeBg }]}>
-            {t('mapDiscover.listTruncated', {
-              shown: MAP_PEOPLE_LIST_LIMIT,
-              total: areaPins.length,
-            })}
-          </Text>
-        ) : null}
         <View style={[styles.segment, { backgroundColor: chromeBg }]}>
           {RADIUS_CHIPS.map((preset) => {
             const isActive = currentRadius === preset.value;

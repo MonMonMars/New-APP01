@@ -47,6 +47,8 @@ async function main() {
     checks.tab_enters_disguise =
       (await page.getByText('Leave Pulse?').count()) > 0 ||
       (await page.getByText(/Top stories|Cosmos/i).count()) > 0;
+    checks.leave_pulse_button =
+      (await page.getByRole('button', { name: /^Leave Pulse$/i }).count()) > 0;
 
     console.log(JSON.stringify({ ok: Object.values(checks).every(Boolean), checks }, null, 2));
     if (!Object.values(checks).every(Boolean)) process.exitCode = 1;

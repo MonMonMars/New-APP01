@@ -169,7 +169,6 @@ import { computeCompatibilityScore, pickDailyMostCompatible } from '../utils/com
 import { isDiscoverableDemoProfile, matchesShowMePreference } from '../utils/showMeFilter';
 import { bumpPulseFeedRefreshGeneration } from '../hooks/usePulseFeedRefresh';
 import { filterDiscoverProfiles } from '../utils/discoverProfileFilter';
-import { matchesPassportCity } from '../utils/passportFilter';
 import {
   requestNotificationPermission,
   scheduleMatchNotification,

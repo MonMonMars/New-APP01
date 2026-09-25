@@ -14,7 +14,8 @@ export const modalFill = {
         right: 0,
         bottom: 0,
         width: '100vw',
-        height: '100vh',
+        height: '100dvh',
+        minHeight: '100vh',
       }
     : null),
 } as ViewStyle;

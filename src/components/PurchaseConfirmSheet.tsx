@@ -1,11 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import {
   ActivityIndicator,
-  Dimensions,
   Modal,
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -19,6 +19,7 @@ import { useTranslation } from '../i18n';
 import { radii, spacing } from '../theme';
 import { modalFill } from '../theme/modalFill';
 import { AnimatedPressable } from './AnimatedPressable';
+import { purchaseConfirmSheetMaxHeight } from './purchaseSheetLayout';
 
 type PurchaseConfirmSheetProps = {
   visible: boolean;
@@ -50,6 +51,7 @@ export function PurchaseConfirmSheet({
   onOpenSubscriptionTerms,
 }: PurchaseConfirmSheetProps) {
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
   const { colors } = useTheme();
   const { locale } = useAppLocale();
   const { t } = useTranslation();
@@ -62,7 +64,10 @@ export function PurchaseConfirmSheet({
       ? legalUi.purchaseAutoRenew
       : `${demoNote} ${legalUi.purchaseAutoRenew}`;
 
-  const maxSheetHeight = Dimensions.get('window').height * 0.9 - insets.top;
+  const sheetMaxHeight = purchaseConfirmSheetMaxHeight(windowHeight, {
+    top: insets.top,
+    bottom: insets.bottom,
+  });
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -70,66 +75,79 @@ export function PurchaseConfirmSheet({
         style={[
           styles.backdrop,
           modalFill,
-          { paddingTop: insets.top + spacing.sm, paddingBottom: spacing.sm },
+          {
+            paddingTop: insets.top + spacing.sm,
+            paddingBottom: insets.bottom + spacing.sm,
+          },
         ]}
       >
-        <ScrollView
-          style={{ maxHeight: maxSheetHeight, width: '100%' }}
-          contentContainerStyle={styles.sheetScroll}
-          keyboardShouldPersistTaps="handled"
-          bounces={false}
+        <View
+          style={[
+            styles.sheetOuter,
+            {
+              backgroundColor: colors.surface,
+              maxHeight: sheetMaxHeight,
+            },
+          ]}
         >
+          <ScrollView
+            style={styles.sheetScroll}
+            contentContainerStyle={styles.sheetScrollContent}
+            keyboardShouldPersistTaps="handled"
+            bounces={false}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.sheetBody}>
+              <View style={[styles.iconWrap, { backgroundColor: `${accent}22` }]}>
+                <Ionicons name={icon} size={28} color={accent} />
+              </View>
+              <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
+              <Text style={[styles.description, { color: colors.textMuted }]}>{description}</Text>
+              {quantity ? (
+                <Text style={[styles.quantity, { color: accent }]}>{quantity}</Text>
+              ) : null}
+              <Text style={[styles.price, { color: colors.text }]}>{price}</Text>
+              {errorMessage ? (
+                <Text style={[styles.error, { color: '#ef4444' }]}>{errorMessage}</Text>
+              ) : null}
+              <Text style={[styles.legal, { color: colors.textMuted }]}>
+                {purchaseFooter}
+                {onOpenSubscriptionTerms ? (
+                  <>
+                    {' '}
+                    <Text style={[styles.legalLink, { color: accent }]} onPress={onOpenSubscriptionTerms}>
+                      {legalUi.subscriptionTermsLink}
+                    </Text>
+                  </>
+                ) : null}
+              </Text>
+            </View>
+          </ScrollView>
           <View
             style={[
-              styles.sheet,
-              {
-                backgroundColor: colors.surface,
-                paddingBottom: insets.bottom + spacing.md,
-              },
+              styles.sheetFooter,
+              { borderTopColor: colors.border, paddingBottom: insets.bottom + spacing.sm },
             ]}
           >
-          <View style={[styles.iconWrap, { backgroundColor: `${accent}22` }]}>
-            <Ionicons name={icon} size={28} color={accent} />
+            <AnimatedPressable
+              style={[
+                styles.confirmButton,
+                { backgroundColor: colors.gradientEnd, opacity: confirmLoading ? 0.7 : 1 },
+              ]}
+              disabled={confirmLoading}
+              onPress={() => void onConfirm()}
+            >
+              {confirmLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.confirmText}>{t('payments.confirmPurchase')}</Text>
+              )}
+            </AnimatedPressable>
+            <AnimatedPressable style={styles.cancelButton} onPress={onClose} disabled={confirmLoading}>
+              <Text style={[styles.cancelText, { color: colors.textMuted }]}>{t('common.cancel')}</Text>
+            </AnimatedPressable>
           </View>
-          <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
-          <Text style={[styles.description, { color: colors.textMuted }]}>{description}</Text>
-          {quantity ? (
-            <Text style={[styles.quantity, { color: accent }]}>{quantity}</Text>
-          ) : null}
-          <Text style={[styles.price, { color: colors.text }]}>{price}</Text>
-          {errorMessage ? (
-            <Text style={[styles.error, { color: '#ef4444' }]}>{errorMessage}</Text>
-          ) : null}
-          <Text style={[styles.legal, { color: colors.textMuted }]}>
-            {purchaseFooter}
-            {onOpenSubscriptionTerms ? (
-              <>
-                {' '}
-                <Text style={[styles.legalLink, { color: accent }]} onPress={onOpenSubscriptionTerms}>
-                  {legalUi.subscriptionTermsLink}
-                </Text>
-              </>
-            ) : null}
-          </Text>
-          <AnimatedPressable
-            style={[
-              styles.confirmButton,
-              { backgroundColor: colors.gradientEnd, opacity: confirmLoading ? 0.7 : 1 },
-            ]}
-            disabled={confirmLoading}
-            onPress={() => void onConfirm()}
-          >
-            {confirmLoading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.confirmText}>{t('payments.confirmPurchase')}</Text>
-            )}
-          </AnimatedPressable>
-          <AnimatedPressable style={styles.cancelButton} onPress={onClose} disabled={confirmLoading}>
-            <Text style={[styles.cancelText, { color: colors.textMuted }]}>{t('common.cancel')}</Text>
-          </AnimatedPressable>
-          </View>
-        </ScrollView>
+        </View>
       </View>
     </Modal>
   );
@@ -140,15 +158,31 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
+    alignItems: 'center',
   },
-  sheetScroll: {
-    flexGrow: 1,
-    justifyContent: 'flex-end',
-  },
-  sheet: {
+  sheetOuter: {
+    width: '100%',
+    maxWidth: 480,
     borderTopLeftRadius: radii.card + 8,
     borderTopRightRadius: radii.card + 8,
-    padding: spacing.lg,
+    overflow: 'hidden',
+  },
+  sheetScroll: {
+    flexGrow: 0,
+    flexShrink: 1,
+  },
+  sheetScrollContent: {
+    flexGrow: 0,
+  },
+  sheetBody: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    alignItems: 'center',
+  },
+  sheetFooter: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
     alignItems: 'center',
   },
   iconWrap: {
@@ -191,7 +225,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 16,
     textAlign: 'center',
-    marginBottom: spacing.lg,
+    marginBottom: spacing.sm,
   },
   legalLink: {
     fontWeight: '700',

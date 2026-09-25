@@ -19,17 +19,21 @@ export function discoverActionRailHeight(compact: boolean): number {
   return DISCOVER_TARGET_SIZE + spacing.md + spacing.lg;
 }
 
-/** Photo indicator row — leave room for top-right info control. */
-/** Keep photo dots out of the top-right info control. */
-export function discoverDotsRightInset(compact: boolean): number {
+export const DISCOVER_INFO_TOP = spacing.md;
+
+/** Tinder-style segment bars at the top of discover photos. */
+export const DISCOVER_PHOTO_SEGMENT_HEIGHT = 3;
+
+/** Same inset on left and right so the bar reads centered on the card (info button overlays). */
+export const DISCOVER_PHOTO_SEGMENT_HORIZONTAL_INSET = spacing.md;
+
+/** Vertically center segment bar in the top chrome row (aligned with the ⓘ control). */
+export function discoverPhotoSegmentBarTop(): number {
   return (
-    DISCOVER_INFO_BUTTON_SIZE +
-    discoverInfoButtonRightInset(compact) +
-    spacing.sm
+    DISCOVER_INFO_TOP +
+    (DISCOVER_INFO_BUTTON_SIZE - DISCOVER_PHOTO_SEGMENT_HEIGHT) / 2
   );
 }
-
-export const DISCOVER_INFO_TOP = spacing.md;
 
 /**
  * Distance from the card's right edge to the info button's right edge.

@@ -147,12 +147,15 @@ export function AuthWelcomePanel({
 
   const handleApple = async () => {
     setAuthLoading(true);
+    setEmailMessage(null);
     try {
       const result = await signInWithApple();
-      if (result.success) {
-        await signInWithAppleStub(result.identityToken, result.displayName);
-        onAuthenticated();
+      if (!result.success) {
+        setEmailMessage(t('auth.appleUnavailable'));
+        return;
       }
+      await signInWithAppleStub(result.identityToken, result.displayName);
+      onAuthenticated();
     } finally {
       setAuthLoading(false);
     }

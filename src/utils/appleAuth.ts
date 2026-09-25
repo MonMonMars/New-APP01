@@ -1,6 +1,8 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { Platform } from 'react-native';
 
+import { isProductionBuild } from './securityGuards';
+
 export type AppleAuthResult = {
   success: boolean;
   displayName?: string;
@@ -32,6 +34,10 @@ export async function signInWithApple(): Promise<AppleAuthResult> {
     }
   }
 
-  // Web / Android / simulator demo stub — marks auth complete without backend.
+  // Web / Android: preview-only demo stub. Production requires native iOS or future web Apple JS.
+  if (isProductionBuild()) {
+    return { success: false, isStub: false };
+  }
+
   return { success: true, isStub: true };
 }

@@ -1147,6 +1147,8 @@ export const en = {
     stayA11y: 'Stay in {name}',
     leaveUnlock: 'Leave {unlockLabel}',
     leaveA11y: 'Leave {unlockLabel}',
+    leaveDisguise: 'Leave {name}',
+    leaveDisguiseA11y: 'Leave {name}',
     leaveHint: 'Opens {unlockLabel}',
   },
   disguiseMiniDismiss: {

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
@@ -30,8 +30,10 @@ import {
   discoverProfileMetaBottom,
 } from '../constants/discoverLayout';
 import { colors as palette, radii, spacing } from '../theme';
+import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
+import { resolveSparkSection } from '../types/preferences';
 import { getEmberLocationLabel, getEmberRelationshipLabel, getInterestLabel } from '../i18n/labels';
 import {
   emberVisiblePhotoCount,
@@ -40,6 +42,10 @@ import {
 import { resolveDemoPortraitUri } from '../utils/resolveDemoPortraitUri';
 import { AnimatedPressable } from './AnimatedPressable';
 import { EmberStatusChips } from './EmberStatusChips';
+
+export type ProfileCardHandle = {
+  navigatePhoto: (side: 'left' | 'right') => void;
+};
 
 type ProfileCardProps = {
   profile: Profile;
@@ -54,27 +60,34 @@ type ProfileCardProps = {
   onOpenDetail?: () => void;
 };
 
-export function ProfileCard({
-  profile,
-  index,
-  activeIndex,
-  translateX,
-  translateY,
-  scale,
-  passDim,
-  compact = false,
-  onPhotoTap,
-  onOpenDetail,
-}: ProfileCardProps) {
+export const ProfileCard = forwardRef<ProfileCardHandle, ProfileCardProps>(function ProfileCard(
+  {
+    profile,
+    index,
+    activeIndex,
+    translateX,
+    translateY,
+    scale,
+    passDim,
+    compact = false,
+    onPhotoTap,
+    onOpenDetail,
+  },
+  ref,
+) {
   const { colors } = useTheme();
   const { t, locale } = useTranslation();
+  const { likedIds, preferences } = useApp();
   const isTop = index === activeIndex;
   const [photoIndex, setPhotoIndex] = useState(0);
   const photoCount = profile.photos.length;
   const emberStatus = getEmberRelationshipLabel(locale, profile.relationshipStatus);
-  const visiblePhotoCount = emberStatus
-    ? emberVisiblePhotoCount(photoCount, profile.emberDiscretion)
-    : photoCount;
+  const inEmberWorld = resolveSparkSection(preferences.sparkSection) === 'ember';
+  const sparkLiked = likedIds.has(profile.id);
+  const visiblePhotoCount =
+    emberStatus && inEmberWorld
+      ? emberVisiblePhotoCount(photoCount, profile.emberDiscretion, sparkLiked)
+      : photoCount;
   const spotlightPulse = useSharedValue(0);
 
   useEffect(() => {
@@ -89,7 +102,11 @@ export function ProfileCard({
 
   useEffect(() => {
     setPhotoIndex(0);
-  }, [profile.id]);
+  }, [profile.id, preferences.sparkSection]);
+
+  useEffect(() => {
+    setPhotoIndex((current) => Math.min(current, Math.max(0, visiblePhotoCount - 1)));
+  }, [visiblePhotoCount]);
 
   const cardStyle = useAnimatedStyle(() => {
     if (!translateX || !translateY || !isTop) {
@@ -134,18 +151,29 @@ export function ProfileCard({
     };
   });
 
-  const goToPhoto = (side: 'left' | 'right') => {
-    if (visiblePhotoCount <= 1) {
-      return;
-    }
-    setPhotoIndex((current) => {
-      if (side === 'left') {
-        return current === 0 ? visiblePhotoCount - 1 : current - 1;
+  const goToPhoto = useCallback(
+    (side: 'left' | 'right') => {
+      if (visiblePhotoCount <= 1) {
+        return;
       }
-      return current === visiblePhotoCount - 1 ? 0 : current + 1;
-    });
-    onPhotoTap?.(side);
-  };
+      setPhotoIndex((current) => {
+        if (side === 'left') {
+          return current === 0 ? visiblePhotoCount - 1 : current - 1;
+        }
+        return current === visiblePhotoCount - 1 ? 0 : current + 1;
+      });
+      onPhotoTap?.(side);
+    },
+    [onPhotoTap, visiblePhotoCount],
+  );
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      navigatePhoto: goToPhoto,
+    }),
+    [goToPhoto],
+  );
 
   return (
     <Animated.View style={[styles.card, cardStyle]}>
@@ -323,7 +351,7 @@ export function ProfileCard({
       </View>
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {

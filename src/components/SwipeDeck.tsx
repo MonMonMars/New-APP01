@@ -30,7 +30,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../i18n';
 import { AnimatedPressable } from './AnimatedPressable';
 import { DropTargets, ZoneLayout } from './DropTargets';
-import { ProfileCard } from './ProfileCard';
+import { ProfileCard, ProfileCardHandle } from './ProfileCard';
 import { SuperLikeCelebration } from './SuperLikeCelebration';
 import { SwipeBurstEffect, SwipeEffectKind, SwipeEffectOrigin } from './SwipeBurstEffect';
 
@@ -132,6 +132,7 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
     const { colors } = useTheme();
     const { t } = useTranslation();
     const containerRef = useRef<View>(null);
+    const topCardRef = useRef<ProfileCardHandle>(null);
     const [activeIndex, setActiveIndex] = useState(0);
     const [activeEffect, setActiveEffect] = useState<ActiveEffect | null>(null);
     const [effectKey, setEffectKey] = useState(0);
@@ -377,9 +378,25 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
 
     const zoneHitPadding = compact ? ZONE_HIT_PADDING_COMPACT : ZONE_HIT_PADDING;
 
+    const navigateTopPhoto = useCallback((side: 'left' | 'right') => {
+      topCardRef.current?.navigatePhoto(side);
+    }, []);
+
+    const photoNavGesture = Gesture.Pan()
+      .activeOffsetX([-8, 8])
+      .failOffsetY([-20, 20])
+      .onEnd((event) => {
+        'worklet';
+        if (event.translationX <= -32) {
+          runOnJS(navigateTopPhoto)('right');
+        } else if (event.translationX >= 32) {
+          runOnJS(navigateTopPhoto)('left');
+        }
+      });
+
     const panGesture = Gesture.Pan()
-      .activeOffsetX([-16, 16])
-      .activeOffsetY([-16, 16])
+      .activeOffsetX([-18, 18])
+      .activeOffsetY([-18, 18])
       .onUpdate((event) => {
         translateX.value = event.translationX;
         translateY.value = event.translationY;
@@ -476,6 +493,8 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
         runOnJS(resetPosition)();
       });
 
+    const deckGesture = Gesture.Exclusive(photoNavGesture, panGesture);
+
     if (activeIndex >= profiles.length) {
       return null;
     }
@@ -498,9 +517,10 @@ export const SwipeDeck = forwardRef<SwipeDeckHandle, SwipeDeckProps>(
               if (isTop) {
                 return (
                   <View key={profile.id} style={styles.cardSlot} pointerEvents="box-none">
-                    <GestureDetector gesture={panGesture}>
+                    <GestureDetector gesture={deckGesture}>
                       <Animated.View style={styles.cardSlot} collapsable={false}>
                         <ProfileCard
+                          ref={topCardRef}
                           profile={profile}
                           index={index}
                           activeIndex={activeIndex}

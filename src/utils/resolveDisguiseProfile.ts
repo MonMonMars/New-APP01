@@ -59,6 +59,11 @@ export function pulseSocialPostReporterId(postId: string): string {
   return `social-${postId}`;
 }
 
+/** Map PersonPreviewSheet reporter id back to Pulse feed post id (for likedPostIds). */
+export function pulseFeedPostIdFromReporter(reporterId: string): string {
+  return reporterId.startsWith('social-') ? reporterId.slice('social-'.length) : reporterId;
+}
+
 export function profileIdFromPostId(postId: string): string | undefined {
   if (postId === 'disguised-user') {
     return undefined;

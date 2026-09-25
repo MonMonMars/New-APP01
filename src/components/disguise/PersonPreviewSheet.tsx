@@ -16,6 +16,7 @@ import { usePulseContextSection } from '../../hooks/usePulseContextSection';
 import { webClass } from '../../motion/webMotion';
 import {
   explicitReporterProfileId,
+  pulseFeedPostIdFromReporter,
   resolveExplicitDatingProfile,
 } from '../../utils/resolveDisguiseProfile';
 import { MatchToast } from '../MatchToast';
@@ -59,6 +60,8 @@ export function PersonPreviewSheet({
     passedIds,
     canLike,
     preferences,
+    pulseSocial,
+    togglePulseLike,
   } = useApp();
 
   const [photoIndex, setPhotoIndex] = useState(initialPhotoIndex);
@@ -171,7 +174,11 @@ export function PersonPreviewSheet({
 
   const sparkActionsEnabled = linkedProfile !== null;
   const profileId = linkedProfile?.id;
-  const liked = profileId ? likedIds.has(profileId) : false;
+  const pulseFeedPostId = reporter ? pulseFeedPostIdFromReporter(reporter.id) : null;
+  const pulsePostLiked =
+    pulseFeedPostId !== null && pulseSocial.likedPostIds.includes(pulseFeedPostId);
+  const sparkLiked = profileId ? likedIds.has(profileId) : false;
+  const liked = sparkLiked || pulsePostLiked;
   const superLiked = profileId ? superLikedIds.has(profileId) : false;
   const passed = profileId ? passedIds.has(profileId) : false;
   const worldName = worldMeta.unlockLabel;
@@ -201,8 +208,11 @@ export function PersonPreviewSheet({
     if (!linkedProfile || isDismissing) {
       return;
     }
-    if (liked) {
+    if (sparkLiked) {
       unlikeProfile(linkedProfile.id);
+      if (pulsePostLiked && pulseFeedPostId) {
+        togglePulseLike(pulseFeedPostId);
+      }
       dismissWithStat('unlike');
       return;
     }
@@ -213,15 +223,21 @@ export function PersonPreviewSheet({
     if (match) {
       notifyMatch(linkedProfile.name);
     }
+    if (pulseFeedPostId && !pulsePostLiked) {
+      togglePulseLike(pulseFeedPostId);
+    }
     dismissWithStat('like');
   }, [
     dismissWithStat,
     guardLikeLimit,
     isDismissing,
     likeProfile,
-    liked,
     linkedProfile,
     notifyMatch,
+    pulseFeedPostId,
+    pulsePostLiked,
+    sparkLiked,
+    togglePulseLike,
     unlikeProfile,
   ]);
 

@@ -1152,8 +1152,8 @@ export const en = {
     leaveHint: 'Opens {unlockLabel}',
   },
   disguiseMiniDismiss: {
-    like: 'Saved',
-    unlike: 'Removed',
+    like: 'Liked',
+    unlike: 'Unliked',
     super: 'Super liked',
     pass: 'Passed',
   },

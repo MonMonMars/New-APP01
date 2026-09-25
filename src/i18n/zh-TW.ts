@@ -1142,8 +1142,8 @@ export const zhTw = {
     leaveHint: '開啟 {unlockLabel}',
   },
   disguiseMiniDismiss: {
-    like: '已儲存',
-    unlike: '已移除',
+    like: '已喜歡',
+    unlike: '已取消喜歡',
     super: '超級喜歡',
     pass: '已略過',
   },

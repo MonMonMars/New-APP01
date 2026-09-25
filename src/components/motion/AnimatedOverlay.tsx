@@ -114,7 +114,7 @@ export function AnimatedOverlay({
               <View
                 pointerEvents="auto"
                 style={variant === 'center' ? styles.centerChildren : styles.bottomChildren}
-                {...webClass('spark-sheet-in')}
+                {...(variant === 'center' ? webClass('spark-sheet-in') : webClass('spark-bottom-sheet-in'))}
               >
                 {children}
               </View>
@@ -178,6 +178,14 @@ const styles = StyleSheet.create({
     maxHeight: '100%',
     flexShrink: 1,
     justifyContent: 'flex-end',
+    ...(Platform.OS === 'web'
+      ? {
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }
+      : null),
   },
   centerChildren: {
     alignItems: 'center',

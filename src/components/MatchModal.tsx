@@ -1,5 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { Image, Modal, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors as palette, radii, spacing } from '../theme';
@@ -8,8 +8,10 @@ import { useTranslation } from '../i18n';
 import { formatOpeningMoveDisplay, getEmberRelationshipLabel } from '../i18n/labels';
 import { Profile } from '../types/profile';
 import { pickOpeningMove } from '../utils/openingMove';
-import { Button } from './Button';
+import { AnimatedPressable } from './AnimatedPressable';
 import { EmberStatusChips } from './EmberStatusChips';
+import { matchFollowUpButtonStyles as btn } from './matchFollowUpButtonStyles';
+import { AnimatedOverlay } from './motion/AnimatedOverlay';
 
 type MatchModalProps = {
   visible: boolean;
@@ -38,10 +40,10 @@ export function MatchModal({
   const emberStatus = getEmberRelationshipLabel(locale, profile.relationshipStatus);
 
   return (
-    <Modal visible={visible} animationType="fade">
+    <AnimatedOverlay visible={visible} onClose={onClose} variant="center">
       <LinearGradient
         colors={[colors.gradientStart, colors.gradientEnd, colors.heartRed]}
-        style={[styles.screen, { paddingTop: insets.top + spacing.xl }]}
+        style={[styles.card, { paddingBottom: Math.max(insets.bottom, spacing.lg) + spacing.md }]}
       >
         <Text style={styles.kicker}>{t('discover.itsA')}</Text>
         <Text style={styles.title}>{t('discover.match')}</Text>
@@ -69,44 +71,56 @@ export function MatchModal({
           <Text style={styles.openingMoveText}>{formatOpeningMoveDisplay(locale, openingMove)}</Text>
         </View>
 
-        <View style={[styles.actions, { paddingBottom: insets.bottom + spacing.lg }]}>
-          <Button label={t('discover.startTalking')} onPress={onMessage} />
-          <Button label={t('discover.keepLooking')} variant="ghost" onPress={onClose} />
+        <View style={btn.actions}>
+          <AnimatedPressable style={styles.primaryButton} onPress={onMessage} scaleTo={0.97}>
+            <Text style={[btn.primaryButtonText, { color: colors.gradientEnd }]}>
+              {t('discover.chatNow')}
+            </Text>
+          </AnimatedPressable>
+          <AnimatedPressable style={btn.secondaryButton} onPress={onClose} scaleTo={0.97}>
+            <Text style={btn.secondaryButtonText}>{t('discover.continueScroll')}</Text>
+          </AnimatedPressable>
         </View>
       </LinearGradient>
-    </Modal>
+    </AnimatedOverlay>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+  card: {
+    width: '100%',
+    maxWidth: 400,
+    alignSelf: 'stretch',
+    borderRadius: radii.card + 8,
+    paddingTop: spacing.xl,
     paddingHorizontal: spacing.lg,
+    alignItems: 'center',
+    overflow: 'hidden',
   },
   kicker: {
     color: palette.text,
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: '600',
     fontStyle: 'italic',
     opacity: 0.9,
   },
   title: {
     color: palette.text,
-    fontSize: 52,
+    fontSize: 40,
     fontWeight: '900',
     fontStyle: 'italic',
-    marginTop: -4,
+    marginTop: -2,
+    textAlign: 'center',
   },
   subtitle: {
     color: palette.text,
-    fontSize: 16,
-    marginTop: spacing.md,
+    fontSize: 15,
+    marginTop: spacing.sm,
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: 22,
     opacity: 0.95,
-    maxWidth: 300,
+    maxWidth: 320,
+    alignSelf: 'stretch',
   },
   emberChips: {
     marginTop: spacing.sm,
@@ -115,42 +129,42 @@ const styles = StyleSheet.create({
   avatarRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: spacing.xl,
+    marginVertical: spacing.lg,
   },
   avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 4,
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    borderWidth: 3,
     borderColor: palette.text,
   },
   avatarLeft: {
-    marginRight: -20,
+    marginRight: -16,
     zIndex: 1,
   },
   avatarRight: {
-    marginLeft: -20,
+    marginLeft: -16,
     zIndex: 1,
   },
   heartBadge: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: palette.text,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 2,
   },
   heart: {
-    color: palette.gradientEnd,
-    fontSize: 24,
+    fontSize: 22,
   },
   openingMoveCard: {
     width: '100%',
+    alignSelf: 'stretch',
     backgroundColor: 'rgba(255,255,255,0.15)',
     borderRadius: radii.card,
     padding: spacing.md,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.sm,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.25)',
   },
@@ -169,35 +183,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 22,
   },
-  actions: {
-    width: '100%',
-    marginTop: 'auto',
-  },
   primaryButton: {
-    width: '100%',
+    ...btn.primaryButton,
     backgroundColor: palette.text,
-    borderRadius: radii.button,
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-  },
-  primaryButtonText: {
-    color: palette.gradientEnd,
-    fontSize: 17,
-    fontWeight: '800',
-  },
-  secondaryButton: {
-    marginTop: spacing.md,
-    width: '100%',
-    borderRadius: radii.button,
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.6)',
-    backgroundColor: 'transparent',
-  },
-  secondaryButtonText: {
-    color: palette.text,
-    fontSize: 16,
-    fontWeight: '700',
   },
 });

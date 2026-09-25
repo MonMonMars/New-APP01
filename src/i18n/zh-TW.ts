@@ -316,6 +316,8 @@ export const zhTw = {
     match: '配對！',
     startTalking: '開始聊天',
     keepLooking: '繼續瀏覽',
+    chatNow: '立即聊天',
+    continueScroll: '繼續滑動',
     openingMove: 'Opening Move',
     superMatch: 'Super Match！',
     superLikeSent: 'Super Like 已送出！',

@@ -316,6 +316,8 @@ export const en = {
     match: 'Match!',
     startTalking: 'Start talking',
     keepLooking: 'Keep looking',
+    chatNow: 'Chat now',
+    continueScroll: 'Continue scrolling',
     openingMove: 'Opening Move',
     superMatch: 'Super Match!',
     superLikeSent: 'Super Like sent!',

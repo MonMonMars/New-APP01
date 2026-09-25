@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  LayoutChangeEvent,
   Modal,
   ScrollView,
   StyleSheet,
@@ -25,7 +26,7 @@ import { formatSearchRadiusLocalized } from '../i18n/labels';
 import { type DiscoveryPreferences, resolveSparkSection } from '../types/preferences';
 import type { Profile } from '../types/profile';
 import { distanceFromCenter, type GeoPoint } from '../utils/geoMap';
-import { profilesForMapViewport } from '../utils/mapDiscoverPins';
+import { resolveMapAreaPeople } from '../utils/mapDiscoverPins';
 import { resolveUserLocation } from '../services/userLocation';
 import {
   listPinnedMapPlaces,
@@ -45,8 +46,6 @@ import { ProfileDetailSheet } from './ProfileDetailSheet';
 import { ReportReasonSheet, type ReportReason, getReportReasonLabel } from './ReportReasonSheet';
 import { RootStackParamList } from '../types/navigation';
 import { MAP_MAX_ZOOM, MAP_MIN_ZOOM, SearchMapView } from './SearchMapView';
-
-const MAP_PEOPLE_LIST_LIMIT = 48;
 
 function approxDistanceMiles(profile: Profile, center: GeoPoint, radiusCap: number): number {
   const raw = distanceFromCenter(profile, center);
@@ -128,6 +127,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const [mapZoom, setMapZoom] = useState(() => zoomForRadius(currentRadius));
   const [queryMode, setQueryMode] = useState<'people' | 'places'>('people');
   const [searchQuery, setSearchQuery] = useState('');
+  const [mapLayout, setMapLayout] = useState({ width: 0, height: 0 });
   const [detailProfile, setDetailProfile] = useState<Profile | null>(null);
   const [deckToast, setDeckToast] = useState<string | null>(null);
   const [showLikeLimit, setShowLikeLimit] = useState(false);
@@ -184,9 +184,25 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   /** Pins and counts follow the map viewport — not locked to GPS until you search. */
   const viewportCenter = mapCenter;
 
+  const peopleNameQuery = queryMode === 'people' ? searchQuery : '';
+
   const areaPins = useMemo(
-    () => profilesForMapViewport(mapDiscoverPool, viewportCenter, currentRadius),
-    [currentRadius, mapDiscoverPool, viewportCenter],
+    () =>
+      resolveMapAreaPeople(mapDiscoverPool, viewportCenter, currentRadius, {
+        nameQuery: peopleNameQuery,
+        mapZoom,
+        mapWidth: mapLayout.width,
+        mapHeight: mapLayout.height,
+      }),
+    [
+      currentRadius,
+      mapDiscoverPool,
+      mapLayout.height,
+      mapLayout.width,
+      mapZoom,
+      peopleNameQuery,
+      viewportCenter,
+    ],
   );
 
   const mapPrivacyPins = useMemo(
@@ -210,8 +226,6 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     }
     return listPinnedMapPlaces(locale, 12);
   }, [locale, queryMode, searchQuery]);
-
-  const peopleListTruncated = areaPins.length > MAP_PEOPLE_LIST_LIMIT;
 
   const handleSearchThisArea = useCallback(() => {
     setSearchCenter(mapCenter);
@@ -285,14 +299,20 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
       centerLat: viewportCenter.lat,
       centerLng: viewportCenter.lng,
       radiusMiles: currentRadius,
-      nameQuery: searchQuery.trim() || undefined,
+      nameQuery: peopleNameQuery.trim() || undefined,
+      mapZoom,
+      mapWidth: mapLayout.width || undefined,
+      mapHeight: mapLayout.height || undefined,
     });
   }, [
     currentRadius,
     mapCenter,
+    mapLayout.height,
+    mapLayout.width,
+    mapZoom,
     navigation,
+    peopleNameQuery,
     searchMapAt,
-    searchQuery,
     showSearchArea,
     viewportCenter.lat,
     viewportCenter.lng,
@@ -404,29 +424,38 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     return t('mapDiscover.searchMilesA11y', { miles: key });
   };
 
+  const handleMapLayout = useCallback((event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    setMapLayout((prev) =>
+      prev.width === width && prev.height === height ? prev : { width, height },
+    );
+  }, []);
+
   return (
     <View style={styles.screen}>
-      <SearchMapView
-        center={mapCenter}
-        zoom={mapZoom}
-        radiusMiles={currentRadius}
-        radiusCenter={viewportCenter}
-        accentColor={accent}
-        pinColor={colors.heartRed}
-        pins={mapPrivacyPins}
-        showAvatarPins={false}
-        pinMarkerStyle="icon"
-        userLocation={null}
-        showYouMarker={false}
-        onCenterChange={setMapCenter}
-        onZoomChange={setMapZoom}
-        showLocateButton
-        onLocatePress={handleLocateGps}
-        locateLoading={locatingGps}
-        locateAccessibilityLabel={t('mapDiscover.locateGpsA11y')}
-        locateInsetBottom={Math.max(insets.bottom, spacing.md) + 168}
-        style={styles.fullMap}
-      />
+      <View style={styles.fullMap} onLayout={handleMapLayout}>
+        <SearchMapView
+          center={mapCenter}
+          zoom={mapZoom}
+          radiusMiles={currentRadius}
+          radiusCenter={viewportCenter}
+          accentColor={accent}
+          pinColor={colors.heartRed}
+          pins={mapPrivacyPins}
+          showAvatarPins={false}
+          pinMarkerStyle="icon"
+          userLocation={null}
+          showYouMarker={false}
+          onCenterChange={setMapCenter}
+          onZoomChange={setMapZoom}
+          showLocateButton
+          onLocatePress={handleLocateGps}
+          locateLoading={locatingGps}
+          locateAccessibilityLabel={t('mapDiscover.locateGpsA11y')}
+          locateInsetBottom={Math.max(insets.bottom, spacing.md) + 168}
+          style={StyleSheet.absoluteFill}
+        />
+      </View>
 
       <View
         pointerEvents="box-none"
@@ -655,14 +684,6 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
             {t('mapDiscover.searchThisArea')}
           </Text>
         </AnimatedPressable>
-        {queryMode === 'people' && peopleListTruncated ? (
-          <Text style={[styles.emptyHint, { color: chromeMuted, backgroundColor: chromeBg }]}>
-            {t('mapDiscover.listTruncated', {
-              shown: MAP_PEOPLE_LIST_LIMIT,
-              total: areaPins.length,
-            })}
-          </Text>
-        ) : null}
         <View style={[styles.segment, { backgroundColor: chromeBg }]}>
           {RADIUS_CHIPS.map((preset) => {
             const isActive = currentRadius === preset.value;

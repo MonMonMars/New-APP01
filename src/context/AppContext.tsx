@@ -16,7 +16,11 @@ import {
   filterProfilesForScamDiscover,
   shouldAutoQuarantineOnReport,
 } from '../trust/scamDetector';
-import { hydrateScamEnforcement, quarantineProfile } from '../trust/scamEnforcementStore';
+import {
+  hydrateScamEnforcement,
+  quarantineProfile,
+  syncSharedQuarantineFromCloud,
+} from '../trust/scamEnforcementStore';
 import { shouldBlockOutgoingLinkToPeer } from '../trust/scamMessageGuard';
 import { seedConversations } from '../data/conversations';
 import {
@@ -522,6 +526,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     superLikedIdsRef.current = superLikedIds;
   }, [superLikedIds]);
+
+  useEffect(() => {
+    if (!userId || !isSupabaseConfigured()) {
+      return;
+    }
+    void syncSharedQuarantineFromCloud().then(() => {
+      setScamEnforcementVersion((version) => version + 1);
+    });
+  }, [userId]);
 
   const applyCloudSnapshot = useCallback(
     (remote: Partial<SyncPayload>, superLikedFallback: string[]) => {

@@ -22,6 +22,7 @@ import { radii, spacing } from '../theme';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { PurchaseConfirmSheet } from '../components/PurchaseConfirmSheet';
 import { PurchasesModeNotice } from '../components/PurchasesModeNotice';
+import { usePurchaseStepUp } from '../hooks/usePurchaseStepUp';
 
 type ConsumablesShopScreenProps = {
   onClose: () => void;
@@ -47,6 +48,16 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
   const [pendingPack, setPendingPack] = useState<Pack | null>(null);
   const [purchasing, setPurchasing] = useState(false);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
+  const {
+    needsStepUp,
+    needsSecondCode,
+    verificationCode,
+    setVerificationCode,
+    verificationCodeConfirm,
+    setVerificationCodeConfirm,
+    stepUpReady,
+    resetStepUp,
+  } = usePurchaseStepUp();
 
   const packs: Pack[] = useMemo(
     () => [
@@ -94,7 +105,12 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
     setPurchasing(true);
     setPurchaseError(null);
     const productId = SHOP_PACK_TO_PRODUCT[pack.id] ?? pack.productId;
-    const result = await purchaseProduct(productId);
+    const result = await purchaseProduct(
+      productId,
+      verificationCode || undefined,
+      undefined,
+      verificationCodeConfirm || undefined,
+    );
     setPurchasing(false);
 
     if (!result.ok) {
@@ -105,6 +121,7 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
     }
 
     setPendingPack(null);
+    resetStepUp();
     const grant = result.grant;
     const product = PRODUCT_CATALOG[productId];
 
@@ -209,6 +226,7 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
           if (!purchasing) {
             setPendingPack(null);
             setPurchaseError(null);
+            resetStepUp();
           }
         }}
         onConfirm={() => {
@@ -216,6 +234,13 @@ export function ConsumablesShopScreen({ onClose }: ConsumablesShopScreenProps) {
             return handlePurchase(pendingPack);
           }
         }}
+        showPurchaseStepUp={needsStepUp}
+        needsSecondVerificationCode={needsSecondCode}
+        verificationCode={verificationCode}
+        onVerificationCodeChange={setVerificationCode}
+        verificationCodeConfirm={verificationCodeConfirm}
+        onVerificationCodeConfirmChange={setVerificationCodeConfirm}
+        confirmDisabled={!stepUpReady}
         onOpenSubscriptionTerms={() => navigation.navigate('LegalDocument', { documentId: 'subscription' })}
       />
     </View>

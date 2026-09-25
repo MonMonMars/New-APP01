@@ -11,6 +11,10 @@ const CSS = `
   from { opacity: 0; transform: translate3d(0, 20px, 0) scale(0.94); }
   to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
+@keyframes spark-bottom-sheet-in {
+  from { opacity: 0; transform: translate3d(0, 28px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
 @keyframes spark-veil {
   0% { opacity: 0; }
   35% { opacity: 1; }
@@ -55,6 +59,10 @@ const CSS = `
 }
 .spark-sheet-in {
   animation: spark-sheet-in 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.spark-bottom-sheet-in {
+  animation: spark-bottom-sheet-in 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: bottom center;
 }
 .spark-veil {
   animation: spark-veil 420ms ease both;

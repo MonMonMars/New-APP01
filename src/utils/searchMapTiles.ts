@@ -2,16 +2,38 @@ import { PixelRatio, Platform } from 'react-native';
 
 import type { GeoPoint } from './geoMap';
 import {
+  latLngToPixel,
+  latToTile,
+  lonToTile,
+  milesToPixels,
+  metersPerPixel,
+  moveMapCenter,
+  TILE_PX,
+  tileToLat,
+  tileToLon,
+} from './mapGeoPixels';
+import {
   CITY_COORDS,
   DEFAULT_MAP_CENTER,
   mapCenterForCity,
   zoomForRadius,
 } from './mapConstants';
 
-export { CITY_COORDS, DEFAULT_MAP_CENTER, mapCenterForCity, zoomForRadius };
-
-/** Logical tile size on screen (Slippy Map 256 world units). */
-export const TILE_PX = 256;
+export {
+  CITY_COORDS,
+  DEFAULT_MAP_CENTER,
+  latLngToPixel,
+  latToTile,
+  lonToTile,
+  mapCenterForCity,
+  milesToPixels,
+  metersPerPixel,
+  moveMapCenter,
+  TILE_PX,
+  tileToLat,
+  tileToLon,
+  zoomForRadius,
+};
 
 /** Max zoom for the active raster basemap (overzoom uses +1 fetch below this cap). */
 export const MAP_TILE_MAX_ZOOM = 19;
@@ -73,60 +95,6 @@ export type MapTile = {
   size: number;
 };
 
-export function lonToTile(lon: number, zoom: number): number {
-  return ((lon + 180) / 360) * 2 ** zoom;
-}
-
-export function latToTile(lat: number, zoom: number): number {
-  const latRad = (lat * Math.PI) / 180;
-  return ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * 2 ** zoom;
-}
-
-export function tileToLon(x: number, zoom: number): number {
-  return (x / 2 ** zoom) * 360 - 180;
-}
-
-export function tileToLat(y: number, zoom: number): number {
-  const n = Math.PI - (2 * Math.PI * y) / 2 ** zoom;
-  return (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
-}
-
-export function moveMapCenter(center: GeoPoint, dx: number, dy: number, zoom: number): GeoPoint {
-  const cx = lonToTile(center.lng, zoom);
-  const cy = latToTile(center.lat, zoom);
-  return {
-    lat: tileToLat(cy - dy / TILE_PX, zoom),
-    lng: tileToLon(cx - dx / TILE_PX, zoom),
-  };
-}
-
-export function latLngToPixel(
-  point: GeoPoint,
-  center: GeoPoint,
-  zoom: number,
-  mapWidth: number,
-  mapHeight: number,
-): { left: number; top: number } {
-  const cx = lonToTile(center.lng, zoom);
-  const cy = latToTile(center.lat, zoom);
-  const px = lonToTile(point.lng, zoom);
-  const py = latToTile(point.lat, zoom);
-  return {
-    left: (px - cx) * TILE_PX + mapWidth / 2,
-    top: (py - cy) * TILE_PX + mapHeight / 2,
-  };
-}
-
-/** Web Mercator meters per pixel at latitude. */
-export function metersPerPixel(lat: number, zoom: number): number {
-  return (156543.03392 * Math.cos((lat * Math.PI) / 180)) / 2 ** zoom;
-}
-
-export function milesToPixels(miles: number, lat: number, zoom: number): number {
-  const meters = miles * 1609.34;
-  return meters / metersPerPixel(lat, zoom);
-}
-
 export function buildMapTiles(
   displayZoom: number,
   width: number,
@@ -186,15 +154,19 @@ export function layoutMapPins(
   zoom: number,
   mapWidth: number,
   mapHeight: number,
-  maxPins = 48,
+  maxPins = 160,
 ): MapPin[] {
   if (mapWidth <= 0 || mapHeight <= 0) {
     return [];
   }
 
-  return profiles.slice(0, maxPins).flatMap((profile) => {
+  const pins: MapPin[] = [];
+  for (const profile of profiles) {
+    if (pins.length >= maxPins) {
+      break;
+    }
     if (typeof profile.latitude !== 'number' || typeof profile.longitude !== 'number') {
-      return [];
+      continue;
     }
 
     const pixel = latLngToPixel(
@@ -210,16 +182,15 @@ export function layoutMapPins(
       pixel.left > mapWidth + 48 ||
       pixel.top > mapHeight + 48
     ) {
-      return [];
+      continue;
     }
-    return [
-      {
-        id: profile.id,
-        left: pixel.left,
-        top: pixel.top,
-        photoUrl: profile.photos?.[0],
-        name: profile.name,
-      },
-    ];
-  });
+    pins.push({
+      id: profile.id,
+      left: pixel.left,
+      top: pixel.top,
+      photoUrl: profile.photos?.[0],
+      name: profile.name,
+    });
+  }
+  return pins;
 }

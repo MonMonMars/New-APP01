@@ -20,7 +20,7 @@ import { RootStackParamList } from '../types/navigation';
 import { Profile } from '../types/profile';
 import { radii, spacing } from '../theme';
 import { distanceFromCenter, type GeoPoint } from '../utils/geoMap';
-import { profilesForMapViewport } from '../utils/mapDiscoverPins';
+import { resolveMapAreaPeople } from '../utils/mapDiscoverPins';
 import { resolveDemoPortraitUri } from '../utils/resolveDemoPortraitUri';
 import { dailyLikeLimitForGender } from '../utils/genderAccountPerks';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -73,15 +73,15 @@ export function MapAreaMatchesScreen({ onClose }: MapAreaMatchesScreenProps) {
     [route.params.centerLat, route.params.centerLng],
   );
   const radiusMiles = route.params.radiusMiles;
-  const nameQuery = route.params.nameQuery?.trim().toLowerCase() ?? '';
+  const nameQuery = route.params.nameQuery?.trim() ?? '';
 
-  const areaProfiles = useMemo(() => {
-    const inViewport = profilesForMapViewport(mapDiscoverPool, center, radiusMiles);
-    if (!nameQuery) {
-      return inViewport;
-    }
-    return inViewport.filter((profile) => profile.name.toLowerCase().includes(nameQuery));
-  }, [center, mapDiscoverPool, nameQuery, radiusMiles]);
+  const areaProfiles = useMemo(
+    () =>
+      resolveMapAreaPeople(mapDiscoverPool, center, radiusMiles, {
+        nameQuery,
+      }),
+    [center, mapDiscoverPool, nameQuery, radiusMiles],
+  );
 
   const [detailProfile, setDetailProfile] = useState<Profile | null>(null);
   const [showLikeLimit, setShowLikeLimit] = useState(false);

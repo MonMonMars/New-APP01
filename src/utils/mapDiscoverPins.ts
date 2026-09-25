@@ -1,22 +1,34 @@
+import type { UserProfile } from '../types/profile';
 import type { Profile } from '../types/profile';
+import type { DiscoveryPreferences } from '../types/preferences';
+import { filterDiscoverProfiles } from './discoverProfileFilter';
 import {
   filterProfilesInRadius,
   relocateProfilesForMapSearch,
   sortProfilesByDistance,
   type GeoPoint,
 } from './geoMap';
-import { latLngToPixel } from './mapGeoPixels';
+
+export type MapDiscoverySuitability = {
+  preferences: DiscoveryPreferences;
+  user: UserProfile;
+  isSparkPlus: boolean;
+  excludedIds: Set<string>;
+  locationSharing?: boolean;
+};
 
 export type MapAreaPeopleOptions = {
   nameQuery?: string;
-  mapZoom?: number;
-  mapWidth?: number;
-  mapHeight?: number;
+  /**
+   * Re-apply discovery prefs (show me, age, filters, section) before radius.
+   * Use with the section catalog pool, not an already-filtered pool.
+   */
+  suitability?: MapDiscoverySuitability;
 };
 
 /**
- * People for the map area — same scatter as `searchMapAt` / discover deck,
- * optionally narrowed to the on-screen map bounds and a name query.
+ * Suitable candidates within the selected radius chip (not the map viewport).
+ * Same scatter as `searchMapAt` / discover deck, optionally narrowed by name.
  */
 export function profilesForMapViewport(
   pool: Profile[],
@@ -38,57 +50,28 @@ export function filterMapPeopleByName(profiles: Profile[], query: string): Profi
   return profiles.filter((profile) => profile.name.toLowerCase().includes(normalized));
 }
 
-/** Keep profiles whose scatter pin falls inside the current map viewport. */
-export function filterProfilesInMapBounds(
-  profiles: Profile[],
-  center: GeoPoint,
-  zoom: number,
-  mapWidth: number,
-  mapHeight: number,
-  marginPx = 48,
-): Profile[] {
-  if (mapWidth <= 0 || mapHeight <= 0) {
-    return profiles;
-  }
-
-  return profiles.filter((profile) => {
-    if (typeof profile.latitude !== 'number' || typeof profile.longitude !== 'number') {
-      return false;
-    }
-    const pixel = latLngToPixel(
-      { lat: profile.latitude, lng: profile.longitude },
-      center,
-      zoom,
-      mapWidth,
-      mapHeight,
-    );
-    return (
-      pixel.left >= -marginPx &&
-      pixel.top >= -marginPx &&
-      pixel.left <= mapWidth + marginPx &&
-      pixel.top <= mapHeight + marginPx
-    );
-  });
-}
-
 export function resolveMapAreaPeople(
   pool: Profile[],
   center: GeoPoint,
   radiusMiles: number,
   options: MapAreaPeopleOptions = {},
 ): Profile[] {
-  let list = profilesForMapViewport(pool, center, radiusMiles);
-  const { nameQuery, mapZoom, mapWidth, mapHeight } = options;
+  const { nameQuery, suitability } = options;
 
-  if (
-    mapZoom != null &&
-    mapWidth != null &&
-    mapHeight != null &&
-    mapWidth > 0 &&
-    mapHeight > 0
-  ) {
-    list = filterProfilesInMapBounds(list, center, mapZoom, mapWidth, mapHeight);
+  let candidates = pool;
+  if (suitability) {
+    candidates = filterDiscoverProfiles(
+      pool,
+      suitability.preferences,
+      suitability.excludedIds,
+      suitability.user,
+      suitability.isSparkPlus,
+      suitability.locationSharing ?? true,
+      { forMapSearch: true },
+    );
   }
+
+  let list = profilesForMapViewport(candidates, center, radiusMiles);
 
   if (nameQuery?.trim()) {
     list = filterMapPeopleByName(list, nameQuery);

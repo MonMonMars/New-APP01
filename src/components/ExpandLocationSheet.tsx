@@ -5,7 +5,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  LayoutChangeEvent,
   Modal,
   ScrollView,
   StyleSheet,
@@ -127,7 +126,6 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   const [mapZoom, setMapZoom] = useState(() => zoomForRadius(currentRadius));
   const [queryMode, setQueryMode] = useState<'people' | 'places'>('people');
   const [searchQuery, setSearchQuery] = useState('');
-  const [mapLayout, setMapLayout] = useState({ width: 0, height: 0 });
   const [detailProfile, setDetailProfile] = useState<Profile | null>(null);
   const [deckToast, setDeckToast] = useState<string | null>(null);
   const [showLikeLimit, setShowLikeLimit] = useState(false);
@@ -181,7 +179,7 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
   }, [hasActiveMapSearch, preferences.passportCity, preferences.travelMode]);
 
   const showSearchArea = centersDiffer(mapCenter, searchCenter);
-  /** Pins and counts follow the map viewport — not locked to GPS until you search. */
+  /** Counts follow the radius chip + discovery prefs (show me, age), not the map viewport. */
   const viewportCenter = mapCenter;
 
   const peopleNameQuery = queryMode === 'people' ? searchQuery : '';
@@ -190,19 +188,8 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     () =>
       resolveMapAreaPeople(mapDiscoverPool, viewportCenter, currentRadius, {
         nameQuery: peopleNameQuery,
-        mapZoom,
-        mapWidth: mapLayout.width,
-        mapHeight: mapLayout.height,
       }),
-    [
-      currentRadius,
-      mapDiscoverPool,
-      mapLayout.height,
-      mapLayout.width,
-      mapZoom,
-      peopleNameQuery,
-      viewportCenter,
-    ],
+    [currentRadius, mapDiscoverPool, peopleNameQuery, viewportCenter],
   );
 
   const mapPrivacyPins = useMemo(
@@ -300,16 +287,10 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
       centerLng: viewportCenter.lng,
       radiusMiles: currentRadius,
       nameQuery: peopleNameQuery.trim() || undefined,
-      mapZoom,
-      mapWidth: mapLayout.width || undefined,
-      mapHeight: mapLayout.height || undefined,
     });
   }, [
     currentRadius,
     mapCenter,
-    mapLayout.height,
-    mapLayout.width,
-    mapZoom,
     navigation,
     peopleNameQuery,
     searchMapAt,
@@ -424,38 +405,29 @@ export function ExpandSearchMap({ onClose }: ExpandSearchMapProps) {
     return t('mapDiscover.searchMilesA11y', { miles: key });
   };
 
-  const handleMapLayout = useCallback((event: LayoutChangeEvent) => {
-    const { width, height } = event.nativeEvent.layout;
-    setMapLayout((prev) =>
-      prev.width === width && prev.height === height ? prev : { width, height },
-    );
-  }, []);
-
   return (
     <View style={styles.screen}>
-      <View style={styles.fullMap} onLayout={handleMapLayout}>
-        <SearchMapView
-          center={mapCenter}
-          zoom={mapZoom}
-          radiusMiles={currentRadius}
-          radiusCenter={viewportCenter}
-          accentColor={accent}
-          pinColor={colors.heartRed}
-          pins={mapPrivacyPins}
-          showAvatarPins={false}
-          pinMarkerStyle="icon"
-          userLocation={null}
-          showYouMarker={false}
-          onCenterChange={setMapCenter}
-          onZoomChange={setMapZoom}
-          showLocateButton
-          onLocatePress={handleLocateGps}
-          locateLoading={locatingGps}
-          locateAccessibilityLabel={t('mapDiscover.locateGpsA11y')}
-          locateInsetBottom={Math.max(insets.bottom, spacing.md) + 168}
-          style={StyleSheet.absoluteFill}
-        />
-      </View>
+      <SearchMapView
+        center={mapCenter}
+        zoom={mapZoom}
+        radiusMiles={currentRadius}
+        radiusCenter={viewportCenter}
+        accentColor={accent}
+        pinColor={colors.heartRed}
+        pins={mapPrivacyPins}
+        showAvatarPins={false}
+        pinMarkerStyle="icon"
+        userLocation={null}
+        showYouMarker={false}
+        onCenterChange={setMapCenter}
+        onZoomChange={setMapZoom}
+        showLocateButton
+        onLocatePress={handleLocateGps}
+        locateLoading={locatingGps}
+        locateAccessibilityLabel={t('mapDiscover.locateGpsA11y')}
+        locateInsetBottom={Math.max(insets.bottom, spacing.md) + 168}
+        style={styles.fullMap}
+      />
 
       <View
         pointerEvents="box-none"

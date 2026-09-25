@@ -79,19 +79,8 @@ export function MapAreaMatchesScreen({ onClose }: MapAreaMatchesScreenProps) {
     () =>
       resolveMapAreaPeople(mapDiscoverPool, center, radiusMiles, {
         nameQuery,
-        mapZoom: route.params.mapZoom,
-        mapWidth: route.params.mapWidth,
-        mapHeight: route.params.mapHeight,
       }),
-    [
-      center,
-      mapDiscoverPool,
-      nameQuery,
-      radiusMiles,
-      route.params.mapHeight,
-      route.params.mapWidth,
-      route.params.mapZoom,
-    ],
+    [center, mapDiscoverPool, nameQuery, radiusMiles],
   );
 
   const [detailProfile, setDetailProfile] = useState<Profile | null>(null);

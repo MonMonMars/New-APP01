@@ -23,9 +23,6 @@ export type RootStackParamList = {
     centerLng: number;
     radiusMiles: number;
     nameQuery?: string;
-    mapZoom?: number;
-    mapWidth?: number;
-    mapHeight?: number;
   };
   Explore: undefined;
   DiscoverHub: undefined;

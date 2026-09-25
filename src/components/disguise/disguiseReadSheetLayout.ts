@@ -2,8 +2,11 @@ import { StyleSheet } from 'react-native';
 
 import { radii, spacing } from '../../theme';
 
-/** Almost full-screen read panels for news, tarot, and sponsored landing content. */
-export const DISGUISE_READ_SHEET_RATIO = 0.88;
+/** Almost full-screen read panels for news and sponsored landing content. */
+export const DISGUISE_READ_SHEET_RATIO = 0.84;
+
+/** Keep the sheet top below the status bar with a visible strip of backdrop. */
+export const DISGUISE_READ_SHEET_MIN_TOP_CLEARANCE = 40;
 
 export type DisguiseReadSheetInsets = {
   top: number;
@@ -15,11 +18,11 @@ export function disguiseReadSheetHeight(
   windowHeight: number,
   insets: DisguiseReadSheetInsets = { top: 0, bottom: 0 },
 ): number {
-  const topGap = insets.top + spacing.sm;
-  const bottomGap = insets.bottom + spacing.sm;
-  const available = windowHeight - topGap - bottomGap;
+  const minTopEdge = insets.top + DISGUISE_READ_SHEET_MIN_TOP_CLEARANCE;
+  const minBottomEdge = insets.bottom + spacing.md;
+  const maxHeight = windowHeight - minTopEdge - minBottomEdge;
   const ratioHeight = Math.round(windowHeight * DISGUISE_READ_SHEET_RATIO);
-  const capped = Math.min(ratioHeight, available);
+  const capped = Math.min(ratioHeight, maxHeight);
   return Math.max(280, capped);
 }
 

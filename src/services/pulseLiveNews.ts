@@ -9,6 +9,7 @@ import { translate } from '../i18n';
 import { disguiseDisplayName } from '../utils/disguiseProfileFeed';
 import { profileIntroCaption } from '../utils/profileIntroCaption';
 import { extractRssItemImage, resolveNewsHeroImage } from '../utils/pulseNewsHeroImage';
+import { rotatePulseList } from '../utils/refreshPulseFeed';
 
 const CACHE_KEY = '@pulse/live-news/v2';
 const CACHE_TTL_MS = 45 * 60 * 1000;
@@ -331,12 +332,27 @@ export async function hydratePulseLiveNewsFromDisk(): Promise<void> {
   }
 }
 
+function finalizeLiveNewsPosts(
+  posts: NewsPost[],
+  locale: AppLocale | null | undefined,
+  rotateSeed?: number,
+): NewsPost[] {
+  let next = posts;
+  if (rotateSeed != null && rotateSeed > 0 && next.length > 1) {
+    next = rotatePulseList(next, rotateSeed);
+  }
+  return applyLiveNewsTimestamps(next, locale);
+}
+
 export async function refreshPulseLiveNews(options?: {
   force?: boolean;
   locale?: AppLocale | null;
+  /** Shifts cached headline pool before merge so every reload updates in-feed news. */
+  rotateSeed?: number;
 }): Promise<NewsPost[]> {
   const force = options?.force ?? false;
   const now = Date.now();
+  const rotateSeed = options?.rotateSeed;
 
   if (!force && memoryCache && now - memoryCache.lastFetched < CACHE_TTL_MS) {
     return applyLiveNewsTimestamps(memoryCache.posts, options?.locale);
@@ -364,6 +380,11 @@ export async function refreshPulseLiveNews(options?: {
   );
 
   if (collected.length === 0 && memoryCache?.posts.length) {
+    if (force) {
+      const posts = finalizeLiveNewsPosts(memoryCache.posts, options?.locale, rotateSeed);
+      await persistCache({ lastFetched: now, posts });
+      return posts;
+    }
     return applyLiveNewsTimestamps(memoryCache.posts, options?.locale);
   }
 
@@ -372,10 +393,11 @@ export async function refreshPulseLiveNews(options?: {
   }
 
   const withReporters = attachDemoReporters(collected.slice(0, 24));
+  const posts = finalizeLiveNewsPosts(withReporters, options?.locale, rotateSeed);
   const payload: PulseNewsCachePayload = {
     lastFetched: now,
-    posts: withReporters,
+    posts,
   };
   await persistCache(payload);
-  return applyLiveNewsTimestamps(withReporters, options?.locale);
+  return posts;
 }

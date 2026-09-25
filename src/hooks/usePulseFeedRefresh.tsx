@@ -3,6 +3,7 @@ import { FlatList, NativeScrollEvent, NativeSyntheticEvent, Platform, ScrollView
 
 import { useApp } from '../context/AppContext';
 import { refreshPulseLiveNews } from '../services/pulseLiveNews';
+import { useAppLocale } from './useAppLocale';
 
 let refreshGeneration = 0;
 const subscribers = new Set<() => void>();
@@ -103,6 +104,7 @@ function waitMs(ms: number): Promise<void> {
 export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}) {
   const { onRefreshed, initialScrollOffset = 0, onPersistScrollOffset } = options;
   const { dismissDisguiseLeaveConfirm } = useApp();
+  const { locale } = useAppLocale();
   const [refreshing, setRefreshing] = useState(false);
   const refreshingRef = useRef(false);
   const [justUpdated, setJustUpdated] = useState(false);
@@ -207,9 +209,15 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
         dismissDisguiseLeaveConfirm();
         scrollToTop(true);
         await waitNextPaint();
+        const nextGeneration = getRefreshGenerationSnapshot() + 1;
+        await refreshPulseLiveNews({
+          force: true,
+          locale,
+          rotateSeed: nextGeneration,
+        }).catch(() => undefined);
+        await waitNextPaint();
         bumpPulseFeedRefreshGeneration();
         onRefreshed?.();
-        void refreshPulseLiveNews({ force: true }).catch(() => undefined);
         const elapsed = Date.now() - startedAt;
         const remain = PULSE_REFRESH_MIN_MS - elapsed;
         if (remain > 0) {
@@ -226,7 +234,7 @@ export function usePulseScrollRefresh(options: UsePulseScrollRefreshOptions = {}
         lastRefreshFinishedAtRef.current = Date.now();
       }
     },
-    [dismissDisguiseLeaveConfirm, onRefreshed, scrollToTop],
+    [dismissDisguiseLeaveConfirm, locale, onRefreshed, scrollToTop],
   );
 
   const refresh = useCallback(() => runRefresh('pull'), [runRefresh]);

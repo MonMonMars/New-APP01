@@ -17,12 +17,14 @@ import { AiPersonaBadge } from './AiPersonaBadge';
 import { VideoProfileOverlay } from './VideoProfileOverlay';
 import { VerificationBadges } from './VerificationBadges';
 import {
-  discoverDotsRightInset,
   discoverInfoButtonRightInset,
   DISCOVER_INFO_BUTTON_SIZE,
   DISCOVER_INFO_ICON_SIZE,
   DISCOVER_INFO_TOP,
+  DISCOVER_PHOTO_SEGMENT_HEIGHT,
+  DISCOVER_PHOTO_SEGMENT_HORIZONTAL_INSET,
   discoverLeftBadgeTop,
+  discoverPhotoSegmentBarTop,
   discoverPhotoTapBottomInset,
   discoverPhotoTapTopInset,
   discoverProfileMetaBottom,
@@ -198,12 +200,7 @@ export function ProfileCard({
 
       {isTop && photoCount > 1 && (
         <>
-          <View
-            style={[
-              styles.dots,
-              { right: spacing.md + discoverDotsRightInset(compact) },
-            ]}
-          >
+          <View style={styles.dots}>
             {profile.photos.map((_, dotIndex) => {
               const locked = dotIndex >= visiblePhotoCount;
               return (
@@ -376,8 +373,9 @@ const styles = StyleSheet.create({
   },
   dots: {
     position: 'absolute',
-    top: DISCOVER_INFO_TOP,
-    left: spacing.md,
+    top: discoverPhotoSegmentBarTop(),
+    left: DISCOVER_PHOTO_SEGMENT_HORIZONTAL_INSET,
+    right: DISCOVER_PHOTO_SEGMENT_HORIZONTAL_INSET,
     flexDirection: 'row',
     gap: 4,
     zIndex: 8,
@@ -385,7 +383,7 @@ const styles = StyleSheet.create({
   },
   dot: {
     flex: 1,
-    height: 3,
+    height: DISCOVER_PHOTO_SEGMENT_HEIGHT,
     borderRadius: 2,
     backgroundColor: 'rgba(255,255,255,0.35)',
   },

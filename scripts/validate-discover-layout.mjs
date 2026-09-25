@@ -5,8 +5,9 @@ const SPACING_SM = 8;
 const SPACING_LG = 24;
 const SPACING_XL = 32;
 const SPACING_XS = 4;
-const INFO_SIZE = 40;
+const INFO_SIZE = 48;
 const INFO_TOP = SPACING_MD;
+const SEGMENT_HEIGHT = 3;
 const BADGE_ROW = 26;
 const COMPACT_TARGET = 52;
 
@@ -15,8 +16,8 @@ function discoverInfoButtonRightInset(compact) {
   return SPACING_MD + boostColumn + SPACING_SM;
 }
 
-function discoverDotsRightInset(compact) {
-  return INFO_SIZE + discoverInfoButtonRightInset(compact) + SPACING_SM;
+function discoverPhotoSegmentBarTop() {
+  return INFO_TOP + (INFO_SIZE - SEGMENT_HEIGHT) / 2;
 }
 
 function discoverTopChromeBottom() {
@@ -82,8 +83,12 @@ assert(
   'info clears boost column on compact deck',
 );
 assert(
-  discoverDotsRightInset(true) > discoverInfoButtonRightInset(true) + INFO_SIZE,
-  'dots leave room for info control',
+  discoverPhotoSegmentBarTop() >= INFO_TOP,
+  'segment bar sits in top chrome',
+);
+assert(
+  discoverPhotoSegmentBarTop() + SEGMENT_HEIGHT <= discoverTopChromeBottom(),
+  'segment bar vertically centered in top chrome',
 );
 
 console.log('validate-discover-layout: ok');

@@ -57,10 +57,10 @@ export function DisguiseUnlockConfirm({
             <NavigationPressable
               style={[styles.unlock, { backgroundColor: accent }]}
               onPress={onConfirm}
-              accessibilityLabel={t('disguiseConfirm.leaveA11y', { unlockLabel })}
+              accessibilityLabel={t('disguiseConfirm.leaveDisguiseA11y', { name: disguiseName })}
               accessibilityHint={t('disguiseConfirm.leaveHint', { unlockLabel })}
             >
-              <Text style={styles.unlockText}>{t('disguiseConfirm.leaveUnlock', { unlockLabel })}</Text>
+              <Text style={styles.unlockText}>{t('disguiseConfirm.leaveDisguise', { name: disguiseName })}</Text>
             </NavigationPressable>
           </View>
         </Pressable>

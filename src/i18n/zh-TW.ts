@@ -1137,6 +1137,8 @@ export const zhTw = {
     stayA11y: '留在 {name}',
     leaveUnlock: '離開 · {unlockLabel}',
     leaveA11y: '離開 · {unlockLabel}',
+    leaveDisguise: '離開 {name}',
+    leaveDisguiseA11y: '離開 {name}',
     leaveHint: '開啟 {unlockLabel}',
   },
   disguiseMiniDismiss: {

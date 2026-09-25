@@ -204,13 +204,16 @@ export async function unlockSparkFromPulse(page) {
   await unlock.click({ force: true });
   await page.waitForTimeout(600);
 
-  const leave = page.getByText(/^Leave Spark$/i).first();
+  const leave = page
+    .getByRole('button', { name: /^Leave (Spark|Pulse)$/i })
+    .or(page.getByText(/^Leave (Spark|Pulse)$/i))
+    .first();
   if (await leave.isVisible({ timeout: 3000 }).catch(() => false)) {
     await leave.click();
     await page.waitForTimeout(600);
   }
 
-  const policy = page.getByText(/i understand — leave spark/i).first();
+  const policy = page.getByText(/i understand — leave (spark|pulse)/i).first();
   if (await policy.isVisible({ timeout: 3000 }).catch(() => false)) {
     await policy.click();
     await page.waitForTimeout(1200);

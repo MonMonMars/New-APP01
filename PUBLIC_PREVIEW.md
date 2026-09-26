@@ -6,8 +6,8 @@
 If the link fails, run `npm run demo:tunnel` in the cloud workspace or use **Vercel** below.
 
 - **Branch:** `main` (map basemap: standard **OpenStreetMap** tiles — no “API key required” watermarks)
-- **Build ID:** `5c9e380-20260924T110445Z` (through **#200** — Pulse unlike restore + CI like-swap smoke)
-- **Verified:** 2026-09-24 — `verify:ci` + `verify:ci-smoke` + **`verify:remote-smoke`** on tunnel (6 scripts: Pulse like swap revert, Tokyo **77**, Browse matches)
+- **Build ID:** `0b043e3-20260926T184219Z` (through **#209** — auth/payments/trust handoff on `main`; bump after next deploy)
+- **Verified:** 2026-09-26 — `verify:ci` on `main` (typecheck + validators + demo build)
 - **Temporary:** Cloudflare quick tunnel — expires when the cloud workspace sleeps.
 
 ### If you still see an old demo (browser cache)

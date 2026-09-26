@@ -2,7 +2,7 @@
 
 **Read this file first** on every new Cloud Agent run for `MonMonMars/New-APP01`.
 
-Last updated: 2026-09-24 (after **#200**; full QA reference in `docs/QA_AND_VERIFICATION.md`).
+Last updated: 2026-09-26 (after **#209** auth/payments/trust handoff + Step 1 session UX; full QA in `docs/QA_AND_VERIFICATION.md`).
 
 ## Where all “data and files” live
 
@@ -13,40 +13,34 @@ Last updated: 2026-09-24 (after **#200**; full QA reference in `docs/QA_AND_VERI
 | **Product spec** | `docs/SPARK_APP_DOCUMENT.md` |
 | **QA / smoke scripts** | `docs/QA_AND_VERIFICATION.md` |
 | **Auth / payments roadmap** | `docs/AUTH_AND_PAYMENTS_ROADMAP.md` |
+| **Compliance index** | `docs/COMPLIANCE_AND_OPERATIONS_MASTER.md` |
 | **Live demo URL** | `PUBLIC_PREVIEW.md` (tunnel often offline — prefer Vercel; see `docs/DEMO_DEPLOY.md`) |
 | **PR triage history** | `docs/PR_TRIAGE.md` |
 | **Agent chat history** | **Not portable** — old Cursor agent threads cannot be merged. This doc replaces them. |
 
 There is nothing to copy out of old agent VMs except what is already committed on GitHub.
 
-## What landed on `main` (2026-09-23 arc)
+## Recent on `main` (2026-09-25 handoff)
 
 | PR | Summary |
 |----|---------|
-| **#175–#180** | Integration: Show me, map OSM basemap, admin gate, Pulse refresh, map privacy list (no avatar pins on map) |
-| **#181–#188** | i18n CI, demo accounts refresh, Pulse captions beside thumbnails |
+| **#202–#204** | Auth steps 1–3: sign out / email / phone |
+| **#205–#209** | OAuth (4), security proxy (5), Stripe + MFA purchases (6), compliance master doc (8), trust & safety (7) |
+| **#210** | Closed — integration branch superseded by #205–#209 |
+| **#211–#219** | Discover/Pulse/map polish (photo bar, like label, read sheets, purchase footer, photo swipe, leave pulse, match popup, pulse refresh, map people search) |
 
-## Recent on `main`
+## Earlier arc (still relevant)
 
 | PR | Summary |
 |----|---------|
-| **#191** | **#189** Pulse like reload + **#190** map pin privacy + `MapAreaMatches` browse grid |
-| **#192** | Map area people count aligned with search pool; Tokyo map smoke + Browse grid |
-| **#193** | CI + `verify:ci-smoke` include Tokyo map Browse flow |
-| **#194** | Pulse mini-window Playwright scroll + View profile / View photos labels |
-| **#195** | `check-mini-window` in GitHub CI + `verify:ci-smoke` |
-| **#196** | `docs/DEMO_DEPLOY.md` + `npm run verify:remote-smoke` |
-| **#197** | README + handoff refresh + build ID in `PUBLIC_PREVIEW.md` |
-| **#198** | `docs/APP_FLOW.md` + README map copy (OSM, pin icons, Browse matches) |
-| **#199** | `docs/QA_AND_VERIFICATION.md` + handoff/deploy doc completion |
-| **#200** | Pulse unlike restores pinned face; `check-pulse-like-swap.mjs` in CI + remote smoke |
+| **#191–#200** | Map smoke, Pulse mini-window CI, demo deploy docs, QA reference, Pulse unlike + like-swap smoke |
 
 Superseded drafts — see **`docs/PR_TRIAGE.md`**.
 
 ## Infrastructure
 
 1. **`main` carries the full Spark/Expo app** (SDK 57).
-2. **CI** — `npm run verify:ci` (typecheck, `validate:profiles`, `build:web:demo`). GitHub Actions then runs **`npm run verify:ci-smoke`** (6 Playwright scripts, incl. Pulse like swap) against `dist` on `:8090`.
+2. **CI** — `npm run verify:ci` (typecheck, `validate:profiles`, `build:web:demo`). GitHub Actions then runs **`npm run verify:ci-smoke`** (6 Playwright scripts) against `dist` on `:8090`.
 3. **Environment build** — https://cursor.com/dashboard/cloud-agents/environments/e/a3b86124-af8c-11f1-bf4b-42ffb4d10ea7
 
 ## Known CI gotcha
@@ -60,12 +54,17 @@ npm ci
 npm run verify:ci              # typecheck + validators + build demo
 npm run demo                   # localhost:8090
 npm run demo:tunnel            # public Cloudflare URL (update PUBLIC_PREVIEW.md)
-npm run verify:ci-smoke        # same 5 scripts as GitHub CI (demo on :8090)
+npm run verify:ci-smoke        # same 6 scripts as GitHub CI (demo on :8090)
 npm run verify:extended        # full Playwright QA (local only)
 DEMO_URL=https://… npm run verify:remote-smoke   # after Vercel deploy
 ```
 
 Manual checklists (map privacy, Pulse like swap, build ID): **`docs/QA_AND_VERIFICATION.md`**.
+
+## Suggested next work
+
+- **Operator QA:** Supabase migrations + Edge Functions + Stripe webhook (see `BACKEND_SETUP.md`, compliance master doc)
+- **Roadmap Step 2+:** Live email/password recovery and SMS on a real Supabase project (manual checklists)
 
 ## First message for a **new** Cloud Agent (copy-paste)
 

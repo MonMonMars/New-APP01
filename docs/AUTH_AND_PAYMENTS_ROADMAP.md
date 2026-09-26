@@ -5,8 +5,8 @@ Working plan for moving Spark from **demo-ready** to **production-ready** auth a
 ## Step 1 — Account session UX
 
 - [x] **Sign out** and **Use another account** in Privacy controls + Security settings (`AccountSessionSection`)
-- [ ] Optional: same entry on Spark **Profile** tab
-- [ ] Persist `signOut` immediately (verify AsyncStorage after sign-out)
+- [x] Optional: same entry on Spark **Profile** tab (`ProfileScreen` + `AccountSessionSection`)
+- [x] Persist `signOut` / switch-account immediately (`persistSessionPatch` → `savePersistedState`)
 
 ## Step 2 — Email auth hardening
 

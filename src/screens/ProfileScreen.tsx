@@ -35,6 +35,7 @@ import { radii, spacing } from '../theme';
 import { LocaleToggle } from '../components/legal/LocaleToggle';
 import { APP_LOCALE_LABELS } from '../types/locale';
 import { AnimatedPressable } from '../components/AnimatedPressable';
+import { AccountSessionSection } from '../components/auth/AccountSessionSection';
 import { getAppVersionLabel } from '../constants/buildInfo';
 
 type SettingsRoute =
@@ -431,6 +432,10 @@ export function ProfileScreen() {
 
         <ReferralCard />
 
+        <View style={styles.accountSessionSection}>
+          <AccountSessionSection />
+        </View>
+
         <View style={styles.section}>
           {settingsRows.map((row) => (
             <AnimatedPressable
@@ -681,6 +686,10 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 12,
     marginTop: spacing.xs,
+  },
+  accountSessionSection: {
+    marginTop: spacing.lg,
+    paddingHorizontal: spacing.lg,
   },
   section: {
     marginTop: spacing.lg,

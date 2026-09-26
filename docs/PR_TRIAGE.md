@@ -1,6 +1,6 @@
 # Open draft PR triage vs `main`
 
-**Status (2026-09-24, latest):** **#200** Pulse unlike fix + like-swap CI smoke · **#199** QA/handoff docs · **#198** APP_FLOW · **#196** remote smoke runner · **#191–#195** map/Pulse CI stack. **No open feature PRs.**
+**Status (2026-09-26, latest):** **#205–#209** auth/payments/compliance/trust handoff · **#211–#219** UI/QA polish · **#210** integration closed as duplicate. **No open feature PRs** (check GitHub before assuming).
 
 **Status (2026-09-22):** Drafts **#1–#139** (plus **#147–#154** earlier) reviewed against current **`main`**. All were **closed as superseded** — features already live via **#155**, **#157**, and follow-ups. **No blind merges** were performed (branches share only the initial commit with `main`).
 

@@ -3397,6 +3397,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIsPaused(paused);
   }, []);
 
+  const persistSessionPatch = useCallback(
+    async (patch: Partial<Pick<PersistedAppState, 'hasOnboarded' | 'isAuthenticated' | 'userId'>>) => {
+      if (!hydratedRef.current) {
+        return;
+      }
+      await savePersistedState({ ...buildPersistedState(), ...patch });
+    },
+    [buildPersistedState],
+  );
+
   const signOut = useCallback(async () => {
     if (isSupabaseConfigured()) {
       await signOutSupabaseSession();
@@ -3404,14 +3414,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIsAuthenticated(false);
     setUserId(null);
     setMfaLoginRequired(false);
-  }, []);
+    await persistSessionPatch({ isAuthenticated: false, userId: null });
+  }, [persistSessionPatch]);
 
   const restartCloudSignIn = useCallback(() => {
     setHasOnboarded(false);
     setIsAuthenticated(false);
     setUserId(null);
     setMfaLoginRequired(false);
-  }, []);
+    void persistSessionPatch({ hasOnboarded: false, isAuthenticated: false, userId: null });
+  }, [persistSessionPatch]);
 
   const deleteAccount = useCallback(async () => {
     if (userId && isSupabaseConfigured()) {

@@ -466,7 +466,7 @@ src/
 docs/
   SPARK_APP_DOCUMENT.md   ← this document
   APP_FLOW.md             UI map + competitor matrix
-  PRODUCT_STRATEGY.md     GTM, monetization, metrics
+  (GTM/metrics — off-repo private archive)
   PUBLIC_PREVIEW.md       Browser demo links
 ```
 
@@ -642,7 +642,6 @@ Prototype user: **Mon**, 28, designer bio, default Unsplash photo.
 | Document | Focus |
 |----------|-------|
 | [`APP_FLOW.md`](./APP_FLOW.md) | Screen map, competitor matrix, navigation |
-| [`PRODUCT_STRATEGY.md`](./PRODUCT_STRATEGY.md) | GTM, pricing, metrics, launch phases |
 | [`PUBLIC_PREVIEW.md`](../PUBLIC_PREVIEW.md) | Live browser demo URLs |
 | [`QA_AND_VERIFICATION.md`](./QA_AND_VERIFICATION.md) | CI scripts, manual map/Pulse checklists |
 | [`DEMO_DEPLOY.md`](./DEMO_DEPLOY.md) | Vercel/Netlify + remote smoke |

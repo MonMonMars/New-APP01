@@ -33,6 +33,10 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
+
+# internal product GTM / investor strategy (private D: archive only)
+docs/PRODUCT_STRATEGY.md
 
 # typescript
 *.tsbuildinfo
